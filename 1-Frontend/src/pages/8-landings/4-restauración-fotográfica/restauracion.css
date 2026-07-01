@@ -1,0 +1,175 @@
+/* ==================== HERO ==================== */
+.restauracion-page .vl-hero__grid { max-width: 720px; }
+.restauracion-page .vl-hero__cta { display: inline-flex; }
+
+/* ==================== SERVICE CARDS ==================== */
+.restauracion-page .vl-service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.restauracion-page .vl-service-card {
+  background: var(--vl-paper);
+  border: 1px solid rgba(13,15,13,.08);
+  padding: 32px 28px;
+  display: grid;
+  gap: 12px;
+  transition: all .4s cubic-bezier(.22,1,.36,1);
+}
+.restauracion-page .vl-service-card:hover {
+  border-color: var(--vl-acid);
+  transform: translateY(-3px);
+}
+.restauracion-page .vl-service-card__icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: var(--vl-ink);
+  color: var(--vl-acid);
+}
+.restauracion-page .vl-service-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+}
+.restauracion-page .vl-service-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #65675f;
+}
+
+/* ==================== COMPARISON SHOWCASE ==================== */
+.restauracion-page .vl-showcase__grid {
+  display: grid;
+  grid-template-columns: .45fr .55fr;
+  gap: 80px;
+  align-items: start;
+}
+.restauracion-page .vl-showcase__pairs {
+  display: grid;
+  gap: 40px;
+}
+.restauracion-page .vl-showcase__label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,.55);
+  font-weight: 500;
+}
+.restauracion-page .vl-showcase__label span {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--vl-acid);
+  font-family: monospace;
+}
+
+.restauracion-page .vl-comparison {
+  --split-position: 50%;
+  position: relative;
+  min-height: 400px;
+  overflow: hidden;
+  background: #d9d7d0;
+  cursor: ew-resize;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.restauracion-page .vl-comparison img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
+.restauracion-page .vl-comparison__shade {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--split-position);
+  background: rgba(13,15,13,.12);
+  backdrop-filter: grayscale(1) contrast(.85);
+  pointer-events: none;
+}
+.restauracion-page .vl-comparison__line {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--split-position);
+  width: 2px;
+  background: var(--vl-acid);
+  transform: translateX(-1px);
+}
+.restauracion-page .vl-comparison__line span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--vl-ink);
+  background: var(--vl-acid);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.restauracion-page .vl-comparison__label {
+  position: absolute;
+  top: 18px;
+  z-index: 2;
+  padding: 8px 10px;
+  font: 700 9px/1 Arial;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.restauracion-page .vl-comparison__label--left { left: 18px; color: white; background: var(--vl-ink); }
+.restauracion-page .vl-comparison__label--right { right: 18px; color: var(--vl-ink); background: var(--vl-acid); }
+
+/* ==================== PROCESS ==================== */
+.restauracion-page .vl-process__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.restauracion-page .vl-process__step {
+  padding: 32px 24px;
+  border: 1px solid rgba(13,15,13,.08);
+  display: grid;
+  gap: 10px;
+  transition: all .4s cubic-bezier(.22,1,.36,1);
+}
+.restauracion-page .vl-process__step:hover {
+  border-color: var(--vl-acid);
+  transform: translateY(-3px);
+}
+.restauracion-page .vl-process__number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--vl-acid);
+  font-family: 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  line-height: 1;
+}
+.restauracion-page .vl-process__step h3 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.restauracion-page .vl-process__step p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #65675f;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1100px) {
+  .restauracion-page .vl-showcase__grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  .restauracion-page .vl-process__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .restauracion-page .vl-service-grid {
+    grid-template-columns: 1fr;
+  }
+  .restauracion-page .vl-process__grid {
+    grid-template-columns: 1fr;
+  }
+  .restauracion-page .vl-comparison { min-height: 280px; }
+}

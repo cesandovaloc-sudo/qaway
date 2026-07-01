@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Servicios Visual Lab</title>
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --panel: #151517;
+      --panel-2: #1d1d20;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --soft: #71717a;
+      --line: #2a2a2e;
+      --accent: #ffd200;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11, 11, 12, 0.92);
+      backdrop-filter: blur(18px);
+      padding: 22px clamp(18px, 4vw, 40px);
+    }
+    .top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 56px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: min(420px, 100%);
+    }
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #101011;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 14px;
+    }
+    input:focus { border-color: var(--accent); }
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 28px clamp(18px, 4vw, 40px) 60px;
+    }
+    .grid {
+      columns: 3 360px;
+      column-gap: 18px;
+    }
+    .category {
+      display: inline-block;
+      width: 100%;
+      break-inside: avoid;
+      margin: 0 0 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel), #111113);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .category-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .index {
+      color: #0b0b0c;
+      background: var(--accent);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.1;
+    }
+    .count {
+      color: var(--soft);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .context {
+      margin: 0;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .services { padding: 8px; }
+    .service {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--panel-2);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .service:last-child { margin-bottom: 0; }
+    summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 13px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+";
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 16px;
+    }
+    details[open] summary::after { content: "-"; }
+    details[open] { border-color: rgba(255, 210, 0, 0.22); }
+    .service p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 0 14px 14px;
+    }
+    .hidden { display: none; }
+    @media (max-width: 720px) {
+      .top { align-items: stretch; flex-direction: column; }
+      header { position: static; }
+      .grid { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <div>
+        <div class="meta">Visual Lab / matriz de servicios</div>
+        <h1>Servicios agrupados</h1>
+      </div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar servicio o descripcion..." autocomplete="off" />
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="grid" id="grid">
+      
+      <section class="category" data-category="visual lab">
+        <div class="category-head">
+          <span class="index">01</span>
+          <h2>Visual Lab</h2>
+          <span class="count">9 servicios</span>
+        </div>
+        <p class="context">Para producción visual avanzada, experimentación, retratos, productos y assets generados/optimizados con IA.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Identidad ejecutiva con IA</summary>
+            <p>Servicio para construir una imagen ejecutiva moderna usando IA, orientada a proyectar autoridad, confianza y presencia profesional en canales digitales.</p>
+          </details>
+          <details class="service">
+            <summary>Retratos profesionales generados con IA</summary>
+            <p>Creacion de retratos profesionales realistas mediante IA para perfiles, presentaciones, redes profesionales y comunicacion corporativa.</p>
+          </details>
+          <details class="service">
+            <summary>Producción visual para productos</summary>
+            <p>Servicio enfocado en crear o mejorar imagenes de productos con acabados profesionales para venta, catalogo, publicidad y comunicacion digital.</p>
+          </details>
+          <details class="service">
+            <summary>Arquitectura visual de marca</summary>
+            <p>Definicion del sistema visual que organiza la apariencia de una marca y permite que sus piezas mantengan coherencia en distintos canales.</p>
+          </details>
+          <details class="service">
+            <summary>Dirección visual para campañas</summary>
+            <p>Acompanamiento creativo para definir la estetica, narrativa visual y coherencia de una campana antes y durante su produccion.</p>
+          </details>
+          <details class="service">
+            <summary>Ecosistemas sociales con IA</summary>
+            <p>Servicio para desarrollar una linea visual consistente para redes sociales, combinando criterio estetico, estrategia e inteligencia artificial.</p>
+          </details>
+          <details class="service">
+            <summary>Optimización visual con IA</summary>
+            <p>Mejora de imagenes y piezas existentes mediante IA para elevar calidad, claridad, impacto visual y adaptacion a formatos digitales.</p>
+          </details>
+          <details class="service">
+            <summary>Restauración y mejora visual</summary>
+            <p>Recuperacion y mejora de material visual deteriorado, antiguo o de baja calidad para volverlo util en contextos profesionales.</p>
+          </details>
+          <details class="service">
+            <summary>Contenido visual híbrido</summary>
+            <p>Creacion de piezas visuales que combinan diseno, edicion, direccion de arte e inteligencia artificial para lograr resultados flexibles y modernos.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="branding digital &amp; marca">
+        <div class="category-head">
+          <span class="index">02</span>
+          <h2>Branding Digital &amp; Marca</h2>
+          <span class="count">10 servicios</span>
+        </div>
+        <p class="context">Para usuarios que quieren construir o renovar cómo se ve y se percibe su marca.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Identidad visual</summary>
+            <p>Servicio para crear o renovar los elementos visuales principales de una marca, asegurando coherencia, reconocimiento y diferenciacion.</p>
+          </details>
+          <details class="service">
+            <summary>Sistema de marca</summary>
+            <p>Construccion de un conjunto ordenado de reglas, recursos y criterios visuales para que la marca pueda crecer sin perder consistencia.</p>
+          </details>
+          <details class="service">
+            <summary>Logo y dirección gráfica</summary>
+            <p>Desarrollo o refinamiento del logo y de la linea grafica base que dara forma al lenguaje visual de la marca.</p>
+          </details>
+          <details class="service">
+            <summary>Narrativa visual</summary>
+            <p>Definicion de los codigos visuales que expresan la historia, personalidad y posicionamiento de una marca a traves de imagenes y diseno.</p>
+          </details>
+          <details class="service">
+            <summary>Manual de marca</summary>
+            <p>Documento de referencia que organiza las reglas de uso visual de la marca para asegurar aplicaciones correctas y consistentes.</p>
+          </details>
+          <details class="service">
+            <summary>Narrativa de marca</summary>
+            <p>Construccion del relato, tono y mensajes que explican quien es la marca, que representa y como debe comunicarse.</p>
+          </details>
+          <details class="service">
+            <summary>Dirección estética</summary>
+            <p>Definicion del estilo visual general de una marca o proyecto para orientar decisiones de diseno, contenido e imagen.</p>
+          </details>
+          <details class="service">
+            <summary>Branding para redes</summary>
+            <p>Adaptacion de la identidad de marca a redes sociales para lograr una presencia reconocible, ordenada y coherente.</p>
+          </details>
+          <details class="service">
+            <summary>Branding personal</summary>
+            <p>Construccion de una identidad de marca para profesionales, creadores o lideres que necesitan comunicar valor de forma clara y diferenciada.</p>
+          </details>
+          <details class="service">
+            <summary>Manual básico de marca</summary>
+            <p>Version sintetica de una guia de marca, pensada para aplicar rapidamente la identidad visual en piezas y canales esenciales.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="contenido visual para redes sociales">
+        <div class="category-head">
+          <span class="index">03</span>
+          <h2>Contenido Visual para Redes Sociales</h2>
+          <span class="count">11 servicios</span>
+        </div>
+        <p class="context">Para quienes necesitan piezas visuales, formatos y contenido recurrente.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Piezas para redes sociales</summary>
+            <p>Diseno de contenidos visuales individuales para redes, adaptados al objetivo de comunicacion, canal y estilo de marca.</p>
+          </details>
+          <details class="service">
+            <summary>Reels y Shorts</summary>
+            <p>Produccion o estructura de videos cortos de alto impacto para captar atencion en plataformas verticales como Instagram, TikTok o YouTube.</p>
+          </details>
+          <details class="service">
+            <summary>Carruseles estratégicos</summary>
+            <p>Contenido secuencial disenado para explicar, educar o vender una idea de forma visual, clara y persuasiva.</p>
+          </details>
+          <details class="service">
+            <summary>Contenido multimedia</summary>
+            <p>Creacion de piezas que integran imagen, video, texto, movimiento o sonido para comunicar mensajes de mayor riqueza visual.</p>
+          </details>
+          <details class="service">
+            <summary>Contenido educativo</summary>
+            <p>Transformacion de conocimiento, ideas o procesos en contenidos faciles de entender y visualmente atractivos para la audiencia.</p>
+          </details>
+          <details class="service">
+            <summary>Contenido para captación</summary>
+            <p>Piezas orientadas a atraer prospectos y motivar una accion concreta dentro de una estrategia comercial o de comunicacion.</p>
+          </details>
+          <details class="service">
+            <summary>Formatos visuales modernos</summary>
+            <p>Desarrollo de formatos actuales y adaptables para redes, web y campanas, alineados a tendencias y buenas practicas digitales.</p>
+          </details>
+          <details class="service">
+            <summary>Edición visual profesional</summary>
+            <p>Mejora, retoque y preparacion de piezas visuales existentes para que alcancen un acabado mas claro, consistente y profesional.</p>
+          </details>
+          <details class="service">
+            <summary>Audio y sonido</summary>
+            <p>Apoyo en la identidad sonora y tratamiento de audio para potenciar videos, piezas multimedia o experiencias de contenido.</p>
+          </details>
+          <details class="service">
+            <summary>Configuración y en vivos</summary>
+            <p>Preparacion visual y tecnica para transmisiones en vivo, con enfoque en presentacion, calidad y coherencia de marca.</p>
+          </details>
+          <details class="service">
+            <summary>Alquiler de equipos de Grabación</summary>
+            <p>Servicio de soporte para produccion audiovisual mediante disponibilidad de equipos de grabacion, captura, luz o sonido.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="presencia profesional">
+        <div class="category-head">
+          <span class="index">04</span>
+          <h2>Presencia Profesional</h2>
+          <span class="count">11 servicios</span>
+        </div>
+        <p class="context">Para profesionales, marcas personales, perfiles y autoridad individual.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Optimización de contenido existente</summary>
+            <p>Revision y mejora de contenido ya creado para elevar su claridad, diseno, enfoque estrategico y rendimiento comunicacional.</p>
+          </details>
+          <details class="service">
+            <summary>Imagen para LinkedIn</summary>
+            <p>Optimizaci?n de la presencia visual y profesional en LinkedIn para fortalecer autoridad, confianza y oportunidades de negocio.</p>
+          </details>
+          <details class="service">
+            <summary>Perfil profesional visual</summary>
+            <p>Construccion de una presentacion digital coherente para que el perfil profesional comunique valor con mayor claridad e impacto.</p>
+          </details>
+          <details class="service">
+            <summary>Fotos ejecutivas con IA</summary>
+            <p>Creacion de imagenes ejecutivas mediante IA para profesionales que necesitan una presencia visual actual, seria y consistente.</p>
+          </details>
+          <details class="service">
+            <summary>Marca personal</summary>
+            <p>Definicion de la identidad, posicionamiento y expresion visual de una persona como marca profesional o publica.</p>
+          </details>
+          <details class="service">
+            <summary>Kit visual profesional</summary>
+            <p>Conjunto de recursos visuales basicos para que un profesional pueda presentarse de forma coherente en distintas plataformas.</p>
+          </details>
+          <details class="service">
+            <summary>Presentación digital</summary>
+            <p>Diseno de materiales de presentacion profesional para mostrar trayectoria, servicios, portafolio o propuesta de valor.</p>
+          </details>
+          <details class="service">
+            <summary>Imagen profesional moderna</summary>
+            <p>Actualizacion integral de la imagen digital de un profesional para transmitir confianza, vigencia y autoridad.</p>
+          </details>
+          <details class="service">
+            <summary>Presencia multiplataforma</summary>
+            <p>Ordenamiento de la imagen y comunicacion profesional en varios canales digitales manteniendo consistencia entre ellos.</p>
+          </details>
+          <details class="service">
+            <summary>Personal branding visual</summary>
+            <p>Desarrollo del lenguaje visual de una marca personal para reforzar posicionamiento, recordacion y coherencia digital.</p>
+          </details>
+          <details class="service">
+            <summary>Adaptación visual corporativa</summary>
+            <p>Alineacion de la imagen profesional o personal con los codigos visuales de una empresa, institucion o entorno corporativo.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="dirección creativa">
+        <div class="category-head">
+          <span class="index">05</span>
+          <h2>Dirección Creativa</h2>
+          <span class="count">11 servicios</span>
+        </div>
+        <p class="context">Para campañas, estética, supervisión visual y concepto.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Concepto visual de campaña</summary>
+            <p>Creacion de la idea visual principal que guiara una campana y dara coherencia a sus piezas, estilo y mensaje.</p>
+          </details>
+          <details class="service">
+            <summary>Línea estética de marca</summary>
+            <p>Definicion del estilo estetico que orienta como debe verse una marca en sus contenidos, campanas y materiales.</p>
+          </details>
+          <details class="service">
+            <summary>Supervisión  estética creativa</summary>
+            <p>Revision y direccion de piezas visuales para asegurar que mantengan calidad, coherencia y fuerza creativa.</p>
+          </details>
+          <details class="service">
+            <summary>Moodboard estratégico</summary>
+            <p>Mapa visual de referencias que ayuda a definir la direccion estetica y conceptual de una marca, campana o proyecto.</p>
+          </details>
+          <details class="service">
+            <summary>Dirección de arte con IA</summary>
+            <p>Direccion creativa que combina criterio humano e inteligencia artificial para crear imagenes, conceptos y piezas visuales diferenciadas.</p>
+          </details>
+          <details class="service">
+            <summary>Lenguaje visual</summary>
+            <p>Sistema de codigos graficos, compositivos y esteticos que define como una marca comunica visualmente.</p>
+          </details>
+          <details class="service">
+            <summary>Supervisión estética</summary>
+            <p>Control de calidad visual para asegurar que las piezas mantengan coherencia con el estilo, objetivo y marca.</p>
+          </details>
+          <details class="service">
+            <summary>Estructura visual de campañas</summary>
+            <p>Organizacion del sistema de piezas visuales de una campana para que cada formato cumpla una funcion clara.</p>
+          </details>
+          <details class="service">
+            <summary>Adaptación multiplataforma</summary>
+            <p>Ajuste de piezas y lenguaje visual a distintos canales, formatos y contextos sin perder coherencia.</p>
+          </details>
+          <details class="service">
+            <summary>Dirección de arte</summary>
+            <p>Liderazgo creativo de la estetica, composicion y estilo visual de un proyecto, marca o campana.</p>
+          </details>
+          <details class="service">
+            <summary>Innovación visual</summary>
+            <p>Exploracion de nuevos recursos, tecnicas, formatos e IA para diferenciar la comunicacion visual de una marca.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="estrategia digital">
+        <div class="category-head">
+          <span class="index">06</span>
+          <h2>Estrategia Digital</h2>
+          <span class="count">10 servicios</span>
+        </div>
+        <p class="context">Para ordenar comunicación, captación, funnels y canales.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Planificación de contenido</summary>
+            <p>Organizacion estrategica de temas, formatos y calendario para producir contenido con direccion y continuidad.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas de contenido</summary>
+            <p>Creacion de una estructura replicable para producir contenido de forma consistente, ordenada y alineada a objetivos.</p>
+          </details>
+          <details class="service">
+            <summary>Funnels y rutas de captación</summary>
+            <p>Diseno del recorrido que guia a una audiencia desde el descubrimiento hasta la conversion mediante contenidos y acciones.</p>
+          </details>
+          <details class="service">
+            <summary>Landing pages</summary>
+            <p>Creacion de paginas enfocadas en presentar una oferta, captar leads o convertir visitantes en clientes.</p>
+          </details>
+          <details class="service">
+            <summary>Campañas digitales</summary>
+            <p>Planificacion y organizacion de acciones digitales coordinadas para comunicar, captar o vender en distintos canales.</p>
+          </details>
+          <details class="service">
+            <summary>Estrategia para redes sociales</summary>
+            <p>Definicion de enfoque, canales, mensajes, formatos y frecuencia para gestionar redes con objetivos claros.</p>
+          </details>
+          <details class="service">
+            <summary>Arquitectura de comunicación</summary>
+            <p>Ordenamiento de mensajes, canales, audiencias y tono para que la comunicacion digital sea clara y consistente.</p>
+          </details>
+          <details class="service">
+            <summary>Contenido orientado a conversión</summary>
+            <p>Contenido disenado para mover al usuario hacia una accion concreta, como consultar, reservar, comprar o dejar datos.</p>
+          </details>
+          <details class="service">
+            <summary>Organización de formatos</summary>
+            <p>Definicion de que formatos conviene usar segun objetivo, canal, etapa del usuario y recursos disponibles.</p>
+          </details>
+          <details class="service">
+            <summary>Estrategias de posicionamiento</summary>
+            <p>Definicion de acciones y mensajes para aumentar visibilidad, diferenciacion y autoridad de una marca o profesional.</p>
+          </details>
+        </div>
+      </section>
+      <section class="category" data-category="7. consultoría estratégica">
+        <div class="category-head">
+          <span class="index">07</span>
+          <h2>7. Consultoría Estratégica</h2>
+          <span class="count">8 servicios</span>
+        </div>
+        <p class="context">Para quien no sabe exactamente qué necesita y quiere diagnóstico/acompamiento.</p>
+        <div class="services">
+          
+          <details class="service">
+            <summary>Diagnóstico de marca</summary>
+            <p>Analisis del estado actual de una marca para identificar problemas, oportunidades y prioridades de mejora.</p>
+          </details>
+          <details class="service">
+            <summary>Estrategia visual</summary>
+            <p>Definicion del rumbo visual mas conveniente para una marca segun sus objetivos, audiencia y posicionamiento.</p>
+          </details>
+          <details class="service">
+            <summary>Plan de contenido</summary>
+            <p>Ruta practica de contenidos, temas y formatos para comunicar con orden y avanzar hacia objetivos concretos.</p>
+          </details>
+          <details class="service">
+            <summary>Optimización de canales</summary>
+            <p>Mejora de perfiles, redes, web u otros canales para aumentar coherencia, claridad y rendimiento digital.</p>
+          </details>
+          <details class="service">
+            <summary>Métrica y medición</summary>
+            <p>Definicion y lectura de indicadores para evaluar si las acciones visuales, de contenido o estrategia estan funcionando.</p>
+          </details>
+          <details class="service">
+            <summary>Consultoría en campañas</summary>
+            <p>Acompanamiento estrategico para planificar, revisar y mejorar campanas digitales o visuales.</p>
+          </details>
+          <details class="service">
+            <summary>Acompañamiento continuo</summary>
+            <p>Soporte periodico para tomar decisiones, ajustar acciones y mantener la estrategia alineada a resultados.</p>
+          </details>
+          <details class="service">
+            <summary>Crecimiento digital</summary>
+            <p>Identificacion de oportunidades para expandir presencia, mejorar posicionamiento y aumentar resultados en canales digitales.</p>
+          </details>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const search = document.querySelector('#search');
+    const categories = [...document.querySelectorAll('.category')];
+    search.addEventListener('input', () => {
+      const term = search.value.trim().toLowerCase();
+      categories.forEach(category => {
+        let visibleCount = 0;
+        category.querySelectorAll('.service').forEach(service => {
+          const text = service.textContent.toLowerCase();
+          const isVisible = !term || text.includes(term) || category.textContent.toLowerCase().includes(term);
+          service.classList.toggle('hidden', !isVisible);
+          if (isVisible) visibleCount += 1;
+        });
+        category.classList.toggle('hidden', visibleCount === 0);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Servicios Sistemas Digitales - Qaway Lab</title>
+  <style>
+    :root {
+      --bg: #0b0b0c;
+      --panel: #151517;
+      --panel-2: #1d1d20;
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --soft: #71717a;
+      --line: #2a2a2e;
+      --accent: #ffd200;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11, 11, 12, 0.92);
+      backdrop-filter: blur(18px);
+      padding: 22px clamp(18px, 4vw, 40px);
+    }
+    .top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 56px);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      min-width: min(420px, 100%);
+    }
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #101011;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 13px 14px;
+      outline: none;
+      font-size: 14px;
+    }
+    input:focus { border-color: var(--accent); }
+    main {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 28px clamp(18px, 4vw, 40px) 60px;
+    }
+    .grid {
+      columns: 3 360px;
+      column-gap: 18px;
+    }
+    .category {
+      display: inline-block;
+      width: 100%;
+      break-inside: avoid;
+      margin: 0 0 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel), #111113);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .category-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .index {
+      color: #0b0b0c;
+      background: var(--accent);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.1;
+    }
+    .count {
+      color: var(--soft);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .context {
+      margin: 0;
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .services { padding: 8px; }
+    .service {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--panel-2);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .service:last-child { margin-bottom: 0; }
+    summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 13px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+";
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 16px;
+    }
+    details[open] summary::after { content: "-"; }
+    details[open] { border-color: rgba(255, 210, 0, 0.22); }
+    .service p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 0 14px 14px;
+    }
+    .hidden { display: none; }
+    @media (max-width: 720px) {
+      .top { align-items: stretch; flex-direction: column; }
+      header { position: static; }
+      .grid { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top">
+      <div>
+        <div class="meta">Sistemas Digitales / matriz de servicios</div>
+        <h1>Servicios agrupados</h1>
+      </div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar servicio o descripcion..." autocomplete="off" />
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="grid" id="grid">
+      
+      <section class="category" data-category="automatización ia">
+        <div class="category-head">
+          <span class="index">01</span>
+          <h2>1. Automatización IA</h2>
+          <span class="count">12 servicios</span>
+        </div>
+        <p class="context">Ordenados de mayor viabilidad y retorno rápido a implementaciones más complejas.</p>
+        <div class="services">
+          <details class="service">
+            <summary>[NUEVO] Kit de Inicio de Productividad con IA</summary>
+            <p>Configuración de espacio de trabajo compartido en ChatGPT Team o Claude Team, entrenamiento de 3 asistentes especializados con información de tu negocio y capacitación técnica básica.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización de tareas repetitivas</summary>
+            <p>Optimización del tiempo de oficina mediante la sustitución de rutinas mecánicas diarias.</p>
+          </details>
+          <details class="service">
+            <summary>Integraciones digitales</summary>
+            <p>Conectividad básica entre tus herramientas operativas (Notion, Google Sheets, Slack) para sincronizar bases de datos.</p>
+          </details>
+          <details class="service">
+            <summary>Resúmenes automáticos con IA</summary>
+            <p>Procesamiento de actas, transcripciones de reuniones, correos y PDFs para extraer datos clave y resumirlos de forma instantánea.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización administrativa</summary>
+            <p>Conexión de herramientas para facturación, conciliación de datos y reportes de oficina de forma automática para ahorrar tiempo operativo.</p>
+          </details>
+          <details class="service">
+            <summary>Flujos automáticos de trabajo</summary>
+            <p>Conexión de flujos de información de extremo a extremo que se ejecutan sin intervención de tu equipo.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización de seguimiento</summary>
+            <p>Envío automático de correos de recordatorio, alertas operativas o confirmación de transacciones a tus clientes.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización para negocios y profesionales</summary>
+            <p>Paquete cerrado de atajos y flujos de automatización sencillos para profesionales independientes.</p>
+          </details>
+          <details class="service">
+            <summary>IA aplicada a productividad</summary>
+            <p>Configuración y diseño de instrucciones de sistema y automatizaciones para acelerar las tareas de tus colaboradores.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización de procesos</summary>
+            <p>Mapeo, modelado y digitalización de procesos operativos tradicionales para convertirlos en flujos automáticos.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización de reuniones</summary>
+            <p>Grabación, transcripción, redacción de minutas e inclusión automática de notas en tu gestor de proyectos.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización de contenidos</summary>
+            <p>Sistemas automatizados de recopilación, formateo y programación de publicaciones (requiere mayor revisión y calibración).</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="category" data-category="workflows">
+        <div class="category-head">
+          <span class="index">02</span>
+          <h2>2. Workflows</h2>
+          <span class="count">11 servicios</span>
+        </div>
+        <p class="context">Ordenados de flujos y tareas sencillas a arquitectura de procesos organizativos completos.</p>
+        <div class="services">
+          <details class="service">
+            <summary>Organización de tareas</summary>
+            <p>Diseño e implementación de tableros de control (Notion/Airtable) para registrar, delegar y dar seguimiento al trabajo diario.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas de trabajo</summary>
+            <p>Definición y configuración de estructuras fijas sobre cómo debe actuar tu equipo al ejecutar y reportar labores.</p>
+          </details>
+          <details class="service">
+            <summary>Flujos colaborativos</summary>
+            <p>Estructuras para que varios colaboradores compartan datos y actualicen el avance de los proyectos en tiempo real sin perder claridad.</p>
+          </details>
+          <details class="service">
+            <summary>Flujos administrativos</summary>
+            <p>Ordenamiento de la documentación de oficina, flujo de facturas, aprobaciones internas y reportes semanales.</p>
+          </details>
+          <details class="service">
+            <summary>Organización operativa</summary>
+            <p>Mapeo claro de roles, herramientas autorizadas y canales de comunicación del negocio para evitar frictions.</p>
+          </details>
+          <details class="service">
+            <summary>Flujos de contenido</summary>
+            <p>Diseño del proceso de publicación desde la conceptualización, diseño, redacción de copys, aprobación y subida final.</p>
+          </details>
+          <details class="service">
+            <summary>Diseño de workflows</summary>
+            <p>Creación del mapa lógico y visual que describe la secuencia correcta de un proceso operativo del negocio.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas de seguimiento</summary>
+            <p>Tableros de control que alertan visualmente cuando una tarea o entregable se encuentra retenido.</p>
+          </details>
+          <details class="service">
+            <summary>Optimización de procesos</summary>
+            <p>Evaluación de flujos activos para detectar y remover actividades redundantes o cuellos de botella.</p>
+          </details>
+          <details class="service">
+            <summary>Organización digital moderna</summary>
+            <p>Diseño de la arquitectura de información, carpetas compartidas y accesos a herramientas en la nube.</p>
+          </details>
+          <details class="service">
+            <summary>Workflows empresariales</summary>
+            <p>Flujos integrados de operación compleja para enlazar diferentes departamentos y áreas de una empresa.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="category" data-category="agentes ia">
+        <div class="category-head">
+          <span class="index">03</span>
+          <h2>3. Agentes IA</h2>
+          <span class="count">10 servicios</span>
+        </div>
+        <p class="context">Ordenados de asistentes operativos de uso interno a agentes de servicio al cliente.</p>
+        <div class="services">
+          <details class="service">
+            <summary>Asistentes operativos</summary>
+            <p>Agentes virtuales configurados con los documentos de tu negocio para responder consultas internas sobre políticas o procesos.</p>
+          </details>
+          <details class="service">
+            <summary>Agentes para productividad</summary>
+            <p>Asistentes diseñados para ayudar en la redacción de correos, formateo de datos, búsqueda de plantillas y agilización de oficina.</p>
+          </details>
+          <details class="service">
+            <summary>IA para organización</summary>
+            <p>Asistentes configurados para categorizar de forma automática información volcando tareas, correos o prospectos.</p>
+          </details>
+          <details class="service">
+            <summary>IA aplicada a procesos diarios</summary>
+            <p>Configuración de pequeños asistentes en tu espacio de trabajo para acelerar la toma de decisiones cotidianas.</p>
+          </details>
+          <details class="service">
+            <summary>Automatización inteligente</summary>
+            <p>Agentes capaces de evaluar una situación bajo reglas lógicas y detonar flujos de trabajo de forma autónoma.</p>
+          </details>
+          <details class="service">
+            <summary>Flujos asistidos por IA</summary>
+            <p>Procesos donde la información es pre-procesada y clasificada por un agente antes de ser atendida por tu equipo humano.</p>
+          </details>
+          <details class="service">
+            <summary>Asistentes para equipos</summary>
+            <p>Bots compartidos por áreas para estandarizar formatos de respuesta, propuestas comerciales y redacciones habituales.</p>
+          </details>
+          <details class="service">
+            <summary>IA para gestión de información</summary>
+            <p>Estructuras de búsqueda semántica para localizar documentos, datos o registros en segundos dentro de tus repositorios.</p>
+          </details>
+          <details class="service">
+            <summary>Agentes para contenido</summary>
+            <p>Bots entrenados con la identidad y voz de la marca para redactar propuestas técnicas o comunicados oficiales.</p>
+          </details>
+          <details class="service">
+            <summary>Agentes para atención y soporte</summary>
+            <p>Sistemas conversacionales avanzados para atención al cliente (requieren altos estándares de calibración y control de respuestas).</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="category" data-category="soluciones ia">
+        <div class="category-head">
+          <span class="index">04</span>
+          <h2>4. Soluciones IA</h2>
+          <span class="count">10 servicios</span>
+        </div>
+        <p class="context">Ordenados de soluciones enfocadas en productividad individual a sistemas corporativos robustos.</p>
+        <div class="services">
+          <details class="service">
+            <summary>IA para profesionales</summary>
+            <p>Paquetes prácticos de implementación de Inteligencia Artificial para acelerar las tareas de consultores, asesores y directivos.</p>
+          </details>
+          <details class="service">
+            <summary>IA para marcas personales</summary>
+            <p>Configuración de herramientas de generación y organización asistida para que un creador multiplique su productividad diaria.</p>
+          </details>
+          <details class="service">
+            <summary>Implementación de herramientas IA</summary>
+            <p>Configuración inicial e integración de plataformas líderes (ChatGPT, Claude, Midjourney) de forma ordenada en tus computadoras.</p>
+          </details>
+          <details class="service">
+            <summary>Soluciones para productividad</summary>
+            <p>Instalación de atajos, plantillas y herramientas de IA con un enfoque centrado en ahorrar horas semanales al equipo de trabajo.</p>
+          </details>
+          <details class="service">
+            <summary>IA aplicada a procesos diarios</summary>
+            <p>Diseño de pequeñas soluciones de soporte digital para las actividades recurrentes de los colaboradores.</p>
+          </details>
+          <details class="service">
+            <summary>Optimización operativa con IA</summary>
+            <p>Análisis de los procesos más lentos de la empresa y diseño de la solución tecnológica adecuada para resolverlos.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas IA personalizados</summary>
+            <p>Desarrollo a medida de agentes y asistentes que se alimentan de bases de datos internas del cliente.</p>
+          </details>
+          <details class="service">
+            <summary>Soluciones digitales modernas</summary>
+            <p>Implementación de soluciones basadas en la nube que reemplazan flujos de papel o archivos obsoletos.</p>
+          </details>
+          <details class="service">
+            <summary>IA aplicada a comunicación y contenido</summary>
+            <p>Instalación de flujos que redactan borradores, propuestas e informes comerciales de forma automática.</p>
+          </details>
+          <details class="service">
+            <summary>Implementación IA para empresas</summary>
+            <p>Diseño de sistemas integrales de IA para optimizar la toma de decisiones y el flujo de información corporativo.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="category" data-category="operación digital">
+        <div class="category-head">
+          <span class="index">05</span>
+          <h2>5. Operación Digital</h2>
+          <span class="count">16 servicios</span>
+        </div>
+        <p class="context">Ordenados de implementaciones críticas con retorno inmediato (CRM) a infraestructura general.</p>
+        <div class="services">
+          <details class="service">
+            <summary>Implementación de CRM</summary>
+            <p>Configuración rápida y eficiente de embudos comerciales (Notion, Airtable o Pipedrive) para llevar el control de tus clientes y no perder ventas.</p>
+          </details>
+          <details class="service">
+            <summary>Dashboards empresariales</summary>
+            <p>Paneles visuales e interactivos en Looker Studio o Airtable para ver los ingresos, gastos y avance de tus proyectos comerciales.</p>
+          </details>
+          <details class="service">
+            <summary>Paneles de control</summary>
+            <p>Interfaces gráficas que consolidan información clave de la operación diaria para que el director tome decisiones al instante.</p>
+          </details>
+          <details class="service">
+            <summary>Creación de webs operativas</summary>
+            <p>Sitios web corporativos rápidos diseñados específicamente para capturar prospectos e integrarse con tus flujos de automatización.</p>
+          </details>
+          <details class="service">
+            <summary>Landing pages</summary>
+            <p>Páginas de destino únicas optimizadas para campañas específicas, facilitando la conversión y la toma de datos de prospectos.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas de productividad</summary>
+            <p>Configuración de herramientas de oficina (Slack, Google Workspace) para organizar la colaboración del equipo.</p>
+          </details>
+          <details class="service">
+            <summary>Herramientas internas de gestión</summary>
+            <p>Formularios y paneles sencillos para el reporte de gastos, actividades de campo o solicitudes internas del equipo.</p>
+          </details>
+          <details class="service">
+            <summary>Centralización de información</summary>
+            <p>Sistemas en la nube para consolidar archivos y datos que antes se encontraban dispersos en chats o correos individuales.</p>
+          </details>
+          <details class="service">
+            <summary>Ecosistemas digitales de trabajo</summary>
+            <p>Conectividad total del entorno digital de trabajo del negocio, asegurando que los datos viajen sin problemas entre apps.</p>
+          </details>
+          <details class="service">
+            <summary>Organización de oficinas y equipos</summary>
+            <p>Limpieza y organización de cuentas, contraseñas, licencias compartidas y accesos de los colaboradores.</p>
+          </details>
+          <details class="service">
+            <summary>Organización digital empresarial</summary>
+            <p>Estructuración general de carpetas, bases de datos y repositorios de información del negocio.</p>
+          </details>
+          <details class="service">
+            <summary>Gestión operativa digital</summary>
+            <p>Tableros y flujos digitales para el reporte de incidencias o control de operaciones en tiempo real.</p>
+          </details>
+          <details class="service">
+            <summary>Infraestructura digital moderna</summary>
+            <p>Estructura de alojamiento de bases de datos seguras y preparadas para soportar automatizaciones futuras.</p>
+          </details>
+          <details class="service">
+            <summary>Sistemas internos</summary>
+            <p>Aplicaciones internas personalizadas para responder a las necesidades logísticas o de control específicas de la empresa.</p>
+          </details>
+          <details class="service">
+            <summary>Entornos digitales modernos</summary>
+            <p>Configuración de entornos virtuales de oficina adaptados al trabajo remoto o híbrido del equipo.</p>
+          </details>
+          <details class="service">
+            <summary>Implementación de plataformas digitales</summary>
+            <p>Acompañamiento técnico para migrar flujos manuales basados en papel a herramientas digitales modernas.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="category" data-category="consultoría estratégica">
+        <div class="category-head">
+          <span class="index">06</span>
+          <h2>6. Consultoría Estratégica</h2>
+          <span class="count">5 servicios</span>
+        </div>
+        <p class="context">Ordenados de diagnóstico inicial a planes de optimización complejos a mediano plazo.</p>
+        <div class="services">
+          <details class="service">
+            <summary>Diagnóstico operativo</summary>
+            <p>Auditoría y análisis de tus flujos de trabajo actuales para identificar fugas de tiempo, ineficiencias y oportunidades claras de automatización.</p>
+          </details>
+          <details class="service">
+            <summary>Ordenamiento de procesos digitales</summary>
+            <p>Clasificación, limpieza y optimización de tus herramientas tecnológicas actuales para preparar la base de la automatización.</p>
+          </details>
+          <details class="service">
+            <summary>Implementación de herramientas de productividad y automatización</summary>
+            <p>Acompañamiento y capacitación para adoptar las nuevas herramientas sin fricción en el equipo.</p>
+          </details>
+          <details class="service">
+            <summary>Plan de automatización operativa</summary>
+            <p>Diseño del plano arquitectónico tecnológico detallado que tu negocio necesita para crecer a corto y mediano plazo.</p>
+          </details>
+          <details class="service">
+            <summary>Métrica y ROI</summary>
+            <p>Evaluación periódica de las automatizaciones implementadas para calcular el retorno de inversión en horas liberadas y costos.</p>
+          </details>
+        </div>
+      </section>
+      
+    </div>
+  </main>
+  <script>
+    const search = document.querySelector('#search');
+    const categories = [...document.querySelectorAll('.category')];
+    search.addEventListener('input', () => {
+      const term = search.value.trim().toLowerCase();
+      categories.forEach(category => {
+        let visibleCount = 0;
+        category.querySelectorAll('.service').forEach(service => {
+          const text = service.textContent.toLowerCase();
+          const isVisible = !term || text.includes(term) || category.textContent.toLowerCase().includes(term);
+          service.classList.toggle('hidden', !isVisible);
+          if (isVisible) visibleCount += 1;
+        });
+        category.classList.toggle('hidden', visibleCount === 0);
+      });
+    });
+  </script>
+</body>
+</html>

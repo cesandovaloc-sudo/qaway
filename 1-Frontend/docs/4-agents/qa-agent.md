@@ -1,0 +1,2 @@
+# qa agent
+Agente especializado.
