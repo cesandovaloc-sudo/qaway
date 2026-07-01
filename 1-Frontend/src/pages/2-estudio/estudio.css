@@ -547,7 +547,7 @@
 }
 
 .estudio-page .vl-branding h2 span { color: var(--vl-acid); }
-.estudio-page .vl-branding__copy > p:not(.vl-kicker) { max-width: 480px; margin: 28px 0 !important; color: #666860; line-height: 1.7; }
+.estudio-page .vl-branding__copy p:not(.vl-kicker) { max-width: 480px; margin: 28px 0 !important; color: #666860; line-height: 1.7; }
 
 .estudio-page .vl-branding__deliverables { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 36px; border-top: 1px solid rgba(13,15,13,.16); border-bottom: 1px solid rgba(13,15,13,.16); }
 .estudio-page .vl-branding__deliverables span {
@@ -746,9 +746,11 @@
 
 .estudio-page .vl-content-showcase__header span {
   display: inline-block;
-  padding: 6px 10px;
-  background: var(--vl-ink);
-  color: var(--vl-acid);
+  padding: 4px 10px;
+  background: #f2f1ef;
+  color: #ff4b0b;
+  border: 1px solid rgba(255, 75, 11, 0.3);
+  border-radius: 0;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .12em;
@@ -757,6 +759,8 @@
 }
 
 .estudio-page .vl-content-showcase__header strong {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
   font-size: 15px;
   font-weight: 700;
   line-height: 1.3;
@@ -872,6 +876,12 @@
 .estudio-page .vl-digital__site-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  min-height: 420px;
+}
+
+.estudio-page .vl-digital__site-hero-copy {
+  display: grid;
+  grid-template-columns: 1fr;
   min-height: 420px;
 }
 

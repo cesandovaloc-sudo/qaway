@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive } from '@/components/typography'
+import DigitalPresenceCopy from './DigitalPresenceCopy';
 import {
   ArrowDown,
   ArrowRight,
@@ -40,17 +41,17 @@ const services = [
   },
   {
     number: '03',
-    title: 'Presencia Profesional',
-    copy: 'Construimos y optimizamos la imagen digital de profesionales, negocios y marcas personales para LinkedIn, web y redes.',
-    icon: CircleUserRound,
-    image: 'marca-personal-transformacion.png',
-  },
-  {
-    number: '04',
     title: 'Estrategia Digital',
     copy: 'Diseñamos estructuras de posicionamiento, captación y crecimiento: contenido, funnels, landing pages, campañas y conexión con sistemas digitales.',
     icon: Image,
     image: 'branding-architecture-moodboard.png',
+  },
+  {
+    number: '04',
+    title: 'Presencia Profesional',
+    copy: 'Construimos y optimizamos la imagen digital de profesionales, negocios y marcas personales para LinkedIn, web y redes.',
+    icon: CircleUserRound,
+    image: 'marca-personal-transformacion.png',
   },
 ]
 
@@ -473,10 +474,16 @@ function ContentSystem() {
             aria-label="Proceso de concepto, producción y edición de contenido para redes sociales"
           />
           <div className="vl-content-showcase__veil" />
-          <div className="vl-content-showcase__header">
-            <span>Motion Lab · En proceso</span>
-            <strong>Contenido que se piensa<br />para moverse.</strong>
-          </div>
+          <motion.div
+            className="vl-content-showcase__header"
+            initial={{ x: 120, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span>Producción multimedia</span>
+            <strong>Edición de reels y piezas<br />que detienen el scroll.</strong>
+          </motion.div>
 
           <div className="vl-content-showcase__status">
             <span><i /> Reel</span>
@@ -733,6 +740,7 @@ export default function EstudioPage() {
       </div>
       <BrandingSpotlight />
       <ContentSystem />
+      <DigitalPresenceCopy />
       <DigitalPresence />
       <Restoration />
       <PersonalBrand />
