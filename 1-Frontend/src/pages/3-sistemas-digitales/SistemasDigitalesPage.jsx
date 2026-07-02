@@ -768,20 +768,18 @@ useSetNavbarVariant('brand')
         <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_80%,rgba(255,210,0,0.06),transparent_70%)] pointer-events-none" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-8">
-          <div className="mb-12 text-center mx-auto max-w-3xl">
-            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Sistema Completo</div>
-            <h2 className="mt-4 text-5xl font-bold tracking-tight text-white text-balance leading-none mx-auto" style={displayFont}>
-              Lo que puede quedar funcionando <br />
-              dentro de <span className="italic text-[#ff4b0b]">tu proyecto.</span>
-            </h2>
-            <p className="mt-6 text-zinc-300 text-lg font-light leading-relaxed mx-auto max-w-2xl">
-              Cada bloque se puede implementar de manera independiente o conectarse en una arquitectura compacta y fácil de usar.
-            </p>
-          </div>
-
           <div className="grid gap-12 lg:grid-cols-12 lg:items-stretch">
-            <div className="lg:col-span-6 flex flex-col justify-start">
-              <div className="relative border-l border-white/10 flex flex-col gap-3 pl-0">
+            {/* Left Column: Title and 2-column Buttons Grid */}
+            <div className="lg:col-span-5 flex flex-col justify-start">
+              <div className="mb-8">
+                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Sistema Completo</div>
+                <h2 className="mt-4 text-4xl lg:text-[45px] font-bold tracking-tight text-white leading-[0.95]" style={displayFont}>
+                  Lo que puede quedar funcionando <br />
+                  dentro de <span className="italic text-[#ff4b0b]">tu proyecto.</span>
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 {items.map((item, idx) => {
                   const Icon = item.icon
                   const isActive = idx === activeIdx
@@ -789,15 +787,15 @@ useSetNavbarVariant('brand')
                     <button
                       key={item.title}
                       onClick={() => setActiveIdx(idx)}
-                      className={`text-left flex items-start gap-4 py-4 pl-6 border-l-2 -ml-[1.5px] transition-all duration-300 ${
+                      className={`text-left flex items-start gap-3 py-3 px-4 border-l-2 transition-all duration-300 ${
                         isActive
                           ? 'border-[#ff4b0b] bg-white/[0.02] text-white font-bold'
-                          : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                          : 'border-white/10 text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
-                      <Icon className={`h-5 w-5 mt-1 shrink-0 transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-500'}`} />
+                      <Icon className={`h-4.5 w-4.5 mt-0.5 shrink-0 transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-500'}`} />
                       <div className="flex-1 min-w-0">
-                        <h3 className={`text-xl font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
+                        <h3 className={`text-[14px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
                           {item.title}
                         </h3>
                         <motion.div
@@ -805,7 +803,7 @@ useSetNavbarVariant('brand')
                           animate={{
                             height: isActive ? 'auto' : 0,
                             opacity: isActive ? 1 : 0,
-                            marginTop: isActive ? 8 : 0,
+                            marginTop: isActive ? 6 : 0,
                           }}
                           transition={{
                             duration: 0.3,
@@ -813,7 +811,7 @@ useSetNavbarVariant('brand')
                           }}
                           className="overflow-hidden"
                         >
-                          <p className="text-sm font-light leading-relaxed text-zinc-400">
+                          <p className="max-w-[340px] text-[11px] font-light leading-relaxed text-zinc-400">
                             {item.desc}
                           </p>
                         </motion.div>
@@ -824,7 +822,8 @@ useSetNavbarVariant('brand')
               </div>
             </div>
 
-            <div className="lg:col-span-6">
+            {/* Right Column: Widened preview image column */}
+            <div className="lg:col-span-7">
               <div className="sticky top-28 h-full flex items-start justify-center rounded-3xl border border-white/10 bg-zinc-950/40 p-4 md:p-6 shadow-2xl overflow-hidden relative pt-2">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
                 <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff4b0b]/5 rounded-full blur-[80px] pointer-events-none" />
