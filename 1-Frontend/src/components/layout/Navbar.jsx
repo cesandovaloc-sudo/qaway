@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowRight, Menu } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 
 const NavbarVariantContext = createContext('light')
@@ -34,7 +34,7 @@ const variantStyles = {
     linkActive: 'text-[#ff4b0b]',
     logo: 'text-[#20201f]',
     cta: 'bg-[#ff4b0b] text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] hover:bg-[#df3900]',
-
+    menuBtn: 'text-[#292927]',
     mobileBg: 'bg-[#f8f7f4] border-[#20201f]/10',
     mobileLink: 'text-[#292927]',
   },
@@ -75,11 +75,6 @@ const variantStyles = {
 
 const navLinks = [
   ['Estudio', '/estudio'],
-  ['Sistemas digitales', '/sistemas-digitales'],
-  ['Academy', '/academy'],
-  ['Qaway Hub', '/hub'],
-  ['Recursos', '/recursos'],
-  ['Blog', '/blog'],
 ]
 
 export default function Navbar({ variant: explicitVariant }) {
@@ -112,10 +107,7 @@ export default function Navbar({ variant: explicitVariant }) {
     setMenuOpen(false)
   }, [location.pathname])
 
-  const isActive = (path) => {
-    if (path === '/blog') return location.pathname.startsWith('/blog')
-    return location.pathname === path || location.pathname.startsWith(path + '/')
-  }
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
 
   return (
     <header
@@ -135,7 +127,7 @@ export default function Navbar({ variant: explicitVariant }) {
             <Link
               key={label}
               to={path}
-               className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${
+              className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${
                 isActive(path)
                   ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
                   : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
@@ -153,12 +145,12 @@ export default function Navbar({ variant: explicitVariant }) {
             rel="noopener noreferrer"
             className={`hidden min-h-12 rounded-none px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
           >
-            Cuéntanos tu proyecto
+            Cuentanos tu proyecto
           </a>
 
           <button
             type="button"
-            aria-label={menuOpen ? 'Cerrar navegación' : 'Abrir navegación'}
+            aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((c) => !c)}
             className={`sm:hidden ${styles.menuBtn}`}
@@ -194,7 +186,7 @@ export default function Navbar({ variant: explicitVariant }) {
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-5 py-3 text-sm font-bold text-white"
               >
-                Cuéntanos tu proyecto
+                Cuentanos tu proyecto
               </a>
             </div>
           </motion.nav>
