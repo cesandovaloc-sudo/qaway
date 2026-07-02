@@ -147,7 +147,7 @@ function Hero() {
               <img
                 src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                 alt="Sistemas Digitales Qaway"
-                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-top grayscale contrast-125 scale-[1.44] origin-bottom"
+                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale contrast-125 scale-110 lg:scale-105 xl:scale-110 2xl:scale-125 origin-bottom"
                 style={{
                   maskImage:
                     "linear-gradient(to bottom, black 60%, transparent 100%)",
@@ -174,24 +174,49 @@ function Hero() {
                 </p>
               </div>
 
-              <div className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-5 flex flex-col gap-2 w-full shadow-2xl relative overflow-hidden">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ff4b0b]/10 rounded-full blur-xl pointer-events-none"></div>
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className="bg-[#ff4b0b] p-3 rounded-xl text-white shadow-lg shadow-[#ff4b0b]/20">
-                    <TrendingUp className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <div className="text-3xl font-bold tracking-tight">
-                      +127%
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1, 
+                  y: [0, -10],
+                  transition: {
+                    y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 },
+                    opacity: { delay: 0.4, duration: 0.6 },
+                    scale: { delay: 0.4, duration: 0.6 }
+                  }
+                }}
+                style={{ willChange: "transform", width: "100%" }}
+              >
+                <motion.div 
+                  className="bg-white border border-[#ff4b0b]/40 rounded-[5px] p-5 flex flex-col gap-2 w-full shadow-xl relative overflow-hidden"
+                  initial={{ opacity: 0.6, y: 0 }}
+                  animate={{ opacity: 0.6, y: 0 }}
+                  whileHover={{ 
+                    opacity: 1, 
+                    y: -10, 
+                    transition: { duration: 0.3, ease: 'easeOut' } 
+                  }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ff4b0b]/10 rounded-full blur-xl pointer-events-none"></div>
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="bg-[#ff4b0b] p-3 rounded text-white shadow-lg shadow-[#ff4b0b]/20">
+                      <TrendingUp className="w-7 h-7" />
                     </div>
-                    <div className="text-xs text-gray-400 leading-tight mt-0.5">
-                      Aumento promedio
-                      <br />
-                      en productividad
+                    <div>
+                      <div className="text-3xl font-bold tracking-tight text-[#161616]">
+                        +127%
+                      </div>
+                      <div className="text-xs text-[#161616]/80 leading-tight mt-0.5 font-medium">
+                        Aumento promedio
+                        <br />
+                        en productividad
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
           </div>
 
