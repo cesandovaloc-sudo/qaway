@@ -147,7 +147,7 @@ function Hero() {
               <img
                 src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                 alt="Sistemas Digitales Qaway"
-                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale contrast-125 scale-110 lg:scale-105 xl:scale-110 2xl:scale-125 origin-bottom"
+                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale contrast-125 scale-[1.19] lg:scale-[1.14] xl:scale-[1.19] 2xl:scale-[1.34] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.14]"
                 style={{
                   maskImage:
                     "linear-gradient(to bottom, black 60%, transparent 100%)",
