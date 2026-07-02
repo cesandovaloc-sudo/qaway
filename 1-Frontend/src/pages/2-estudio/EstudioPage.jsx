@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
@@ -17,8 +17,11 @@ import {
   LockKeyhole,
   MousePointer2,
   Users,
+  Check,
+  Send
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import { supabase } from '@/config/supabase'
 import './estudio.css'
 
 
@@ -30,28 +33,29 @@ const services = [
     title: 'Branding IA',
     copy: 'Construimos, optimizamos y transformamos marcas para entornos digitales mediante estrategia, dirección visual e IA aplicada.',
     icon: Brush,
-    image: 'branding-hospitality-moodboard.png',
+    image: 'study-replacements/study-branding-coffee.png',
   },
   {
     number: '02',
     title: 'Contenido Visual',
     copy: 'Creamos piezas visuales estratégicas para plataformas digitales: reels, carruseles, edición y contenido que comunica y convierte.',
     icon: Layers3,
-    image: 'sistema-contenido.png',
+    image: 'ChatGPT Image 1 jul 2026, 15_30_58.png',
+    position: 'center 90%',
   },
   {
     number: '03',
     title: 'Estrategia Digital',
     copy: 'Diseñamos estructuras de posicionamiento, captación y crecimiento: contenido, funnels, landing pages, campañas y conexión con sistemas digitales.',
     icon: Image,
-    image: 'branding-architecture-moodboard.png',
+    image: 'ChatGPT Image 1 jul 2026, 15_53_17.png',
   },
   {
     number: '04',
     title: 'Presencia Profesional',
     copy: 'Construimos y optimizamos la imagen digital de profesionales, negocios y marcas personales para LinkedIn, web y redes.',
     icon: CircleUserRound,
-    image: 'marca-personal-transformacion.png',
+    image: 'ChatGPT Image 1 jul 2026, 16_10_34.png',
   },
 ]
 
@@ -100,7 +104,7 @@ function TiltPanel({ children, className = '' }) {
   )
 }
 
-function SplitVisual({ src, alt, dark = false }) {
+function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
   const [position, setPosition] = useState(50)
 
   return (
@@ -110,10 +114,11 @@ function SplitVisual({ src, alt, dark = false }) {
         const rect = event.currentTarget.getBoundingClientRect()
         setPosition(Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100)))
       }}
-      style={{ '--split-position': `${position}%` }}
+      style={{ '--split-position': `${position}%`, width: '100%', height: '100%' }}
     >
-      <img src={src} alt={alt} />
-      <div className="vl-comparison__shade" />
+      <img src={beforeImage} alt={`Original - ${alt}`} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
+      <img src={afterImage} alt={`Resultado - ${alt}`} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, clipPath: `inset(0 0 0 var(--split-position))` }} />
+      
       <span className="vl-comparison__label vl-comparison__label--left">Original</span>
       <span className="vl-comparison__label vl-comparison__label--right">Resultado</span>
       <div className="vl-comparison__line">
@@ -139,9 +144,10 @@ function Hero() {
       style={{ '--pointer-x': `${pointer.x}%`, '--pointer-y': `${pointer.y}%` }}
     >
       {/* Nav removed */}
-      <img className="vl-hero__image" src={`${ASSET}/visual-lab-hero-v7.png`} alt="Transformación visual dirigida por Qaway Lab" />
+      <img className="vl-hero__image" src={`${ASSET}/ChatGPT Image 2 jul 2026, 00_14_43.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ objectPosition: 'right center', filter: 'brightness(1.10) contrast(0.95) grayscale(100%)', transform: 'scale(1.19) translate(4%, 15%)' }} />
       <div className="vl-hero__veil" />
       <div className="vl-hero__spotlight" />
+      <div className="vl-hero__glow" />
       <div className="vl-hero__grid" />
 
       <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
@@ -150,7 +156,7 @@ function Hero() {
           <h1>
             Menos<br />
             piezas sueltas.<br />
-            <em>Más<br />dirección<br />visual.</em>
+            <em>Más<br />Dirección<br />Visual.</em>
           </h1>
           <p className="vl-hero__copy">
             Diseñamos imágenes, sistemas y contenido para que tu marca se vea clara, actual y coherente en web, redes y presentaciones.
@@ -213,7 +219,7 @@ function Hero() {
         <p>Material original<br />Intervención<br />Resultado</p>
       </div>
 
-      <div className="vl-hero__bar" />
+
     </section>
   )
 }
@@ -243,7 +249,7 @@ function BrandingSpotlight() {
   }
 
   return (
-    <section id="branding" className="vl-paper vl-section vl-branding">
+    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', paddingBottom: '60px' }}>
       <div className="vl-shell vl-branding__grid">
         <motion.figure
           initial={{ opacity: 0, scale: .965, x: -34 }}
@@ -341,16 +347,16 @@ function BrandingSpotlight() {
 
 function Services() {
   return (
-    <section id="servicios" className="vl-dark vl-section">
-      <div className="vl-shell">
-        <motion.div {...reveal} className="vl-services__heading">
-          <div>
+    <section id="servicios" className="vl-dark vl-section" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="vl-shell w-full">
+        <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
+          <div style={{ textAlign: 'center', width: '100%' }}>
             
-            <h2>Cuatro áreas<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+            <h2 style={{ fontSize: 'clamp(2.2rem, 3.6vw, 4rem)', textAlign: 'center', margin: '0 auto' }}>Cuatro áreas<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
           </div>
         </motion.div>
 
-        <div className="vl-services-grid">
+        <div className="vl-services-grid" style={{ width: '85%', margin: '0 auto' }}>
           {featuredServices.map((service, index) => {
             const Icon = service.icon
             const paths = [
@@ -362,7 +368,7 @@ function Services() {
             return (
               <Link key={service.title} to={paths[index]} className="vl-service-link">
                 <TiltPanel className={`vl-service vl-service--${index + 1}`}>
-                  {service.image && <img src={`${ASSET}/${service.image}`} alt="" />}
+                  {service.image && <img src={`${ASSET}/${service.image}`} alt="" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
                     <div className="vl-service__top"><span>{service.number}</span><Icon size={22} /></div>
                     <h3>{service.title}</h3>
@@ -378,60 +384,127 @@ function Services() {
   )
 }
 
-function Restoration() {
+function TransformacionVisualCarousel() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  
+  const slides = [
+    {
+      id: 'presencia',
+      title: 'Presencia Profesional',
+      beforeImage: `${ASSET}/presencia-profesional1.png`,
+      afterImage: `${ASSET}/presencia-profesional2.png`,
+      alt: 'Transformación de presencia profesional'
+    },
+    {
+      id: 'producto',
+      title: 'Optimización Visual',
+      beforeImage: `${ASSET}/ChatGPT Image 1 jul 2026, 18_06_57.png`, 
+      afterImage: `${ASSET}/ChatGPT Image 1 jul 2026, 18_23_09.png`,
+      alt: 'Optimización de producto y visuales'
+    },
+    {
+      id: 'restauracion',
+      title: 'Restauración',
+      beforeImage: `${ASSET}/restauración-1.png`, 
+      afterImage: `${ASSET}/restauración-2.png`,
+      alt: 'Fotografía antigua restaurada'
+    }
+  ];
+
   return (
-    <section className="vl-paper vl-section vl-restoration">
-      <div className="vl-shell">
-        <motion.div {...reveal} className="vl-restoration__title">
-          <p className="vl-kicker">Transformación visual / 05</p>
-          <h2>Recuperar.<br />Mejorar.<br /><span>Reconstruir.</span></h2>
-          <p>No maquillamos defectos. Rediseñamos logos, objetos, piezas e imágenes para que funcionen mejor dentro de una marca real.</p>
-          <a href="#diagnostico" className="vl-button vl-button--ink">Evaluar mi material <ArrowRight size={16} /></a>
+    <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
+      <div className="vl-shell vl-content-system" style={{ gridTemplateColumns: '.95fr .95fr', gap: '80px' }}>
+        <motion.div {...reveal} className="vl-content-system__copy">
+          <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Transformación visual / 04</p>
+          <h2>Lo que ves,<br /><span>lo transformamos.</span></h2>
+          <p>
+            Tres niveles de intervención para elevar la percepción de tu marca: presencia profesional, optimización de producto y restauración de archivo.
+          </p>
+
+          {/* Navigation Tabs (Vertical Stack) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '32px' }}>
+            {slides.map((slide, index) => (
+              <motion.button
+                key={slide.id}
+                onClick={() => setActiveSlide(index)}
+                whileInView={
+                  activeSlide === index 
+                    ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
+                    : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
+                }
+                viewport={{ once: false, amount: 0.5 }}
+                transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  padding: '16px 20px',
+                  border: '1px solid',
+                  borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
+                  backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
+                  color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                  textAlign: 'left'
+                }}
+              >
+                <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
+                  0{index + 1}
+                </span>
+                <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
+                  {slide.title}
+                </span>
+              </motion.button>
+            ))}
+          </div>
         </motion.div>
 
-        <div className="vl-restoration__visuals">
-          <motion.div {...reveal}>
-            <SplitVisual src={`${ASSET}/producto-antes-despues.png`} alt="Fotografía de producto optimizada" dark />
-            <div className="vl-caption"><span>01</span> Objeto y presentación comercial</div>
-          </motion.div>
-          <motion.div {...reveal}>
-            <SplitVisual src={`${ASSET}/restauracion-antes-despues.png`} alt="Fotografía antigua restaurada" />
-            <div className="vl-caption"><span>02</span> Restauración de archivo cuando aplica</div>
-          </motion.div>
-        </div>
+        <motion.div {...reveal} className="vl-content-showcase" style={{ padding: 0, background: 'none' }}>
+          <div
+            style={{
+              width: '100%',
+              height: '75vh',
+              minHeight: '550px',
+              position: 'relative',
+              overflow: 'hidden',
+              border: '1px solid rgba(0,0,0,0.12)',
+              borderRadius: '6px',
+              backgroundColor: '#f3f1ee'
+            }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSlide}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6, ease: 'easeInOut' }}
+                style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+              >
+                <SplitVisual 
+                  beforeImage={slides[activeSlide].beforeImage} 
+                  afterImage={slides[activeSlide].afterImage} 
+                  alt={slides[activeSlide].alt} 
+                  dark={false} 
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
     </section>
-  )
-}
-
-function PersonalBrand() {
-  return (
-    <section id="presencia" className="vl-personal">
-      <img src={`${ASSET}/marca-personal-transformacion.png`} alt="Transformación de fotografías para presencia profesional y marca personal" />
-      <div className="vl-personal__shade" />
-      <motion.div {...reveal} className="vl-personal__content">
-        <p className="vl-kicker vl-kicker--dark">Presencia profesional / 06</p>
-        <h2>Tu experiencia ya existe.<br /><span>Hagamos que también se perciba.</span></h2>
-        <p>
-          Organizamos retratos, perfiles y presentación digital para proyectar una imagen coherente con tu trabajo, tu personalidad y el nivel al que quieres llegar.
-        </p>
-        <div className="vl-personal__formats">
-          {['LinkedIn', 'Web', 'Prensa', 'Marca personal'].map(item => <span key={item}>{item}</span>)}
-        </div>
-        <Link to="/estudio/presencia-profesional" className="vl-button vl-button--acid">Profesionalizar mi imagen <ArrowRight size={16} /></Link>
-      </motion.div>
-    </section>
-  )
+  );
 }
 
 function ContentSystem() {
   const formats = ['1:1', '4:5', '9:16', '16:9']
 
   return (
-    <section id="contenido" className="vl-paper vl-section vl-social">
+    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
-          <p className="vl-kicker">Contenido para redes / 02</p>
+          <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Contenido para redes / 02</p>
           <h2>Una marca activa.<br /><span>Muchos formatos, una sola voz.</span></h2>
           <p>
             Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca.
@@ -474,16 +547,6 @@ function ContentSystem() {
             aria-label="Proceso de concepto, producción y edición de contenido para redes sociales"
           />
           <div className="vl-content-showcase__veil" />
-          <motion.div
-            className="vl-content-showcase__header"
-            initial={{ x: 120, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span>Producción multimedia</span>
-            <strong>Edición de reels y piezas<br />que detienen el scroll.</strong>
-          </motion.div>
 
           <div className="vl-content-showcase__status">
             <span><i /> Reel</span>
@@ -496,132 +559,69 @@ function ContentSystem() {
   )
 }
 
-function DigitalPresence() {
-  return (
-    <section id="estrategia" className="vl-dark vl-section vl-digital">
-      <div className="vl-shell">
-        <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark vl-digital__heading">
-          <div>
-            <p className="vl-kicker vl-kicker--dark">Presencia digital / 04</p>
-            <h2>De la identidad<br /><span>a una marca que ya vive online.</span></h2>
-          </div>
-          <p>Conectamos la imagen de la marca con sus perfiles, contenido y landing para construir una experiencia coherente de principio a fin.</p>
-        </motion.div>
-
-        <motion.div {...reveal} className="vl-digital__stage">
-          <div className="vl-digital__browser">
-            <div className="vl-digital__browser-bar"><i /><i /><i /><span>qaway.brand / inicio</span></div>
-            <div className="vl-digital__landing">
-              <motion.div
-                className="vl-digital__site-scroll"
-                initial={{ y: 0 }}
-                whileInView={{ y: -360 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 11, delay: .35, ease: [0.33, 0, 0.12, 1] }}
-              >
-                <section className="vl-digital__site-hero">
-                  <div className="vl-digital__site-copy">
-                    <small>IDENTIDAD · CONTENIDO · CONVERSIÓN</small>
-                    <strong>UNA MARCA QUE<br />SE ENTIENDE<br />Y CONVIERTE.</strong>
-                    <span>Landing editorial pensada para presentar propuesta, reforzar confianza y guiar a la acción.</span>
-                    <Link to="/estudio/estrategia-digital" className="font-bold flex items-center gap-1 mt-2 text-white hover:text-[#ff4b0b] transition-colors">Explorar estrategia <ArrowRight size={14} /></Link>
-                  </div>
-                  <div className="vl-digital__site-visual">
-                    <img src={`${ASSET}/branding-architecture-moodboard.png`} alt="Identidad visual aplicada en una landing digital" />
-                  </div>
-                </section>
-
-                <section className="vl-digital__site-band">
-                  <span>Dirección visual consistente</span>
-                  <span>Mensajes claros</span>
-                  <span>Conversión</span>
-                </section>
-
-                <section className="vl-digital__site-grid">
-                  <article>
-                    <small>01</small>
-                    <strong>Hero y propuesta</strong>
-                    <p>Entrada clara, tono visual definido y llamada a la acción visible.</p>
-                  </article>
-                  <article>
-                    <small>02</small>
-                    <strong>Servicios</strong>
-                    <p>Sistema de bloques para explicar oferta, proceso y entregables.</p>
-                  </article>
-                  <article>
-                    <small>03</small>
-                    <strong>Pruebas visuales</strong>
-                    <p>Aplicaciones, mockups y piezas que refuerzan la credibilidad de la marca.</p>
-                  </article>
-                </section>
-
-                <section className="vl-digital__site-gallery">
-                  <img src={`${ASSET}/branding-botanical-moodboard.png`} alt="Sistema visual aplicado a piezas de marca" />
-                  <img src={`${ASSET}/sistema-contenido.png`} alt="Sistema de contenido conectado con la landing" />
-                </section>
-
-                <section className="vl-digital__site-cta">
-                  <div>
-                    <small>Captación</small>
-                    <strong>Una ruta completa<br />desde la marca hasta el contacto.</strong>
-                  </div>
-                  <span>Formulario · CTA · WhatsApp · Agenda</span>
-                </section>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="vl-digital__social">
-            <div className="vl-digital__profile">
-              <span>QB</span>
-              <div><strong>qaway.brand</strong><small>Dirección visual y contenido</small></div>
-            </div>
-            <img src={`${ASSET}/sistema-contenido.png`} alt="Sistema de contenido aplicado a redes sociales" />
-            <div className="vl-digital__metrics"><span>24 piezas</span><span>4 formatos</span><span>1 sistema</span></div>
-          </div>
-
-          <div className="vl-digital__path">
-            {['Identidad', 'Redes', 'Landing', 'Captación'].map((item, index) => (
-              <span key={item}><small>0{index + 1}</small>{item}</span>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  )
-}
-
 function Method() {
+  const [activePhase, setActivePhase] = useState(0)
+
   return (
     <section className="vl-dark vl-section vl-method">
       <div className="vl-shell">
-        <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark">
+        <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
-            <p className="vl-kicker vl-kicker--dark">Método híbrido / 07</p>
-            <h2>IA para acelerar.<br /><span>Criterio humano para decidir.</span></h2>
+            <p className="vl-kicker vl-kicker--dark">Método híbrido / 05</p>
+            <h2 style={{ marginBottom: 0 }}>IA para acelerar.<br /><span style={{ color: '#fff' }}>Criterio humano para decidir.</span></h2>
           </div>
-          <p>La herramienta amplía posibilidades. La dirección define cuáles tienen sentido para tu proyecto.</p>
         </motion.div>
 
-        <div className="vl-method__body">
-          <div className="vl-method__phases">
+        <div className="vl-method__body" style={{ marginTop: '32px', alignItems: 'flex-start' }}>
+          <div className="vl-method__phases" style={{ gap: '0px', display: 'flex', flexDirection: 'column' }}>
             {phases.map(([number, title, copy], index) => (
-              <motion.div {...reveal} key={title} className="vl-phase">
-                <span>{number}</span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{copy}</p>
+              <motion.div
+                {...reveal}
+                key={title}
+                className="vl-phase"
+                onClick={() => setActivePhase(activePhase === index ? -1 : index)}
+                style={{
+                  cursor: 'pointer',
+                  padding: '16px 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '24px'
+                }}
+              >
+                <span style={{ color: activePhase === index ? 'var(--vl-acid)' : '#666', font: 'bold 13px monospace' }}>{number}</span>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', color: activePhase === index ? '#fff' : '#8b8c88', transition: 'color 0.3s' }}>
+                    {title}
+                  </h3>
+                  <AnimatePresence>
+                    {activePhase === index && (
+                      <motion.p
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        style={{ overflow: 'hidden', margin: 0, color: '#aaa99f', fontSize: '15px', lineHeight: 1.6, paddingTop: '10px' }}
+                      >
+                        {copy}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
                 </div>
-                {index < phases.length - 1 && <ChevronDown size={18} />}
+                <motion.div
+                  animate={{ rotate: activePhase === index ? 180 : 0 }}
+                  style={{ color: activePhase === index ? 'var(--vl-acid)' : '#666' }}
+                >
+                  <ChevronDown size={18} />
+                </motion.div>
               </motion.div>
             ))}
           </div>
-          <motion.figure {...reveal} className="vl-method__image">
-            <img src={`${ASSET}/metodologia-estudio.png`} alt="Dirección humana de un proceso visual asistido por IA" />
+          <motion.figure {...reveal} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
+            <img src={`${ASSET}/ChatGPT Image 1 jul 2026, 15_30_58.png`} alt="Dirección humana de un proceso visual asistido por IA" style={{ borderRadius: '8px' }} />
           </motion.figure>
         </div>
 
-        <div className="vl-trust">
+        <div className="vl-trust" style={{ marginTop: '20px' }}>
           {[
             [LockKeyhole, 'Archivos protegidos'],
             [CircleUserRound, 'Revisión estética humana'],
@@ -634,94 +634,148 @@ function Method() {
 }
 
 function Diagnostic() {
-  const options = useMemo(() => [
-    'Una marca o identidad en construcción',
-    'Contenido para redes',
-    'Una landing o presencia digital',
-    'Fotografías, productos o piezas visuales',
-    'Archivos antiguos',
-    'Referencias o una idea',
-    'No estoy seguro',
-  ], [])
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
 
-  const [form, setForm] = useState({
-    project: '',
-    material: options[0],
-    result: 'Construir una identidad visual',
-    email: '',
-  })
-
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
-    const message = [
-      'Hola Qaway, quiero solicitar un diagnóstico de Visual Lab.',
-      '',
-      `Proyecto: ${form.project}`,
-      `Material disponible: ${form.material}`,
-      `Resultado buscado: ${form.result}`,
-      `Correo: ${form.email}`,
-    ].join('\n')
-    window.open(`${WHATSAPP_LINK.split('?text=')[0]}?text=${encodeURIComponent(message)}`, '_blank')
+    setSubmitting(true)
+    setSubmitError('')
+    
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
+    const lead = {
+      name: String(form.get('name') || '').trim(),
+      phone: String(form.get('phone') || '').trim(),
+      email: String(form.get('email') || '').trim().toLowerCase(),
+      profile: String(form.get('profile') || '').trim(),
+      interest: String(form.get('interest') || '').trim(),
+      message: String(form.get('message') || '').trim(),
+    }
+
+    try {
+      const { error } = await supabase.from('leads').insert([{
+        client_name: lead.name,
+        contact_info: lead.phone,
+        source: 'Estudio',
+        stage: 'new',
+        metadata: {
+          email: lead.email,
+          profile: lead.profile,
+          interest: lead.interest,
+          message: lead.message || 'Sin mensaje adicional',
+        },
+      }])
+      if (error) throw error
+
+      const apiKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || ''
+      if (apiKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: apiKey.trim(),
+            subject: `Nueva consulta Estudio: ${lead.interest || 'Orientación'}`,
+            from_name: 'Visual Lab Estudio',
+            name: lead.name,
+            phone: lead.phone,
+            email: lead.email,
+            profile: lead.profile,
+            interest: lead.interest,
+            message: lead.message || 'Sin mensaje adicional',
+          }),
+        })
+      }
+      setSubmitted(true)
+    } catch (e) {
+      console.error(e)
+      setSubmitError('Hubo un error al enviar tu solicitud. Inténtalo de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
   }
+
+  const resetForm = () => setSubmitted(false)
 
   return (
     <section id="diagnostico" className="vl-diagnostic">
-      <div className="vl-diagnostic__form">
-        <motion.div {...reveal}>
-          <p className="vl-kicker">Diagnóstico visual / 08</p>
-          <h2>Cuéntanos qué tienes.<br /><span>Te diremos qué podemos transformar.</span></h2>
-          <p className="vl-diagnostic__intro">
-            Fotos, contenido, referencias, una marca en construcción o una idea todavía desordenada. No necesitas saber qué servicio elegir.
-          </p>
-        </motion.div>
+      <div className="vl-diagnostic__form academy-section academy-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
+          <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
+            <h2 style={{ textTransform: 'none' }}>Hablemos de tu <span>Proyecto.</span></h2>
+          </motion.div>
 
-        <form onSubmit={submit}>
-          <label>
-            Cuéntanos de qué va tu proyecto
-            <textarea
-              required
-              value={form.project}
-              onChange={event => setForm({ ...form, project: event.target.value })}
-              placeholder="Ej: Tengo fotografías de mis productos tomadas con celular y quiero convertirlas en imágenes para una campaña."
-            />
-          </label>
-          <div className="vl-form-row">
-            <label>
-              Qué material tienes
-              <select value={form.material} onChange={event => setForm({ ...form, material: event.target.value })}>
-                {options.map(item => <option key={item}>{item}</option>)}
-              </select>
-            </label>
-            <label>
-              Qué resultado buscas
-              <select value={form.result} onChange={event => setForm({ ...form, result: event.target.value })}>
-                <option>Construir una identidad visual</option>
-                <option>Crear contenido para redes</option>
-                <option>Conectar redes y landing</option>
-                <option>Construir presencia profesional</option>
-                <option>Mejorar material existente</option>
-                <option>No estoy seguro, quiero orientación</option>
-              </select>
-            </label>
-          </div>
-          <label>
-            Tu correo
-            <input
-              required
-              type="email"
-              value={form.email}
-              onChange={event => setForm({ ...form, email: event.target.value })}
-              placeholder="tu@correo.com"
-            />
-          </label>
-          <button type="submit">Solicitar diagnóstico visual <ArrowRight size={17} /></button>
-        </form>
+          <motion.div {...reveal}>
+            <form onSubmit={submit} className="academy-interest-form">
+              {submitted ? (
+                <div className="academy-form-success">
+                  <div><Check size={28} /></div>
+                  <h3>¡Consulta enviada!</h3>
+                  <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
+                  <button type="button" onClick={resetForm}>Enviar otro mensaje</button>
+                </div>
+              ) : (
+                <>
+                  <div className="academy-field">
+                    <label htmlFor="academy-name">¿Cómo te llamas?</label>
+                    <input type="text" id="academy-name" name="name" required placeholder="Tu nombre completo" />
+                  </div>
+                  <div className="academy-field-row">
+                    <div className="academy-field">
+                      <label htmlFor="academy-phone">Teléfono</label>
+                      <input type="tel" id="academy-phone" name="phone" required placeholder="+51 999 999 999" />
+                    </div>
+                    <div className="academy-field">
+                      <label htmlFor="academy-email">Correo</label>
+                      <input type="email" id="academy-email" name="email" required placeholder="tucorreo@empresa.com" />
+                    </div>
+                  </div>
+
+                  <div className="academy-field-row">
+                    <div className="academy-field">
+                      <label htmlFor="academy-profile">¿A qué te dedicas?</label>
+                      <select id="academy-profile" name="profile" required>
+                        <option value="">Selecciona tu perfil</option>
+                        <option value="Profesional / Consultor">Profesional / Consultor</option>
+                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                        <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
+                        <option value="Equipo de empresa">Equipo de empresa</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <div className="academy-field">
+                      <label htmlFor="academy-interest">¿Qué Servicio te interesa?</label>
+                      <select id="academy-interest" name="interest" required>
+                        <option value="">Selecciona un interés</option>
+                        <option value="Identidad Visual">Identidad Visual</option>
+                        <option value="Landing Page o Web">Landing Page o Web</option>
+                        <option value="Contenido para Redes">Contenido para Redes</option>
+                        <option value="Presencia Digital Completa">Presencia Digital Completa</option>
+                        <option value="Orientación general / Otro">Orientación general / Otro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="academy-field">
+                    <label htmlFor="academy-message">Cuéntanos un poco más</label>
+                    <textarea id="academy-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
+                  </div>
+                  <button type="submit" className="academy-submit-button" disabled={submitting}>
+                    {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÓN'}
+                    <Send size={17} />
+                  </button>
+                  {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                </>
+              )}
+            </form>
+          </motion.div>
+        </div>
       </div>
 
       <div className="vl-diagnostic__visual">
-        <img src={`${ASSET}/diagnostico-visual.png`} alt="Universo visual creativo desarrollado por Visual Lab" />
+        <img src={`${ASSET}/diagnostico-visual.png`} alt="Contacto creativo desarrollado por Visual Lab" />
         <div className="vl-diagnostic__frame" />
-        <span>No necesitas saber qué servicio elegir.</span>
       </div>
     </section>
   )
@@ -733,17 +787,11 @@ export default function EstudioPage() {
     <div className="estudio-page">
       <Hero />
       <Services />
-      <div className="vl-section-cut">
-        <span className="vl-section-cut__bar" />
-        <span className="vl-section-cut__label">02 / Branding</span>
-        <span className="vl-section-cut__bar vl-section-cut__bar--fade" />
-      </div>
+
       <BrandingSpotlight />
       <ContentSystem />
       <DigitalPresenceCopy />
-      <DigitalPresence />
-      <Restoration />
-      <PersonalBrand />
+      <TransformacionVisualCarousel />
       <Method />
       <Diagnostic />
     </div>
