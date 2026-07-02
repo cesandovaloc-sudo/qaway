@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import { getNavbarLinks } from '@/config/siteVisibility'
 
 const NavbarVariantContext = createContext('light')
 const NavbarSetVariantContext = createContext(() => {})
@@ -73,15 +74,12 @@ const variantStyles = {
   },
 }
 
-const navLinks = [
-  ['Estudio', '/estudio'],
-]
-
 export default function Navbar({ variant: explicitVariant }) {
   const contextVariant = useContext(NavbarVariantContext)
   const variant = explicitVariant || contextVariant
   const styles = variantStyles[variant] || variantStyles.light
   const location = useLocation()
+  const navLinks = getNavbarLinks()
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [headerVisible, setHeaderVisible] = useState(true)
@@ -107,7 +105,10 @@ export default function Navbar({ variant: explicitVariant }) {
     setMenuOpen(false)
   }, [location.pathname])
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+  const isActive = (path) => {
+    if (path === '/blog') return location.pathname.startsWith('/blog')
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
 
   return (
     <header
@@ -123,17 +124,17 @@ export default function Navbar({ variant: explicitVariant }) {
         </Link>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
-          {navLinks.map(([label, path]) => (
+          {navLinks.map((link) => (
             <Link
-              key={label}
-              to={path}
+              key={link.key}
+              to={link.path}
               className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${
-                isActive(path)
+                isActive(link.path)
                   ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
                   : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
               }`}
             >
-              {label}
+              {link.label}
             </Link>
           ))}
         </nav>
@@ -152,7 +153,7 @@ export default function Navbar({ variant: explicitVariant }) {
             type="button"
             aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
             aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((c) => !c)}
+            onClick={() => setMenuOpen((current) => !current)}
             className={`sm:hidden ${styles.menuBtn}`}
           >
             <Menu size={22} />
@@ -170,14 +171,14 @@ export default function Navbar({ variant: explicitVariant }) {
             className={`border-b ${styles.mobileBg} px-6 py-5 sm:hidden`}
           >
             <div className="flex flex-col">
-              {navLinks.map(([label, path]) => (
+              {navLinks.map((link) => (
                 <Link
-                  key={label}
-                  to={path}
+                  key={link.key}
+                  to={link.path}
                   onClick={() => setMenuOpen(false)}
                   className={`border-b border-[#20201f]/10 py-3 text-sm font-bold uppercase tracking-widest last:border-b-0 ${styles.mobileLink}`}
                 >
-                  {label}
+                  {link.label}
                 </Link>
               ))}
               <a

@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom'
 import { socialLinks, WHATSAPP_LINK } from '@/data/navigation'
+import { getFooterLinks } from '@/config/siteVisibility'
 
 export default function Footer() {
+  const areaLinks = getFooterLinks('areas')
+  const resourceLinks = getFooterLinks('resources')
+
   return (
     <footer className="border-t border-white/10 bg-[#111111] px-6 py-14 text-white sm:px-10 lg:px-14 lg:py-16">
       <div className="mx-auto max-w-[94rem]">
-        <div className="grid gap-14 lg:grid-cols-[1.5fr_.9fr_.9fr]">
+        <div className="grid gap-14 lg:grid-cols-[1.5fr_.9fr_.9fr_.9fr]">
           <div className="lg:pr-16">
             <Link to="/" className="inline-flex items-center gap-2 text-2xl font-semibold tracking-[-0.05em]">
               Qaway <span className="text-[#ff4b0b]">Lab</span>
@@ -28,18 +32,38 @@ export default function Footer() {
             </div>
           </div>
 
-          <div>
-            <p className="mb-4 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Paginas activas</p>
-            <div className="grid gap-3 text-sm text-white/72">
-              <Link to="/" className="hover:text-white">Inicio</Link>
-              <Link to="/estudio" className="hover:text-white">Estudio</Link>
+          {areaLinks.length > 0 && (
+            <div>
+              <p className="mb-4 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Areas</p>
+              <div className="grid gap-3 text-sm text-white/72">
+                {areaLinks.map((link) => (
+                  <Link key={link.key} to={link.path} className="hover:text-white">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {resourceLinks.length > 0 && (
+            <div>
+              <p className="mb-4 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Recursos</p>
+              <div className="grid gap-3 text-sm text-white/72">
+                {resourceLinks.map((link) => (
+                  <Link key={link.key} to={link.path} className="hover:text-white">
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <p className="mb-4 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
             <div className="grid gap-3 text-sm text-white/72">
-              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="hover:text-white">Escribir por WhatsApp</a>
+              <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                Escribir por WhatsApp
+              </a>
             </div>
           </div>
         </div>
