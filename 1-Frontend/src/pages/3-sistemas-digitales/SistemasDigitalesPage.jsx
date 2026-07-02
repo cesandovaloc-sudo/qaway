@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -21,6 +21,11 @@ import {
   Cpu,
   ChevronRight,
   CheckCircle2,
+  ArrowDown,
+  Gauge,
+  GitBranch,
+  Layers3,
+  Network,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -28,12 +33,123 @@ import './digital-presence.css'
 
 const ASSET = '/assets/pages/2-estudio'
 
+function CounterValue({ value }) {
+  const [current, setCurrent] = useState(0);
+  const elementRef = useRef(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          
+          let target = 0;
+          if (value === "01") {
+            target = 1;
+            animateCount(0, target, (val) => {
+              setCurrent(val < 10 ? `0${val}` : val);
+            }, 800);
+          } else if (value === "-42%") {
+            target = -42;
+            animateCount(0, target, (val) => {
+              setCurrent(`${val}%`);
+            }, 1000);
+          } else if (value === "24/7") {
+            target = 24;
+            animateCount(0, target, (val) => {
+              setCurrent(`${val}/7`);
+            }, 900);
+          } else {
+            setCurrent(value);
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => {
+      if (elementRef.current) {
+        observer.unobserve(elementRef.current);
+      }
+    };
+  }, [value]);
+
+  const animateCount = (start, end, updateFn, duration) => {
+    const startTime = performance.now();
+    
+    const step = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = progress * (2 - progress);
+      const currentVal = Math.round(start + (end - start) * easeProgress);
+      
+      updateFn(currentVal);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  return (
+    <span ref={elementRef} className="inline-block">
+      {current || (value === "01" ? "00" : value === "-42%" ? "0%" : "0/7")}
+    </span>
+  );
+}
+
+
 const reveal = {
   initial: { opacity: 0, y: 36 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.16 },
   transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] },
 }
+
+const items = [
+  {
+    title: 'Automatización administrativa',
+    desc: 'Crea facturas, registra gastos, archiva documentos y gestiona correos de forma automática.',
+    icon: Database,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_1.webp',
+  },
+  {
+    title: 'Dashboards operativos',
+    desc: 'Mide tiempos de entrega, cuellos de botella y rendimiento del equipo en tiempo real.',
+    icon: Gauge,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_3.webp',
+  },
+  {
+    title: 'CRM y seguimiento comercial',
+    desc: 'Asigna prospectos, envía recordatorios automatizados por WhatsApp y actualiza estados de venta.',
+    icon: GitBranch,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_2.webp',
+  },
+  {
+    title: 'Agentes para atención y soporte',
+    desc: 'IA que responde preguntas frecuentes, califica leads y deriva casos complejos a humanos.',
+    icon: BrainCircuit,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_4.webp',
+  },
+  {
+    title: 'Sistemas de contenido con IA',
+    desc: 'Estructura calendarios, genera borradores para posts y optimiza tus activos de marketing.',
+    icon: Layers3,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_5.webp',
+  },
+  {
+    title: 'Procesos internos documentados',
+    desc: 'SOPs en Notion para que tu equipo ejecute cada automatización sin depender de ti.',
+    icon: Network,
+    image: '/assets/pages/3-sistemas-digitales/1-automatizacion/bloque4_6.webp',
+  },
+]
 
 const displayFont = {
   fontFamily:
@@ -134,9 +250,15 @@ function Hero() {
                     </>
                   }
                   subtitle="Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal."
-                  primaryCta={{ href: "#soluciones", label: "Ver soluciones" }}
-                  secondaryCta={{ href: "/", label: "Conocer Qaway" }}
                 />
+                <div className="flex flex-wrap items-center gap-6 mt-8">
+                  <a href="#soluciones" className="inline-flex items-center justify-center gap-2 bg-[#ff4b0b] text-white px-8 py-3.5 font-bold text-[14px] hover:-translate-y-1 hover:bg-[#e04400] transition-all duration-300">
+                    Ver soluciones <ArrowDown size={16} />
+                  </a>
+                  <a href="/" className="inline-flex items-center gap-2 text-white font-medium text-[14px] border-b border-[#ff4b0b] pb-1 hover:text-[#ff4b0b] transition-colors duration-300">
+                    Conocer Qaway Lab <ArrowRight size={15} />
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -268,17 +390,17 @@ const operatingSignals = [
   {
     value: "01",
     title: "Sistema central",
-    text: "Ideas, piezas, responsables y estados visibles en un mismo lugar.",
+    text: "Ideas, piezas y responsables en un mismo lugar.",
   },
   {
     value: "-42%",
     title: "Menos fricción operativa",
-    text: "Reducimos pasos manuales y cambios de contexto en la gestión diaria.",
+    text: "Reducimos pasos manuales en la gestión diaria.",
   },
   {
     value: "24/7",
     title: "Seguimiento constante",
-    text: "Automatizaciones, dashboards y alertas para no perder ritmo ni trazabilidad.",
+    text: "Automatizaciones, dashboards y alertas eficientes",
   },
 ];
 
@@ -546,7 +668,7 @@ function DigitalPresence() {
 export default function SistemasDigitalesPage() {
 useSetNavbarVariant('brand')
   const reduceMotion = useReducedMotion();
-  const [activeStage, setActiveStage] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   return (
     <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
@@ -561,9 +683,11 @@ useSetNavbarVariant('brand')
             variants={revealUp}
             custom={0}
           >
-            <SectionLabel>Sistema de contenido</SectionLabel>
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              SISTEMA DE CONTENIDO / 01
+            </p>
             <h2
-              className="mt-6 text-[clamp(2.9rem,6vw,5.4rem)] uppercase leading-[0.86] tracking-[-0.055em]"
+              className="mt-3 text-[clamp(2.5rem,5.5vw,4.2rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
               No basta con publicar.
@@ -572,14 +696,13 @@ useSetNavbarVariant('brand')
                 Hay que operar con sistema.
               </span>
             </h2>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-black/62 sm:text-lg">
-              Esta capa de Sistemas Digitales toma la lógica de un sistema de
-              contenidos y la conecta con automatización, reporting, CRM y
-              seguimiento operativo. El resultado es una estructura que produce
-              con más orden, menos fricción y mejor lectura del negocio.
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Conectamos sistemas de contenidos con automatización, CRM y
+              seguimiento operativo. El resultado es una estructura con orden,
+              menos fricción y mejor lectura del negocio.
             </p>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {operatingSignals.map(function (signal, index) {
                 return (
                   <motion.article
@@ -589,15 +712,18 @@ useSetNavbarVariant('brand')
                     viewport={{ once: true, amount: 0.3 }}
                     variants={revealUp}
                     custom={0.08 * (index + 1)}
-                    className="border border-black/8 bg-white px-5 py-6 shadow-[0_18px_44px_rgba(0,0,0,0.04)]"
+                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
                   >
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff4b0b]">
-                      {signal.value}
+                    <span 
+                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
+                      style={displayFont}
+                    >
+                      <CounterValue value={signal.value} />
                     </span>
-                    <h3 className="mt-3 text-lg font-semibold leading-tight text-[#191918]">
+                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
                       {signal.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-black/58">
+                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
                       {signal.text}
                     </p>
                   </motion.article>
@@ -611,7 +737,7 @@ useSetNavbarVariant('brand')
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden border border-black/10 bg-[#121212] p-4 shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
@@ -638,138 +764,160 @@ useSetNavbarVariant('brand')
         </div>
       </section>
 
-      <section
-        id="soluciones"
-        className="border-b border-black/6 bg-white py-20 lg:py-28"
-      >
-        <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-          <motion.div
-            initial={reduceMotion ? false : "hidden"}
-            whileInView={reduceMotion ? undefined : "show"}
-            viewport={{ once: true, amount: 0.2 }}
-            variants={revealUp}
-            custom={0}
-            className="mx-auto mb-14 max-w-3xl text-center"
-          >
-            <SectionLabel>Capas del sistema</SectionLabel>
-            <h2
-              className="mt-6 text-[clamp(3rem,5.4vw,5.1rem)] uppercase leading-[0.86] tracking-[-0.05em]"
-              style={displayFont}
-            >
-              Cómo se ve un{" "}
-              <span className="text-[#ff4b0b]">sistema de contenido</span>
-              <br />
-              cuando sí está bien armado.
+      <section className="relative bg-black py-24 text-white overflow-hidden border-t border-white/5">
+        <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_80%,rgba(255,210,0,0.06),transparent_70%)] pointer-events-none" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-8">
+          <div className="mb-12 text-center mx-auto max-w-3xl">
+            <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Sistema Completo</div>
+            <h2 className="mt-4 text-5xl font-bold tracking-tight text-white text-balance leading-none mx-auto" style={displayFont}>
+              Lo que puede quedar funcionando <br />
+              dentro de <span className="italic text-[#ff4b0b]">tu proyecto.</span>
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-black/58 sm:text-lg">
-              Tomamos la lógica de la landing de sistema de contenidos y la
-              llevamos a un formato más amplio, conectado con operación digital,
-              automatizaciones y seguimiento comercial.
+            <p className="mt-6 text-zinc-300 text-lg font-light leading-relaxed mx-auto max-w-2xl">
+              Cada bloque se puede implementar de manera independiente o conectarse en una arquitectura compacta y fácil de usar.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-start">
-            <div className="grid gap-3">
-              {systemStages.map(function (stage) {
-                const isActive = stage.id === activeStage;
-                const stateClasses = isActive
-                  ? "border-[#ff4b0b]/20 bg-[#ff4b0b]/5 shadow-[0_18px_42px_rgba(255,75,11,0.08)]"
-                  : "border-black/8 bg-[#f8f7f4] hover:border-[#ff4b0b]/18 hover:bg-[#fff8f4]";
-
-                return (
-                  <button
-                    key={stage.id}
-                    type="button"
-                    onClick={function () {
-                      setActiveStage(stage.id);
-                    }}
-                    className={[
-                      "border px-5 py-5 text-left transition-all duration-300",
-                      stateClasses,
-                    ].join(" ")}
-                  >
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
-                      {stage.tag}
-                    </span>
-                    <h3 className="mt-3 text-[1.35rem] font-semibold leading-tight text-[#191918]">
-                      {stage.title}
-                    </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-black/58">
-                      {stage.description}
-                    </p>
-                  </button>
-                );
-              })}
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-stretch">
+            <div className="lg:col-span-6 flex flex-col justify-start">
+              <div className="relative border-l border-white/10 flex flex-col gap-3 pl-0">
+                {items.map((item, idx) => {
+                  const Icon = item.icon
+                  const isActive = idx === activeIdx
+                  return (
+                    <button
+                      key={item.title}
+                      onClick={() => setActiveIdx(idx)}
+                      className={`text-left flex items-start gap-4 py-4 pl-6 border-l-2 -ml-[1.5px] transition-all duration-300 ${
+                        isActive
+                          ? 'border-[#ff4b0b] bg-white/[0.02] text-white font-bold'
+                          : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      <Icon className={`h-5 w-5 mt-1 shrink-0 transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-500'}`} />
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`text-xl font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
+                          {item.title}
+                        </h3>
+                        <motion.div
+                          initial={false}
+                          animate={{
+                            height: isActive ? 'auto' : 0,
+                            opacity: isActive ? 1 : 0,
+                            marginTop: isActive ? 8 : 0,
+                          }}
+                          transition={{
+                            duration: 0.3,
+                            ease: [0.16, 1, 0.3, 1]
+                          }}
+                          className="overflow-hidden"
+                        >
+                          <p className="text-sm font-light leading-relaxed text-zinc-400">
+                            {item.desc}
+                          </p>
+                        </motion.div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
-            <div className="relative overflow-hidden border border-black/8 bg-[#f4f1ec] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.06)]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeStage}
-                  initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                  animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                  exit={reduceMotion ? undefined : { opacity: 0, y: -18 }}
-                  transition={{ duration: 0.32, ease: "easeInOut" }}
-                  className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"
-                >
-                  <div className="overflow-hidden border border-black/8 bg-white">
-                    <img
-                      src={systemStages[activeStage].image}
-                      alt={systemStages[activeStage].title}
-                      className="h-full min-h-[23rem] w-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-between bg-[#191918] px-6 py-7 text-white">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
-                        {systemStages[activeStage].tag}
-                      </span>
-                      <h3
-                        className="mt-4 text-[2rem] uppercase leading-[0.9] tracking-[-0.04em]"
-                        style={displayFont}
-                      >
-                        {systemStages[activeStage].title}
-                      </h3>
-                      <p className="mt-4 text-sm leading-relaxed text-white/66">
-                        {systemStages[activeStage].description}
-                      </p>
-                    </div>
+            <div className="lg:col-span-6">
+              <div className="sticky top-28 h-full flex items-start justify-center rounded-3xl border border-white/10 bg-zinc-950/40 p-4 md:p-6 shadow-2xl overflow-hidden relative pt-2">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff4b0b]/5 rounded-full blur-[80px] pointer-events-none" />
 
-                    <div className="mt-8 border-t border-white/10 pt-6">
-                      <ul className="space-y-3">
-                        {systemStages[activeStage].bullets.map(
-                          function (bullet) {
-                            return (
-                              <li
-                                key={bullet}
-                                className="flex items-start gap-3 text-sm leading-relaxed text-white/78"
-                              >
-                                <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#ff4b0b]" />
-                                <span>{bullet}</span>
-                              </li>
-                            );
-                          },
-                        )}
-                      </ul>
+                <div className="relative z-10 w-full flex items-center justify-center min-h-[500px]" style={{ perspective: 1000 }}>
+                  <div className="relative w-full max-w-[360px]" style={{ aspectRatio: '1080/1350' }}>
+                    {items.map((item, idx) => {
+                      const isPast = idx < activeIdx
+                      const isActive = idx === activeIdx
+                      const isNext = idx === activeIdx + 1
+                      
+                      let x = 0
+                      let y = 0
+                      let scale = 1
+                      let opacity = 0
+                      let rotate = 0
+                      let pointerEvents = 'none'
+                      
+                      if (isPast) {
+                        x = 0
+                        y = 12
+                        scale = 1.10
+                        rotate = 0
+                        opacity = 0
+                      } else if (isActive) {
+                        x = 0
+                        y = 0
+                        scale = 1
+                        rotate = 0
+                        opacity = 1
+                        pointerEvents = 'auto'
+                      } else if (isNext) {
+                        x = 0
+                        y = -32
+                        scale = 0.88
+                        rotate = 0
+                        opacity = 0.75
+                        pointerEvents = 'none'
+                      } else {
+                        x = 0
+                        y = -32
+                        scale = 0.82
+                        rotate = 0
+                        opacity = 0
+                        pointerEvents = 'none'
+                      }
 
-                      <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-5">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/42">
-                          Sistema Qaway
-                        </span>
-                        <Link
-                          to="/sistemas-digitales/automatizacion"
-                          className="inline-flex items-center gap-2 text-sm font-semibold text-white transition-colors hover:text-[#ff4b0b]"
+                      return (
+                        <motion.div
+                          key={item.title}
+                          className="absolute inset-0 rounded-[12px] border border-white/10 bg-black/80 p-2.5 shadow-2xl overflow-hidden"
+                          style={{
+                            transformOrigin: 'top center',
+                            pointerEvents,
+                            zIndex: items.length - idx,
+                          }}
+                          animate={{
+                            x,
+                            y,
+                            scale,
+                            opacity,
+                            rotate,
+                          }}
+                          transition={{
+                            default: {
+                              type: 'spring',
+                              stiffness: 110,
+                              damping: 18,
+                              mass: 1.0
+                            },
+                            opacity: { duration: 0.45, ease: 'easeInOut' }
+                          }}
                         >
-                          Ver implementación
-                          <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </div>
-                    </div>
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
+                            style={{
+                              aspectRatio: '1080/1350',
+                            }}
+                          />
+                          <div
+                            className="absolute inset-0 bg-black pointer-events-none rounded-[8px] transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                            style={{
+                              opacity: isActive ? 0 : (isNext ? 0.3 : 0.55),
+                            }}
+                          />
+                        </motion.div>
+                      )
+                    })}
                   </div>
-                </motion.div>
-              </AnimatePresence>
+                </div>
+              </div>
             </div>
           </div>
         </div>
