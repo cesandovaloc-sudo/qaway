@@ -466,6 +466,15 @@ const digitalAreas = [
       "Procesos repetitivos que se convierten en flujos conectados y medibles.",
     icon: Workflow,
     path: "/sistemas-digitales/automatizacion",
+    deliverables: [
+      "Flujo automatizado",
+      "Resumen automático con IA",
+      "Sistema de alertas",
+      "Integración de herramientas",
+      "Mapa de workflow",
+      "Tablero de tareas",
+      "Documentación operativa"
+    ]
   },
   {
     title: "Canales digitales",
@@ -473,6 +482,15 @@ const digitalAreas = [
       "WhatsApp, redes y entornos comerciales listos para captar y responder mejor.",
     icon: Radio,
     path: "/sistemas-digitales/canales-digitales",
+    deliverables: [
+      "WhatsApp Business",
+      "Mensajes automáticos",
+      "Configuración Meta Suite",
+      "Catálogo de atención",
+      "Configuración de Instagram/Facebook",
+      "Respuestas rápidas",
+      "Etiquetas de atención"
+    ]
   },
   {
     title: "Webs y landings",
@@ -480,14 +498,31 @@ const digitalAreas = [
       "Páginas conectadas a formularios, medición y rutas de conversión reales.",
     icon: Globe,
     path: "/sistemas-digitales/webs-y-landings",
+    deliverables: [
+      "Landing page",
+      "Página de servicio / captación",
+      "Formulario conectado",
+      "Integración con WhatsApp",
+      "Conexión con CRM",
+      "Configuración de medición",
+      "Página publicada"
+    ]
   },
-
   {
     title: "CRM, datos y dashboards",
     description:
       "Seguimiento comercial y control operativo desde un tablero comprensible.",
     icon: BarChart3,
     path: "/sistemas-digitales/crm-datos-dashboards",
+    deliverables: [
+      "CRM y Pipeline comercial",
+      "Tablero de leads",
+      "Dashboard de ventas",
+      "Bases de datos organizada",
+      "Dashboard operativo",
+      "Reporte diario o semanal",
+      "Tablero de control"
+    ]
   },
   {
     title: "Agentes IA",
@@ -495,6 +530,14 @@ const digitalAreas = [
       "Asistentes para clasificar, resumir, responder y acelerar decisiones.",
     icon: BrainCircuit,
     path: "/sistemas-digitales/agentes-ia",
+    deliverables: [
+      "Asistente de productividad",
+      "Agente de soporte/atención",
+      "Agente de contenido",
+      "Prompt base y reglas",
+      "Agente IA configurado",
+      "Flujo de interacción"
+    ]
   },
   {
     title: "Estrategia digital",
@@ -502,6 +545,14 @@ const digitalAreas = [
       "Ruta de implementación para definir qué ordenar primero y cómo escalarlo.",
     icon: Compass,
     path: "/sistemas-digitales/estrategia-digital",
+    deliverables: [
+      "Diagnóstico digital",
+      "Ruta de implementación",
+      "Arquitectura de captación",
+      "Plan de automatización",
+      "Mapa de canales",
+      "Flujo de conversión"
+    ]
   },
 ];
 
@@ -570,105 +621,13 @@ const advisoryCases = [
   "Quiero automatizar briefs, aprobaciones o reportes sin volver todo más complejo.",
 ];
 
-function DigitalPresence() {
-  return (
-    <section className="vl-digital-copy vl-dark vl-section vl-digital">
-      <div className="vl-shell">
-        <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark vl-digital__heading">
-          <div>
-            <p className="vl-kicker vl-kicker--dark">Presencia digital / 04</p>
-            <h2>De la identidad<br /><span>a una marca que ya vive online.</span></h2>
-          </div>
-          <p>Conectamos la imagen de la marca con sus perfiles, contenido y landing para construir una experiencia coherente de principio a fin.</p>
-        </motion.div>
 
-        <motion.div {...reveal} className="vl-digital__stage">
-          <div className="vl-digital__browser">
-            <div className="vl-digital__browser-bar"><i /><i /><i /><span>qaway.brand / inicio</span></div>
-            <div className="vl-digital__landing">
-              <motion.div
-                className="vl-digital__site-scroll"
-                initial={{ y: 0 }}
-                whileInView={{ y: -360 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ duration: 11, delay: .35, ease: [0.33, 0, 0.12, 1] }}
-              >
-                <section className="vl-digital__site-hero">
-                  <div className="vl-digital__site-copy">
-                    <small>IDENTIDAD · CONTENIDO · CONVERSIÓN</small>
-                    <strong>UNA MARCA QUE<br />SE ENTIENDE<br />Y CONVIERTE.</strong>
-                    <span>Landing editorial pensada para presentar propuesta, reforzar confianza y guiar a la acción.</span>
-                    <b>Explorar landing <ArrowRight size={14} /></b>
-                  </div>
-                  <div className="vl-digital__site-visual">
-                    <img src={`${ASSET}/branding-architecture-moodboard.png`} alt="Identidad visual aplicada en una landing digital" />
-                  </div>
-                </section>
-
-                <section className="vl-digital__site-band">
-                  <span>Dirección visual consistente</span>
-                  <span>Mensajes claros</span>
-                  <span>Conversión</span>
-                </section>
-
-                <section className="vl-digital__site-grid">
-                  <article>
-                    <small>01</small>
-                    <strong>Hero y propuesta</strong>
-                    <p>Entrada clara, tono visual definido y llamada a la acción visible.</p>
-                  </article>
-                  <article>
-                    <small>02</small>
-                    <strong>Servicios</strong>
-                    <p>Sistema de bloques para explicar oferta, proceso y entregables.</p>
-                  </article>
-                  <article>
-                    <small>03</small>
-                    <strong>Pruebas visuales</strong>
-                    <p>Aplicaciones, mockups y piezas que refuerzan la credibilidad de la marca.</p>
-                  </article>
-                </section>
-
-                <section className="vl-digital__site-gallery">
-                  <img src={`${ASSET}/branding-botanical-moodboard.png`} alt="Sistema visual aplicado a piezas de marca" />
-                  <img src={`${ASSET}/sistema-contenido.png`} alt="Sistema de contenido conectado con la landing" />
-                </section>
-
-                <section className="vl-digital__site-cta">
-                  <div>
-                    <small>Captación</small>
-                    <strong>Una ruta completa<br />desde la marca hasta el contacto.</strong>
-                  </div>
-                  <span>Formulario · CTA · WhatsApp · Agenda</span>
-                </section>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="vl-digital__social">
-            <div className="vl-digital__profile">
-              <span>QB</span>
-              <div><strong>qaway.brand</strong><small>Dirección visual y contenido</small></div>
-            </div>
-            <img src={`${ASSET}/sistema-contenido.png`} alt="Sistema de contenido aplicado a redes sociales" />
-            <div className="vl-digital__metrics"><span>24 piezas</span><span>4 formatos</span><span>1 sistema</span></div>
-          </div>
-
-          <div className="vl-digital__path">
-            {['Identidad', 'Redes', 'Landing', 'Captación'].map((item, index) => (
-              <span key={item}><small>0{index + 1}</small>{item}</span>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  )
-}
 
 export default function SistemasDigitalesPage() {
 useSetNavbarVariant('brand')
   const reduceMotion = useReducedMotion();
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(null);
+  const [expandedArea, setExpandedArea] = useState(null);
 
   return (
     <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
@@ -687,7 +646,7 @@ useSetNavbarVariant('brand')
               SISTEMA DE CONTENIDO / 01
             </p>
             <h2
-              className="mt-3 text-[clamp(2.5rem,5.5vw,4.2rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
               No basta con publicar.
@@ -764,18 +723,27 @@ useSetNavbarVariant('brand')
         </div>
       </section>
 
-      <section className="relative bg-black py-24 text-white overflow-hidden border-t border-white/5">
-        <div className="absolute inset-0 bg-[radial-gradient(800px_400px_at_80%_80%,rgba(255,210,0,0.06),transparent_70%)] pointer-events-none" />
+      <section className="relative bg-[#121212] py-24 text-white overflow-hidden border-t border-white/5">
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
+          style={{
+            backgroundImage:
+              'url("https://www.transparenttextures.com/patterns/stardust.png")',
+          }}
+        />
+        {/* Ambient glows directly on the section background */}
+        <div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none top-1/2 right-[10%] -translate-y-1/2 z-0" style={{ background: "radial-gradient(circle, rgba(255,75,11,0.12) 0%, transparent 70%)" }} />
+        <div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none top-1/2 right-[10%] -translate-y-1/2 z-0" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)" }} />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-8">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-stretch">
+        <div className="relative z-10 mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
             {/* Left Column: Title and 2-column Buttons Grid */}
             <div className="lg:col-span-5 flex flex-col justify-start">
               <div className="mb-8">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Sistema Completo</div>
-                <h2 className="mt-4 text-4xl lg:text-[45px] font-bold tracking-tight text-white leading-[0.95]" style={displayFont}>
-                  Lo que puede quedar funcionando <br />
-                  dentro de <span className="italic text-[#ff4b0b]">tu proyecto.</span>
+                <h2 className="mt-4 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-white" style={displayFont}>
+                  Herramientas <br />
+                  adaptadas a <span className="italic text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
               </div>
 
@@ -787,35 +755,16 @@ useSetNavbarVariant('brand')
                     <button
                       key={item.title}
                       onClick={() => setActiveIdx(idx)}
-                      className={`text-left flex items-start gap-3 py-3 px-4 border-l-2 transition-all duration-300 ${
+                      className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${
                         isActive
-                          ? 'border-[#ff4b0b] bg-white/[0.02] text-white font-bold'
-                          : 'border-white/10 text-zinc-500 hover:text-zinc-300'
+                          ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
+                          : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
                       }`}
                     >
-                      <Icon className={`h-4.5 w-4.5 mt-0.5 shrink-0 transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-500'}`} />
-                      <div className="flex-1 min-w-0">
-                        <h3 className={`text-[14px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
-                          {item.title}
-                        </h3>
-                        <motion.div
-                          initial={false}
-                          animate={{
-                            height: isActive ? 'auto' : 0,
-                            opacity: isActive ? 1 : 0,
-                            marginTop: isActive ? 6 : 0,
-                          }}
-                          transition={{
-                            duration: 0.3,
-                            ease: [0.16, 1, 0.3, 1]
-                          }}
-                          className="overflow-hidden"
-                        >
-                          <p className="max-w-[340px] text-[11px] font-light leading-relaxed text-zinc-400">
-                            {item.desc}
-                          </p>
-                        </motion.div>
-                      </div>
+                      <Icon className="h-4.5 w-4.5 shrink-0 text-[#ff4b0b]" />
+                      <span className={`text-[13px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
+                        {item.title}
+                      </span>
                     </button>
                   )
                 })}
@@ -824,16 +773,16 @@ useSetNavbarVariant('brand')
 
             {/* Right Column: Widened preview image column */}
             <div className="lg:col-span-7">
-              <div className="sticky top-28 h-full flex items-start justify-center rounded-3xl border border-white/10 bg-zinc-950/40 p-4 md:p-6 shadow-2xl overflow-hidden relative pt-2">
+              <div className="sticky top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
-                <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff4b0b]/5 rounded-full blur-[80px] pointer-events-none" />
 
-                <div className="relative z-10 w-full flex items-center justify-center min-h-[500px]" style={{ perspective: 1000 }}>
-                  <div className="relative w-full max-w-[360px]" style={{ aspectRatio: '1080/1350' }}>
+                <div className="relative z-10 w-full flex items-center justify-center min-h-[620px]" style={{ perspective: 1000 }}>
+                  <div className="relative w-full max-w-[450px]" style={{ aspectRatio: '1080/1350' }}>
                     {items.map((item, idx) => {
-                      const isPast = idx < activeIdx
-                      const isActive = idx === activeIdx
-                      const isNext = idx === activeIdx + 1
+                      const currentActive = activeIdx === null ? 0 : activeIdx
+                      const isPast = idx < currentActive
+                      const isActive = idx === currentActive
+                      const isNext = idx === currentActive + 1
                       
                       let x = 0
                       let y = 0
@@ -874,7 +823,7 @@ useSetNavbarVariant('brand')
                       return (
                         <motion.div
                           key={item.title}
-                          className="absolute inset-0 rounded-[12px] border border-white/10 bg-black/80 p-2.5 shadow-2xl overflow-hidden"
+                          className="absolute inset-0 rounded-[5px] bg-black/80 p-0 shadow-2xl overflow-hidden"
                           style={{
                             transformOrigin: 'top center',
                             pointerEvents,
@@ -900,13 +849,13 @@ useSetNavbarVariant('brand')
                           <img
                             src={item.image}
                             alt={item.title}
-                            className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
+                            className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
                             style={{
                               aspectRatio: '1080/1350',
                             }}
                           />
                           <div
-                            className="absolute inset-0 bg-black pointer-events-none rounded-[8px] transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                            className="absolute inset-0 bg-black pointer-events-none rounded-[5px] transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                             style={{
                               opacity: isActive ? 0 : (isNext ? 0.3 : 0.55),
                             }}
@@ -934,14 +883,14 @@ useSetNavbarVariant('brand')
             >
               <SectionLabel inverse>Arquitectura conectada</SectionLabel>
               <h2
-                className="mt-6 text-[clamp(3rem,5.2vw,5rem)] uppercase leading-[0.86] tracking-[-0.05em] text-white"
+                className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-white"
                 style={displayFont}
               >
                 El sistema de contenido
                 <br />
                 no vive solo<span className="text-[#ff4b0b]">.</span>
               </h2>
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/64 sm:text-lg">
+              <p className="mt-5 max-w-2xl text-[16px] leading-[1.62] text-white/64 sm:text-[17px]">
                 Cuando el contenido se conecta con CRM, dashboards, landings,
                 agentes IA y canales de atención, deja de ser una pieza aislada
                 y se convierte en infraestructura real del negocio.
@@ -961,38 +910,69 @@ useSetNavbarVariant('brand')
             <div className="grid gap-4 sm:grid-cols-2 lg:pt-16">
               {digitalAreas.map(function (area, index) {
                 const Icon = area.icon;
+                const isActive = index === expandedArea;
                 return (
-                  <motion.div
+                  <motion.button
                     key={area.title}
+                    onClick={() => setExpandedArea(isActive ? null : index)}
                     initial={reduceMotion ? false : "hidden"}
                     whileInView={reduceMotion ? undefined : "show"}
                     viewport={{ once: true, amount: 0.2 }}
                     variants={revealUp}
                     custom={0.08 * index}
-                    className="group border border-white/10 bg-white/[0.03] p-6 transition-all duration-300 hover:border-[#ff4b0b]/25 hover:bg-white/[0.05] hover:-translate-y-1"
+                    className="group text-left border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:border-[#ff4b0b]/25 hover:bg-white/[0.05] hover:-translate-y-1 w-full rounded-[5px] block"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="grid h-12 w-12 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">
-                        <Icon className="h-5 w-5" />
+                      <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">
+                        <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/34">
                         0{index + 1}
                       </span>
                     </div>
-                    <h3 className="mt-6 text-xl font-semibold leading-tight text-white">
+                    <h3 className="mt-4 text-[16px] font-semibold leading-tight text-white">
                       {area.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-relaxed text-white/56">
+                    <p className="mt-2 text-[12px] leading-relaxed text-white/56">
                       {area.description}
                     </p>
-                    <Link
+                    <motion.div
+                      initial={false}
+                      animate={{
+                        height: isActive ? "auto" : 0,
+                        opacity: isActive ? 1 : 0,
+                        marginTop: isActive ? 12 : 0,
+                      }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden w-full text-left"
+                    >
+                      <div className="pt-3 border-t border-white/10 flex flex-wrap gap-1.5 items-center">
+                        {area.deliverables.slice(0, 3).map(function (del) {
+                          return (
+                            <span
+                              key={del}
+                              className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-white/[0.04] border border-white/5 text-white/60 font-semibold rounded-[3px]"
+                            >
+                              {del}
+                            </span>
+                          );
+                        })}
+                        {area.deliverables.length > 3 && (
+                          <span className="text-white/45 text-xs font-bold px-1 select-none">
+                            ...
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                    {/* Explorar módulo ocultado temporalmente */}
+                    {/* <Link
                       to={area.path}
                       className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white/82 transition-colors hover:text-[#ff4b0b]"
                     >
                       Explorar módulo
                       <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </motion.div>
+                    </Link> */}
+                  </motion.button>
                 );
               })}
             </div>
@@ -1008,16 +988,16 @@ useSetNavbarVariant('brand')
             viewport={{ once: true, amount: 0.2 }}
             variants={revealUp}
             custom={0}
-            className="mb-14 max-w-3xl"
+            className="mb-14 max-w-4xl mx-auto text-center"
           >
             <SectionLabel>Aplicaciones reales</SectionLabel>
             <h2
-              className="mt-6 text-[clamp(3rem,5.4vw,5.1rem)] uppercase leading-[0.86] tracking-[-0.05em]"
+              className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
-              Diseñado para proyectos que quieren{" "}
-              <span className="text-[#ff4b0b]">sostener</span>,<br />
-              vender y coordinar mejor.
+              Diseñamos infraestructura para{" "}
+              <span className="text-[#ff4b0b]">creadores</span>,{" "}
+              equipos y proyectos.
             </h2>
           </motion.div>
 
@@ -1083,7 +1063,7 @@ useSetNavbarVariant('brand')
           >
             <SectionLabel>Método de implementación</SectionLabel>
             <h2
-              className="mt-6 text-[clamp(3rem,5vw,4.8rem)] uppercase leading-[0.86] tracking-[-0.05em]"
+              className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
               De la intuición dispersa
@@ -1154,7 +1134,7 @@ useSetNavbarVariant('brand')
               <div className="px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
                 <SectionLabel>Consultoría estratégica</SectionLabel>
                 <h2
-                  className="mt-6 text-[clamp(2.6rem,4.8vw,4.4rem)] uppercase leading-[0.86] tracking-[-0.05em]"
+                  className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
                   style={displayFont}
                 >
                   Si el contenido ya existe,
@@ -1206,8 +1186,6 @@ useSetNavbarVariant('brand')
           </div>
         </div>
       </section>
-
-      <DigitalPresence />
     </div>
   );
 }

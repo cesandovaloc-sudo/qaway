@@ -16,12 +16,12 @@ La IA tendrá total autonomía para evaluar y decidir el estilo visual. No fijar
 El estilo conversa con el producto (Ejemplo): Si es una página de cursos (Academy), la IA puede usar espacios blancos para inspirar limpieza; si es de servicios creativos, ajustará el contraste. La IA decide el balance.
 Colores Predominantes: 
   - **Naranjas de Acento y Degradados:** #fd5605 #ff4b0b El naranja es el color principal de acción y energía. Se usa un tono vibrante y eléctrico (cercano a `#FF4B0B` o `#FF5A1F`). Los degradados transicionan desde este naranja brillante hacia tonos más quemados (ámbar/cobre), creando un efecto inmersivo de iluminación cálida.
-  - **Grises Claros (Off-White) y blancos:Principal: bg-[#f5f5f4]. ** #f2f1ef  #f5f5f5 #efede8  Para las áreas luminosas o de contenido extenso, en lugar de blanco puro deslumbrante, se emplean grises muy tenues y elegantes (`#F8F8F8`, `#F5F5F5`) que generan amplitud y descanso visual.
+  - **Grises Claros (Off-White) y blancos:Principal: PRINCIPAL: #f8f9f7, bg-[#f5f5f4]. ** #f2f1ef  #f5f5f5 #efede8  Para las áreas luminosas o de contenido extenso, en lugar de blanco puro deslumbrante, se emplean grises muy tenues y elegantes (`#F8F8F8`, `#F5F5F5`) que generan amplitud y descanso visual.
   - **Oscuros y Negros:** En las secciones de alto impacto creativo, se utilizan fondos oscuros profundos ( gris carbón muy oscuro como `#111111` o `#18181B` en algunas partes negro puro o), lo que genera un contraste dramático para que el naranja resalte.
   - **Se debe usar degradado estrategicos donde corresponda, ya sea a los tonos naranajas o a los tonos oscuros. También variaciones donde corresponda de los tonos grises como agregar sombras: "C:\LEO\EMPRESAS\QAWAY LAB\1-Web-Qaway-React\docs\0-documento-oficial\Captura de pantalla 2026-06-20 084318.png" Ver siempre las referecias de estilo.**
   - **En ocasiones se puede jugar con imágenes de personas en blanco y negro, evluando la tematica**
   - La mezcla de esta paleta (clara u oscura) quedará siempre a discreción de la IA según el contexto de la página.
-Formas y Bordes: El redondeo o la pronunciación de los bordes puede variar libremente en función al producto o servicio que se quiere ofrecer.esto equivale a border-radius: 0.375rem; (que en la mayoría de navegadores por defecto se traduce en 6px).
+Formas y Bordes: El redondeo o la pronunciación de los bordes puede variar libremente en función al producto o servicio que se quiere ofrecer.esto equivale a border-radius: De entrada la mayoria no tienen bordes redondeados, pudiendo en algunos casos solo dejar 5 px.
 LAs fotografías empleadas pueden usar cero bordes, sin ser toda la pagina con ese estilo, aplicar en algunos casos los bordes antes señalados. Además, jugar también con fotos sin fondo para dejar un estilo premium también. Este mismo criterio aplicado a objetos u otros cuando corresponda.
 Animaciones con Criterio de IA: La IA evaluará libremente qué animación moderna utilizar (ej. tracking de cursor, objetos 3D rotando en su eje, scroll-sticky interactivo, etc.) según lo que mejor comunique el mensaje, sin casarse con ningún efecto obligatorio.
 Directorio de Modelos Base: Los modelos de diseño y referencias para los Heros vivirán en: C:\LEO\EMPRESAS\QAWAY LAB\1-Web-Qaway-React\docs\0-documento-oficial.
@@ -46,6 +46,7 @@ Qaway Hub
 Recursos
 Blog
 Landings
+
 Cada sección cumple una función específica dentro del ecosistema:
 Inicio presenta la visión general de Qaway Lab y dirige al usuario hacia las áreas principales.
 Estudio trabaja la construcción visual, branding digital, contenido, presencia profesional, dirección creativa y estrategia digital.
@@ -57,7 +58,7 @@ Blog será la sección editorial orientada a SEO, autoridad, análisis, noticias
 Landings serán páginas específicas de captación, venta o campañas, desarrolladas en React para mantener control visual, velocidad y conversión.
 En conjunto, la web debe funcionar como una plataforma de entrada al ecosistema Qaway Lab: muestra autoridad, educa, capta leads, presenta servicios, conecta con formación, ofrece herramientas y guía al usuario hacia soluciones concretas.
 PRIMER NIVEL
-1.	Inicio — Puro React
+1. Inicio — Puro React
 
 2. Estudio — Puro React
 
@@ -107,6 +108,20 @@ SEGUNDO NIVEL
    ├── Checkout — WooCommerce
    ├── Mi cuenta — WooCommerce
    └── Certificados — Tutor LMS
+4.1. Academy — React - PILOTO JULIO 2026
+	Este es un piloto ya avanzado todo React
+   ├── Academy — React
+   ├── Cursos — React / Tutor LMS
+   ├── Talleres — React
+   ├── Programas — React
+   ├── Incubadora — React
+   ├── Membresías — React / WooCommerce
+   ├── Login / Registro — WordPress
+   ├── Panel del alumno — Tutor LMS
+   ├── Carrito — WooCommerce
+   ├── Checkout — WooCommerce
+   ├── Mi cuenta — WooCommerce
+   └── Certificados — Tutor LMS
 5. Qaway Hub — Puro React
    ├── Ruta Marca / Emprendimiento
    ├── Ruta Profesional / Oficina
@@ -132,7 +147,12 @@ SEGUNDO NIVEL
    ├── Sistemas Digitales — WordPress Headless
    └── Artículo Individual — WordPress Headless
 8. Landings — Puro React
-   ├── Landing de servicio
+   ├── Landing de sistema notion
+  ├── Landing de identidad visual
+  ├── Landing de restauración fotografía
+  ├── Landing de fotografía linkein
+  ├── Landing de contabilidad
+  ├── Landing de servicio
    ├── Landing de campaña
    ├── Landing de curso
    ├── Landing de incubadora
@@ -153,11 +173,9 @@ ________________________________________
 
 Estudio
 ├── Branding IA
-├── Presencia Profesional
-├── Contenido Visual
-
-Transversales con Sistemas Digitales
+----Contenido para redes
 ├── Estrategia Digital
+├── Presencia Profesional
 └── Consultoría / Diagnóstico
 
 Descripción general
@@ -180,16 +198,19 @@ Incluye reels, shorts, carruseles, edición visual, contenido multimedia, conten
 
 También contempla la transformación visual de productos, servicios o marcas a partir de materiales básicos o de baja calidad, como fotos simples, imágenes poco cuidadas o recursos desordenados, para convertirlos en piezas más profesionales, vendibles y coherentes con la identidad digital de la marca.
 
-C) Presencia Profesional
-Presencia Profesional se enfoca en construir y optimizar la imagen digital de profesionales, especialistas, negocios y marcas personales. Su objetivo es mejorar la percepción, autoridad, confianza y presentación en entornos digitales.
 
-Incluye optimización de perfiles, imagen para LinkedIn, presencia profesional en Instagram, fotografía o avatar ejecutivo, biografía, portada, presentación visual, adaptación corporativa y recursos visuales para comunicar una imagen más sólida, moderna y confiable.
 
-D) Estrategia Digital - Transversal con Sistemas Digitales
+C) Estrategia Digital - Transversal con Sistemas Digitales
 
 Estrategia Digital diseña estructuras orientadas a posicionamiento, captación y crecimiento. Integra marca, contenido, comunicación, funnels, landing pages, experiencia digital, automatización y medición en una ruta clara de implementación.
 
 Incluye planificación de contenido, sistemas de contenido, arquitectura de comunicación, funnels y rutas de captación, landing pages, campañas digitales ADS, estrategias para redes sociales, contenido orientado a conversión, organización de formatos, criterios de medición y conexión con sistemas digitales.
+
+D) Presencia Profesional
+Presencia Profesional se enfoca en construir y optimizar la imagen digital de profesionales, especialistas, negocios y marcas personales. Su objetivo es mejorar la percepción, autoridad, confianza y presentación en entornos digitales.
+
+Incluye optimización de perfiles, imagen para LinkedIn, presencia profesional en Instagram, fotografía o avatar ejecutivo, biografía, portada, presentación visual, adaptación corporativa y recursos visuales para comunicar una imagen más sólida, moderna y confiable.
+
 
 
 E)Consultoría Estratégica
@@ -457,19 +478,43 @@ ________________________________________
 
 
 
-4. Academy — React + WordPress / Tutor LMS / WooCommerce
-Descripción general
-Academy será la plataforma educativa de Qaway Lab. Su objetivo es centralizar cursos, talleres, programas, incubadora, membresías y comunidad educativa.
-React funcionará como la capa visual y de experiencia principal. WordPress, Tutor LMS y WooCommerce funcionarán como la capa de cursos, usuarios, pagos, carrito, panel del alumno y gestión educativa.
-Capa React
-En React vivirán las páginas visuales, comerciales e informativas de Academy.
-Incluye la portada principal de Academy, catálogo visual de cursos, talleres, programas formativos, incubadora, membresías, comunidad y landings personalizadas para cursos clave.
-Capa WordPress / Tutor LMS / WooCommerce
-En WordPress, Tutor LMS y WooCommerce vivirá la gestión real de cursos, alumnos y pagos.
-Incluye cursos internos, lecciones, módulos, progreso, evaluaciones, panel del alumno, login, registro, carrito de compras, checkout, mi cuenta, certificados y gestión de membresías o accesos.
-Flujo de usuario
-El usuario no inscrito podrá descubrir cursos, talleres, programas, membresías e incubadora desde la capa visual en React. Cuando compre o se inscriba, el proceso pasará por WooCommerce y Tutor LMS.
-El usuario inscrito accederá al panel, cursos internos, lecciones, progreso, certificados y cuenta desde WordPress, Tutor LMS y WooCommerce.
+4. Academy — React + Supabase (piloto) / WordPress híbrido (arquitectura final)
+Academy es la plataforma educativa de Qaway Lab. Actualmente conviven dos arquitecturas: un piloto React nativo y el diseño híbrido final.
+
+4.1. Academy-Qaway — Piloto Julio 2026 (React + Supabase)
+	Proyecto independiente en `3-Academy-Qaway/` — SPA en React 19 + Vite + Supabase, sin WordPress.
+	Stack: React 19, Vite, Tailwind CSS v4, Framer Motion, React Router DOM v7, Supabase (PostgreSQL, Auth, Storage).
+	Pagos: WooCommerce como puente inicial (webhook → backend Express → Supabase).
+
+   ├── Home — Landing pública
+   ├── Catálogo de cursos — React
+   ├── Detalle de curso — React
+   ├── Lección / reproductor — React + VideoPlayer
+   ├── Login / Registro / Recuperar — Supabase Auth
+   ├── Panel del alumno — Dashboard con progreso, cursos, certificados
+   ├── Admin — Gestión de cursos, alumnos, permisos, roles
+   ├── Docente — Gestión de cursos, tareas, dashboard
+   ├── Certificados — Emitidos desde Supabase
+   └── Supabase — Base de datos (profiles, courses, modules, lessons, enrollments, progress, certificates, orders)
+
+4.2. Academy (arquitectura híbrida final)
+	Diseño para cuando Academy viva dentro de la web principal (1-Frontend).
+	React como capa visual; WordPress + Tutor LMS + WooCommerce como backend educativo.
+
+   ├── Academy — React (portada visual)
+   ├── Catálogo de cursos — React
+   ├── Talleres — React
+   ├── Programas — React
+   ├── Incubadora — React
+   ├── Membresías — React / WooCommerce
+   ├── Login / Registro — WordPress
+   ├── Panel del alumno — Tutor LMS
+   ├── Carrito — WooCommerce
+   ├── Checkout — WooCommerce
+   ├── Mi cuenta — WooCommerce
+   └── Certificados — Tutor LMS
+
+Nota: Ambos modelos coexistirán hasta que el piloto React+Supabase madure y pueda reemplazar por completo la capa híbrida. Mientras tanto, la web principal (1-Frontend) redirige a `3-Academy-Qaway/` para la experiencia Academy.
 ________________________________________
 5. Qaway Hub — Puro React
 Descripción general
