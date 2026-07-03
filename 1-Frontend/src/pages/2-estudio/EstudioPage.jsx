@@ -16,6 +16,7 @@ import {
   Layers3,
   LockKeyhole,
   MousePointer2,
+  Sparkles,
   Users,
   Check,
   Send
@@ -144,12 +145,38 @@ function Hero() {
       style={{ '--pointer-x': `${pointer.x}%`, '--pointer-y': `${pointer.y}%` }}
     >
       {/* Nav removed */}
-      <img className="vl-hero__image" src={`${ASSET}/ChatGPT Image 3 jul 2026, 09_22_55.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ filter: 'brightness(1.15) contrast(0.80)', transform: 'scale(1.35) translate(-10%, 15%)' }} />
-      <div className="vl-hero__veil" />
-      <div className="vl-hero__right-pane" />
-      <div className="vl-hero__spotlight" />
-      <div className="vl-hero__glow" />
-      <div className="vl-hero__grid" />
+      <img className="vl-hero__image" src={`${ASSET}/ig_0d333d70a933ac02016a47e5714d808191a66498052288aa9f.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
+      
+      <div className="vl-hero__right-pane">
+        <motion.div
+          className="vl-hero__panel"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="vl-hero__panel-mark" />
+          <p className="vl-hero__panel-kicker">Visual Lab</p>
+          <h2>
+            Dirección visual<br />
+            para conectar.
+          </h2>
+          <div className="vl-hero__panel-rule" />
+          <p>Diseñamos identidades modernas e imágenes con IA para que tu marca se presente con coherencia y claridad.</p>
+
+          <div className="vl-hero__panel-card">
+            <div className="vl-hero__panel-icon"><Sparkles size={20} strokeWidth={1.6} /></div>
+            <div>
+              <strong>Criterio estético</strong>
+              <span>Diseño que eleva tu marca.</span>
+            </div>
+          </div>
+
+          <a href="#branding">
+            Ver servicios <ArrowRight size={13} />
+          </a>
+        </motion.div>
+      </div>
+
 
       <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
         <div className="vl-hero__main">
@@ -361,13 +388,13 @@ function Services() {
           {featuredServices.map((service, index) => {
             const Icon = service.icon
             const paths = [
-              '/estudio/branding-digital',
-              '/estudio/contenido-visual',
-              '/estudio/presencia-profesional',
-              '/estudio/estrategia-digital'
+              '#branding',
+              '#contenido',
+              '#metodo',
+              '#transformacion'
             ]
             return (
-              <Link key={service.title} to={paths[index]} className="vl-service-link">
+              <a key={service.title} href={paths[index]} className="vl-service-link">
                 <TiltPanel className={`vl-service vl-service--${index + 1}`}>
                   {service.image && <img src={`${ASSET}/${service.image}`} alt="" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
@@ -376,7 +403,7 @@ function Services() {
                     <ArrowRight className="vl-service__arrow" size={18} />
                   </div>
                 </TiltPanel>
-              </Link>
+              </a>
             )
           })}
         </div>
@@ -564,7 +591,7 @@ function Method() {
   const [activePhase, setActivePhase] = useState(0)
 
   return (
-    <section className="vl-dark vl-section vl-method">
+    <section id="metodo" className="vl-dark vl-section vl-method">
       <div className="vl-shell">
         <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
