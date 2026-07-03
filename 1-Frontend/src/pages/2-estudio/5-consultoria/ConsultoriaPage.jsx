@@ -70,7 +70,7 @@ export default function ConsultoriaPage() {
               description="No solo te decimos qué hacer. Te acompañamos en el proceso de transformación digital de tu marca con criterio estratégico y visión práctica."
             />
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button>
+// <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button> (Hidden until services page ready)
               <Button variant="secondary" size="lg" href="https://wa.me/51930756781?text=hola%20quiero%20consultor%C3%ADa%20estrat%C3%A9gica%20para%20mi%20marca">Agendar diagnóstico</Button>
             </div>
           </motion.div>

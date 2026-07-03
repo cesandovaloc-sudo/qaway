@@ -73,7 +73,7 @@ export default function ContenidoVisualPage() {
               description="No solo producimos piezas visuales. Construimos formatos claros, modernos y adaptables que conectan con tu audiencia y generan resultados."
             />
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" href="#servicios">Ver formatos</Button>
+// <Button variant="primary" size="lg" href="#servicios">Ver formatos</Button> (Hidden until services page ready)
               <Button variant="secondary" size="lg" href="https://wa.me/51930756781?text=hola%20quiero%20crear%20contenido%20visual%20para%20mis%20redes">Comenzar proyecto</Button>
             </div>
           </motion.div>

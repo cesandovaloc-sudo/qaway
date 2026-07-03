@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
@@ -31,17 +31,17 @@ const ASSET = '/assets/pages/2-estudio'
 const services = [
   {
     number: '01',
-    title: 'Branding IA',
+    title: 'Branding digital',
     copy: 'Construimos, optimizamos y transformamos marcas para entornos digitales mediante estrategia, dirección visual e IA aplicada.',
     icon: Brush,
-    image: 'study-replacements/study-branding-coffee.png',
+    image: 'estudio-proyecto-cafe.webp',
   },
   {
     number: '02',
     title: 'Contenido Visual',
     copy: 'Creamos piezas visuales estratégicas para plataformas digitales: reels, carruseles, edición y contenido que comunica y convierte.',
     icon: Layers3,
-    image: 'ChatGPT Image 1 jul 2026, 15_30_58.png',
+    image: 'estudio-servicio-contenido.webp',
     position: 'center 90%',
   },
   {
@@ -49,14 +49,14 @@ const services = [
     title: 'Estrategia Digital',
     copy: 'Diseñamos estructuras de posicionamiento, captación y crecimiento: contenido, funnels, landing pages, campañas y conexión con sistemas digitales.',
     icon: Image,
-    image: 'ChatGPT Image 1 jul 2026, 15_53_17.png',
+    image: 'estudio-servicio-estrategia.webp',
   },
   {
     number: '04',
     title: 'Presencia Profesional',
     copy: 'Construimos y optimizamos la imagen digital de profesionales, negocios y marcas personales para LinkedIn, web y redes.',
     icon: CircleUserRound,
-    image: 'ChatGPT Image 1 jul 2026, 16_10_34.png',
+    image: 'estudio-servicio-presencia.webp',
   },
 ]
 
@@ -73,19 +73,19 @@ const brandingProjects = [
   {
     name: 'Hospitalidad',
     description: 'Identidad táctil, packaging y experiencia de marca.',
-    image: `${ASSET}/study-replacements/study-branding-hospitality.png`,
+    image: `${ASSET}/estudio-proyecto-hospitalidad.webp`,
     palette: ['#111111', '#f2f1ef', '#a86137', '#fd5605'],
   },
   {
     name: 'Arquitectura',
     description: 'Sistema visual aplicado a marca, soporte y presentación.',
-    image: `${ASSET}/study-replacements/study-branding-architecture.png`,
+    image: `${ASSET}/estudio-proyecto-arquitectura.webp`,
     palette: ['#111111', '#f2f1ef', '#2850b8', '#fd5605'],
   },
   {
     name: 'Café de autor',
     description: 'Packaging, piezas editoriales y sistema de producto.',
-    image: `${ASSET}/study-replacements/study-branding-coffee.png`,
+    image: `${ASSET}/estudio-proyecto-cafe.webp`,
     palette: ['#111111', '#f2f1ef', '#a86137', '#fd5605'],
   },
 ]
@@ -106,19 +106,22 @@ function TiltPanel({ children, className = '' }) {
 }
 
 function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
-  const [position, setPosition] = useState(50)
+  const containerRef = useRef(null)
 
   return (
     <div
+      ref={containerRef}
       className={`vl-comparison ${dark ? 'vl-comparison--dark' : ''}`}
       onMouseMove={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect()
-        setPosition(Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100)))
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect()
+        const position = Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100));
+        containerRef.current.style.setProperty('--split-position', `${position}%`);
       }}
-      style={{ '--split-position': `${position}%`, width: '100%', height: '100%' }}
+      style={{ '--split-position': `50%`, width: '100%', height: '100%' }}
     >
-      <img src={beforeImage} alt={`Original - ${alt}`} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
-      <img src={afterImage} alt={`Resultado - ${alt}`} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, clipPath: `inset(0 0 0 var(--split-position))` }} />
+      <img src={beforeImage} alt={`Original - ${alt}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
+      <img src={afterImage} alt={`Resultado - ${alt}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, clipPath: `inset(0 0 0 var(--split-position))` }} />
       
       <span className="vl-comparison__label vl-comparison__label--left">Original</span>
       <span className="vl-comparison__label vl-comparison__label--right">Resultado</span>
@@ -130,22 +133,24 @@ function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
 }
 
 function Hero() {
-  const [pointer, setPointer] = useState({ x: 72, y: 43 })
+  const heroRef = useRef(null)
 
   return (
     <section
+      ref={heroRef}
       className="vl-hero"
       onMouseMove={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect()
-        setPointer({
-          x: ((event.clientX - rect.left) / rect.width) * 100,
-          y: ((event.clientY - rect.top) / rect.height) * 100,
-        })
+        if (!heroRef.current) return;
+        const rect = heroRef.current.getBoundingClientRect()
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        heroRef.current.style.setProperty('--pointer-x', `${x}%`);
+        heroRef.current.style.setProperty('--pointer-y', `${y}%`);
       }}
-      style={{ '--pointer-x': `${pointer.x}%`, '--pointer-y': `${pointer.y}%` }}
+      style={{ '--pointer-x': `72%`, '--pointer-y': `43%` }}
     >
       {/* Nav removed */}
-      <img className="vl-hero__image" src={`${ASSET}/ig_0d333d70a933ac02016a47e5714d808191a66498052288aa9f.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
+      <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
       
       <div className="vl-hero__right-pane">
         <motion.div
@@ -171,9 +176,7 @@ function Hero() {
             </div>
           </div>
 
-          <a href="#branding">
-            Ver servicios <ArrowRight size={13} />
-          </a>
+
         </motion.div>
       </div>
 
@@ -195,8 +198,11 @@ function Hero() {
             <span>Estrategia Digital</span>
           </div>
           <div className="vl-actions">
-            <a href="#servicios" className="vl-button vl-button--acid">Ver soluciones <ArrowDown size={16} /></a>
-            <a href="#diagnostico" className="vl-text-link">Solicitar diagnóstico <ArrowRight size={15} /></a>
+              <a
+                href="#diagnostico"
+                className="vl-button vl-button--acid vl-branding__cta">
+                Construir mi marca <ArrowRight size={16} />
+              </a>
           </div>
         </div>
       </motion.div>
@@ -295,10 +301,6 @@ function BrandingSpotlight() {
             transition={{ duration: .75, ease: [0.22, 1, 0.36, 1] }}
           />
           <div className="vl-branding__overlay">
-            <figcaption>
-              <span>{project.name} · Proyecto 0{activeProject + 1}</span>
-              <strong>{project.description}</strong>
-            </figcaption>
             <div className="vl-branding__palette" aria-label={`Paleta del proyecto ${project.name}`}>
               {project.palette.map(color => <i key={color} style={{ background: color }} />)}
             </div>
@@ -340,12 +342,13 @@ function BrandingSpotlight() {
                 >
                   Construir mi marca <ArrowRight size={16} />
                 </a>
+                {/*
                 <Link
                   to="/estudio/branding-digital"
-                  className="vl-text-link"
-                >
+                  className="vl-text-link">
                   Ver detalles <ArrowRight size={15} />
                 </Link>
+                */}
               </div>
             }
           />
@@ -390,13 +393,13 @@ function Services() {
             const paths = [
               '#branding',
               '#contenido',
-              '#metodo',
+              '#estrategia-digital',
               '#transformacion'
             ]
             return (
               <a key={service.title} href={paths[index]} className="vl-service-link">
                 <TiltPanel className={`vl-service vl-service--${index + 1}`}>
-                  {service.image && <img src={`${ASSET}/${service.image}`} alt="" style={{ objectPosition: service.position || 'center' }} />}
+                  {service.image && <img src={`${ASSET}/${service.image}`} alt={`Servicio de ${service.title}`} loading="lazy" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
                     <div className="vl-service__top"><span>{service.number}</span><Icon size={22} /></div>
                     <h3>{service.title}</h3>
@@ -419,22 +422,22 @@ function TransformacionVisualCarousel() {
     {
       id: 'presencia',
       title: 'Presencia Profesional',
-      beforeImage: `${ASSET}/presencia-profesional1.png`,
-      afterImage: `${ASSET}/presencia-profesional2.png`,
+      beforeImage: `${ASSET}/estudio-transformacion-presencia-antes.webp`,
+      afterImage: `${ASSET}/estudio-transformacion-presencia-despues.webp`,
       alt: 'Transformación de presencia profesional'
     },
     {
       id: 'producto',
       title: 'Optimización Visual',
-      beforeImage: `${ASSET}/ChatGPT Image 1 jul 2026, 18_06_57.png`, 
-      afterImage: `${ASSET}/ChatGPT Image 1 jul 2026, 18_23_09.png`,
+      beforeImage: `${ASSET}/estudio-transformacion-producto-antes.webp`, 
+      afterImage: `${ASSET}/estudio-transformacion-producto-despues.webp`,
       alt: 'Optimización de producto y visuales'
     },
     {
       id: 'restauracion',
       title: 'Restauración',
-      beforeImage: `${ASSET}/restauración-1.png`, 
-      afterImage: `${ASSET}/restauración-2.png`,
+      beforeImage: `${ASSET}/estudio-transformacion-restauracion-antes.webp`, 
+      afterImage: `${ASSET}/estudio-transformacion-restauracion-despues.webp`,
       alt: 'Fotografía antigua restaurada'
     }
   ];
@@ -567,7 +570,7 @@ function ContentSystem() {
           }}
         >
           <video
-            src="/assets/pages/2-estudio/estudio_portada_social_media.mp4"
+            src="/assets/pages/2-estudio/estudio-social-media-reel.mp4"
             autoPlay
             loop
             muted
@@ -645,7 +648,7 @@ function Method() {
             ))}
           </div>
           <motion.figure {...reveal} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
-            <img src={`${ASSET}/ChatGPT Image 1 jul 2026, 15_30_58.png`} alt="Dirección humana de un proceso visual asistido por IA" style={{ borderRadius: '8px' }} />
+            <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
           </motion.figure>
         </div>
 

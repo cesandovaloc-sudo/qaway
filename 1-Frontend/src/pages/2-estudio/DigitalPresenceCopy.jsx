@@ -4,9 +4,9 @@ import { motion, AnimatePresence, useInView, useAnimation } from 'framer-motion'
 const ASSET = '/assets/pages/2-estudio';
 
 const SLIDE_IMAGES = [
-  { src: `${ASSET}/ChatGPT Image 1 jul 2026, 12_34_12.png`,     label: '24 piezas', position: 'center 20%' },
-  { src: `${ASSET}/ChatGPT Image 1 jul 2026, 12_34_24 (1).png`, label: '4 formatos', position: 'center 5%' },
-  { src: `${ASSET}/ChatGPT Image 1 jul 2026, 12_34_24 (2).png`, label: '1 sistema',  position: 'center 95%' },
+  { src: `${ASSET}/estudio-copy-24-piezas.webp`,     label: '24 piezas', position: 'center 20%' },
+  { src: `${ASSET}/estudio-copy-4-formatos.webp`, label: '4 formatos', position: 'center 5%' },
+  { src: `${ASSET}/estudio-copy-1-sistema.webp`, label: '1 sistema',  position: 'center 95%' },
 ];
 
 export default function DigitalPresenceCopy() {
@@ -50,7 +50,7 @@ export default function DigitalPresenceCopy() {
   }, []);
 
   return (
-    <section id="estrategia-copy" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918' }}>
+    <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918' }}>
       <div className="vl-shell">
         <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-16 xl:gap-24 items-stretch">
 
@@ -128,7 +128,7 @@ export default function DigitalPresenceCopy() {
                   style={{ width: '100%', transformOrigin: 'center top' }}
                 >
                   <img
-                    src="/assets/pages/2-estudio/web-completa3.png"
+                    src="/assets/pages/2-estudio/estudio-copy-showcase-web.webp"
                     alt="Full web mockup"
                     style={{ width: '100%', display: 'block', height: 'auto' }}
                   />

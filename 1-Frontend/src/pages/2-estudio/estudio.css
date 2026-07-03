@@ -200,9 +200,7 @@
 
 @media (max-width: 1023px) {
   .estudio-page .vl-hero__badge--branding {
-    top: 110px;
-    right: 16px;
-    bottom: auto;
+    display: none !important;
   }
 }
 
@@ -215,19 +213,13 @@
 
 @media (max-width: 1023px) {
   .estudio-page .vl-hero__badge--academy {
-    top: 195px;
-    right: 16px;
-    bottom: auto;
+    display: none !important;
   }
 }
 
 @media (max-width: 1023px) {
   .estudio-page .vl-hero__badge {
-    bottom: auto;
-    padding: 0.68rem;
-    gap: 0.68rem;
-    width: auto;
-    max-width: calc(100% - 32px);
+    display: none !important;
   }
 }
 

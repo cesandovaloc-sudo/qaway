@@ -71,7 +71,7 @@ export default function PresenciaProfesionalPage() {
               description="Optimizamos tu presencia digital profesional para generar confianza, autoridad y oportunidades. Tu perfil es tu nueva tarjeta de presentación."
             />
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button>
+// <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button> (Hidden until services page ready)
               <Button variant="secondary" size="lg" href="https://wa.me/51930756781?text=hola%20quiero%20mejorar%20mi%20presencia%20profesional">Optimizar mi perfil</Button>
             </div>
           </motion.div>
