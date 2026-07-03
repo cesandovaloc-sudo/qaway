@@ -269,7 +269,7 @@ function Hero() {
               <img
                 src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                 alt="Sistemas Digitales Qaway"
-                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale contrast-125 scale-[1.19] lg:scale-[1.14] xl:scale-[1.19] 2xl:scale-[1.34] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.14]"
+                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale scale-[1.19] lg:scale-[1.14] xl:scale-[1.19] 2xl:scale-[1.34] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.14]"
                 style={{
                   maskImage:
                     "linear-gradient(to bottom, black 60%, transparent 100%)",
@@ -544,7 +544,7 @@ const digitalAreas = [
     description:
       "Ruta de implementación para definir qué ordenar primero y cómo escalarlo.",
     icon: Compass,
-    path: "/sistemas-digitales/estrategia-digital",
+    path: "#estrategia-digital",
     deliverables: [
       "Diagnóstico digital",
       "Ruta de implementación",
@@ -628,6 +628,28 @@ useSetNavbarVariant('brand')
   const reduceMotion = useReducedMotion();
   const [activeIdx, setActiveIdx] = useState(null);
   const [expandedArea, setExpandedArea] = useState(null);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  async function handleContactSubmit(e) {
+    e.preventDefault();
+    setFormSubmitting(true);
+    setFormError('');
+    try {
+      const data = Object.fromEntries(new FormData(e.target));
+      await fetch('https://formspree.io/f/xnqkgjkq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(data),
+      });
+      setFormSubmitted(true);
+    } catch {
+      setFormError('Ocurrió un error al enviar. Intenta de nuevo.');
+    } finally {
+      setFormSubmitting(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
@@ -871,7 +893,7 @@ useSetNavbarVariant('brand')
         </div>
       </section>
 
-      <section className="border-b border-white/8 bg-[#121212] py-20 text-white lg:py-28">
+      <section id="estrategia-digital" className="border-b border-white/8 bg-[#121212] py-20 text-white lg:py-28">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <motion.div
@@ -1078,20 +1100,33 @@ useSetNavbarVariant('brand')
               return (
                 <motion.article
                   key={item.step}
-                  initial={reduceMotion ? false : "hidden"}
-                  whileInView={reduceMotion ? undefined : "show"}
-                  viewport={{ once: true, amount: 0.2 }}
-                  variants={revealUp}
-                  custom={0.08 * index}
-                  className="border border-black/8 bg-[#f7f5f2] p-6 shadow-[0_12px_36px_rgba(0,0,0,0.04)]"
+                  initial={reduceMotion ? false : { opacity: 0, y: 36 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{
+                    duration: 0.55,
+                    delay: index * 0.12,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  whileHover={reduceMotion ? {} : {
+                    y: -6,
+                    boxShadow: "0 12px 28px rgba(0,0,0,0.05)",
+                    borderColor: "rgba(255,75,11,0.22)",
+                    transition: { duration: 0.25, ease: "easeOut" },
+                  }}
+                  className="border border-black/8 bg-[#f7f5f2] p-6 shadow-[0_12px_36px_rgba(0,0,0,0.04)] cursor-default"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff4b0b]">
                       {item.step}
                     </span>
-                    <span className="grid h-11 w-11 place-items-center bg-white text-[#ff4b0b] shadow-sm">
+                    <motion.span
+                      whileHover={reduceMotion ? {} : { rotate: 10, scale: 1.12 }}
+                      transition={{ duration: 0.2 }}
+                      className="grid h-11 w-11 place-items-center bg-white text-[#ff4b0b] shadow-sm"
+                    >
                       <Icon className="h-5 w-5" />
-                    </span>
+                    </motion.span>
                   </div>
                   <h3 className="mt-6 text-[1.35rem] font-semibold leading-tight text-[#191918]">
                     {item.title}
@@ -1123,7 +1158,7 @@ useSetNavbarVariant('brand')
                   <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
                     Asesoría y acompañamiento
                   </span>
-                  <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/72">
+                  <p className="mt-3 max-w-lg text-sm leading-relaxed text-white">
                     Definimos qué parte del sistema conviene ordenar primero
                     para que el siguiente paso ya tenga impacto real en ventas,
                     producción o coordinación interna.
@@ -1131,56 +1166,91 @@ useSetNavbarVariant('brand')
                 </div>
               </div>
 
-              <div className="px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
-                <SectionLabel>Consultoría estratégica</SectionLabel>
+              <div className="px-6 py-10 sm:px-8 lg:px-12 lg:py-12 flex flex-col justify-center">
                 <h2
-                  className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+                  className="text-[clamp(2.1rem,4.8vw,3.6rem)] leading-[0.95] tracking-[-0.03em] text-[#191918]"
                   style={displayFont}
                 >
-                  Si el contenido ya existe,
+                  Ya tienes la Idea.
                   <br />
-                  el siguiente paso es darle{" "}
-                  <span className="text-[#ff4b0b]">sistema</span>.
+                  <span className="text-[#ff4b0b]">Ahora Construimos</span>
+                  <br />
+                  Su Infraestructura.
                 </h2>
-                <p className="mt-5 max-w-xl text-base leading-relaxed text-black/60">
-                  Acompañamos procesos relacionados con automatización,
-                  contenido, IA, dashboards, CRM, herramientas internas y
-                  estructura operativa para que todo respire dentro de una misma
-                  lógica de negocio.
-                </p>
 
-                <ul className="mt-8 space-y-3">
-                  {advisoryCases.map(function (item) {
-                    return (
-                      <li
-                        key={item}
-                        className="flex items-start gap-3 border border-black/6 bg-[#f8f6f2] px-4 py-4 text-sm leading-relaxed text-black/62"
+                {formSubmitted ? (
+                  <div className="mt-8 flex flex-col items-start gap-3 border border-black/8 bg-[#f8f6f2] px-6 py-6">
+                    <CheckCircle2 className="h-7 w-7 text-[#ff4b0b]" />
+                    <p className="text-[15px] font-semibold text-[#191918]">¡Solicitud enviada!</p>
+                    <p className="text-sm text-black/56">Te contactamos en menos de 24 horas para definir el siguiente paso juntos.</p>
+                    <button
+                      onClick={() => setFormSubmitted(false)}
+                      className="mt-2 text-xs font-bold uppercase tracking-wider text-[#ff4b0b] hover:underline"
+                    >
+                      Enviar otra consulta
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="mt-8 space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="sd-name" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Nombre</label>
+                        <input
+                          id="sd-name" name="name" type="text" required
+                          placeholder="Tu nombre"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="sd-email" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Correo</label>
+                        <input
+                          id="sd-email" name="email" type="email" required
+                          placeholder="tucorreo@empresa.com"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="sd-service" className="text-[11px] font-bold uppercase tracking-wider text-black/50">¿Qué necesitas implementar?</label>
+                      <select
+                        id="sd-service" name="service" required
+                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#ff4b0b]/60 transition-colors"
                       >
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#ff4b0b]" />
-                        <span>{item}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
+                        <option value="">Selecciona un servicio</option>
+                        <option value="Automatización y Workflows">Automatización y Workflows</option>
+                        <option value="Canales Digitales">Canales Digitales</option>
+                        <option value="Webs y Landings">Webs y Landings</option>
+                        <option value="CRM, Datos y Dashboards">CRM, Datos y Dashboards</option>
+                        <option value="Agentes IA">Agentes IA</option>
+                        <option value="Herramientas Internas">Herramientas Internas</option>
+                        <option value="Estrategia Digital">Estrategia Digital</option>
+                        <option value="No sé todavía / Necesito orientación">No sé todavía / Necesito orientación</option>
+                      </select>
+                    </div>
 
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <a
-                    href="https://wa.me/51930756781?text=Hola%20Qaway,%20quiero%20ordenar%20mi%20sistema%20de%20contenido%20y%20operaci%C3%B3n%20digital"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[#ff4b0b] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#e03a00]"
-                  >
-                    Agendar diagnóstico
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                  <Link
-                    to="/sistemas-digitales/automatizacion"
-                    className="inline-flex items-center gap-2 border border-black/10 px-6 py-3 text-sm font-semibold text-[#191918] transition-colors hover:border-[#ff4b0b]/30 hover:text-[#ff4b0b]"
-                  >
-                    Ver un módulo ya armado
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor="sd-message" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Cuéntanos tu situación</label>
+                      <textarea
+                        id="sd-message" name="message" rows={3}
+                        placeholder="¿Qué quieres ordenar, automatizar o mejorar?"
+                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors resize-none"
+                      />
+                    </div>
+
+                    {formError && <p className="text-xs text-red-500">{formError}</p>}
+
+                    <button
+                      type="submit"
+                      disabled={formSubmitting}
+                      className="inline-flex items-center gap-2 bg-[#ff4b0b] px-7 py-3 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#e03a00] disabled:opacity-60"
+                    >
+                      {formSubmitting ? 'Enviando...' : 'Solicitar diagnóstico'}
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                    <p className="text-[11px] text-black/38">Usamos esta información únicamente para responder tu consulta.</p>
+                  </form>
+                )}
               </div>
             </div>
           </div>
