@@ -1,0 +1,734 @@
+═══════════════════════════════════════════════════════════════
+                     WEB QAWAY 2026 — VERSIÓN 2
+                  Documento maestro reordenado y completo
+═══════════════════════════════════════════════════════════════
+
+ÍNDICE
+══════
+1.  Introducción
+    1.1  Descripción del proyecto
+    1.2  Propuesta de valor y público objetivo
+    1.3  Propuestas maestras de diseño visual
+
+2.  Arquitectura del ecosistema
+    2.1  Mapa general (primer nivel)
+    2.2  Árbol completo (segundo nivel)
+
+3.  Secciones del sitio — Descripción detallada
+    3.1  1-inicio
+    3.2  2-estudio
+    3.3  3-sistemas-digitales
+    3.4  4-academy
+    3.5  5-qaway-hub
+    3.6  6-recursos
+    3.7  7-blog
+    3.8  8-landings
+    3.9  auth (login/registro)
+
+4.  Mapa de código real
+    4.1  Estructura de directorios vs. documento
+    4.2  Notas sobre archivos y versiones
+
+5.  Apéndice: Matriz de servicios de Sistemas Digitales
+    5.1  Automatización IA
+    5.2  Workflows
+    5.3  Agentes IA
+    5.4  Soluciones IA
+    5.5  Operación Digital
+    5.6  Consultoría Estratégica
+
+
+═══════════════════════════════════════════════════════════════
+1. INTRODUCCIÓN
+═══════════════════════════════════════════════════════════════
+
+1.1  Descripción del proyecto
+─────────────────────────────
+
+La web de Qaway Lab es el centro principal del ecosistema de
+marca. Su función es presentar de forma clara las áreas de
+trabajo, servicios, formación, herramientas, recursos y
+contenidos estratégicos de Qaway, manteniendo una experiencia
+visual moderna, ordenada y coherente.
+
+La página no debe sentirse como una agencia tradicional ni
+como una simple web corporativa.
+
+1.2  Propuesta de valor y público objetivo
+──────────────────────────────────────────
+
+Qaway Lab es un ecosistema fundamentado en la mejora de la
+eficiencia a través de la Inteligencia Artificial. Aplicamos
+la IA en la optimización de procesos, la automatización
+operativa, así como en el marketing y el diseño digital
+creativo. El entorno creativo y moderno se basa en el uso de
+herramientas tecnológicas de vanguardia.
+
+Pilar educativo: impartir conocimiento que combina
+orquestación de IA aplicada, estrategia digital, comunicación
+visual, automatización, formación y herramientas guiadas.
+
+¿A quiénes nos dirigimos?
+
+  • Pymes: negocios, marcas y equipos que buscan optimizar
+    procesos y escalar con tecnología.
+  • Profesionales en desarrollo: personas que desean optimizar
+    tareas, escalar a un mejor puesto o mejorar habilidades.
+  • Creadores de Marca Personal: branding profesional y
+    marketing estratégico con IA.
+  • Emprendedores, Consultores y Creadores de Contenido:
+    proyectos independientes que buscan la IA como acelerador.
+
+1.3  Propuestas maestras de diseño visual
+──────────────────────────────────────────
+
+Ninguna indicación es estricta; son propuestas a evaluar
+según cada página y su contenido.
+
+Referencias de hero:
+  C:\LEO\EMPRESAS\QAWAY LAB\1-Web-Qaway-React\docs\
+  0-documento-oficial
+
+La IA tiene autonomía total para evaluar y decidir el estilo
+visual. Se usan criterios estratégicos:
+
+  a) El estilo conversa con el producto:
+     - Academy → espacios blancos, limpieza
+     - Servicios creativos → contraste dramático
+     - La IA decide el balance
+
+  b) Colores predominantes:
+     - Naranja de acento: #fd5605, #ff4b0b
+       (acción, energía. Degradados a ámbar/cobre)
+     - Grises claros (off-white): #f8f9f7, #f5f5f4, #f2f1ef,
+       #efede8 (áreas luminosas, contenido extenso)
+     - Oscuros/negros: #111111, #18181B
+       (secciones de alto impacto)
+     - Degradados estratégicos en naranjas u oscuros
+     - Fotos en blanco y negro cuando la temática lo permita
+     - La mezcla clara/oscura queda a discreción de la IA
+
+  c) Formas y bordes:
+     - Por defecto: sin bordes redondeados
+     - Excepción: hasta 5 px si el contexto lo requiere
+     - Fotos sin fondo para estilo premium
+
+  d) Animaciones:
+     - La IA evalua libremente: tracking de cursor, 3D,
+       scroll-sticky interactivo, etc.
+
+  e) Modelos base:
+     - C:\LEO\EMPRESAS\QAWAY LAB\1-Web-Qaway-React\docs\
+       0-documento-oficial\
+
+
+═══════════════════════════════════════════════════════════════
+2. ARQUITECTURA DEL ECOSISTEMA
+═══════════════════════════════════════════════════════════════
+
+2.1  Mapa general (primer nivel)
+─────────────────────────────────
+
+  Nº  Sección            Stack              Estado
+  ─── ────────────────── ────────────────── ──────────
+   1  Inicio             React puro         ✅ Activo
+   2  Estudio            React puro         ✅ Activo
+   3  Sistemas Digitales React puro         ✅ Activo
+   4  Academy            Híbrido / Piloto   🚧 En curso
+   5  Qaway Hub          React puro         ✅ Activo
+   6  Recursos           React puro         ⚠️ 2 versiones
+   7  Blog               React + WordPress  ✅ Activo
+   8  Landings           React puro         ✅ Activo
+
+2.2  Árbol completo (segundo nivel)
+────────────────────────────────────
+
+  1-inicio/
+    └── InicioPage (portada general del ecosistema)
+
+  2-estudio/
+    ├── 1-branding-digital/     — Branding IA
+    ├── 2-contenido-visual/     — Contenido Visual
+    ├── 3-presencia-profesional/ — Presencia Profesional
+    ├── 4-estrategia-digital/   — Estrategia Digital
+    └── 5-consultoria/          — Consultoría Estratégica
+
+  3-sistemas-digitales/
+    ├── 1-automatizacion/       — Automatización y Workflows
+    ├── 2-canales-digitales/    — Canales Digitales
+    ├── 3-webs-y-landings/      — Webs y Landings
+    ├── 4-crm-datos-dashboards/ — CRM, Datos y Dashboards
+    ├── 5-agentes-ia/           — Agentes IA
+    ├── 6-herramientas-internas/— Herramientas Internas
+    └── 7-estrategia-digital/   — Estrategia Digital
+
+  4-academy/  →  Ver sección 3.4 para detalle de arquitecturas
+
+  5-qaway-hub/
+    ├── crm/                    — CRM integrado
+    ├── waba-crm/               — WhatsApp + CRM
+    ├── 4-descargadores/        — Descargadores/herramientas
+    └── HubPage                 — Portada del Hub
+
+  6-recursos/
+    ├── RecursosPage            — V1 activa
+    ├── RecursosV2Page          — V2 en desarrollo
+    ├── RecursoVisorPage        — Visor V1
+    └── EbookVisorV2Page        — Visor V2
+
+  7-blog/
+    ├── BlogPage                — Portada del blog
+    └── ArticleDetailPage       — Artículo individual
+
+  8-landings/
+    ├── 1-sistema-contenido-notion/   — Sistema Contenido Notion
+    ├── 2-identidad-visual/           — Identidad Visual
+    ├── 3-contable/                   — Contable
+    ├── 4-restauración-fotográfica/   — Restauración Fotográfica
+    └── 5-fotografia-linkedin/        — Fotografía LinkedIn
+
+  auth/
+    └── LoginPage
+
+
+═══════════════════════════════════════════════════════════════
+3. SECCIONES DEL SITIO — DESCRIPCIÓN DETALLADA
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+3.1  1-inicio — React puro
+───────────────────────────────────────────────────────────────
+
+La página de inicio es la entrada principal al ecosistema
+Qaway Lab. Presenta la propuesta general de la marca, sus
+áreas principales y dirige al usuario hacia Estudio, Sistemas
+Digitales, Academy, Qaway Hub, Recursos, Blog y Landings.
+
+Funciona como una vista panorámica del ecosistema.
+
+Código: 1-Frontend/src/pages/1-inicio/InicioPage.jsx
+
+
+───────────────────────────────────────────────────────────────
+3.2  2-estudio — React puro
+───────────────────────────────────────────────────────────────
+
+Estudio es el área enfocada en construir identidad visual,
+comunicación digital y presencia moderna para marcas,
+profesionales y negocios.
+
+Servicios directos (columnas de la grilla de servicios):
+
+  3.2.1  Branding Digital (1-branding-digital)
+        Construcción, optimización y transformación de marcas
+        para entornos digitales: naming, identidad visual,
+        logo, paletas, patrones gráficos, sistema visual,
+        mockups, rebranding asistido por IA.
+
+  3.2.2  Contenido Visual (2-contenido-visual)
+        Creación y transformación de piezas visuales: reels,
+        shorts, carruseles, edición, banners, flyers, posts,
+        transformación de materiales básicos a calidad
+        profesional.
+
+  3.2.3  Presencia Profesional (3-presencia-profesional)
+        Optimización de imagen digital profesional: LinkedIn,
+        Instagram, avatar ejecutivo, biografía, portada,
+        presentación visual.
+
+Servicios transversales (compartidos con Sistemas Digitales):
+
+  3.2.4  Estrategia Digital (4-estrategia-digital)
+        Diseño de estructuras de posicionamiento, captación y
+        crecimiento: contenido, funnels, landings, campañas,
+        medición.
+
+  3.2.5  Consultoría Estratégica (5-consultoria)
+        → Ver sección 3.3.H para detalle completo.
+        Guía de decisiones y acompañamiento en marca,
+        presencia digital, contenido, campañas, IA y procesos.
+        No compite visualmente con los servicios principales.
+
+Código:
+  1-Frontend/src/pages/2-estudio/EstudioPage.jsx
+  1-Frontend/src/pages/2-estudio/EstudioLayout.jsx
+  Subpáginas en carpetas 1-branding-digital/ a 5-consultoria/
+
+
+───────────────────────────────────────────────────────────────
+3.3  3-sistemas-digitales — React puro
+───────────────────────────────────────────────────────────────
+
+Sistemas Digitales implementa estructuras, herramientas y
+procesos digitales para mejorar la operación diaria de
+profesionales, negocios, equipos y marcas personales.
+
+Integra IA aplicada, automatización, workflows, canales
+digitales, CRM, dashboards, landings y herramientas internas.
+
+  A) Automatización y Workflows (1-automatizacion)
+     Reducción de tareas repetitivas, orden de procesos y
+     mejora de flujos operativos.
+
+     Entregables: flujo automatizado, mapa de workflow,
+     documentación, resumen IA, alertas, tablero de tareas.
+
+  B) Canales Digitales (2-canales-digitales)
+     Creación, configuración y vinculación de canales
+     digitales para comunicación y captación.
+
+     Entregables: Instagram/Facebook configurados, WhatsApp
+     Business, Meta Business Suite, catálogo, etiquetas.
+
+  C) Webs y Landings (3-webs-y-landings)
+     Páginas digitales orientadas a presentación, captación,
+     conversión y operación.
+
+     Entregables: landing page, formulario conectado,
+     integración WhatsApp, conexión CRM, tracking.
+
+  D) CRM, Datos y Dashboards (4-crm-datos-dashboards)
+     Orden de información de clientes, leads y procesos
+     comerciales.
+
+     Entregables: CRM básico, tablero de leads, pipeline,
+     dashboards operativo/ventas, reportes.
+
+  E) Agentes IA (5-agentes-ia)
+     Asistentes de IA para tareas, respuestas, organización,
+     contenido y procesos.
+
+     Entregables: agente configurado, prompts base, reglas
+     de uso, flujo de interacción.
+
+  F) Herramientas Internas (6-herramientas-internas)
+     Soluciones simples para tareas, procesos, cálculos y
+     registros internos.
+
+     Entregables: calculadora, formulario, tablero, mini
+     herramienta, plantilla operativa.
+
+  G) Estrategia Digital (7-estrategia-digital)
+     Estructuras de posicionamiento, captación, operación y
+     crecimiento dentro de Sistemas Digitales.
+
+     Entregables: diagnóstico digital, ruta de implementación,
+     mapa de canales, arquitectura de captación, plan de
+     automatización.
+
+  H) Consultoría Estratégica
+     ---
+     NOTA GENERAL:
+     No se presenta como servicio principal ni como producto
+     dentro de la grilla. Funciona como sección estratégica
+     independiente para invitar a solicitar asesoría cuando
+     la persona necesita orientación antes de implementar.
+     Debe ser breve, clara y contextual. No compite
+     visualmente con los servicios principales.
+     ---
+
+     Bloque base:
+     Consultoría Estratégica guía decisiones, ordena
+     prioridades y acompaña procesos de implementación
+     relacionados con marca, presencia digital, contenido,
+     campañas, IA, sistemas digitales, herramientas, procesos
+     y canales de comunicación. Presencial o virtual.
+
+     Aplicación en Estudio:
+       - marca, presencia digital, contenido, comunicación
+         visual, campañas, perfiles profesionales, dirección
+         visual, uso de IA
+       - Casos: "No sé cómo debería verse mi marca", "Quiero
+         mejorar mi perfil profesional", "Necesito ordenar mi
+         contenido"
+
+     Aplicación en Sistemas Digitales:
+       - automatización, workflows, CRM, dashboards, canales
+         digitales, WhatsApp Business, herramientas IA,
+         procesos operativos
+       - Casos: "Quiero automatizar tareas repetitivas",
+         "Necesito ordenar mis leads", "Quiero conectar mis
+         redes con WhatsApp"
+
+Código:
+  1-Frontend/src/pages/3-sistemas-digitales/SistemasDigitalesPage.jsx
+  Subpáginas en carpetas 1-automatizacion/ a 7-estrategia-digital/
+
+
+───────────────────────────────────────────────────────────────
+3.4  4-academy — Híbrida (React + WordPress) / Piloto (React + Supabase)
+───────────────────────────────────────────────────────────────
+
+Academy es la plataforma educativa de Qaway Lab. Actualmente
+conviven DOS arquitecturas:
+
+  3.4.1  Academy-Qaway — Piloto Julio 2026 (React + Supabase)
+
+         Proyecto independiente en 3-Academy-Qaway/
+         SPA en React 19 + Vite + Supabase (sin WordPress).
+
+         Stack: React 19, Vite, Tailwind CSS v4, Framer
+         Motion, React Router DOM v7, Supabase (PostgreSQL,
+         Auth, Storage).
+
+         Pagos: WooCommerce como puente inicial (webhook →
+         backend Express → Supabase).
+
+         Páginas:
+           Home / Catálogo de cursos / Detalle de curso /
+           Lección (reproductor) / Login-Registro-Recuperar /
+           Panel del alumno (dashboard, progreso) / Admin
+           (gestión, roles) / Docente (gestión, tareas) /
+           Certificados
+
+         Directorio:
+           3-Academy-Qaway/src/pages/
+             Home.jsx, Catalog.jsx, CourseDetail.jsx,
+             Lesson.jsx, Dashboard.jsx, Auth/, Admin/,
+             Docente/, Panel/
+
+         Base de datos (Supabase):
+           profiles, courses, modules, lessons, enrollments,
+           progress, certificates, orders
+
+  3.4.2  Academy (arquitectura híbrida final)
+
+         Diseño para cuando Academy viva dentro de la web
+         principal (1-Frontend). React como capa visual;
+         WordPress + Tutor LMS + WooCommerce como backend.
+
+         Componentes previstos:
+           Academy (portada React), Catálogo de cursos,
+           Talleres, Programas, Incubadora, Membresías
+           (React + WooCommerce), Login/Registro (WordPress),
+           Panel del alumno (Tutor LMS), Carrito/Checkout/
+           Mi Cuenta (WooCommerce), Certificados (Tutor LMS)
+
+         Nota: Ambos modelos coexistirán hasta que el piloto
+         React+Supabase madure y pueda reemplazar la capa
+         híbrida. Mientras, 1-Frontend redirige a
+         3-Academy-Qaway para la experiencia Academy.
+
+Código actual (portada):
+  1-Frontend/src/pages/4-academy/AcademyPage.jsx
+
+
+───────────────────────────────────────────────────────────────
+3.5  5-qaway-hub — React puro
+───────────────────────────────────────────────────────────────
+
+Plataforma modular de crecimiento, organización y operación
+digital. No es una colección de apps aisladas, sino un
+ecosistema de herramientas guiadas con rutas estructuradas.
+
+  Rutas previstas:
+    • Ruta Marca / Emprendimiento:
+      Idea → Naming → Logo → Identidad visual → Perfiles →
+      Biografía → Copy → Prompts → Plantillas → Landing →
+      Captación → Automatización → Dashboard
+    • Ruta Profesional / Oficina:
+      Datos → Reportes → Dashboards → Resúmenes IA →
+      Automatización de reuniones → Seguimiento
+    • Ruta Incubadora:
+      Diagnóstico → Validación → Formularios → Encuestas →
+      Propuesta → Automatización → Escalamiento
+
+  Suscripción:
+    Herramientas libres + herramientas por suscripción.
+    Soluciones iniciales de valor que motiven a continuar
+    dentro del ecosistema mediante una cuota accesible.
+
+  Módulos ya creados en código:
+    • crm/ — CRM integrado
+    • waba-crm/ — WhatsApp Business + CRM
+    • 4-descargadores/ — Herramientas de descarga
+
+Código:
+  1-Frontend/src/pages/5-qaway-hub/HubPage.jsx
+
+
+───────────────────────────────────────────────────────────────
+3.6  6-recursos — React puro
+───────────────────────────────────────────────────────────────
+
+Sección estratégica de captación, autoridad y conversión.
+Funciona como biblioteca viva de materiales prácticos para
+recibir valor inmediato antes de comprar o suscribirse.
+
+  Objetivo: captar leads, generar confianza, educar al
+  usuario, activar ventas indirectas, llevar tráfico hacia
+  Estudio, Sistemas Digitales, Academy o Qaway Hub.
+
+  Hub de Recursos (página principal):
+    Biblioteca + buscador + centro de captación.
+    Incluye destacados, buscador, filtros, recientes,
+    gratuitos, premium y CTAs.
+
+  Categorías de recursos:
+    • Plantillas: matriz FODA, calendarios, briefs,
+      planificadores, plantillas de marca, operativas.
+    • Guías: IA aplicada, branding, contenido, automatización,
+      negocios, profesionales.
+    • Prompts: contenido, branding, imágenes, reportes,
+      análisis, automatización.
+    • Checklists: lanzamiento, marca, contenido, campañas,
+      automatización, operación.
+    • Scripts: instalación, configuración, flujos IA,
+      automatización, procesos operativos.
+
+  Recurso Individual:
+    Cada recurso tiene página propia con descripción, para
+    quién sirve, vista previa, descarga, formulario de
+    captación si aplica, recursos relacionados y CTA.
+
+  ⚠️ Estado actual: conviven 2 implementaciones
+    • V1 (RecursosPage.jsx) — activa en /recursos
+    • V2 (RecursosV2Page.jsx) — en desarrollo en /recursos-v2
+    • Visores: RecursoVisorPage (V1), EbookVisorV2Page (V2)
+
+
+───────────────────────────────────────────────────────────────
+3.7  7-blog — React portada + WordPress Headless contenido
+───────────────────────────────────────────────────────────────
+
+Sección editorial orientada a posicionamiento, autoridad, SEO
+y análisis estratégico.
+
+  Objetivo: mejorar SEO, construir autoridad, educar al
+  mercado, captar tráfico orgánico, nutrir confianza y llevar
+  usuarios a las áreas de servicio.
+
+  Arquitectura técnica:
+    • Portada visual → React (1-Frontend)
+    • Contenido editorial → WordPress Headless
+    • React mantiene identidad visual unificada
+    • WordPress permite publicación rápida, SEO, categorías
+
+  Páginas:
+    • Blog Home (BlogPage.jsx)
+      Artículos destacados, últimas publicaciones, categorías,
+      buscador, CTA a servicios.
+
+    • Artículo Individual (ArticleDetailPage.jsx)
+      Título, resumen, fecha, categoría, desarrollo, recursos
+      relacionados, CTA.
+
+  Categorías editoriales (WordPress):
+    • Noticias y Tendencias: novedades IA, herramientas,
+      cambios en plataformas.
+    • Tutoriales: paso a paso, herramientas, contenido,
+      automatización.
+    • Estrategia: contenido, branding, marketing, captación.
+    • Sistemas Digitales: automatización, workflows, agentes,
+      CRM, dashboards.
+
+
+───────────────────────────────────────────────────────────────
+3.8  8-landings — React puro
+───────────────────────────────────────────────────────────────
+
+Páginas específicas de captación, venta o presentación de
+servicios. Desarrolladas en React puro para control visual,
+velocidad e iteración.
+
+  3.8.1  Landings existentes (Julio 2026)
+
+    1. Sistema Contenido Notion
+       Landing de servicio: sistema de contenido en Notion
+       Código: 1-sistema-contenido-notion/
+
+    2. Identidad Visual
+       Landing de servicio: branding e identidad visual
+       Código: 2-identidad-visual/
+
+    3. Contable
+       Landing de servicio: gestión contable con IA
+       Código: 3-contable/
+
+    4. Restauración Fotográfica
+       Landing de servicio: restauración de fotos con IA
+       Código: 4-restauración-fotográfica/
+
+    5. Fotografía LinkedIn
+       Landing de servicio: fotografía profesional LinkedIn
+       Código: 5-fotografia-linkedin/
+
+  3.8.2  Landings futuras (por crear)
+
+    • Landing de campaña
+    • Landing de curso
+    • Landing de incubadora
+    • Landing de captación general
+    • Landing de recurso premium
+    • Landing de automatización
+    • Landing de Qaway Hub
+    • Landing de servicio (nuevos servicios)
+
+
+───────────────────────────────────────────────────────────────
+3.9  auth — Login / Registro (React)
+───────────────────────────────────────────────────────────────
+
+Página de autenticación para el ecosistema.
+
+Código:
+  1-Frontend/src/pages/auth/LoginPage.jsx
+
+
+═══════════════════════════════════════════════════════════════
+4. MAPA DE CÓDIGO REAL
+═══════════════════════════════════════════════════════════════
+
+4.1  Estructura de directorios vs. documento
+──────────────────────────────────────────────
+
+  Documento         Directorio real                   Archivo ppal.
+  ────────────────  ────────────────────────────────  ─────────────
+  1-inicio          1-Frontend/src/pages/1-inicio/    InicioPage.jsx
+  2-estudio         1-Frontend/src/pages/2-estudio/   EstudioPage.jsx
+  3-sistemas-dig.   1-Frontend/src/pages/3-sd/        SistDigitPage.jsx
+  4-academy         1-Frontend/src/pages/4-academy/   AcademyPage.jsx
+  Academy-piloto    3-Academy-Qaway/src/pages/        Home.jsx
+  5-qaway-hub       1-Frontend/src/pages/5-qh/        HubPage.jsx
+  6-recursos        1-Frontend/src/pages/6-recursos/  RecursosPage.jsx
+  7-blog            1-Frontend/src/pages/7-blog/      BlogPage.jsx
+  8-landings        1-Frontend/src/pages/8-landings/  (carpetas/)
+  auth              1-Frontend/src/pages/auth/        LoginPage.jsx
+
+4.2  Notas sobre el estado del código
+──────────────────────────────────────
+
+  • 10-briefs/ — Carpeta numerada fuera de secuencia
+    (salta de 8 a 10). Revisar si debe integrarse en otra
+    sección o eliminarse.
+
+  • 9-pruebas/ — Contiene versiones descartadas y prototipos.
+    Incluye: InicioQaway2026Page, páginas descartadas de
+    inicio y estudio, RecursosPruebaPage. Revisar limpieza.
+
+  • 6-recursos/ — Dos implementaciones activas (V1 y V2).
+    Pendiente unificar.
+
+  • Estrategia Digital — Existe tanto en 2-estudio
+    (4-estrategia-digital) como en 3-sistemas-digitales
+    (7-estrategia-digital). El documento la define como
+    transversal, pero tener dos páginas separadas con el
+    mismo nombre de exportación en AppRouter es confuso.
+    Evaluar si deben unificarse o diferenciarse claramente.
+
+  • 5-qaway-hub — Tiene módulos experimentales (crm/,
+    waba-crm/, 4-descargadores/) que no están en el diseño
+    original del documento. Evaluar si pertenecen aquí o en
+    Recursos/Sistemas Digitales.
+
+  • 3-sistemas-digitales/6-herramientas-internas/ —
+    Existe en código pero no está listada en el documento
+    como módulo separado. Decidir si mantener o reubicar.
+
+
+═══════════════════════════════════════════════════════════════
+5. APÉNDICE: MATRIZ DE SERVICIOS DE SISTEMAS DIGITALES
+═══════════════════════════════════════════════════════════════
+
+Estructura y desagregados oficiales de Sistemas Digitales,
+organizados por orden de prioridad comercial.
+
+───────────────────────────────────────────────────────────────
+5.1  Automatización IA
+───────────────────────────────────────────────────────────────
+
+  1. Kit de Inicio de Productividad con IA
+     Configuración ChatGPT/Claude Team, 3 asistentes
+     entrenados con info del negocio.
+  2. Automatización de tareas repetitivas
+  3. Integraciones digitales
+  4. Resúmenes automáticos con IA
+  5. Automatización administrativa
+  6. Flujos automáticos de trabajo
+  7. Automatización de seguimiento
+  8. Automatización para negocios y profesionales
+  9. IA aplicada a productividad
+ 10. Automatización de procesos
+ 11. Automatización de reuniones
+ 12. Automatización de contenidos
+
+───────────────────────────────────────────────────────────────
+5.2  Workflows
+───────────────────────────────────────────────────────────────
+
+  1. Organización de tareas
+  2. Sistemas de trabajo
+  3. Flujos colaborativos
+  4. Flujos administrativos
+  5. Organización operativa
+  6. Flujos de contenido
+  7. Diseño de workflows
+  8. Sistemas de seguimiento
+  9. Optimización de procesos
+ 10. Organización digital moderna
+ 11. Workflows empresariales
+
+───────────────────────────────────────────────────────────────
+5.3  Agentes IA
+───────────────────────────────────────────────────────────────
+
+  1. Asistentes operativos
+  2. Agentes para productividad
+  3. IA para organización
+  4. IA aplicada a procesos diarios
+  5. Automatización inteligente
+  6. Flujos asistidos por IA
+  7. Asistentes para equipos
+  8. IA para gestión de información
+  9. Agentes para contenido
+ 10. Agentes para atención y soporte
+
+───────────────────────────────────────────────────────────────
+5.4  Soluciones IA
+───────────────────────────────────────────────────────────────
+
+  1. IA para profesionales
+  2. IA para marcas personales
+  3. Implementación de herramientas IA
+  4. Soluciones para productividad
+  5. IA aplicada a procesos diarios
+  6. Optimización operativa con IA
+  7. Sistemas IA personalizados
+  8. Soluciones digitales modernas
+  9. IA aplicada a comunicación y contenido
+ 10. Implementación IA para empresas
+
+───────────────────────────────────────────────────────────────
+5.5  Operación Digital
+───────────────────────────────────────────────────────────────
+
+  1. Implementación de CRM
+  2. Dashboards empresariales
+  3. Paneles de control
+  4. Creación de webs operativas
+  5. Landing pages
+  6. Sistemas de productividad
+  7. Herramientas internas de gestión
+  8. Centralización de información
+  9. Ecosistemas digitales de trabajo
+ 10. Organización de oficinas y equipos
+ 11. Organización digital empresarial
+ 12. Gestión operativa digital
+ 13. Infraestructura digital moderna
+ 14. Sistemas internos
+ 15. Entornos digitales modernos
+ 16. Implementación de plataformas digitales
+
+───────────────────────────────────────────────────────────────
+5.6  Consultoría Estratégica
+───────────────────────────────────────────────────────────────
+
+  1. Diagnóstico operativo
+  2. Ordenamiento de procesos digitales
+  3. Implementación de herramientas de productividad
+  4. Plan de automatización operativa
+  5. Métrica y ROI
+
+═══════════════════════════════════════════════════════════════
+                    FIN DEL DOCUMENTO V2
+═══════════════════════════════════════════════════════════════
