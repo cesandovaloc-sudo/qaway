@@ -41,7 +41,7 @@ import FotografiaLinkedinPage from '@/pages/8-landings/5-fotografia-linkedin/Fot
 import RecursosPruebaPage from '@/pages/9-pruebas/5-Recursos/RecursosPruebaPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import ScrollToTop from '@/components/layout/ScrollToTop'
-import DiscardedInicioPage from '@/pages/9-pruebas/1-páginas_descartadas/1-inicio/InicioPage.jsx'
+// import DiscardedInicioPage from '@/pages/9-pruebas/1-páginas_descartadas/1-inicio/InicioPage.jsx'
 
 export default function AppRouter() {
   return (
@@ -54,7 +54,7 @@ export default function AppRouter() {
       <Route path="/landings/contable" element={<ContableLandingPage />} />
       <Route path="/landings/restauracion-fotografica" element={<RestauracionFotograficaPage />} />
       <Route path="/landings/fotografia-linkedin" element={<FotografiaLinkedinPage />} />
-      <Route path="/pruebas/inicio-descartado" element={<DiscardedInicioPage />} />
+      {/* <Route path="/pruebas/inicio-descartado" element={<DiscardedInicioPage />} /> */}
 
 
       {/* Rutas de prueba sin Layout */}

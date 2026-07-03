@@ -144,8 +144,9 @@ function Hero() {
       style={{ '--pointer-x': `${pointer.x}%`, '--pointer-y': `${pointer.y}%` }}
     >
       {/* Nav removed */}
-      <img className="vl-hero__image" src={`${ASSET}/ChatGPT Image 2 jul 2026, 00_14_43.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ objectPosition: 'right center', filter: 'brightness(1.10) contrast(0.95) grayscale(100%)', transform: 'scale(1.19) translate(4%, 15%)' }} />
+      <img className="vl-hero__image" src={`${ASSET}/ChatGPT Image 3 jul 2026, 09_22_55.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ filter: 'brightness(1.15) contrast(0.80)', transform: 'scale(1.35) translate(-10%, 15%)' }} />
       <div className="vl-hero__veil" />
+      <div className="vl-hero__right-pane" />
       <div className="vl-hero__spotlight" />
       <div className="vl-hero__glow" />
       <div className="vl-hero__grid" />
