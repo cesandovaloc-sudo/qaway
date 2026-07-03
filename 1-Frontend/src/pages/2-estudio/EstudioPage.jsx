@@ -805,7 +805,7 @@ function Diagnostic() {
       </div>
 
       <div className="vl-diagnostic__visual">
-        <img src={`${ASSET}/diagnostico-visual.png`} alt="Contacto creativo desarrollado por Visual Lab" />
+        <img src={`${ASSET}/diagnostico-visual.webp`} alt="Contacto creativo desarrollado por Visual Lab" loading="lazy" />
         <div className="vl-diagnostic__frame" />
       </div>
     </section>
