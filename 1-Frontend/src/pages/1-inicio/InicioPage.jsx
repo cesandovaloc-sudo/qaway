@@ -1019,7 +1019,7 @@ function CoursesLandings() {
           </h2>
         </Reveal>
 
-        <div className="grid flex-1 gap-5 sm:gap-6 md:gap-8 lg:gap-[60px] px-5 sm:px-8 md:px-12 lg:px-[14%] sm:grid-cols-2">
+        <div className="grid flex-1 gap-5 sm:gap-6 md:gap-8 px-0 sm:px-8 md:px-12 lg:gap-[60px] lg:px-[14%] sm:grid-cols-2">
           <Reveal delay={0}>
             <Link
               to={landing.link}
