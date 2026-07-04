@@ -434,13 +434,13 @@ function EcosystemIntro() {
   )
 }
 
-const VLAB = '/assets/pages/2-estudio'
+const VLAB = '/assets/pages/1-inicio'
 
 const estudioServices = [
-  { title: 'Branding Digital', icon: Brush, image: `${VLAB}/branding-hospitality-moodboard.png` },
-  { title: 'Contenido Visual', icon: ImageIcon, image: `${VLAB}/sistema-contenido.png` },
-  { title: 'Presencia Profesional', icon: CircleUserRound, image: `${VLAB}/marca-personal-transformacion.png` },
-  { title: 'Estrategia Digital', icon: ScanSearch, image: `${VLAB}/branding-architecture-moodboard.png` },
+  { title: 'Branding Digital', icon: Brush, image: `${VLAB}/inicio-branding-hospitality-moodboard.webp` },
+  { title: 'Contenido Visual', icon: ImageIcon, image: `${VLAB}/inicio-servicio-contenido.webp` },
+  { title: 'Presencia Profesional', icon: CircleUserRound, image: `${VLAB}/estudio_portada_identidad_ejecutiva.webp` },
+  { title: 'Estrategia Digital', icon: ScanSearch, image: `${VLAB}/inicio-servicio-estrategia.webp` },
 ]
 
 function EstudioSection() {
