@@ -447,9 +447,9 @@ function TransformacionVisualCarousel() {
       <div className="vl-shell vl-content-system" style={{ gridTemplateColumns: '.95fr .95fr', gap: '80px' }}>
         <motion.div {...reveal} className="vl-content-system__copy">
           <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Transformación visual / 04</p>
-          <h2>Lo que ves,<br /><span>lo transformamos.</span></h2>
+          <h2>TU IMAGEN TAMBIÉN<br /><span>COMUNICA PROFESIONALISMO.</span></h2>
           <p>
-            Tres niveles de intervención para elevar la percepción de tu marca: presencia profesional, optimización de producto y restauración de archivo.
+            Mejoramos la forma en que profesionales, negocios y marcas se presentan en medios digitales: perfiles, fotografías, productos, piezas comerciales y material visual que necesita verse más claro, cuidado y confiable.
           </p>
 
           {/* Navigation Tabs (Vertical Stack) */}
