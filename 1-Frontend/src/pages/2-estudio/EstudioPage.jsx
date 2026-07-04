@@ -540,7 +540,9 @@ function ContentSystem() {
           <p>
             Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca.
           </p>
+          {/* 
           <Link to="/estudio/contenido-visual" className="vl-button vl-button--acid">Diseñar mi contenido <ArrowRight size={16} /></Link>
+          */}
           <div className="vl-format-rail">
             {formats.map((item, index) => (
               <motion.span
