@@ -81,7 +81,7 @@ export default function EstrategiaDigitalPage() {
               description="Diseñamos estrategias completas de posicionamiento, captación y crecimiento integrando contenido, comunicación, funnels y experiencia digital en un solo sistema."
             />
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button>
+// <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button> (Hidden until services page ready)
               <Button variant="secondary" size="lg" href="https://wa.me/51930756781?text=hola%20quiero%20una%20estrategia%20digital%20para%20mi%20negocio">Diseñar estrategia</Button>
             </div>
           </motion.div>

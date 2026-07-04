@@ -77,7 +77,7 @@ export default function BrandingDigitalPage() {
               size="hero"
             />
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button>
+// <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button> (Hidden until services page ready)
               <Button variant="secondary" size="lg" href="https://wa.me/51930756781?text=hola%20quiero%20construir%20mi%20identidad%20digital%20con%20Branding%20Digital">Iniciar proyecto</Button>
             </div>
           </motion.div>
