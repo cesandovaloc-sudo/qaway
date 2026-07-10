@@ -1,24 +1,28 @@
 # Instrucciones de Desarrollo de Qaway Lab
 
-## Comportamiento del Agente (Obligatorio)
-
-1. **Mostrar la Rama Actual**: Al inicio de **cada respuesta**, debes indicar de forma clara y visible en qué rama de Git te encuentras actualmente (ej. `Rama actual: page/inicio`).
-2. **Protección de Ramas**: 
-   * Trabaja **únicamente** en la rama correspondiente a la página/tarea asignada.
-   * **NUNCA** debes modificar archivos en una rama que no corresponda a tu tarea, incluso si el usuario te lo pide por error o te da una instrucción directa para otra rama.
-   * Si detectas que el usuario te solicita cambios en una página distinta a la rama en la que te encuentras, debes **detenerte de inmediato y alertar al usuario** del error para que decida si cambiar de rama o corregir la instrucción.
-
-## Flujo de Trabajo en Git
-
-Cada agente que trabaje en este repositorio debe seguir estrictamente estas reglas de ramas:
-
-1. **Rama Base**: La rama de producción y desarrollo estable es `main`.
-2. **Ramas Propias por Página/Funcionalidad**:
-   * Trabaja en la rama propia de la página o sección asignada (por ejemplo, `page/inicio`, `page/estudio`, `page/sistemas-digitales`, `page/academy`).
-   * Antes de modificar nada, verifica que exista la rama base `main`. Si no existe la rama propia para tu página, créala desde `main`.
-   * Puedes tocar tanto `src/` como `public/` si la tarea lo requiere, pero **no mezcles tu trabajo con ramas de otras páginas**.
-3. **Cambios Globales (Navbar, Footer, Enrutador, Estilos Globales)**:
-   * Si la tarea implica modificar un elemento global que afecte a varias páginas (como `Footer.jsx`, `Navbar.jsx`, `AppRouter.jsx` o `index.css`), crea y trabaja en una rama con el prefijo `global/` (por ejemplo, `global/footer`, `global/styles` o `global/router`) creada desde `main`.
-4. **Fusión y Limpieza**:
-   * Al terminar y verificar que el proyecto compila (`npm run build`), integra los cambios de tu rama (`page/*` o `global/*`) a `main`.
-   * Elimina la rama temporal utilizada para mantener limpio el repositorio.
+Comportamiento del Agente (Obligatorio)
+Flujo de Trabajo en Git y Carpeta
+La única rama válida de trabajo es la rama principal del proyecto, es decir su propio main o alguna variación del nombre de la misma, coordinada previamente con el usuario.
+Bajo ninguna circunstancia un agente puede crear nuevas ramas, renombrar ramas, cambiarse a otra rama o eliminar ramas.
+Bajo ningún motivo el agente puede salir de su carpeta raíz, incluso si el usuario se lo pide.
+Si el usuario pide actuar fuera de la carpeta raíz, eso solo puede considerarse para lectura.
+Aun cuando sea solo lectura fuera de la carpeta raíz, el agente siempre debe informar previamente al usuario.
+El agente debe considerar que puede tratarse de un error o de una instrucción dirigida a otro agente, especialmente cuando hay múltiples agentes trabajando al mismo tiempo.
+En esos casos, no se ejecuta nada fuera de la carpeta raíz y solo se advierte al usuario.
+Si se requiere evaluar una situación crítica, el agente debe informar previamente, explicar los motivos y no actuar hasta tener instrucción explícita del usuario.
+Todo trabajo debe hacerse únicamente dentro de su carpeta raíz.
+Ningún agente puede crear archivos fuera de su carpeta raíz.
+Ningún agente puede mover archivos fuera de su carpeta raíz.
+Ningún agente puede apoyarse en carpetas externas para trabajar.
+Antes de modificar nada, el agente debe verificar y reportar siempre:
+   rama actual,
+   carpeta actual,
+   último commit.
+El formato del commit debe seguir esta estructura:
+   fecha_hora_commit_motivo
+Ejemplo de formato válido:
+   2026-07-07_21:30_A22@@@_cambio-de-fecha
+Si el agente encuentra cambios inesperados, conflictos, archivos ajenos o dudas sobre el estado del repositorio, debe detenerse y avisar antes de actuar.
+No se permiten resets duros, limpiezas destructivas ni operaciones agresivas de Git sin autorización explícita del usuario.
+Todo cambio debe buscar mantener el repositorio simple, estable y trazable.
+Si quieres, te lo puedo devolver también en una versión más limpia y más normativa, lista para pegarla como bloque oficial dentro de un AGENTS.md o documento de reglas.

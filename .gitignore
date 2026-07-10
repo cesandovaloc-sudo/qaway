@@ -3,3 +3,14 @@ dist/
 .env
 *.log
 nul
+.claude/
+.vscode/
+dist-check/
+dist-dev-check/
+dist-public-check/
+tmp/
+tmp-*.js
+tmp-*.css
+hostinger_websites.png
+hero_screenshot.png
+fotografia-linkedin-desktop.png

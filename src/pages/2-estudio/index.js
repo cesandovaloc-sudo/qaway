@@ -1,0 +1,7 @@
+export { default as EstudioPage } from './EstudioPage'
+export { default as EstudioLayout } from './EstudioLayout'
+export { default as BrandingDigitalPage } from './1-branding-digital/BrandingDigitalPage'
+export { default as ContenidoVisualPage } from './2-contenido-visual/ContenidoVisualPage'
+export { default as PresenciaProfesionalPage } from './3-presencia-profesional/PresenciaProfesionalPage'
+export { default as EstrategiaDigitalPage } from './4-estrategia-digital/EstrategiaDigitalPage'
+export { default as ConsultoriaPage } from './5-consultoria/ConsultoriaPage'

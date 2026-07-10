@@ -1,0 +1,6 @@
+export { default as Kicker } from './Kicker'
+export { default as SectionHeading } from './SectionHeading'
+export { default as BodyText } from './BodyText'
+export { default as HeroPrimitive } from './HeroPrimitive'
+export { default as SectionPrimitive } from './SectionPrimitive'
+export { default as ImpactPrimitive } from './ImpactPrimitive'
