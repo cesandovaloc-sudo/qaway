@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useParams, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Link, useParams } from 'react-router-dom'
 import {
   FileText, BookMarked, MessageSquare, ClipboardCheck,
-  Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Menu
+  Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Search
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 
@@ -122,134 +122,33 @@ const displayFont = {
   fontStretch: 'condensed',
 }
 
-export function Header() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const location = useLocation()
-  const pathname = location.pathname
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const links = [
-    ['Estudio', '/estudio'],
-    ['Sistemas digitales', '/sistemas-digitales'],
-    ['Academy', '/academy'],
-    ['Recursos', '/recursos'],
-    ['Blog', '/blog'],
-  ]
-
-  return (
-    <header className={`fixed inset-x-0 top-0 z-30 h-20 transition-all duration-300 ${
-      scrolled 
-        ? 'bg-white/90 backdrop-blur-md shadow-sm border-b border-black/5' 
-        : 'bg-transparent'
-    }`}>
-      <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
-        <Link to="/" className="text-xl font-semibold tracking-[-0.055em] text-[#191918]">
-          Qaway <span className="text-[#ff4b0b]">Lab</span>
-        </Link>
-
-        <nav className="hidden items-center gap-7 lg:flex xl:gap-10">
-          {links.map(([label, href]) => {
-            const isActive = pathname === href || 
-              (href === '/recursos' && pathname.startsWith('/recursos')) ||
-              (href === '/blog' && pathname.startsWith('/blog'))
-            return (
-              <Link
-                key={label}
-                to={href}
-                className={`relative py-2 text-[11px] font-bold uppercase tracking-widest transition-colors ${
-                  isActive
-                    ? 'text-[#191918] after:absolute after:inset-x-0 after:-bottom-[2px] after:h-[3px] after:bg-[#ff4b0b]'
-                    : 'text-[#191918]/60 hover:text-[#191918]'
-                }`}
-              >
-                {label}
-              </Link>
-            )
-          })}
-        </nav>
-
-        <a
-          href={WHATSAPP_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden rounded-md bg-[#ff4b0b] px-5 py-3 text-xs font-semibold text-white transition-colors hover:bg-[#dc3d00] active:translate-y-px sm:inline-flex"
-        >
-          CuÃ©ntanos tu proyecto
-        </a>
-
-        <button
-          type="button"
-          aria-label={menuOpen ? 'Cerrar navegaciÃ³n' : 'Abrir navegaciÃ³n'}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((current) => !current)}
-          className="text-[#191918] sm:hidden"
-        >
-          <Menu size={22} />
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="border-b border-black/10 bg-[#f5f5f4] px-6 py-5 sm:hidden"
-          >
-            <div className="flex flex-col">
-              {links.map(([label, href]) => {
-                const isActive = pathname === href || 
-                  (href === '/recursos' && pathname.startsWith('/recursos')) ||
-                  (href === '/blog' && pathname.startsWith('/blog'))
-                return (
-                  <Link
-                    key={label}
-                    to={href}
-                    onClick={() => setMenuOpen(false)}
-                    className={`border-b border-black/5 py-3 text-sm font-semibold transition-colors ${
-                      isActive ? 'text-[#ff4b0b]' : 'text-[#191918]/70 hover:text-black'
-                    } last:border-b-0`}
-                  >
-                    {label}
-                  </Link>
-                )
-              })}
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex justify-center rounded-md bg-[#ff4b0b] px-5 py-3 text-sm font-semibold text-white"
-              >
-                CuÃ©ntanos tu proyecto
-              </a>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
-    </header>
-  )
-}
-
 export default function RecursosPage() {
   const { category } = useParams()
   const [activeCategory, setActiveCategory] = useState(category || null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     setActiveCategory(category || null)
   }, [category])
 
-  const filteredResources = activeCategory
-    ? resources.filter(res => res.category === activeCategory)
-    : resources
+  const normalizedSearch = searchQuery.trim().toLowerCase()
+  const isSearchActive = normalizedSearch.length > 0
+
+  const filteredResources = resources.filter((resource) => {
+    const matchesCategory = activeCategory ? resource.category === activeCategory : true
+    const searchableText = [
+      resource.title,
+      resource.description,
+      resource.type,
+      resource.categoryLabel,
+      resource.badge,
+    ]
+      .join(' ')
+      .toLowerCase()
+
+    const matchesSearch = isSearchActive ? searchableText.includes(normalizedSearch) : true
+    return matchesCategory && matchesSearch
+  })
 
   const categoriesWithCounts = categories.map(cat => {
     const count = resources.filter(res => res.category === cat.key).length
@@ -372,7 +271,6 @@ export default function RecursosPage() {
             <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10" />
           </div>
         </div>
-        <Header />
         <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
           <div className="min-h-[190px] sm:h-[220px]">
             <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
@@ -420,14 +318,25 @@ export default function RecursosPage() {
                   <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>{cat.title}</span>
                 </Link>
               )
-            })}
+            })}          </div>
+          <div className="mt-6 max-w-[34rem]">
+            <label className="group flex items-center gap-3 rounded-md border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.04)] transition-all focus-within:border-[#ff4b0b]/50 focus-within:shadow-[0_18px_44px_rgba(0,0,0,0.08)]">
+              <Search className="h-4 w-4 text-[#191918]/40 transition-colors group-focus-within:text-[#ff4b0b]" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Buscar recurso, tipo o palabra clave"
+                className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-[#191918]/45"
+              />
+            </label>
           </div>
         </div>
       </section>
       <section className="pb-12 pt-10 lg:pb-24 lg:pt-16">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-          {!activeCategory ? (
-            /* â”€â”€ VIEW: NO FILTER SELECTED â”€â”€ */
+          {!activeCategory && !isSearchActive ? (
+            /* Ã¢â€â‚¬Ã¢â€â‚¬ VIEW: NO FILTER SELECTED Ã¢â€â‚¬Ã¢â€â‚¬ */
             <motion.div key="all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
               <div className="mb-14 grid gap-6 md:grid-cols-2">
                 <Link to={featured[0]?.path || '#'} className="block">
@@ -447,7 +356,7 @@ export default function RecursosPage() {
                     />
                     <div className="relative z-10 w-[60%]">
                       <span className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ background: 'rgba(124,58,237,0.15)', color: '#5b21b6' }}>
-                        <TrendingUp size={12} strokeWidth={3} /> MÃ¡s Descargada
+                        <TrendingUp size={12} strokeWidth={3} /> MÃƒÂ¡s Descargada
                       </span>
                       <p className="mb-1 text-[13px] font-medium" style={{ color: '#6d28d9' }}>{featured[0]?.type}</p>
                       <h3 className="text-[clamp(1.4rem,3vw,1.8rem)] font-bold leading-[1.15]" style={{ color: '#3b0764' }}>
@@ -473,7 +382,7 @@ export default function RecursosPage() {
                     />
                     <div className="relative z-10 w-[60%]">
                       <span className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ background: 'rgba(14,116,144,0.15)', color: '#155e75' }}>
-                        <Star size={12} strokeWidth={3} /> SÃºper Destacada
+                        <Star size={12} strokeWidth={3} /> SÃƒÂºper Destacada
                       </span>
                       <p className="mb-1 text-[13px] font-medium" style={{ color: '#0e7490' }}>{featured[1]?.type}</p>
                       <h3 className="text-[clamp(1.4rem,3vw,1.8rem)] font-bold leading-[1.15]" style={{ color: '#064e3b' }}>
@@ -486,7 +395,7 @@ export default function RecursosPage() {
               <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
                 <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Para empezar</h2>
                 <Link to="/recursos/prompts" className="flex items-center gap-2 text-sm font-bold text-[#191918]/60 transition-colors hover:text-[#ff4b0b]">
-                  Ver mÃ¡s <ArrowRight size={16} />
+                  Ver mÃƒÂ¡s <ArrowRight size={16} />
                 </Link>
               </div>
               <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -495,7 +404,7 @@ export default function RecursosPage() {
                 ))}
               </div>
               <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-                <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>ReciÃ©n agregados</h2>
+                <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>ReciÃƒÂ©n agregados</h2>
               </div>
               <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 {newResources.map((res, idx) => (
@@ -504,36 +413,45 @@ export default function RecursosPage() {
               </div>
             </motion.div>
           ) : (
-            /* â”€â”€ VIEW: FILTERED RESULTS â”€â”€ */
             <motion.div key="filtered" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
               <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-black/10 pb-6">
                 <div>
                   <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#191918]/50">
-                    <span>Recursos</span> <ChevronRight size={12} /> <span>{activeCategoryObj?.title}</span>
+                    <span>Recursos</span>
+                    {activeCategoryObj ? <><ChevronRight size={12} /> <span>{activeCategoryObj.title}</span></> : null}
+                    {isSearchActive ? <><ChevronRight size={12} /> <span>Búsqueda</span></> : null}
                   </div>
                   <h2 className="text-4xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>
-                    {activeCategoryObj?.title} <span className="text-[#ff4b0b]">.</span>
+                    {activeCategoryObj ? activeCategoryObj.title : 'Resultados'} <span className="text-[#ff4b0b]">.</span>
                   </h2>
-                  <p className="mt-2 text-sm text-[#191918]/60">{activeCategoryObj?.description}</p>
+                  <p className="mt-2 text-sm text-[#191918]/60">
+                    {activeCategoryObj
+                      ? activeCategoryObj.description
+                      : 'Explora coincidencias dentro de la biblioteca de recursos por formato, tipo o palabra clave.'}
+                  </p>
                 </div>
                 <Link to="/recursos" className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#191918] transition-all hover:bg-black/5">
                   <ArrowLeft size={14} /> Volver a todos
                 </Link>
               </div>
               {filteredResources.length > 0 ? (
-                <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                  {filteredResources.map((res, idx) => (
-                    <GalleryCard key={idx} res={res} idx={idx} />
-                  ))}
-                </div>
+                <>
+                  <p className="mb-6 text-xs font-bold uppercase tracking-widest text-[#191918]/45">
+                    {filteredResources.length} resultado{filteredResources.length !== 1 ? 's' : ''}
+                  </p>
+                  <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {filteredResources.map((res, idx) => (
+                      <GalleryCard key={idx} res={res} idx={idx} />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="mb-16 rounded-md border border-dashed border-black/20 py-24 text-center">
-                  <p className="text-[#191918]/50 font-bold uppercase tracking-widest text-sm">No hay recursos en esta categorÃ­a todavÃ­a.</p>
+                  <p className="text-[#191918]/50 font-bold uppercase tracking-widest text-sm">No encontramos recursos con ese criterio.</p>
                 </div>
               )}
             </motion.div>
-          )}
-          <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
+          )}          <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
             <div className="flex-1 min-w-[300px]">
               <h2 className="mb-3 text-[clamp(1.4rem,3vw,2rem)] font-bold uppercase leading-tight tracking-tight text-[#ff4b0b]" style={{ ...displayFont }}>
                 Acelera con Qaway Academy

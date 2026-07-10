@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, ArrowLeft, BookOpen, Send, Mail, Sparkles } from 'lucide-react'
-import { Header } from '@/pages/6-recursos/RecursosPage'
 import { articles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
@@ -226,7 +225,6 @@ export default function ArticleDetailPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 pt-[100px] pb-24 relative">
-      <Header />
       
       {/* Barra de progreso de lectura pegajosa justo debajo del Navbar */}
       <div className="fixed top-[80px] left-0 right-0 h-1 bg-zinc-100 z-40">

@@ -40,10 +40,11 @@ export const navItems = [
     label: 'Blog',
     path: '/blog',
     items: [
-      { label: 'Noticias y Tendencias', path: '/blog/tendencias' },
-      { label: 'Tutoriales', path: '/blog/tutoriales' },
-      { label: 'Estrategia', path: '/blog/estrategia' },
-      { label: 'Sistemas Digitales', path: '/blog/sistemas-digitales' },
+      { label: 'I. Artificial', path: '/blog/inteligencia-artificial' },
+      { label: 'Productividad', path: '/blog/productividad' },
+      { label: 'Marketing', path: '/blog/marketing' },
+      { label: 'Diseño', path: '/blog/diseno-branding' },
+      { label: 'Automatización', path: '/blog/automatizacion' },
     ],
   },
   {
