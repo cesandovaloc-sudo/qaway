@@ -393,7 +393,7 @@ const styles = {
 }
 
 export default function HubPage() {
-  useSetNavbarVariant('dark')
+  useSetNavbarVariant('light')
   const featured = routes.filter(r => r.badge)
   const remaining = routes.filter(r => !r.badge)
 

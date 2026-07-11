@@ -823,7 +823,7 @@ function Diagnostic() {
 }
 
 export default function EstudioPage() {
-  useSetNavbarVariant('dark')
+  useSetNavbarVariant('light')
   return (
     <div className="estudio-page">
       <Hero />
