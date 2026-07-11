@@ -9,11 +9,6 @@
   overflow-x: hidden;
 }
 
-#root:has(.estudio-page) header {
-  background: #111 !important;
-  border-color: rgba(255,255,255,.1) !important;
-}
-
 .estudio-page * { box-sizing: border-box; }
 .estudio-page h1,
 .estudio-page h2,
