@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
@@ -134,6 +134,7 @@ function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
 
 function Hero() {
   const heroRef = useRef(null)
+  const reduceMotion = useReducedMotion()
 
   return (
     <section
@@ -150,7 +151,14 @@ function Hero() {
       style={{ '--pointer-x': `72%`, '--pointer-y': `43%` }}
     >
       {/* Nav removed */}
-      <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
+      >
+        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
+      </motion.div>
       
       <div className="vl-hero__right-pane">
         <motion.div
