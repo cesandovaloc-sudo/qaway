@@ -188,6 +188,8 @@ const revealUp = {
 };
 
 function Hero() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="relative w-full min-h-screen flex flex-col font-sans overflow-hidden bg-[#161616]">
       <div
@@ -239,7 +241,12 @@ function Hero() {
 
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-8 md:px-16 pt-16 pb-8">
             <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0">
-              <div className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300">
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+                className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300"
+              >
                 <HeroPrimitive
                   title={
                     <>
@@ -259,7 +266,7 @@ function Hero() {
                     Conocer Qaway Lab <ArrowRight size={15} />
                   </a>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             <div className="lg:col-span-4 relative flex items-end justify-center pt-10 min-h-[400px]">
