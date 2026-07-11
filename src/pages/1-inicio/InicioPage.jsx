@@ -189,6 +189,35 @@ function ArrowLink({ to, children, light = false, newTab = false }) {
   )
 }
 
+/* 
+================================================================================
+GUÍA DE ALINEACIÓN Y MAQUETACIÓN (QAWAY LAB):
+================================================================================
+Para asegurar la consistencia visual en todas las páginas del ecosistema, 
+se deben seguir las siguientes reglas en la sección Hero de cada página:
+
+1. SANGRADO / ALINEACIÓN HORIZONTAL:
+   - El contenedor principal de la cuadrícula o rejilla (grid) debe tener un 
+     ancho máximo de 96rem (max-w-[96rem] o max-width: 96rem) y estar centrado 
+     horizontalmente (mx-auto o margin: 0 auto).
+   - El sangrado izquierdo de la columna de texto debe ser de 2.5rem (px-10 o 
+     padding-left: 2.5rem) en escritorio para alinearse exactamente con el 
+     logotipo del Navbar. Evitar el uso de paddings fluidos en vw (ej. 3.5vw).
+
+2. TAMAÑO E INTERLINEADO DEL TÍTULO (H1):
+   - El título principal debe usar un tamaño controlado de font-size:
+     clamp(3.2rem, 5.5vw, 6.5rem)
+   - El interlineado (line-height) debe ser ajustado a 0.82 (leading-[0.82]).
+   - El ancho máximo del título debe estar limitado (ej. max-w-[58rem] o 
+     max-width: 58rem) para evitar invadir las imágenes adyacentes.
+
+3. COMPORTAMIENTO FLEXIBLE DE LÍNEAS:
+   - Evitar el uso de 'white-space: nowrap' en las líneas o spans del título,
+     permitiendo saltos de línea naturales (responsive) para que el texto no 
+     se desborde sobre el rostro de las imágenes.
+================================================================================
+*/
+
 function Hero() {
   const reduceMotion = useReducedMotion()
 
