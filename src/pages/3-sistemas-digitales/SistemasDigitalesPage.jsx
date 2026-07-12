@@ -234,10 +234,7 @@ function Hero() {
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em]"
                   style={displayFont}
                 >
-                  Automatización, Canales Y<br />
-                  Sistemas
-                  <br />
-                  <span className="text-[#ff4b0b]">Con IA</span>
+                  Automatización, Canales Y Sistemas <span className="text-[#ff4b0b]">Con IA</span>
                 </h1>
                 <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5]">
                   Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal.
