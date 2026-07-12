@@ -82,7 +82,7 @@
 
 .academy-hero-copy h1 {
   max-width: 58rem;
-  margin-top: 2.25rem;
+  margin-top: 0.6rem;
   font-size: clamp(3.2rem, 5.5vw, 6.5rem);
   font-weight: 700;
   letter-spacing: -0.055em;
@@ -173,8 +173,8 @@
 .academy-hero-portrait {
   position: relative;
   z-index: 3;
-  align-self: end;
-  height: calc(100dvh - 9.25rem);
+  align-self: stretch;
+  height: 100%;
   min-height: 38rem;
 }
 
@@ -242,7 +242,7 @@
 .academy-hero-panel h2 {
   max-width: 19rem;
   margin-top: 1.5rem;
-  font-size: clamp(2.15rem, 3vw, 3.6rem);
+  font-size: clamp(1.85rem, 2.5vw, 3rem);
   font-weight: 700;
   letter-spacing: -0.04em;
   line-height: 0.98;

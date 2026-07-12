@@ -40,10 +40,10 @@ export const navItems = [
     label: 'Blog',
     path: '/blog',
     items: [
-      { label: 'I. Artificial', path: '/blog/inteligencia-artificial' },
+      { label: 'Artificial', path: '/blog/artificial' },
       { label: 'Productividad', path: '/blog/productividad' },
       { label: 'Marketing', path: '/blog/marketing' },
-      { label: 'Diseño', path: '/blog/diseno-branding' },
+      { label: 'Diseño', path: '/blog/diseno' },
       { label: 'Automatización', path: '/blog/automatizacion' },
     ],
   },
