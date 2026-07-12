@@ -230,17 +230,18 @@ function Hero() {
                 transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
                 className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300"
               >
-                <HeroPrimitive
-                  title={
-                    <>
-                      Automatización, Canales Y<br />
-                      Sistemas
-                      <br />
-                      <span className="text-[#ff4b0b]">Con IA</span>
-                    </>
-                  }
-                  subtitle="Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal."
-                />
+                <h1
+                  className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em]"
+                  style={displayFont}
+                >
+                  Automatización, Canales Y<br />
+                  Sistemas
+                  <br />
+                  <span className="text-[#ff4b0b]">Con IA</span>
+                </h1>
+                <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5]">
+                  Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal.
+                </p>
                 <div className="flex flex-wrap items-center gap-6 mt-8">
                   <a href="#soluciones" className="inline-flex items-center justify-center gap-2 bg-[#ff4b0b] text-white px-8 py-3.5 font-bold text-[14px] hover:-translate-y-1 hover:bg-[#e04400] transition-all duration-300">
                     Ver soluciones <ArrowDown size={16} />
