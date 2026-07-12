@@ -146,12 +146,15 @@
 }
 
 .academy-hero-benefits {
+  position: absolute;
+  bottom: 2rem;
+  left: 2.5rem;
   display: grid;
   grid-template-columns: repeat(3, auto);
   align-items: center;
   width: fit-content;
-  margin-top: auto;
-  padding-top: 2rem;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .academy-hero-benefits > div {
