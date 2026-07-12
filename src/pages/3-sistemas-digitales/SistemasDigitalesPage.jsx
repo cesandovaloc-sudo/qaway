@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
-import './digital-presence.css'
+import '@/pages/4-academy/academy.css'
 
 const ASSET = '/assets/pages/2-estudio'
 
