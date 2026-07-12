@@ -201,23 +201,6 @@ function Hero() {
       ></div>
 
       <div className="flex flex-1 w-full z-10 relative">
-        <div className="w-16 md:w-20 bg-[#f8f9f7] text-[#1a1a1a] flex flex-col items-center justify-between py-10 shrink-0 relative z-20">
-          <div className="flex flex-col items-center gap-4 text-gray-400">
-            <span className="text-2xl font-light">+</span>
-            <span className="w-px h-12 bg-gray-300"></span>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="rotate-180" style={{ writingMode: "vertical-rl" }}>
-              <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold text-gray-500 whitespace-nowrap">
-                Sistemas que escalan contigo
-              </span>
-            </p>
-          </div>
-          <div className="w-full flex justify-start pl-2">
-            <div className="w-6 h-6 border-l-[3px] border-b-[3px] border-[#ff4b0b]"></div>
-          </div>
-        </div>
-
         <div className="flex-1 flex flex-col relative bg-[#161616]">
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
             <div
@@ -391,6 +374,23 @@ function Hero() {
                 IA aplicada
               </span>
             </div>
+          </div>
+        </div>
+
+        <div className="w-16 md:w-20 bg-[#f8f9f7] text-[#1a1a1a] flex flex-col items-center justify-between py-10 shrink-0 relative z-20">
+          <div className="flex flex-col items-center gap-4 text-gray-400">
+            <span className="text-2xl font-light">+</span>
+            <span className="w-px h-12 bg-gray-300"></span>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="rotate-180" style={{ writingMode: "vertical-rl" }}>
+              <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold text-gray-500 whitespace-nowrap">
+                Sistemas que escalan contigo
+              </span>
+            </p>
+          </div>
+          <div className="w-full flex justify-end pr-2">
+            <div className="w-6 h-6 border-r-[3px] border-b-[3px] border-[#ff4b0b]"></div>
           </div>
         </div>
       </div>
