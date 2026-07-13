@@ -64,6 +64,13 @@ export const articles = [
     content: "<p className='mb-4'>Automatizar tareas repetitivas es uno de los mejores retornos de inversión cuando implementas Inteligencia Artificial en tu negocio. En este artículo, aprenderás a construir un flujo automatizado que toma datos de un formulario de venta, genera una factura formal usando ChatGPT, crea un PDF limpio y lo envía al correo del cliente de manera 100% autónoma.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>El workflow en 3 pasos clave:</h3><ul className='list-disc pl-5 mb-4 space-y-2'><li><strong>Paso 1: El disparador (Trigger):</strong> Conectamos la pasarela de pagos (como Stripe o WooCommerce) a Make para detectar cada nueva compra.</li><li><strong>Paso 2: Procesamiento y estructura con ChatGPT:</strong> La IA se encarga de formatear el concepto, validar el tipo de cambio y estructurar la información fiscal sin errores.</li><li><strong>Paso 3: Generación del PDF y Envío:</strong> Usamos un generador de plantillas PDF para crear el documento final y enviarlo vía Gmail automáticamente.</li></ul><p>Este sistema reduce a cero los errores de facturación y libera más de 10 horas de trabajo operativo al mes para tu equipo.</p>",
     date: '04 Jun 2026',
     readTime: '5 min',
+    publishedAt: '2026-06-04',
+    homeSection: 'featured',
+    featured: {
+      order: 1,
+      label: 'Destacado',
+      icon: 'trending'
+    },
     image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
   },
   {
@@ -76,6 +83,13 @@ export const articles = [
     content: "<p className='mb-4'>Tener un CRM no tiene por qué ser costoso ni complejo. Con Notion y la integración correcta de WhatsApp, puedes centralizar tus contactos comerciales y recibir notificaciones instantáneas cada vez que entra un nuevo lead.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>¿Cómo conectar ambos mundos?</h3><p className='mb-4'>El truco consiste en utilizar webhooks intermedios que conecten tu base de datos de Notion con la API de WhatsApp Business. De esta manera, cuando mueves una tarjeta de prospecto a la columna de 'Contactado', el sistema puede enviar un mensaje predeterminado al cliente automáticamente.</p><p className='mb-4'>Este enfoque híbrido de CRM combina la flexibilidad visual de Notion con la inmediatez de WhatsApp para aumentar tus tasas de cierre comerciales de manera sustancial.</p>",
     date: '02 Jun 2026',
     readTime: '8 min',
+    publishedAt: '2026-06-02',
+    homeSection: 'featured',
+    featured: {
+      order: 2,
+      label: 'Guia clave',
+      icon: 'book'
+    },
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
   },
   {
@@ -88,6 +102,13 @@ export const articles = [
     content: "<p className='mb-4'>En un mercado saturado de plantillas genéricas, la coherencia de marca y un diseño premium no son lujos, son herramientas de conversión directa. Un ADN visual consistente reduce el costo de adquisición de tus clientes al generar confianza inmediata.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>La regla de la primera impresión</h3><p className='mb-4'>Los usuarios juzgan la credibilidad de tu negocio en los primeros 3 segundos de cargar tu sitio web. Si tu tipografía, colores y composiciones lucen amateur, el prospecto asumirá que tu servicio también lo es. Trabajar en una identidad visual sólida y consistente es la base de cualquier estrategia de marketing digital exitosa.</p>",
     date: '28 May 2026',
     readTime: '6 min',
+    publishedAt: '2026-05-28',
+    homeSection: 'featured',
+    featured: {
+      order: 3,
+      label: 'Analisis',
+      icon: 'target'
+    },
     image: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=800',
   },
   {
@@ -100,6 +121,8 @@ export const articles = [
     content: "<p className='mb-4'>Los chatbots de preguntas y respuestas son cosa del pasado. En 2026, los agentes autónomos de IA tienen la capacidad de ejecutar flujos completos de trabajo, interactuar con APIs externas, tomar decisiones lógicas y aprender de sus propios errores.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>El impacto en los equipos operativos</h3><p className='mb-4'>Un agente de IA ahora puede revisar una bandeja de correo de soporte, clasificar las solicitudes, consultar la base de datos interna y responder con una solución personalizada de forma autónoma. La productividad de las empresas se está multiplicando gracias a estos copilotos autónomos.</p>",
     date: '25 May 2026',
     readTime: '4 min',
+    publishedAt: '2026-05-25',
+    homeSection: 'more',
     image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=800',
   },
   {
@@ -112,6 +135,8 @@ export const articles = [
     content: "<p className='mb-4'>Delegar tareas es la única forma de escalar un negocio, pero hacerlo sin procesos documentados (SOPs) solo genera caos y pérdida de calidad. En esta guía te enseñamos a administrar una base de conocimientos en Notion.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>Estructura de un SOP efectivo:</h3><p className='mb-4'>Cada SOP debe responder 3 preguntas básicas de forma visual: ¿Qué se hace? ¿Cómo se hace? (con capturas o videos cortos) y ¿Qué hacer si algo sale mal? Notion es la plataforma perfecta para mantener estos documentos vivos y accesibles a todo tu equipo.</p>",
     date: '18 May 2026',
     readTime: '7 min',
+    publishedAt: '2026-05-18',
+    homeSection: 'more',
     image: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=800',
   },
   {
@@ -124,6 +149,8 @@ export const articles = [
     content: "<p className='mb-4'>Automatizar la creación de contenido es tentador, pero el spam automatizado destruye la reputación de tu marca. Aquí te mostramos una metodología para usar IA como un amplificador creativo de tu voz real.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>Manteniendo la voz de marca</h3><p className='mb-4'>El secreto está en entrenar a tu modelo de lenguaje con ejemplos exactos de tu estilo de escritura, tono de comunicación y valores. La IA debe encargarse del borrador inicial y del formato para diferentes canales, pero la curación final y el toque humano siguen siendo indispensables.</p>",
     date: '10 May 2026',
     readTime: '6 min',
+    publishedAt: '2026-05-10',
+    homeSection: 'more',
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800',
   },
 ]
@@ -137,6 +164,7 @@ export default function BlogPage() {
   const { category } = useParams()
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
 
   useEffect(() => {
     setActiveCategory(category || null)
@@ -144,6 +172,7 @@ export default function BlogPage() {
 
   const normalizedSearch = searchQuery.trim().toLowerCase()
   const isSearchActive = normalizedSearch.length > 0
+  const shouldExpandSearch = isSearchExpanded || isSearchActive
 
   const filteredArticles = articles.filter((article) => {
     const matchesCategory = activeCategory ? article.category === activeCategory : true
@@ -170,8 +199,21 @@ export default function BlogPage() {
   })
 
   const activeCategoryObj = categoriesWithCounts.find((cat) => cat.key === activeCategory)
-  const highlightedArticles = articles.slice(0, 3)
-  const secondaryArticles = articles.slice(3)
+
+  const selectCategory = (nextCategory) => {
+    setActiveCategory(nextCategory)
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', nextCategory ? '/blog/' + nextCategory : '/blog')
+    }
+  }
+
+  const highlightedArticles = articles
+    .filter((article) => article.featured)
+    .sort((a, b) => a.featured.order - b.featured.order)
+
+  const secondaryArticles = articles
+    .filter((article) => article.homeSection === 'more' || !article.featured)
+    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
 
   const renderArticleCard = (article, idx) => (
     <Link to={`/blog/articulo/${article.id}`} key={article.id} className="block">
@@ -229,7 +271,7 @@ export default function BlogPage() {
   return (
     <div className="flex min-h-screen flex-col justify-between bg-[#f2f1ef] selection:bg-[#ff4b0b] selection:text-white">
       <div>
-        <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#f5f5f4] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
+        <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#f5f5f4] pb-10 pt-24 text-[#191918] sm:pb-12 sm:pt-32">
           <div className="absolute inset-0 z-0 overflow-hidden bg-[#f5f5f4] pointer-events-none select-none">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
@@ -246,7 +288,7 @@ export default function BlogPage() {
           </div>
 
           <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
-            <div className="min-h-[190px] sm:h-[220px]">
+            <div>
               <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
                 <span>/ Blog</span>
               </div>
@@ -262,7 +304,7 @@ export default function BlogPage() {
               </motion.h1>
 
               <motion.p
-                className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
+                className="mt-4 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -271,87 +313,67 @@ export default function BlogPage() {
               </motion.p>
             </div>
 
-            <div className="mt-12 flex flex-wrap items-center gap-3 max-w-5xl relative">
-              <Link
-                to="/blog"
-                className={`group flex min-w-[110px] flex-1 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
+            <div className="mt-7 flex flex-nowrap items-center gap-3 max-w-[78rem] relative">
+              <button
+                type="button"
+                onClick={() => selectCategory(null)}
+                className={`group flex w-[110px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
                   activeCategory === null ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
                 }`}
               >
                 <span className={`text-[11px] font-bold uppercase tracking-widest ${activeCategory === null ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>
                   Todos
                 </span>
-              </Link>
+              </button>
 
               {categoriesWithCounts.map((cat) => {
-                const Icon = cat.icon
                 const isActive = activeCategory === cat.key
                 return (
-                  <Link
+                  <button
                     key={cat.key}
-                    to={cat.path}
-                    className={`group flex min-w-[130px] flex-1 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
+                    type="button"
+                    onClick={() => selectCategory(cat.key)}
+                    className={`group flex w-[130px] shrink-0 items-center justify-center rounded-md border border-black/10 px-4 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
                       isActive ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
                     }`}
                   >
-                    <Icon size={16} className={`transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]/40 group-hover:text-[#ff4b0b]'}`} />
                     <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>
                       {cat.title}
                     </span>
-                  </Link>
+                  </button>
                 )
               })}
-            </div>
 
-            <div className="mt-6 max-w-[34rem]">
-              <label className="group flex items-center gap-3 rounded-md border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.04)] transition-all focus-within:border-[#ff4b0b]/50 focus-within:shadow-[0_18px_44px_rgba(0,0,0,0.08)]">
+              <label className={`group flex items-center gap-3 rounded-md border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.04)] transition-all duration-300 focus-within:border-[#ff4b0b]/50 focus-within:shadow-[0_18px_44px_rgba(0,0,0,0.08)] ${shouldExpandSearch ? 'w-[300px] flex-none' : 'w-[132px] flex-none'}`}>
                 <Search className="h-4 w-4 text-[#191918]/40 transition-colors group-focus-within:text-[#ff4b0b]" />
                 <input
                   type="search"
                   value={searchQuery}
+                  onFocus={() => setIsSearchExpanded(true)}
+                  onBlur={() => setIsSearchExpanded(false)}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Buscar por tema, formato o palabra clave"
-                  className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-[#191918]/45"
+                  placeholder={shouldExpandSearch ? 'Buscar tema' : 'Buscar'}
+                  className={`w-full bg-transparent text-sm text-[#191918] outline-none transition-opacity duration-200 placeholder:text-[#191918]/45 ${shouldExpandSearch ? 'opacity-100' : 'opacity-0'}`}
                 />
               </label>
             </div>
           </div>
         </section>
 
-        <section className="bg-[#f2f1ef] pb-12 pt-10 lg:pb-24 lg:pt-16">
+        <section className="bg-[#f2f1ef] pb-12 pt-8 lg:pb-24 lg:pt-10">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {activeCategory || isSearchActive ? (
               <>
-                <div className="mb-8 flex flex-col justify-between gap-4 border-b border-black/10 pb-4 md:flex-row md:items-center">
-                  <div>
-                    <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-                      {activeCategoryObj ? activeCategoryObj.title : 'Resultados'}
-                      {isSearchActive ? <span className="text-black/35">/ búsqueda</span> : null}
-                    </div>
-                    <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>
-                      {activeCategoryObj ? activeCategoryObj.title : 'Resultados'}
-                    </h2>
-                    <p className="mt-2 text-sm text-[#191918]/60">
-                      {activeCategoryObj ? activeCategoryObj.description : 'Explora coincidencias dentro del blog por palabra clave, pilar o formato.'}
-                    </p>
-                  </div>
-                  <div className="shrink-0">
-                    <Link
-                      to="/blog"
-                      className="inline-flex items-center gap-2 rounded-md border border-black/10 bg-white px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#191918] transition-all duration-300 hover:bg-zinc-50"
-                    >
-                      <ArrowLeft className="h-3.5 w-3.5" />
-                      Ver todo el blog
-                    </Link>
-                  </div>
-                </div>
-
                 {filteredArticles.length > 0 ? (
                   <>
-                    <p className="mb-6 text-xs font-bold uppercase tracking-widest text-[#191918]/45">
-                      {filteredArticles.length} resultado{filteredArticles.length !== 1 ? 's' : ''}
-                    </p>
+                    <div className="mb-4 flex items-center justify-between gap-4">
+                      <p className="text-xs font-bold uppercase tracking-widest text-[#191918]/45">
+                        {filteredArticles.length} resultado{filteredArticles.length !== 1 ? 's' : ''}
+                      </p>
+                      <button type="button" onClick={() => { selectCategory(null); setSearchQuery('') }} className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#191918]/55 transition-colors hover:text-[#ff4b0b]">
+                        <ArrowLeft size={13} /> Ver todo el blog
+                      </button>
+                    </div>
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                       {filteredArticles.map((article, idx) => renderArticleCard(article, idx))}
                     </div>
