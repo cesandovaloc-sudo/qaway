@@ -37,7 +37,7 @@
   font-family: 'Inter', system-ui, sans-serif;
   display: flex;
   position: relative;
-  padding-top: 60px; /* Offset for fixed website header */
+  padding-top: 80px; /* Offset for fixed website header (Navbar h-20 = 80px) */
 }
 
 /* Progress bar top fixed - above everything */
@@ -63,7 +63,7 @@
 .visor-sidebar {
   position: fixed;
   left: 0;
-  top: 60px; /* Offset for fixed website header */
+  top: 80px; /* Offset for fixed website header (Navbar h-20 = 80px) */
   bottom: 0;
   width: 280px;
   background: var(--bg-sidebar);
@@ -203,7 +203,7 @@
 /* Header toolbar no-print (Light Warm Glass effect) */
 .visor-toolbar {
   position: sticky;
-  top: 60px; /* Sticky right below fixed website header */
+  top: 80px; /* Sticky right below fixed website header (Navbar h-20 = 80px) */
   background: rgba(247, 245, 241, 0.8);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid var(--border-light);

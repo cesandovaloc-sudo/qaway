@@ -144,7 +144,8 @@ export default function EbookDigitalPage() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' })
       setActiveChapter(sectionId)
-      setSidebarOpen(false)
+      // Solo cerrar sidebar en móvil
+      if (window.innerWidth <= 992) setSidebarOpen(false)
     }
   }
 
@@ -261,11 +262,11 @@ export default function EbookDigitalPage() {
       {/* Barra de progreso de lectura — estilos inline */}
       <div style={{
         position: 'fixed',
-        top: '64px',
+        top: 0,
         left: 0,
         right: 0,
-        height: '4px',
-        background: 'rgba(0,0,0,0.08)',
+        height: '3px',
+        background: 'transparent',
         zIndex: 9999,
         pointerEvents: 'none',
       }}>
@@ -274,7 +275,7 @@ export default function EbookDigitalPage() {
           width: `${scrollProgress}%`,
           background: 'linear-gradient(90deg, #ffd200, #ff6600)',
           transition: 'width 0.1s ease-out',
-          minWidth: scrollProgress > 0 ? '6px' : '0px',
+          minWidth: scrollProgress > 0 ? '4px' : '0px',
         }} />
       </div>
 
@@ -380,15 +381,6 @@ export default function EbookDigitalPage() {
                 <span>Guardar en PDF / Imprimir</span>
               </button>
             )}
-            <a 
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="visor-btn-action visor-btn-primary"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Consultar Asesoría</span>
-            </a>
           </div>
         </header>
 
