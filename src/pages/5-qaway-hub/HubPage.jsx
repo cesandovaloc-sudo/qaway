@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Route, Briefcase, FlaskConical,
   Wrench, BarChart3, Zap, ArrowRight, MessageSquare, Calendar,
-  Sparkles, TrendingUp, Layers
+  Sparkles, TrendingUp, Layers, PenSquare
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 
@@ -18,9 +18,18 @@ const iconColors = {
 
 const routes = [
   {
+    icon: PenSquare,
+    title: 'Editor Interno de Blog',
+    description: 'Herramienta interna para crear articulos con categoria real, portada, bloques y snippet listo para integracion.',
+    path: '/hub/blog-editor',
+    palette: iconColors.amber,
+    badge: 'Beta',
+    category: 'herramientas',
+  },
+  {
     icon: Calendar,
     title: 'Consola WABA + CRM',
-    description: 'Panel ejecutivo para campaña: integración WhatsApp API, payloads, checklist y pruebas E2E en un solo lugar.',
+    description: 'Panel ejecutivo para campana: integracion WhatsApp API, payloads, checklist y pruebas E2E en un solo lugar.',
     path: '/hub/waba-crm',
     palette: iconColors.cyan,
     badge: 'Destacado',
@@ -29,7 +38,7 @@ const routes = [
   {
     icon: MessageSquare,
     title: 'Consola CRM Comercial',
-    description: 'Bandeja multiagente de WhatsApp, atribución en tiempo real de Meta Ads y analíticas estilo Power BI.',
+    description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real de Meta Ads y analiticas estilo Power BI.',
     path: '/hub/crm',
     palette: iconColors.green,
     badge: 'Nuevo',
@@ -38,7 +47,7 @@ const routes = [
   {
     icon: Route,
     title: 'Ruta Marca / Emprendimiento',
-    description: 'Desde la idea hasta tu estructura digital básica. Naming, logo, identidad, redes, landing y captación.',
+    description: 'Desde la idea hasta tu estructura digital basica. Naming, logo, identidad, redes, landing y captacion.',
     path: '/hub/ruta-marca',
     palette: iconColors.yellow,
     badge: null,
@@ -47,7 +56,7 @@ const routes = [
   {
     icon: Briefcase,
     title: 'Ruta Profesional / Oficina',
-    description: 'Organización, reportes, dashboards, automatización y productividad para equipos y oficinas.',
+    description: 'Organizacion, reportes, dashboards, automatizacion y productividad para equipos y oficinas.',
     path: '/hub/ruta-profesional',
     palette: iconColors.blue,
     badge: null,
@@ -56,7 +65,7 @@ const routes = [
   {
     icon: FlaskConical,
     title: 'Ruta Incubadora',
-    description: 'Acompañamiento para validar ideas, proyectos o negocios con herramientas y módulos progresivos.',
+    description: 'Acompanamiento para validar ideas, proyectos o negocios con herramientas y modulos progresivos.',
     path: '/hub/ruta-incubadora',
     palette: iconColors.green,
     badge: null,
@@ -65,7 +74,7 @@ const routes = [
   {
     icon: Wrench,
     title: 'Herramientas Guiadas',
-    description: 'Soluciones modulares paso a paso para construir, organizar y mejorar tu operación digital.',
+    description: 'Soluciones modulares paso a paso para construir, organizar y mejorar tu operacion digital.',
     path: '/hub/herramientas',
     palette: iconColors.purple,
     badge: null,
@@ -74,7 +83,7 @@ const routes = [
   {
     icon: BarChart3,
     title: 'Dashboards',
-    description: 'Paneles de control para medir, analizar y optimizar tu presencia y operación digital.',
+    description: 'Paneles de control para medir, analizar y optimizar tu presencia y operacion digital.',
     path: '/hub/dashboards',
     palette: iconColors.cyan,
     badge: null,
@@ -83,7 +92,7 @@ const routes = [
   {
     icon: Zap,
     title: 'Automatizaciones',
-    description: 'Flujos automáticos y conectores para optimizar procesos repetitivos y ganar productividad.',
+    description: 'Flujos automaticos y conectores para optimizar procesos repetitivos y ganar productividad.',
     path: '/hub/automatizaciones',
     palette: iconColors.amber,
     badge: null,
@@ -93,7 +102,7 @@ const routes = [
 
 const categories = [
   { key: 'marcas', title: 'Rutas de Marca', description: 'Construye y lanza tu presencia digital desde cero' },
-  { key: 'profesional', title: 'Ruta Profesional', description: 'Organiza y optimiza tu operación diaria' },
+  { key: 'profesional', title: 'Ruta Profesional', description: 'Organiza y optimiza tu operacion diaria' },
   { key: 'herramientas', title: 'Herramientas y Paneles', description: 'Soluciones modulares y dashboards de control' },
 ]
 
@@ -500,7 +509,7 @@ export default function HubPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            Herramientas guiadas, rutas progresivas y dashboards para construir, organizar y mejorar tu operación digital paso a paso.
+            Herramientas guiadas, rutas progresivas y dashboards para construir, organizar y mejorar tu operacion digital paso a paso.
           </motion.p>
         </div>
       </section>
@@ -517,7 +526,7 @@ export default function HubPage() {
           <div style={styles.sectionHeader}>
             <h2 style={styles.sectionTitle}>Todas las rutas y herramientas</h2>
             <span style={styles.sectionLink}>
-              {routes.length} módulos <ArrowRight style={{ width: '14px', height: '14px' }} />
+              {routes.length} modulos <ArrowRight style={{ width: '14px', height: '14px' }} />
             </span>
           </div>
           <div style={styles.cardContainer}>
@@ -529,7 +538,7 @@ export default function HubPage() {
           </div>
 
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ ...styles.sectionTitle, fontSize: '1.4rem' }}>Áreas del Hub</h2>
+            <h2 style={{ ...styles.sectionTitle, fontSize: '1.4rem' }}>Areas del Hub</h2>
           </div>
           <div style={styles.catGrid}>
             {categories.map((cat, i) => {
@@ -567,7 +576,7 @@ export default function HubPage() {
             <div style={styles.academyText}>
               <h2 style={styles.academyTitle}>Domina el Ecosistema Qaway Hub</h2>
               <p style={styles.academyDesc}>
-                Aprende a usar cada herramienta, ruta y dashboard con nuestros tutoriales guiados. De básico a avanzado, paso a paso.
+                Aprende a usar cada herramienta, ruta y dashboard con nuestros tutoriales guiados. De basico a avanzado, paso a paso.
               </p>
               <Link to="/academy" style={styles.academyBtn}
                 onMouseEnter={e => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#fff' }}

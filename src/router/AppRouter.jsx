@@ -22,6 +22,7 @@ import { HerramientasInternasPage } from '@/pages/3-sistemas-digitales/6-herrami
 import { EstrategiaDigitalPage as SistemasEstrategiaDigitalPage } from '@/pages/3-sistemas-digitales/7-estrategia-digital'
 import AcademyPage from '@/pages/4-academy/AcademyPage'
 import HubPage from '@/pages/5-qaway-hub/HubPage'
+import BlogEditorPage from '@/pages/5-qaway-hub/blog-editor/BlogEditorPage'
 import CRMPage from '@/pages/5-qaway-hub/crm/CRMPage'
 import WabaCrmConsolePage from '@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
@@ -94,6 +95,10 @@ export default function AppRouter() {
           <Route
             path="hub/waba-crm"
             element={renderRoute('hub', <ProtectedRoute><WabaCrmConsolePage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/blog-editor"
+            element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/*"
