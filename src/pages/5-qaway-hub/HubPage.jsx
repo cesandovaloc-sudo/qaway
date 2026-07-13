@@ -1,20 +1,22 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
-  Route, Briefcase, FlaskConical,
-  Wrench, BarChart3, Zap, ArrowRight, MessageSquare, Calendar,
-  Sparkles, TrendingUp, Layers, PenSquare
+  Route,
+  Briefcase,
+  FlaskConical,
+  Wrench,
+  BarChart3,
+  Zap,
+  ArrowRight,
+  MessageSquare,
+  Calendar,
+  Sparkles,
+  TrendingUp,
+  Layers,
+  PenSquare,
+  Star,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
-
-const iconColors = {
-  cyan: { bg: 'rgba(6,182,212,0.12)', color: '#06b6d4' },
-  green: { bg: 'rgba(34,197,94,0.12)', color: '#22c55e' },
-  yellow: { bg: 'rgba(255,210,0,0.12)', color: '#ffd200' },
-  blue: { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
-  purple: { bg: 'rgba(168,85,247,0.12)', color: '#a855f7' },
-  amber: { bg: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
-}
 
 const routes = [
   {
@@ -22,574 +24,278 @@ const routes = [
     title: 'Editor Interno de Blog',
     description: 'Herramienta interna para crear articulos con categoria real, portada, bloques y snippet listo para integracion.',
     path: '/hub/blog-editor',
-    palette: iconColors.amber,
-    badge: 'Beta',
-    category: 'herramientas',
+    badge: null,
+    category: 'Herramientas',
+    tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
   },
   {
     icon: Calendar,
     title: 'Consola WABA + CRM',
     description: 'Panel ejecutivo para campana: integracion WhatsApp API, payloads, checklist y pruebas E2E en un solo lugar.',
     path: '/hub/waba-crm',
-    palette: iconColors.cyan,
     badge: 'Destacado',
-    category: 'herramientas',
+    category: 'Panel de control',
+    tone: 'bg-[#191918] text-white',
   },
   {
     icon: MessageSquare,
     title: 'Consola CRM Comercial',
     description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real de Meta Ads y analiticas estilo Power BI.',
     path: '/hub/crm',
-    palette: iconColors.green,
     badge: 'Nuevo',
-    category: 'herramientas',
+    category: 'Panel de control',
+    tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
   },
   {
     icon: Route,
     title: 'Ruta Marca / Emprendimiento',
     description: 'Desde la idea hasta tu estructura digital basica. Naming, logo, identidad, redes, landing y captacion.',
     path: '/hub/ruta-marca',
-    palette: iconColors.yellow,
     badge: null,
-    category: 'marcas',
+    category: 'Rutas de Marca',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
   {
     icon: Briefcase,
     title: 'Ruta Profesional / Oficina',
     description: 'Organizacion, reportes, dashboards, automatizacion y productividad para equipos y oficinas.',
     path: '/hub/ruta-profesional',
-    palette: iconColors.blue,
     badge: null,
-    category: 'profesional',
+    category: 'Ruta Profesional',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
   {
     icon: FlaskConical,
     title: 'Ruta Incubadora',
     description: 'Acompanamiento para validar ideas, proyectos o negocios con herramientas y modulos progresivos.',
     path: '/hub/ruta-incubadora',
-    palette: iconColors.green,
     badge: null,
-    category: 'marcas',
+    category: 'Rutas de Marca',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
   {
     icon: Wrench,
     title: 'Herramientas Guiadas',
     description: 'Soluciones modulares paso a paso para construir, organizar y mejorar tu operacion digital.',
     path: '/hub/herramientas',
-    palette: iconColors.purple,
     badge: null,
-    category: 'herramientas',
+    category: 'Herramientas',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
   {
     icon: BarChart3,
     title: 'Dashboards',
     description: 'Paneles de control para medir, analizar y optimizar tu presencia y operacion digital.',
     path: '/hub/dashboards',
-    palette: iconColors.cyan,
     badge: null,
-    category: 'herramientas',
+    category: 'Herramientas',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
   {
     icon: Zap,
     title: 'Automatizaciones',
     description: 'Flujos automaticos y conectores para optimizar procesos repetitivos y ganar productividad.',
     path: '/hub/automatizaciones',
-    palette: iconColors.amber,
     badge: null,
-    category: 'herramientas',
+    category: 'Herramientas',
+    tone: 'bg-[#191918]/5 text-[#191918]/70',
   },
 ]
 
-const categories = [
-  { key: 'marcas', title: 'Rutas de Marca', description: 'Construye y lanza tu presencia digital desde cero' },
-  { key: 'profesional', title: 'Ruta Profesional', description: 'Organiza y optimiza tu operacion diaria' },
-  { key: 'herramientas', title: 'Herramientas y Paneles', description: 'Soluciones modulares y dashboards de control' },
+const areas = [
+  { icon: Route, title: 'Rutas de Marca', description: 'Construye y lanza tu presencia digital desde cero.' },
+  { icon: Briefcase, title: 'Ruta Profesional', description: 'Organiza y optimiza tu operacion diaria.' },
+  { icon: Layers, title: 'Herramientas y Paneles', description: 'Soluciones modulares y dashboards de control.' },
 ]
 
-const styles = {
-  heroSection: {
-    position: 'relative',
-    paddingTop: '120px',
-    paddingBottom: '64px',
-    background: 'linear-gradient(135deg, #0a0a0a 0%, #111 100%)',
-    borderBottom: '1px solid rgba(255,255,255,0.05)',
-    overflow: 'hidden',
-    color: '#fff',
-    zIndex: 20,
-  },
-  heroGlow: {
-    position: 'absolute',
-    inset: 0,
-    background: 'radial-gradient(ellipse at top left, rgba(255,210,0,0.06), transparent 50%)',
-    pointerEvents: 'none',
-  },
-  heroInner: {
-    maxWidth: '1280px',
-    margin: '0 auto',
-    padding: '0 32px',
-    position: 'relative',
-    zIndex: 10,
-    textAlign: 'center',
-  },
-  heroBadge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '6px 16px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: 700,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    background: 'rgba(255,210,0,0.1)',
-    color: '#ffd200',
-    border: '1px solid rgba(255,210,0,0.15)',
-    marginBottom: '20px',
-  },
-  heroTitle: {
-    fontSize: 'clamp(2rem, 5vw, 3.2rem)',
-    fontWeight: 800,
-    letterSpacing: '-0.02em',
-    lineHeight: 1.1,
-    color: '#fff',
-    margin: 0,
-  },
-  heroSub: {
-    marginTop: '14px',
-    fontSize: '1rem',
-    color: '#a1a1aa',
-    fontWeight: 300,
-    maxWidth: '640px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    lineHeight: 1.6,
-  },
-  body: {
-    paddingTop: '48px',
-    paddingBottom: '96px',
-    background: '#fafafa',
-    minHeight: '100vh',
-  },
-  container: {
-    maxWidth: '1280px',
-    margin: '0 auto',
-    padding: '0 32px',
-  },
-  featuredRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))',
-    gap: '24px',
-    marginBottom: '56px',
-  },
-  featuredCard: (bg) => ({
-    borderRadius: '24px',
-    padding: '40px 36px',
-    position: 'relative',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
-    minHeight: '300px',
-    background: bg,
-    cursor: 'pointer',
-    transition: 'transform 0.35s cubic-bezier(.22,1,.36,1), box-shadow 0.35s ease',
-  }),
-  featuredBadge: (bg, color) => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '5px 14px',
-    borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: 700,
-    letterSpacing: '0.05em',
-    textTransform: 'uppercase',
-    background: bg,
-    color: color,
-    width: 'fit-content',
-    marginBottom: '12px',
-  }),
-  featuredType: {
-    fontSize: '13px',
-    fontWeight: 500,
-    opacity: 0.7,
-    marginBottom: '4px',
-  },
-  featuredTitle: {
-    fontSize: 'clamp(1.4rem, 3vw, 1.8rem)',
-    fontWeight: 800,
-    lineHeight: 1.15,
-    margin: 0,
-  },
-  sectionHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '20px',
-  },
-  sectionTitle: {
-    fontSize: '1.3rem',
-    fontWeight: 800,
-    color: '#18181b',
-    letterSpacing: '-0.01em',
-  },
-  sectionLink: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#71717a',
-    textDecoration: 'none',
-    transition: 'color 0.2s',
-  },
-  catGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: '16px',
-    marginBottom: '56px',
-  },
-  catCard: {
-    background: '#fff',
-    border: '1px solid #e4e4e7',
-    borderRadius: '16px',
-    padding: '28px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '10px',
-    cursor: 'pointer',
-    transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s',
-    textDecoration: 'none',
-    color: 'inherit',
-    textAlign: 'center',
-  },
-  catIcon: {
-    width: '36px',
-    height: '36px',
-    color: '#06b6d4',
-  },
-  catLabel: {
-    fontSize: '13px',
-    fontWeight: 700,
-    color: '#18181b',
-  },
-  cardContainer: {
-    background: '#f4f4f5',
-    border: '1px solid #e4e4e7',
-    borderRadius: '20px',
-    padding: '24px',
-    marginBottom: '56px',
-  },
-  cardGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
-    gap: '20px',
-  },
-  card: {
-    background: '#fff',
-    borderRadius: '16px',
-    overflow: 'hidden',
-    border: '1px solid #e4e4e7',
-    cursor: 'pointer',
-    transition: 'transform 0.3s cubic-bezier(.22,1,.36,1), box-shadow 0.3s ease, border-color 0.3s',
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'block',
-    padding: '20px',
-  },
-  cardTop: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    marginBottom: '16px',
-  },
-  cardIcon: {
-    width: '44px',
-    height: '44px',
-    borderRadius: '14px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  cardBadge: {
-    display: 'inline-block',
-    fontSize: '10px',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    padding: '3px 10px',
-    borderRadius: '12px',
-    background: '#fef3c7',
-    color: '#92400e',
-  },
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#18181b',
-    lineHeight: 1.35,
-    margin: 0,
-    marginBottom: '8px',
-  },
-  cardDesc: {
-    fontSize: '13px',
-    color: '#71717a',
-    lineHeight: 1.55,
-    margin: 0,
-    marginBottom: '16px',
-  },
-  cardLink: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    fontSize: '12px',
-    fontWeight: 700,
-    textTransform: 'uppercase',
-    letterSpacing: '0.06em',
-    color: '#18181b',
-    transition: 'gap 0.2s',
-  },
-  academyBanner: {
-    borderRadius: '28px',
-    padding: '48px 40px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '40px',
-    flexWrap: 'wrap',
-    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%)',
-    border: '1px solid #bae6fd',
-    marginBottom: '24px',
-  },
-  academyText: {
-    flex: '1 1 400px',
-  },
-  academyTitle: {
-    fontSize: 'clamp(1.4rem, 3vw, 2rem)',
-    fontWeight: 800,
-    color: '#0c4a6e',
-    lineHeight: 1.15,
-    marginBottom: '12px',
-  },
-  academyDesc: {
-    fontSize: '15px',
-    color: '#334155',
-    lineHeight: 1.6,
-    marginBottom: '24px',
-  },
-  academyBtn: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px 28px',
-    borderRadius: '14px',
-    border: '2px solid #0284c7',
-    background: 'transparent',
-    color: '#0284c7',
-    fontWeight: 700,
-    fontSize: '14px',
-    letterSpacing: '0.02em',
-    cursor: 'pointer',
-    transition: 'all 0.25s ease',
-    textDecoration: 'none',
-  },
-  academyImage: {
-    flex: '0 0 320px',
-    maxWidth: '360px',
-    borderRadius: '16px',
-    objectFit: 'contain',
-  },
+const displayFont = {
+  fontFamily: "'Oswald', sans-serif",
+  fontStretch: 'condensed',
 }
 
 export default function HubPage() {
   useSetNavbarVariant('light')
-  const featured = routes.filter(r => r.badge)
-  const remaining = routes.filter(r => !r.badge)
 
-  const RouteCard = ({ route, idx, isFeatured }) => {
+  const featured = routes.filter((route) => route.badge)
+  const regularRoutes = routes.filter((route) => !route.badge)
+
+  const FeaturedCard = ({ route, idx }) => {
     const Icon = route.icon
+    const isPrimary = idx === 0
 
     return (
-      <Link
-        to={route.path}
-        style={isFeatured ? {} : styles.card}
-        onMouseEnter={e => {
-          if (!isFeatured) {
-            e.currentTarget.style.transform = 'translateY(-6px)'
-            e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.08)'
-            e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)'
-          }
-        }}
-        onMouseLeave={e => {
-          if (!isFeatured) {
-            e.currentTarget.style.transform = 'translateY(0)'
-            e.currentTarget.style.boxShadow = 'none'
-            e.currentTarget.style.borderColor = '#e4e4e7'
-          }
-        }}
-      >
-        {isFeatured ? (
-          <motion.div
-            style={styles.featuredCard('linear-gradient(135deg, #ede9fe 0%, #ddd6fe 40%, #c4b5fd 100%)')}
-            initial={{ opacity: 0, x: idx === 0 ? -30 : 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
-            whileHover={{ y: -6, boxShadow: '0 20px 50px rgba(139,92,246,0.15)' }}
-          >
-            <div style={{ position: 'relative', zIndex: 2 }}>
-              <div style={{ ...styles.featuredBadge('rgba(124,58,237,0.15)', '#5b21b6') }}>
-                <TrendingUp style={{ width: '12px', height: '12px' }} /> {route.badge}
-              </div>
-              <div style={{
-                width: '44px', height: '44px', borderRadius: '14px',
-                background: 'rgba(124,58,237,0.15)', display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-                marginBottom: '16px',
-              }}>
-                <Icon style={{ width: '22px', height: '22px', color: '#5b21b6' }} />
-              </div>
-              <p style={{ ...styles.featuredType, color: '#6d28d9' }}>{route.category === 'herramientas' ? 'Panel de Control' : 'Ruta Guiada'}</p>
-              <h3 style={{ ...styles.featuredTitle, color: '#3b0764' }}>{route.title}</h3>
-              <p style={{ fontSize: '13px', color: '#6d28d9', marginTop: '8px', maxWidth: '300px', lineHeight: 1.5 }}>{route.description}</p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.45, delay: idx * 0.06 }}
-          >
-            <div style={styles.cardTop}>
-              <div style={{
-                ...styles.cardIcon,
-                background: route.palette.bg,
-              }}>
-                <Icon style={{ width: '20px', height: '20px', color: route.palette.color }} />
-              </div>
-              {route.badge && <span style={styles.cardBadge}>{route.badge}</span>}
-            </div>
-            <p style={styles.cardTitle}>{route.title}</p>
-            <p style={styles.cardDesc}>{route.description}</p>
-            <div style={styles.cardLink}>
-              Explorar <ArrowRight style={{ width: '14px', height: '14px' }} />
-            </div>
-          </motion.div>
-        )}
+      <Link to={route.path} className="block">
+        <motion.article
+          className={`group relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-2xl p-10 transition-all ${
+            isPrimary
+              ? 'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]'
+              : 'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]'
+          }`}
+          initial={{ opacity: 0, x: isPrimary ? -30 : 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.55 }}
+          whileHover={{ y: -6, boxShadow: '0 20px 50px rgba(0,0,0,0.12)' }}
+        >
+          <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-3 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-500 group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-105">
+            <Icon className="h-24 w-24" strokeWidth={1.4} />
+          </div>
+          <div className="relative z-10 max-w-[68%]">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#191918]/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-[#191918]">
+              {isPrimary ? <TrendingUp size={12} strokeWidth={3} /> : <Star size={12} strokeWidth={3} />}
+              {route.badge}
+            </span>
+            <p className="mb-1 text-[13px] font-medium text-[#191918]/60">{route.category}</p>
+            <h3 className="text-[clamp(1.4rem,3vw,1.8rem)] font-bold leading-[1.15] text-[#191918]">
+              {route.title}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-[#191918]/65">{route.description}</p>
+          </div>
+        </motion.article>
       </Link>
     )
   }
 
-  return (
-    <>
-      <section style={styles.heroSection}>
-        <div style={styles.heroGlow} />
-        <div style={styles.heroInner}>
-          <motion.div
-            style={styles.heroBadge}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <Sparkles style={{ width: '14px', height: '14px' }} />
-            Qaway Hub
-          </motion.div>
-          <motion.h1
-            style={styles.heroTitle}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Plataforma modular de <em style={{ color: '#ffd200', fontStyle: 'normal' }}>crecimiento digital</em>
-          </motion.h1>
-          <motion.p
-            style={styles.heroSub}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            Herramientas guiadas, rutas progresivas y dashboards para construir, organizar y mejorar tu operacion digital paso a paso.
-          </motion.p>
-        </div>
-      </section>
+  const ModuleCard = ({ route, idx }) => {
+    const Icon = route.icon
 
-      <section style={styles.body}>
-        <div style={styles.container}>
-
-          <div style={styles.featuredRow}>
-            {featured.map((route, idx) => (
-              <RouteCard key={route.title} route={route} idx={idx} isFeatured />
-            ))}
-          </div>
-
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Todas las rutas y herramientas</h2>
-            <span style={styles.sectionLink}>
-              {routes.length} modulos <ArrowRight style={{ width: '14px', height: '14px' }} />
-            </span>
-          </div>
-          <div style={styles.cardContainer}>
-            <div style={styles.cardGrid}>
-              {remaining.map((route, idx) => (
-                <RouteCard key={route.title} route={route} idx={idx} />
-              ))}
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.45, delay: idx * 0.06 }}
+      >
+        <Link to={route.path} className="group flex h-full flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
+          <div>
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f2f1ef] text-[#191918]/55 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
+                <Icon size={20} />
+              </div>
+              <span className={`rounded-md px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${route.tone}`}>
+                {route.category}
+              </span>
             </div>
+            <h3 className="text-[15px] font-bold leading-snug text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+              {route.title}
+            </h3>
+            <p className="mt-2 text-xs leading-relaxed text-black/60">{route.description}</p>
+          </div>
+          <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4 text-xs font-bold uppercase tracking-widest text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+            <span>Abrir</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </Link>
+      </motion.div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f2f1ef] selection:bg-[#ff4b0b] selection:text-white">
+      <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#f5f5f4] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
+        <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden bg-[#f5f5f4]">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
+          <div
+            className="absolute bottom-0 right-0 top-0 w-[42%] bg-[#1a1918] shadow-2xl transition-all duration-300 md:w-[34%] lg:w-[28%]"
+            style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)' }}
+          >
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px] opacity-[0.14]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
+            <div className="absolute inset-y-0 left-0 w-px bg-white/10" />
+          </div>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
+          <div className="min-h-[190px] sm:h-[220px]">
+            <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+              <span>/ Hub</span>
+            </div>
+            <motion.h1
+              className="text-[clamp(3rem,6.5vw,5rem)] font-bold uppercase leading-[0.85] text-[#191918]"
+              style={displayFont}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Qaway Hub<span className="text-[#ff4b0b]">.</span>
+            </motion.h1>
+            <motion.p
+              className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              Accede a rutas, paneles y herramientas internas para organizar la operacion digital de Qaway.
+            </motion.p>
           </div>
 
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <h2 style={{ ...styles.sectionTitle, fontSize: '1.4rem' }}>Areas del Hub</h2>
-          </div>
-          <div style={styles.catGrid}>
-            {categories.map((cat, i) => {
-              const Icon = i === 0 ? Route : i === 1 ? Briefcase : Layers
+          <div className="mt-12 grid max-w-5xl gap-3 sm:grid-cols-3">
+            {areas.map((area) => {
+              const Icon = area.icon
               return (
-                <div
-                  key={i}
-                  style={styles.catCard}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.transform = 'translateY(-4px)'
-                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.06)'
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.3)'
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = 'none'
-                    e.currentTarget.style.borderColor = '#e4e4e7'
-                  }}
-                >
-                  <Icon style={styles.catIcon} />
-                  <span style={styles.catLabel}>{cat.title}</span>
-                  <span style={{ fontSize: '11px', color: '#71717a' }}>{cat.description}</span>
+                <div key={area.title} className="flex items-center gap-3 rounded-md border border-black/10 bg-white px-5 py-4">
+                  <Icon size={18} className="shrink-0 text-[#ff4b0b]" />
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#191918]">{area.title}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-[#191918]/55">{area.description}</p>
+                  </div>
                 </div>
               )
             })}
           </div>
-
-          <motion.div
-            style={styles.academyBanner}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
-          >
-            <div style={styles.academyText}>
-              <h2 style={styles.academyTitle}>Domina el Ecosistema Qaway Hub</h2>
-              <p style={styles.academyDesc}>
-                Aprende a usar cada herramienta, ruta y dashboard con nuestros tutoriales guiados. De basico a avanzado, paso a paso.
-              </p>
-              <Link to="/academy" style={styles.academyBtn}
-                onMouseEnter={e => { e.currentTarget.style.background = '#0284c7'; e.currentTarget.style.color = '#fff' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0284c7' }}
-              >
-                Ir a Academy
-                <ArrowRight style={{ width: '16px', height: '16px' }} />
-              </Link>
-            </div>
-          </motion.div>
-
         </div>
       </section>
-    </>
+
+      <section className="pb-12 pt-10 lg:pb-24 lg:pt-16">
+        <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+          <div className="mb-8 border-b border-black/10 pb-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
+              Bloques destacados
+            </div>
+          </div>
+
+          <div className="mb-16 grid gap-6 md:grid-cols-2">
+            {featured.map((route, idx) => (
+              <FeaturedCard key={route.title} route={route} idx={idx} />
+            ))}
+          </div>
+
+          <div className="mb-8 flex items-center justify-between border-b border-black/10 pb-4">
+            <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>
+              Rutas y herramientas
+            </h2>
+            <span className="flex items-center gap-2 text-sm font-bold text-[#191918]/60">
+              {routes.length} modulos <ArrowRight size={16} />
+            </span>
+          </div>
+
+          <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {regularRoutes.map((route, idx) => (
+              <ModuleCard key={route.title} route={route} idx={idx} />
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
+            <div className="min-w-[300px] flex-1">
+              <h2 className="mb-3 text-[clamp(1.4rem,3vw,2rem)] font-bold uppercase leading-tight tracking-tight text-[#ff4b0b]" style={displayFont}>
+                Domina el ecosistema Qaway Hub
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-[#191918]/70">
+                Aprende a usar cada herramienta, ruta y dashboard con tutoriales guiados. De basico a avanzado, paso a paso.
+              </p>
+              <Link to="/academy" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
+                Ir a Academy <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="flex h-36 w-36 shrink-0 items-center justify-center rounded-md border border-[#ff4b0b]/20 bg-white/70 text-[#ff4b0b]">
+              <Sparkles className="h-16 w-16" strokeWidth={1.5} />
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   )
 }

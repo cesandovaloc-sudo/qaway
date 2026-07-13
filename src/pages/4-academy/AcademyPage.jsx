@@ -34,7 +34,7 @@ const heroImage = '/assets/pages/9-pruebas/academy/academy-hero-educator.png'
 const featuredCourses = [
   {
     image: '/assets/pages/9-pruebas/academy/curso-identidad-visual-ia.png',
-    category: 'Diseño e IA',
+    category: 'Diseño',
     title: 'Identidad Visual con IA',
     text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
     format: 'Curso práctico',
@@ -44,7 +44,7 @@ const featuredCourses = [
   },
   {
     image: '/assets/pages/9-pruebas/academy/curso-whatsapp-business.png',
-    category: 'Ventas y atención',
+    category: 'Marketing',
     title: 'WhatsApp Business para negocios',
     text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
     format: 'Taller guiado',
@@ -54,7 +54,7 @@ const featuredCourses = [
   },
   {
     image: '/assets/pages/9-pruebas/academy/curso-antigravity-youtube.png',
-    category: 'YouTube',
+    category: 'Inteligencia artificial',
     title: 'Antigravity desde cero',
     text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
     format: 'Serie gratuita',
@@ -78,7 +78,7 @@ const courseCatalog = [
   },
   {
     image: '/assets/pages/9-pruebas/academy/curso-identidad-visual-ia.png',
-    category: 'Contenido',
+    category: 'Inteligencia artificial',
     title: 'Sistema de contenido con IA',
     text: 'Diseña una ruta sostenible para investigar, crear y adaptar contenido sin improvisar.',
     format: 'Curso',
@@ -96,7 +96,7 @@ const courseCatalog = [
   },
   {
     image: '/assets/pages/9-pruebas/academy/curso-whatsapp-business.png',
-    category: 'Negocios',
+    category: 'Marketing',
     title: 'Presencia digital para emprender',
     text: 'Ordena tu propuesta, tus canales y tu comunicación para presentarte con claridad.',
     format: 'Ruta',
@@ -105,7 +105,7 @@ const courseCatalog = [
   },
 ]
 
-const courseTopics = ['Todos', 'Diseño e IA', 'Negocios', 'Productividad', 'Contenido', 'Automatización']
+const courseTopics = ['Todos', 'Inteligencia artificial', 'Productividad', 'Marketing', 'Diseño', 'Automatización']
 
 const testimonials = [
   {
@@ -342,6 +342,7 @@ export default function AcademyPage() {
     ? courseCatalog
     : courseCatalog.filter((course) => course.category === activeTopic)
 
+  // Auto-rotate testimonials
   useEffect(() => {
     if (reduceMotion) return undefined
 
@@ -351,6 +352,25 @@ export default function AcademyPage() {
 
     return () => window.clearInterval(timer)
   }, [reduceMotion])
+
+  // Auto-scroll course carousel
+  useEffect(() => {
+    if (reduceMotion) return undefined
+    const el = carouselRef.current
+    if (!el) return undefined
+
+    const timer = window.setInterval(() => {
+      const cardWidth = Math.min(el.clientWidth * 0.78, 520)
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: 'smooth' })
+      } else {
+        el.scrollBy({ left: cardWidth, behavior: 'smooth' })
+      }
+    }, 4000)
+
+    return () => window.clearInterval(timer)
+  }, [reduceMotion, visibleCourses])
 
   function moveTestimonials(direction) {
     setActiveTestimonial((current) => (
@@ -655,7 +675,7 @@ export default function AcademyPage() {
         <motion.div {...reveal} className="academy-testimonial-heading">
           <div>
             <p className="academy-kicker">Experiencias reales</p>
-            <h2 style={displayFont}>Resultados reales contados por quienes ya <span className="academy-title-emphasis">aprendieron</span><span className="academy-title-punct">.</span></h2>
+            <h2 style={displayFont}>Ellos ya <span className="academy-title-emphasis">aprendieron</span> con nosotros<span className="academy-title-punct">.</span></h2>
           </div>
           <p>Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos en su trabajo, negocio o contenido.</p>
         </motion.div>
@@ -836,11 +856,13 @@ export default function AcademyPage() {
                   <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
                   <select id="academy-interest" name="interest" required>
                     <option value="">Selecciona un interés</option>
-                    <option value="Identidad Visual con IA">Identidad Visual con IA</option>
-                    <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
-                    <option value="IA para equipos pequeños">IA para equipos pequeños</option>
-                    <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
-                    <option value="Workflows sin código">Workflows sin código</option>
+                    <option value="Identidad Visual con IA">Diseño — Identidad Visual con IA</option>
+                    <option value="WhatsApp Business para negocios">Marketing — WhatsApp Business para negocios</option>
+                    <option value="Antigravity desde cero">IA — Antigravity desde cero</option>
+                    <option value="IA para equipos pequeños">Productividad — IA para equipos pequeños</option>
+                    <option value="Sistema de contenido con IA">IA — Sistema de contenido con IA</option>
+                    <option value="Workflows sin código">Automatización — Workflows sin código</option>
+                    <option value="Presencia digital para emprender">Marketing — Presencia digital para emprender</option>
                     <option value="Orientación general / Otro">Orientación general / Otro</option>
                   </select>
                 </div>
