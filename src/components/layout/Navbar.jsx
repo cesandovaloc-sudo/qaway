@@ -77,6 +77,10 @@ const variantStyles = {
 export default function Navbar({ variant: explicitVariant }) {
   const contextVariant = useContext(NavbarVariantContext)
   const variant = explicitVariant || contextVariant
+
+  // Visor / reader pages hide the global Navbar for immersive experience
+  if (variant === 'hidden') return null
+
   const styles = variantStyles[variant] || variantStyles.light
   const location = useLocation()
   const navLinks = getNavbarLinks()
@@ -90,11 +94,7 @@ export default function Navbar({ variant: explicitVariant }) {
     const handleScroll = () => {
       const currentY = window.scrollY
       setScrolled(currentY > 20)
-      if (currentY > lastScrollY.current && currentY > 80) {
-        setHeaderVisible(false)
-      } else {
-        setHeaderVisible(true)
-      }
+      setHeaderVisible(true) // Siempre fijo
       lastScrollY.current = currentY
     }
     window.addEventListener('scroll', handleScroll, { passive: true })

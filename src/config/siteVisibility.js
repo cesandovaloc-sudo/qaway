@@ -1,20 +1,33 @@
-const SITE_MODE = import.meta.env.MODE || 'development'
+﻿const SITE_MODE = import.meta.env.MODE || 'development'
 
 export const isPublicSiteMode = SITE_MODE === 'public'
 
 const routeVisibility = {
   inicio: true,
-  estudio: false,
+  estudio: true,
   brief: false,
   sistemasDigitales: true,
-  academy: false,
+  academy: true,
   hub: false,
-  recursos: false,
-  blog: false,
-  landings: false,
+  recursos: true,
+  blog: true,
+  landings: true,
   auth: false,
   pruebas: false,
 }
+
+const publicPathAllowList = new Set([
+  '/',
+  '/estudio',
+  '/sistemas-digitales',
+  '/academy',
+  '/recursos',
+  '/recursos/ebooks/google-calendar-dominado',
+  '/blog',
+  '/blog/articulo/google-calendar-dominado-guia-productividad',
+  '/landings/sistema-contenido-notion',
+  '/landings/identidad-visual',
+])
 
 const navigationRegistry = [
   {
@@ -66,8 +79,14 @@ export function isRouteEnabled(routeKey) {
   return Boolean(routeVisibility[routeKey])
 }
 
+export function isPublicPathAllowed(pathname) {
+  if (!isPublicSiteMode) return true
+  const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
+  return publicPathAllowList.has(normalizedPath)
+}
+
 function isLinkVisible(link) {
-  return isRouteEnabled(link.key)
+  return isRouteEnabled(link.key) && isPublicPathAllowed(link.path)
 }
 
 export function getNavbarLinks() {
@@ -85,3 +104,5 @@ export const publicRouteKeys = new Set(
     .filter(([, enabled]) => enabled)
     .map(([key]) => key)
 )
+
+export const publicPaths = Array.from(publicPathAllowList)

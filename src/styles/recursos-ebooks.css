@@ -37,7 +37,7 @@
   font-family: 'Inter', system-ui, sans-serif;
   display: flex;
   position: relative;
-  padding-top: 80px; /* Offset for fixed website header (Navbar h-20 = 80px) */
+  /* padding-top handled dynamically via inline style in JSX (navbarVisible state) */
 }
 
 /* Progress bar top fixed - above everything */
@@ -63,12 +63,12 @@
 .visor-sidebar {
   position: fixed;
   left: 0;
-  top: 80px; /* Offset for fixed website header (Navbar h-20 = 80px) */
+  top: 80px; /* Below fixed Navbar — overridden inline when navbar hides */
   bottom: 0;
   width: 280px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-glass);
-  padding: 2.5rem 1.5rem;
+  padding: 1rem 1.5rem 2.5rem; /* Reduced top padding to move items up */
   overflow-y: auto;
   z-index: 100;
   transition: var(--transition-smooth);
@@ -203,7 +203,7 @@
 /* Header toolbar no-print (Light Warm Glass effect) */
 .visor-toolbar {
   position: sticky;
-  top: 80px; /* Sticky right below fixed website header (Navbar h-20 = 80px) */
+  top: 80px; /* Below fixed Navbar — overridden inline when navbar hides */
   background: rgba(247, 245, 241, 0.8);
   backdrop-filter: blur(15px);
   border-bottom: 1px solid var(--border-light);
@@ -307,7 +307,7 @@
   max-width: 900px;
   margin: 0 auto;
   width: 100%;
-  padding: 3rem 3rem 6rem;
+  padding: 1rem 3rem 6rem; /* Reduced top padding from 3rem to 1rem */
 }
 
 /* Chapter Page layout */

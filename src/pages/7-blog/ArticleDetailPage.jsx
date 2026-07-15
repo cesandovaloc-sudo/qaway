@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, ArrowLeft, BookOpen, Send, Mail, Sparkles } from 'lucide-react'
-import { articles } from './BlogPage'
+import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
 
@@ -29,7 +29,7 @@ export default function ArticleDetailPage() {
   const [newsletterError, setNewsletterError] = useState(null)
 
   // Buscar el artículo por su ID
-  const article = articles.find(art => art.id === id)
+  const article = visibleArticles.find(art => art.id === id)
 
   // Comentarios iniciales de respaldo en caso de que no haya conexión a Supabase o esté vacío
   const fallbackComments = [
@@ -219,7 +219,7 @@ export default function ArticleDetailPage() {
   }
 
   // Obtener artículos recomendados (excluyendo el actual, máximo 3)
-  const recommendedArticles = articles
+  const recommendedArticles = visibleArticles
     .filter(art => art.id !== article.id)
     .slice(0, 3)
 

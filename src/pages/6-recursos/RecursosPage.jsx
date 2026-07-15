@@ -6,6 +6,7 @@ import {
   Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Search
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
   { icon: FileText, title: 'Plantillas', key: 'plantillas', description: 'Materiales editables y organizados listos para estandarizar la operacion de tu negocio.' },
@@ -25,6 +26,7 @@ const resources = [
     type: 'Ebook Digital Interactivo',
     badge: 'Gratis',
     publishedAt: '2026-07-08',
+    public: true,
     homeSection: 'new',
     path: '/recursos/ebooks/google-calendar-dominado',
     image: '/recursos/qaway-calendar.png'
@@ -145,6 +147,10 @@ const resources = [
   }
 ]
 
+const visibleResources = isPublicSiteMode
+  ? resources.filter((resource) => resource.public)
+  : resources
+
 const displayFont = {
   fontFamily: "'Oswald', sans-serif",
   fontStretch: 'condensed',
@@ -164,7 +170,7 @@ export default function RecursosPage() {
   const isSearchActive = normalizedSearch.length > 0
   const shouldExpandSearch = isSearchExpanded || isSearchActive
 
-  const filteredResources = resources.filter((resource) => {
+  const filteredResources = visibleResources.filter((resource) => {
     const matchesCategory = activeCategory ? resource.category === activeCategory : true
     const searchableText = [
       resource.title,
@@ -181,7 +187,7 @@ export default function RecursosPage() {
   })
 
   const categoriesWithCounts = categories.map(cat => {
-    const count = resources.filter(res => res.category === cat.key).length
+    const count = visibleResources.filter(res => res.category === cat.key).length
     return { ...cat, count: `${count} recurso${count !== 1 ? 's' : ''}` }
   })
 
@@ -195,14 +201,14 @@ export default function RecursosPage() {
     }
   }
 
-  const featured = resources
+  const featured = visibleResources
     .filter(resource => resource.featured)
     .sort((a, b) => a.featured.order - b.featured.order)
     .slice(0, 2)
 
-  const highlighted = resources.filter(resource => resource.homeSection === 'starter')
+  const highlighted = visibleResources.filter(resource => resource.homeSection === 'starter')
 
-  const newResources = resources
+  const newResources = visibleResources
     .filter(resource => resource.homeSection === 'new' || resource.featured)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
     .slice(0, 4)
@@ -435,30 +441,40 @@ export default function RecursosPage() {
           {!activeCategory && !isSearchActive ? (
             /* VIEW: NO FILTER SELECTED */
             <motion.div key="all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-              <div className="mb-14 grid gap-6 md:grid-cols-2">
-                {featured.map((res, idx) => (
-                  <FeaturedCard key={res.id} res={res} idx={idx} />
-                ))}
-              </div>
-              <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-                <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Para empezar</h2>
-                <Link to="/recursos/prompts" className="flex items-center gap-2 text-sm font-bold text-[#191918]/60 transition-colors hover:text-[#ff4b0b]">
-                  Ver Mas <ArrowRight size={16} />
-                </Link>
-              </div>
-              <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {highlighted.map((res, idx) => (
-                  <GalleryCard key={idx} res={res} idx={idx} />
-                ))}
-              </div>
-              <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-                <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Recien agregados</h2>
-              </div>
-              <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                {newResources.map((res, idx) => (
-                  <GalleryCard key={idx} res={res} idx={idx} />
-                ))}
-              </div>
+              {featured.length > 0 && (
+                <div className="mb-14 grid gap-6 md:grid-cols-2">
+                  {featured.map((res, idx) => (
+                    <FeaturedCard key={res.id} res={res} idx={idx} />
+                  ))}
+                </div>
+              )}
+              {highlighted.length > 0 && (
+                <>
+                  <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
+                    <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Para empezar</h2>
+                    <Link to="/recursos/prompts" className="flex items-center gap-2 text-sm font-bold text-[#191918]/60 transition-colors hover:text-[#ff4b0b]">
+                      Ver Mas <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                  <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {highlighted.map((res, idx) => (
+                      <GalleryCard key={idx} res={res} idx={idx} />
+                    ))}
+                  </div>
+                </>
+              )}
+              {newResources.length > 0 && (
+                <>
+                  <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
+                    <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Recien agregados</h2>
+                  </div>
+                  <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {newResources.map((res, idx) => (
+                      <GalleryCard key={idx} res={res} idx={idx} />
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           ) : (
             <motion.div key="filtered" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>

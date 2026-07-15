@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
@@ -39,7 +39,7 @@ import FotografiaLinkedinPage from '@/pages/8-landings/5-fotografia-linkedin/Fot
 import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
 import DiscardedInicioPage from '@/pages/9-pruebas/1-paginas_descartadas/1-inicio/InicioPage.jsx'
 import NotFoundPage from '@/pages/NotFoundPage'
-import { isPublicSiteMode, isRouteEnabled } from '@/config/siteVisibility'
+import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
 function ProtectedRoute({ children }) {
   return children
@@ -48,6 +48,17 @@ function ProtectedRoute({ children }) {
 function renderRoute(routeKey, element) {
   if (isRouteEnabled(routeKey)) return element
   return <Navigate to="/" replace />
+}
+
+function renderPublicPathRoute(routeKey, pathname, element) {
+  if (isRouteEnabled(routeKey) && isPublicPathAllowed(pathname)) return element
+  return <Navigate to="/" replace />
+}
+
+function PublicPathRoute({ routeKey, children, fallback = '/' }) {
+  const location = useLocation()
+  if (isRouteEnabled(routeKey) && isPublicPathAllowed(location.pathname)) return children
+  return <Navigate to={fallback} replace />
 }
 
 export default function AppRouter() {
@@ -59,23 +70,23 @@ export default function AppRouter() {
       <Routes>
         <Route
           path="/landings/sistema-contenido-notion"
-          element={renderRoute('landings', <SistemaContenidosNotionLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/sistema-contenido-notion', <SistemaContenidosNotionLandingPage />)}
         />
         <Route
           path="/landings/identidad-visual"
-          element={renderRoute('landings', <IdentidadVisualLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/identidad-visual', <IdentidadVisualLandingPage />)}
         />
         <Route
           path="/landings/contable"
-          element={renderRoute('landings', <ContableLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/contable', <ContableLandingPage />)}
         />
         <Route
           path="/landings/restauracion-fotografica"
-          element={renderRoute('landings', <RestauracionFotograficaPage />)}
+          element={renderPublicPathRoute('landings', '/landings/restauracion-fotografica', <RestauracionFotograficaPage />)}
         />
         <Route
           path="/landings/fotografia-linkedin"
-          element={renderRoute('landings', <FotografiaLinkedinPage />)}
+          element={renderPublicPathRoute('landings', '/landings/fotografia-linkedin', <FotografiaLinkedinPage />)}
         />
         <Route
           path="/pruebas/inicio-descartado"
@@ -167,25 +178,25 @@ export default function AppRouter() {
           <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
           <Route path="academy/*" element={renderRoute('academy', <AcademyPage />)} />
 
-          <Route path="recursos" element={renderRoute('recursos', <RecursosPage />)} />
-          <Route path="recursos/:category" element={renderRoute('recursos', <RecursosPage />)} />
+          <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
+          <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />
           <Route
             path="recursos/ebooks/google-calendar-dominado"
-            element={renderRoute('recursos', <EbookDigitalPage />)}
+            element={renderPublicPathRoute('recursos', '/recursos/ebooks/google-calendar-dominado', <EbookDigitalPage />)}
           />
           <Route
             path="recursos/:resourceType/:id"
-            element={renderRoute('recursos', <RecursoVisorPage />)}
+            element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursoVisorPage /></PublicPathRoute>}
           />
-          <Route path="blog" element={renderRoute('blog', <BlogPage />)} />
-          <Route path="blog/:category" element={renderRoute('blog', <BlogPage />)} />
+          <Route path="blog" element={renderPublicPathRoute('blog', '/blog', <BlogPage />)} />
+          <Route path="blog/:category" element={<PublicPathRoute routeKey="blog" fallback="/blog"><BlogPage /></PublicPathRoute>} />
           <Route
             path="blog/articulo/:id"
-            element={renderRoute('blog', <ArticleDetailPage />)}
+            element={<PublicPathRoute routeKey="blog" fallback="/blog"><ArticleDetailPage /></PublicPathRoute>}
           />
 
-          <Route path="landings" element={renderRoute('landings', <LandingsPage />)} />
-          <Route path="landings/*" element={renderRoute('landings', <LandingsPage />)} />
+          <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
+          <Route path="landings/*" element={<PublicPathRoute routeKey="landings"><LandingsPage /></PublicPathRoute>} />
 
           <Route path="*" element={notFoundElement} />
         </Route>

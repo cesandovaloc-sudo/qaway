@@ -1,0 +1,13 @@
+﻿User-agent: *
+Allow: /
+
+Disallow: /hub
+Disallow: /hub/
+Disallow: /login
+Disallow: /brief
+Disallow: /pruebas
+Disallow: /landings/contable
+Disallow: /landings/restauracion-fotografica
+Disallow: /landings/fotografia-linkedin
+
+Sitemap: https://qawaylab.com/sitemap.xml

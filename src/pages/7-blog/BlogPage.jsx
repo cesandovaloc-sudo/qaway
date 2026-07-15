@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
+import { isPublicSiteMode } from '@/config/siteVisibility'
 import {
   Newspaper,
   TrendingUp,
@@ -54,6 +55,26 @@ const categories = [
 ]
 
 export const articles = [
+  {
+    id: 'google-calendar-dominado-guia-productividad',
+    category: 'productividad',
+    categoryLabel: 'Productividad',
+    formatLabel: 'Guia',
+    title: 'Google Calendar Dominado: guia para ordenar tu semana con IA',
+    excerpt: 'Aprende a usar Google Calendar con metodo, bloques de tiempo, tareas y apoyo de IA para reducir friccion operativa.',
+    content: "<p className='mb-4'>Google Calendar puede ser mucho mas que una agenda de reuniones. Usado con metodo, se convierte en un sistema operativo semanal para decidir prioridades, proteger bloques de trabajo profundo y coordinar tareas sin depender de la memoria.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>La idea central</h3><p className='mb-4'>Primero separa eventos, tareas y recordatorios. Luego crea calendarios secundarios para distinguir trabajo, foco, seguimiento comercial y vida personal. Esta estructura permite que la IA sugiera horarios, detecte conflictos y ayude a planificar semanas mas realistas.</p><h3 className='text-xl font-bold mt-6 mb-3 text-zinc-950'>Como empezar</h3><p className='mb-4'>Define bloques fijos, deja espacios de recuperacion y revisa tu calendario cada viernes. Si quieres profundizar, el recurso Google Calendar Dominado incluye una guia extendida y una plantilla practica para aplicar este sistema paso a paso.</p>",
+    date: '08 Jul 2026',
+    readTime: '7 min',
+    publishedAt: '2026-07-08',
+    public: true,
+    homeSection: 'featured',
+    featured: {
+      order: 1,
+      label: 'Guia publica',
+      icon: 'book'
+    },
+    image: '/recursos/qaway-calendar.png',
+  },
   {
     id: 'como-automatizar-facturacion-make-chatgpt',
     category: 'automatizacion',
@@ -155,6 +176,10 @@ export const articles = [
   },
 ]
 
+export const visibleArticles = isPublicSiteMode
+  ? articles.filter((article) => article.public)
+  : articles
+
 const displayFont = {
   fontFamily: "'Oswald', sans-serif",
   fontStretch: 'condensed',
@@ -174,7 +199,7 @@ export default function BlogPage() {
   const isSearchActive = normalizedSearch.length > 0
   const shouldExpandSearch = isSearchExpanded || isSearchActive
 
-  const filteredArticles = articles.filter((article) => {
+  const filteredArticles = visibleArticles.filter((article) => {
     const matchesCategory = activeCategory ? article.category === activeCategory : true
     const searchableText = [
       article.title,
@@ -191,7 +216,7 @@ export default function BlogPage() {
   })
 
   const categoriesWithCounts = categories.map((cat) => {
-    const count = articles.filter((article) => article.category === cat.key).length
+    const count = visibleArticles.filter((article) => article.category === cat.key).length
     return {
       ...cat,
       count: `${count} publicación${count !== 1 ? 'es' : ''}`,
@@ -207,11 +232,11 @@ export default function BlogPage() {
     }
   }
 
-  const highlightedArticles = articles
+  const highlightedArticles = visibleArticles
     .filter((article) => article.featured)
     .sort((a, b) => a.featured.order - b.featured.order)
 
-  const secondaryArticles = articles
+  const secondaryArticles = visibleArticles
     .filter((article) => article.homeSection === 'more' || !article.featured)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
 
@@ -396,20 +421,26 @@ export default function BlogPage() {
                   </div>
                 </div>
 
-                <div className="mb-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {highlightedArticles.map((article, idx) => renderArticleCard(article, idx))}
-                </div>
-
-                <div className="mb-8 border-b border-black/10 pb-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-                    Más publicaciones
+                {highlightedArticles.length > 0 && (
+                  <div className="mb-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    {highlightedArticles.map((article, idx) => renderArticleCard(article, idx))}
                   </div>
-                </div>
+                )}
 
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                  {secondaryArticles.map((article, idx) => renderArticleCard(article, idx))}
-                </div>
+                {secondaryArticles.length > 0 && (
+                  <>
+                    <div className="mb-8 border-b border-black/10 pb-4">
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
+                        <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
+                        MÃ¡s publicaciones
+                      </div>
+                    </div>
+
+                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                      {secondaryArticles.map((article, idx) => renderArticleCard(article, idx))}
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>

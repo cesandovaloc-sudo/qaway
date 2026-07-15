@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -26,6 +26,10 @@ export default function EbookDigitalPage() {
   // Inicializar abierto en desktop (ancho > 992px) y cerrado en móvil
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 992)
   const [isUnlocked, setIsUnlocked] = useState(false)
+  const [navbarVisible, setNavbarVisible] = useState(true)
+  const lastScrollY = useRef(0)
+  const isLockScrolling = useRef(false)
+  const lockTimeoutRef = useRef(null)
 
   // Ajustar menú según cambio de tamaño de pantalla
   useEffect(() => {
@@ -91,16 +95,34 @@ export default function EbookDigitalPage() {
       const scrolled = height > 0 ? (winScroll / height) * 100 : 0
       setScrollProgress(scrolled)
 
-      // Activar el bloqueo por scroll si no está desbloqueado
       const unlocked = localStorage.getItem('recurso_desbloqueado_google-calendar-dominado') === 'true'
+      const isCurrentlyLocked = (!unlocked && scrolled >= 24.5)
+
+      // Mantener navbarVisible siempre en true para sincronizar con el Navbar global que ahora es fijo
+      if (!isLockScrolling.current) {
+        setNavbarVisible(true)
+        lastScrollY.current = winScroll
+      }
+
+      // Activar el bloqueo por scroll si no está desbloqueado
       if (!unlocked) {
-        // Si el scroll pasa del 25% del avance de lectura, se bloquea
-        if (scrolled > 25) {
+        // Usamos >= 24.5 para evitar parpadeos de la tarjeta cuando el limitScroll redondea
+        if (scrolled >= 24.5) {
           setShowLockCard(true)
-          // Forzar scroll en el límite de 25%
           const limitScroll = Math.round(height * 0.25)
           if (winScroll > limitScroll + 5) {
-            window.scrollTo(0, limitScroll)
+            // Marcar como scroll programático para no disparar el tracker del navbar
+            isLockScrolling.current = true
+            window.scrollTo(0, limitScroll) // Instantáneo (más firme que smooth para una barrera)
+            
+            // Limpiar timeout anterior si el usuario sigue haciendo scroll compulsivamente
+            if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current)
+            
+            // Resetear el flag y sincronizar lastScrollY tras un breve instante
+            lockTimeoutRef.current = setTimeout(() => {
+              isLockScrolling.current = false
+              lastScrollY.current = limitScroll
+            }, 50)
           }
         } else {
           setShowLockCard(false)
@@ -258,7 +280,13 @@ export default function EbookDigitalPage() {
   }
 
   return (
-    <div className="visor-layout">
+    <div
+      className="visor-layout"
+      style={{
+        paddingTop: navbarVisible ? '80px' : '0px',
+        transition: 'padding-top 0.3s cubic-bezier(0.16,1,0.3,1)',
+      }}
+    >
       {/* Barra de progreso de lectura — estilos inline */}
       <div style={{
         position: 'fixed',
@@ -280,18 +308,18 @@ export default function EbookDigitalPage() {
       </div>
 
       {/* LEFT NAVIGATION SIDEBAR */}
-      <nav className={`visor-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-        <div className="visor-logo-header">
-          <div className="visor-logo">
-            <div className="visor-logo-title">Qaway<span>Lab</span></div>
-            <div className="visor-logo-subtitle">Ebook Visor · Guía 2026</div>
-          </div>
-          <button 
+      <nav
+        className={`visor-sidebar ${sidebarOpen ? 'open' : 'closed'}`}
+        style={{ top: navbarVisible ? '80px' : '0px', transition: 'top 0.3s cubic-bezier(0.16,1,0.3,1)' }}
+      >
+        {/* Solo botón de colapso, oculto en desktop (sin ocupar espacio) */}
+        <div className="flex justify-end mb-4 lg:hidden">
+          <button
             onClick={() => setSidebarOpen(false)}
             className="visor-sidebar-close-btn"
             aria-label="Cerrar Menú"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
         
@@ -355,34 +383,36 @@ export default function EbookDigitalPage() {
 
       {/* MAIN CONTENT AREA */}
       <div className={`visor-main ${sidebarOpen ? '' : 'full-width'}`}>
-        {/* Sticky Header Toolbar */}
-        <header className="visor-toolbar no-print">
-          <div className="visor-toolbar-left">
-            {!sidebarOpen && (
-              <button 
-                onClick={() => setSidebarOpen(true)}
-                className="visor-menu-btn"
-                aria-label="Abrir Menú"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            )}
-            <span className="visor-badge visor-badge-blue">📘 Ebook Completo</span>
-            <span className="visor-badge visor-badge-yellow">🎬 Tutorial Conectado</span>
-          </div>
-
-          <div className="visor-toolbar-actions">
-            {isUnlocked && (
-              <button 
-                onClick={() => window.print()}
-                className="visor-btn-action"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Guardar en PDF / Imprimir</span>
-              </button>
-            )}
-          </div>
-        </header>
+        {/* Toolbar: solo se muestra cuando tiene contenido visible */}
+        {(!sidebarOpen || isUnlocked) && (
+          <header
+            className="visor-toolbar no-print"
+            style={{ top: navbarVisible ? '80px' : '0px', transition: 'top 0.3s cubic-bezier(0.16,1,0.3,1)' }}
+          >
+            <div className="visor-toolbar-left">
+              {!sidebarOpen && (
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="visor-menu-btn"
+                  aria-label="Abrir Menú"
+                >
+                  <Menu className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <div className="visor-toolbar-actions">
+              {isUnlocked && (
+                <button
+                  onClick={() => window.print()}
+                  className="visor-btn-action"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Guardar en PDF / Imprimir</span>
+                </button>
+              )}
+            </div>
+          </header>
+        )}
 
         {/* Ebook Readable Content Container */}
         <main className="visor-content-container">
@@ -1152,8 +1182,9 @@ export default function EbookDigitalPage() {
       {/* FLOATING SCROLL-GATE LOCK CARD OVERLAY */}
       <AnimatePresence>
         {showLockCard && !isUnlocked && (
-          <div className={`scroll-gate-overlay no-print ${sidebarOpen ? '' : 'full-width'}`}>
+          <div className={`scroll-gate-overlay no-print ${sidebarOpen ? '' : 'full-width'}`} style={{ zIndex: 9999 }}>
             <motion.div 
+              key="lock-card"
               className="lock-card"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
