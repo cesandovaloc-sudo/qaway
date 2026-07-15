@@ -74,6 +74,13 @@ export const articles = [
       icon: 'book'
     },
     image: '/recursos/qaway-calendar.png',
+    relatedCta: {
+      title: 'Google Calendar Dominado',
+      description: 'Descarga nuestra guía extendida y plantilla práctica para aplicar este sistema de productividad paso a paso y tomar el control de tu tiempo.',
+      image: '/recursos/qaway-calendar.png',
+      link: '/recursos/ebooks/google-calendar-dominado',
+      buttonText: 'Acceder al Recurso'
+    }
   },
   {
     id: 'como-automatizar-facturacion-make-chatgpt',

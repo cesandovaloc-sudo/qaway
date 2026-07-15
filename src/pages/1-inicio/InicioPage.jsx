@@ -57,20 +57,20 @@ const growX = {
 
 const primaryAreas = [
   {
-    title: 'Estudio',
-    description: 'Identidad, contenido y presencia digital con una dirección visual clara.',
+    title: 'Estudio creativo',
+    description: 'Branding, contenido y presencia digital para marcas, profesionales y negocios.',
     link: '/estudio',
     icon: PenTool,
   },
   {
     title: 'Sistemas digitales',
-    description: 'Automatización, IA y herramientas conectadas para operar con más orden.',
+    description: 'Automatización, IA y herramientas conectadas para ordenar procesos y operar mejor.',
     link: '/sistemas-digitales',
     icon: Workflow,
   },
   {
     title: 'Academy',
-    description: 'Formación práctica para convertir herramientas nuevas en capacidades reales.',
+    description: 'Formación práctica para convertir herramientas digitales e IA en capacidades reales.',
     link: '/academy',
     icon: GraduationCap,
   },
@@ -101,21 +101,21 @@ const heroCapabilities = [
   {
     icon: PenTool,
     title: 'Estudio',
-    description: 'Identidad y presencia',
+    description: 'Branding y contenido',
     link: '#estudio',
     placement: 'left-6 bottom-28 w-[15.5rem]',
   },
   {
     icon: Workflow,
     title: 'Sistemas',
-    description: 'Automatización y procesos',
+    description: 'Automatización e IA',
     link: '#sistemas',
     placement: '-left-10 top-24 w-[14.5rem]',
   },
   {
     icon: GraduationCap,
     title: 'Academy',
-    description: 'Cursos y formación',
+    description: 'Formación aplicada',
     link: '#academy',
     placement: '-right-12 top-16 w-[14rem]',
   },
@@ -249,17 +249,17 @@ function Hero() {
             className="relative z-10"
           >
             <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-              Estrategia, creatividad y tecnología
+              IA, estrategia y diseño digital
             </p>
             <h1
               className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
               style={displayFont}
             >
-              <span className="block">Ideas que toman forma.</span>
-              <span className="block text-[#ff4b0b]">Sistemas que avanzan.</span>
+              <span className="block">Creamos Marcas,</span>
+              <span className="block text-[#ff4b0b]">sistemas digitales y Formación con IA.</span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
-              Construimos presencia, operación y aprendizaje digital para marcas, profesionales y equipos.
+              Aplicamos IA en diseño, marketing, automatización y formación para marcas y negocios.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-5">
               <a
@@ -275,7 +275,7 @@ function Hero() {
                 href="#primary-areas"
                 className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
               >
-                Conocer el ecosistema
+                Ver áreas principales
               </a>
             </div>
           </motion.div>
@@ -358,12 +358,12 @@ function Hero() {
               className="text-[clamp(1.4rem,3.8vw,2.5rem)] leading-[0.9] tracking-[-0.022em] text-balance"
               style={displayFont}
             >
-              Un ecosistema para construir,
-              <span className="block">ordenar y crecer<span className="text-[#ff4b0b]">.</span></span>
+              Un ecosistema para crear,
+              <span className="block">automatizar y formar<span className="text-[#ff4b0b]">.</span></span>
             </h2>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
             <p className="mt-4 text-sm leading-relaxed text-black/56">
-              Unimos dirección visual, sistemas digitales, formación y herramientas en una misma ruta.
+              Conectamos estudio creativo, sistemas digitales, automatización y formación en una ruta clara.
             </p>
           </motion.div>
         </aside>

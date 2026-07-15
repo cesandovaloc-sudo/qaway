@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, ArrowLeft, BookOpen, Send, Mail, Sparkles } from 'lucide-react'
+import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen, Send, Mail, Sparkles } from 'lucide-react'
 import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
@@ -9,6 +9,7 @@ import { supabase } from '@/config/supabase'
 export default function ArticleDetailPage() {
   const { id } = useParams()
   const [scrollProgress, setScrollProgress] = useState(0)
+  const articleRef = useRef(null)
 
   // Estados para comentarios de Supabase
   const [comments, setComments] = useState([])
@@ -82,18 +83,36 @@ export default function ArticleDetailPage() {
     setNewsletterError(null)
   }, [id])
 
-  // Escuchar el progreso de scroll
+  // Escuchar el progreso de scroll respecto al artículo
   useEffect(() => {
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight
-      if (totalHeight > 0) {
-        const progress = (window.scrollY / totalHeight) * 100
-        setScrollProgress(progress)
+      if (!articleRef.current) return
+      
+      const { top, bottom, height } = articleRef.current.getBoundingClientRect()
+      // La altura visible del viewport
+      const windowHeight = window.innerHeight
+      
+      // Si el artículo aún no entra en pantalla
+      if (top > windowHeight) {
+        setScrollProgress(0)
+        return
       }
+      
+      // La distancia que hemos scrolleado dentro del artículo
+      // (top es negativo o menor a windowHeight cuando ya estamos bajando)
+      const scrolled = windowHeight - top
+      // Para evitar que sea más del 100%
+      const progress = Math.min(Math.max((scrolled / height) * 100, 0), 100)
+      
+      setScrollProgress(progress)
     }
+
     window.addEventListener('scroll', handleScroll, { passive: true })
+    // Ejecutar una vez para inicializar
+    handleScroll()
+    
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [article])
 
   // Enviar correo de notificación a qaway.myc@gmail.com vía Web3Forms
   const sendEmailNotification = async (subject, messageDetails) => {
@@ -306,6 +325,7 @@ export default function ArticleDetailPage() {
             
             {/* Cuerpo del Artículo */}
             <motion.article
+              ref={articleRef}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -316,6 +336,47 @@ export default function ArticleDetailPage() {
                 className="space-y-6"
               />
             </motion.article>
+
+            {/* CTA Dinámico del Artículo */}
+            {article.relatedCta && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="bg-zinc-950 border border-zinc-800 rounded-[15px] p-8 md:p-10 overflow-hidden relative group"
+              >
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,210,0,0.1),transparent_50%)] pointer-events-none" />
+                <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                  <div className="w-full md:w-1/3 flex justify-center">
+                    <div className="relative">
+                      <div className="absolute -inset-4 bg-qaway-accent/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <img 
+                        src={article.relatedCta.image} 
+                        alt={article.relatedCta.title}
+                        className="w-48 h-auto object-contain drop-shadow-2xl group-hover:-translate-y-2 transition-transform duration-500 relative z-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-2/3 text-center md:text-left space-y-4">
+                    <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                      {article.relatedCta.title}
+                    </h3>
+                    <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+                      {article.relatedCta.description}
+                    </p>
+                    <div className="pt-2">
+                      <Link 
+                        to={article.relatedCta.link}
+                        className="inline-flex items-center gap-2 bg-qaway-accent hover:bg-[#E5BE3A] text-black font-extrabold uppercase tracking-widest text-[11px] px-6 py-3.5 rounded-xl transition-all hover:scale-105 shadow-lg shadow-qaway-accent/20"
+                      >
+                        {article.relatedCta.buttonText}
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Sección de Comentarios */}
             <motion.div
@@ -431,43 +492,43 @@ export default function ArticleDetailPage() {
             </div>
 
             {/* Widget: Newsletter (Captación) */}
-            <div className="bg-[#0c0c0e] text-white border border-white/5 rounded-[15px] p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,210,0,0.08),transparent_50%)] pointer-events-none" />
-              <h4 className="text-[9px] font-extrabold text-qaway-accent uppercase tracking-widest mb-2 flex items-center gap-1">
+            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-qaway-accent/60 via-qaway-accent to-qaway-accent/60 rounded-t-[15px]" />
+              <h4 className="text-[9px] font-extrabold text-qaway-accent uppercase tracking-widest mb-2 flex items-center gap-1 mt-1">
                 <Sparkles className="w-3 h-3" /> Boletín Semanal
               </h4>
-              <h5 className="text-sm font-black mb-1.5 leading-tight">Únete al manual de operaciones de IA</h5>
-              <p className="text-[11px] text-zinc-400 mb-4 leading-relaxed">Recibe ideas prácticas de automatización directamente en tu correo cada semana.</p>
+              <h5 className="text-sm font-black mb-1.5 leading-tight text-zinc-900">Únete al manual de operaciones de IA</h5>
+              <p className="text-[11px] text-zinc-500 mb-4 leading-relaxed">Recibe ideas prácticas de automatización directamente en tu correo cada semana.</p>
               
               {newsletterSubmitted ? (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-5 bg-qaway-accent/10 border border-qaway-accent/20 text-qaway-accent-light rounded-xl text-center"
+                  className="p-4 bg-qaway-accent/8 border border-qaway-accent/20 text-zinc-800 rounded-xl text-center"
                 >
                   <h5 className="font-bold text-xs mb-1">¡Suscrito con éxito!</h5>
-                  <p className="text-[10px] text-zinc-400 leading-normal">Pronto recibirás el manual de operaciones en tu correo.</p>
+                  <p className="text-[10px] text-zinc-500 leading-normal">Pronto recibirás el manual de operaciones en tu correo.</p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleNewsletterSubmit} className="space-y-2.5">
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-500" />
+                    <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
                     <input
                       type="email"
                       required
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="Tu correo electrónico"
-                      className="w-full bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-white/20 transition-all font-semibold"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-zinc-300 focus:bg-white transition-all font-semibold"
                     />
                   </div>
                   {newsletterError && (
-                    <p className="text-[10px] text-rose-400 font-semibold px-1">{newsletterError}</p>
+                    <p className="text-[10px] text-rose-500 font-semibold px-1">{newsletterError}</p>
                   )}
                   <button
                     type="submit"
                     disabled={newsletterSubmitting}
-                    className="w-full bg-qaway-accent hover:bg-qaway-accent-light disabled:bg-zinc-600 text-zinc-950 text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl transition-all duration-300 active:scale-95"
+                    className="w-full bg-zinc-950 hover:bg-zinc-800 disabled:bg-zinc-300 text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl transition-all duration-300 active:scale-95"
                   >
                     {newsletterSubmitting ? 'Procesando...' : 'Suscribirme'}
                   </button>
