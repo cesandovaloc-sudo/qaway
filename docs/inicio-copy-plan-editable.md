@@ -22,7 +22,7 @@ Mantengo el mismo orden de la tabla anterior para que podamos aplicar cambios di
 | Hero lateral título | `Un ecosistema para crear, automatizar y formar.` | `Todo lo que necesitas para crear, automatizar y aprender.` |
 | Hero lateral párrafo | `Conectamos estudio creativo, sistemas digitales, automatización y formación en una ruta clara.` | `Conectamos estudio creativo, sistemas digitales, automatización y formación en una ruta clara.` |
 | Bloque visión kicker | `La visión completa` | `Todo conectado` |
-| Bloque visión título | `Lo digital funciona mejor cuando todo se conecta.` | `Tu marca, tus sistemas y tu aprendizaje funcionan mejor cuando se conectan.` |
+| Bloque visión título | `Lo digital funciona mejor cuando todo se conecta.` | `Tu proyecto y tu aprendizaje funcionan mejor cuando se conectan.` |
 | Bloque visión párrafo | `No trabajamos piezas aisladas. Diseñamos un sistema donde marca, procesos, conocimiento y herramientas se apoyan entre sí.` | `No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.` |
 | Estudio kicker | `Dirección visual y contenido` | `Estudio creativo y creación contenido` |
 | Estudio título | `Una Marca que se ve, Se Reconoce.` | `Haz que tu marca se vea clara, sólida y profesional.` |
@@ -59,9 +59,9 @@ Mantengo el mismo orden de la tabla anterior para que podamos aplicar cambios di
 | Botón formulario | `SOLICITAR ORIENTACIÓN` | `QUIERO ORIENTACIÓN` |
 | Bloque final kicker | `Cursos y landings` | `Formación y soluciones` |
 | Bloque final título | `Aprende y Convierte.` | `Aprende y aplica.` |
-| Tarjeta izquierda título | `Productos digitales` | `Soluciones listas para usar` |
+| Tarjeta izquierda título | `Productos digitales` | `Soluciones digitales` |
 | Tarjeta izquierda CTA | `Explorar` | `Ver solución` |
-| Tarjeta derecha título | `Cursos y formación` | `Formación aplicada` |
+| Tarjeta derecha título | `Cursos y formación` | `Cursos aplicados` |
 | Tarjeta derecha CTA | `Ver todos` | `Ver formación` |
 | Ecosystem area extra | `Qaway Hub` + `Rutas guiadas, herramientas y módulos para construir paso a paso.` | `Qaway Hub` + `Ruta interna de herramientas y módulos para organizar mejor tu trabajo.` |
 | Ecosystem area extra | `Recursos` + `Plantillas, guías, prompts y materiales listos para aplicar.` | `Recursos` + `Plantillas, guías y materiales listos para aplicar en tu trabajo.` |

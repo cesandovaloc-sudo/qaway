@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
@@ -824,6 +824,10 @@ function Diagnostic() {
 
 export default function EstudioPage() {
   useSetNavbarVariant('light')
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [])
   return (
     <div className="estudio-page">
       <Hero />

@@ -60,18 +60,21 @@ const primaryAreas = [
     title: 'Estudio creativo',
     description: 'Branding, contenido y presencia digital para marcas, profesionales y negocios.',
     link: '/estudio',
+    ctaLabel: 'Ver estudio creativo',
     icon: PenTool,
   },
   {
     title: 'Sistemas digitales',
-    description: 'Automatización, IA y herramientas conectadas para ordenar procesos y operar mejor.',
+    description: 'Organiza procesos, automatiza tareas y conecta herramientas para trabajar mejor.',
     link: '/sistemas-digitales',
+    ctaLabel: 'Ver sistemas digitales',
     icon: Workflow,
   },
   {
     title: 'Academy',
-    description: 'Formación práctica para convertir herramientas digitales e IA en capacidades reales.',
+    description: 'Aprende a usar IA, sistemas y herramientas digitales de forma práctica.',
     link: '/academy',
+    ctaLabel: 'Ver Academy',
     icon: GraduationCap,
   },
 ]
@@ -79,19 +82,19 @@ const primaryAreas = [
 const ecosystemAreas = [
   {
     title: 'Qaway Hub',
-    description: 'Rutas guiadas, herramientas y módulos para construir paso a paso.',
+    description: 'Ruta interna de herramientas y módulos para organizar mejor tu trabajo.',
     link: '/hub',
     icon: Boxes,
   },
   {
     title: 'Recursos',
-    description: 'Plantillas, guías, prompts y materiales listos para aplicar.',
+    description: 'Plantillas, guías y materiales listos para aplicar en tu trabajo.',
     link: '/recursos',
     icon: BookOpen,
   },
   {
     title: 'Blog',
-    description: 'Análisis, tutoriales y tendencias para decidir con más criterio.',
+    description: 'Guías y artículos para entender mejor IA, sistemas, marketing y productividad.',
     link: '/blog',
     icon: Compass,
   },
@@ -100,8 +103,8 @@ const ecosystemAreas = [
 const heroCapabilities = [
   {
     icon: PenTool,
-    title: 'Estudio',
-    description: 'Branding y contenido',
+    title: 'Estudio creativo',
+    description: 'Branding y Contenido',
     link: '#estudio',
     placement: 'left-6 bottom-28 w-[15.5rem]',
   },
@@ -114,7 +117,7 @@ const heroCapabilities = [
   },
   {
     icon: GraduationCap,
-    title: 'Academy',
+    title: 'Academia',
     description: 'Formación aplicada',
     link: '#academy',
     placement: '-right-12 top-16 w-[14rem]',
@@ -249,17 +252,17 @@ function Hero() {
             className="relative z-10"
           >
             <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-              IA, estrategia y diseño digital
+              Marcas, Automatización y formación con IA
             </p>
             <h1
               className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
-              style={displayFont}
+              style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Creamos Marcas,</span>
-              <span className="block text-[#ff4b0b]">sistemas digitales y Formación con IA.</span>
+              <span className="block">Creamos marcas,</span>
+              <span className="block text-[#ff4b0b]">sistemas digitales y formación con IA.</span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
-              Aplicamos IA en diseño, marketing, automatización y formación para marcas y negocios.
+              Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-5">
               <a
@@ -268,14 +271,14 @@ function Hero() {
                 rel="noopener noreferrer"
                 className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
               >
-                Empezar una conversación
+                Cuéntanos tu proyecto
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a
                 href="#primary-areas"
                 className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
               >
-                Ver áreas principales
+                Elige por dónde empezar
               </a>
             </div>
           </motion.div>
@@ -356,10 +359,10 @@ function Hero() {
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
             <h2
               className="text-[clamp(1.4rem,3.8vw,2.5rem)] leading-[0.9] tracking-[-0.022em] text-balance"
-              style={displayFont}
+              style={{ ...displayFont, fontWeight: 760 }}
             >
-              Un ecosistema para crear,
-              <span className="block">automatizar y formar<span className="text-[#ff4b0b]">.</span></span>
+              Todo lo que necesitas para crear,
+              <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
             </h2>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
             <p className="mt-4 text-sm leading-relaxed text-black/56">
@@ -440,19 +443,19 @@ function EcosystemPhoto() {
 
 function EcosystemIntro() {
   return (
-    <section id="ecosistema" className="bg-[#f8f9f7] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
+    <section id="ecosistema" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
       <div className="mx-auto max-w-[94rem]">
-        <Reveal className="grid items-start gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
+        <Reveal className="grid items-center gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
           <div>
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">La visión completa</p>
+            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Todo conectado</p>
             <h2
-              className="text-[clamp(3.3rem,5.8vw,6.4rem)] uppercase leading-[0.88] tracking-[-0.022em]"
-              style={displayFont}
+              className="max-w-[42rem] text-[clamp(3.08rem,5.26vw,5.63rem)] leading-[0.9] tracking-[-0.058em]"
+              style={{ ...displayFont, fontWeight: 760 }}
             >
-              Lo digital funciona mejor cuando <span className="text-[#ff4b0b]">todo se conecta.</span>
+              Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
             </h2>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-black/55 sm:text-lg">
-              No trabajamos piezas aisladas. Diseñamos un sistema donde marca, procesos, conocimiento y herramientas se apoyan entre sí.
+              No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.
             </p>
           </div>
 
@@ -483,16 +486,16 @@ function EstudioSection() {
         <Reveal className="mb-6 grid items-center gap-8 lg:grid-cols-[.9fr_1.1fr] lg:gap-14">
           <div>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                Dirección visual y contenido
+                Estudio creativo y creación contenido
               </p>
               <h2
                 className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.81] tracking-[-0.08em]"
-                style={displayFont}
+                style={{ ...displayFont, fontWeight: 760 }}
               >
-                Una Marca que se ve,<br /><span className="text-[#ff4b0b]">Se Reconoce.</span>
+                Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
               </h2>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-black/55">
-              Construimos dirección visual, contenido y presencia digital con un método híbrido entre criterio humano y herramientas de IA.
+              Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
             </p>
           </div>
           <div className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-auto lg:h-[42vh]">
@@ -557,11 +560,11 @@ function EstudioSection() {
               <Sparkles size={15} strokeWidth={1.5} />
             </span>
             <div>
-              <span className="text-sm font-bold uppercase tracking-[0.06em]">Consultoría Estratégica</span>
-              <span className="ml-3 hidden text-xs text-black/40 lg:inline">Diagnóstico, metodología y plan con criterio humano + IA</span>
+              <span className="text-sm font-bold uppercase tracking-[0.06em]">Consultoría estratégica</span>
+              <span className="ml-3 hidden text-xs text-black/40 lg:inline">Diagnóstico, dirección y plan de acción para tu marca.</span>
             </div>
           </div>
-          <ArrowLink to="/estudio">Ir al estudio</ArrowLink>
+          <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
         </Reveal>
       </div>
     </section>
@@ -575,18 +578,18 @@ function PrimaryAreas() {
     <section id="primary-areas" className="bg-[#191918] px-6 py-18 text-white sm:px-10 lg:px-14 lg:py-24">
       <div className="mx-auto max-w-[94rem]">
         <Reveal className="mb-12 lg:mb-16">
-          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Tres puertas de entrada</p>
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza aquí</p>
           <h2
             className="text-[clamp(3.3rem,5.4vw,5.9rem)] leading-[0.86] tracking-[-0.03em]"
             style={{ ...displayFont, fontWeight: 680 }}
           >
-            <span className="text-[#8b8c88]">Empieza por lo que Hoy</span><br />
-            <span className="text-white">Necesitas Avanzar.</span>
+            <span className="text-[#8b8c88]">Elige el área que hoy</span><br />
+            <span className="text-white">necesitas fortalecer.</span>
           </h2>
         </Reveal>
 
         <div className="grid border-t border-white/18 lg:grid-cols-3">
-          {primaryAreas.map(({ title, description, link, icon: Icon }, index) => {
+          {primaryAreas.map(({ title, description, link, ctaLabel, icon: Icon }, index) => {
             const dir = index === 0 ? { x: -50 } : index === 1 ? { y: 50 } : { x: 50 }
             return (
               <motion.div
@@ -608,13 +611,13 @@ function PrimaryAreas() {
                   </span>
                 </div>
                 <div className="relative flex flex-1 flex-col justify-end pt-[3.25rem]">
-                  <h3 className="text-[clamp(1.8rem,2.8vw,3.6rem)] uppercase leading-[0.85] tracking-[-0.035em]" style={displayFont}>
+                  <h3 className="text-[clamp(1.8rem,2.8vw,3.6rem)] uppercase leading-[0.85] tracking-[-0.035em]" style={{ ...displayFont, fontWeight: 760 }}>
                     {title}
                   </h3>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/50">{description}</p>
                   <div className="mt-2">
                     <ArrowLink to={link} light newTab>
-                      Explorar {title}
+                      {ctaLabel}
                     </ArrowLink>
                   </div>
                 </div>
@@ -744,15 +747,15 @@ function SistemasDigitalesSection() {
           <div className="flex flex-col justify-center">
             <Reveal>
               <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                Sistema completo
+                Sistemas digitales con IA
               </p>
               <h2
                 className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
-                style={displayFont}
+                style={{ ...displayFont, fontWeight: 760 }}
               >
-                Sistemas que trabajan sin ti<span className="text-[#ff4b0b]">.</span>
+                Haz que tus procesos funcionen con<span className="text-[#ff4b0b]"> más orden</span>
                 <br />
-                <span className="text-[#ff4b0b]">Para ti</span>
+                <span className="text-[#ff4b0b]">y menos carga manual.</span>
               </h2>
             </Reveal>
 
@@ -791,7 +794,7 @@ function SistemasDigitalesSection() {
             </div>
 
             <Reveal className="mt-10 flex items-center gap-4 border-t border-black/10 pt-4">
-              <ArrowLink to="/sistemas-digitales">Explorar sistemas digitales</ArrowLink>
+              <ArrowLink to="/sistemas-digitales">Ver sistemas digitales</ArrowLink>
             </Reveal>
           </div>
 
@@ -825,19 +828,19 @@ function AcademyFeature() {
       </motion.div>
 
       <Reveal className="flex flex-col justify-center px-8 py-16 sm:px-12 lg:px-14">
-        <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.24em] text-[#ff4b0b]">Aprendizaje aplicado</p>
+        <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.24em] text-[#ff4b0b]">Academy</p>
         <h2
           className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
-          style={displayFont}
+          style={{ ...displayFont, fontWeight: 760 }}
         >
-          <span className="text-[#ff4b0b]">Aprender</span> para Construir Mejor<span className="text-[#ff4b0b]">.</span>
+          <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
         </h2>
         <p className="mt-5 max-w-lg text-base leading-relaxed text-black/55">
-          Cursos, talleres, asesorías y recursos para incorporar IA, sistemas y comunicación digital con criterio práctico.
+          Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
         </p>
         <div className="mt-7 flex flex-wrap gap-7">
-          <ArrowLink to="/academy">Conocer Academy</ArrowLink>
-          <ArrowLink to="/recursos">Explorar recursos</ArrowLink>
+          <ArrowLink to="/academy">Ver Academy</ArrowLink>
+          <ArrowLink to="/recursos">Ver recursos</ArrowLink>
         </div>
       </Reveal>
     </section>
@@ -850,12 +853,12 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
       <section id="formulario" className="academy-section academy-form-section">
         <Reveal className="academy-form-intro">
           <p className="academy-kicker font-bold">Contacto</p>
-          <h2 style={displayFont}>Resuelve tus <span className="academy-title-emphasis">dudas</span><span className="academy-title-punct">.</span></h2>
-          <p>Escríbenos para consultar detalles sobre los programas, metodologías o coordinar capacitación para tu equipo.</p>
+          <h2 style={{ ...displayFont, fontWeight: 760 }}>Cuéntanos <span className="academy-title-emphasis">qué necesitas</span><span className="academy-title-punct">.</span></h2>
+          <p>Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.</p>
           <div className="academy-form-points">
-            <span><Check size={16} /> Respuesta en menos de 24 horas</span>
-            <span><Check size={16} /> Orientación sin compromiso</span>
-            <span><Check size={16} /> Opciones personalizadas para empresas</span>
+            <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
+            <span><Check size={16} /> Recibe orientación sin compromiso</span>
+            <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
           </div>
         </Reveal>
 
@@ -868,7 +871,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
             <div className="academy-form-success">
               <div><Check size={28} /></div>
               <h3>¡Consulta enviada!</h3>
-              <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
+              <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
               <button type="button" onClick={onReset}>Enviar otro mensaje</button>
             </div>
           ) : (
@@ -942,7 +945,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                 />
               </div>
               <button type="submit" className="academy-submit-button" disabled={submitting}>
-                {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÓN'}
+                {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
                 <Send size={17} />
               </button>
               {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
@@ -1039,12 +1042,12 @@ function CoursesLandings() {
     <section className="bg-[#f8f9f7] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col">
       <div className="mx-auto flex w-full max-w-[94rem] flex-col flex-1">
         <Reveal className="mb-3 lg:mb-4 text-center">
-          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Cursos y landings</p>
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Formación y soluciones</p>
           <h2
             className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
-            style={displayFont}
+            style={{ ...displayFont, fontWeight: 760 }}
           >
-            Aprende y <span className="text-[#ff4b0b]">Convierte.</span>
+            Aprende y <span className="text-[#ff4b0b]">aplica.</span>
           </h2>
         </Reveal>
 
@@ -1059,8 +1062,8 @@ function CoursesLandings() {
                 <Compass size={21} strokeWidth={1.45} />
               </span>
               <div>
-                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={displayFont}>
-                  Productos digitales
+                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                  Soluciones digitales
                 </h3>
                 <div className="relative mt-2">
                   <AnimatePresence mode="wait">
@@ -1102,8 +1105,8 @@ function CoursesLandings() {
                 <GraduationCap size={21} strokeWidth={1.45} />
               </span>
               <div>
-                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={displayFont}>
-                  Cursos y formación
+                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                  Cursos aplicados
                 </h3>
                 <div className="relative mt-2">
                   <AnimatePresence mode="wait">
@@ -1128,7 +1131,7 @@ function CoursesLandings() {
                   </AnimatePresence>
                 </div>
                 <span className="my-5 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
-                  Ver todos
+                  Ver formación
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                 </span>
               </div>
