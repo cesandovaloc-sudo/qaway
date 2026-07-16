@@ -30,7 +30,7 @@ import { WHATSAPP_LINK } from '@/data/navigation'
 import '@/pages/4-academy/academy.css'
 import { supabase } from '@/config/supabase'
 
-const base = '/assets/pages/9-pruebas/inicio-qaway-2026/'
+const base = '/assets/pages/1-inicio/'
 const displayFont = {
   fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
   fontStretch: 'condensed',
@@ -292,8 +292,8 @@ function Hero() {
         >
           <div className="absolute inset-0 overflow-hidden">
             <img
-              src={`${base}hero-retrato-editorial.webp`}
-              alt="Profesional creativo retratado con dirección editorial"
+              src={`${base}hero-qaway-vision-lab.webp`}
+              alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
@@ -1041,11 +1041,11 @@ function CoursesLandings() {
           </h2>
         </Reveal>
 
-        <div className="grid flex-1 gap-5 sm:gap-6 md:gap-8 px-0 sm:px-8 md:px-12 lg:gap-[60px] lg:px-[14%] sm:grid-cols-2">
+        <div className="grid flex-1 gap-5 sm:gap-6 md:gap-8 px-0 sm:px-8 md:px-12 lg:gap-10 lg:px-[8%] sm:grid-cols-2">
           <Reveal delay={0}>
             <Link
               to={landing.link}
-              style={{ transform: 'scale(0.85)', transformOrigin: 'center' }}
+              style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 py-7"
             >
               <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
@@ -1070,7 +1070,7 @@ function CoursesLandings() {
                         <img src={landing.image} alt="" loading="lazy" decoding="async" />
                         {landing.featured && <span>{landing.featured}</span>}
                       </div>
-                      <div style={{ padding: '3.8rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
+                      <div style={{ padding: '2.4rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{landing.category}</p>
                         <h3>{landing.title}</h3>
                       </div>
@@ -1088,7 +1088,7 @@ function CoursesLandings() {
           <Reveal delay={0.06}>
             <Link
               to="/academy"
-              style={{ transform: 'scale(0.85)', transformOrigin: 'center' }}
+              style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 py-7"
             >
               <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
@@ -1113,7 +1113,7 @@ function CoursesLandings() {
                         <img src={course.image} alt="" loading="lazy" decoding="async" />
                         {course.featured && <span>{course.featured}</span>}
                       </div>
-                      <div style={{ padding: '3.8rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
+                      <div style={{ padding: '2.4rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{course.category}</p>
                         <h3>{course.title}</h3>
                       </div>

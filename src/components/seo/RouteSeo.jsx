@@ -1,24 +1,25 @@
-﻿import { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { isPublicPathAllowed } from '@/config/siteVisibility'
 
 const SITE_URL = 'https://qawaylab.com'
+const DEFAULT_IMAGE = `${SITE_URL}/assets/pages/1-inicio/hero-qaway-vision-lab.webp`
 
 const seoByPath = {
   '/': {
-    title: 'Qaway Lab | IA, estudio creativo y sistemas digitales',
-    description: 'Qaway Lab integra estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos con IA aplicada.',
+    title: 'Qaway Lab | Marcas, sistemas digitales y formacion con IA',
+    description: 'Qaway Lab integra estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos con IA aplicada para marcas, negocios y proyectos.',
   },
   '/estudio': {
-    title: 'Estudio Qaway | Direccion visual, marca y contenido',
-    description: 'Disena una presencia visual clara para tu marca con identidad, contenido, imagen profesional y criterio digital.',
+    title: 'Estudio Qaway | Marca, contenido e identidad visual',
+    description: 'Crea una presencia visual clara para tu marca con identidad, contenido, imagen profesional y direccion creativa aplicada.',
   },
   '/sistemas-digitales': {
     title: 'Sistemas Digitales | Automatizacion, CRM e IA para negocios',
     description: 'Implementa automatizacion, dashboards, CRM, canales digitales y sistemas con IA para ordenar la operacion de tu negocio.',
   },
   '/academy': {
-    title: 'Qaway Academy | Aprende IA, sistemas y contenido aplicado',
+    title: 'Qaway Academy | Formacion aplicada en IA y sistemas digitales',
     description: 'Cursos practicos para aprender IA, automatizacion, contenido y herramientas digitales aplicadas a proyectos reales.',
   },
   '/recursos': {
@@ -57,6 +58,16 @@ function setMeta(name, content) {
   meta.setAttribute('content', content)
 }
 
+function setPropertyMeta(property, content) {
+  let meta = document.querySelector(`meta[property="${property}"]`)
+  if (!meta) {
+    meta = document.createElement('meta')
+    meta.setAttribute('property', property)
+    document.head.appendChild(meta)
+  }
+  meta.setAttribute('content', content)
+}
+
 function setCanonical(href) {
   let link = document.querySelector('link[rel="canonical"]')
   if (!link) {
@@ -78,56 +89,63 @@ function setJsonLd(id, data) {
   script.textContent = JSON.stringify(data)
 }
 
-function removeJsonLd(id) {
-  document.getElementById(id)?.remove()
-}
-
 export default function RouteSeo() {
   const location = useLocation()
 
   useEffect(() => {
     const normalizedPath = location.pathname === '/' ? '/' : location.pathname.replace(/\/$/, '')
     const seo = seoByPath[normalizedPath] || seoByPath['/']
-    const canonicalPath = isPublicPathAllowed(normalizedPath) ? normalizedPath : '/'
+    const isAllowed = isPublicPathAllowed(normalizedPath)
+    const canonicalPath = isAllowed ? normalizedPath : '/'
     const canonicalUrl = `${SITE_URL}${canonicalPath === '/' ? '' : canonicalPath}`
+    const pageId = `${canonicalUrl}#webpage`
 
     document.title = seo.title
     setMeta('description', seo.description)
-    setMeta('robots', isPublicPathAllowed(normalizedPath) ? 'index,follow' : 'noindex,nofollow')
+    setMeta('robots', isAllowed ? 'index,follow' : 'noindex,nofollow')
+    setMeta('twitter:card', 'summary_large_image')
+    setMeta('twitter:title', seo.title)
+    setMeta('twitter:description', seo.description)
+    setMeta('twitter:image', DEFAULT_IMAGE)
+    setPropertyMeta('og:locale', 'es_PE')
+    setPropertyMeta('og:type', 'website')
+    setPropertyMeta('og:site_name', 'Qaway Lab')
+    setPropertyMeta('og:title', seo.title)
+    setPropertyMeta('og:description', seo.description)
+    setPropertyMeta('og:url', canonicalUrl)
+    setPropertyMeta('og:image', DEFAULT_IMAGE)
     setCanonical(canonicalUrl)
 
-    if (normalizedPath === '/') {
-      setJsonLd('qaway-home-schema', {
-        '@context': 'https://schema.org',
-        '@graph': [
-          {
-            '@type': 'Organization',
-            '@id': `${SITE_URL}/#organization`,
-            name: 'Qaway Lab',
-            url: SITE_URL,
-            description: 'Ecosistema de IA aplicada, estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos.',
-          },
-          {
-            '@type': 'WebSite',
-            '@id': `${SITE_URL}/#website`,
-            name: 'Qaway Lab',
-            url: SITE_URL,
-            publisher: { '@id': `${SITE_URL}/#organization` },
-          },
-          {
-            '@type': 'WebPage',
-            '@id': `${SITE_URL}/#webpage`,
-            url: SITE_URL,
-            name: seo.title,
-            description: seo.description,
-            isPartOf: { '@id': `${SITE_URL}/#website` },
-            about: { '@id': `${SITE_URL}/#organization` },
-          },
-        ],
-      })
-    } else {
-      removeJsonLd('qaway-home-schema')
-    }
+    setJsonLd('qaway-route-schema', {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Organization',
+          '@id': `${SITE_URL}/#organization`,
+          name: 'Qaway Lab',
+          url: SITE_URL,
+          description: 'Estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos con IA aplicada.',
+        },
+        {
+          '@type': 'WebSite',
+          '@id': `${SITE_URL}/#website`,
+          name: 'Qaway Lab',
+          url: SITE_URL,
+          inLanguage: 'es-PE',
+          publisher: { '@id': `${SITE_URL}/#organization` },
+        },
+        {
+          '@type': 'WebPage',
+          '@id': pageId,
+          url: canonicalUrl,
+          name: seo.title,
+          description: seo.description,
+          inLanguage: 'es-PE',
+          isPartOf: { '@id': `${SITE_URL}/#website` },
+          about: { '@id': `${SITE_URL}/#organization` },
+        },
+      ],
+    })
   }, [location.pathname])
 
   return null
