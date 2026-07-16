@@ -705,40 +705,37 @@ const sistemasSubsections = [
   {
     icon: Settings,
     title: 'Automatización administrativa',
-    description: 'Crea facturas, registra gastos, archiva documentos y gestiona correos de forma automática.',
+    description: 'Automatiza facturas, gastos, archivos y correos en un solo flujo.',
   },
   {
     icon: BarChart3,
     title: 'Dashboards operativos',
-    description: 'Paneles que muestran lo que antes estaba disperso, con indicadores y reportes para controlar avance.',
+    description: 'Visualiza indicadores y reportes clave en un solo panel.',
   },
   {
     icon: CircleUserRound,
     title: 'CRM y seguimiento comercial',
-    description: 'Gestiona clientes, oportunidades y seguimiento comercial desde un solo lugar.',
+    description: 'Organiza clientes y seguimiento comercial en un solo lugar.',
   },
   {
     icon: Bot,
     title: 'Agentes para atención y soporte',
-    description: 'Agentes que responden, clasifican y resuelven consultas con criterio operativo.',
+    description: 'Automatiza respuestas y clasifica consultas con lógica operativa.',
   },
   {
     icon: PenTool,
     title: 'Sistemas de contenido con IA',
-    description: 'Crea, gestiona y distribuye contenido asistido por inteligencia artificial.',
+    description: 'Crea, organiza y distribuye contenido con apoyo de IA.',
   },
   {
     icon: BookOpen,
     title: 'Procesos internos documentados',
-    description: 'Documenta, estandariza y mejora tus procesos operativos internos.',
+    description: 'Documenta y estandariza procesos para operar con más orden.',
   },
 ]
 
 function SistemasDigitalesSection() {
   const reduceMotion = useReducedMotion()
-  const [expanded, setExpanded] = useState(null)
-
-  const toggle = (i) => setExpanded(expanded === i ? null : i)
 
   return (
     <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f0f2ee] px-6 py-10 text-[#20201f] sm:px-10 lg:px-14">
@@ -753,9 +750,9 @@ function SistemasDigitalesSection() {
                 className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
-                Haz que tus procesos funcionen con<span className="text-[#ff4b0b]"> más orden</span>
+                Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
                 <br />
-                <span className="text-[#ff4b0b]">y menos carga manual.</span>
+                <span className="text-[#ff4b0b]">la carga manual.</span>
               </h2>
             </Reveal>
 
@@ -767,7 +764,6 @@ function SistemasDigitalesSection() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.4, delay: 0.04 * index, ease: [0.22, 1, 0.36, 1] }}
-                  onClick={() => toggle(index)}
                   className="group flex cursor-pointer items-start gap-3 border-t border-black/8 pt-3"
                 >
                   <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center border border-[#ff4b0b]/15 bg-[#ff4b0b] text-white transition-colors duration-300 group-hover:bg-[#ff4b0b]/80">
@@ -777,14 +773,8 @@ function SistemasDigitalesSection() {
                     <h3 className="text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#20201f]">
                       {title}
                     </h3>
-                    <div
-                      className={`absolute left-0 top-full z-10 transition-all duration-300 ${
-                        expanded === index
-                          ? 'translate-y-0 opacity-100'
-                          : 'translate-y-1 opacity-0 pointer-events-none lg:group-hover:translate-y-0 lg:group-hover:opacity-100'
-                      }`}
-                    >
-                      <p className="pt-0.5 text-[11px] leading-relaxed text-black/50">
+                    <div className="pointer-events-none absolute left-0 top-full z-10 w-[min(20rem,100%)] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                      <p className="pt-2 text-[11px] leading-relaxed text-black/38">
                         {description}
                       </p>
                     </div>
