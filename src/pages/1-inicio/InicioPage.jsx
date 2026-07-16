@@ -301,30 +301,47 @@ function Hero() {
 
           <div className="absolute inset-0 z-10 hidden lg:block">
             {heroCapabilities.map(({ icon: Icon, title, description, link, placement }, index) => (
-              <a
+              <motion.div
                 key={title}
-                href={link}
-                className={`group absolute ${placement} border border-[#ff4b0b]/50 bg-[#fbfaf8]/92 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white`}
+                className={`absolute ${placement}`}
+                animate={
+                  reduceMotion
+                    ? {}
+                    : {
+                        y: [0, -6, 0],
+                      }
+                }
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: index * 1.2,
+                }}
               >
-                <span className="flex items-center gap-3">
-                  <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                    <Icon size={22} strokeWidth={1.65} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#8b8c88]">
-                      {title}
+                <a
+                  href={link}
+                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                      <Icon size={22} strokeWidth={1.65} />
                     </span>
-                    <span className="mt-1 block text-xs leading-snug text-[#6d6b68]">
-                      {description}
+                    <span className="min-w-0">
+                      <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                        {title}
+                      </span>
+                      <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                        {description}
+                      </span>
                     </span>
                   </span>
-                </span>
-                <span
-                  className={`absolute h-px bg-[#ff4b0b]/80 ${
-                    index % 2 === 0 ? '-right-10 top-1/2 w-10' : '-left-10 top-1/2 w-10'
-                  }`}
-                />
-              </a>
+                  <span
+                    className={`absolute h-px bg-[#ff4b0b]/80 ${
+                      index % 2 === 0 ? '-right-10 top-1/2 w-10' : '-left-10 top-1/2 w-10'
+                    }`}
+                  />
+                </a>
+              </motion.div>
             ))}
           </div>
 
@@ -333,14 +350,14 @@ function Hero() {
               <a
                 key={title}
                 href={link}
-                className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/95 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
+                className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
               >
                 <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
                   <Icon size={21} strokeWidth={1.65} />
                 </span>
                 <span>
-                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#8b8c88]">{title}</span>
-                  <span className="mt-1 block text-xs text-[#6d6b68]">{description}</span>
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">{title}</span>
+                  <span className="mt-1 block text-xs text-[#3e3d3b]">{description}</span>
                 </span>
               </a>
             ))}

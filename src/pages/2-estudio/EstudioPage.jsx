@@ -32,14 +32,14 @@ const services = [
   {
     number: '01',
     title: 'Branding digital',
-    copy: 'Construimos, optimizamos y transformamos marcas para entornos digitales mediante estrategia, dirección visual e IA aplicada.',
+    copy: 'Diseñamos identidades visuales desde cero o renovamos tu marca actual (Rebranding) aplicando estrategia y diseño asistido por IA.',
     icon: Brush,
     image: 'estudio-proyecto-cafe.webp',
   },
   {
     number: '02',
     title: 'Contenido Visual',
-    copy: 'Creamos piezas visuales estratégicas para plataformas digitales: reels, carruseles, edición y contenido que comunica y convierte.',
+    copy: 'Producimos contenido visual para redes y canales: reels de alto impacto, carruseles educativos y edición de video lista para publicar.',
     icon: Layers3,
     image: 'estudio-servicio-contenido.webp',
     position: 'center 90%',
@@ -47,14 +47,14 @@ const services = [
   {
     number: '03',
     title: 'Estrategia Digital',
-    copy: 'Diseñamos estructuras de posicionamiento, captación y crecimiento: contenido, funnels, landing pages, campañas y conexión con sistemas digitales.',
+    copy: 'Trazamos la estrategia digital para conectar tu marca: páginas web, embudos de venta (funnels) y campañas estructuradas para captar leads.',
     icon: Image,
     image: 'estudio-servicio-estrategia.webp',
   },
   {
     number: '04',
     title: 'Presencia Profesional',
-    copy: 'Construimos y optimizamos la imagen digital de profesionales, negocios y marcas personales para LinkedIn, web y redes.',
+    copy: 'Optimizamos tu imagen profesional en canales clave (como LinkedIn e Instagram): retratos, biografías y perfiles que proyectan autoridad.',
     icon: CircleUserRound,
     image: 'estudio-servicio-presencia.webp',
   },
@@ -64,7 +64,7 @@ const featuredServices = services
 
 const phases = [
   ['01', 'Diagnóstico visual', 'Entendemos el proyecto, el uso final y el material disponible.'],
-  ['02', 'Selección y dirección', 'Definimos qué conservar, mejorar, reconstruir o generar.'],
+  ['02', 'Curaduría de activos', 'Definimos qué conservar de tu marca, qué mejorar y qué generar usando herramientas de vanguardia.'],
   ['03', 'Intervención híbrida', 'Integramos IA, diseño, edición y postproducción visual.'],
   ['04', 'Entrega adaptable', 'Organizamos los resultados por canal, formato y objetivo.'],
 ]
@@ -170,11 +170,11 @@ function Hero() {
           <div className="vl-hero__panel-mark" />
           <p className="vl-hero__panel-kicker">Visual Lab</p>
           <h2>
-            Dirección visual<br />
-            para conectar.
+            Identidad visual<br />
+            que vende.
           </h2>
           <div className="vl-hero__panel-rule" />
-          <p>Diseñamos identidades modernas e imágenes con IA para que tu marca se presente con coherencia y claridad.</p>
+          <p>Creamos identidades de marca y material gráfico con Inteligencia Artificial para que tu marca se proyecte profesional, moderna y coherente.</p>
 
           <div className="vl-hero__panel-card">
             <div className="vl-hero__panel-icon"><Sparkles size={20} strokeWidth={1.6} /></div>
@@ -191,14 +191,14 @@ function Hero() {
 
       <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
         <div className="vl-hero__main">
-          <p className="vl-eyebrow">Visual Lab / dirección visual + contenido</p>
+          <p className="vl-eyebrow">Estudio Creativo / Dirección Visual, Branding y Contenido</p>
           <h1>
             Menos<br />
             piezas sueltas.<br />
-            <em>Más<br />Dirección<br />Visual.</em>
+            <em>Más<br />claridad y<br />confianza.</em>
           </h1>
           <p className="vl-hero__copy">
-            Diseñamos imágenes, sistemas y contenido para que tu marca se vea clara, actual y coherente en web, redes y presentaciones.
+            Diseñamos identidades visuales, sistemas gráficos y contenido premium para que tu negocio se vea profesional, confiable y listo para vender.
           </p>
           <div className="vl-chips">
             <span>Branding</span>
@@ -230,8 +230,8 @@ function Hero() {
         <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
         <div className="vl-hero__badge-icon"><Brush size={22} /></div>
         <div>
-          <strong>Branding digital</strong>
-          <span>Identidad y sistemas visuales.</span>
+          <strong>Branding y Rebranding</strong>
+          <span>Identidades que destacan y se recuerdan.</span>
         </div>
       </motion.a>
 
@@ -250,8 +250,8 @@ function Hero() {
         <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
         <div className="vl-hero__badge-icon"><Users size={22} /></div>
         <div>
-          <strong>Aprende aplicando</strong>
-          <span>Metodología clara, humana y accionable.</span>
+          <strong>Diseño Híbrido</strong>
+          <span>Estética premium potenciada con Inteligencia Artificial.</span>
         </div>
       </motion.a>
 
@@ -340,8 +340,8 @@ function BrandingSpotlight() {
           <SectionPrimitive
             uppercase
             kicker="Branding digital / 01"
-            title={<>TU MARCA NO ES<br />TU <span>LOGO.</span><br />ES LO QUE LA<br />HACE <span>RECONOCIBLE.</span></>}
-            body="Construimos una dirección visual capaz de vivir en cada punto de contacto: identidad, paleta, moodboard, contenido y presencia digital."
+            title={<>TU MARCA NO ES<br />SOLO UN <span>LOGOTIPO.</span><br />ES LO QUE TE<br />HACE <span>MEMORABLE.</span></>}
+            body="Diseñamos un sistema visual estratégico que da vida a tu marca en cada canal: desde tu paleta de colores y logotipo, hasta tu web y presentaciones."
             cta={
               <div className="flex flex-wrap items-center gap-6 mt-[36px]">
                 <a
@@ -391,7 +391,7 @@ function Services() {
         <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ textAlign: 'center', width: '100%' }}>
             
-            <h2 style={{ fontSize: 'clamp(2.2rem, 3.6vw, 4rem)', textAlign: 'center', margin: '0 auto' }}>Cuatro áreas<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+            <h2 style={{ fontSize: 'clamp(2.2rem, 3.6vw, 4rem)', textAlign: 'center', margin: '0 auto' }}>Servicios creativos<br /><span>para que tu marca destaque en entornos digitales<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
           </div>
         </motion.div>
 
@@ -457,7 +457,7 @@ function TransformacionVisualCarousel() {
           <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Transformación visual / 04</p>
           <h2>TU IMAGEN TAMBIÉN<br /><span>COMUNICA PROFESIONALISMO.</span></h2>
           <p>
-            Mejoramos la forma en que profesionales, negocios y marcas se presentan en medios digitales: perfiles, fotografías, productos, piezas comerciales y material visual que necesita verse más claro, cuidado y confiable.
+            ¿Tu marca se ve desordenada o desactualizada? Elevamos la calidad de tus imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para proyectar confianza y excelencia desde el primer segundo.
           </p>
 
           {/* Navigation Tabs (Vertical Stack) */}
@@ -544,7 +544,7 @@ function ContentSystem() {
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
           <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Contenido para redes / 02</p>
-          <h2>Una marca activa.<br /><span>Muchos formatos, una sola voz.</span></h2>
+          <h2>Contenido que se reconoce al instante.<br /><span>En cualquier canal.</span></h2>
           <p>
             Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca.
           </p>
@@ -609,7 +609,7 @@ function Method() {
         <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
             <p className="vl-kicker vl-kicker--dark">Método híbrido / 05</p>
-            <h2 style={{ marginBottom: 0 }}>IA para acelerar.<br /><span style={{ color: '#fff' }}>Criterio humano para decidir.</span></h2>
+            <h2 style={{ marginBottom: 0 }}>Tecnología para acelerar procesos.<br /><span style={{ color: '#fff' }}>Criterio humano para asegurar la excelencia.</span></h2>
           </div>
         </motion.div>
 
