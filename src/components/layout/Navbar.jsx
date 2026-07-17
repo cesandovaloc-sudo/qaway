@@ -94,7 +94,13 @@ export default function Navbar({ variant: explicitVariant }) {
     const handleScroll = () => {
       const currentY = window.scrollY
       setScrolled(currentY > 20)
-      setHeaderVisible(true) // Siempre fijo
+      
+      if (currentY > lastScrollY.current && currentY > 50) {
+        setHeaderVisible(false) // Ocultar al bajar
+      } else {
+        setHeaderVisible(true)  // Mostrar al subir
+      }
+      
       lastScrollY.current = currentY
     }
     window.addEventListener('scroll', handleScroll, { passive: true })

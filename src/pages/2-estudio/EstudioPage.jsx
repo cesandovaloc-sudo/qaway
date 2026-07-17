@@ -406,7 +406,7 @@ function Services() {
         <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ textAlign: 'center', width: '100%' }}>
             
-            <h2 style={{ fontSize: 'clamp(2.7rem, 4.1vw, 4.5rem)', textAlign: 'center', margin: '0 auto', textTransform: 'none', fontWeight: 550 }}>Servicios Creativos<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+            <h2 style={{ fontSize: 'clamp(2.9rem, 4.3vw, 4.7rem)', textAlign: 'center', margin: '0 auto', textTransform: 'none', fontWeight: 550 }}>Servicios Creativos<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
           </div>
         </motion.div>
 
