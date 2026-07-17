@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
+﻿import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
@@ -32,14 +32,14 @@ const services = [
   {
     number: '01',
     title: 'Branding digital',
-    copy: 'Diseñamos identidades visuales desde cero o renovamos tu marca actual (Rebranding) aplicando estrategia y diseño asistido por IA.',
+    copy: 'DiseÃ±amos identidades visuales desde cero o renovamos tu marca actual (Rebranding) aplicando estrategia y diseÃ±o asistido por IA.',
     icon: Brush,
     image: 'estudio-proyecto-cafe.webp',
   },
   {
     number: '02',
     title: 'Contenido Visual',
-    copy: 'Producimos contenido visual para redes y canales: reels de alto impacto, carruseles educativos y edición de video lista para publicar.',
+    copy: 'Producimos contenido visual para redes y canales: reels de alto impacto, carruseles educativos y ediciÃ³n de video lista para publicar.',
     icon: Layers3,
     image: 'estudio-servicio-contenido.webp',
     position: 'center 90%',
@@ -47,14 +47,14 @@ const services = [
   {
     number: '03',
     title: 'Estrategia Digital',
-    copy: 'Trazamos la estrategia digital para conectar tu marca: páginas web, embudos de venta (funnels) y campañas estructuradas para captar leads.',
+    copy: 'Trazamos la estrategia digital para conectar tu marca: pÃ¡ginas web, embudos de venta (funnels) y campaÃ±as estructuradas para captar leads.',
     icon: Image,
     image: 'estudio-servicio-estrategia.webp',
   },
   {
     number: '04',
     title: 'Presencia Profesional',
-    copy: 'Optimizamos tu imagen profesional en canales clave (como LinkedIn e Instagram): retratos, biografías y perfiles que proyectan autoridad.',
+    copy: 'Optimizamos tu imagen profesional en canales clave (como LinkedIn e Instagram): retratos, biografÃ­as y perfiles que proyectan autoridad.',
     icon: CircleUserRound,
     image: 'estudio-servicio-presencia.webp',
   },
@@ -63,27 +63,27 @@ const services = [
 const featuredServices = services
 
 const phases = [
-  ['01', 'Diagnóstico visual', 'Entendemos el proyecto, el uso final y el material disponible.'],
-  ['02', 'Curaduría de activos', 'Definimos qué conservar de tu marca, qué mejorar y qué generar usando herramientas de vanguardia.'],
-  ['03', 'Intervención híbrida', 'Integramos IA, diseño, edición y postproducción visual.'],
+  ['01', 'DiagnÃ³stico visual', 'Entendemos el proyecto, el uso final y el material disponible.'],
+  ['02', 'CuradurÃ­a de activos', 'Definimos quÃ© conservar de tu marca, quÃ© mejorar y quÃ© generar usando herramientas de vanguardia.'],
+  ['03', 'IntervenciÃ³n hÃ­brida', 'Integramos IA, diseÃ±o, ediciÃ³n y postproducciÃ³n visual.'],
   ['04', 'Entrega adaptable', 'Organizamos los resultados por canal, formato y objetivo.'],
 ]
 
 const brandingProjects = [
   {
     name: 'Hospitalidad',
-    description: 'Identidad táctil, packaging y experiencia de marca.',
+    description: 'Identidad tÃ¡ctil, packaging y experiencia de marca.',
     image: `${ASSET}/estudio-proyecto-hospitalidad.webp`,
     palette: ['#111111', '#f2f1ef', '#a86137', '#fd5605'],
   },
   {
     name: 'Arquitectura',
-    description: 'Sistema visual aplicado a marca, soporte y presentación.',
+    description: 'Sistema visual aplicado a marca, soporte y presentaciÃ³n.',
     image: `${ASSET}/estudio-proyecto-arquitectura.webp`,
     palette: ['#111111', '#f2f1ef', '#2850b8', '#fd5605'],
   },
   {
-    name: 'Café de autor',
+    name: 'CafÃ© de autor',
     description: 'Packaging, piezas editoriales y sistema de producto.',
     image: `${ASSET}/estudio-proyecto-cafe.webp`,
     palette: ['#111111', '#f2f1ef', '#a86137', '#fd5605'],
@@ -157,7 +157,7 @@ function Hero() {
         transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
       >
-        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
+        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.png`} alt="TransformaciÃ³n visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
       </motion.div>
       
       <div className="vl-hero__right-pane">
@@ -168,30 +168,19 @@ function Hero() {
           transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="vl-hero__panel-mark" />
-          <p className="vl-hero__panel-kicker">Visual Lab</p>
+          <p className="vl-hero__panel-kicker">visual lab</p>
           <h2>
-            Identidad visual<br />
-            que vende.
+            identidad visual<br />
+            lista para vender.
           </h2>
           <div className="vl-hero__panel-rule" />
-          <p>Creamos identidades de marca y material gráfico con Inteligencia Artificial para que tu marca se proyecte profesional, moderna y coherente.</p>
-
-          <div className="vl-hero__panel-card">
-            <div className="vl-hero__panel-icon"><Sparkles size={20} strokeWidth={1.6} /></div>
-            <div>
-              <strong>Criterio estético</strong>
-              <span>Diseño que eleva tu marca.</span>
-            </div>
-          </div>
-
-
-        </motion.div>
+          <p>Creamos identidad de marca y piezas graficas para que tu marca se vea clara, actual y profesional en cada punto de contacto.</p>        </motion.div>
       </div>
 
 
       <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
         <div className="vl-hero__main">
-          <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio Creativo / Dirección Visual, Branding y Contenido</p>
+          <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio creativo / Branding, contenido y presencia digital</p>
           <h1>
             Creamos la<br />
             identidad visual<br />
@@ -203,14 +192,14 @@ function Hero() {
           </p>
           <div className="vl-chips">
             <span>Branding</span>
-            <span>Contenido Visual</span>
-            <span>Estrategia Digital</span>
+            <span>Contenido visual</span>
+            <span>Presencia digital</span>
           </div>
           <div className="vl-actions">
               <a
                 href="#diagnostico"
                 className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta">
-                Construir mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                Quiero mejorar mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
           </div>
         </div>
@@ -235,7 +224,7 @@ function Hero() {
                 Branding
               </span>
               <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                Identidades que destacan y se recuerdan.
+                Una identidad clara, propia y facil de reconocer.
               </span>
             </span>
           </span>
@@ -259,10 +248,10 @@ function Hero() {
             </span>
             <span className="min-w-0">
               <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                Contenido Visual
+                Contenido visual
               </span>
               <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                Material gráfico y videos premium.
+                Piezas y videos que se ven parte de la misma marca.
               </span>
             </span>
           </span>
@@ -273,7 +262,7 @@ function Hero() {
       <div className="vl-hero__rail">
         <span>01</span>
         <div />
-        <p>Material original<br />Intervención<br />Resultado</p>
+        <p>Material original<br />IntervenciÃ³n<br />Resultado</p>
       </div>
 
 
@@ -352,20 +341,18 @@ function BrandingSpotlight() {
           whileInView="visible"
           viewport={{ once: true, amount: .22 }}
         >
-          <div style={{ paddingBottom: '32px' }}>
-            <Kicker>Branding digital / 01</Kicker>
-          </div>
           <SectionPrimitive
+            kicker="Branding digital / 01"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
-            title={<>Tu marca no es<br />solo un <span>logotipo.</span><br />Es lo que te<br />hace <span>memorable.</span></>}
-            body="Diseñamos un sistema visual estratégico que da vida a tu marca en cada canal: desde tu paleta de colores y logotipo, hasta tu web y presentaciones."
+            title={<>Creamos una identidad<br />visual clara para tu marca</>}
+            body="Creamos una identidad visual para que tu marca se vea clara, coherente y bien presentada en redes, web, presentaciones y piezas comerciales."
             cta={
-              <div className="flex flex-wrap items-center gap-6 mt-1">
+              <div className="flex flex-wrap items-center gap-6">
                 <a
                   href="#diagnostico"
                   className="vl-button vl-button--acid vl-branding__cta"
                 >
-                  Construir mi marca <ArrowRight size={16} />
+                  Quiero construir mi marca <ArrowRight size={16} />
                 </a>
                 {/*
                 <Link
@@ -378,7 +365,7 @@ function BrandingSpotlight() {
             }
           />
           <motion.div className="vl-branding__deliverables">
-            {['Logo e identidad', 'Moodboard', 'Paleta y tipografía', 'Sistema visual'].map((item, index) => (
+            {['Logo e identidad', 'Moodboard', 'Paleta y tipografÃ­a', 'Sistema visual'].map((item, index) => (
               <motion.span
                 key={item}
                 initial={{ opacity: 0, y: 12 }}
@@ -449,21 +436,21 @@ function TransformacionVisualCarousel() {
       title: 'Presencia Profesional',
       beforeImage: `${ASSET}/estudio-transformacion-presencia-antes.webp`,
       afterImage: `${ASSET}/estudio-transformacion-presencia-despues.webp`,
-      alt: 'Transformación de presencia profesional'
+      alt: 'TransformaciÃ³n de presencia profesional'
     },
     {
       id: 'producto',
-      title: 'Optimización Visual',
+      title: 'OptimizaciÃ³n Visual',
       beforeImage: `${ASSET}/estudio-transformacion-producto-antes.webp`, 
       afterImage: `${ASSET}/estudio-transformacion-producto-despues.webp`,
-      alt: 'Optimización de producto y visuales'
+      alt: 'OptimizaciÃ³n de producto y visuales'
     },
     {
       id: 'restauracion',
-      title: 'Restauración',
+      title: 'RestauraciÃ³n',
       beforeImage: `${ASSET}/estudio-transformacion-restauracion-antes.webp`, 
       afterImage: `${ASSET}/estudio-transformacion-restauracion-despues.webp`,
-      alt: 'Fotografía antigua restaurada'
+      alt: 'FotografÃ­a antigua restaurada'
     }
   ];
 
@@ -471,14 +458,13 @@ function TransformacionVisualCarousel() {
     <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system" style={{ gridTemplateColumns: '.95fr .95fr', gap: '80px' }}>
         <motion.div {...reveal} className="vl-content-system__copy">
-          <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Transformación visual / 04</p>
-          <h2>TU IMAGEN TAMBIÉN<br /><span>COMUNICA PROFESIONALISMO.</span></h2>
-          <p>
-            ¿Tu marca se ve desordenada o desactualizada? Elevamos la calidad de tus imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para proyectar confianza y excelencia desde el primer segundo.
-          </p>
-
-          {/* Navigation Tabs (Vertical Stack) */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '32px' }}>
+          <SectionPrimitive
+            kicker="TransformaciÃ³n visual / 04"
+            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+            title={<>Tu imagen tambiÃ©n<br /><span style={{ color: 'var(--vl-acid)' }}>comunica profesionalismo.</span></>}
+            body="Â¿Tu marca se ve desordenada o desactualizada? Elevamos la calidad de tus imÃ¡genes, fotografÃ­as de producto, perfiles profesionales y piezas comerciales para proyectar confianza y excelencia desde el primer segundo."
+            cta={
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px' }}>
             {slides.map((slide, index) => (
               <motion.button
                 key={slide.id}
@@ -514,6 +500,8 @@ function TransformacionVisualCarousel() {
               </motion.button>
             ))}
           </div>
+            }
+          />
         </motion.div>
 
         <motion.div {...reveal} className="vl-content-showcase" style={{ padding: 0, background: 'none' }}>
@@ -560,15 +548,13 @@ function ContentSystem() {
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
-          <div style={{ paddingBottom: '32px' }}>
-            <Kicker>Contenido para redes / 02</Kicker>
-          </div>
           <SectionPrimitive
+            kicker="Contenido para redes sociales / 02"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-            title={<>Contenido que se<br />reconoce al instante.<br /><span style={{ color: 'var(--vl-acid)' }}>En cualquier canal.</span></>}
-            body="Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca."
+            title={<>Diseñamos contenido visual<br />para una marca coherente</>}
+            body="Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma direccion visual y te ayuden a posicionarte."
             cta={
-              <div className="vl-format-rail !mt-1">
+              <div className="vl-format-rail">
                 {formats.map((item, index) => (
                   <motion.span
                     key={item}
@@ -604,13 +590,13 @@ function ContentSystem() {
             loop
             muted
             playsInline
-            aria-label="Proceso de concepto, producción y edición de contenido para redes sociales"
+            aria-label="Proceso de concepto, producciÃ³n y ediciÃ³n de contenido para redes sociales"
           />
           <div className="vl-content-showcase__veil" />
 
           <div className="vl-content-showcase__status">
             <span><i /> Reel</span>
-            <span>Edición</span>
+            <span>EdiciÃ³n</span>
             <span>Social system</span>
           </div>
         </motion.div>
@@ -627,8 +613,8 @@ function Method() {
       <div className="vl-shell">
         <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
-            <p className="vl-kicker vl-kicker--dark">Método híbrido / 05</p>
-            <h2 style={{ marginBottom: 0 }}>Tecnología para acelerar procesos.<br /><span style={{ color: '#fff' }}>Criterio humano para asegurar la excelencia.</span></h2>
+            <p className="vl-kicker vl-kicker--dark">MÃ©todo hÃ­brido / 05</p>
+            <h2 style={{ marginBottom: 0 }}>TecnologÃ­a para acelerar procesos.<br /><span style={{ color: '#fff' }}>Criterio humano para asegurar la excelencia.</span></h2>
           </div>
         </motion.div>
 
@@ -677,14 +663,14 @@ function Method() {
             ))}
           </div>
           <motion.figure {...reveal} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
-            <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
+            <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="DirecciÃ³n humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
           </motion.figure>
         </div>
 
         <div className="vl-trust" style={{ marginTop: '20px' }}>
           {[
             [LockKeyhole, 'Archivos protegidos'],
-            [CircleUserRound, 'Revisión estética humana'],
+            [CircleUserRound, 'RevisiÃ³n estÃ©tica humana'],
             [Layers3, 'Entregables organizados'],
           ].map(([Icon, label]) => <div key={label}><Icon size={18} /><span>{label}</span></div>)}
         </div>
@@ -736,7 +722,7 @@ function Diagnostic() {
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
             access_key: apiKey.trim(),
-            subject: `Nueva consulta Estudio: ${lead.interest || 'Orientación'}`,
+            subject: `Nueva consulta Estudio: ${lead.interest || 'OrientaciÃ³n'}`,
             from_name: 'Visual Lab Estudio',
             name: lead.name,
             phone: lead.phone,
@@ -750,7 +736,7 @@ function Diagnostic() {
       setSubmitted(true)
     } catch (e) {
       console.error(e)
-      setSubmitError('Hubo un error al enviar tu solicitud. Inténtalo de nuevo.')
+      setSubmitError('Hubo un error al enviar tu solicitud. IntÃ©ntalo de nuevo.')
     } finally {
       setSubmitting(false)
     }
@@ -771,19 +757,19 @@ function Diagnostic() {
               {submitted ? (
                 <div className="academy-form-success">
                   <div><Check size={28} /></div>
-                  <h3>¡Consulta enviada!</h3>
+                  <h3>Â¡Consulta enviada!</h3>
                   <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
                   <button type="button" onClick={resetForm}>Enviar otro mensaje</button>
                 </div>
               ) : (
                 <>
                   <div className="academy-field">
-                    <label htmlFor="academy-name">¿Cómo te llamas?</label>
+                    <label htmlFor="academy-name">Â¿CÃ³mo te llamas?</label>
                     <input type="text" id="academy-name" name="name" required placeholder="Tu nombre completo" />
                   </div>
                   <div className="academy-field-row">
                     <div className="academy-field">
-                      <label htmlFor="academy-phone">Teléfono</label>
+                      <label htmlFor="academy-phone">TelÃ©fono</label>
                       <input type="tel" id="academy-phone" name="phone" required placeholder="+51 999 999 999" />
                     </div>
                     <div className="academy-field">
@@ -794,35 +780,35 @@ function Diagnostic() {
 
                   <div className="academy-field-row">
                     <div className="academy-field">
-                      <label htmlFor="academy-profile">¿A qué te dedicas?</label>
+                      <label htmlFor="academy-profile">Â¿A quÃ© te dedicas?</label>
                       <select id="academy-profile" name="profile" required>
                         <option value="">Selecciona tu perfil</option>
                         <option value="Profesional / Consultor">Profesional / Consultor</option>
-                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                        <option value="Emprendedor / DueÃ±o de negocio">Emprendedor / DueÃ±o de negocio</option>
                         <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
                         <option value="Equipo de empresa">Equipo de empresa</option>
                         <option value="Otro">Otro</option>
                       </select>
                     </div>
                     <div className="academy-field">
-                      <label htmlFor="academy-interest">¿Qué Servicio te interesa?</label>
+                      <label htmlFor="academy-interest">Â¿QuÃ© Servicio te interesa?</label>
                       <select id="academy-interest" name="interest" required>
-                        <option value="">Selecciona un interés</option>
+                        <option value="">Selecciona un interÃ©s</option>
                         <option value="Identidad Visual">Identidad Visual</option>
                         <option value="Landing Page o Web">Landing Page o Web</option>
                         <option value="Contenido para Redes">Contenido para Redes</option>
                         <option value="Presencia Digital Completa">Presencia Digital Completa</option>
-                        <option value="Orientación general / Otro">Orientación general / Otro</option>
+                        <option value="OrientaciÃ³n general / Otro">OrientaciÃ³n general / Otro</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="academy-field">
-                    <label htmlFor="academy-message">Cuéntanos un poco más</label>
-                    <textarea id="academy-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
+                    <label htmlFor="academy-message">CuÃ©ntanos un poco mÃ¡s</label>
+                    <textarea id="academy-message" name="message" rows="4" placeholder="Â¿QuÃ© quieres lograr o quÃ© dificultad estÃ¡s intentando resolver?" />
                   </div>
                   <button type="submit" className="academy-submit-button" disabled={submitting}>
-                    {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÓN'}
+                    {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÃ“N'}
                     <Send size={17} />
                   </button>
                   {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
@@ -861,3 +847,13 @@ export default function EstudioPage() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+

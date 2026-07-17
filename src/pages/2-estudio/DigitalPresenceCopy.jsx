@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, useAnimation } from 'framer-motion';
-import { SectionPrimitive, Kicker } from '@/components/typography';
+import { SectionPrimitive } from '@/components/typography';
 
 const ASSET = '/assets/pages/2-estudio';
 
@@ -63,10 +63,8 @@ export default function DigitalPresenceCopy() {
               viewport={{ once: true, amount: 0.16 }}
               transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div style={{ paddingBottom: '32px' }}>
-                <Kicker>Estrategia digital / 03</Kicker>
-              </div>
               <SectionPrimitive
+                kicker="Estrategia digital / 03"
                 titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
                 title={<>De la identidad<br /><span style={{ color: '#666860' }}>a una marca que ya vive online.</span></>}
               />

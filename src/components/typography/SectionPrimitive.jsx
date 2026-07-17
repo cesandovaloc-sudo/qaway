@@ -13,17 +13,23 @@ export default function SectionPrimitive({
 }) {
   return (
     <div className={className}>
-      {kicker && <Kicker className="mb-5">{kicker}</Kicker>}
+      {kicker && (
+        <div style={{ paddingBottom: '32px' }}>
+          <Kicker>{kicker}</Kicker>
+        </div>
+      )}
       <SectionHeading size="default" tracking="-0.055em" leading="0.87" className={uppercase ? 'uppercase' : titleClassName}>
         {title}
       </SectionHeading>
       {body && (
-        <BodyText className="mt-4 max-w-md">
-          {body}
-        </BodyText>
+        <div style={{ paddingTop: '24px' }}>
+          <BodyText className="max-w-[480px] !text-[#666860] !leading-[1.7] !text-[16px]">
+            {body}
+          </BodyText>
+        </div>
       )}
       {cta && (
-        <div className="mt-6">
+        <div style={{ paddingTop: '28px' }}>
           {cta}
         </div>
       )}

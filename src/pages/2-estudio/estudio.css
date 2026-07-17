@@ -1,4 +1,4 @@
-.estudio-page {
+﻿.estudio-page {
   --vl-ink: #0d0f0d;
   --vl-paper: #f8f9f7;
   --vl-acid: #ff4b0b;
@@ -46,9 +46,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end; 
+  justify-content: center; 
   isolation: isolate;
-  padding-top: 180px;
+  padding-top: 120px;
   padding-bottom: 8px; 
 }
 
@@ -115,7 +115,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 48px;
-  margin-top: -110px;
+  margin-top: 0;
 }
 
 @media (min-width: 1024px) {
@@ -128,13 +128,13 @@
 .estudio-page .vl-hero__main {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; 
+  justify-content: center; 
   padding: clamp(24px, 5vh, 40px) 0;
   background: transparent;
   border-radius: 0;
   position: relative;
   height: fit-content;
-  align-self: end;
+  align-self: center;
 }
 
 .estudio-page .vl-hero__main::before {
@@ -583,7 +583,6 @@
 }
 
 .estudio-page .vl-branding h2 span { color: var(--vl-acid); }
-.estudio-page .vl-branding__copy p:not(.vl-kicker) { max-width: 480px; margin-top: 16px !important; margin-bottom: 0px !important; color: #666860; line-height: 1.7; }
 
 .estudio-page .vl-branding__deliverables { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 28px; border-top: 1px solid rgba(13,15,13,.16); border-bottom: 1px solid rgba(13,15,13,.16); }
 .estudio-page .vl-branding__deliverables span {
@@ -748,7 +747,7 @@
 /* ==================== CONTENT SYSTEM ==================== */
 
 .estudio-page .vl-content-system { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: center; }
-.estudio-page .vl-content-system__copy p:not(.vl-kicker) { max-width: 480px; margin-top: 16px !important; margin-bottom: 0px !important; color: #666860; line-height: 1.7; }
+
 .estudio-page .vl-format-rail { display: flex; margin-top: 32px; border-top: 1px solid rgba(13,15,13,.2); border-bottom: 1px solid rgba(13,15,13,.2); }
 .estudio-page .vl-format-rail span { flex: 1; padding: 16px 8px; text-align: center; font: 10px monospace; }
 .estudio-page .vl-format-rail span + span { border-left: 1px solid rgba(13,15,13,.2); }
@@ -1408,4 +1407,5 @@
     background: linear-gradient(var(--vl-acid), rgba(7, 9, 7, 0.15));
   }
 }
+
 
