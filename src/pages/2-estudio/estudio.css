@@ -394,9 +394,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: rgba(13,15,13,.5);
-  font-size: 10px;
-  font-weight: 600;
+  color: rgba(13,15,13,.65);
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: .04em;
 }
 
@@ -479,7 +479,7 @@
   }
 }
 
-.estudio-page .vl-hero h1 em { display: block; color: var(--vl-acid); font-style: normal; }
+.estudio-page .vl-hero h1 em { display: inline; color: var(--vl-acid); font-style: normal; }
 .estudio-page .vl-hero__copy { margin-top: 20px !important; max-width: 600px; color: #676960; font-size: 17px; line-height: 1.65; }
 .estudio-page .vl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 30px; margin-top: 36px; }
 

@@ -193,9 +193,10 @@ function Hero() {
         <div className="vl-hero__main">
           <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio Creativo / Dirección Visual, Branding y Contenido</p>
           <h1>
-            Menos<br />
-            piezas sueltas.<br />
-            <em>Más<br />claridad y<br />confianza.</em>
+            Creamos la<br />
+            identidad visual<br />
+            y&nbsp;<em>presencia digital<br />
+            para tu marca.</em>
           </h1>
           <p className="vl-hero__copy">
             Diseñamos identidades visuales, sistemas gráficos y contenido premium para que tu negocio se vea profesional, confiable y listo para vender.
@@ -215,45 +216,59 @@ function Hero() {
         </div>
       </motion.div>
 
-      <motion.a 
-        href="#branding"
-        className="vl-hero__badge vl-hero__badge--branding"
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 0.5, scale: 1, y: [0, -10] }}
-        whileHover={{ opacity: 1, y: -16, transition: { duration: 0.3, ease: 'easeOut' } }}
-        transition={{ 
-          opacity: { delay: 0.4, duration: 0.6 },
-          scale: { delay: 0.4, duration: 0.6 },
-          y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 }
-        }}
+      <motion.div
+        className="absolute z-10 hidden lg:block"
+        style={{ top: '58%', right: 'calc(20% + 20px)' }}
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
       >
-        <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-        <div className="vl-hero__badge-icon"><Brush size={22} /></div>
-        <div>
-          <strong>Branding y Rebranding</strong>
-          <span>Identidades que destacan y se recuerdan.</span>
-        </div>
-      </motion.a>
+        <a
+          href="#branding"
+          className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+        >
+          <span className="flex items-center gap-3">
+            <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+              <Brush size={22} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                Branding y Rebranding
+              </span>
+              <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                Identidades que destacan y se recuerdan.
+              </span>
+            </span>
+          </span>
+          <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+        </a>
+      </motion.div>
 
-      <motion.a 
-        href="#servicios"
-        className="vl-hero__badge vl-hero__badge--academy"
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 0.5, scale: 1, y: [0, -8] }}
-        whileHover={{ opacity: 1, y: -16, transition: { duration: 0.3, ease: 'easeOut' } }}
-        transition={{ 
-          opacity: { delay: 0.55, duration: 0.6 },
-          scale: { delay: 0.55, duration: 0.6 },
-          y: { repeat: Infinity, repeatType: "reverse", duration: 4.5, ease: "easeInOut", delay: 1.5 }
-        }}
+      <motion.div
+        className="absolute z-10 hidden lg:block"
+        style={{ top: '72%', right: 'calc(20% + 240px)' }}
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
       >
-        <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-        <div className="vl-hero__badge-icon"><Users size={22} /></div>
-        <div>
-          <strong>Diseño Híbrido</strong>
-          <span>Estética premium potenciada con Inteligencia Artificial.</span>
-        </div>
-      </motion.a>
+        <a
+          href="#servicios"
+          className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+        >
+          <span className="flex items-center gap-3">
+            <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+              <Users size={22} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                Diseño Híbrido
+              </span>
+              <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                Estética premium potenciada con IA.
+              </span>
+            </span>
+          </span>
+          <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+        </a>
+      </motion.div>
 
       <div className="vl-hero__rail">
         <span>01</span>
