@@ -56,7 +56,7 @@
 .estudio-page .vl-hero__veil,
 .estudio-page .vl-hero__spotlight,
 .estudio-page .vl-hero__grid { position: absolute; inset: 0; width: 100%; height: 100%; }
-.estudio-page .vl-hero__image { z-index: -4; object-fit: cover; object-position: center; top: -20%; height: 120%; }
+.estudio-page .vl-hero__image { z-index: -4; object-fit: cover; object-position: center; top: -20%; height: 110%; }
 
 .estudio-page .vl-hero__veil {
   z-index: -3;
@@ -120,7 +120,7 @@
 
 @media (min-width: 1024px) {
   .estudio-page .vl-hero__content {
-    grid-template-columns: minmax(auto, 680px); /* Limit width of the left block */
+    grid-template-columns: minmax(auto, 655px); /* Limit width of the left block */
     justify-content: start;
   }
 }

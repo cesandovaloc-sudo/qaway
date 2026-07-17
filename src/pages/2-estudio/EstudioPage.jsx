@@ -157,7 +157,7 @@ function Hero() {
         transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
       >
-        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.10) translate(2%, 19%)' }} />
+        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
       </motion.div>
       
       <div className="vl-hero__right-pane">
@@ -191,7 +191,7 @@ function Hero() {
 
       <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
         <div className="vl-hero__main">
-          <p className="vl-eyebrow">Estudio Creativo / Dirección Visual, Branding y Contenido</p>
+          <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio Creativo / Dirección Visual, Branding y Contenido</p>
           <h1>
             Menos<br />
             piezas sueltas.<br />
