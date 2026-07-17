@@ -199,7 +199,7 @@ function Hero() {
             para tu marca.</em>
           </h1>
           <p className="vl-hero__copy">
-            Diseñamos identidades visuales, sistemas gráficos y contenido premium para que tu negocio se vea profesional, confiable y listo para vender.
+            Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
           </p>
           <div className="vl-chips">
             <span>Branding</span>
@@ -209,8 +209,8 @@ function Hero() {
           <div className="vl-actions">
               <a
                 href="#diagnostico"
-                className="vl-button vl-button--acid vl-branding__cta">
-                Construir mi marca <ArrowRight size={16} />
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta">
+                Construir mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
           </div>
         </div>
@@ -232,7 +232,7 @@ function Hero() {
             </span>
             <span className="min-w-0">
               <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                Branding y Rebranding
+                Branding
               </span>
               <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
                 Identidades que destacan y se recuerdan.
@@ -259,10 +259,10 @@ function Hero() {
             </span>
             <span className="min-w-0">
               <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                Diseño Híbrido
+                Contenido Visual
               </span>
               <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                Estética premium potenciada con IA.
+                Material gráfico y videos premium.
               </span>
             </span>
           </span>
@@ -406,7 +406,7 @@ function Services() {
         <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ textAlign: 'center', width: '100%' }}>
             
-            <h2 style={{ fontSize: 'clamp(2.2rem, 3.6vw, 4rem)', textAlign: 'center', margin: '0 auto' }}>Servicios creativos<br /><span>para que tu marca destaque en entornos digitales<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+            <h2 style={{ fontSize: 'clamp(2.7rem, 4.1vw, 4.5rem)', textAlign: 'center', margin: '0 auto', textTransform: 'none', fontWeight: 550 }}>Servicios Creativos<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
           </div>
         </motion.div>
 
