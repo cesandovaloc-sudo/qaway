@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
-import { SectionPrimitive } from '@/components/typography'
+import { SectionPrimitive, Kicker } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
 import {
   ArrowDown,
@@ -352,8 +352,10 @@ function BrandingSpotlight() {
           whileInView="visible"
           viewport={{ once: true, amount: .22 }}
         >
+          <div style={{ paddingBottom: '32px' }}>
+            <Kicker>Branding digital / 01</Kicker>
+          </div>
           <SectionPrimitive
-            kicker="Branding digital / 01"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
             title={<>Tu marca no es<br />solo un <span>logotipo.</span><br />Es lo que te<br />hace <span>memorable.</span></>}
             body="Diseñamos un sistema visual estratégico que da vida a tu marca en cada canal: desde tu paleta de colores y logotipo, hasta tu web y presentaciones."
@@ -558,8 +560,10 @@ function ContentSystem() {
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
+          <div style={{ paddingBottom: '32px' }}>
+            <Kicker>Contenido para redes / 02</Kicker>
+          </div>
           <SectionPrimitive
-            kicker="Contenido para redes / 02"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
             title={<>Contenido que se<br />reconoce al instante.<br /><span style={{ color: 'var(--vl-acid)' }}>En cualquier canal.</span></>}
             body="Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca."

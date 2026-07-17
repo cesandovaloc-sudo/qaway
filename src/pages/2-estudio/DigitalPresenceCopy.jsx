@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, useAnimation } from 'framer-motion';
+import { SectionPrimitive, Kicker } from '@/components/typography';
 
 const ASSET = '/assets/pages/2-estudio';
 
@@ -62,11 +63,13 @@ export default function DigitalPresenceCopy() {
               viewport={{ once: true, amount: 0.16 }}
               transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
             >
-              <p className="vl-kicker" style={{ color: '#8b8c88', fontSize: '12px', fontWeight: 'bold' }}>Estrategia digital / 03</p>
-              <h2 className="vl-heading-row__h2" style={{ marginTop: '20px', fontSize: 'clamp(2.6rem, 4.8vw, 5rem)', lineHeight: '.84', textTransform: 'uppercase', fontFamily: "'Arial Narrow','Roboto Condensed',sans-serif", fontWeight: 700 }}>
-                De la identidad<br />
-                <span style={{ color: '#666860' }}>a una marca que ya vive online.</span>
-              </h2>
+              <div style={{ paddingBottom: '32px' }}>
+                <Kicker>Estrategia digital / 03</Kicker>
+              </div>
+              <SectionPrimitive
+                titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                title={<>De la identidad<br /><span style={{ color: '#666860' }}>a una marca que ya vive online.</span></>}
+              />
             </motion.div>
 
             {/* Tarjeta slideshow con borde gris claro */}
