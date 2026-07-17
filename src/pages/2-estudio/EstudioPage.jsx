@@ -558,31 +558,31 @@ function ContentSystem() {
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
-          <p className="vl-kicker" style={{ color: 'var(--vl-acid)', fontSize: '12px', fontWeight: 'bold' }}>Contenido para redes / 02</p>
-          <h2>Contenido que se reconoce al instante.<br /><span>En cualquier canal.</span></h2>
-          <p>
-            Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca.
-          </p>
-          {/* 
-          <Link to="/estudio/contenido-visual" className="vl-button vl-button--acid">Diseñar mi contenido <ArrowRight size={16} /></Link>
-          */}
-          <div className="vl-format-rail">
-            {formats.map((item, index) => (
-              <motion.span
-                key={item}
-                initial={{ opacity: 0, x: -12 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                whileHover={{ x: 5.1 }}
-                viewport={{ once: true }}
-                transition={{
-                  delay: .12 + index * .07,
-                  x: { type: 'spring', stiffness: 260, damping: 22 },
-                }}
-              >
-                {item}
-              </motion.span>
-            ))}
-          </div>
+          <SectionPrimitive
+            kicker="Contenido para redes / 02"
+            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+            title={<>Contenido que se<br />reconoce al instante.<br /><span style={{ color: 'var(--vl-acid)' }}>En cualquier canal.</span></>}
+            body="Diseñamos sistemas de contenido para que carruseles, reels, campañas y publicaciones se reconozcan como parte de la misma marca."
+            cta={
+              <div className="vl-format-rail !mt-1">
+                {formats.map((item, index) => (
+                  <motion.span
+                    key={item}
+                    initial={{ opacity: 0, x: -12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    whileHover={{ x: 5.1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      delay: .12 + index * .07,
+                      x: { type: 'spring', stiffness: 260, damping: 22 },
+                    }}
+                  >
+                    {item}
+                  </motion.span>
+                ))}
+              </div>
+            }
+          />
         </motion.div>
 
         <motion.div
