@@ -583,9 +583,9 @@
 }
 
 .estudio-page .vl-branding h2 span { color: var(--vl-acid); }
-.estudio-page .vl-branding__copy p:not(.vl-kicker) { max-width: 480px; margin: 28px 0 !important; color: #666860; line-height: 1.7; }
+.estudio-page .vl-branding__copy p:not(.vl-kicker) { max-width: 480px; margin-top: 16px !important; margin-bottom: 0px !important; color: #666860; line-height: 1.7; }
 
-.estudio-page .vl-branding__deliverables { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 36px; border-top: 1px solid rgba(13,15,13,.16); border-bottom: 1px solid rgba(13,15,13,.16); }
+.estudio-page .vl-branding__deliverables { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 28px; border-top: 1px solid rgba(13,15,13,.16); border-bottom: 1px solid rgba(13,15,13,.16); }
 .estudio-page .vl-branding__deliverables span {
   display: flex;
   align-items: center;

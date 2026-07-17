@@ -353,12 +353,12 @@ function BrandingSpotlight() {
           viewport={{ once: true, amount: .22 }}
         >
           <SectionPrimitive
-            uppercase
             kicker="Branding digital / 01"
-            title={<>TU MARCA NO ES<br />SOLO UN <span>LOGOTIPO.</span><br />ES LO QUE TE<br />HACE <span>MEMORABLE.</span></>}
+            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
+            title={<>Tu marca no es<br />solo un <span>logotipo.</span><br />Es lo que te<br />hace <span>memorable.</span></>}
             body="Diseñamos un sistema visual estratégico que da vida a tu marca en cada canal: desde tu paleta de colores y logotipo, hasta tu web y presentaciones."
             cta={
-              <div className="flex flex-wrap items-center gap-6 mt-[36px]">
+              <div className="flex flex-wrap items-center gap-6 mt-1">
                 <a
                   href="#diagnostico"
                   className="vl-button vl-button--acid vl-branding__cta"
