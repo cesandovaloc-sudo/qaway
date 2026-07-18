@@ -135,6 +135,7 @@
   position: relative;
   height: fit-content;
   align-self: center;
+  transform: translateY(-40px);
 }
 
 .estudio-page .vl-hero__main::before {
