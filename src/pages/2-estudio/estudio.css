@@ -50,6 +50,7 @@
   isolation: isolate;
   padding-top: 120px;
   padding-bottom: 8px; 
+  overflow: hidden;
 }
 
 .estudio-page .vl-hero__image,
@@ -155,11 +156,11 @@
   }
   .estudio-page .vl-hero__main::before {
     top: auto;
-    bottom: 0;
+    bottom: -96px;
     left: auto;
     right: 0;
     width: 100vw;
-    height: 150vh; /* Extends massively upwards to reach the top of the hero */
+    height: calc(150vh + 96px); /* Extends massively upwards to reach the top of the hero */
   }
 }
 
