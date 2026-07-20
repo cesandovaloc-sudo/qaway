@@ -258,8 +258,7 @@ function Hero() {
               className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Creamos marcas,</span>
-              <span className="block text-[#ff4b0b]">sistemas digitales y formación con IA.</span>
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.

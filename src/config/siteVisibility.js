@@ -5,6 +5,7 @@ export const isPublicSiteMode = SITE_MODE === 'public'
 const routeVisibility = {
   inicio: true,
   estudio: true,
+  proyectos: true,
   brief: false,
   sistemasDigitales: true,
   academy: true,
@@ -19,6 +20,7 @@ const routeVisibility = {
 const publicPathAllowList = new Set([
   '/',
   '/estudio',
+  '/proyectos',
   '/sistemas-digitales',
   '/academy',
   '/recursos',
@@ -34,6 +36,13 @@ const navigationRegistry = [
     key: 'estudio',
     label: 'Estudio',
     path: '/estudio',
+    navbar: true,
+    footerGroup: 'areas',
+  },
+  {
+    key: 'proyectos',
+    label: 'Proyectos',
+    path: '/proyectos',
     navbar: true,
     footerGroup: 'areas',
   },

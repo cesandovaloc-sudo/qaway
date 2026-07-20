@@ -37,6 +37,7 @@ import ContableLandingPage from '@/pages/8-landings/3-contable/ContableLandingPa
 import RestauracionFotograficaPage from '@/pages/8-landings/4-restauracion-fotografica/RestauracionFotograficaPage'
 import FotografiaLinkedinPage from '@/pages/8-landings/5-fotografia-linkedin/FotografiaLinkedinPage'
 import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
+import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
 import DiscardedInicioPage from '@/pages/9-pruebas/1-paginas_descartadas/1-inicio/InicioPage.jsx'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
@@ -126,6 +127,8 @@ export default function AppRouter() {
           </Route>
 
           <Route path="brief" element={renderRoute('brief', <BriefBrandingPage />)} />
+          <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
+          <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
           <Route
             path="sistemas-digitales"

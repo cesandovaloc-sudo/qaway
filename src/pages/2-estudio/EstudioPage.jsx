@@ -168,9 +168,9 @@ function Hero() {
           transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="vl-hero__panel-mark" />
-          <p className="vl-hero__panel-kicker">visual lab</p>
+          <p className="vl-hero__panel-kicker">ESTUDIO VISUAL</p>
           <h2>
-            identidad visual<br />
+            Identidad visual<br />
             lista para vender.
           </h2>
           <div className="vl-hero__panel-rule" />
@@ -183,8 +183,8 @@ function Hero() {
           <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio creativo / Branding, contenido y presencia digital</p>
           <h1>
             Creamos la<br />
-            identidad visual<br />
-            y&nbsp;<em>presencia digital<br />
+            identidad y<br />
+            <em>presencia digital<br />
             para tu marca.</em>
           </h1>
           <p className="vl-hero__copy">
@@ -344,8 +344,8 @@ function BrandingSpotlight() {
           <SectionPrimitive
             kicker="Branding digital / 01"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
-            title={<>Creamos una identidad<br />visual clara para tu marca</>}
-            body="Creamos una identidad visual para que tu marca se vea clara, coherente y bien presentada en redes, web, presentaciones y piezas comerciales."
+            title={<>branding visual para que tu marca<br />se vea clara y profesional</>}
+            body="Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales."
             cta={
               <div className="flex flex-wrap items-center gap-6">
                 <a

@@ -14,6 +14,10 @@ const seoByPath = {
     title: 'Estudio Qaway | Marca, contenido e identidad visual',
     description: 'Crea una presencia visual clara para tu marca con identidad, contenido, imagen profesional y direccion creativa aplicada.',
   },
+  '/proyectos': {
+    title: 'Proyectos Qaway | Branding, contenido y sistemas digitales',
+    description: 'Explora proyectos de branding, contenido visual, presencia digital, automatizacion, CRM, webs y sistemas digitales desarrollados por Qaway Lab.',
+  },
   '/sistemas-digitales': {
     title: 'Sistemas Digitales | Automatizacion, CRM e IA para negocios',
     description: 'Implementa automatizacion, dashboards, CRM, canales digitales y sistemas con IA para ordenar la operacion de tu negocio.',

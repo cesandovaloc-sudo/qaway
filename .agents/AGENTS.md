@@ -26,3 +26,11 @@ Si el agente encuentra cambios inesperados, conflictos, archivos ajenos o dudas 
 No se permiten resets duros, limpiezas destructivas ni operaciones agresivas de Git sin autorización explícita del usuario.
 Todo cambio debe buscar mantener el repositorio simple, estable y trazable.
 Si quieres, te lo puedo devolver también en una versión más limpia y más normativa, lista para pegarla como bloque oficial dentro de un AGENTS.md o documento de reglas.
+
+CANDADO VISUAL:
+Solo toca el elemento exacto que menciono.
+No muevas elementos hermanos, padres ni hijos.
+No cambies tamaño de texto, imagen, sección, layout ni responsive.
+No uses soluciones indirectas como tocar el contenedor general.
+Primero revisa código y dime qué tocarías. No edites hasta que yo diga "aplica".
+
