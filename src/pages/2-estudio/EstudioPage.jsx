@@ -158,7 +158,7 @@ function Hero() {
         transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
       >
-        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
+        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual6.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
       </motion.div>
       
       <div className="vl-hero__right-pane">
