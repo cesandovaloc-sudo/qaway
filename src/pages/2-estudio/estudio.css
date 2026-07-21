@@ -722,7 +722,7 @@
 }
 .estudio-page .vl-comparison__label { position: absolute; top: 18px; z-index: 2; padding: 8px 10px; font: 700 9px/1 Arial; letter-spacing: .15em; text-transform: uppercase; }
 .estudio-page .vl-comparison__label--left { left: 18px; color: white; background: var(--vl-ink); }
-.estudio-page .vl-comparison__label--right { right: 18px; color: var(--vl-ink); background: var(--vl-acid); }
+.estudio-page .vl-comparison__label--right { right: 18px; color: #fff; background: var(--vl-acid); }
 
 .estudio-page .vl-caption { padding: 16px 0; border-bottom: 1px solid rgba(13,15,13,.2); font-size: 12px; }
 .estudio-page .vl-caption span { margin-right: 18px; color: #92948c; font-family: monospace; }
@@ -1182,6 +1182,14 @@
 .estudio-page .vl-trust div + div { border-left: 1px solid rgba(255,255,255,.16); }
 .estudio-page .vl-trust svg { color: var(--vl-acid); }
 
+
+.estudio-page #metodo .vl-kicker {
+  color: #fff;
+}
+
+.estudio-page #metodo h2 {
+  text-transform: none;
+}
 /* ==================== DIAGNOSTIC ==================== */
 
 .estudio-page .vl-diagnostic { display: grid; grid-template-columns: 56% 44%; min-height: 100vh; color: var(--vl-ink); background: var(--vl-paper); }
@@ -1234,6 +1242,15 @@
 .estudio-page .vl-diagnostic__frame { position: absolute; z-index: 2; inset: 12% 10%; border: 7px solid var(--vl-acid); border-right-color: transparent; pointer-events: none; }
 .estudio-page .vl-diagnostic__visual > span { position: absolute; z-index: 3; left: 32px; bottom: 32px; max-width: 260px; padding: 14px 16px; color: var(--vl-ink); background: var(--vl-acid); font-size: 11px; font-weight: 750; }
 
+
+.estudio-page #transformacion .vl-kicker {
+  margin-bottom: 18px;
+}
+
+.estudio-page #transformacion .vl-heading-row h2,
+.estudio-page #transformacion .vl-content-system__copy h2 {
+  margin-top: 0;
+}
 /* ==================== FOOTER ==================== */
 
 .estudio-page .vl-footer {
@@ -1402,6 +1419,90 @@
 @media (max-width: 1024px) { .academy-form-intro { position: static; } }
 @media (max-width: 760px) { .academy-form-intro h2 { font-size: clamp(3.35rem, 15vw, 5rem); } .academy-interest-form { min-height: 0; padding: 1.4rem; } .academy-field-row { grid-template-columns: 1fr; gap: 0; } }
 
+
+/* ESTUDIO CONTACT FORM - match Inicio form styling */
+.estudio-page #diagnostico .academy-interest-form {
+  display: grid;
+  gap: 0;
+  max-width: 760px;
+  padding: clamp(1.8rem, 4vw, 4rem);
+  border: 1px solid rgba(32, 32, 31, 0.11);
+  background: #eeece7;
+  box-shadow: 0 26px 65px rgba(75, 55, 44, 0.08);
+}
+
+.estudio-page #diagnostico .academy-interest-form:hover,
+.estudio-page #diagnostico .academy-interest-form:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 32px 75px rgba(75, 55, 44, 0.12), 0 8px 24px rgba(255, 75, 11, 0.02);
+}
+
+.estudio-page #diagnostico .academy-field {
+  display: grid;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+.estudio-page #diagnostico .academy-field label {
+  display: block;
+  color: #474642;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.estudio-page #diagnostico .academy-field input,
+.estudio-page #diagnostico .academy-field select,
+.estudio-page #diagnostico .academy-field textarea {
+  width: 100%;
+  border: 1px solid rgba(32, 32, 31, 0.14);
+  border-radius: 0;
+  outline: 0;
+  background: rgba(255, 255, 255, 0.72);
+  color: #20201f;
+  font: inherit;
+  font-size: 0.85rem;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.estudio-page #diagnostico .academy-field input,
+.estudio-page #diagnostico .academy-field select {
+  min-height: 3.4rem;
+  padding: 0 1rem;
+}
+
+.estudio-page #diagnostico .academy-field textarea {
+  min-height: 8.5rem;
+  resize: vertical;
+  padding: 1rem;
+}
+
+.estudio-page #diagnostico .academy-field input:focus,
+.estudio-page #diagnostico .academy-field select:focus,
+.estudio-page #diagnostico .academy-field textarea:focus {
+  border-color: #ff4b0b;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 75, 11, 0.1);
+}
+
+.estudio-page #diagnostico .academy-submit-button {
+  width: 100%;
+  min-height: 3.6rem;
+  margin-top: 0.5rem;
+  border: none;
+  background: #ff4b0b;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: background 220ms ease, transform 220ms ease;
+}
+
+.estudio-page #diagnostico .academy-submit-button:hover {
+  background: #df3900;
+  color: white;
+  transform: none;
+}
 /* Nuevo bloque derecho en el Hero */
 .estudio-page .vl-hero__right-pane {
   display: none;

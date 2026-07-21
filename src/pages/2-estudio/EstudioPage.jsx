@@ -619,7 +619,6 @@ function Method() {
           <div className="vl-method__phases" style={{ gap: '0px', display: 'flex', flexDirection: 'column' }}>
             {phases.map(([number, title, copy], index) => (
               <motion.div
-                {...reveal}
                 key={title}
                 className="vl-phase"
                 onClick={() => setActivePhase(activePhase === index ? -1 : index)}
@@ -637,21 +636,22 @@ function Method() {
                   <h3 style={{ margin: 0, fontSize: '18px', color: activePhase === index ? '#fff' : '#8b8c88', transition: 'color 0.3s' }}>
                     {title}
                   </h3>
-                  <AnimatePresence>
-                    {activePhase === index && (
-                      <motion.p
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        style={{ overflow: 'hidden', margin: 0, color: '#aaa99f', fontSize: '15px', lineHeight: 1.6, paddingTop: '10px' }}
-                      >
-                        {copy}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  <motion.p
+                    animate={{
+                      maxHeight: activePhase === index ? 88 : 0,
+                      opacity: activePhase === index ? 1 : 0,
+                      y: activePhase === index ? 0 : -3,
+                      paddingTop: activePhase === index ? 10 : 0,
+                    }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    style={{ overflow: 'hidden', margin: 0, color: '#aaa99f', fontSize: '15px', lineHeight: 1.6 }}
+                  >
+                    {copy}
+                  </motion.p>
                 </div>
                 <motion.div
                   animate={{ rotate: activePhase === index ? 180 : 0 }}
+                  transition={{ duration: 0.16, ease: 'easeOut' }}
                   style={{ color: activePhase === index ? 'var(--vl-acid)' : '#666' }}
                 >
                   <ChevronDown size={18} />
@@ -780,22 +780,25 @@ function Diagnostic() {
                       <label htmlFor="academy-profile">¿A qué te dedicas?</label>
                       <select id="academy-profile" name="profile" required>
                         <option value="">Selecciona tu perfil</option>
-                        <option value="Profesional / Consultor">Profesional / Consultor</option>
-                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
-                        <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                        <option value="Equipo de empresa">Equipo de empresa</option>
+                        <option value="Profesional">Profesional</option>
+                        <option value="Emprendedor o dueño de negocio">Emprendedor o dueño de negocio</option>
+                        <option value="Marca personal">Marca personal</option>
+                        <option value="Creador de contenido">Creador de contenido</option>
+                        <option value="Equipo comercial o de marketing">Equipo comercial o de marketing</option>
+                        <option value="Empresa o institución">Empresa o institución</option>
                         <option value="Otro">Otro</option>
                       </select>
                     </div>
                     <div className="academy-field">
-                      <label htmlFor="academy-interest">¿Qué Servicio te interesa?</label>
+                      <label htmlFor="academy-interest">¿En qué servicio estás interesado/a?</label>
                       <select id="academy-interest" name="interest" required>
                         <option value="">Selecciona un interés</option>
-                        <option value="Identidad Visual">Identidad Visual</option>
-                        <option value="Landing Page o Web">Landing Page o Web</option>
-                        <option value="Contenido para Redes">Contenido para Redes</option>
-                        <option value="Presencia Digital Completa">Presencia Digital Completa</option>
-                        <option value="Orientación general / Otro">Orientación general / Otro</option>
+                        <option value="Branding digital">Branding digital</option>
+                        <option value="Contenido visual">Contenido visual</option>
+                        <option value="Estrategia digital">Estrategia digital</option>
+                        <option value="Presencia profesional">Presencia profesional</option>
+                        <option value="Transformación visual">Transformación visual</option>
+                        <option value="Otro">Otro</option>
                       </select>
                     </div>
                   </div>
@@ -805,7 +808,7 @@ function Diagnostic() {
                     <textarea id="academy-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
                   </div>
                   <button type="submit" className="academy-submit-button" disabled={submitting}>
-                    {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÓN'}
+                    {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
                     <Send size={17} />
                   </button>
                   {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}

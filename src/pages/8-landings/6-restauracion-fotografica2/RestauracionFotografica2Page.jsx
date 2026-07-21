@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -28,11 +29,85 @@ const fadeIn = {
   transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] },
 }
 
+const detailHotspots = [
+  {
+    id: 'identidad',
+    title: 'Identidad',
+    text: 'Conservamos rasgos, mirada y expresion sin reemplazar a la persona.',
+    x: 50,
+    y: 48,
+    zoomX: 52,
+    zoomY: 48,
+  },
+  {
+    id: 'textura',
+    title: 'Textura',
+    text: 'Recuperamos piel, poros y microdetalle con acabado natural.',
+    x: 58,
+    y: 64,
+    zoomX: 57,
+    zoomY: 62,
+  },
+  {
+    id: 'color',
+    title: 'Color',
+    text: 'Ajustamos tonos reales sin sepia, sin amarillo y sin piel artificial.',
+    x: 42,
+    y: 40,
+    zoomX: 43,
+    zoomY: 40,
+  },
+  {
+    id: 'contraste',
+    title: 'Contraste',
+    text: 'Devolvemos profundidad, luz y definicion sin exagerar el rostro.',
+    x: 66,
+    y: 38,
+    zoomX: 65,
+    zoomY: 38,
+  },
+]
 const damages = [
-  ['Manchas y hongos', 'Limpieza digital por zonas sin borrar textura real.'],
-  ['Roturas y papel perdido', 'Reconstruccion visual controlada con bordes naturales.'],
-  ['Color y contraste', 'Correccion tonal para recuperar profundidad y piel.'],
-  ['Baja definicion', 'Preparacion nitida para archivo digital e impresion.'],
+  {
+    id: 'manchas',
+    title: 'Manchas y hongos',
+    text: 'Limpieza digital por zonas sin borrar textura real.',
+    signal: 'Humedad, manchas circulares y veladuras sobre el papel.',
+    x: 54,
+    y: 62,
+    zoomX: 54,
+    zoomY: 62,
+  },
+  {
+    id: 'roturas',
+    title: 'Roturas y papel perdido',
+    text: 'Reconstruccion visual controlada con bordes naturales.',
+    signal: 'Quiebres, esquinas faltantes y cortes visibles en el soporte.',
+    x: 35,
+    y: 28,
+    zoomX: 35,
+    zoomY: 28,
+  },
+  {
+    id: 'color',
+    title: 'Color y contraste',
+    text: 'Correccion tonal para recuperar profundidad y piel.',
+    signal: 'Imagen lavada, negros debiles y perdida de volumen.',
+    x: 68,
+    y: 30,
+    zoomX: 68,
+    zoomY: 30,
+  },
+  {
+    id: 'definicion',
+    title: 'Baja definicion',
+    text: 'Preparacion nitida para archivo digital e impresion.',
+    signal: 'Detalle suave, grano deteriorado y poca lectura del rostro.',
+    x: 81,
+    y: 64,
+    zoomX: 81,
+    zoomY: 64,
+  },
 ]
 
 const process = [
@@ -146,40 +221,120 @@ function Principle() {
 }
 
 function PrincipleCopy() {
+  const [activeId, setActiveId] = useState(detailHotspots[0].id)
+  const activeHotspot = detailHotspots.find((item) => item.id === activeId) || detailHotspots[0]
+
   return (
     <section className="rf2-band rf2-principle rf2-principle--copy">
-      <motion.div {...fadeIn}>
+      <motion.div {...fadeIn} className="rf2-principle__copy">
+        <p className="rf2-kicker">Fidelidad visual</p>
         <h2>No creamos otra persona. Recuperamos la que esta en la fotografia.</h2>
+        <p>
+          Pasa el mouse por cada punto para ver que parte se recupera y como se conserva la identidad real.
+        </p>
       </motion.div>
-      <motion.div {...fadeIn} className="rf2-eye-card">
-        <img src={images.detail} alt="Detalle realista de identidad preservada" />
-        <ul>
-          <li><strong>Identidad</strong><span>Rasgos fieles, no genericos.</span></li>
-          <li><strong>Textura</strong><span>Piel, poros y detalles reales.</span></li>
-          <li><strong>Color</strong><span>Tonos naturales y estables.</span></li>
-          <li><strong>Contraste</strong><span>Profundidad sin exagerar.</span></li>
-        </ul>
+
+      <motion.div {...fadeIn} className="rf2-detail-lab">
+        <div className="rf2-detail-lab__stage" style={{ '--active-x': `${activeHotspot.x}%`, '--active-y': `${activeHotspot.y}%` }}>
+          <img src={images.detail} alt="Detalle realista de identidad preservada" />
+          {detailHotspots.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`rf2-hotspot ${activeId === item.id ? 'is-active' : ''}`}
+              style={{ '--x': `${item.x}%`, '--y': `${item.y}%` }}
+              onMouseEnter={() => setActiveId(item.id)}
+              onFocus={() => setActiveId(item.id)}
+              onClick={() => setActiveId(item.id)}
+              aria-label={`Ver detalle de ${item.title}`}
+            >
+              <span className="rf2-hotspot__dot" />
+              <span className="rf2-hotspot__card">
+                <strong>{item.title}</strong>
+                <small>{item.text}</small>
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="rf2-detail-lab__panel">
+          <div
+            className="rf2-detail-lab__zoom"
+            style={{
+              backgroundImage: `url(${images.detail})`,
+              backgroundPosition: `${activeHotspot.zoomX}% ${activeHotspot.zoomY}%`,
+            }}
+            aria-hidden="true"
+          />
+        </div>
       </motion.div>
     </section>
   )
 }
 function DamageMatrix() {
+  const [activeDamageId, setActiveDamageId] = useState(damages[0].id)
+  const activeDamage = damages.find((item) => item.id === activeDamageId) || damages[0]
+
   return (
     <section className="rf2-band rf2-damage">
-      <motion.div {...fadeIn} className="rf2-section-title">
+      <motion.div {...fadeIn} className="rf2-damage__heading">
         <p className="rf2-kicker">Diagnostico visual</p>
-        <h2>Cada dano exige un tratamiento distinto.</h2>
+        <h2>Diagnosticamos el dano antes de restaurar.</h2>
+        <p>Selecciona un tipo de deterioro para ver que evaluamos antes de intervenir la fotografia.</p>
       </motion.div>
       <div className="rf2-damage__grid">
-        <motion.div {...fadeIn} className="rf2-damage__list">
-          {damages.map(([title, text]) => (
-            <article key={title}>
-              <span>{title}</span>
-              <p>{text}</p>
-            </article>
+        <motion.div {...fadeIn} className="rf2-damage__list" aria-label="Tipos de dano fotografico">
+          {damages.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              className={activeDamageId === item.id ? 'is-active' : ''}
+              onMouseEnter={() => setActiveDamageId(item.id)}
+              onFocus={() => setActiveDamageId(item.id)}
+              onClick={() => setActiveDamageId(item.id)}
+            >
+              <em>{String(index + 1).padStart(2, '0')}</em>
+              <span>{item.title}</span>
+              <p>{item.text}</p>
+            </button>
           ))}
+          <CtaButton compact>Enviar foto para diagnostico</CtaButton>
         </motion.div>
-        <motion.img {...fadeIn} src={images.damage} alt="Diagnostico de danos fotograficos en mesa de restauracion" />
+        <motion.div
+          {...fadeIn}
+          className="rf2-damage__visual"
+          style={{ '--damage-x': `${activeDamage.x}%`, '--damage-y': `${activeDamage.y}%` }}
+        >
+          <img src={images.damage} alt="Diagnostico de danos fotograficos en mesa de restauracion" />
+          {damages.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`rf2-damage-marker ${activeDamageId === item.id ? 'is-active' : ''}`}
+              style={{ '--x': `${item.x}%`, '--y': `${item.y}%` }}
+              onMouseEnter={() => setActiveDamageId(item.id)}
+              onFocus={() => setActiveDamageId(item.id)}
+              onClick={() => setActiveDamageId(item.id)}
+              aria-label={`Diagnosticar ${item.title}`}
+            >
+              <span />
+            </button>
+          ))}
+          <div className="rf2-damage__inspector">
+            <div
+              className="rf2-damage__zoom"
+              style={{
+                backgroundImage: `url(${images.damage})`,
+                backgroundPosition: `${activeDamage.zoomX}% ${activeDamage.zoomY}%`,
+              }}
+              aria-hidden="true"
+            />
+            <div>
+              <strong>{activeDamage.title}</strong>
+              <p>{activeDamage.signal}</p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
