@@ -115,11 +115,10 @@ function Hero() {
           transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
           className="rf2-hero__visual"
         >
-          <img src={images.hero} alt="Referencia visual de restauracion fotografica Qaway Lab" />
-          <div className="rf2-diagnosis">
-            <span>Dano detectado: <strong>Alto</strong></span>
-            <span>Recuperacion estimada: <strong>85-95%</strong></span>
-            <span>Entrega: <strong>Alta resolucion</strong></span>
+          <div className="rf2-hero-compare" aria-label="Comparacion animada de antes y despues">
+            <img className="rf2-hero-compare__before" src={images.before} alt="Fotografia deteriorada antes de restauracion" />
+            <img className="rf2-hero-compare__after" src={images.after} alt="Fotografia restaurada despues del proceso" />
+            <span className="rf2-hero-compare__line" aria-hidden="true"><span /></span>
           </div>
         </motion.div>
       </div>
@@ -146,6 +145,24 @@ function Principle() {
   )
 }
 
+function PrincipleCopy() {
+  return (
+    <section className="rf2-band rf2-principle rf2-principle--copy">
+      <motion.div {...fadeIn}>
+        <h2>No creamos otra persona. Recuperamos la que esta en la fotografia.</h2>
+      </motion.div>
+      <motion.div {...fadeIn} className="rf2-eye-card">
+        <img src={images.detail} alt="Detalle realista de identidad preservada" />
+        <ul>
+          <li><strong>Identidad</strong><span>Rasgos fieles, no genericos.</span></li>
+          <li><strong>Textura</strong><span>Piel, poros y detalles reales.</span></li>
+          <li><strong>Color</strong><span>Tonos naturales y estables.</span></li>
+          <li><strong>Contraste</strong><span>Profundidad sin exagerar.</span></li>
+        </ul>
+      </motion.div>
+    </section>
+  )
+}
 function DamageMatrix() {
   return (
     <section className="rf2-band rf2-damage">
@@ -302,7 +319,7 @@ export default function RestauracionFotografica2Page() {
   return (
     <main className="rf2-page">
       <Hero />
-      <Principle />
+      <PrincipleCopy />
       <DamageMatrix />
       <Process />
       <Results />

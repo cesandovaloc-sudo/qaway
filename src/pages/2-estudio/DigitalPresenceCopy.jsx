@@ -66,7 +66,7 @@ export default function DigitalPresenceCopy() {
               <SectionPrimitive
                 kicker="Estrategia digital / 03"
                 titleClassName="vl-digital-copy__title !text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-                title={<>De la identidad<br /><span style={{ color: '#666860' }}>a una marca que ya vive online.</span></>}
+                title={<>Tu marca lista<br /><span style={{ color: '#666860' }}>para vivir online.</span></>}
               />
             </motion.div>
 
@@ -139,7 +139,7 @@ export default function DigitalPresenceCopy() {
                   position: 'absolute',
                   top: 0, left: 0, right: 0, bottom: 0,
                   pointerEvents: 'none',
-                  boxShadow: 'inset 0 0 30px 15px rgba(255,255,255,0.9)'
+                  boxShadow: 'inset 0 0 15px 8px rgba(255,255,255,0.45)'
                 }} />
               </div>
             </div>

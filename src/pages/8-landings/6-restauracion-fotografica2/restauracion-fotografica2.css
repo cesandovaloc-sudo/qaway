@@ -6,8 +6,9 @@
   --muted: rgba(255, 255, 255, 0.66);
   background: var(--paper);
   color: var(--ink);
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   letter-spacing: 0;
+  --display-font: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
 }
 
 .rf2-page * { box-sizing: border-box; }
@@ -63,7 +64,7 @@
 .rf2-button--compact { min-height: 2.35rem; padding: 0 0.8rem; font-size: 0.72rem; }
 
 .rf2-hero { position: relative; min-height: 100dvh; overflow: hidden; background: #080807; color: white; }
-.rf2-hero__content { min-height: 100dvh; display: grid; grid-template-columns: minmax(22rem, 41%) 1fr; align-items: stretch; }
+.rf2-hero__content { min-height: 100dvh; max-width: 96rem; margin: 0 auto; display: grid; grid-template-columns: minmax(21rem, 38%) 1fr; align-items: stretch; }
 
 .rf2-hero__copy {
   position: relative;
@@ -71,7 +72,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 7rem 2.6rem 4rem 4.6rem;
+  padding: 7rem 2.5rem 4rem 2.5rem;
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.96), rgba(0, 0, 0, 0.72) 62%, transparent), radial-gradient(circle at 10% 20%, rgba(255, 75, 11, 0.18), transparent 24%);
 }
 
@@ -84,36 +85,72 @@
 .rf2-final h2 {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0;
-  font-family: Impact, "Arial Narrow", "Franklin Gothic Condensed", sans-serif;
+  letter-spacing: -0.055em;
+  font-family: var(--display-font);
+  font-stretch: condensed;
+  font-weight: 760;
 }
 
-.rf2-hero h1 { max-width: 39rem; font-size: clamp(4.2rem, 8vw, 8.7rem); line-height: 0.86; }
+.rf2-hero h1 { max-width: 58rem; font-size: clamp(3.2rem, 5.5vw, 6.5rem); line-height: 0.82; white-space: normal; overflow-wrap: normal; }
 .rf2-hero__copy > p:not(.rf2-kicker) { max-width: 29rem; margin: 1.4rem 0 0; color: rgba(255, 255, 255, 0.76); font-size: 1.02rem; line-height: 1.58; }
 .rf2-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; margin-top: 1.6rem; }
 .rf2-actions > a:last-child { color: white; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.5); padding-bottom: 0.4rem; font-size: 0.9rem; }
 
-.rf2-hero__visual { position: relative; min-height: 100dvh; overflow: hidden; }
-.rf2-hero__visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 25%, rgba(0, 0, 0, 0.16)); pointer-events: none; }
-.rf2-hero__visual img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-
-.rf2-diagnosis {
+.rf2-hero__visual { position: relative; min-height: 100dvh; overflow: hidden; background: #111; }
+.rf2-hero__visual::after { content: ""; position: absolute; inset: 0; z-index: 4; background: linear-gradient(90deg, rgba(0, 0, 0, 0.2), transparent 22%, rgba(0, 0, 0, 0.1)); pointer-events: none; }
+.rf2-hero-compare {
   position: absolute;
-  right: 2.8rem;
-  bottom: 5.2rem;
-  z-index: 3;
-  width: min(24rem, calc(100% - 3rem));
-  padding: 1.1rem 1.25rem;
-  display: grid;
-  gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.86);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: white;
-  font-size: 0.8rem;
-  text-transform: uppercase;
+  inset: 0;
+  overflow: hidden;
 }
-.rf2-diagnosis strong { color: var(--orange); }
-
+.rf2-hero-compare img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+.rf2-hero-compare__before {
+  z-index: 1;
+  filter: grayscale(1) contrast(1.05);
+}
+.rf2-hero-compare__after {
+  z-index: 2;
+  animation: rf2AfterReveal 7.5s ease-in-out infinite alternate;
+}
+.rf2-hero-compare__line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.34);
+  animation: rf2LineSweep 7.5s ease-in-out infinite alternate;
+}
+.rf2-hero-compare__line span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.7rem;
+  height: 2.7rem;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: rgba(16, 16, 15, 0.56);
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(8px);
+}
+@keyframes rf2AfterReveal {
+  0%, 10% { clip-path: inset(0 66% 0 0); }
+  48%, 58% { clip-path: inset(0 30% 0 0); }
+  100% { clip-path: inset(0 52% 0 0); }
+}
+@keyframes rf2LineSweep {
+  0%, 10% { left: 34%; }
+  48%, 58% { left: 70%; }
+  100% { left: 48%; }
+}
 .rf2-band { padding: clamp(4.5rem, 8vw, 7rem) clamp(1.3rem, 5vw, 4.5rem); }
 .rf2-principle { display: grid; grid-template-columns: minmax(18rem, 0.9fr) 1.1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; border-bottom: 1px solid var(--line); }
 .rf2-principle h2,
@@ -130,6 +167,18 @@
 .rf2-eye-card strong { text-transform: uppercase; font-size: 0.75rem; }
 .rf2-eye-card span { margin-top: 0.25rem; color: rgba(17, 16, 15, 0.58); font-size: 0.84rem; line-height: 1.45; }
 
+.rf2-eye-card strong,
+.rf2-damage__list span,
+.rf2-process__steps h3,
+.rf2-results__grid strong,
+.rf2-guarantees__list strong,
+.rf2-price-table strong,
+.rf2-faq summary {
+  font-family: var(--display-font);
+  font-stretch: condensed;
+  font-weight: 760;
+  letter-spacing: -0.025em;
+}
 .rf2-section-title { max-width: 48rem; margin-bottom: 2.2rem; }
 .rf2-section-title--center { margin-left: auto; margin-right: auto; text-align: center; }
 .rf2-damage__grid { display: grid; grid-template-columns: minmax(17rem, 0.72fr) 1.28fr; gap: 1rem; }
@@ -152,20 +201,20 @@
 }
 .rf2-process__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid rgba(255, 255, 255, 0.24); }
 .rf2-process__steps article { min-height: 18rem; padding: 1.4rem; border-left: 1px solid rgba(255, 255, 255, 0.16); }
-.rf2-process__steps span { display: block; color: rgba(255, 255, 255, 0.28); font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(3.5rem, 5vw, 5.5rem); line-height: 1; }
+.rf2-process__steps span { display: block; color: rgba(255, 255, 255, 0.28); font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: clamp(3.5rem, 5vw, 5.5rem); line-height: 1; }
 .rf2-process__steps h3 { margin: 1.2rem 0 0; text-transform: uppercase; font-size: 0.92rem; }
 .rf2-process__steps p { margin: 0.8rem 0 0; color: var(--muted); line-height: 1.54; }
 
 .rf2-results { background: #fbfaf7; }
 .rf2-results__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
 .rf2-results__grid article { border: 1px solid var(--line); background: white; }
-.rf2-results__grid img { width: 100%; height: 24rem; object-fit: cover; object-position: center top; filter: saturate(0.82); }
+.rf2-results__grid img { width: 100%; height: 24rem; object-fit: cover; object-position: center center; filter: saturate(0.82); }
 .rf2-results__grid div { padding: 1.2rem; display: grid; grid-template-columns: max-content 1fr; gap: 0.65rem 1rem; font-size: 0.83rem; }
 .rf2-results__grid strong { text-transform: uppercase; }
 .rf2-results__grid p { margin: 0; color: rgba(17, 16, 15, 0.64); }
 
 .rf2-guarantees { display: grid; grid-template-columns: minmax(15rem, 0.35fr) 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.rf2-seal { aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; text-align: center; text-transform: uppercase; font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(2rem, 3.4vw, 4rem); line-height: 0.94; padding: 2rem; }
+.rf2-seal { aspect-ratio: 1; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; text-align: center; text-transform: uppercase; font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: clamp(2rem, 3.4vw, 4rem); line-height: 0.94; padding: 2rem; }
 .rf2-guarantees__list { display: grid; gap: 1rem; }
 .rf2-guarantees__list article { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.1rem 1rem; align-items: start; padding: 1.25rem 0; border-bottom: 1px solid var(--line); }
 .rf2-guarantees__list svg { color: var(--orange); }
@@ -178,7 +227,7 @@
 .rf2-price-table a:hover,
 .rf2-price-table .is-featured { background: #050505; color: white; }
 .rf2-price-table span,
-.rf2-price-table strong { font-family: Impact, "Arial Narrow", sans-serif; text-transform: uppercase; font-size: 1.55rem; }
+.rf2-price-table strong { font-family: var(--display-font); font-stretch: condensed; font-weight: 760; text-transform: uppercase; font-size: 1.55rem; }
 .rf2-price-table em { color: var(--orange); font-style: normal; font-weight: 900; }
 .rf2-price-table p { margin: 0; color: currentColor; opacity: 0.68; font-size: 0.84rem; line-height: 1.35; }
 .rf2-pricing small { display: block; margin-top: 0.85rem; color: rgba(17, 16, 15, 0.52); }
@@ -203,7 +252,7 @@
   .rf2-process,
   .rf2-guarantees,
   .rf2-faq { grid-template-columns: 1fr; }
-  .rf2-hero__copy { min-height: 70dvh; padding: 7rem 1.4rem 3rem; }
+  .rf2-hero__copy { min-height: 70dvh; padding: 7rem 1.5rem 3rem; }
   .rf2-hero__visual,
   .rf2-hero__visual img { min-height: 38rem; }
   .rf2-process__steps,
@@ -216,10 +265,9 @@
   .rf2-header { height: auto; padding: 1rem 1.1rem; }
   .rf2-nav > a:not(.rf2-button) { display: none; }
   .rf2-brand span { font-size: 0.76rem; }
-  .rf2-hero h1 { font-size: clamp(3.5rem, 18vw, 5.1rem); }
+  .rf2-hero h1 { font-size: clamp(3.2rem, 14vw, 5.1rem); }
   .rf2-actions,
   .rf2-button { width: 100%; }
-  .rf2-diagnosis { right: 1rem; bottom: 1rem; }
   .rf2-process__steps,
   .rf2-results__grid { grid-template-columns: 1fr; }
   .rf2-price-table a { grid-template-columns: 3.2rem 1fr; gap: 0.4rem 1rem; }
