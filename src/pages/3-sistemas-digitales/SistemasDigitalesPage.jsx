@@ -222,7 +222,7 @@ function Hero() {
           </div>
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-8 md:px-16 pt-16 pb-8">
+          <div className="mx-auto w-full max-w-[96rem] flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-6 sm:px-10 lg:px-10 pt-16 pb-8">
             <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 18 }}
