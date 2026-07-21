@@ -172,7 +172,6 @@
 .rf2-process__steps h3,
 .rf2-results__grid strong,
 .rf2-guarantees__list strong,
-.rf2-price-table strong,
 .rf2-faq summary {
   font-family: var(--display-font);
   font-stretch: condensed;
@@ -254,12 +253,12 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 1.75rem;
+  right: 1.75rem;
   width: clamp(5rem, 12vw, 10rem);
   height: 1px;
   background: rgba(255, 255, 255, 0.72);
   transform: scaleX(0);
-  transform-origin: left center;
+  transform-origin: right center;
   transition: transform 260ms ease, opacity 260ms ease;
   opacity: 0;
 }
@@ -286,7 +285,7 @@
 
 .rf2-hotspot__card {
   position: absolute;
-  left: calc(100% + 8.5rem);
+  right: calc(100% + 8.5rem);
   top: 50%;
   width: min(18rem, 32vw);
   padding: 0.9rem 1rem 0.95rem;
@@ -296,7 +295,7 @@
   text-align: left;
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(12px);
-  transform: translateY(-50%) translateX(-0.5rem);
+  transform: translateY(-50%) translateX(0.5rem);
   opacity: 0;
   pointer-events: none;
   transition: opacity 220ms ease, transform 220ms ease;
@@ -331,6 +330,7 @@
 .rf2-detail-lab__panel {
   display: grid;
   min-height: 0;
+  align-items: stretch;
   overflow: hidden;
   padding: 1rem;
   border-left: 1px solid var(--line);
@@ -338,11 +338,13 @@
 }
 
 .rf2-detail-lab__zoom {
+  width: 100%;
+  height: 100%;
   min-height: 0;
   border: 1px solid var(--line);
   background-repeat: no-repeat;
-  background-size: 330%;
-  background-color: #151515;
+  background-size: 420%;
+  background-color: #f4f1ea;
   box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.02);
   transition: background-position 320ms ease;
 }
@@ -350,32 +352,26 @@
 .rf2-section-title { max-width: 48rem; margin-bottom: 2.2rem; }
 .rf2-section-title--center { margin-left: auto; margin-right: auto; text-align: center; }
 .rf2-damage { background: #f4f1ea; }
-.rf2-damage__heading { display: grid; grid-template-columns: minmax(26rem, 0.72fr) minmax(18rem, 0.38fr); gap: clamp(2rem, 5vw, 5rem); align-items: end; margin-bottom: 2rem; }
-.rf2-damage__heading h2 { max-width: 56rem; margin: 0; font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: clamp(3rem, 5.6vw, 5.9rem); line-height: 0.9; letter-spacing: -0.055em; text-transform: uppercase; }
-.rf2-damage__heading > p:last-child { max-width: 28rem; margin: 0; color: rgba(17, 16, 15, 0.62); font-size: 1rem; line-height: 1.55; }
-.rf2-damage__grid { display: grid; grid-template-columns: minmax(20rem, 0.52fr) minmax(34rem, 1fr); gap: 1rem; align-items: stretch; }
-.rf2-damage__list { display: grid; grid-template-rows: repeat(4, 1fr) auto; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.34); }
-.rf2-damage__list button { display: grid; grid-template-columns: 3rem 1fr; gap: 0.2rem 0.9rem; width: 100%; min-height: 7rem; padding: 1.2rem; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; cursor: pointer; transition: background 180ms ease, color 180ms ease; }
-.rf2-damage__list button:hover,
-.rf2-damage__list button:focus-visible,
-.rf2-damage__list button.is-active { background: #050505; color: #fff; outline: 0; }
-.rf2-damage__list em { grid-row: span 2; color: var(--orange); font-family: var(--display-font); font-stretch: condensed; font-size: 1.65rem; font-style: normal; font-weight: 760; line-height: 0.95; }
-.rf2-damage__list span { display: block; text-transform: uppercase; font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: 1.05rem; letter-spacing: -0.02em; }
-.rf2-damage__list p { margin: 0.28rem 0 0; color: currentColor; opacity: 0.62; line-height: 1.42; }
-.rf2-damage__list .rf2-button { align-self: end; margin: 1rem; }
-.rf2-damage__visual { position: relative; min-height: 38rem; overflow: hidden; border: 1px solid var(--line); background: #111; }
-.rf2-damage__visual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at var(--damage-x, 54%) var(--damage-y, 62%), transparent 0 7rem, rgba(0, 0, 0, 0.08) 12rem, rgba(0, 0, 0, 0.3)); pointer-events: none; transition: background 260ms ease; }
-.rf2-damage__visual > img { width: 100%; height: 100%; min-height: 38rem; object-fit: cover; object-position: center 35%; filter: saturate(0.88) contrast(1.04); }
-.rf2-damage-marker { position: absolute; left: var(--x); top: var(--y); z-index: 3; width: 2.2rem; height: 2.2rem; padding: 0; border: 1px solid rgba(255, 255, 255, 0.72); border-radius: 999px; background: rgba(5, 5, 5, 0.36); transform: translate(-50%, -50%); cursor: pointer; backdrop-filter: blur(7px); }
-.rf2-damage-marker span { position: absolute; inset: 0.48rem; border-radius: 999px; background: var(--orange); box-shadow: 0 0 0 7px rgba(255, 75, 11, 0.18), 0 0 24px rgba(255, 75, 11, 0.36); transition: transform 200ms ease, box-shadow 200ms ease; }
-.rf2-damage-marker.is-active span,
-.rf2-damage-marker:hover span,
-.rf2-damage-marker:focus-visible span { transform: scale(1.24); box-shadow: 0 0 0 11px rgba(255, 75, 11, 0.22), 0 0 34px rgba(255, 75, 11, 0.52); }
-.rf2-damage__inspector { position: absolute; right: 1rem; bottom: 1rem; z-index: 4; display: grid; grid-template-columns: 8.5rem minmax(12rem, 17rem); gap: 1rem; align-items: stretch; padding: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(5, 5, 5, 0.88); color: #fff; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34); backdrop-filter: blur(12px); }
-.rf2-damage__zoom { min-height: 6.5rem; border: 1px solid rgba(255, 255, 255, 0.16); background-repeat: no-repeat; background-size: 360%; background-color: #151515; transition: background-position 300ms ease; }
-.rf2-damage__inspector strong { display: block; color: var(--orange); font-family: var(--display-font); font-stretch: condensed; font-size: 1.15rem; font-weight: 760; letter-spacing: -0.02em; text-transform: uppercase; }
-.rf2-damage__inspector p { margin: 0.35rem 0 0; color: rgba(255, 255, 255, 0.76); font-size: 0.82rem; line-height: 1.4; }
-
+.rf2-damage__grid { display: grid; grid-template-columns: minmax(18rem, 0.42fr) minmax(38rem, 1fr); gap: clamp(1.4rem, 4vw, 4rem); align-items: start; }
+.rf2-damage__heading { position: sticky; top: 5rem; max-width: 34rem; padding-top: 0.35rem; }
+.rf2-damage__heading h2 { max-width: 34rem; margin: 0; font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: clamp(3rem, 5vw, 5.2rem); line-height: 0.9; letter-spacing: -0.055em; text-transform: uppercase; }
+.rf2-damage__heading > p:last-of-type { max-width: 28rem; margin: 1.05rem 0 1.35rem; color: rgba(17, 16, 15, 0.62); font-size: 1rem; line-height: 1.55; }
+.rf2-damage__media { min-width: 0; }
+.rf2-damage__visual { position: relative; min-height: 33rem; overflow: hidden; border: 1px solid var(--line); background: #111; }
+.rf2-damage__visual > img { width: 100%; height: 100%; min-height: 33rem; object-fit: cover; object-position: center 35%; filter: saturate(0.9) contrast(1.02); }
+.rf2-damage-scan { position: absolute; left: var(--damage-x); top: var(--damage-y); z-index: 3; width: var(--damage-w); height: var(--damage-h); border: 1px solid rgba(255, 75, 11, 0.82); background: rgba(255, 75, 11, 0.055); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32); transform: translate(-50%, -50%); transition: left 520ms ease, top 520ms ease, width 520ms ease, height 520ms ease; pointer-events: none; }
+.rf2-damage-scan::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(255, 255, 255, 0.7); transform: translateY(-50%); opacity: 0.55; }
+.rf2-damage__inspector { position: absolute; right: 1rem; bottom: 1rem; z-index: 4; width: min(22rem, calc(100% - 2rem)); padding: 0.85rem 0.95rem; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(5, 5, 5, 0.82); color: #fff; box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24); backdrop-filter: blur(10px); }
+.rf2-damage__inspector strong { display: block; color: var(--orange); font-family: var(--display-font); font-stretch: condensed; font-size: 1rem; font-weight: 760; letter-spacing: -0.02em; text-transform: uppercase; }
+.rf2-damage__inspector p { margin: 0.28rem 0 0; color: rgba(255, 255, 255, 0.74); font-size: 0.78rem; line-height: 1.35; }
+.rf2-damage__tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-top: 0; background: rgba(255, 255, 255, 0.32); }
+.rf2-damage__tabs button { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.55rem; min-height: 3.15rem; padding: 0.72rem 0.85rem; border: 0; border-right: 1px solid var(--line); background: transparent; color: rgba(17, 16, 15, 0.72); text-align: left; cursor: pointer; transition: color 160ms ease, background 160ms ease; }
+.rf2-damage__tabs button:last-child { border-right: 0; }
+.rf2-damage__tabs button:hover,
+.rf2-damage__tabs button:focus-visible { background: rgba(255, 255, 255, 0.55); color: var(--ink); outline: 0; }
+.rf2-damage__tabs button.is-active { background: #fff; color: var(--ink); box-shadow: inset 0 -2px 0 var(--orange); }
+.rf2-damage__tabs em { color: var(--orange); font-family: var(--display-font); font-stretch: condensed; font-size: 1.05rem; font-style: normal; font-weight: 760; line-height: 1; }
+.rf2-damage__tabs span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--display-font); font-stretch: condensed; font-weight: 760; font-size: 0.86rem; letter-spacing: -0.015em; text-transform: uppercase; }
 .rf2-process { display: grid; grid-template-columns: minmax(17rem, 24%) 0.72fr 1fr; gap: 1.4rem; padding: clamp(4rem, 7vw, 6rem) clamp(1.3rem, 5vw, 4.5rem); background: #050505; color: white; }
 .rf2-process__intro p:not(.rf2-kicker) { max-width: 18rem; color: var(--muted); line-height: 1.55; }
 .rf2-process__image {
@@ -408,16 +404,28 @@
 .rf2-guarantees__list strong { text-transform: uppercase; }
 .rf2-guarantees__list p { grid-column: 2; margin: 0; color: rgba(17, 16, 15, 0.6); }
 
-.rf2-price-table { border: 1px solid var(--line); }
-.rf2-price-table a { display: grid; grid-template-columns: 4.5rem 1.2fr 0.7fr 1.8fr 2rem; align-items: center; gap: 1rem; min-height: 4.2rem; padding: 0.8rem 1rem; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); transition: background 180ms ease, color 180ms ease; }
-.rf2-price-table a:last-child { border-bottom: 0; }
-.rf2-price-table a:hover,
-.rf2-price-table .is-featured { background: #050505; color: white; }
-.rf2-price-table span,
-.rf2-price-table strong { font-family: var(--display-font); font-stretch: condensed; font-weight: 760; text-transform: uppercase; font-size: 1.55rem; }
-.rf2-price-table em { color: var(--orange); font-style: normal; font-weight: 900; }
-.rf2-price-table p { margin: 0; color: currentColor; opacity: 0.68; font-size: 0.84rem; line-height: 1.35; }
-.rf2-pricing small { display: block; margin-top: 0.85rem; color: rgba(17, 16, 15, 0.52); }
+.rf2-pricing { background: #fbfaf7; }
+.rf2-pricing__title { display: grid; grid-template-columns: minmax(24rem, 0.68fr) minmax(18rem, 0.42fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; max-width: none; }
+.rf2-pricing__title h2 { max-width: 52rem; }
+.rf2-pricing__title > p:last-child { max-width: 30rem; margin: 0; color: rgba(17, 16, 15, 0.62); line-height: 1.55; }
+.rf2-price-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; align-items: stretch; }
+.rf2-price-card { position: relative; display: grid; grid-template-rows: auto auto auto 1fr auto auto; gap: 1rem; min-height: 27rem; padding: 1.25rem; border: 1px solid var(--line); background: #fff; color: var(--ink); text-decoration: none; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.rf2-price-card:hover,
+.rf2-price-card:focus-visible { transform: translateY(-4px); border-color: rgba(255, 75, 11, 0.45); box-shadow: 0 24px 60px rgba(17, 16, 15, 0.09); outline: 0; }
+.rf2-price-card.is-featured { background: #050505; color: #fff; border-color: #050505; }
+.rf2-price-card__top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.rf2-price-card__top span,
+.rf2-price-card strong,
+.rf2-price-card__price { font-family: var(--display-font); font-stretch: condensed; font-weight: 760; letter-spacing: -0.025em; text-transform: uppercase; }
+.rf2-price-card__top span { color: var(--orange); font-size: 1.7rem; line-height: 1; }
+.rf2-price-card__top em { padding: 0.4rem 0.5rem; border: 1px solid currentColor; color: currentColor; opacity: 0.66; font-size: 0.68rem; font-style: normal; font-weight: 850; text-transform: uppercase; }
+.rf2-price-card strong { max-width: 12rem; font-size: clamp(2rem, 3vw, 3rem); line-height: 0.9; }
+.rf2-price-card__price { color: var(--orange); font-size: clamp(2.5rem, 4vw, 4.2rem); line-height: 0.9; }
+.rf2-price-card p { margin: 0; color: currentColor; opacity: 0.66; line-height: 1.5; }
+.rf2-price-card small { display: block; margin: 0; padding-top: 1rem; border-top: 1px solid currentColor; color: currentColor; opacity: 0.54; font-size: 0.82rem; line-height: 1.35; }
+.rf2-price-card__action { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3rem; margin-top: 0.4rem; padding: 0 0.85rem; background: var(--orange); color: #fff; font-weight: 850; font-size: 0.82rem; }
+.rf2-price-card:not(.is-featured) .rf2-price-card__action { background: #050505; }
+.rf2-pricing__note { margin: 1rem 0 0; color: rgba(17, 16, 15, 0.52); font-size: 0.86rem; }
 
 .rf2-faq { display: grid; grid-template-columns: minmax(18rem, 0.52fr) 1fr; gap: 2rem; background: #fbfaf7; }
 .rf2-faq details { border-top: 1px solid var(--line); padding: 1.05rem 0; }
@@ -463,10 +471,10 @@
   .rf2-button { width: 100%; }
   .rf2-process__steps,
   .rf2-results__grid { grid-template-columns: 1fr; }
-  .rf2-price-table a { grid-template-columns: 3.2rem 1fr; gap: 0.4rem 1rem; }
-  .rf2-price-table em,
-  .rf2-price-table p,
-  .rf2-price-table svg { grid-column: 2; }
+  .rf2-pricing__title { display: block; }
+  .rf2-price-cards { grid-template-columns: 1fr; }
+  .rf2-price-card { min-height: auto; }
+  .rf2-price-card strong { max-width: none; }
   .rf2-results__grid div { grid-template-columns: 1fr; }
   .rf2-hotspot::before { width: 4rem; }
   .rf2-hotspot__card {

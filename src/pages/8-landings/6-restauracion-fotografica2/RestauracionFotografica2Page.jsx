@@ -73,8 +73,10 @@ const damages = [
     title: 'Manchas y hongos',
     text: 'Limpieza digital por zonas sin borrar textura real.',
     signal: 'Humedad, manchas circulares y veladuras sobre el papel.',
-    x: 54,
-    y: 62,
+    x: 50,
+    y: 56,
+    w: 22,
+    h: 24,
     zoomX: 54,
     zoomY: 62,
   },
@@ -83,8 +85,10 @@ const damages = [
     title: 'Roturas y papel perdido',
     text: 'Reconstruccion visual controlada con bordes naturales.',
     signal: 'Quiebres, esquinas faltantes y cortes visibles en el soporte.',
-    x: 35,
-    y: 28,
+    x: 31,
+    y: 24,
+    w: 24,
+    h: 26,
     zoomX: 35,
     zoomY: 28,
   },
@@ -93,8 +97,10 @@ const damages = [
     title: 'Color y contraste',
     text: 'Correccion tonal para recuperar profundidad y piel.',
     signal: 'Imagen lavada, negros debiles y perdida de volumen.',
-    x: 68,
-    y: 30,
+    x: 66,
+    y: 27,
+    w: 24,
+    h: 24,
     zoomX: 68,
     zoomY: 30,
   },
@@ -103,8 +109,10 @@ const damages = [
     title: 'Baja definicion',
     text: 'Preparacion nitida para archivo digital e impresion.',
     signal: 'Detalle suave, grano deteriorado y poca lectura del rostro.',
-    x: 81,
-    y: 64,
+    x: 80,
+    y: 56,
+    w: 18,
+    h: 30,
     zoomX: 81,
     zoomY: 64,
   },
@@ -118,9 +126,9 @@ const process = [
 ]
 
 const plans = [
-  ['01', 'Esencial', 'S/ 11.50', 'Manchas leves, pliegues menores, limpieza y definicion.'],
-  ['02', 'Recuperacion', 'S/ 15.00', 'Roturas visibles, perdida de color y deterioro medio.'],
-  ['03', 'Reconstruccion', 'S/ 18.50', 'Dano severo, zonas perdidas y trabajo de maxima precision.'],
+  ['01', 'Esencial', 'S/ 11.50', 'Manchas leves, pliegues menores, limpieza y definicion.', 'Limpieza base', 'Archivo digital listo para guardar'],
+  ['02', 'Recuperacion', 'S/ 15.00', 'Roturas visibles, perdida de color y deterioro medio.', 'Mas solicitado', 'Restauracion equilibrada para imprimir'],
+  ['03', 'Reconstruccion', 'S/ 18.50', 'Dano severo, zonas perdidas y trabajo de maxima precision.', 'Alta precision', 'Reconstruccion visual avanzada'],
 ]
 
 const faqs = [
@@ -277,62 +285,39 @@ function DamageMatrix() {
 
   return (
     <section className="rf2-band rf2-damage">
-      <motion.div {...fadeIn} className="rf2-damage__heading">
-        <p className="rf2-kicker">Diagnostico visual</p>
-        <h2>Diagnosticamos el dano antes de restaurar.</h2>
-        <p>Selecciona un tipo de deterioro para ver que evaluamos antes de intervenir la fotografia.</p>
-      </motion.div>
       <div className="rf2-damage__grid">
-        <motion.div {...fadeIn} className="rf2-damage__list" aria-label="Tipos de dano fotografico">
-          {damages.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              className={activeDamageId === item.id ? 'is-active' : ''}
-              onMouseEnter={() => setActiveDamageId(item.id)}
-              onFocus={() => setActiveDamageId(item.id)}
-              onClick={() => setActiveDamageId(item.id)}
-            >
-              <em>{String(index + 1).padStart(2, '0')}</em>
-              <span>{item.title}</span>
-              <p>{item.text}</p>
-            </button>
-          ))}
+        <motion.div {...fadeIn} className="rf2-damage__heading">
+          <p className="rf2-kicker">Diagnostico visual</p>
+          <h2>Cada dano pide un tratamiento distinto.</h2>
+          <p>El diagnostico define limpieza, reconstruccion, color y nitidez antes de tocar la imagen.</p>
           <CtaButton compact>Enviar foto para diagnostico</CtaButton>
         </motion.div>
-        <motion.div
-          {...fadeIn}
-          className="rf2-damage__visual"
-          style={{ '--damage-x': `${activeDamage.x}%`, '--damage-y': `${activeDamage.y}%` }}
-        >
-          <img src={images.damage} alt="Diagnostico de danos fotograficos en mesa de restauracion" />
-          {damages.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`rf2-damage-marker ${activeDamageId === item.id ? 'is-active' : ''}`}
-              style={{ '--x': `${item.x}%`, '--y': `${item.y}%` }}
-              onMouseEnter={() => setActiveDamageId(item.id)}
-              onFocus={() => setActiveDamageId(item.id)}
-              onClick={() => setActiveDamageId(item.id)}
-              aria-label={`Diagnosticar ${item.title}`}
-            >
-              <span />
-            </button>
-          ))}
-          <div className="rf2-damage__inspector">
-            <div
-              className="rf2-damage__zoom"
-              style={{
-                backgroundImage: `url(${images.damage})`,
-                backgroundPosition: `${activeDamage.zoomX}% ${activeDamage.zoomY}%`,
-              }}
-              aria-hidden="true"
-            />
-            <div>
+        <motion.div {...fadeIn} className="rf2-damage__media">
+          <div
+            className="rf2-damage__visual"
+            style={{ '--damage-x': `${activeDamage.x}%`, '--damage-y': `${activeDamage.y}%`, '--damage-w': `${activeDamage.w}%`, '--damage-h': `${activeDamage.h}%` }}
+          >
+            <img src={images.damage} alt="Diagnostico de danos fotograficos en mesa de restauracion" />
+            <div className="rf2-damage-scan" aria-hidden="true" />
+            <div className="rf2-damage__inspector">
               <strong>{activeDamage.title}</strong>
               <p>{activeDamage.signal}</p>
             </div>
+          </div>
+          <div className="rf2-damage__tabs" aria-label="Tipos de dano fotografico">
+            {damages.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeDamageId === item.id ? 'is-active' : ''}
+                onMouseEnter={() => setActiveDamageId(item.id)}
+                onFocus={() => setActiveDamageId(item.id)}
+                onClick={() => setActiveDamageId(item.id)}
+              >
+                <em>{String(index + 1).padStart(2, '0')}</em>
+                <span>{item.title}</span>
+              </button>
+            ))}
           </div>
         </motion.div>
       </div>
@@ -411,29 +396,37 @@ function Guarantees() {
 function Pricing() {
   return (
     <section id="niveles" className="rf2-band rf2-pricing">
-      <motion.div {...fadeIn} className="rf2-section-title">
+      <motion.div {...fadeIn} className="rf2-section-title rf2-pricing__title">
         <p className="rf2-kicker">Elige segun el nivel de dano</p>
         <h2>Una evaluacion clara antes de empezar.</h2>
+        <p>El precio se confirma al revisar la imagen. Primero miramos el dano, luego recomendamos el nivel justo.</p>
       </motion.div>
-      <div className="rf2-price-table">
-        {plans.map(([number, title, price, text], index) => (
+      <div className="rf2-price-cards">
+        {plans.map(([number, title, price, text, badge, delivery], index) => (
           <motion.a
             key={title}
             {...fadeIn}
             href={WHATSAPP_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className={index === 1 ? 'is-featured' : ''}
+            className={`rf2-price-card ${index === 1 ? 'is-featured' : ''}`}
           >
-            <span>{number}</span>
+            <div className="rf2-price-card__top">
+              <span>{number}</span>
+              <em>{badge}</em>
+            </div>
             <strong>{title}</strong>
-            <em>{price}</em>
+            <div className="rf2-price-card__price">{price}</div>
             <p>{text}</p>
-            <ArrowRight size={18} />
+            <small>{delivery}</small>
+            <div className="rf2-price-card__action">
+              Evaluar mi fotografia
+              <ArrowRight size={17} />
+            </div>
           </motion.a>
         ))}
       </div>
-      <small>El nivel final se confirma despues de revisar la imagen.</small>
+      <p className="rf2-pricing__note">El nivel final se confirma despues de revisar la imagen.</p>
     </section>
   )
 }

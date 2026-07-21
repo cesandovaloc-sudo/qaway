@@ -223,18 +223,21 @@ function Hero() {
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="mx-auto w-full max-w-[96rem] flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-6 sm:px-10 lg:px-10 pt-16 pb-8">
-            <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0">
+            <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 18 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
                 className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300"
               >
+                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
+                  Sistemas digitales, automatización y formación con IA
+                </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em]"
                   style={displayFont}
                 >
-                  Automatización, Canales Y Sistemas <span className="text-[#ff4b0b]">Con IA</span>
+                  Diseñamos sistemas digitales con IA para <span className="text-[#ff4b0b]">tu Proyecto</span>
                 </h1>
                 <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5]">
                   Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal.
@@ -363,7 +366,7 @@ function Hero() {
                 CRM
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end py-6 lg:pr-12 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
               <Brain
                 className="w-7 h-7 text-[#ff4b0b] transition-all duration-300 group-hover:scale-110 group-hover:text-white"
                 strokeWidth={1.5}
