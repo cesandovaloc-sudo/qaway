@@ -344,7 +344,7 @@ function BrandingSpotlight() {
           <SectionPrimitive
             kicker="Branding digital / 01"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
-            title={<>branding visual para que tu marca<br />se vea clara y profesional</>}
+            title={<>Branding para que tu marca<br />se vea <span style={{ color: 'var(--vl-acid)' }}>clara y profesional</span></>}
             body="Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales."
             cta={
               <div className="flex flex-wrap items-center gap-6">
@@ -370,11 +370,11 @@ function BrandingSpotlight() {
                 key={item}
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -3, transition: { duration: 0.2, ease: "easeOut", delay: 0 } }}
+                whileHover={{ y: -1, transition: { duration: 0.06, ease: "linear", delay: 0 } }}
                 viewport={{ once: true }}
                 transition={{
-                  delay: .4 + index * .07,
-                  duration: .5,
+                  delay: .32 + index * .05,
+                  duration: .08,
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
@@ -542,7 +542,7 @@ function TransformacionVisualCarousel() {
 }
 
 function ContentSystem() {
-  const formats = ['1:1', '4:5', '9:16', '16:9']
+  const formats = ['Feed', 'Carrusel', 'Reels', 'Stories', 'Web']
 
   return (
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
@@ -551,8 +551,11 @@ function ContentSystem() {
           <SectionPrimitive
             kicker="Contenido para redes sociales / 02"
             titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-            title={<>Diseñamos contenido visual<br />para una marca coherente</>}
-            body="Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma direccion visual y te ayuden a posicionarte."
+            title={<>Diseñamos contenido visual<br />para una <span style={{ color: 'var(--vl-acid)' }}>marca coherente</span></>}
+            body={<>
+              <span className="block">Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma direccion visual y te ayuden a posicionarte.</span>
+              <span className="block">Diseñamos piezas que mantienen coherencia visual en cada formato y plataforma.</span>
+            </>}
             cta={
               <div className="vl-format-rail">
                 {formats.map((item, index) => (

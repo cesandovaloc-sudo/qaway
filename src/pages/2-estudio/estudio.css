@@ -750,7 +750,7 @@
 .estudio-page .vl-content-system { display: grid; grid-template-columns: .9fr 1.1fr; gap: 60px; align-items: center; }
 
 .estudio-page .vl-format-rail { display: flex; margin-top: 32px; border-top: 1px solid rgba(13,15,13,.2); border-bottom: 1px solid rgba(13,15,13,.2); }
-.estudio-page .vl-format-rail span { flex: 1; padding: 16px 8px; text-align: center; font: 10px monospace; }
+.estudio-page .vl-format-rail span { flex: 1; padding: 16px 8px; text-align: center; font: 700 12px monospace; }
 .estudio-page .vl-format-rail span + span { border-left: 1px solid rgba(13,15,13,.2); }
 
 .estudio-page .vl-content-showcase {

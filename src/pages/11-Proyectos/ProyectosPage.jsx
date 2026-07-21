@@ -102,8 +102,8 @@ const projects = [
 ]
 
 const categories = [
-  { label: 'Estudio', detail: 'Branding, contenido visual, estrategia digital y presencia profesional.', path: '/proyectos/estudio/branding' },
-  { label: 'Sistemas digitales', detail: 'Automatizacion, canales, webs, CRM, agentes IA y dashboards.', path: '/proyectos/sistemas-digitales/automatizacion' },
+  { label: 'Estudio', detail: 'Branding, contenido visual, estrategia digital y presencia profesional.', path: '/estudio', cta: 'Ver servicios de Estudio' },
+  { label: 'Sistemas digitales', detail: 'Automatizacion, canales, webs, CRM, agentes IA y dashboards.', path: '/sistemas-digitales', cta: 'Ver sistemas digitales' },
 ]
 
 function useHeroCarousel() {
@@ -162,8 +162,8 @@ export default function ProyectosPage() {
             transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="projects-kicker">Proyectos / branding, contenido y presencia digital</p>
-            <h1>Proyectos de branding, contenido y presencia digital.</h1>
-            <p className="projects-hero__lead">Una seleccion de marcas y sistemas desarrollados desde el concepto hasta sus aplicaciones en redes, packaging, web y otros soportes.</p>
+            <h1>Proyectos que tomaron forma</h1>
+            <p className="projects-hero__lead">Una seleccion de trabajos donde combinamos direccion visual y sistemas aplicados a marcas reales.</p>
             <a className="projects-button" href="#proyectos-listado">Explorar proyectos <ArrowRight size={16} /></a>
           </motion.div>
 
@@ -220,32 +220,34 @@ export default function ProyectosPage() {
             </div>
           </div>
 
-          <motion.article
-            className="projects-featured"
-            initial={{ opacity: 0, y: 26 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="projects-featured__media">
-              <img src={`${estudioAssets}estudio-proyecto-cafe.webp`} alt="Aplicaciones de marca Brenda y Ely Cafe" />
-              <div className="projects-palette" aria-hidden="true">
-                {['#101010', '#32170c', '#ff4b0b', '#788348', '#e8dece', '#f5f0e7'].map((color) => <span key={color} style={{ background: color }} />)}
+          {activeFilter === 'Todos' && (
+            <motion.article
+              className="projects-featured"
+              initial={{ opacity: 0, y: 26 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="projects-featured__media">
+                <img src={`${estudioAssets}estudio-proyecto-cafe.webp`} alt="Aplicaciones de marca Brenda y Ely Cafe" />
+                <div className="projects-palette" aria-hidden="true">
+                  {['#101010', '#32170c', '#ff4b0b', '#788348', '#e8dece', '#f5f0e7'].map((color) => <span key={color} style={{ background: color }} />)}
+                </div>
               </div>
-            </div>
-            <div className="projects-featured__copy">
-              <p><i />Proyecto destacado</p>
-              <h2>Brenda y Ely Cafe</h2>
-              <strong>Cafeteria joven en San Miguel</strong>
-              <span>Desarrollamos su identidad de marca, estrategia de contenido y aplicaciones en clave digital y fisica para conectar con una comunidad que valora el buen cafe y los momentos autenticos.</span>
-              <div className="projects-featured__tags">
-                <small>Branding</small>
-                <small>Contenido visual</small>
-                <small>Aplicaciones de marca</small>
+              <div className="projects-featured__copy">
+                <p><i />Proyecto destacado</p>
+                <h2>Brenda y Ely Cafe</h2>
+                <strong>Cafeteria joven en San Miguel</strong>
+                <span>Desarrollamos su identidad de marca, estrategia de contenido y aplicaciones en clave digital y fisica para conectar con una comunidad que valora el buen cafe y los momentos autenticos.</span>
+                <div className="projects-featured__tags">
+                  <small>Branding</small>
+                  <small>Contenido visual</small>
+                  <small>Aplicaciones de marca</small>
+                </div>
+                <Link to="/proyectos/estudio/branding/cafe-brenda-y-ely">Ver proyecto completo <ArrowRight size={15} /></Link>
               </div>
-              <Link to="/proyectos/estudio/branding/cafe-brenda-y-ely">Ver proyecto completo <ArrowRight size={15} /></Link>
-            </div>
-          </motion.article>
+            </motion.article>
+          )}
 
           <div className="projects-grid">
             {visibleProjects.map((project, projectIndex) => (
@@ -262,7 +264,7 @@ export default function ProyectosPage() {
               <span>Proyectos / {category.label}</span>
               <h2>{category.label}</h2>
               <p>{category.detail}</p>
-              <small>Explorar categoria <ArrowRight size={14} /></small>
+              <small>{category.cta} <ArrowRight size={14} /></small>
             </Link>
           ))}
         </div>
