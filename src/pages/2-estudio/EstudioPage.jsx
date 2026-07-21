@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive, Kicker } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
+import SEO from '../../components/seo/SEO';
 import {
   ArrowDown,
   ArrowRight,
@@ -157,7 +158,7 @@ function Hero() {
         transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
       >
-        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.png`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
+        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual4.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
       </motion.div>
       
       <div className="vl-hero__right-pane">
@@ -833,8 +834,55 @@ export default function EstudioPage() {
   useLayoutEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }, [])
+
+  const estudioSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "Estudio Creativo y Dirección Visual",
+    "provider": {
+      "@type": "Organization",
+      "name": "Qaway Lab",
+      "url": "https://qaway.pe"
+    },
+    "description": "Desarrollamos la identidad visual, branding y contenido digital para que tu proyecto o marca tenga una presencia profesional y confiable.",
+    "areaServed": "PE",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Servicios Creativos",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Branding digital"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Contenido Visual"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Estrategia Digital"
+          }
+        }
+      ]
+    }
+  };
+
   return (
     <div className="estudio-page">
+      <SEO 
+        title="Estudio Creativo y Dirección Visual | Qaway Lab"
+        description="Creamos la identidad visual, branding y contenido digital para que tu proyecto tenga una presencia profesional y confiable."
+        canonical="https://qaway.pe/estudio"
+        schema={estudioSchema}
+      />
       <Hero />
       <Services />
 
