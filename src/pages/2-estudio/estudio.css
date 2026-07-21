@@ -1133,6 +1133,23 @@
   font: 10px monospace;
 }
 
+
+.estudio-page .vl-digital-copy__grid { align-items: stretch; }
+.estudio-page .vl-digital-copy__left,
+.estudio-page .vl-digital-copy__right { min-width: 0; }
+.estudio-page .vl-digital-copy__social-media { height: 340px; }
+.estudio-page .vl-digital-copy__right .vl-digital__browser { height: 72vh; }
+
+@media (min-width: 1024px) and (max-height: 900px) {
+  .estudio-page #estrategia-digital.vl-section { padding: 64px 0; }
+  .estudio-page .vl-digital-copy__grid { gap: 48px; }
+  .estudio-page .vl-digital-copy__left { gap: 22px; }
+  .estudio-page .vl-digital-copy__title { font-size: clamp(3.25rem, 4.85vw, 5rem) !important; }
+  .estudio-page .vl-digital-copy__social-media { height: clamp(350px, 43vh, 390px); }
+  .estudio-page .vl-digital-copy__right .vl-digital__browser { height: clamp(560px, 70vh, 680px); }
+  .estudio-page .vl-digital-copy__right .vl-digital__path { padding-block: 8px !important; }
+}
+
 /* ==================== METHOD ==================== */
 
 .estudio-page .vl-method__body { position: relative; z-index: 1; display: grid; grid-template-columns: .9fr 1.1fr; gap: 70px; }

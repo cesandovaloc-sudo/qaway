@@ -53,10 +53,10 @@ export default function DigitalPresenceCopy() {
   return (
     <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918' }}>
       <div className="vl-shell">
-        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-16 xl:gap-24 items-stretch">
+        <div className="vl-digital-copy__grid grid lg:grid-cols-[1.2fr_0.8fr] gap-16 xl:gap-24 items-stretch">
 
           {/* Columna izquierda: Título + tarjeta slideshow */}
-          <div className="flex flex-col gap-8">
+          <div className="vl-digital-copy__left flex flex-col gap-8">
             <motion.div
               initial={{ opacity: 0, y: 36 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -65,7 +65,7 @@ export default function DigitalPresenceCopy() {
             >
               <SectionPrimitive
                 kicker="Estrategia digital / 03"
-                titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                titleClassName="vl-digital-copy__title !text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
                 title={<>De la identidad<br /><span style={{ color: '#666860' }}>a una marca que ya vive online.</span></>}
               />
             </motion.div>
@@ -89,7 +89,7 @@ export default function DigitalPresenceCopy() {
                 <span style={{ color: '#ffffff' }}>Q</span>
                 <div><strong>qaway.lab</strong><small style={{ color: '#666860' }}>Dirección visual y contenido</small></div>
               </div>
-              <div style={{ position: 'relative', overflow: 'hidden', height: '340px' }}>
+              <div className="vl-digital-copy__social-media" style={{ position: 'relative', overflow: 'hidden' }}>
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeSlide}
@@ -112,12 +112,12 @@ export default function DigitalPresenceCopy() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.16 }}
             transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-4"
+            className="vl-digital-copy__right flex flex-col gap-4"
           >
             {/* Browser mockup con borde gris claro */}
             <div
               className="vl-digital__browser"
-              style={{ width: '100%', height: '72vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.12)', borderRadius: '6px', backgroundColor: '#ffffff' }}
+              style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.12)', borderRadius: '6px', backgroundColor: '#ffffff' }}
             >
               <div className="vl-digital__browser-bar">
                 <i></i><i></i><i></i><span>qaway.lab / inicio</span>

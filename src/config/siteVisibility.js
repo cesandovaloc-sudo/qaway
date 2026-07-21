@@ -29,6 +29,7 @@ const publicPathAllowList = new Set([
   '/blog/articulo/google-calendar-dominado-guia-productividad',
   '/landings/sistema-contenido-notion',
   '/landings/identidad-visual',
+  '/landings/restauracion-fotografica2',
 ])
 
 const navigationRegistry = [
