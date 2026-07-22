@@ -234,7 +234,7 @@ function HeroInicioBlockPractice() {
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
-            <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10">
+            <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : 'hidden'}
                 animate={reduceMotion ? undefined : 'show'}
@@ -797,16 +797,15 @@ export default function SistemasDigitalesPage() {
                             y,
                             scale,
                             opacity,
-                            rotate,
                           }}
                           transition={{
                             default: {
                               type: 'spring',
-                              stiffness: 110,
-                              damping: 18,
-                              mass: 1.0
+                              stiffness: 300,
+                              damping: 28,
+                              mass: 0.6,
                             },
-                            opacity: { duration: 0.45, ease: 'easeInOut' }
+                            opacity: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
                           }}
                         >
                           <img
@@ -818,7 +817,7 @@ export default function SistemasDigitalesPage() {
                             }}
                           />
                           <div
-                            className="absolute inset-0 bg-black pointer-events-none rounded-[5px] transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                            className="absolute inset-0 bg-black pointer-events-none rounded-[5px] transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
                             style={{
                               opacity: isActive ? 0 : (isNext ? 0.3 : 0.55),
                             }}
