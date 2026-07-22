@@ -946,7 +946,7 @@ export default function SistemasDigitalesPage() {
             <img
               src="/assets/pages/3-sistemas-digitales/content-ops-automatización.webp"
               alt="Automatización y flujos de trabajo en procesos digitales"
-              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-[50%_30%]"
+              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-center scale-[0.92]"
               loading="lazy"
               decoding="async"
             />
