@@ -404,20 +404,20 @@ function HeroInicioBlockPractice() {
 const workflowCardsData = [
   {
     num: "01",
-    title: "Información registrada",
-    text: "Los datos recibidos pasan automáticamente al sistema correspondiente.",
+    title: "Tareas automáticas",
+    text: "Reducimos acciones manuales y repetitivas.",
     icon: Database,
   },
   {
     num: "02",
-    title: "Tareas y avisos",
-    text: "Se asignan responsables y se generan alertas según cada etapa.",
+    title: "Herramientas conectadas",
+    text: "La información pasa de un sistema a otro.",
     icon: Bell,
   },
   {
     num: "03",
-    title: "Seguimiento del proceso",
-    text: "Puedes revisar qué está pendiente, en curso o completado.",
+    title: "Seguimiento y alertas",
+    text: "Los procesos avanzan con avisos y control.",
     icon: CheckCircle2,
   },
 ];
