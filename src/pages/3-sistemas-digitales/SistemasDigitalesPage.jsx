@@ -640,7 +640,7 @@ const advisoryCases = [
 export default function SistemasDigitalesPage() {
   useSetNavbarVariant('brand')
   const reduceMotion = useReducedMotion();
-  const [activeIdx, setActiveIdx] = useState(null);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [expandedArea, setExpandedArea] = useState(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [formSubmitting, setFormSubmitting] = useState(false);
@@ -707,8 +707,8 @@ export default function SistemasDigitalesPage() {
                   Soluciones digitales <br />
                   adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
-                <p className="mt-5 text-[15px] leading-relaxed text-zinc-400 max-w-lg">
-                  Automatización, canales digitales, desarrollo web, CRM, paneles de control, agentes de IA y herramientas internas para ordenar procesos, conectar información y facilitar el trabajo diario.
+                <p className="mt-5 text-[15px] leading-relaxed text-zinc-400 max-w-xl">
+                  Automatización, canales digitales, CRM y herramientas internas y más, para ordenar, conectar procesos e información y facilitar el trabajo diario.
                 </p>
               </div>
 
@@ -741,7 +741,7 @@ export default function SistemasDigitalesPage() {
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
                 <div className="relative z-10 w-full flex items-center justify-center min-h-[620px]" style={{ perspective: 1000 }}>
-                  <div className="relative w-full max-w-[450px]" style={{ aspectRatio: '1080/1350' }}>
+                  <div className="relative w-full max-w-[450px]" style={{ aspectRatio: '655/864' }}>
                     {items.map((item, idx) => {
                       const currentActive = activeIdx === null ? 0 : activeIdx
                       const isPast = idx < currentActive
@@ -815,7 +815,7 @@ export default function SistemasDigitalesPage() {
                             alt={item.title}
                             className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
                             style={{
-                              aspectRatio: '1080/1350',
+                              aspectRatio: '655/864',
                             }}
                           />
                           <div
