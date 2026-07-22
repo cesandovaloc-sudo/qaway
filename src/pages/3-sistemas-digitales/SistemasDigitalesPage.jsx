@@ -242,17 +242,17 @@ function HeroInicioBlockPractice() {
                 custom={0}
                 className="relative z-10"
               >
-                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-                  Marcas, Automatización y formación con IA
+                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#a3a19b]">
+                  Sistemas Digitales y Automatización con IA
                 </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
-                  <span className="block text-white">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
+                  <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
                 </h1>
-                <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
-                  Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
+                <p className="mt-6 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#a8a6a2]">
+                  Implementamos automatizaciones, CRM, herramientas y procesos digitales para mejorar la operación de tu proyecto.
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-5">
                   <a
@@ -266,7 +266,7 @@ function HeroInicioBlockPractice() {
                   </a>
                   <a
                     href="#primary-areas"
-                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
+                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#a8a6a2] transition-colors hover:text-[#ff4b0b]"
                   >
                     Elige por dónde empezar
                   </a>
@@ -299,14 +299,14 @@ function HeroInicioBlockPractice() {
             <div className="relative z-20 mt-12 flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
               <div className="mb-8 text-center">
                 <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
-                <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                <p className="max-w-[16rem] mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
                   Sistemas digitales
                 </p>
                 <p
-                  className="max-w-[16rem] text-[clamp(1.34rem,1.9vw,1.94rem)] font-bold leading-[0.95] tracking-[-0.04em] text-white"
-                  style={displayFont}
+                  className="max-w-[16rem] text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
+                  style={{ ...displayFont, fontWeight: 600 }}
                 >
-                  Automatización y productividad para negocios que necesitan operar mejor.
+                  Automatización para negocios que necesitan operar mejor.
                 </p>
               </div>
 
@@ -396,218 +396,6 @@ function HeroInicioBlockPractice() {
         </div>
       </div>
     </section>
-  );
-}
-
-function Hero() {
-  const reduceMotion = useReducedMotion();
-
-  return (
-    <div className="relative w-full min-h-screen flex flex-col font-sans overflow-hidden bg-[#161616]">
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
-        style={{
-          backgroundImage:
-            'url("https://www.transparenttextures.com/patterns/stardust.png")',
-        }}
-      ></div>
-
-      <div className="flex flex-1 w-full z-10 relative">
-        <div className="flex-1 flex flex-col relative bg-[#161616]">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-            <div
-              className="w-[120%] aspect-square"
-              style={{
-                background:
-                  "radial-gradient(circle at 55% 40%, rgba(255,255,255,0.06) 0%, transparent 50%)",
-              }}
-            />
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-            <div
-              className="w-[100%] aspect-square"
-              style={{
-                background:
-                  "radial-gradient(circle at 55% 45%, rgba(255,75,11,0.12) 0%, transparent 50%)",
-              }}
-            />
-          </div>
-          <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
-
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-8 md:px-16 pt-16 pb-8">
-            <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0">
-              <motion.div
-                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-                transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-                className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300"
-              >
-                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-                  SISTEMAS DIGITALES Y AUTOMATIZACIÓN CON IA
-                </p>
-                <h1
-                  className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em]"
-                  style={displayFont}
-                >
-                  Automatización, Canales Y Sistemas <span className="text-[#ff4b0b]">Con IA</span>
-                </h1>
-                <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5]">
-                  Diseñamos proyectos digitales, CRMs, dashboards y herramientas operativas y agentes de inteligencia artificial a la medida, para que tu equipo ejecute más rápido y tu negocio escale sin depender de ti.
-                </p>
-                <div className="flex flex-wrap items-center gap-6 mt-8">
-                  <a href="#soluciones" className="inline-flex items-center justify-center gap-2 bg-[#ff4b0b] text-white px-8 py-3.5 font-bold text-[14px] hover:-translate-y-1 hover:bg-[#e04400] transition-all duration-300">
-                    Ver soluciones <ArrowDown size={16} />
-                  </a>
-                  <a href="/" className="inline-flex items-center gap-2 text-white font-medium text-[14px] border-b border-[#ff4b0b] pb-1 hover:text-[#ff4b0b] transition-colors duration-300">
-                    Conocer Qaway Lab <ArrowRight size={15} />
-                  </a>
-                </div>
-              </motion.div>
-            </div>
-
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="lg:col-span-4 relative flex items-end justify-center pt-10 min-h-[400px]"
-            >
-              <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
-              <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
-              <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
-              <img
-                src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
-                alt="Sistemas Digitales Qaway"
-                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale scale-[1.19] lg:scale-[1.14] xl:scale-[1.19] 2xl:scale-[1.34] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.14]"
-                style={{
-                  maskImage:
-                    "linear-gradient(to bottom, black 60%, transparent 100%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to bottom, black 60%, transparent 100%)",
-                }}
-              />
-            </motion.div>
-
-            <div className="lg:col-span-3 flex flex-col justify-center lg:pl-10 lg:border-l border-white/5 z-20 mt-12 lg:mt-0">
-              <div className="mb-12">
-                <div className="w-6 h-1 bg-[#ff4b0b] mb-6"></div>
-                <p className="text-[1.35rem] font-medium leading-snug text-white">
-                  Automatización y productividad para negocios que necesitan
-                  operar mejor.
-                </p>
-              </div>
-
-              <div className="mb-12">
-                <div className="w-6 h-[1px] bg-[#ff4b0b] mb-6"></div>
-                <p className="text-gray-400 text-sm leading-relaxed pr-4">
-                  Unimos estrategia, tecnología e inteligencia para construir
-                  sistemas que escalan contigo.
-                </p>
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: [0, -10],
-                  transition: {
-                    y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 },
-                    opacity: { delay: 0.4, duration: 0.6 },
-                    scale: { delay: 0.4, duration: 0.6 }
-                  }
-                }}
-                style={{ willChange: "transform", width: "100%" }}
-              >
-                <motion.div
-                  className="bg-white border border-[#ff4b0b]/40 rounded-[5px] p-5 flex flex-col gap-2 w-full shadow-xl relative overflow-hidden"
-                  initial={{ opacity: 0.6, y: 0 }}
-                  animate={{ opacity: 0.6, y: 0 }}
-                  whileHover={{
-                    opacity: 1,
-                    y: -10,
-                    transition: { duration: 0.3, ease: 'easeOut' }
-                  }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                >
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ff4b0b]/10 rounded-full blur-xl pointer-events-none"></div>
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="bg-[#ff4b0b] p-3 rounded text-white shadow-lg shadow-[#ff4b0b]/20">
-                      <TrendingUp className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold tracking-tight text-[#161616]">
-                        +127%
-                      </div>
-                      <div className="text-xs text-[#161616]/80 leading-tight mt-0.5 font-medium">
-                        Aumento promedio
-                        <br />
-                        en productividad
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            </div>
-          </div>
-
-          <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start lg:border-r-[3px] border-black/5 py-6 lg:pl-16 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
-              <Settings
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                Automatización
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
-              <LayoutDashboard
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                Dashboards
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
-              <Users
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                CRM
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end py-6 lg:pr-12 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
-              <Brain
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                IA aplicada
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-16 md:w-20 bg-[#f8f9f7] text-[#1a1a1a] flex flex-col items-center justify-between py-10 shrink-0 relative z-20">
-          <div className="flex flex-col items-center gap-4 text-gray-400">
-            <span className="text-2xl font-light">+</span>
-            <span className="w-px h-12 bg-gray-300"></span>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="rotate-180" style={{ writingMode: "vertical-rl" }}>
-              <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold text-gray-500 whitespace-nowrap">
-                Sistemas que escalan contigo
-              </span>
-            </p>
-          </div>
-          <div className="w-full flex justify-end pr-2">
-            <div className="w-6 h-6 border-r-[3px] border-b-[3px] border-[#ff4b0b]"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -878,7 +666,7 @@ export default function SistemasDigitalesPage() {
 
   return (
     <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
-      <SEO 
+      <SEO
         title="Sistemas Digitales y Automatización con IA | Qaway LAB"
         description="Implementamos sistemas, CRMs y agentes con IA para optimizar la operación de tu negocio."
         canonical="https://qaway.dev/sistemas-digitales"
@@ -895,7 +683,6 @@ export default function SistemasDigitalesPage() {
         }}
       />
       <HeroInicioBlockPractice />
-      <Hero />
 
       <section className="relative bg-[#121212] py-24 text-white overflow-hidden border-t border-white/5">
         <div
@@ -933,8 +720,8 @@ export default function SistemasDigitalesPage() {
                       key={item.title}
                       onClick={() => setActiveIdx(idx)}
                       className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${isActive
-                          ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
-                          : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
+                        ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
+                        : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
                         }`}
                     >
                       <Icon className="h-4.5 w-4.5 shrink-0 text-[#ff4b0b]" />
