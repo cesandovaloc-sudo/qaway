@@ -27,6 +27,7 @@ import {
   Layers3,
   Network,
   Brush,
+  Bell,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -405,19 +406,19 @@ const workflowCardsData = [
     num: "01",
     title: "Información registrada",
     text: "Los datos recibidos pasan automáticamente al sistema correspondiente.",
-    badge: "REGISTRADO",
+    icon: Database,
   },
   {
     num: "02",
     title: "Tareas y avisos",
     text: "Se asignan responsables y se generan alertas según cada etapa.",
-    badge: "NOTIFICADO",
+    icon: Bell,
   },
   {
     num: "03",
     title: "Seguimiento del proceso",
     text: "Puedes revisar qué está pendiente, en curso o completado.",
-    badge: "COMPLETADO",
+    icon: CheckCircle2,
   },
 ];
 
@@ -885,6 +886,7 @@ export default function SistemasDigitalesPage() {
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {workflowCardsData.map(function (card, index) {
+                const Icon = card.icon;
                 return (
                   <motion.article
                     key={card.num}
@@ -903,9 +905,8 @@ export default function SistemasDigitalesPage() {
                         >
                           {card.num}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#ff4b0b]/10 text-[#ff4b0b] rounded-[3px] border border-[#ff4b0b]/20">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b] animate-pulse" />
-                          {card.badge}
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] border border-[#ff4b0b]/20">
+                          <Icon className="h-4 w-4" />
                         </span>
                       </div>
                       <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
