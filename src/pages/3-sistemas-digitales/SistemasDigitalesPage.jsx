@@ -30,6 +30,7 @@ import {
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
 import '@/pages/4-academy/academy.css'
+import SEO from "@/components/seo/SEO";
 
 const ASSET = '/assets/pages/2-estudio'
 
@@ -44,7 +45,7 @@ function CounterValue({ value }) {
         const [entry] = entries;
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true;
-          
+
           let target = 0;
           if (value === "01") {
             target = 1;
@@ -82,13 +83,13 @@ function CounterValue({ value }) {
 
   const animateCount = (start, end, updateFn, duration) => {
     const startTime = performance.now();
-    
+
     const step = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const easeProgress = progress * (2 - progress);
       const currentVal = Math.round(start + (end - start) * easeProgress);
-      
+
       updateFn(currentVal);
       if (progress < 1) {
         requestAnimationFrame(step);
@@ -222,8 +223,8 @@ function Hero() {
           </div>
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
-          <div className="mx-auto w-full max-w-[96rem] flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-6 sm:px-10 lg:px-10 pt-16 pb-8">
-            <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0 lg:px-10">
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 relative px-8 md:px-16 pt-16 pb-8">
+            <div className="lg:col-span-5 flex flex-col justify-center z-20 pb-12 lg:pb-0">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 18 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -231,16 +232,16 @@ function Hero() {
                 className="text-white [&_p]:!text-gray-400 [&_a:last-child]:!text-gray-300"
               >
                 <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-                  Sistemas digitales, automatización y formación con IA
+                  SISTEMAS DIGITALES Y AUTOMATIZACIÓN CON IA
                 </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em]"
                   style={displayFont}
                 >
-                  Diseñamos sistemas digitales con IA para <span className="text-[#ff4b0b]">tu Proyecto</span>
+                  Automatización, Canales Y Sistemas <span className="text-[#ff4b0b]">Con IA</span>
                 </h1>
                 <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5]">
-                  Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio, equipo o marca personal.
+                  Diseñamos proyectos digitales, CRMs, dashboards y herramientas operativas y agentes de inteligencia artificial a la medida, para que tu equipo ejecute más rápido y tu negocio escale sin depender de ti.
                 </p>
                 <div className="flex flex-wrap items-center gap-6 mt-8">
                   <a href="#soluciones" className="inline-flex items-center justify-center gap-2 bg-[#ff4b0b] text-white px-8 py-3.5 font-bold text-[14px] hover:-translate-y-1 hover:bg-[#e04400] transition-all duration-300">
@@ -294,9 +295,9 @@ function Hero() {
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1, 
+                animate={{
+                  opacity: 1,
+                  scale: 1,
                   y: [0, -10],
                   transition: {
                     y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 },
@@ -306,14 +307,14 @@ function Hero() {
                 }}
                 style={{ willChange: "transform", width: "100%" }}
               >
-                <motion.div 
+                <motion.div
                   className="bg-white border border-[#ff4b0b]/40 rounded-[5px] p-5 flex flex-col gap-2 w-full shadow-xl relative overflow-hidden"
                   initial={{ opacity: 0.6, y: 0 }}
                   animate={{ opacity: 0.6, y: 0 }}
-                  whileHover={{ 
-                    opacity: 1, 
-                    y: -10, 
-                    transition: { duration: 0.3, ease: 'easeOut' } 
+                  whileHover={{
+                    opacity: 1,
+                    y: -10,
+                    transition: { duration: 0.3, ease: 'easeOut' }
                   }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
                 >
@@ -338,40 +339,40 @@ function Hero() {
             </div>
           </div>
 
-          <div className="w-full border-t-[3px] border-[#f8f9f7]/10 grid grid-cols-2 lg:grid-cols-4 bg-[#161616]">
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start lg:border-r-[3px] border-[#f8f9f7]/10 py-6 lg:pl-16 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
+          <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start lg:border-r-[3px] border-black/5 py-6 lg:pl-16 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Settings
-                className="w-7 h-7 text-[#ff4b0b] transition-all duration-300 group-hover:scale-110 group-hover:text-white"
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
               />
-              <span className="text-sm text-gray-300 font-medium transition-colors duration-300 group-hover:text-white">
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
                 Automatización
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-[#f8f9f7]/10 py-6 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <LayoutDashboard
-                className="w-7 h-7 text-[#ff4b0b] transition-all duration-300 group-hover:scale-110 group-hover:text-white"
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
               />
-              <span className="text-sm text-gray-300 font-medium transition-colors duration-300 group-hover:text-white">
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
                 Dashboards
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-[#f8f9f7]/10 py-6 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Users
-                className="w-7 h-7 text-[#ff4b0b] transition-all duration-300 group-hover:scale-110 group-hover:text-white"
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
               />
-              <span className="text-sm text-gray-300 font-medium transition-colors duration-300 group-hover:text-white">
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
                 CRM
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 transition-all duration-300 cursor-pointer hover:bg-white/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end py-6 lg:pr-12 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Brain
-                className="w-7 h-7 text-[#ff4b0b] transition-all duration-300 group-hover:scale-110 group-hover:text-white"
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
               />
-              <span className="text-sm text-gray-300 font-medium transition-colors duration-300 group-hover:text-white">
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
                 IA aplicada
               </span>
             </div>
@@ -637,7 +638,7 @@ const advisoryCases = [
 
 
 export default function SistemasDigitalesPage() {
-useSetNavbarVariant('brand')
+  useSetNavbarVariant('brand')
   const reduceMotion = useReducedMotion();
   const [activeIdx, setActiveIdx] = useState(null);
   const [expandedArea, setExpandedArea] = useState(null);
@@ -666,97 +667,23 @@ useSetNavbarVariant('brand')
 
   return (
     <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
+      <SEO 
+        title="Sistemas Digitales y Automatización con IA | Qaway LAB"
+        description="Implementamos sistemas, CRMs y agentes con IA para optimizar la operación de tu negocio."
+        canonical="https://qaway.dev/sistemas-digitales"
+        type="website"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "Service",
+          "name": "Sistemas Digitales y Automatización",
+          "provider": {
+            "@type": "Organization",
+            "name": "Qaway LAB"
+          },
+          "description": "Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio."
+        }}
+      />
       <Hero />
-
-      <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
-        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
-          <motion.div
-            initial={reduceMotion ? false : "hidden"}
-            whileInView={reduceMotion ? undefined : "show"}
-            viewport={{ once: true, amount: 0.2 }}
-            variants={revealUp}
-            custom={0}
-          >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              SISTEMA DE CONTENIDO / 01
-            </p>
-            <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
-              style={displayFont}
-            >
-              No basta con publicar.
-              <br />
-              <span className="text-[#ff4b0b]">
-                Hay que operar con sistema.
-              </span>
-            </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Conectamos sistemas de contenidos con automatización, CRM y
-              seguimiento operativo. El resultado es una estructura con orden,
-              menos fricción y mejor lectura del negocio.
-            </p>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              {operatingSignals.map(function (signal, index) {
-                return (
-                  <motion.article
-                    key={signal.title}
-                    initial={reduceMotion ? false : "hidden"}
-                    whileInView={reduceMotion ? undefined : "show"}
-                    viewport={{ once: true, amount: 0.3 }}
-                    variants={revealUp}
-                    custom={0.08 * (index + 1)}
-                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
-                  >
-                    <span 
-                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
-                      style={displayFont}
-                    >
-                      <CounterValue value={signal.value} />
-                    </span>
-                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
-                      {signal.title}
-                    </h3>
-                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
-                      {signal.text}
-                    </p>
-                  </motion.article>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
-            <img
-              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
-              alt="Centro de control de contenido y operaciones digitales"
-              className="relative z-10 h-full min-h-[28rem] w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
-              <div className="flex items-center gap-3 text-white">
-                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
-                  Operación con criterio
-                </span>
-              </div>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-                Planeación, producción, seguimiento y automatización dentro de
-                una misma lectura operativa. Eso permite producir mejor sin
-                multiplicar el caos.
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
 
       <section className="relative bg-[#121212] py-24 text-white overflow-hidden border-t border-white/5">
         <div
@@ -775,11 +702,14 @@ useSetNavbarVariant('brand')
             {/* Left Column: Title and 2-column Buttons Grid */}
             <div className="lg:col-span-5 flex flex-col justify-start">
               <div className="mb-8">
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Sistema Completo</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">SERVICIOS DE SISTEMAS DIGITALES</div>
                 <h2 className="mt-4 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-white" style={displayFont}>
-                  Herramientas <br />
-                  adaptadas a <span className="italic text-[#ff4b0b]">tu proyecto.</span>
+                  Soluciones digitales <br />
+                  adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
+                <p className="mt-5 text-[15px] leading-relaxed text-zinc-400 max-w-lg">
+                  Automatización, canales digitales, desarrollo web, CRM, paneles de control, agentes de IA y herramientas internas para ordenar procesos, conectar información y facilitar el trabajo diario.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -790,11 +720,10 @@ useSetNavbarVariant('brand')
                     <button
                       key={item.title}
                       onClick={() => setActiveIdx(idx)}
-                      className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${
-                        isActive
+                      className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${isActive
                           ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
                           : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
-                      }`}
+                        }`}
                     >
                       <Icon className="h-4.5 w-4.5 shrink-0 text-[#ff4b0b]" />
                       <span className={`text-[13px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
@@ -818,14 +747,14 @@ useSetNavbarVariant('brand')
                       const isPast = idx < currentActive
                       const isActive = idx === currentActive
                       const isNext = idx === currentActive + 1
-                      
+
                       let x = 0
                       let y = 0
                       let scale = 1
                       let opacity = 0
                       let rotate = 0
                       let pointerEvents = 'none'
-                      
+
                       if (isPast) {
                         x = 0
                         y = 12
@@ -903,6 +832,96 @@ useSetNavbarVariant('brand')
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+          <motion.div
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
+            viewport={{ once: true, amount: 0.2 }}
+            variants={revealUp}
+            custom={0}
+          >
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              SISTEMA DE CONTENIDO / 01
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              style={displayFont}
+            >
+              No basta con publicar.
+              <br />
+              <span className="text-[#ff4b0b]">
+                Hay que operar con sistema.
+              </span>
+            </h2>
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Conectamos sistemas de contenidos con automatización, CRM y
+              seguimiento operativo. El resultado es una estructura con orden,
+              menos fricción y mejor lectura del negocio.
+            </p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              {operatingSignals.map(function (signal, index) {
+                return (
+                  <motion.article
+                    key={signal.title}
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={revealUp}
+                    custom={0.08 * (index + 1)}
+                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
+                  >
+                    <span
+                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
+                      style={displayFont}
+                    >
+                      <CounterValue value={signal.value} />
+                    </span>
+                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
+                      {signal.title}
+                    </h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
+                      {signal.text}
+                    </p>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
+            <img
+              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
+              alt="Centro de control de contenido y operaciones digitales"
+              className="relative z-10 h-full min-h-[28rem] w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
+              <div className="flex items-center gap-3 text-white">
+                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
+                  Operación con criterio
+                </span>
+              </div>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+                Planeación, producción, seguimiento y automatización dentro de
+                una misma lectura operativa. Eso permite producir mejor sin
+                multiplicar el caos.
+              </p>
+            </div>
+          </motion.div>
         </div>
       </section>
 
