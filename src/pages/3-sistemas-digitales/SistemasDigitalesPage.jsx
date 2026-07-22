@@ -400,6 +400,27 @@ function HeroInicioBlockPractice() {
   );
 }
 
+const workflowCardsData = [
+  {
+    num: "01",
+    title: "Información registrada",
+    text: "Los datos recibidos pasan automáticamente al sistema correspondiente.",
+    badge: "REGISTRADO",
+  },
+  {
+    num: "02",
+    title: "Tareas y avisos",
+    text: "Se asignan responsables y se generan alertas según cada etapa.",
+    badge: "NOTIFICADO",
+  },
+  {
+    num: "03",
+    title: "Seguimiento del proceso",
+    text: "Puedes revisar qué está pendiente, en curso o completado.",
+    badge: "COMPLETADO",
+  },
+];
+
 const operatingSignals = [
   {
     value: "01",
@@ -637,164 +658,7 @@ const advisoryCases = [
 
 
 
-function WorkflowAnimationLab() {
-  const [activeTab, setActiveTab] = useState(0);
 
-  const workflowItems = [
-    {
-      num: "01",
-      title: "Información registrada",
-      text: "Los datos recibidos pasan automáticamente al sistema correspondiente.",
-      badge: "RECIBIDO"
-    },
-    {
-      num: "02",
-      title: "Tareas y avisos",
-      text: "Se asignan responsables y se generan alertas según cada etapa.",
-      badge: "NOTIFICADO"
-    },
-    {
-      num: "03",
-      title: "Seguimiento del proceso",
-      text: "Puedes revisar qué está pendiente, en curso o completado.",
-      badge: "COMPLETADO"
-    }
-  ];
-
-  return (
-    <section className="bg-[#161616] text-white py-16 border-y-2 border-[#ff4b0b]/40">
-      <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-        <div className="mb-8 text-center">
-          <span className="inline-block bg-[#ff4b0b] text-white text-[10px] font-bold uppercase tracking-[0.22em] px-3 py-1 rounded-sm">
-            LABORATORIO DE ANIMACIONES (PRUEBA EN VIVO)
-          </span>
-          <h3 className="mt-3 text-2xl font-bold text-white uppercase tracking-tight">Elige la animación ideal para tus 3 tarjetas</h3>
-          <p className="text-zinc-400 text-sm mt-1 max-w-xl mx-auto">Selecciona la pestaña para ver la dinámica de cada propuesta en tiempo real.</p>
-        </div>
-
-        {/* Tab Selector */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          {["OPCIÓN 1: Línea de Flujo Conectada", "OPCIÓN 2: Rompecabezas / Puzzle Snap", "OPCIÓN 3: Pulsos de Estado Activo"].map((label, idx) => (
-            <button
-              key={label}
-              onClick={() => setActiveTab(idx)}
-              className={`px-5 py-2.5 text-xs font-bold uppercase tracking-wider rounded transition-all ${
-                activeTab === idx
-                  ? "bg-[#ff4b0b] text-white shadow-[0_0_20px_rgba(255,75,11,0.35)]"
-                  : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Option 1: Línea de Flujo Conectada */}
-        {activeTab === 0 && (
-          <div className="relative pt-4">
-            <div className="hidden sm:block absolute top-[55px] left-[15%] right-[15%] h-[2px] bg-white/10 z-0">
-              <motion.div
-                className="h-full bg-gradient-to-r from-transparent via-[#ff4b0b] to-transparent w-[30%]"
-                animate={{ x: ["0%", "230%"] }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
-              />
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-3 relative z-10">
-              {workflowItems.map((item, index) => (
-                <motion.div
-                  key={item.num}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: index * 0.12 }}
-                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="group relative border border-white/10 bg-white/[0.03] px-6 py-6 rounded shadow-xl hover:border-[#ff4b0b]/60 transition-all duration-300"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="grid h-10 w-10 place-items-center bg-[#ff4b0b] text-white font-bold text-base rounded shadow-[0_0_15px_rgba(255,75,11,0.3)]">
-                      {item.num}
-                    </span>
-                    <span className="flex h-2.5 w-2.5 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ff4b0b] opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#ff4b0b]"></span>
-                    </span>
-                  </div>
-                  <h4 className="text-lg font-bold text-white group-hover:text-[#ff4b0b] transition-colors">{item.title}</h4>
-                  <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{item.text}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Option 2: Rompecabezas / Puzzle Snap */}
-        {activeTab === 1 && (
-          <div className="grid gap-4 sm:grid-cols-3 pt-4">
-            {workflowItems.map((item, index) => (
-              <motion.div
-                key={item.num}
-                initial={{ opacity: 0, scale: 0.92, x: index === 0 ? -15 : index === 2 ? 15 : 0 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                transition={{ type: "spring", stiffness: 280, damping: 22, delay: index * 0.1 }}
-                whileHover={{ scale: 1.03 }}
-                className="relative border border-[#ff4b0b]/50 bg-white/[0.04] p-6 rounded shadow-2xl flex flex-col justify-between overflow-hidden"
-              >
-                {index < 2 && (
-                  <div className="hidden sm:block absolute -right-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-[#ff4b0b] rounded-full z-20 shadow-[0_0_10px_#ff4b0b]" />
-                )}
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[11px] font-mono font-bold text-[#ff4b0b] bg-[#ff4b0b]/10 px-2 py-0.5 rounded border border-[#ff4b0b]/30">
-                      MÓDULO {item.num}
-                    </span>
-                  </div>
-                  <h4 className="text-lg font-bold text-white">{item.title}</h4>
-                  <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{item.text}</p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-zinc-500 font-mono">
-                  <span>MÓDULO ENSAMBLADO</span>
-                  <span className="text-[#ff4b0b] font-bold">✓ CONECTADO</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Option 3: Pulsos de Estado Activo */}
-        {activeTab === 2 && (
-          <div className="grid gap-6 sm:grid-cols-3 pt-4">
-            {workflowItems.map((item, index) => (
-              <motion.div
-                key={item.num}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="border border-white/10 bg-[#1e1e1e] p-6 rounded shadow-lg relative overflow-hidden"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-3xl font-extrabold text-[#ff4b0b]">{item.num}</span>
-                  <span className="text-[10px] font-bold tracking-wider px-2.5 py-1 bg-[#ff4b0b]/15 text-[#ff4b0b] border border-[#ff4b0b]/30 rounded">
-                    ● {item.badge}
-                  </span>
-                </div>
-                <h4 className="text-lg font-bold text-white">{item.title}</h4>
-                <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{item.text}</p>
-                <div className="mt-5 w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                  <motion.div
-                    className="bg-[#ff4b0b] h-full"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 1.8, delay: index * 0.4, repeat: Infinity, repeatDelay: 0.8 }}
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
 
 export default function SistemasDigitalesPage() {
   useSetNavbarVariant('brand')
@@ -1009,40 +873,62 @@ export default function SistemasDigitalesPage() {
               className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
-              No basta con integrar.
+              Automatizamos tareas repetitivas
               <br />
               <span className="text-[#ff4b0b]">
-                Hay que conectar procesos.
+                y procesos de trabajo.
               </span>
             </h2>
             <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Diseñamos e implementamos automatizaciones a medida para eliminar tareas manuales, conectar tus herramientas y acelerar la operación de tu negocio.
+              Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
             </p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              {operatingSignals.map(function (signal, index) {
+              {workflowCardsData.map(function (card, index) {
                 return (
                   <motion.article
-                    key={`wf-${signal.title}`}
+                    key={card.num}
                     initial={reduceMotion ? false : "hidden"}
                     whileInView={reduceMotion ? undefined : "show"}
                     viewport={{ once: true, amount: 0.3 }}
                     variants={revealUp}
                     custom={0.08 * (index + 1)}
-                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
+                    className="relative overflow-hidden border border-black/8 bg-white px-5 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default rounded-[4px] flex flex-col justify-between"
                   >
-                    <span
-                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
-                      style={displayFont}
-                    >
-                      <CounterValue value={signal.value} />
-                    </span>
-                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
-                      {signal.title}
-                    </h3>
-                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
-                      {signal.text}
-                    </p>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span
+                          className="text-[26px] sm:text-[32px] font-bold uppercase tracking-tight text-[#ff4b0b]"
+                          style={displayFont}
+                        >
+                          {card.num}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-wider px-2 py-0.5 bg-[#ff4b0b]/10 text-[#ff4b0b] rounded-[3px] border border-[#ff4b0b]/20">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b] animate-pulse" />
+                          {card.badge}
+                        </span>
+                      </div>
+                      <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                        {card.text}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 w-full bg-black/5 h-[3px] rounded-full overflow-hidden">
+                      <motion.div
+                        className="bg-[#ff4b0b] h-full"
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{
+                          duration: 2,
+                          delay: index * 0.4,
+                          repeat: Infinity,
+                          repeatDelay: 1,
+                        }}
+                      />
+                    </div>
                   </motion.article>
                 );
               })}
@@ -1080,8 +966,6 @@ export default function SistemasDigitalesPage() {
         </div>
       </section>
 
-      {/* LABORATORIO DE PRUEBAS DE ANIMACIÓN DE TARJETAS */}
-      <WorkflowAnimationLab />
 
       <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
         <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
