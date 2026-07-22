@@ -871,7 +871,7 @@ export default function SistemasDigitalesPage() {
               AUTOMATIZACIÓN Y FLUJOS DE TRABAJO / 01
             </p>
             <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
               Automatizamos tareas repetitivas
