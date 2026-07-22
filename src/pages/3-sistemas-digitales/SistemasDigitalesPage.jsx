@@ -844,7 +844,94 @@ export default function SistemasDigitalesPage() {
             custom={0}
           >
             <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              SISTEMA DE CONTENIDO / 01
+              AUTOMATIZACIÓN Y FLUJOS DE TRABAJO / 01
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              style={displayFont}
+            >
+              No basta con integrar.
+              <br />
+              <span className="text-[#ff4b0b]">
+                Hay que conectar procesos.
+              </span>
+            </h2>
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Diseñamos e implementamos automatizaciones a medida para eliminar tareas manuales, conectar tus herramientas y acelerar la operación de tu negocio.
+            </p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              {operatingSignals.map(function (signal, index) {
+                return (
+                  <motion.article
+                    key={`wf-${signal.title}`}
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.3 }}
+                    variants={revealUp}
+                    custom={0.08 * (index + 1)}
+                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
+                  >
+                    <span
+                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
+                      style={displayFont}
+                    >
+                      <CounterValue value={signal.value} />
+                    </span>
+                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
+                      {signal.title}
+                    </h3>
+                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
+                      {signal.text}
+                    </p>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
+            <img
+              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
+              alt="Automatización y flujos de trabajo en procesos digitales"
+              className="relative z-10 h-full min-h-[28rem] w-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
+              <div className="flex items-center gap-3 text-white">
+                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
+                  Flujos automatizados
+                </span>
+              </div>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+                Conexión fluida entre tus aplicaciones, bases de datos y equipos.
+                Reduce tiempos muertos y elimina errores de digitación manual.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+          <motion.div
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
+            viewport={{ once: true, amount: 0.2 }}
+            variants={revealUp}
+            custom={0}
+          >
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              SISTEMA DE CONTENIDO / 02
             </p>
             <h2
               className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
