@@ -944,7 +944,7 @@ export default function SistemasDigitalesPage() {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
-              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
+              src="/assets/pages/3-sistemas-digitales/content-ops-automatización.webp"
               alt="Automatización y flujos de trabajo en procesos digitales"
               className="relative z-10 h-full min-h-[28rem] w-full object-cover"
               loading="lazy"
