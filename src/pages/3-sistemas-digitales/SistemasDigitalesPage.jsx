@@ -31,6 +31,7 @@ import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
 import '@/pages/4-academy/academy.css'
 import SEO from "@/components/seo/SEO";
+import { WHATSAPP_LINK } from "@/data/navigation";
 
 const ASSET = '/assets/pages/2-estudio'
 
@@ -158,6 +159,14 @@ const displayFont = {
   fontStretch: "condensed",
   fontWeight: 700,
 };
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.72, delay, ease: [0.22, 1, 0.36, 1] },
+  }),
+};
 
 function SectionLabel({ children, inverse = false }) {
   const tone = inverse ? "text-[#ff4b0b]" : "text-[#ff4b0b]";
@@ -187,6 +196,228 @@ const revealUp = {
     };
   },
 };
+
+function HeroInicioBlockPractice() {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <section className="relative min-h-[100dvh] overflow-hidden bg-[#161616] pt-20 font-sans text-white">
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
+        style={{
+          backgroundImage:
+            'url("https://www.transparenttextures.com/patterns/stardust.png")',
+        }}
+      ></div>
+
+      <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] w-full">
+        <div className="relative flex min-w-0 flex-1 flex-col bg-[#161616]">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            <div
+              className="w-[120%] aspect-square"
+              style={{
+                background:
+                  "radial-gradient(circle at 55% 40%, rgba(255,255,255,0.06) 0%, transparent 50%)",
+              }}
+            />
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            <div
+              className="w-[100%] aspect-square"
+              style={{
+                background:
+                  "radial-gradient(circle at 55% 45%, rgba(255,75,11,0.12) 0%, transparent 50%)",
+              }}
+            />
+          </div>
+          <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
+
+          <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
+            <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10">
+              <motion.div
+                initial={reduceMotion ? false : 'hidden'}
+                animate={reduceMotion ? undefined : 'show'}
+                variants={fadeUp}
+                custom={0}
+                className="relative z-10"
+              >
+                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
+                  Marcas, Automatización y formación con IA
+                </p>
+                <h1
+                  className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  <span className="block text-white">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
+                </h1>
+                <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
+                  Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
+                </p>
+                <div className="mt-5 flex flex-wrap items-center gap-5">
+                  <a
+                    href={WHATSAPP_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
+                  >
+                    Cuéntanos tu proyecto
+                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  </a>
+                  <a
+                    href="#primary-areas"
+                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
+                  >
+                    Elige por dónde empezar
+                  </a>
+                </div>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="relative flex min-h-[40vh] items-end justify-center overflow-visible border-white/10 pt-10 lg:min-h-[30rem] lg:border-x"
+            >
+              <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
+              <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
+              <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
+              <img
+                src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
+                alt="Sistemas Digitales Qaway"
+                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale scale-[1.31] lg:scale-[1.25] xl:scale-[1.31] 2xl:scale-[1.47] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.25]"
+                style={{
+                  maskImage:
+                    "linear-gradient(to bottom, black 60%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, black 60%, transparent 100%)",
+                }}
+              />
+            </motion.div>
+
+            <div className="relative z-20 mt-12 flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
+              <div className="mb-12">
+                <div className="w-6 h-1 bg-[#ff4b0b] mb-6"></div>
+                <p className="text-[1.35rem] font-medium leading-snug text-white">
+                  Automatización y productividad para negocios que necesitan
+                  operar mejor.
+                </p>
+              </div>
+
+              <div className="mb-12">
+                <div className="w-6 h-[1px] bg-[#ff4b0b] mb-6"></div>
+                <p className="text-gray-400 text-sm leading-relaxed pr-4">
+                  Unimos estrategia, tecnología e inteligencia para construir
+                  sistemas que escalan contigo.
+                </p>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: [0, -10],
+                  transition: {
+                    y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 },
+                    opacity: { delay: 0.4, duration: 0.6 },
+                    scale: { delay: 0.4, duration: 0.6 }
+                  }
+                }}
+                style={{ willChange: "transform", width: "100%" }}
+              >
+                <motion.div
+                  className="bg-white border border-[#ff4b0b]/40 rounded-[5px] p-5 flex flex-col gap-2 w-full shadow-xl relative overflow-hidden"
+                  initial={{ opacity: 0.6, y: 0 }}
+                  animate={{ opacity: 0.6, y: 0 }}
+                  whileHover={{
+                    opacity: 1,
+                    y: -10,
+                    transition: { duration: 0.3, ease: 'easeOut' }
+                  }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                >
+                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ff4b0b]/10 rounded-full blur-xl pointer-events-none"></div>
+                  <div className="flex items-center gap-4 relative z-10">
+                    <div className="bg-[#ff4b0b] p-3 rounded text-white shadow-lg shadow-[#ff4b0b]/20">
+                      <TrendingUp className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold tracking-tight text-[#161616]">
+                        +127%
+                      </div>
+                      <div className="text-xs text-[#161616]/80 leading-tight mt-0.5 font-medium">
+                        Aumento promedio
+                        <br />
+                        en productividad
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
+
+          <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start lg:border-r-[3px] border-black/5 py-6 lg:pl-16 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+              <Settings
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={1.5}
+              />
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
+                Automatización
+              </span>
+            </div>
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+              <LayoutDashboard
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={1.5}
+              />
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
+                Dashboards
+              </span>
+            </div>
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+              <Users
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={1.5}
+              />
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
+                CRM
+              </span>
+            </div>
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end py-6 lg:pr-12 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+              <Brain
+                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
+                strokeWidth={1.5}
+              />
+              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
+                IA aplicada
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute inset-y-0 right-0 z-20 hidden w-16 shrink-0 flex-col items-center justify-between bg-[#f8f9f7] py-10 text-[#1a1a1a] md:w-20 lg:flex">
+          <div className="flex flex-col items-center gap-4 text-gray-400">
+            <span className="text-2xl font-light">+</span>
+            <span className="w-px h-12 bg-gray-300"></span>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="rotate-180" style={{ writingMode: "vertical-rl" }}>
+              <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold text-gray-500 whitespace-nowrap">
+                Sistemas que escalan contigo
+              </span>
+            </p>
+          </div>
+          <div className="w-full flex justify-end pr-2">
+            <div className="w-6 h-6 border-r-[3px] border-b-[3px] border-[#ff4b0b]"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function Hero() {
   const reduceMotion = useReducedMotion();
@@ -683,6 +914,7 @@ export default function SistemasDigitalesPage() {
           "description": "Implementamos estructuras, herramientas y procesos digitales con IA para mejorar la operación diaria de tu negocio."
         }}
       />
+      <HeroInicioBlockPractice />
       <Hero />
 
       <section className="relative bg-[#121212] py-24 text-white overflow-hidden border-t border-white/5">
