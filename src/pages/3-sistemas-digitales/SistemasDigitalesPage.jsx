@@ -340,7 +340,7 @@ function HeroInicioBlockPractice() {
           </div>
 
           <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-start lg:border-r-[3px] border-black/5 py-6 lg:pl-16 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Settings
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -349,7 +349,7 @@ function HeroInicioBlockPractice() {
                 Automatización
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <LayoutDashboard
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -358,7 +358,7 @@ function HeroInicioBlockPractice() {
                 Dashboards
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Users
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -367,7 +367,7 @@ function HeroInicioBlockPractice() {
                 CRM
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:justify-end py-6 lg:pr-12 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 px-4 lg:pr-20 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
               <Brain
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
