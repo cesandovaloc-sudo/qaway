@@ -26,6 +26,7 @@ import {
   GitBranch,
   Layers3,
   Network,
+  Brush,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -296,64 +297,43 @@ function HeroInicioBlockPractice() {
             </motion.div>
 
             <div className="relative z-20 mt-12 flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
-              <div className="mb-12">
-                <div className="w-6 h-1 bg-[#ff4b0b] mb-6"></div>
-                <p className="text-[1.35rem] font-medium leading-snug text-white">
-                  Automatización y productividad para negocios que necesitan
-                  operar mejor.
+              <div className="mb-8 text-center">
+                <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
+                <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                  Sistemas digitales
                 </p>
-              </div>
-
-              <div className="mb-12">
-                <div className="w-6 h-[1px] bg-[#ff4b0b] mb-6"></div>
-                <p className="text-gray-400 text-sm leading-relaxed pr-4">
-                  Unimos estrategia, tecnología e inteligencia para construir
-                  sistemas que escalan contigo.
+                <p
+                  className="max-w-[16rem] text-[clamp(1.34rem,1.9vw,1.94rem)] font-bold leading-[0.95] tracking-[-0.04em] text-white"
+                  style={displayFont}
+                >
+                  Automatización y productividad para negocios que necesitan operar mejor.
                 </p>
               </div>
 
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                  y: [0, -10],
-                  transition: {
-                    y: { repeat: Infinity, repeatType: "reverse", duration: 3.6, ease: "easeInOut", delay: 0.8 },
-                    opacity: { delay: 0.4, duration: 0.6 },
-                    scale: { delay: 0.4, duration: 0.6 }
-                  }
-                }}
-                style={{ willChange: "transform", width: "100%" }}
+                className="mb-8 hidden lg:block"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
               >
-                <motion.div
-                  className="bg-white border border-[#ff4b0b]/40 rounded-[5px] p-5 flex flex-col gap-2 w-full shadow-xl relative overflow-hidden"
-                  initial={{ opacity: 0.6, y: 0 }}
-                  animate={{ opacity: 0.6, y: 0 }}
-                  whileHover={{
-                    opacity: 1,
-                    y: -10,
-                    transition: { duration: 0.3, ease: 'easeOut' }
-                  }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                <a
+                  href="#branding"
+                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
                 >
-                  <div className="absolute -right-6 -top-6 w-24 h-24 bg-[#ff4b0b]/10 rounded-full blur-xl pointer-events-none"></div>
-                  <div className="flex items-center gap-4 relative z-10">
-                    <div className="bg-[#ff4b0b] p-3 rounded text-white shadow-lg shadow-[#ff4b0b]/20">
-                      <TrendingUp className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold tracking-tight text-[#161616]">
+                  <span className="flex items-center gap-3">
+                    <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+                      <Brush size={22} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[1.35rem] font-bold tracking-tight text-[#161616]">
                         +127%
-                      </div>
-                      <div className="text-xs text-[#161616]/80 leading-tight mt-0.5 font-medium">
-                        Aumento promedio
-                        <br />
-                        en productividad
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                      </span>
+                      <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                        Aumento promedio<br />en productividad
+                      </span>
+                    </span>
+                  </span>
+                  <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+                </a>
               </motion.div>
             </div>
           </div>
