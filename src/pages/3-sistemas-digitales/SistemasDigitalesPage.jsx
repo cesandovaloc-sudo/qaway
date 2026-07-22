@@ -940,13 +940,13 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden bg-[#121212] p-2 sm:p-3 shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+            className="relative overflow-hidden bg-[#121212] aspect-[1.35/1] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
               src="/assets/pages/3-sistemas-digitales/content-ops-automatización.webp"
               alt="Automatización y flujos de trabajo en procesos digitales"
-              className="relative z-10 h-full min-h-[28rem] w-full object-cover object-[50%_30%] rounded-[2px]"
+              className="relative z-10 w-full h-full object-cover object-center"
               loading="lazy"
               decoding="async"
             />
