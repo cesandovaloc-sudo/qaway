@@ -252,7 +252,7 @@ function HeroInicioBlockPractice() {
                 </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
-                  style={{ ...displayFont, fontWeight: 760 }}
+                  style={{ ...displayFont, fontWeight: 740 }}
                 >
                   <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
                 </h1>
