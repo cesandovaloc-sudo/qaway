@@ -1120,18 +1120,19 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
+            className="relative flex items-center justify-center w-full"
           >
-            <img
-              src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
-              alt="Desarrollo web y páginas de captación para proyectos"
-              className="relative z-10 w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]"
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="relative w-[95%] lg:w-[88%] mx-auto flex justify-center">
+              <img
+                src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
+                alt="Desarrollo web y páginas de captación para proyectos"
+                className="relative z-10 w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]"
+                loading="lazy"
+                decoding="async"
+              />
 
-            {/* Tarjetas Flotantes CRM (ocultas en móvil pequeño para evitar overflow) */}
-            <div className="absolute top-[8%] right-0 lg:-right-6 z-20 hidden md:flex flex-col gap-6 w-[240px]">
+              {/* Tarjetas Flotantes CRM (ocultas en móvil pequeño para evitar overflow) */}
+              <div className="absolute top-[8%] -right-4 lg:-right-10 z-20 hidden md:flex flex-col gap-6 w-[240px]">
               
               {/* Tarjeta 1: Nuevo contacto */}
               <motion.div 
@@ -1207,6 +1208,7 @@ export default function SistemasDigitalesPage() {
                 </div>
               </motion.div>
 
+            </div>
             </div>
           </motion.div>
         </div>
