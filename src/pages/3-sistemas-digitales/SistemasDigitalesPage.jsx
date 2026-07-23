@@ -31,6 +31,7 @@ import {
   ListChecks,
   FileText,
   Cloud,
+  User,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -1122,15 +1123,94 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden"
+            className="relative"
           >
             <img
-              src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion.png"
+              src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
               alt="Desarrollo web y páginas de captación para proyectos"
               className="relative z-10 w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]"
               loading="lazy"
               decoding="async"
             />
+
+            {/* Tarjetas Flotantes CRM (ocultas en móvil pequeño para evitar overflow) */}
+            <div className="absolute top-[8%] right-0 lg:-right-6 z-20 hidden md:flex flex-col gap-6 w-[240px]">
+              
+              {/* Tarjeta 1: Nuevo contacto */}
+              <motion.div 
+                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: 0.3, duration: 0.5, ease: "easeOut" }}
+                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
+              >
+                {/* Conector horizontal */}
+                <div className="absolute top-1/2 -left-12 w-12 h-[1px] border-b border-dashed border-[#ff4b0b]/40 -z-10" />
+                
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="grid h-7 w-7 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b]">
+                      <User className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-[13px] font-bold text-[#191918]">Nuevo contacto</span>
+                  </div>
+                </div>
+                <div className="space-y-1 text-[11px] leading-relaxed text-[#666]">
+                  <p>Ana Torres</p>
+                  <p>ana.torres@gmail.com</p>
+                  <p>+51 987 654 321</p>
+                  <p>Interés: Proyecto Altoverde</p>
+                </div>
+                <div className="mt-3 inline-block rounded-full bg-[#ff4b0b]/10 px-2 py-0.5 text-[10px] font-bold text-[#ff4b0b]">
+                  Nuevo
+                </div>
+              </motion.div>
+
+              {/* Tarjeta 2: CRM */}
+              <motion.div 
+                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
+                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
+              >
+                {/* Conector vertical */}
+                <div className="absolute -top-6 left-1/2 h-6 w-[1px] border-l border-dashed border-[#ff4b0b]/40 -z-10" />
+                
+                <div className="text-center py-1">
+                  <h4 className="text-[14px] font-bold text-[#191918]">CRM</h4>
+                  <div className="mt-2 flex items-center justify-center gap-1.5 text-[12px] font-medium text-[#666]">
+                    Contacto registrado
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#ff4b0b]" />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Tarjeta 3: Seguimiento */}
+              <motion.div 
+                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: 0.7, duration: 0.5, ease: "easeOut" }}
+                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
+              >
+                {/* Conector vertical */}
+                <div className="absolute -top-6 left-1/2 h-6 w-[1px] border-l border-dashed border-[#ff4b0b]/40 -z-10" />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="grid h-7 w-7 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b]">
+                    <Bell className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="text-[13px] font-bold text-[#191918]">Seguimiento</span>
+                </div>
+                <div className="space-y-1 text-[11px] leading-relaxed text-[#666]">
+                  <p>Visita agendada</p>
+                  <p>para el 18/05 - 11:00 a.m.</p>
+                  <p className="pt-1">Asesor: Juan Pérez</p>
+                </div>
+              </motion.div>
+
+            </div>
           </motion.div>
         </div>
       </section>
