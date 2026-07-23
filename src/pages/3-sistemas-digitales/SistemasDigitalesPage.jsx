@@ -1122,7 +1122,7 @@ export default function SistemasDigitalesPage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="relative flex items-center justify-start w-full"
           >
-            <div className="relative w-[110%] lg:w-[115%] lg:-ml-10 xl:-ml-16 flex justify-start">
+            <div className="relative w-full lg:w-[95%] flex justify-start">
               <img
                 src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
