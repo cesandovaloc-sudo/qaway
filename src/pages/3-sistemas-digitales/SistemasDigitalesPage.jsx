@@ -29,6 +29,8 @@ import {
   Brush,
   Bell,
   ListChecks,
+  FileText,
+  Cloud,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -438,6 +440,24 @@ const crmEditorialColumns = [
     title: "Paneles de control",
     text: "Pendientes, avances y resultados.",
     icon: BarChart3,
+  },
+];
+
+const webCapEditorialColumns = [
+  {
+    title: "Presentación clara",
+    text: "Diseño profesional que comunica tu proyecto, beneficios y estilo de vida que ofrece.",
+    icon: Globe,
+  },
+  {
+    title: "Captación de consultas",
+    text: "Formularios y WhatsApp integrados para convertir visitantes en interesados calificados.",
+    icon: FileText,
+  },
+  {
+    title: "Conexión con CRM",
+    text: "Cada consulta se registra automáticamente en tu CRM para dar seguimiento y cerrar más ventas.",
+    icon: Cloud,
   },
 ];
 
@@ -1044,6 +1064,73 @@ export default function SistemasDigitalesPage() {
                 );
               })}
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      <section className="border-b border-black/6 bg-[#f9f8f6] py-20 lg:py-28">
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+          <motion.div
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
+            viewport={{ once: true, amount: 0.2 }}
+            variants={revealUp}
+            custom={0}
+          >
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              DESARROLLO WEB Y PÁGINAS DE CAPTACIÓN / 03
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              style={displayFont}
+            >
+              CREAMOS PÁGINAS WEB PARA PRESENTAR PROYECTOS{" "}
+              <br />
+              <span className="text-[#ff4b0b]">Y RECIBIR CONSULTAS.</span>
+            </h2>
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Desarrollamos sitios web y páginas de campaña con formularios, WhatsApp y conexión con CRM para captar y dar seguimiento a cada consulta interesada en tu proyecto inmobiliario.
+            </p>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-3 border-t border-black/10 pt-6">
+              {webCapEditorialColumns.map(function (col, index) {
+                const Icon = col.icon;
+                return (
+                  <motion.div
+                    key={col.title}
+                    whileHover={reduceMotion ? {} : { y: -3 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className={`group cursor-pointer pr-2 ${
+                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
+                    }`}
+                  >
+                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
+                    <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                      {col.title}
+                    </h3>
+                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                      {col.text}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden"
+          >
+            <img
+              src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion.png"
+              alt="Desarrollo web y páginas de captación para proyectos"
+              className="relative z-10 w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]"
+              loading="lazy"
+              decoding="async"
+            />
           </motion.div>
         </div>
       </section>
