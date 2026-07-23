@@ -447,17 +447,14 @@ const crmEditorialColumns = [
 const webCapEditorialColumns = [
   {
     title: "Presentación clara",
-    text: "Diseño profesional que comunica tu proyecto, beneficios y estilo de vida que ofrece.",
     icon: Globe,
   },
   {
     title: "Captación de consultas",
-    text: "Formularios y WhatsApp integrados para convertir visitantes en interesados calificados.",
     icon: FileText,
   },
   {
-    title: "Conexión con CRM",
-    text: "Cada consulta se registra automáticamente en tu CRM para dar seguimiento y cerrar más ventas.",
+    title: "Contacto directo",
     icon: Cloud,
   },
 ];
@@ -1087,7 +1084,7 @@ export default function SistemasDigitalesPage() {
       </section>
 
       <section className="border-b border-black/6 bg-[#f9f8f6] py-20 lg:py-28">
-        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+        <div className="mx-auto grid max-w-[94rem] gap-8 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-4 lg:px-14">
           <motion.div
             initial={reduceMotion ? false : "hidden"}
             whileInView={reduceMotion ? undefined : "show"}
@@ -1099,36 +1096,40 @@ export default function SistemasDigitalesPage() {
               DESARROLLO WEB Y PÁGINAS DE CAPTACIÓN / 03
             </p>
             <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-3 text-[clamp(1.9rem,4.5vw,3.2rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
               style={displayFont}
             >
-              CREAMOS PÁGINAS WEB PARA PRESENTAR PROYECTOS{" "}
+              PÁGINAS WEB PARA PRESENTAR,{" "}
               <br />
-              <span className="text-[#ff4b0b]">Y RECIBIR CONSULTAS.</span>
+              <span className="text-[#ff4b0b]">CAPTAR Y CONVERTIR.</span>
             </h2>
             <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Desarrollamos sitios web y páginas de campaña con formularios, WhatsApp y conexión con CRM para captar y dar seguimiento a cada consulta interesada en tu proyecto inmobiliario.
+              Desarrollamos plataformas web de alto rendimiento. Desde la estructura visual hasta la integración técnica, diseñamos páginas preparadas para recibir tráfico, captar consultas y registrar cada oportunidad.
             </p>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-3 border-t border-black/10 pt-6">
+            <div className="mt-8 flex flex-wrap gap-3 border-t border-black/10 pt-6">
               {webCapEditorialColumns.map(function (col, index) {
                 const Icon = col.icon;
                 return (
                   <motion.div
                     key={col.title}
-                    whileHover={reduceMotion ? {} : { y: -3 }}
+                    whileHover={reduceMotion ? {} : { y: -2 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`group cursor-pointer pr-2 ${
-                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
-                    }`}
+                    className="group cursor-default flex items-center gap-2.5 rounded-full bg-white px-5 py-2.5 shadow-[0_4px_14px_rgba(0,0,0,0.03)] border border-black/5"
                   >
-                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <Icon className="h-4 w-4 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" />
+                    <h3 className="text-[13px] font-bold text-[#191918]">
                       {col.title}
                     </h3>
                   </motion.div>
                 );
               })}
+            </div>
+            
+            <div className="mt-10">
+              <Link to="/portafolio" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#191918] px-7 py-3 text-[13px] font-bold uppercase tracking-wider text-white transition-all hover:bg-[#ff4b0b]">
+                Ver proyectos <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </motion.div>
 
@@ -1137,95 +1138,16 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex items-center justify-start w-full"
+            className="relative flex w-full items-center justify-center"
           >
-            <div className="relative w-full lg:w-[95%] flex justify-start">
+            <div className="group relative mx-auto flex w-full justify-center lg:w-[105%] lg:-translate-x-10 xl:-translate-x-14">
               <img
                 src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion3.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
-                className="relative z-10 w-full h-auto object-contain object-left transition-transform duration-500 hover:scale-[1.01]"
+                className="relative z-10 h-auto w-full object-contain object-center transition-transform duration-500 hover:scale-[1.01]"
                 loading="lazy"
                 decoding="async"
               />
-
-              {/* Tarjetas Flotantes CRM (ocultas en móvil pequeño para evitar overflow) */}
-              <div className="absolute top-[8%] -right-4 lg:-right-6 z-20 hidden md:flex flex-col gap-6 w-[240px]">
-              
-              {/* Tarjeta 1: Nuevo contacto */}
-              <motion.div 
-                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
-                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: 0.3, duration: 0.5, ease: "easeOut" }}
-                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
-              >
-                {/* Conector horizontal */}
-                <div className="absolute top-1/2 -left-12 w-12 h-[1px] border-b border-dashed border-[#ff4b0b]/40 -z-10" />
-                
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="grid h-7 w-7 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b]">
-                      <User className="h-3.5 w-3.5" />
-                    </div>
-                    <span className="text-[13px] font-bold text-[#191918]">Nuevo contacto</span>
-                  </div>
-                </div>
-                <div className="space-y-1 text-[11px] leading-relaxed text-[#666]">
-                  <p>Ana Torres</p>
-                  <p>ana.torres@gmail.com</p>
-                  <p>+51 987 654 321</p>
-                  <p>Interés: Proyecto Altoverde</p>
-                </div>
-                <div className="mt-3 inline-block rounded-full bg-[#ff4b0b]/10 px-2 py-0.5 text-[10px] font-bold text-[#ff4b0b]">
-                  Nuevo
-                </div>
-              </motion.div>
-
-              {/* Tarjeta 2: CRM */}
-              <motion.div 
-                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
-                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
-                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
-              >
-                {/* Conector vertical */}
-                <div className="absolute -top-6 left-1/2 h-6 w-[1px] border-l border-dashed border-[#ff4b0b]/40 -z-10" />
-                
-                <div className="text-center py-1">
-                  <h4 className="text-[14px] font-bold text-[#191918]">CRM</h4>
-                  <div className="mt-2 flex items-center justify-center gap-1.5 text-[12px] font-medium text-[#666]">
-                    Contacto registrado
-                    <CheckCircle2 className="h-3.5 w-3.5 text-[#ff4b0b]" />
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Tarjeta 3: Seguimiento */}
-              <motion.div 
-                initial={reduceMotion ? false : { opacity: 0, x: 20 }}
-                whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.5 }}
-                transition={{ delay: 0.7, duration: 0.5, ease: "easeOut" }}
-                className="bg-white rounded-2xl p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/5 relative group cursor-default"
-              >
-                {/* Conector vertical */}
-                <div className="absolute -top-6 left-1/2 h-6 w-[1px] border-l border-dashed border-[#ff4b0b]/40 -z-10" />
-                
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="grid h-7 w-7 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b]">
-                    <Bell className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="text-[13px] font-bold text-[#191918]">Seguimiento</span>
-                </div>
-                <div className="space-y-1 text-[11px] leading-relaxed text-[#666]">
-                  <p>Visita agendada</p>
-                  <p>para el 18/05 - 11:00 a.m.</p>
-                  <p className="pt-1">Asesor: Juan Pérez</p>
-                </div>
-              </motion.div>
-
-            </div>
             </div>
           </motion.div>
         </div>
