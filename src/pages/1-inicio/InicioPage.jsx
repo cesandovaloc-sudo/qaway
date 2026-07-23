@@ -485,9 +485,9 @@ function EcosystemIntro() {
 const VLAB = '/assets/pages/1-inicio'
 
 const estudioServices = [
-  { title: 'Branding Digital', icon: Brush, image: `${VLAB}/inicio-branding-hospitality-moodboard.webp` },
+  { title: 'Branding Digital', icon: Brush, image: `${VLAB}/inicio-branding-hospitality-moodboard2.webp` },
   { title: 'Contenido Visual', icon: ImageIcon, image: `${VLAB}/inicio-servicio-contenido.webp` },
-  { title: 'Presencia Profesional', icon: CircleUserRound, image: `${VLAB}/estudio_portada_identidad_ejecutiva.webp` },
+  { title: 'Presencia Profesional', icon: CircleUserRound, image: `${VLAB}/estudio_portada_identidad_ejecutiva2.webp` },
   { title: 'Estrategia Digital', icon: ScanSearch, image: `${VLAB}/inicio-servicio-estrategia.webp` },
 ]
 
@@ -499,8 +499,9 @@ function EstudioSection() {
   return (
     <section id="estudio" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f8f9f7] px-6 py-12 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
-        <Reveal className="mb-6 grid items-center gap-8 lg:grid-cols-[.9fr_1.1fr] lg:gap-14">
-          <div>
+        <Reveal className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+          <div className="flex flex-col">
+            <div>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
                 Estudio creativo y creación contenido
               </p>
@@ -511,10 +512,51 @@ function EstudioSection() {
                 Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
               </h2>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-black/55">
-              Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
-            </p>
+                Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
+              </p>
+            </div>
+
+            <div className="mt-8 grid min-h-0 grid-cols-2 content-stretch gap-2 sm:gap-3">
+              {estudioServices.map(({ title, icon: Icon }, index) => (
+                <motion.div
+                  key={title}
+                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.45, delay: 0.06 * index, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActive(index)}
+                    className={`group flex h-full w-full items-center gap-3 border px-4 py-3 text-left transition-all duration-300 sm:px-5 sm:py-3.5 ${
+                      active === index
+                        ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
+                        : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
+                    }`}
+                  >
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center transition-colors duration-300 ${
+                      active === index
+                        ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
+                        : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
+                    }`}>
+                      <Icon size={17} strokeWidth={1.5} />
+                    </span>
+                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${
+                      active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
+                    }`}>
+                      {title}
+                    </span>
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-8 flex justify-start">
+              <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
+            </div>
           </div>
-          <div className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-auto lg:h-[42vh]">
+
+          <div className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2]">
             <AnimatePresence mode="wait">
               <motion.img
                 key={activeService.title}
@@ -533,54 +575,6 @@ function EstudioSection() {
               {activeService.title}
             </span>
           </div>
-        </Reveal>
-
-        <div className="grid min-h-0 grid-cols-2 content-stretch gap-2 sm:gap-3">
-          {estudioServices.map(({ title, icon: Icon }, index) => (
-            <motion.div
-              key={title}
-              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.45, delay: 0.06 * index, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <button
-                type="button"
-                onClick={() => setActive(index)}
-                className={`group flex h-full w-full items-center gap-4 border px-5 py-4 text-left transition-all duration-300 sm:px-6 sm:py-5 ${
-                  active === index
-                    ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
-                    : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
-                }`}
-              >
-                <span className={`grid h-10 w-10 shrink-0 place-items-center transition-colors duration-300 ${
-                  active === index
-                    ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
-                    : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
-                }`}>
-                  <Icon size={17} strokeWidth={1.5} />
-                </span>
-                <span className={`text-sm font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${
-                  active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
-                }`}>
-                  {title}
-                </span>
-              </button>
-            </motion.div>
-          ))}
-        </div>
-
-        <Reveal className="mt-3 flex items-center justify-between border-t border-black/10 py-4">
-          <div className="flex items-center gap-3">
-            <span className="grid h-8 w-8 shrink-0 place-items-center border border-[#ff4b0b]/30 text-[#ff4b0b]">
-              <Sparkles size={15} strokeWidth={1.5} />
-            </span>
-            <div>
-              <span className="text-sm font-bold uppercase tracking-[0.06em]">Consultoría estratégica</span>
-              <span className="ml-3 hidden text-xs text-black/40 lg:inline">Diagnóstico, dirección y plan de acción para tu marca.</span>
-            </div>
-          </div>
-          <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
         </Reveal>
       </div>
     </section>
