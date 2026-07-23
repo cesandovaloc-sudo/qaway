@@ -1233,11 +1233,6 @@ export default function SistemasDigitalesPage() {
                 <br />
                 no vive solo<span className="text-[#ff4b0b]">.</span>
               </h2>
-              <p className="mt-5 max-w-2xl text-[16px] leading-[1.62] text-white/64 sm:text-[17px]">
-                Cuando el contenido se conecta con CRM, dashboards, landings,
-                agentes IA y canales de atención, deja de ser una pieza aislada
-                y se convierte en infraestructura real del negocio.
-              </p>
 
               <div className="mt-8 overflow-hidden border border-white/10 bg-white/[0.03] p-3 shadow-[0_28px_80px_rgba(0,0,0,0.28)]">
                 <img
@@ -1253,17 +1248,15 @@ export default function SistemasDigitalesPage() {
             <div className="grid gap-4 sm:grid-cols-2 lg:pt-16">
               {digitalAreas.map(function (area, index) {
                 const Icon = area.icon;
-                const isActive = index === expandedArea;
                 return (
-                  <motion.button
+                  <motion.div
                     key={area.title}
-                    onClick={() => setExpandedArea(isActive ? null : index)}
                     initial={reduceMotion ? false : "hidden"}
                     whileInView={reduceMotion ? undefined : "show"}
                     viewport={{ once: true, amount: 0.2 }}
                     variants={revealUp}
                     custom={0.08 * index}
-                    className="group text-left border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:border-[#ff4b0b]/25 hover:bg-white/[0.05] hover:-translate-y-1 w-full rounded-[5px] block"
+                    className="group text-left border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:border-[#ff4b0b]/25 hover:bg-white/[0.05] hover:-translate-y-1 w-full rounded-[5px] block cursor-default"
                   >
                     <div className="flex items-center justify-between">
                       <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">
@@ -1279,43 +1272,7 @@ export default function SistemasDigitalesPage() {
                     <p className="mt-2 text-[12px] leading-relaxed text-white/56">
                       {area.description}
                     </p>
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        height: isActive ? "auto" : 0,
-                        opacity: isActive ? 1 : 0,
-                        marginTop: isActive ? 12 : 0,
-                      }}
-                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                      className="overflow-hidden w-full text-left"
-                    >
-                      <div className="pt-3 border-t border-white/10 flex flex-wrap gap-1.5 items-center">
-                        {area.deliverables.slice(0, 3).map(function (del) {
-                          return (
-                            <span
-                              key={del}
-                              className="text-[10px] uppercase tracking-wider px-2 py-0.5 bg-white/[0.04] border border-white/5 text-white/60 font-semibold rounded-[3px]"
-                            >
-                              {del}
-                            </span>
-                          );
-                        })}
-                        {area.deliverables.length > 3 && (
-                          <span className="text-white/45 text-xs font-bold px-1 select-none">
-                            ...
-                          </span>
-                        )}
-                      </div>
-                    </motion.div>
-                    {/* Explorar módulo ocultado temporalmente */}
-                    {/* <Link
-                      to={area.path}
-                      className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-white/82 transition-colors hover:text-[#ff4b0b]"
-                    >
-                      Explorar módulo
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </Link> */}
-                  </motion.button>
+                  </motion.div>
                 );
               })}
             </div>
