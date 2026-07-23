@@ -97,7 +97,6 @@ const projects = [
     tags: ['Branding', 'Contenido visual', 'Packaging'],
     categories: ['Branding', 'Contenido visual'],
     kind: 'Proyecto',
-    tall: true,
   },
 ]
 
