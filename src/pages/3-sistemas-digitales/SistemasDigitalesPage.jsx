@@ -970,14 +970,41 @@ export default function SistemasDigitalesPage() {
 
 
       <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
-        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
+            <img
+              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
+              alt="Centro de control CRM y operaciones digitales"
+              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-center"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
+              <div className="flex items-center gap-3 text-white">
+                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
+                  CRM Y SEGUIMIENTO COMERCIAL
+                </span>
+              </div>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
+                Contactos, oportunidades y tareas reunidos en una sola vista para facilitar el seguimiento diario.
+              </p>
+            </div>
+          </motion.div>
+
           <motion.div
             initial={reduceMotion ? false : "hidden"}
             whileInView={reduceMotion ? undefined : "show"}
             viewport={{ once: true, amount: 0.2 }}
             variants={revealUp}
             custom={0}
-            className="order-last lg:order-first"
           >
             <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
               CRM, DATOS Y PANELES DE CONTROL / 02
@@ -998,50 +1025,24 @@ export default function SistemasDigitalesPage() {
               {crmEditorialColumns.map(function (col, index) {
                 const Icon = col.icon;
                 return (
-                  <div
+                  <motion.div
                     key={col.title}
-                    className={`pr-2 ${
+                    whileHover={reduceMotion ? {} : { y: -3 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className={`group cursor-pointer pr-2 ${
                       index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                     }`}
                   >
-                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3" />
-                    <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
+                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
+                    <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
                     <p className="mt-2 text-[13px] leading-relaxed text-black/60">
                       {col.text}
                     </p>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="order-first lg:order-last relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
-            <img
-              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
-              alt="Centro de control CRM y operaciones digitales"
-              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-center"
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
-              <div className="flex items-center gap-3 text-white">
-                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
-                  CRM Y SEGUIMIENTO COMERCIAL
-                </span>
-              </div>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-                Contactos, oportunidades y tareas reunidos en una sola vista para facilitar el seguimiento diario.
-              </p>
             </div>
           </motion.div>
         </div>
