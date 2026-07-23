@@ -1109,9 +1109,6 @@ export default function SistemasDigitalesPage() {
                     <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
-                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
-                      {col.text}
-                    </p>
                   </motion.div>
                 );
               })}
