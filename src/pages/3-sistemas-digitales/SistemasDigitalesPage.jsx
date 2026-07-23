@@ -1122,7 +1122,7 @@ export default function SistemasDigitalesPage() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="relative flex items-center justify-start w-full"
           >
-            <div className="relative w-full lg:w-[95%] flex justify-start">
+            <div className="relative w-[110%] lg:w-[115%] lg:-ml-10 xl:-ml-16 flex justify-start">
               <img
                 src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
@@ -1132,7 +1132,7 @@ export default function SistemasDigitalesPage() {
               />
 
               {/* Tarjetas Flotantes CRM (ocultas en móvil pequeño para evitar overflow) */}
-              <div className="absolute top-[8%] -right-4 lg:-right-10 z-20 hidden md:flex flex-col gap-6 w-[240px]">
+              <div className="absolute top-[8%] -right-4 lg:-right-6 z-20 hidden md:flex flex-col gap-6 w-[240px]">
               
               {/* Tarjeta 1: Nuevo contacto */}
               <motion.div 
