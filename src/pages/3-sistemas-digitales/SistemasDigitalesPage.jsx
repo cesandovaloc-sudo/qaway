@@ -422,21 +422,18 @@ const workflowCardsData = [
   },
 ];
 
-const operatingSignals = [
+const crmEditorialColumns = [
   {
-    value: "01",
-    title: "Sistema central",
-    text: "Ideas, piezas y responsables en un mismo lugar.",
+    title: "Contactos organizados",
+    text: "Datos, origen e historial de cada consulta.",
   },
   {
-    value: "-42%",
-    title: "Menos fricción operativa",
-    text: "Reducimos pasos manuales en la gestión diaria.",
+    title: "Seguimiento comercial",
+    text: "Etapas, responsables y próximos pasos.",
   },
   {
-    value: "24/7",
-    title: "Seguimiento constante",
-    text: "Automatizaciones, dashboards y alertas eficientes",
+    title: "Paneles de control",
+    text: "Pendientes, avances y resultados visibles.",
   },
 ];
 
@@ -969,63 +966,7 @@ export default function SistemasDigitalesPage() {
 
 
       <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
-        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
-          <motion.div
-            initial={reduceMotion ? false : "hidden"}
-            whileInView={reduceMotion ? undefined : "show"}
-            viewport={{ once: true, amount: 0.2 }}
-            variants={revealUp}
-            custom={0}
-          >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              SISTEMA DE CONTENIDO / 02
-            </p>
-            <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
-              style={displayFont}
-            >
-              No basta con publicar.
-              <br />
-              <span className="text-[#ff4b0b]">
-                Hay que operar con sistema.
-              </span>
-            </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Conectamos sistemas de contenidos con automatización, CRM y
-              seguimiento operativo. El resultado es una estructura con orden,
-              menos fricción y mejor lectura del negocio.
-            </p>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              {operatingSignals.map(function (signal, index) {
-                return (
-                  <motion.article
-                    key={signal.title}
-                    initial={reduceMotion ? false : "hidden"}
-                    whileInView={reduceMotion ? undefined : "show"}
-                    viewport={{ once: true, amount: 0.3 }}
-                    variants={revealUp}
-                    custom={0.08 * (index + 1)}
-                    className="border border-black/8 bg-white px-6 py-5 shadow-[0_18px_44px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_24px_50px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-default"
-                  >
-                    <span
-                      className="block text-center text-[29px] sm:text-[38px] font-bold uppercase tracking-tight text-[#ff4b0b]"
-                      style={displayFont}
-                    >
-                      <CounterValue value={signal.value} />
-                    </span>
-                    <h3 className="mt-4 text-[17px] font-bold leading-tight text-[#191918]">
-                      {signal.title}
-                    </h3>
-                    <p className="mt-2 text-[14px] leading-relaxed text-black/60">
-                      {signal.text}
-                    </p>
-                  </motion.article>
-                );
-              })}
-            </div>
-          </motion.div>
-
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 22 }}
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -1036,8 +977,8 @@ export default function SistemasDigitalesPage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
               src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
-              alt="Centro de control de contenido y operaciones digitales"
-              className="relative z-10 h-full min-h-[28rem] w-full object-cover"
+              alt="Centro de control CRM y operaciones digitales"
+              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-center"
               loading="lazy"
               decoding="async"
             />
@@ -1049,10 +990,49 @@ export default function SistemasDigitalesPage() {
                 </span>
               </div>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-                Planeación, producción, seguimiento y automatización dentro de
-                una misma lectura operativa. Eso permite producir mejor sin
-                multiplicar el caos.
+                Planeación, seguimiento comercial, CRM y paneles dentro de una misma lectura operativa.
               </p>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
+            viewport={{ once: true, amount: 0.2 }}
+            variants={revealUp}
+            custom={0}
+          >
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              CRM, DATOS Y PANELES DE CONTROL / 02
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              style={displayFont}
+            >
+              ORGANIZAMOS CONTACTOS, CONSULTAS Y SEGUIMIENTO COMERCIAL.
+            </h2>
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Implementamos un CRM para registrar contactos, ordenar oportunidades y revisar cada seguimiento desde un mismo lugar. También configuramos paneles para consultar pendientes, avances y resultados.
+            </p>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-3 border-t border-black/10 pt-6">
+              {crmEditorialColumns.map(function (col, index) {
+                return (
+                  <div
+                    key={col.title}
+                    className={`pr-2 ${
+                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
+                    }`}
+                  >
+                    <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
+                      {col.title}
+                    </h3>
+                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                      {col.text}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         </div>
