@@ -1259,6 +1259,10 @@
   box-shadow: 0 18px 44px rgba(32, 32, 31, 0.08), 0 6px 18px rgba(255, 75, 11, 0.035) !important;
 }
 
+.academy-outer-card .academy-course-card {
+  box-shadow: none !important;
+}
+
 .academy-field-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

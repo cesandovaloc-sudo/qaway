@@ -748,7 +748,7 @@ function SistemasDigitalesSection() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f0f2ee] px-6 py-10 text-[#20201f] sm:px-10 lg:px-14">
+    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f0f2ee] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
           <div className="flex flex-col justify-center">
@@ -819,7 +819,7 @@ function AcademyFeature() {
         className="relative min-h-[30rem] overflow-hidden cursor-pointer"
       >
         <img
-          src={`${base}aprendizaje-aplicado.webp`}
+          src={`${base}aprendizaje-aplicado2.webp`}
           alt="Profesional aprendiendo y prototipando en un espacio de trabajo"
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
@@ -1016,7 +1016,7 @@ const carouselLandings = [
     text: 'Sistema de gestión y productividad para equipos creativos, con plantillas y flujos optimizados.',
     format: 'Landing',
     duration: 'Página web',
-    link: '/landings/sistema-contenidos-notion',
+    link: '/landings/sistema-contenido-notion',
     featured: null,
   },
 ]
