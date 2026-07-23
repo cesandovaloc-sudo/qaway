@@ -28,6 +28,7 @@ import {
   Network,
   Brush,
   Bell,
+  ListChecks,
 } from "lucide-react";
 import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
@@ -425,15 +426,18 @@ const workflowCardsData = [
 const crmEditorialColumns = [
   {
     title: "Contactos organizados",
-    text: "Datos, origen e historial de cada consulta.",
+    text: "Datos e historial de cada consulta.",
+    icon: Users,
   },
   {
     title: "Seguimiento comercial",
     text: "Etapas, responsables y próximos pasos.",
+    icon: ListChecks,
   },
   {
     title: "Paneles de control",
-    text: "Pendientes, avances y resultados visibles.",
+    text: "Pendientes, avances y resultados.",
+    icon: BarChart3,
   },
 ];
 
@@ -966,13 +970,59 @@ export default function SistemasDigitalesPage() {
 
 
       <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
-        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
+        <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
+          <motion.div
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
+            viewport={{ once: true, amount: 0.2 }}
+            variants={revealUp}
+            custom={0}
+            className="order-last lg:order-first"
+          >
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              CRM, DATOS Y PANELES DE CONTROL / 02
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              style={displayFont}
+            >
+              ORGANIZAMOS CONTACTOS, CONSULTAS Y{" "}
+              <br />
+              <span className="text-[#ff4b0b]">SEGUIMIENTO COMERCIAL.</span>
+            </h2>
+            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+              Implementamos un CRM para registrar contactos, ordenar oportunidades y centralizar el seguimiento comercial. Configuramos paneles para visualizar pendientes, avances y resultados.
+            </p>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-3 border-t border-black/10 pt-6">
+              {crmEditorialColumns.map(function (col, index) {
+                const Icon = col.icon;
+                return (
+                  <div
+                    key={col.title}
+                    className={`pr-2 ${
+                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
+                    }`}
+                  >
+                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3" />
+                    <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
+                      {col.title}
+                    </h3>
+                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                      {col.text}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 22 }}
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+            className="order-first lg:order-last relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
@@ -986,53 +1036,12 @@ export default function SistemasDigitalesPage() {
               <div className="flex items-center gap-3 text-white">
                 <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
-                  Operación con criterio
+                  CRM Y SEGUIMIENTO COMERCIAL
                 </span>
               </div>
               <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/70">
-                Planeación, seguimiento comercial, CRM y paneles dentro de una misma lectura operativa.
+                Contactos, oportunidades y tareas reunidos en una sola vista para facilitar el seguimiento diario.
               </p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={reduceMotion ? false : "hidden"}
-            whileInView={reduceMotion ? undefined : "show"}
-            viewport={{ once: true, amount: 0.2 }}
-            variants={revealUp}
-            custom={0}
-          >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              CRM, DATOS Y PANELES DE CONTROL / 02
-            </p>
-            <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
-              style={displayFont}
-            >
-              ORGANIZAMOS CONTACTOS, CONSULTAS Y SEGUIMIENTO COMERCIAL.
-            </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Implementamos un CRM para registrar contactos, ordenar oportunidades y revisar cada seguimiento desde un mismo lugar. También configuramos paneles para consultar pendientes, avances y resultados.
-            </p>
-
-            <div className="mt-8 grid gap-6 sm:grid-cols-3 border-t border-black/10 pt-6">
-              {crmEditorialColumns.map(function (col, index) {
-                return (
-                  <div
-                    key={col.title}
-                    className={`pr-2 ${
-                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
-                    }`}
-                  >
-                    <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
-                      {col.title}
-                    </h3>
-                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
-                      {col.text}
-                    </p>
-                  </div>
-                );
-              })}
             </div>
           </motion.div>
         </div>
