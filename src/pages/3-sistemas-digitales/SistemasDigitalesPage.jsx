@@ -1256,7 +1256,13 @@ export default function SistemasDigitalesPage() {
                     viewport={{ once: true, amount: 0.2 }}
                     variants={revealUp}
                     custom={0.08 * index}
-                    className="group text-left border border-white/10 bg-white/[0.03] p-5 transition-all duration-300 hover:border-[#ff4b0b]/25 hover:bg-white/[0.05] hover:-translate-y-1 w-full rounded-[5px] block cursor-default"
+                    whileHover={reduceMotion ? {} : {
+                      y: -6,
+                      borderColor: "rgba(255,75,11,0.3)",
+                      backgroundColor: "rgba(255,255,255,0.06)",
+                      transition: { duration: 0.25, ease: "easeOut" },
+                    }}
+                    className="group text-left border border-white/10 bg-white/[0.03] p-5 w-full rounded-[5px] block cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
                       <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">
