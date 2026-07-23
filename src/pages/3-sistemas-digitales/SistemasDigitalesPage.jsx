@@ -1120,13 +1120,13 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative flex items-center justify-center w-full"
+            className="relative flex items-center justify-start w-full"
           >
-            <div className="relative w-[95%] lg:w-[88%] mx-auto flex justify-center">
+            <div className="relative w-full lg:w-[95%] flex justify-start">
               <img
                 src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
-                className="relative z-10 w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]"
+                className="relative z-10 w-full h-auto object-contain object-left transition-transform duration-500 hover:scale-[1.01]"
                 loading="lazy"
                 decoding="async"
               />
