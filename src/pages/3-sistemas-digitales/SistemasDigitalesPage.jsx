@@ -1124,7 +1124,7 @@ export default function SistemasDigitalesPage() {
           >
             <div className="relative w-full lg:w-[95%] flex justify-start">
               <img
-                src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion2.webp"
+                src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion3.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
                 className="relative z-10 w-full h-auto object-contain object-left transition-transform duration-500 hover:scale-[1.01]"
                 loading="lazy"
