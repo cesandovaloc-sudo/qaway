@@ -698,11 +698,28 @@ export default function SistemasDigitalesPage() {
     setFormError('');
     try {
       const data = Object.fromEntries(new FormData(e.target));
-      await fetch('https://formspree.io/f/xnqkgjkq', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(data),
-      });
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+      if (isLocal) {
+        console.log('Modo Desarrollo: Simulando envío de lead', data);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        await fetch('https://hook.us2.make.com/p519xo2f741g1z29z213fctk4o9u0wro', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            origen: 'Sistemas Digitales',
+            nombre: data.name,
+            telefono: data.phone,
+            email: data.email,
+            perfil: data.profile,
+            interes: data.service,
+            mensaje: data.message || 'Sin mensaje adicional',
+          }),
+        });
+      }
       setFormSubmitted(true);
     } catch {
       setFormError('Ocurrió un error al enviar. Intenta de nuevo.');
@@ -1414,7 +1431,15 @@ export default function SistemasDigitalesPage() {
                         <label htmlFor="sd-name" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Nombre</label>
                         <input
                           id="sd-name" name="name" type="text" required
-                          placeholder="Tu nombre"
+                          placeholder="Tu nombre completo"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="sd-phone" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Teléfono</label>
+                        <input
+                          id="sd-phone" name="phone" type="tel" required
+                          placeholder="+51 999 999 999"
                           className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
                         />
                       </div>
@@ -1425,6 +1450,22 @@ export default function SistemasDigitalesPage() {
                           placeholder="tucorreo@empresa.com"
                           className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
                         />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="sd-profile" className="text-[11px] font-bold uppercase tracking-wider text-black/50">¿A qué te dedicas?</label>
+                        <select
+                          id="sd-profile" name="profile" required
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                        >
+                          <option value="">Selecciona tu perfil</option>
+                          <option value="Profesional">Profesional</option>
+                          <option value="Emprendedor o dueño de negocio">Emprendedor o dueño de negocio</option>
+                          <option value="Marca personal">Marca personal</option>
+                          <option value="Creador de contenido">Creador de contenido</option>
+                          <option value="Equipo comercial o de marketing">Equipo comercial o de marketing</option>
+                          <option value="Empresa o institución">Empresa o institución</option>
+                          <option value="Otro">Otro</option>
+                        </select>
                       </div>
                     </div>
 
