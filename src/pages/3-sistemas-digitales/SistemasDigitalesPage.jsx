@@ -1129,8 +1129,8 @@ export default function SistemasDigitalesPage() {
             </div>
             
             <div className="mt-10">
-              <Link to="/portafolio" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#191918] px-7 py-3 text-[13px] font-bold uppercase tracking-wider text-white transition-all hover:bg-[#ff4b0b]">
-                Ver proyectos <ArrowRight className="h-4 w-4" />
+              <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]">
+                Ver proyectos
               </Link>
             </div>
           </motion.div>
