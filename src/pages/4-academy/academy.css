@@ -37,12 +37,24 @@
   font-size: 0.84rem;
   font-weight: 700;
   box-shadow: 0 14px 36px rgba(168, 53, 8, 0.16);
-  transition: background 220ms ease, box-shadow 220ms ease;
+  transition: background 220ms ease, box-shadow 220ms ease, transform 200ms ease;
 }
 
 .academy-primary-button:hover {
   background: #df3900;
   box-shadow: 0 18px 44px rgba(168, 53, 8, 0.24);
+}
+
+.academy-primary-button:hover svg {
+  transform: translateX(0.25rem);
+}
+
+.academy-primary-button:active {
+  transform: translateY(1px);
+}
+
+.academy-primary-button svg {
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .academy-hero-grid {
@@ -59,8 +71,9 @@
   z-index: 4;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding: clamp(4.5rem, 6dvh, 5.5rem) 2.5rem 2.5rem;
+  justify-content: center;
+  align-self: center;
+  padding: clamp(2rem, 3dvh, 3rem) 2.5rem;
 }
 
 .academy-eyebrow,
@@ -146,14 +159,14 @@
 }
 
 .academy-hero-benefits {
-  position: absolute;
-  bottom: 2rem;
-  left: 2.5rem;
+  position: relative;
+  bottom: auto;
+  left: auto;
   display: grid;
   grid-template-columns: repeat(3, auto);
   align-items: center;
   width: fit-content;
-  margin-top: 0;
+  margin-top: 2.5rem;
   padding-top: 0;
 }
 
@@ -354,16 +367,15 @@
 }
 
 .academy-section {
-  padding: clamp(5.5rem, 9vw, 9rem) clamp(1.5rem, 5vw, 6rem);
+  padding: clamp(3rem, 5vw, 4rem) clamp(1.5rem, 5vw, 6rem);
 }
 
 .academy-section-heading {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 5rem;
-  align-items: end;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
   max-width: 92rem;
-  margin: 0 auto 4rem;
+  margin: 0 auto 3rem;
 }
 
 .academy-section-heading h2,
@@ -379,7 +391,7 @@
 }
 
 .academy-section-heading > p {
-  max-width: 30rem;
+  max-width: 42rem;
   color: var(--academy-muted);
   line-height: 1.65;
 }
@@ -390,7 +402,7 @@
 
 .academy-featured-courses {
   display: grid;
-  grid-template-columns: 1.18fr 0.82fr;
+  grid-template-columns: 1.1fr 0.9fr;
   gap: 1.2rem;
   max-width: 92rem;
   margin: 0 auto;
@@ -406,12 +418,12 @@
 }
 
 .academy-featured-courses > div:first-child .academy-course-image {
-  min-height: 30rem;
+  min-height: 16rem;
 }
 
 .academy-featured-courses > div:not(:first-child) .academy-course-card {
-  grid-template-columns: 0.94fr 1.06fr;
-  min-height: 22.9rem;
+  grid-template-columns: 1fr;
+  min-height: 23rem;
 }
 
 .academy-featured-courses > div:not(:first-child) .academy-course-description {
@@ -1577,6 +1589,8 @@
   .academy-hero-copy {
     min-height: calc(100dvh - 68px);
     padding: 4rem 1.25rem 2rem;
+    justify-content: flex-start;
+    align-self: stretch;
   }
 
   .academy-eyebrow {

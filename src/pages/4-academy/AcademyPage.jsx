@@ -485,10 +485,10 @@ export default function AcademyPage() {
             </p>
 
             <div className="academy-hero-actions">
-              <MagneticLink href="#programas" className="academy-primary-button">
+              <a href="#programas" className="academy-primary-button">
                 Ver programas
                 <ArrowRight size={17} />
-              </MagneticLink>
+              </a>
               <a href="#metodo" className="academy-text-link">
                 Conocer Academy
                 <ArrowRight size={16} />

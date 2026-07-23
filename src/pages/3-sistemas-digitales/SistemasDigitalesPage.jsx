@@ -252,7 +252,7 @@ function HeroInicioBlockPractice() {
                 </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
-                  style={{ ...displayFont, fontWeight: 720 }}
+                  style={{ ...displayFont, fontWeight: 700 }}
                 >
                   <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
                 </h1>
@@ -270,8 +270,8 @@ function HeroInicioBlockPractice() {
                     <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                   </a>
                   <a
-                    href="#primary-areas"
-                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#a8a6a2] transition-colors hover:text-[#ff4b0b]"
+                    href="#estrategia-digital"
+                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-white/85 transition-colors hover:text-[#ff4b0b]"
                   >
                     Elige por dónde empezar
                   </a>
@@ -321,9 +321,8 @@ function HeroInicioBlockPractice() {
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
               >
-                <a
-                  href="#branding"
-                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+                <div
+                  className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
                 >
                   <span className="flex items-center gap-3">
                     <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
@@ -339,7 +338,7 @@ function HeroInicioBlockPractice() {
                     </span>
                   </span>
                   <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-                </a>
+                </div>
               </motion.div>
             </div>
           </div>
@@ -981,9 +980,9 @@ export default function SistemasDigitalesPage() {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
-              src="/assets/pages/3-sistemas-digitales/content-ops-automatización.png"
+              src="/assets/pages/3-sistemas-digitales/content-ops-automatización3.webp"
               alt="Automatización y flujos de trabajo en procesos digitales"
-              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-[50%_30%]"
+              className="relative z-10 h-full min-h-[25rem] w-full object-cover object-[50%_30%] brightness-90 contrast-[.95]"
               loading="lazy"
               decoding="async"
             />
@@ -1156,7 +1155,7 @@ export default function SistemasDigitalesPage() {
         </div>
       </section>
 
-      <section id="estrategia-digital" className="border-b border-white/8 bg-[#121212] py-20 text-white lg:py-28">
+      <section id="estrategia-digital" className="-scroll-mt-24 border-b border-white/8 bg-[#121212] py-20 text-white lg:py-28">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <motion.div
@@ -1223,6 +1222,12 @@ export default function SistemasDigitalesPage() {
                   </motion.div>
                 );
               })}
+              <div className="sm:col-span-2 mt-8 lg:mt-8 flex justify-start">
+                <a href="#diagnostico" className="group inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-white transition-colors hover:text-[#ff4b0b]">
+                  Solicitar diagnóstico
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -1300,7 +1305,7 @@ export default function SistemasDigitalesPage() {
       </section>
 
 
-      <section className="bg-[#f3f1ee] py-20 lg:py-28">
+      <section id="diagnostico" className="-scroll-mt-24 bg-[#f3f1ee] py-20 lg:py-28">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           <div className="overflow-hidden border border-black/8 bg-white shadow-[0_24px_74px_rgba(0,0,0,0.06)]">
             <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">

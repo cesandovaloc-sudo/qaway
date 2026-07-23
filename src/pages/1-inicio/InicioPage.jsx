@@ -445,7 +445,7 @@ function EcosystemPhoto() {
         style={{ boxShadow: '0 24px 64px rgba(32, 32, 31, 0.10)' }}
       >
         <img
-          src={`${base}equipo-colaborando.webp`}
+          src={`${base}equipo-colaborando2.webp`}
           alt="Equipo multidisciplinario colaborando en un proyecto"
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
@@ -632,7 +632,7 @@ function PrimaryAreas() {
                   </h3>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/50">{description}</p>
                   <div className="mt-2">
-                    <ArrowLink to={link} light newTab>
+                    <ArrowLink to={link} light>
                       {ctaLabel}
                     </ArrowLink>
                   </div>
