@@ -1,0 +1,180 @@
+Guía maestra para la creación de assets visuales — Qaway Lab
+1. Principio general
+
+Los assets de Qaway Lab deben compartir una misma calidad visual, pero no necesariamente la misma iluminación, paleta o intensidad.
+
+La coherencia debe construirse mediante:
+
+Dirección visual profesional.
+Composición editorial.
+Jerarquía clara.
+Fotografía y mockups realistas.
+Buen balance de blancos.
+Contraste limpio.
+Uso intencional del color.
+Evidencia visual del servicio, sistema o proceso presentado.
+
+Cada imagen debe adaptar su atmósfera al contenido. No se debe aplicar automáticamente un filtro oscuro, gris o desaturado a todos los assets.
+
+Vibrante no significa escandaloso.
+Sobrio no significa oscuro.
+Premium no significa apagado.
+
+El objetivo es encontrar la intensidad adecuada para cada servicio, curso, proyecto o contenido.
+
+2. Reglas comunes para todos los assets
+
+Independientemente del área, cada imagen debe:
+
+Comunicar claramente qué se está haciendo, creando o resolviendo.
+Mostrar procesos, herramientas, aplicaciones o resultados relacionados con el contenido.
+Sentirse actual, profesional, estratégica y visualmente cuidada.
+Evitar fotografías genéricas que podrían utilizarse para cualquier empresa.
+Evitar personas posando, mirando a cámara o sonriendo sin una razón relacionada con la escena.
+Mantener piel, manos, materiales, pantallas y objetos con apariencia real.
+Usar blancos limpios, negros definidos y sombras con detalle.
+Evitar dominantes amarillas, sepia, beige artificial o colores embarrados.
+Evitar el aspecto excesivamente generado por IA.
+Evitar decoraciones tecnológicas, hologramas o interfaces futuristas cuando no sean necesarias.
+Utilizar el naranja de Qaway como firma o acento, pero no obligatoriamente como color dominante.
+
+Se pueden utilizar azul, verde, rojo, violeta u otros colores cuando el proyecto, rubro o contenido lo justifique. La identidad de Qaway debe mantenerse mediante la composición, el criterio y la presentación, no limitando todos los proyectos a negro, blanco y naranja.
+
+3. Assets para ESTUDIO
+
+ESTUDIO representa creatividad, branding, dirección visual, contenido, fotografía, video y presencia digital. Por lo tanto, sus imágenes pueden y deben tener mayor energía visual.
+
+Sensación buscada
+Creatividad.
+Expresión.
+Transformación visual.
+Actualidad.
+Calidad de diseño.
+Deseo de verse mejor.
+Capacidad para construir marcas con personalidad.
+Tratamiento visual
+Iluminación clara, limpia o de alto contraste.
+Colores vivos, destacados y vibrantes cuando el proyecto lo requiera.
+Combinaciones cromáticas controladas, no tímidas.
+Materiales, mockups, packaging, tipografías, pantallas, publicaciones y aplicaciones reales.
+Alternancia entre composiciones claras, oscuras y coloridas.
+Fotografías con presencia visual, no únicamente escenas de personas trabajando.
+
+En ESTUDIO no se debe tener miedo al color. Un proyecto de arquitectura puede utilizar azul intenso; una marca de joyería puede usar verde profundo; una cafetería puede usar colores propios de su identidad; una marca juvenil puede tener combinaciones más enérgicas.
+
+El color debe provenir del concepto del proyecto, no colocarse de manera aleatoria.
+
+Evitar
+Convertir todos los proyectos en negro, gris y naranja.
+Presentar solo personas frente a una computadora.
+Mostrar mesas llenas de objetos sin jerarquía.
+Confundir branding con manualidades.
+Apagar los colores para que todo parezca “premium”.
+Usar muchas tonalidades saturadas sin un color principal.
+
+El asset debe provocar una reacción cercana a: “Quiero que mi marca pueda verse así.”
+
+4. Cursos creativos y de diseño
+
+Los cursos de identidad visual, branding, contenido, fotografía o video deben sentirse más luminosos y estimulantes que los cursos técnicos.
+
+Tratamiento recomendado
+Luz natural o iluminación editorial abierta.
+Fondos blancos, grises claros o espacios creativos limpios.
+Negros definidos para generar contraste.
+Colores visibles en materiales, pantallas, impresiones o aplicaciones.
+Uno o dos colores protagonistas, además de los neutros.
+Procesos reales: retículas, tipografía, logos, moodboards, packaging, edición o composición.
+
+No deben verse infantiles, excesivamente alegres ni como una tienda de materiales. El color debe aportar energía creativa sin quitar profesionalismo.
+
+5. Marketing, negocio y productividad
+
+Estos assets deben sentirse claros, cercanos y funcionales.
+
+Sensación buscada
+Aplicación inmediata.
+Organización.
+Utilidad real.
+Trabajo cotidiano.
+Acompañamiento.
+Tratamiento recomendado
+Iluminación natural y balance de blancos neutro.
+Espacios reales, limpios y luminosos.
+Personas concentradas en una acción concreta.
+Pantallas o herramientas relacionadas con el proceso.
+Paleta equilibrada entre blancos, madera clara, negro, gris y acentos controlados.
+
+La imagen de WhatsApp Business es una buena referencia de este nivel: clara, profesional, natural y con un acento naranja puntual.
+
+Evitar representar todo mediante una persona sonriendo y mirando un celular. La escena debe mostrar la operación que se está enseñando: consultas, catálogo, seguimiento, planificación o atención.
+
+6. Sistemas Digitales, automatización y operaciones
+
+Estas imágenes pueden utilizar una atmósfera más oscura, técnica y estructurada.
+
+Sensación buscada
+Orden.
+Control.
+Precisión.
+Productividad.
+Operación conectada.
+Tecnología aplicada.
+Tratamiento recomendado
+Negro, gris carbón y superficies neutras.
+Iluminación controlada con detalles visibles en las sombras.
+Naranja como indicador, conexión, alerta o estado activo.
+Interfaces realistas.
+Monitores y dispositivos de uso cotidiano.
+Flujos, responsables, alertas, formularios, estados y procesos conectados.
+
+El entorno puede ser oscuro, pero no debe sentirse apagado ni perder información. Los negros deben ser limpios y las interfaces deben distinguirse con claridad.
+
+Evitar ciencia ficción, hologramas, exceso de neón y grandes pantallas irreales.
+
+7. IA, software y desarrollo
+
+Estos assets pueden tener mayor profundidad y contraste, especialmente cuando el contenido sea técnico.
+
+Tratamiento recomendado
+Espacios oscuros o neutros.
+Luz lateral controlada.
+Pantallas reales.
+Personas trabajando o experimentando con una herramienta.
+Detalles de interfaz, código, nodos o componentes relacionados con el contenido.
+Acentos cromáticos moderados.
+
+No todos los contenidos de IA necesitan luces azules, robots o estética futurista. La imagen debe mostrar la herramienta aplicada, no una representación genérica de “tecnología”.
+
+8. Proyectos y casos aplicados
+
+En Proyectos, la identidad desarrollada para cada marca tiene prioridad.
+
+Cada caso puede utilizar su propia paleta, fotografía y personalidad. Qaway aporta coherencia mediante:
+
+La retícula.
+La presentación editorial.
+La jerarquía.
+El tratamiento de mockups.
+La selección de aplicaciones.
+Los pequeños identificadores de navegación.
+El uso puntual del naranja como firma.
+
+Los proyectos deben mostrarse completos: logotipo, paleta, materiales, packaging, web, redes, señalética o aplicaciones relevantes. No deben reducirse a un único mockup aislado.
+
+9. Criterio final de validación
+
+Antes de aprobar un asset, revisar:
+
+¿La imagen representa realmente el contenido?
+¿Su intensidad visual corresponde al área?
+¿Tiene suficiente luz, contraste y definición?
+¿El color tiene una función o solo decora?
+¿Se siente parte de Qaway sin parecer igual a todo lo demás?
+¿Podría confundirse con una fotografía de stock?
+¿Muestra proceso, aplicación o resultado?
+¿Aporta variedad al conjunto de la página?
+¿Se siente actual, real y profesional?
+¿Genera la percepción que buscaría el cliente de ese servicio?
+
+La meta no es uniformar todos los assets. La meta es construir variedad con dirección: creatividad y color para ESTUDIO, claridad para formación y negocio, profundidad para sistemas y libertad visual para cada

@@ -252,7 +252,7 @@ function HeroInicioBlockPractice() {
                 </p>
                 <h1
                   className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
-                  style={{ ...displayFont, fontWeight: 740 }}
+                  style={{ ...displayFont, fontWeight: 720 }}
                 >
                   <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
                 </h1>
@@ -345,7 +345,7 @@ function HeroInicioBlockPractice() {
           </div>
 
           <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
               <Settings
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -354,7 +354,7 @@ function HeroInicioBlockPractice() {
                 Automatización
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
               <LayoutDashboard
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -363,7 +363,7 @@ function HeroInicioBlockPractice() {
                 Dashboards
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
               <Users
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -372,7 +372,7 @@ function HeroInicioBlockPractice() {
                 CRM
               </span>
             </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 px-4 lg:pr-20 transition-all duration-300 cursor-pointer hover:bg-black/[0.02]">
+            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 px-4 lg:pr-20 transition-all duration-300 hover:bg-black/[0.02]">
               <Brain
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
                 strokeWidth={1.5}
@@ -1064,7 +1064,7 @@ export default function SistemasDigitalesPage() {
                     key={col.title}
                     whileHover={reduceMotion ? {} : { y: -3 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`group cursor-pointer pr-2 ${
+                    className={`group pr-2 ${
                       index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                     }`}
                   >
@@ -1115,12 +1115,13 @@ export default function SistemasDigitalesPage() {
                     key={col.title}
                     whileHover={reduceMotion ? {} : { y: -3 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`group cursor-pointer pr-2 ${
+                    style={{ scale: 0.73, transformOrigin: "top left" }}
+                    className={`group pr-2 ${
                       index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                     }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <h3 className="text-[16px] font-medium leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
                   </motion.div>
@@ -1129,7 +1130,7 @@ export default function SistemasDigitalesPage() {
             </div>
             
             <div className="mt-10">
-              <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]">
+              <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b] scale-[1.26] origin-left">
                 Ver proyectos
               </Link>
             </div>
@@ -1203,7 +1204,7 @@ export default function SistemasDigitalesPage() {
                       backgroundColor: "rgba(255,255,255,0.06)",
                       transition: { duration: 0.25, ease: "easeOut" },
                     }}
-                    className="group text-left border border-white/10 bg-white/[0.03] p-5 w-full rounded-[5px] block cursor-pointer"
+                    className="group text-left border border-white/10 bg-white/[0.03] p-5 w-full rounded-[5px] block"
                   >
                     <div className="flex items-center justify-between">
                       <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">

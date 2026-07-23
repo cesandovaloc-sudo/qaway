@@ -33,7 +33,7 @@ const heroImage = '/assets/pages/9-pruebas/academy/academy-hero-educator.png'
 
 const featuredCourses = [
   {
-    image: '/assets/pages/9-pruebas/academy/curso-identidad-visual-ia.png',
+    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
     category: 'Diseño',
     title: 'Identidad Visual con IA',
     text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
@@ -43,7 +43,7 @@ const featuredCourses = [
     href: '/landings/identidad-visual',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-whatsapp-business.png',
+    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
     category: 'Marketing',
     title: 'WhatsApp Business para negocios',
     text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
@@ -53,7 +53,7 @@ const featuredCourses = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-antigravity-youtube.png',
+    image: '/assets/pages/4-academy/curso-antigravity-youtube2.png',
     category: 'Inteligencia artificial',
     title: 'Antigravity desde cero',
     text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
@@ -77,7 +77,7 @@ const courseCatalog = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-identidad-visual-ia.png',
+    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
     category: 'Inteligencia artificial',
     title: 'Sistema de contenido con IA',
     text: 'Diseña una ruta sostenible para investigar, crear y adaptar contenido sin improvisar.',
@@ -95,7 +95,7 @@ const courseCatalog = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-whatsapp-business.png',
+    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
     category: 'Marketing',
     title: 'Presencia digital para emprender',
     text: 'Ordena tu propuesta, tus canales y tu comunicación para presentarte con claridad.',
