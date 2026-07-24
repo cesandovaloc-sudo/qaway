@@ -1025,7 +1025,7 @@ function useCarousel(items) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setIndex(i => (i + 1) % items.length), 4000)
+    const id = setInterval(() => setIndex(i => (i + 1) % items.length), 7000)
     return () => clearInterval(id)
   }, [items.length])
 
@@ -1056,7 +1056,7 @@ function CoursesLandings() {
             <Link
               to={landing.link}
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
-              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 py-7"
+              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                 <Compass size={21} strokeWidth={1.45} />
@@ -1080,14 +1080,14 @@ function CoursesLandings() {
                         <img src={landing.image} alt="" loading="lazy" decoding="async" />
                         {landing.featured && <span>{landing.featured}</span>}
                       </div>
-                      <div style={{ padding: '2.4rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
+                      <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{landing.category}</p>
                         <h3>{landing.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
                 </div>
-                <span className="my-5 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
+                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
                   Explorar
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                 </span>
@@ -1099,7 +1099,7 @@ function CoursesLandings() {
             <Link
               to="/academy"
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
-              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 py-7"
+              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                 <GraduationCap size={21} strokeWidth={1.45} />
@@ -1123,14 +1123,14 @@ function CoursesLandings() {
                         <img src={course.image} alt="" loading="lazy" decoding="async" />
                         {course.featured && <span>{course.featured}</span>}
                       </div>
-                      <div style={{ padding: '2.4rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
+                      <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{course.category}</p>
                         <h3>{course.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
                 </div>
-                <span className="my-5 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
+                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
                   Ver formación
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                 </span>
