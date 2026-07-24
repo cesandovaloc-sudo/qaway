@@ -344,7 +344,7 @@ function BrandingSpotlight() {
         >
           <SectionPrimitive
             kicker="Branding digital / 01"
-            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)]"
+            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
             title={<>Branding para que tu marca<br />se vea <span style={{ color: 'var(--vl-acid)' }}>clara y profesional</span></>}
             body="Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales."
             cta={

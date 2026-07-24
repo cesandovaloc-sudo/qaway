@@ -74,7 +74,6 @@ export default function BrandingDigitalPage() {
               title="Identidad digital moderna para tu marca"
               description="Construimos la percepción, diferenciación y coherencia visual que tu negocio necesita para destacar en el entorno digital."
               as="h1"
-              size="hero"
             />
             <div className="flex flex-wrap gap-4 mt-8">
 // <Button variant="primary" size="lg" href="#servicios">Ver servicios</Button> (Hidden until services page ready)
