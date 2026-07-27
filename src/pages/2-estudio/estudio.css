@@ -543,7 +543,6 @@
 }
 
 .estudio-page .vl-heading-row h2,
-.estudio-page .vl-services__heading h2,
 .estudio-page .vl-restoration__title h2,
 .estudio-page .vl-personal h2 {
   margin-top: 20px;
@@ -554,6 +553,7 @@
   font-weight: 700;
 }
 
+.estudio-page .vl-services__heading h2,
 .estudio-page .vl-content-system h2,
 .estudio-page .vl-method h2,
 .estudio-page .vl-diagnostic h2 {
