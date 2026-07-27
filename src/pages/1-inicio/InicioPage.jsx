@@ -106,7 +106,7 @@ const heroCapabilities = [
     title: 'Estudio creativo',
     description: 'Branding y Contenido',
     link: '#estudio',
-    placement: 'left-6 bottom-28 w-[15.5rem]',
+    placement: 'left-[0.5%] bottom-28 w-[15.5rem]',
   },
   {
     icon: Workflow,
@@ -127,7 +127,7 @@ const heroCapabilities = [
     title: 'Contacto',
     description: 'Resolver dudas',
     link: '#formulario',
-    placement: 'right-8 bottom-32 w-[14rem]',
+    placement: 'right-[18%] bottom-32 w-[14rem]',
   },
 ]
 
