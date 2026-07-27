@@ -283,23 +283,25 @@ function HeroInicioBlockPractice() {
               initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: "bottom center", willChange: "transform", transform: "translateZ(0)" }}
-              className="relative flex min-h-[40vh] items-end justify-center overflow-visible border-white/10 pt-10 lg:min-h-[30rem] lg:border-x"
+              className="relative min-h-[40vh] overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
             >
-              <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
-              <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
-              <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
-              <img
-                src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
-                alt="Sistemas Digitales Qaway"
-                className="relative z-10 h-[90%] w-auto max-w-full object-contain object-bottom origin-bottom grayscale"
-                style={{
-                  maskImage:
-                    "linear-gradient(to bottom, black 75%, transparent 100%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to bottom, black 75%, transparent 100%)",
-                }}
-              />
+              <div className="absolute inset-0 overflow-hidden flex items-end justify-center">
+                <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
+                <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
+                <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
+                <img
+                  src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
+                  alt="Sistemas Digitales Qaway"
+                  className="relative z-10 h-[96%] w-auto max-w-none object-contain object-bottom grayscale"
+                  style={{
+                    maskImage:
+                      "linear-gradient(to bottom, black 75%, transparent 100%)",
+                    WebkitMaskImage:
+                      "linear-gradient(to bottom, black 75%, transparent 100%)",
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+              </div>
             </motion.div>
 
             <div className="relative z-20 hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
