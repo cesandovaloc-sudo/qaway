@@ -902,22 +902,51 @@ export default function SistemasDigitalesPage() {
             variants={revealUp}
             custom={0}
           >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              AUTOMATIZACIÓN Y FLUJOS DE TRABAJO / 01
-            </p>
-            <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
-              style={displayFont}
-            >
-              Automatizamos tareas repetitivas
-              <br />
-              <span className="text-[#ff4b0b]">
-                y procesos de trabajo.
+            {/* OPCIÓN A: NUEVO PATRÓN APROBADO (Sentence Case) */}
+            <div className="mb-10 p-6 border-2 border-emerald-500/40 bg-emerald-50/20 rounded-lg">
+              <span className="mb-4 inline-block bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded">
+                [NUEVO PATRÓN APROBADO - SENTENCE CASE]
               </span>
-            </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-              Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
-            </p>
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                Automatización y flujos de trabajo / 01
+              </p>
+              <h2
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
+                style={displayFont}
+              >
+                Automatizamos tareas repetitivas
+                <br />
+                <span className="text-[#ff4b0b]">
+                  y procesos de trabajo.
+                </span>
+              </h2>
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
+              </p>
+            </div>
+
+            {/* OPCIÓN B: VERSIÓN ORIGINAL ANTERIOR (MAYÚSCULAS) */}
+            <div className="p-6 border-2 border-amber-500/40 bg-amber-50/20 rounded-lg opacity-60">
+              <span className="mb-4 inline-block bg-amber-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded">
+                [VERSIÓN ORIGINAL ANTERIOR - MAYÚSCULAS]
+              </span>
+              <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+                AUTOMATIZACIÓN Y FLUJOS DE TRABAJO / 01
+              </p>
+              <h2
+                className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+                style={displayFont}
+              >
+                Automatizamos tareas repetitivas
+                <br />
+                <span className="text-[#ff4b0b]">
+                  y procesos de trabajo.
+                </span>
+              </h2>
+              <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+                Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
+              </p>
+            </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {workflowCardsData.map(function (card, index) {
