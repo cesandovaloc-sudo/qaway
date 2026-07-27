@@ -458,7 +458,7 @@ function TransformacionVisualCarousel() {
 
   return (
     <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
-      <div className="vl-shell vl-content-system" style={{ gridTemplateColumns: '.95fr .95fr', gap: '80px' }}>
+      <div className="vl-shell vl-content-system grid grid-cols-1 lg:grid-cols-[.95fr_.95fr] gap-8 lg:gap-20">
         <motion.div {...reveal} className="vl-content-system__copy">
           <div>
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Transformación visual / 04</p>
@@ -472,7 +472,7 @@ function TransformacionVisualCarousel() {
               Mejoramos imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para que tu marca se vea más cuidada, clara y confiable.
             </p>
           </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
                 {slides.map((slide, index) => (
                   <motion.button
                     key={slide.id}
@@ -510,12 +510,11 @@ function TransformacionVisualCarousel() {
               </div>
         </motion.div>
 
-        <motion.div {...reveal} className="vl-content-showcase" style={{ padding: 0, background: 'none' }}>
+        <motion.div {...reveal} className="vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
           <div
             style={{
               width: '100%',
-              height: '75vh',
-              minHeight: '550px',
+              height: '100%',
               position: 'relative',
               overflow: 'hidden',
               border: '1px solid rgba(0,0,0,0.12)',
