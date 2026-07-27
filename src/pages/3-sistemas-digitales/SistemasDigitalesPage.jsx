@@ -305,11 +305,11 @@ function HeroInicioBlockPractice() {
             <div className="relative z-20 mt-12 flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
               <div className="mb-8 text-center">
                 <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
-                <p className="max-w-[16rem] mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
                   Sistemas digitales
                 </p>
                 <p
-                  className="max-w-[16rem] text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
+                  className="text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
                   style={{ ...displayFont, fontWeight: 600 }}
                 >
                   Automatización para negocios que necesitan operar mejor.
@@ -762,7 +762,7 @@ export default function SistemasDigitalesPage() {
             <div className="lg:col-span-5 flex flex-col justify-start">
               <div className="mb-8">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">SERVICIOS DE SISTEMAS DIGITALES</div>
-                <h2 className="mt-4 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-white" style={displayFont}>
+                <h2 className="mt-4 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-white" style={displayFont}>
                   Soluciones digitales <br />
                   adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
@@ -902,51 +902,22 @@ export default function SistemasDigitalesPage() {
             variants={revealUp}
             custom={0}
           >
-            {/* OPCIÓN A: NUEVO PATRÓN APROBADO (Sentence Case) */}
-            <div className="mb-10 p-6 border-2 border-emerald-500/40 bg-emerald-50/20 rounded-lg">
-              <span className="mb-4 inline-block bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded">
-                [NUEVO PATRÓN APROBADO - SENTENCE CASE]
+            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+              Automatización y flujos de trabajo / 01
+            </p>
+            <h2
+              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
+              style={displayFont}
+            >
+              Automatizamos tareas repetitivas
+              <br />
+              <span className="text-[#ff4b0b]">
+                y procesos de trabajo.
               </span>
-              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                Automatización y flujos de trabajo / 01
-              </p>
-              <h2
-                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
-                style={displayFont}
-              >
-                Automatizamos tareas repetitivas
-                <br />
-                <span className="text-[#ff4b0b]">
-                  y procesos de trabajo.
-                </span>
-              </h2>
-              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-                Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
-              </p>
-            </div>
-
-            {/* OPCIÓN B: VERSIÓN ORIGINAL ANTERIOR (MAYÚSCULAS) */}
-            <div className="p-6 border-2 border-amber-500/40 bg-amber-50/20 rounded-lg opacity-60">
-              <span className="mb-4 inline-block bg-amber-600 text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-widest rounded">
-                [VERSIÓN ORIGINAL ANTERIOR - MAYÚSCULAS]
-              </span>
-              <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-                AUTOMATIZACIÓN Y FLUJOS DE TRABAJO / 01
-              </p>
-              <h2
-                className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
-                style={displayFont}
-              >
-                Automatizamos tareas repetitivas
-                <br />
-                <span className="text-[#ff4b0b]">
-                  y procesos de trabajo.
-                </span>
-              </h2>
-              <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
-                Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
-              </p>
-            </div>
+            </h2>
+            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
+            </p>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {workflowCardsData.map(function (card, index) {
@@ -1070,15 +1041,15 @@ export default function SistemasDigitalesPage() {
             custom={0}
           >
             <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              CRM, DATOS Y PANELES DE CONTROL / 02
+              CRM y seguimiento comercial / 02
             </p>
             <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
               style={displayFont}
             >
-              ORGANIZAMOS CONTACTOS, CONSULTAS Y{" "}
+              Organizamos contactos, consultas y
               <br />
-              <span className="text-[#ff4b0b]">SEGUIMIENTO COMERCIAL.</span>
+              <span className="text-[#ff4b0b]">seguimiento comercial.</span>
             </h2>
             <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
               Implementamos un CRM para registrar contactos, ordenar oportunidades y centralizar el seguimiento comercial. Configuramos paneles para visualizar pendientes, avances y resultados.
@@ -1121,15 +1092,15 @@ export default function SistemasDigitalesPage() {
             custom={0}
           >
             <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
-              DESARROLLO WEB Y PÁGINAS DE CAPTACIÓN / 03
+              Desarrollo web y páginas de captación / 03
             </p>
             <h2
-              className="mt-3 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
               style={displayFont}
             >
-              PÁGINAS WEB PARA PRESENTAR,{" "}
+              Páginas web para presentar,
               <br />
-              <span className="text-[#ff4b0b]">CAPTAR Y CONVERTIR.</span>
+              <span className="text-[#ff4b0b]">captar y convertir.</span>
             </h2>
             <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
               Desarrollamos plataformas web de alto rendimiento. Desde la estructura visual hasta la integración técnica, diseñamos páginas preparadas para recibir tráfico, captar consultas y registrar cada oportunidad.
@@ -1274,7 +1245,7 @@ export default function SistemasDigitalesPage() {
           >
             <SectionLabel>Aplicaciones reales</SectionLabel>
             <h2
-              className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-[#191918]"
+              className="mt-6 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
               style={displayFont}
             >
               Diseñamos infraestructura para{" "}
