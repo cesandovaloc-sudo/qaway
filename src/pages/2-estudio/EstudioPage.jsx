@@ -183,10 +183,12 @@ function Hero() {
               Estudio creativo / Branding, contenido y presencia digital
             </p>
             <h1
-              className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+              className="max-w-[58rem] text-[clamp(2.5rem,4.2vw,4.8rem)] leading-[0.86] tracking-[-0.055em] text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Creamos la identidad y <span className="text-[#ff4b0b]">presencia digital para tu marca.</span></span>
+              <span className="block">Creamos la identidad y</span>
+              <span className="block text-[#ff4b0b]">presencia digital</span>
+              <span className="block text-[#ff4b0b]">para tu marca.</span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
