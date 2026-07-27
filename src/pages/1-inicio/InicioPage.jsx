@@ -219,16 +219,16 @@ se deben seguir estrictamente las siguientes reglas en la sección Hero:
      permitiendo saltos de línea naturales (responsive) para que el texto no 
      se desborde sobre el rostro de las imágenes.
 
-4. ESTRUCTURA DE 3 COLUMNAS INTEGRADAS Y TARJETAS ANCLADAS (RESPONSIVIDAD):
-   - El Hero de cada página debe estructurarse obligatoriamente en un contenedor
-     grid de 3 columnas integradas: lg:grid-cols-[.95fr_1.05fr_.7fr] max-w-[96rem] mx-auto.
-   - Las tarjetas flotantes de capacidades (Branding, Sistemas, Academia, etc.) 
-     NUNCA deben posicionarse con 'right: calc(X% + Ypx)' sueltas respecto a la 
-     pantalla global. DEBEN ir ancladas como hijas directas dentro de la columna 
-     central (Columna 2 - lg:col-start-2) con posiciones relativas a dicha columna.
-   - Esto garantiza que al reducir el tamaño del navegador en laptops o pantallas 
-     intermedias (ej. 1366px o 1024px), las 3 columnas y sus tarjetas flotantes 
-     se contraigan en proporción armónica sin chocar ni montarse sobre el h1.
+4. ESTRUCTURA DE 3 COLUMNAS INTEGRADAS Y AJUSTE FLEXIBLE DE PROPORCIONES:
+   - El Hero de cada página se estructura en un contenedor grid de 3 columnas integradas
+     con base de referencia `lg:grid-cols-[.95fr_1.05fr_.7fr] max-w-[96rem] mx-auto`.
+   - Las tarjetas flotantes NUNCA deben posicionarse con 'right: calc(X% + Ypx)' sueltas 
+     respecto a la pantalla global. DEBEN ir ancladas dentro de la columna central.
+   - REGLA FLEXIBLE DE PROPORCIÓN: El ratio de las columnas no es una regla rígida e imperativa;
+     dependerá de la longitud del título H1 y del encuadre de la imagen de cada página. 
+     Si un título genera saltos de línea aislados o torre de filas (ej. "la" o "y" solas),
+     se debe aplicar un micro-desplazamiento del 1% al 3% a la derecha (ej. `lg:grid-cols-[1.03fr_0.97fr_0.70fr]`)
+     para dar aire al texto manteniendo intacta la escala tipográfica referente de Inicio.
 ================================================================================
 */
 
