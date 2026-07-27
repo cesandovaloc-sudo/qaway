@@ -292,7 +292,7 @@ function HeroInicioBlockPractice() {
                 <img
                   src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                   alt="Sistemas Digitales Qaway"
-                  className="relative z-10 h-[96%] w-auto max-w-none object-contain object-bottom grayscale"
+                  className="relative z-10 h-[24rem] sm:h-[28rem] lg:h-[86%] xl:h-[90%] 2xl:h-[92%] w-auto max-w-[320px] lg:max-w-[380px] xl:max-w-[440px] 2xl:max-w-[500px] object-contain object-bottom grayscale"
                   style={{
                     maskImage:
                       "linear-gradient(to bottom, black 75%, transparent 100%)",
