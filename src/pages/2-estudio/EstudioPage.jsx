@@ -395,7 +395,7 @@ function Services() {
                 className="mx-auto text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
-                Servicios creativos<br />para construir tu marca<span className="text-[#ff4b0b]">.</span>
+                Servicios creativos<br />para <span className="text-white">construir tu marca.</span>
               </h2>
             </div>
           </div>
