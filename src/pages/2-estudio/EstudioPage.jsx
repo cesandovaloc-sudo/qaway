@@ -44,6 +44,28 @@ const fadeUp = {
   }),
 }
 
+const revealUp = {
+  hidden: { opacity: 0, y: 32 },
+  show: function (delay) {
+    const wait = typeof delay === "number" ? delay : 0;
+    return {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.75, delay: wait, ease: [0.22, 1, 0.36, 1] },
+    };
+  },
+};
+
+const scaleUpImage = {
+  hidden: { opacity: 0, scale: 0.95, y: 28 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
 const services = [
   {
     number: '01',
@@ -440,7 +462,7 @@ function Services() {
   return (
     <section id="servicios" className="vl-dark vl-section" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div className="vl-shell w-full">
-        <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ textAlign: 'center', width: '100%' }}>
             <div>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Servicios Creativos</p>
@@ -512,7 +534,7 @@ function TransformacionVisualCarousel() {
   return (
     <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system grid grid-cols-1 lg:grid-cols-[.95fr_.95fr] gap-8 lg:gap-20">
-        <motion.div {...reveal} className="vl-content-system__copy">
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Transformación visual / 04</p>
             <h2
@@ -563,7 +585,7 @@ function TransformacionVisualCarousel() {
               </div>
         </motion.div>
 
-        <motion.div {...reveal} className="vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
           <div
             style={{
               width: '100%',
@@ -605,7 +627,7 @@ function ContentSystem() {
   return (
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
-        <motion.div {...reveal} className="vl-content-system__copy">
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contenido para redes sociales / 02</p>
             <h2
@@ -638,7 +660,10 @@ function ContentSystem() {
         </motion.div>
 
         <motion.div
-          {...reveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={scaleUpImage}
           className="vl-content-showcase"
           onMouseMove={(event) => {
             const rect = event.currentTarget.getBoundingClientRect()
@@ -667,7 +692,7 @@ function Method() {
   return (
     <section id="metodo" className="vl-dark vl-section vl-method">
       <div className="vl-shell">
-        <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
             <div className="flex flex-col gap-10">
               <div className="border-b border-red-500/20 pb-6">
@@ -727,7 +752,7 @@ function Method() {
               </motion.div>
             ))}
           </div>
-          <motion.figure {...reveal} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
+          <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
             <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
           </motion.figure>
         </div>
