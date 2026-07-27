@@ -169,11 +169,10 @@ function Reveal({ children, className = '', delay = 0 }) {
 }
 
 function ArrowLink({ to, children, light = false, newTab = false }) {
-  const classes = `group inline-flex items-center gap-4 border-b pb-2 text-sm font-medium transition-colors ${
-    light
-      ? 'border-[#ff4b0b] text-white/78 hover:text-white'
-      : 'border-[#ff4b0b] text-[#20201f]/72 hover:text-[#20201f]'
-  }`
+  const classes = `group inline-flex items-center gap-4 border-b pb-2 text-sm font-medium transition-colors ${light
+    ? 'border-[#ff4b0b] text-white/78 hover:text-white'
+    : 'border-[#ff4b0b] text-[#20201f]/72 hover:text-[#20201f]'
+    }`
 
   if (newTab) {
     return (
@@ -307,8 +306,8 @@ function Hero() {
                   reduceMotion
                     ? {}
                     : {
-                        y: [0, -6, 0],
-                      }
+                      y: [0, -6, 0],
+                    }
                 }
                 transition={{
                   duration: 5,
@@ -335,9 +334,8 @@ function Hero() {
                     </span>
                   </span>
                   <span
-                    className={`absolute h-px bg-[#ff4b0b]/80 ${
-                      index % 2 === 0 ? '-right-10 top-1/2 w-10' : '-left-10 top-1/2 w-10'
-                    }`}
+                    className={`absolute h-px bg-[#ff4b0b]/80 ${index % 2 === 0 ? '-right-10 top-1/2 w-10' : '-left-10 top-1/2 w-10'
+                      }`}
                   />
                 </a>
               </motion.div>
@@ -363,7 +361,7 @@ function Hero() {
           </div>
         </motion.div>
 
-        <aside className="relative grid min-h-auto overflow-visible bg-[#f8f9f7] text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
+        <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-[#f8f9f7] text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             whileInView={reduceMotion ? undefined : 'show'}
@@ -462,15 +460,15 @@ function EcosystemIntro() {
     <section id="ecosistema" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
       <div className="mx-auto max-w-[94rem]">
         <Reveal className="grid items-center gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
-          <div>
+          <div className="text-center lg:text-left">
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Todo conectado</p>
             <h2
-              className="max-w-[42rem] text-[clamp(3.08rem,5.26vw,5.63rem)] leading-[0.9] tracking-[-0.058em]"
+              className="mx-auto lg:mx-0 max-w-[42rem] text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-black/55 sm:text-lg">
+            <p className="mt-4 mx-auto lg:mx-0 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
               No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.
             </p>
           </div>
@@ -503,15 +501,15 @@ function EstudioSection() {
           <div className="flex flex-col">
             <div>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                Estudio creativo y creación contenido
+                Estudio creativo
               </p>
               <h2
-                className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.81] tracking-[-0.08em]"
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
               </h2>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-black/55">
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
                 Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
               </p>
             </div>
@@ -528,22 +526,19 @@ function EstudioSection() {
                   <button
                     type="button"
                     onClick={() => setActive(index)}
-                    className={`group flex h-full w-full items-center gap-3 border px-4 py-3 text-left transition-all duration-300 sm:px-5 sm:py-3.5 ${
-                      active === index
-                        ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
-                        : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
-                    }`}
+                    className={`group flex h-full w-full items-center gap-3 border px-4 py-3 text-left transition-all duration-300 sm:px-5 sm:py-3.5 ${active === index
+                      ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
+                      : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
+                      }`}
                   >
-                    <span className={`grid h-8 w-8 shrink-0 place-items-center transition-colors duration-300 ${
-                      active === index
-                        ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
-                        : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
-                    }`}>
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center transition-colors duration-300 ${active === index
+                      ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
+                      : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
+                      }`}>
                       <Icon size={17} strokeWidth={1.5} />
                     </span>
-                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${
-                      active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
-                    }`}>
+                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
+                      }`}>
                       {title}
                     </span>
                   </button>
@@ -608,14 +603,13 @@ function PrimaryAreas() {
                 whileInView={{ opacity: 1, x: 0, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
-                className={`group relative flex flex-col overflow-hidden border-b border-white/18 py-6 transition-all duration-500 lg:border-b-0 lg:px-12 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,75,11,0.1),inset_0_0_0_1px_rgba(255,75,11,0.25)] ${
-                  index ? 'lg:border-l' : ''
-                } ${index === 0 ? 'lg:pl-12' : ''}`}
+                className={`group relative flex flex-col overflow-hidden border-b border-white/18 py-6 transition-all duration-500 lg:border-b-0 lg:px-12 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,75,11,0.1),inset_0_0_0_1px_rgba(255,75,11,0.25)] ${index ? 'lg:border-l' : ''
+                  } ${index === 0 ? 'lg:pl-12' : ''}`}
               >
-<span className="pointer-events-none absolute -top-6 left-4 select-none text-[10rem] font-bold leading-none text-white/[0.04]">
-  0{index + 1}
-</span>
-<div className="relative mb-10 flex justify-end">
+                <span className="pointer-events-none absolute -top-6 left-4 select-none text-[10rem] font-bold leading-none text-white/[0.04]">
+                  0{index + 1}
+                </span>
+                <div className="relative mb-10 flex justify-end">
                   <span className="grid h-12 w-12 place-items-center rounded-[6px] border border-white/15 text-[#ff4b0b] transition-all duration-500 group-hover:border-[#ff4b0b] group-hover:bg-[#ff4b0b] group-hover:text-white group-hover:shadow-[0_0_24px_rgba(255,75,11,0.25)]">
                     <Icon size={21} strokeWidth={1.45} />
                   </span>
@@ -684,9 +678,8 @@ function OpsImageStage({ reduceMotion }) {
                 ease: [0.22, 1, 0.36, 1]
               }
             }
-            className={`absolute transform-gpu will-change-transform ${image.className} ${
-              idx === 2 ? 'academy-ops-solution' : ''
-            }`}
+            className={`absolute transform-gpu will-change-transform ${image.className} ${idx === 2 ? 'academy-ops-solution' : ''
+              }`}
           >
             <div className="relative overflow-hidden">
               <img
@@ -753,17 +746,20 @@ function SistemasDigitalesSection() {
         <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
           <div className="flex flex-col justify-center">
             <Reveal>
-              <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
                 Sistemas digitales con IA
               </p>
               <h2
-                className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
                 <br />
                 <span className="text-[#ff4b0b]">la carga manual.</span>
               </h2>
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Organiza tus herramientas, automatiza tareas repetitivas y conecta tus procesos con apoyo de IA.
+              </p>
             </Reveal>
 
             <div className="mt-6 grid gap-x-6 gap-y-11 pb-10 sm:grid-cols-2">
@@ -810,13 +806,30 @@ function AcademyFeature() {
 
   return (
     <section id="academy" className="grid min-h-[40rem] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
+      <Reveal className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
+        <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Academy</p>
+        <h2
+          className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+          style={{ ...displayFont, fontWeight: 760 }}
+        >
+          <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
+        </h2>
+        <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+          Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
+        </p>
+        <div className="mt-7 flex flex-wrap gap-7">
+          <ArrowLink to="/academy">Ver Academy</ArrowLink>
+          <ArrowLink to="/recursos">Ver recursos</ArrowLink>
+        </div>
+      </Reveal>
+
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 18 }}
         whileInView={{ opacity: 1, y: 0 }}
         whileHover={reduceMotion ? undefined : { y: -3 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative min-h-[30rem] overflow-hidden cursor-pointer"
+        className="order-2 relative min-h-[30rem] overflow-hidden cursor-pointer lg:order-1"
       >
         <img
           src={`${base}aprendizaje-aplicado2.webp`}
@@ -826,23 +839,6 @@ function AcademyFeature() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/18" />
       </motion.div>
-
-      <Reveal className="flex flex-col justify-center px-8 py-16 sm:px-12 lg:px-14">
-        <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.24em] text-[#ff4b0b]">Academy</p>
-        <h2
-          className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
-          style={{ ...displayFont, fontWeight: 760 }}
-        >
-          <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
-        </h2>
-        <p className="mt-5 max-w-lg text-base leading-relaxed text-black/55">
-          Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-7">
-          <ArrowLink to="/academy">Ver Academy</ArrowLink>
-          <ArrowLink to="/recursos">Ver recursos</ArrowLink>
-        </div>
-      </Reveal>
     </section>
   )
 }
@@ -852,10 +848,14 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
     <div className="academy-page">
       <section id="formulario" className="academy-section academy-form-section">
         <Reveal className="academy-form-intro">
-          <p className="academy-kicker font-bold">Contacto</p>
-          <h2 style={{ ...displayFont, fontWeight: 760 }}>Cuéntanos <span className="academy-title-emphasis">qué necesitas</span><span className="academy-title-punct">.</span></h2>
-          <p>Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.</p>
-          <div className="academy-form-points">
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
+          <h2 className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+            Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
+          </h2>
+          <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
+          </p>
+          <div className="academy-form-points mt-6">
             <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
             <span><Check size={16} /> Recibe orientación sin compromiso</span>
             <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
@@ -863,96 +863,96 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
         </Reveal>
 
         <Reveal>
-        <form
-          onSubmit={onSubmit}
-          className="academy-interest-form"
-        >
-          {submitted ? (
-            <div className="academy-form-success">
-              <div><Check size={28} /></div>
-              <h3>¡Consulta enviada!</h3>
-              <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-              <button type="button" onClick={onReset}>Enviar otro mensaje</button>
-            </div>
-          ) : (
-            <>
-              <div className="academy-field">
-                <label htmlFor="academy-name">¿Cómo te llamas?</label>
-                <input
-                  type="text"
-                  id="academy-name"
-                  name="name"
-                  required
-                  placeholder="Tu nombre completo"
-                />
+          <form
+            onSubmit={onSubmit}
+            className="academy-interest-form"
+          >
+            {submitted ? (
+              <div className="academy-form-success">
+                <div><Check size={28} /></div>
+                <h3>¡Consulta enviada!</h3>
+                <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
+                <button type="button" onClick={onReset}>Enviar otro mensaje</button>
               </div>
-              <div className="academy-field-row">
+            ) : (
+              <>
                 <div className="academy-field">
-                  <label htmlFor="academy-phone">Teléfono</label>
+                  <label htmlFor="academy-name">¿Cómo te llamas?</label>
                   <input
-                    type="tel"
-                    id="academy-phone"
-                    name="phone"
+                    type="text"
+                    id="academy-name"
+                    name="name"
                     required
-                    placeholder="+51 999 999 999"
+                    placeholder="Tu nombre completo"
                   />
                 </div>
+                <div className="academy-field-row">
+                  <div className="academy-field">
+                    <label htmlFor="academy-phone">Teléfono</label>
+                    <input
+                      type="tel"
+                      id="academy-phone"
+                      name="phone"
+                      required
+                      placeholder="+51 999 999 999"
+                    />
+                  </div>
+                  <div className="academy-field">
+                    <label htmlFor="academy-email">Correo</label>
+                    <input
+                      type="email"
+                      id="academy-email"
+                      name="email"
+                      required
+                      placeholder="tucorreo@empresa.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="academy-field-row">
+                  <div className="academy-field">
+                    <label htmlFor="academy-profile">¿A qué te dedicas?</label>
+                    <select id="academy-profile" name="profile" required>
+                      <option value="">Selecciona tu perfil</option>
+                      <option value="Profesional / Consultor">Profesional / Consultor</option>
+                      <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                      <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
+                      <option value="Equipo de empresa">Equipo de empresa</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                  <div className="academy-field">
+                    <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
+                    <select id="academy-interest" name="interest" required>
+                      <option value="">Selecciona un interés</option>
+                      <option value="Identidad Visual con IA">Identidad Visual con IA</option>
+                      <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
+                      <option value="IA para equipos pequeños">IA para equipos pequeños</option>
+                      <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
+                      <option value="Workflows sin código">Workflows sin código</option>
+                      <option value="Orientación general / Otro">Orientación general / Otro</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="academy-field">
-                  <label htmlFor="academy-email">Correo</label>
-                  <input
-                    type="email"
-                    id="academy-email"
-                    name="email"
-                    required
-                    placeholder="tucorreo@empresa.com"
+                  <label htmlFor="academy-message">Cuéntanos un poco más</label>
+                  <textarea
+                    id="academy-message"
+                    name="message"
+                    rows="4"
+                    placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
                   />
                 </div>
-              </div>
-
-              <div className="academy-field-row">
-                <div className="academy-field">
-                  <label htmlFor="academy-profile">¿A qué te dedicas?</label>
-                  <select id="academy-profile" name="profile" required>
-                    <option value="">Selecciona tu perfil</option>
-                    <option value="Profesional / Consultor">Profesional / Consultor</option>
-                    <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
-                    <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                    <option value="Equipo de empresa">Equipo de empresa</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-                <div className="academy-field">
-                  <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
-                  <select id="academy-interest" name="interest" required>
-                    <option value="">Selecciona un interés</option>
-                    <option value="Identidad Visual con IA">Identidad Visual con IA</option>
-                    <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
-                    <option value="IA para equipos pequeños">IA para equipos pequeños</option>
-                    <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
-                    <option value="Workflows sin código">Workflows sin código</option>
-                    <option value="Orientación general / Otro">Orientación general / Otro</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="academy-field">
-                <label htmlFor="academy-message">Cuéntanos un poco más</label>
-                <textarea
-                  id="academy-message"
-                  name="message"
-                  rows="4"
-                  placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
-                />
-              </div>
-              <button type="submit" className="academy-submit-button" disabled={submitting}>
-                {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
-                <Send size={17} />
-              </button>
-              {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
-              <small>Usaremos esta información únicamente para responder tu consulta.</small>
-            </>
-          )}
-        </form>
+                <button type="submit" className="academy-submit-button" disabled={submitting}>
+                  {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
+                  <Send size={17} />
+                </button>
+                {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                <small>Usaremos esta información únicamente para responder tu consulta.</small>
+              </>
+            )}
+          </form>
         </Reveal>
       </section>
     </div>
@@ -1044,7 +1044,7 @@ function CoursesLandings() {
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Formación y soluciones</p>
           <h2
-            className="text-[clamp(3.6rem,5.3vw,6rem)] leading-[0.87] tracking-[-0.055em]"
+            className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
             style={{ ...displayFont, fontWeight: 760 }}
           >
             Aprende y <span className="text-[#ff4b0b]">aplica.</span>

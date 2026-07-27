@@ -28,6 +28,11 @@ import './estudio.css'
 
 
 const ASSET = '/assets/pages/2-estudio'
+const displayFont = {
+  fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
+  fontStretch: 'condensed',
+  fontWeight: 700,
+}
 
 const services = [
   {
@@ -123,7 +128,7 @@ function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
     >
       <img src={beforeImage} alt={`Original - ${alt}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
       <img src={afterImage} alt={`Resultado - ${alt}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0, clipPath: `inset(0 0 0 var(--split-position))` }} />
-      
+
       <span className="vl-comparison__label vl-comparison__label--left">Original</span>
       <span className="vl-comparison__label vl-comparison__label--right">Resultado</span>
       <div className="vl-comparison__line">
@@ -160,7 +165,7 @@ function Hero() {
       >
         <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual6.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
       </motion.div>
-      
+
       <div className="vl-hero__right-pane">
         <motion.div
           className="vl-hero__panel"
@@ -186,7 +191,7 @@ function Hero() {
             Creamos la<br />
             identidad y<br />
             <em>presencia digital<br />
-            para tu marca.</em>
+              para tu marca.</em>
           </h1>
           <p className="vl-hero__copy">
             Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
@@ -197,11 +202,11 @@ function Hero() {
             <span>Presencia digital</span>
           </div>
           <div className="vl-actions">
-              <a
-                href="#diagnostico"
-                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta">
-                Quiero mejorar mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </a>
+            <a
+              href="#diagnostico"
+              className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta">
+              Quiero mejorar mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            </a>
           </div>
         </div>
       </motion.div>
@@ -342,29 +347,43 @@ function BrandingSpotlight() {
           whileInView="visible"
           viewport={{ once: true, amount: .22 }}
         >
-          <SectionPrimitive
-            kicker="Branding digital / 01"
-            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-            title={<>Branding para que tu marca<br />se vea <span style={{ color: 'var(--vl-acid)' }}>clara y profesional</span></>}
-            body="Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales."
-            cta={
-              <div className="flex flex-wrap items-center gap-6">
-                <a
-                  href="#diagnostico"
-                  className="vl-button vl-button--acid vl-branding__cta"
-                >
-                  Quiero construir mi marca <ArrowRight size={16} />
-                </a>
-                {/*
-                <Link
-                  to="/estudio/branding-digital"
-                  className="vl-text-link">
-                  Ver detalles <ArrowRight size={15} />
-                </Link>
-                */}
-              </div>
-            }
-          />
+          <div className="flex flex-col gap-10">
+            {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+            <div className="border-b border-red-500/20 pb-6">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Branding digital</p>
+              <h2
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                style={{ ...displayFont, fontWeight: 760 }}
+              >
+                Branding para que tu marca<br />se vea <span className="text-[#ff4b0b]">clara y profesional.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales.
+              </p>
+            </div>
+
+            {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+            <div className="opacity-60">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+              <SectionPrimitive
+                kicker="Branding digital / 01"
+                titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                title={<>Branding para que tu marca<br />se vea <span style={{ color: 'var(--vl-acid)' }}>clara y profesional</span></>}
+                body="Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales."
+                cta={
+                  <div className="flex flex-wrap items-center gap-6">
+                    <a
+                      href="#diagnostico"
+                      className="vl-button vl-button--acid vl-branding__cta"
+                    >
+                      Quiero construir mi marca <ArrowRight size={16} />
+                    </a>
+                  </div>
+                }
+              />
+            </div>
+          </div>
           <motion.div className="vl-branding__deliverables">
             {['Logo e identidad', 'Moodboard', 'Paleta y tipografía', 'Sistema visual'].map((item, index) => (
               <motion.span
@@ -395,8 +414,25 @@ function Services() {
       <div className="vl-shell w-full">
         <motion.div {...reveal} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ textAlign: 'center', width: '100%' }}>
-            
-            <h2 style={{ fontSize: 'clamp(2.9rem, 4.3vw, 4.7rem)', textAlign: 'center', margin: '0 auto', textTransform: 'none', fontWeight: 550 }}>Servicios Creativos<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+            <div className="flex flex-col gap-10">
+              {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+              <div className="border-b border-red-500/20 pb-6">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Servicios Creativos</p>
+                <h2
+                  className="mx-auto text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  Servicios Creativos<br />para construir tu marca<span className="text-[#ff4b0b]">.</span>
+                </h2>
+              </div>
+
+              {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+              <div className="opacity-60">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+                <h2 style={{ fontSize: 'clamp(2.9rem, 4.3vw, 4.7rem)', textAlign: 'center', margin: '0 auto', textTransform: 'none', fontWeight: 550 }}>Servicios Creativos<br /><span>para construir tu marca<span style={{ color: 'var(--vl-acid)' }}>.</span></span></h2>
+              </div>
+            </div>
           </div>
         </motion.div>
 
@@ -430,7 +466,7 @@ function Services() {
 
 function TransformacionVisualCarousel() {
   const [activeSlide, setActiveSlide] = useState(0);
-  
+
   const slides = [
     {
       id: 'presencia',
@@ -442,14 +478,14 @@ function TransformacionVisualCarousel() {
     {
       id: 'producto',
       title: 'Optimización Visual',
-      beforeImage: `${ASSET}/estudio-transformacion-producto-antes.webp`, 
+      beforeImage: `${ASSET}/estudio-transformacion-producto-antes.webp`,
       afterImage: `${ASSET}/estudio-transformacion-producto-despues.webp`,
       alt: 'Optimización de producto y visuales'
     },
     {
       id: 'restauracion',
       title: 'Restauración',
-      beforeImage: `${ASSET}/estudio-transformacion-restauracion-antes.webp`, 
+      beforeImage: `${ASSET}/estudio-transformacion-restauracion-antes.webp`,
       afterImage: `${ASSET}/estudio-transformacion-restauracion-despues.webp`,
       alt: 'Fotografía antigua restaurada'
     }
@@ -459,50 +495,69 @@ function TransformacionVisualCarousel() {
     <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system" style={{ gridTemplateColumns: '.95fr .95fr', gap: '80px' }}>
         <motion.div {...reveal} className="vl-content-system__copy">
-          <SectionPrimitive
-            kicker="Transformación visual / 04"
-            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-            title={<>Tu imagen también<br /><span style={{ color: 'var(--vl-acid)' }}>comunica profesionalismo.</span></>}
-            body="Mejoramos imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para que tu marca se vea más cuidada, clara y confiable en cada punto de contacto."
-            cta={
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px' }}>
-            {slides.map((slide, index) => (
-              <motion.button
-                key={slide.id}
-                onClick={() => setActiveSlide(index)}
-                whileInView={
-                  activeSlide === index 
-                    ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
-                    : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
-                }
-                viewport={{ once: false, amount: 0.5 }}
-                transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  padding: '16px 20px',
-                  border: '1px solid',
-                  borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
-                  backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
-                  color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
-                  textAlign: 'left'
-                }}
+          <div className="flex flex-col gap-10">
+            {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+            <div className="border-b border-red-500/20 pb-6">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Transformación visual</p>
+              <h2
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                style={{ ...displayFont, fontWeight: 760 }}
               >
-                <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
-                  0{index + 1}
-                </span>
-                <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
-                  {slide.title}
-                </span>
-              </motion.button>
-            ))}
+                Tu imagen también<br /><span className="text-[#ff4b0b]">comunica profesionalismo.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Mejoramos imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para que tu marca se vea más cuidada, clara y confiable.
+              </p>
+            </div>
+
+            {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+            <div className="opacity-60">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+              <SectionPrimitive
+                kicker="Transformación visual / 04"
+                titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                title={<>Tu imagen también<br /><span style={{ color: 'var(--vl-acid)' }}>comunica profesionalismo.</span></>}
+                body="Mejoramos imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para que tu marca se vea más cuidada, clara y confiable en cada punto de contacto."
+              />
+            </div>
           </div>
-            }
-          />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px' }}>
+                {slides.map((slide, index) => (
+                  <motion.button
+                    key={slide.id}
+                    onClick={() => setActiveSlide(index)}
+                    whileInView={
+                      activeSlide === index
+                        ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
+                        : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
+                    }
+                    viewport={{ once: false, amount: 0.5 }}
+                    transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '16px 20px',
+                      border: '1px solid',
+                      borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
+                      backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
+                      color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
+                      0{index + 1}
+                    </span>
+                    <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
+                      {slide.title}
+                    </span>
+                  </motion.button>
+                ))}
+              </div>
         </motion.div>
 
         <motion.div {...reveal} className="vl-content-showcase" style={{ padding: 0, background: 'none' }}>
@@ -527,11 +582,11 @@ function TransformacionVisualCarousel() {
                 transition={{ duration: 0.6, ease: 'easeInOut' }}
                 style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
               >
-                <SplitVisual 
-                  beforeImage={slides[activeSlide].beforeImage} 
-                  afterImage={slides[activeSlide].afterImage} 
-                  alt={slides[activeSlide].alt} 
-                  dark={false} 
+                <SplitVisual
+                  beforeImage={slides[activeSlide].beforeImage}
+                  afterImage={slides[activeSlide].afterImage}
+                  alt={slides[activeSlide].alt}
+                  dark={false}
                 />
               </motion.div>
             </AnimatePresence>
@@ -549,15 +604,36 @@ function ContentSystem() {
     <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div {...reveal} className="vl-content-system__copy">
-          <SectionPrimitive
-            kicker="Contenido para redes sociales / 02"
-            titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-            title={<>Diseñamos contenido visual<br />para una <span style={{ color: 'var(--vl-acid)' }}>marca coherente</span></>}
-            body={<>
-              <span className="block">Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.</span>
-              <span className="block">Diseñamos piezas que mantienen coherencia visual en cada formato y plataforma.</span>
-            </>}
-            cta={
+          <div className="flex flex-col gap-10">
+            {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+            <div className="border-b border-red-500/20 pb-6">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contenido para redes sociales</p>
+              <h2
+                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                style={{ ...displayFont, fontWeight: 760 }}
+              >
+                Diseñamos contenido visual<br />para una <span className="text-[#ff4b0b]">marca coherente.</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.
+              </p>
+            </div>
+
+            {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+            <div className="opacity-60">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+              <SectionPrimitive
+                kicker="Contenido para redes sociales / 02"
+                titleClassName="!text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                title={<>Diseñamos contenido visual<br />para una <span style={{ color: 'var(--vl-acid)' }}>marca coherente</span></>}
+                body={<>
+                  <span className="block">Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.</span>
+                  <span className="block">Diseñamos piezas que mantienen coherencia visual en cada formato y plataforma.</span>
+                </>}
+              />
+            </div>
+          </div>
               <div className="vl-format-rail">
                 {formats.map((item, index) => (
                   <motion.span
@@ -575,8 +651,6 @@ function ContentSystem() {
                   </motion.span>
                 ))}
               </div>
-            }
-          />
         </motion.div>
 
         <motion.div
@@ -611,8 +685,26 @@ function Method() {
       <div className="vl-shell">
         <motion.div {...reveal} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
-            <p className="vl-kicker vl-kicker--dark">Método híbrido / 05</p>
-            <h2 style={{ marginBottom: 0 }}>IA para acelerar el proceso.<br /><span style={{ color: '#fff' }}>Dirección para cuidar el resultado.</span></h2>
+            <div className="flex flex-col gap-10">
+              {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+              <div className="border-b border-red-500/20 pb-6">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método híbrido</p>
+                <h2
+                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  IA para acelerar el proceso.<br /><span className="text-[#ff4b0b]">Dirección para cuidar el resultado.</span>
+                </h2>
+              </div>
+
+              {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+              <div className="opacity-60">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+                <p className="vl-kicker vl-kicker--dark">Método híbrido / 05</p>
+                <h2 style={{ marginBottom: 0 }}>IA para acelerar el proceso.<br /><span style={{ color: '#fff' }}>Dirección para cuidar el resultado.</span></h2>
+              </div>
+            </div>
           </div>
         </motion.div>
 
@@ -686,7 +778,7 @@ function Diagnostic() {
     event.preventDefault()
     setSubmitting(true)
     setSubmitError('')
-    
+
     const formElement = event.currentTarget
     const form = new FormData(formElement)
     const lead = {
@@ -747,7 +839,25 @@ function Diagnostic() {
       <div className="vl-diagnostic__form academy-section academy-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
           <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
-            <h2 style={{ textTransform: 'none' }}>Hablemos de tu <span>Proyecto.</span></h2>
+            <div className="flex flex-col gap-10">
+              {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+              <div className="border-b border-red-500/20 pb-6">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
+                <h2
+                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  Hablemos de tu <span className="text-[#ff4b0b]">Proyecto.</span>
+                </h2>
+              </div>
+
+              {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+              <div className="opacity-60">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+                <h2 style={{ textTransform: 'none' }}>Hablemos de tu <span>Proyecto.</span></h2>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div {...reveal}>
@@ -877,7 +987,7 @@ export default function EstudioPage() {
 
   return (
     <div className="estudio-page">
-      <SEO 
+      <SEO
         title="Estudio Creativo y Dirección Visual | Qaway Lab"
         description="Creamos la identidad visual, branding y contenido digital para que tu proyecto tenga una presencia profesional y confiable."
         canonical="https://qaway.pe/estudio"

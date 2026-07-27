@@ -3,11 +3,16 @@ import { motion, AnimatePresence, useInView, useAnimation } from 'framer-motion'
 import { SectionPrimitive } from '@/components/typography';
 
 const ASSET = '/assets/pages/2-estudio';
+const displayFont = {
+  fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
+  fontStretch: 'condensed',
+  fontWeight: 700,
+};
 
 const SLIDE_IMAGES = [
-  { src: `${ASSET}/estudio-copy-24-piezas.webp`,     label: '24 piezas', position: 'center 20%' },
+  { src: `${ASSET}/estudio-copy-24-piezas.webp`, label: '24 piezas', position: 'center 20%' },
   { src: `${ASSET}/estudio-copy-4-formatos.webp`, label: '4 formatos', position: 'center 5%' },
-  { src: `${ASSET}/estudio-copy-1-sistema.webp`, label: '1 sistema',  position: 'center 95%' },
+  { src: `${ASSET}/estudio-copy-1-sistema.webp`, label: '1 sistema', position: 'center 95%' },
 ];
 
 export default function DigitalPresenceCopy() {
@@ -63,11 +68,29 @@ export default function DigitalPresenceCopy() {
               viewport={{ once: true, amount: 0.16 }}
               transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
             >
-              <SectionPrimitive
-                kicker="Estrategia digital / 03"
-                titleClassName="vl-digital-copy__title !text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
-                title={<>Tu marca lista<br /><span style={{ color: '#666860' }}>para vivir online.</span></>}
-              />
+              <div className="flex flex-col gap-10">
+                {/* ===== VERSION 1: NUEVO PATRÓN APROBADO (ARRIBA) ===== */}
+                <div className="border-b border-red-500/20 pb-6">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-red-500">[NUEVO PATRÓN APROBADO]</p>
+                  <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Estrategia digital</p>
+                  <h2
+                    className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                    style={{ ...displayFont, fontWeight: 760 }}
+                  >
+                    Tu marca lista<br /><span className="text-[#ff4b0b]">para vivir online.</span>
+                  </h2>
+                </div>
+
+                {/* ===== VERSION 2: ORIGINAL ANTERIOR (ABAJO) ===== */}
+                <div className="opacity-60">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">[VERSION ORIGINAL ANTERIOR]</p>
+                  <SectionPrimitive
+                    kicker="Estrategia digital / 03"
+                    titleClassName="vl-digital-copy__title !text-[clamp(3.7rem,5.4vw,6.1rem)] !normal-case"
+                    title={<>Tu marca lista<br /><span style={{ color: '#666860' }}>para vivir online.</span></>}
+                  />
+                </div>
+              </div>
             </motion.div>
 
             {/* Tarjeta slideshow con borde gris claro */}
