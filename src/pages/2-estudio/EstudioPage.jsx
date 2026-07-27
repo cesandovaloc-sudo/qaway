@@ -442,10 +442,10 @@ function TransformacionVisualCarousel() {
     },
     {
       id: 'producto',
-      title: 'Optimización Visual',
+      title: 'Catálogo y Producto',
       beforeImage: `${ASSET}/estudio-transformacion-producto-antes.webp`,
       afterImage: `${ASSET}/estudio-transformacion-producto-despues.webp`,
-      alt: 'Optimización de producto y visuales'
+      alt: 'Transformación visual de catálogo y producto'
     },
     {
       id: 'restauracion',
@@ -469,7 +469,7 @@ function TransformacionVisualCarousel() {
               Tu imagen también<br /><span className="text-[#ff4b0b]">comunica profesionalismo.</span>
             </h2>
             <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Mejoramos imágenes, fotografías de producto, perfiles profesionales y piezas comerciales para que tu marca se vea más cuidada, clara y confiable.
+              Transformamos tus imágenes de productos, servicios y perfiles comerciales en un portafolio visual moderno, profesional y listo para transmitir autoridad y confianza a tus clientes.
             </p>
           </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
