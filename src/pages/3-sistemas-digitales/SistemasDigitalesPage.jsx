@@ -238,7 +238,7 @@ function HeroInicioBlockPractice() {
           </div>
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
-          <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
+          <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[1.03fr_0.97fr_0.70fr]">
             <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : 'hidden'}
@@ -292,12 +292,12 @@ function HeroInicioBlockPractice() {
               <img
                 src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                 alt="Sistemas Digitales Qaway"
-                className="relative z-10 w-full max-w-[320px] xl:max-w-[380px] h-auto object-cover object-bottom grayscale scale-[1.31] lg:scale-[1.25] xl:scale-[1.31] 2xl:scale-[1.47] origin-bottom [@media(min-width:1536px)_and_(max-height:900px)]:max-w-[320px] [@media(min-width:1536px)_and_(max-height:900px)]:scale-[1.25]"
+                className="relative z-10 max-h-[82vh] w-auto max-w-[340px] xl:max-w-[400px] object-contain object-bottom origin-bottom grayscale"
                 style={{
                   maskImage:
-                    "linear-gradient(to bottom, black 60%, transparent 100%)",
+                    "linear-gradient(to bottom, black 70%, transparent 100%)",
                   WebkitMaskImage:
-                    "linear-gradient(to bottom, black 60%, transparent 100%)",
+                    "linear-gradient(to bottom, black 70%, transparent 100%)",
                 }}
               />
             </motion.div>
