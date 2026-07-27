@@ -302,7 +302,7 @@ function HeroInicioBlockPractice() {
               />
             </motion.div>
 
-            <div className="relative z-20 mt-12 flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
+            <div className="relative z-20 hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
               <div className="mb-8 text-center">
                 <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
                 <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
@@ -343,7 +343,7 @@ function HeroInicioBlockPractice() {
             </div>
           </div>
 
-          <div className="w-full border-t-[3px] border-black/5 grid grid-cols-2 lg:grid-cols-4 bg-[#f8f9f7]">
+          <div className="hidden lg:grid w-full border-t-[3px] border-black/5 lg:grid-cols-4 bg-[#f8f9f7]">
             <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
               <Settings
                 className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
