@@ -10,10 +10,11 @@
 }
 
 .estudio-page * { box-sizing: border-box; }
-.estudio-page h1,
-.estudio-page h2,
-.estudio-page h3,
-.estudio-page p { margin: 0; }
+.estudio-page .vl-hero h1,
+.estudio-page .vl-hero h2,
+.estudio-page .vl-hero h3,
+.estudio-page .vl-hero p,
+.estudio-page .vl-services__heading h2 { margin: 0; }
 .estudio-page h1,
 .estudio-page h2 {
   font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
@@ -544,14 +545,21 @@
 .estudio-page .vl-heading-row h2,
 .estudio-page .vl-services__heading h2,
 .estudio-page .vl-restoration__title h2,
-.estudio-page .vl-personal h2,
+.estudio-page .vl-personal h2 {
+  margin-top: 20px;
+  font-size: clamp(2.6rem, 4.8vw, 5rem);
+  line-height: .84;
+  text-transform: uppercase;
+  font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', 'Impact', sans-serif;
+  font-weight: 700;
+}
+
 .estudio-page .vl-content-system h2,
 .estudio-page .vl-method h2,
 .estudio-page .vl-diagnostic h2 {
   margin-top: 20px;
   font-size: clamp(2.6rem, 4.8vw, 5rem);
   line-height: .84;
-  text-transform: uppercase;
   font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', 'Impact', sans-serif;
   font-weight: 700;
 }
