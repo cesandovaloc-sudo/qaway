@@ -222,7 +222,7 @@ function Hero() {
           <div className="absolute inset-0 z-10 hidden lg:block">
             {/* Tarjeta 1: Branding */}
             <motion.div
-              className="absolute left-2 top-28 w-[15rem]"
+              className="absolute left-[2%] top-[40%] w-[15rem]"
               animate={reduceMotion ? {} : { y: [0, -6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
             >
@@ -249,7 +249,7 @@ function Hero() {
 
             {/* Tarjeta 2: Contenido Visual */}
             <motion.div
-              className="absolute right-2 bottom-28 w-[15.5rem]"
+              className="absolute right-[-2%] bottom-32 w-[15.5rem]"
               animate={reduceMotion ? {} : { y: [0, -6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
             >
