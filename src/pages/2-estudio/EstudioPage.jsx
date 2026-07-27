@@ -306,7 +306,7 @@ function Hero() {
         </motion.div>
 
         {/* Columna 3: Panel Derecho */}
-        <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
+        <div className="relative hidden lg:flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
           <motion.div
             className="relative z-10"
             initial={{ opacity: 0, x: 20 }}
