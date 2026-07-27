@@ -192,14 +192,24 @@ function SectionLabel({ children, inverse = false }) {
 }
 
 const revealUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 32 },
   show: function (delay) {
     const wait = typeof delay === "number" ? delay : 0;
     return {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.62, delay: wait, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.75, delay: wait, ease: [0.22, 1, 0.36, 1] },
     };
+  },
+};
+
+const scaleUpImage = {
+  hidden: { opacity: 0, scale: 0.95, y: 28 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -974,10 +984,10 @@ export default function SistemasDigitalesPage() {
           </motion.div>
 
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            variants={scaleUpImage}
             className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
@@ -1008,10 +1018,10 @@ export default function SistemasDigitalesPage() {
       <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
         <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            variants={scaleUpImage}
             className="relative order-2 lg:order-1 overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
@@ -1137,10 +1147,10 @@ export default function SistemasDigitalesPage() {
           </motion.div>
 
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            initial={reduceMotion ? false : "hidden"}
+            whileInView={reduceMotion ? undefined : "show"}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            variants={scaleUpImage}
             className="relative flex w-full items-center justify-center"
           >
             <div className="group relative mx-auto flex w-full justify-center lg:w-[105%] lg:-translate-x-10 xl:-translate-x-14">
