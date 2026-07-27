@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import Navbar, { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive, Kicker } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
 import SEO from '../../components/seo/SEO';
@@ -13,10 +13,11 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleUserRound,
-  Image,
+  Image as ImageIcon,
   Layers3,
   LockKeyhole,
   MousePointer2,
+  PenTool,
   Sparkles,
   Users,
   Check,
@@ -32,6 +33,15 @@ const displayFont = {
   fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
   fontStretch: 'condensed',
   fontWeight: 700,
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.72, delay, ease: [0.22, 1, 0.36, 1] },
+  }),
 }
 
 const services = [
