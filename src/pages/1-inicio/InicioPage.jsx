@@ -113,7 +113,7 @@ const heroCapabilities = [
     title: 'Sistemas',
     description: 'Automatización e IA',
     link: '#sistemas',
-    placement: '-left-10 top-24 w-[14.5rem]',
+    placement: '-left-10 top-[20%] w-[14.5rem]',
   },
   {
     icon: GraduationCap,
