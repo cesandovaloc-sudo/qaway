@@ -303,45 +303,8 @@ function BrandingSpotlight() {
   return (
     <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', paddingBottom: '60px' }}>
       <div className="vl-shell vl-branding__grid">
-        <motion.figure
-          initial={{ opacity: 0, scale: .965, x: -34 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0 }}
-          viewport={{ once: true, amount: .18 }}
-          transition={{ duration: .85, ease: [0.22, 1, 0.36, 1] }}
-          className="vl-branding__visual"
-        >
-          <motion.img
-            key={project.image}
-            src={project.image}
-            alt={`Moodboard y mockups de branding para ${project.name}`}
-            initial={{ opacity: 0, scale: 1.035 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: .75, ease: [0.22, 1, 0.36, 1] }}
-          />
-          <div className="vl-branding__overlay">
-            <div className="vl-branding__palette" aria-label={`Paleta del proyecto ${project.name}`}>
-              {project.palette.map(color => <i key={color} style={{ background: color }} />)}
-            </div>
-            <div className="vl-branding__controls">
-              <button type="button" onClick={() => selectProject(activeProject - 1)} aria-label="Proyecto anterior"><ChevronLeft size={17} /></button>
-              <div>
-                {brandingProjects.map((item, index) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={index === activeProject ? 'is-active' : ''}
-                    onClick={() => selectProject(index)}
-                    aria-label={`Ver proyecto ${item.name}`}
-                  />
-                ))}
-              </div>
-              <button type="button" onClick={() => selectProject(activeProject + 1)} aria-label="Proyecto siguiente"><ChevronRight size={17} /></button>
-            </div>
-          </div>
-        </motion.figure>
-
         <motion.div
-          className="vl-branding__copy"
+          className="vl-branding__copy order-1 lg:order-2"
           variants={copyStagger}
           initial="hidden"
           whileInView="visible"
@@ -378,6 +341,43 @@ function BrandingSpotlight() {
             ))}
           </motion.div>
         </motion.div>
+
+        <motion.figure
+          initial={{ opacity: 0, scale: .965, x: -34 }}
+          whileInView={{ opacity: 1, scale: 1, x: 0 }}
+          viewport={{ once: true, amount: .18 }}
+          transition={{ duration: .85, ease: [0.22, 1, 0.36, 1] }}
+          className="vl-branding__visual order-2 lg:order-1"
+        >
+          <motion.img
+            key={project.image}
+            src={project.image}
+            alt={`Moodboard y mockups de branding para ${project.name}`}
+            initial={{ opacity: 0, scale: 1.035 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: .75, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <div className="vl-branding__overlay">
+            <div className="vl-branding__palette" aria-label={`Paleta del proyecto ${project.name}`}>
+              {project.palette.map(color => <i key={color} style={{ background: color }} />)}
+            </div>
+            <div className="vl-branding__controls">
+              <button type="button" onClick={() => selectProject(activeProject - 1)} aria-label="Proyecto anterior"><ChevronLeft size={17} /></button>
+              <div>
+                {brandingProjects.map((item, index) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    className={index === activeProject ? 'is-active' : ''}
+                    onClick={() => selectProject(index)}
+                    aria-label={`Ver proyecto ${item.name}`}
+                  />
+                ))}
+              </div>
+              <button type="button" onClick={() => selectProject(activeProject + 1)} aria-label="Proyecto siguiente"><ChevronRight size={17} /></button>
+            </div>
+          </div>
+        </motion.figure>
       </div>
     </section>
   )
