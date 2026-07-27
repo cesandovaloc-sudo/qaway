@@ -64,7 +64,7 @@ const services = [
     number: '03',
     title: 'Estrategia Digital',
     copy: 'Trazamos la estrategia digital para conectar tu marca: páginas web, embudos de venta (funnels) y campañas estructuradas para captar leads.',
-    icon: Image,
+    icon: ImageIcon,
     image: 'estudio-servicio-estrategia.webp',
   },
   {
