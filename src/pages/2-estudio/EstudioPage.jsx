@@ -139,139 +139,153 @@ function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
 }
 
 function Hero() {
-  const heroRef = useRef(null)
   const reduceMotion = useReducedMotion()
 
   return (
     <section
-      ref={heroRef}
-      className="vl-hero"
-      onMouseMove={(event) => {
-        if (!heroRef.current) return;
-        const rect = heroRef.current.getBoundingClientRect()
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
-        heroRef.current.style.setProperty('--pointer-x', `${x}%`);
-        heroRef.current.style.setProperty('--pointer-y', `${y}%`);
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f]"
+      style={{
+        background:
+          'radial-gradient(circle at 76% 14%, rgba(255, 75, 11, 0.05), transparent 24rem), linear-gradient(135deg, #f8f9f7 0%, #efeeeb 100%)',
       }}
-      style={{ '--pointer-x': `72%`, '--pointer-y': `43%` }}
     >
-      {/* Nav removed */}
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}
-      >
-        <img className="vl-hero__image" src={`${ASSET}/estudio-hero-visual6.webp`} alt="Transformación visual dirigida por Qaway Lab" style={{ transform: 'scale(1.00) translate(0%, 19%)' }} />
-      </motion.div>
+      <Navbar variant="light" />
 
-      <div className="vl-hero__right-pane">
-        <motion.div
-          className="vl-hero__panel"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="vl-hero__panel-mark" />
-          <p className="vl-hero__panel-kicker">ESTUDIO VISUAL</p>
-          <h2>
-            Identidad visual<br />
-            lista para vender.
-          </h2>
-          <div className="vl-hero__panel-rule" />
-          <p>Creamos identidad de marca y piezas graficas para que tu marca se vea clara, actual y profesional en cada punto de contacto.</p>        </motion.div>
-      </div>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 180 180%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.74%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.44%22/%3E%3C/svg%3E")',
+        }}
+      />
 
-
-      <motion.div initial={{ opacity: 0, y: 34 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.85 }} className="vl-hero__content">
-        <div className="vl-hero__main">
-          <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">Estudio creativo / Branding, contenido y presencia digital</p>
-          <h1>
-            Creamos la<br />
-            identidad y<br />
-            <em>presencia digital<br />
-              para tu marca.</em>
-          </h1>
-          <p className="vl-hero__copy">
-            Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
-          </p>
-          <div className="vl-chips">
-            <span>Branding</span>
-            <span>Contenido visual</span>
-            <span>Presencia digital</span>
-          </div>
-          <div className="vl-actions">
-            <a
-              href="#diagnostico"
-              className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta">
-              Quiero mejorar mi marca <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </a>
-          </div>
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[.95fr_1.05fr_.7fr]">
+        {/* Columna 1: Texto Principal */}
+        <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
+          <motion.div
+            initial={reduceMotion ? false : 'hidden'}
+            animate={reduceMotion ? undefined : 'show'}
+            variants={fadeUp}
+            custom={0}
+            className="relative z-10"
+          >
+            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
+              Estudio creativo / Branding, contenido y presencia digital
+            </p>
+            <h1
+              className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+              style={{ ...displayFont, fontWeight: 760 }}
+            >
+              <span className="block">Creamos la identidad y <span className="text-[#ff4b0b]">presencia digital para tu marca.</span></span>
+            </h1>
+            <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
+              Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-5">
+              <a
+                href="#diagnostico"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta"
+              >
+                Quiero mejorar mi marca
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </a>
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
 
-      <motion.div
-        className="absolute z-10 hidden lg:block"
-        style={{ top: '58%', right: 'calc(20% + 20px)' }}
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
-      >
-        <a
-          href="#branding"
-          className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+        {/* Columna 2: Imagen Central con Tarjetas Ancladas */}
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="relative min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
         >
-          <span className="flex items-center gap-3">
-            <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
-              <Brush size={22} />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                Branding
-              </span>
-              <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                Una identidad clara, propia y facil de reconocer.
-              </span>
-            </span>
-          </span>
-          <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-        </a>
-      </motion.div>
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={`${ASSET}/estudio-hero-visual6.webp`}
+              alt="Transformación visual dirigida por Qaway Lab"
+              className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
+          </div>
 
-      <motion.div
-        className="absolute z-10 hidden lg:block"
-        style={{ top: '72%', right: 'calc(20% + 240px)' }}
-        animate={{ y: [0, -6, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
-      >
-        <a
-          href="#servicios"
-          className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
-        >
-          <span className="flex items-center gap-3">
-            <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
-              <Users size={22} />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                Contenido visual
-              </span>
-              <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                Piezas y videos que se ven parte de la misma marca.
-              </span>
-            </span>
-          </span>
-          <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-        </a>
-      </motion.div>
+          <div className="absolute inset-0 z-10 hidden lg:block">
+            {/* Tarjeta 1: Branding */}
+            <motion.div
+              className="absolute left-2 top-28 w-[15rem]"
+              animate={reduceMotion ? {} : { y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+            >
+              <a
+                href="#branding"
+                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                    <PenTool size={22} strokeWidth={1.65} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                      Branding
+                    </span>
+                    <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                      Identidad clara y propia
+                    </span>
+                  </span>
+                </span>
+                <span className="absolute -left-6 top-1/2 h-px w-6 bg-[#ff4b0b]/80" />
+              </a>
+            </motion.div>
 
-      <div className="vl-hero__rail">
-        <span>01</span>
-        <div />
-        <p>Material original<br />Intervención<br />Resultado</p>
+            {/* Tarjeta 2: Contenido Visual */}
+            <motion.div
+              className="absolute right-2 bottom-28 w-[15.5rem]"
+              animate={reduceMotion ? {} : { y: [0, -6, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
+            >
+              <a
+                href="#contenido"
+                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+              >
+                <span className="flex items-center gap-3">
+                  <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                    <ImageIcon size={22} strokeWidth={1.65} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                      Contenido Visual
+                    </span>
+                    <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                      Piezas y videos profesionales
+                    </span>
+                  </span>
+                </span>
+                <span className="absolute -right-6 top-1/2 h-px w-6 bg-[#ff4b0b]/80" />
+              </a>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Columna 3: Panel Derecho */}
+        <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
+          <motion.div
+            className="relative z-10"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">ESTUDIO VISUAL</p>
+            <h2 className="text-[clamp(1.8rem,2.8vw,3.6rem)] leading-[0.87] tracking-[-0.055em] text-[#20201f]" style={{ ...displayFont, fontWeight: 760 }}>
+              Identidad visual<br />
+              lista para vender.
+            </h2>
+            <div className="my-4 h-0.5 w-10 bg-[#ff4b0b]" />
+            <p className="text-[clamp(0.88rem,1vw,1rem)] leading-[1.65] text-[#6d6b68]">
+              Creamos identidad de marca y piezas gráficas para que tu marca se vea clara, actual y profesional en cada punto de contacto.
+            </p>
+          </motion.div>
+        </div>
       </div>
-
-
     </section>
   )
 }

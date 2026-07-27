@@ -193,10 +193,11 @@ function ArrowLink({ to, children, light = false, newTab = false }) {
 
 /* 
 ================================================================================
-GUÍA DE ALINEACIÓN Y MAQUETACIÓN (QAWAY LAB):
+GUÍA DE ALINEACIÓN Y MAQUETACIÓN DE SECCIONES HERO (QAWAY LAB):
 ================================================================================
-Para asegurar la consistencia visual en todas las páginas del ecosistema, 
-se deben seguir las siguientes reglas en la sección Hero de cada página:
+Para asegurar la consistencia visual y estabilidad responsiva en todas las 
+páginas del ecosistema (Inicio, Estudio, Sistemas Digitales, Academy), 
+se deben seguir estrictamente las siguientes reglas en la sección Hero:
 
 1. SANGRADO / ALINEACIÓN HORIZONTAL:
    - El contenedor principal de la cuadrícula o rejilla (grid) debe tener un 
@@ -217,6 +218,17 @@ se deben seguir las siguientes reglas en la sección Hero de cada página:
    - Evitar el uso de 'white-space: nowrap' en las líneas o spans del título,
      permitiendo saltos de línea naturales (responsive) para que el texto no 
      se desborde sobre el rostro de las imágenes.
+
+4. ESTRUCTURA DE 3 COLUMNAS INTEGRADAS Y TARJETAS ANCLADAS (RESPONSIVIDAD):
+   - El Hero de cada página debe estructurarse obligatoriamente en un contenedor
+     grid de 3 columnas integradas: lg:grid-cols-[.95fr_1.05fr_.7fr] max-w-[96rem] mx-auto.
+   - Las tarjetas flotantes de capacidades (Branding, Sistemas, Academia, etc.) 
+     NUNCA deben posicionarse con 'right: calc(X% + Ypx)' sueltas respecto a la 
+     pantalla global. DEBEN ir ancladas como hijas directas dentro de la columna 
+     central (Columna 2 - lg:col-start-2) con posiciones relativas a dicha columna.
+   - Esto garantiza que al reducir el tamaño del navegador en laptops o pantallas 
+     intermedias (ej. 1366px o 1024px), las 3 columnas y sus tarjetas flotantes 
+     se contraigan en proporción armónica sin chocar ni montarse sobre el h1.
 ================================================================================
 */
 
