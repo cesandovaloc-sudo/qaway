@@ -127,7 +127,7 @@ const heroCapabilities = [
     title: 'Contacto',
     description: 'Resolver dudas',
     link: '#formulario',
-    placement: 'right-[18%] bottom-32 w-[14rem]',
+    placement: 'right-[-2%] bottom-32 w-[14rem]',
   },
 ]
 
