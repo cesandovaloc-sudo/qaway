@@ -238,7 +238,7 @@ function HeroInicioBlockPractice() {
           </div>
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
-          <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[1.03fr_0.97fr_0.70fr]">
+          <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
             <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : 'hidden'}
@@ -292,12 +292,12 @@ function HeroInicioBlockPractice() {
               <img
                 src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                 alt="Sistemas Digitales Qaway"
-                className="relative z-10 max-h-[82vh] w-auto max-w-[340px] xl:max-w-[400px] object-contain object-bottom origin-bottom grayscale"
+                className="relative z-10 h-[90%] w-auto max-w-full object-contain object-bottom origin-bottom grayscale"
                 style={{
                   maskImage:
-                    "linear-gradient(to bottom, black 70%, transparent 100%)",
+                    "linear-gradient(to bottom, black 75%, transparent 100%)",
                   WebkitMaskImage:
-                    "linear-gradient(to bottom, black 70%, transparent 100%)",
+                    "linear-gradient(to bottom, black 75%, transparent 100%)",
                 }}
               />
             </motion.div>
@@ -1063,9 +1063,8 @@ export default function SistemasDigitalesPage() {
                     key={col.title}
                     whileHover={reduceMotion ? {} : { y: -3 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`group pr-2 ${
-                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
-                    }`}
+                    className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
+                      }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
                     <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
@@ -1115,9 +1114,8 @@ export default function SistemasDigitalesPage() {
                     whileHover={reduceMotion ? {} : { y: -3 }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     style={{ scale: 0.73, transformOrigin: "top left" }}
-                    className={`group pr-2 ${
-                      index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
-                    }`}
+                    className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
+                      }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
                     <h3 className="text-[16px] font-medium leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
@@ -1127,7 +1125,7 @@ export default function SistemasDigitalesPage() {
                 );
               })}
             </div>
-            
+
             <div className="mt-10">
               <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b] scale-[1.26] origin-left">
                 Ver proyectos
