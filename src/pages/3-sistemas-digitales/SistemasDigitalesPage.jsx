@@ -299,6 +299,32 @@ function HeroInicioBlockPractice() {
                 <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
                 <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
                 <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
+
+                {/* Tarjeta Flotante Homologada con Estudio */}
+                <div className="absolute inset-0 z-20 hidden lg:block pointer-events-none">
+                  <motion.div
+                    className="absolute left-3 top-24 w-[15.5rem] pointer-events-auto"
+                    animate={reduceMotion ? {} : { y: [0, -6, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+                  >
+                    <div className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/90 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.22)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white rounded">
+                      <span className="flex items-center gap-3">
+                        <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+                          <Brush size={22} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-[1.35rem] font-bold tracking-tight text-[#161616]">
+                            +127%
+                          </span>
+                          <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                            Aumento promedio<br />en productividad
+                          </span>
+                        </span>
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+
                 <img
                   src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
                   alt="Sistemas Digitales Qaway"
@@ -327,31 +353,6 @@ function HeroInicioBlockPractice() {
                   Automatización para negocios que necesitan operar mejor.
                 </p>
               </div>
-
-              <motion.div
-                className="mb-8 hidden lg:block"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
-              >
-                <div
-                  className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
-                      <Brush size={22} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[1.35rem] font-bold tracking-tight text-[#161616]">
-                        +127%
-                      </span>
-                      <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                        Aumento promedio<br />en productividad
-                      </span>
-                    </span>
-                  </span>
-                  <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
-                </div>
-              </motion.div>
             </div>
           </div>
 
