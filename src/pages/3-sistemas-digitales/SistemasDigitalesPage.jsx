@@ -1012,7 +1012,7 @@ export default function SistemasDigitalesPage() {
             whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
+            className="relative order-2 lg:order-1 overflow-hidden bg-[#121212] shadow-[0_26px_80px_rgba(0,0,0,0.16)]"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
@@ -1041,6 +1041,7 @@ export default function SistemasDigitalesPage() {
             viewport={{ once: true, amount: 0.2 }}
             variants={revealUp}
             custom={0}
+            className="order-1 lg:order-2"
           >
             <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
               CRM y seguimiento comercial / 02
