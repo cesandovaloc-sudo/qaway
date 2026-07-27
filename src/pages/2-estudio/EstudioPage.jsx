@@ -274,6 +274,35 @@ function Hero() {
               </a>
             </motion.div>
           </div>
+
+          {/* Bloque Móvil Responsivo (Idéntico a Inicio) */}
+          <div className="relative z-10 grid gap-2 px-4 pb-4 sm:grid-cols-2 lg:hidden mt-4">
+            <a
+              href="#branding"
+              className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
+            >
+              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
+                <PenTool size={21} strokeWidth={1.65} />
+              </span>
+              <span>
+                <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">Branding</span>
+                <span className="mt-1 block text-xs text-[#3e3d3b]">Identidad clara y propia</span>
+              </span>
+            </a>
+
+            <a
+              href="#contenido"
+              className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
+            >
+              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
+                <ImageIcon size={21} strokeWidth={1.65} />
+              </span>
+              <span>
+                <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">Contenido Visual</span>
+                <span className="mt-1 block text-xs text-[#3e3d3b]">Piezas y videos profesionales</span>
+              </span>
+            </a>
+          </div>
         </motion.div>
 
         {/* Columna 3: Panel Derecho */}
