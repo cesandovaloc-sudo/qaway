@@ -293,7 +293,7 @@ function HeroInicioBlockPractice() {
               initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="relative min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
+              className="relative z-20 min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
             >
               <div className="absolute inset-0 overflow-visible lg:overflow-hidden flex items-end justify-center pt-4 lg:pt-0">
                 <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
