@@ -134,7 +134,7 @@ export default function Navbar({ variant: explicitVariant }) {
     <>
       <header
         ref={menuContainerRef}
-        className={`fixed inset-x-0 top-0 z-30 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
           } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
           }`}
       >
@@ -224,7 +224,7 @@ export default function Navbar({ variant: explicitVariant }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 top-20 z-20 h-screen w-screen bg-black/45 backdrop-blur-md sm:hidden"
+              className="fixed inset-0 top-20 z-40 h-screen w-screen bg-black/55 backdrop-blur-md sm:hidden"
             />,
             document.body
           )}

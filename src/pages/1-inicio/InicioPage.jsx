@@ -364,7 +364,7 @@ function Hero() {
             ))}
           </div>
 
-          <div className="relative z-10 mt-[calc(44vh-1rem)] grid gap-2 px-4 pb-4 sm:mt-[calc(52vh-1rem)] sm:grid-cols-2 lg:hidden">
+          <div className="hidden">
             {heroCapabilities.map(({ icon: Icon, title, description, link }) => (
               <a
                 key={title}
