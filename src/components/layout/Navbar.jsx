@@ -225,9 +225,9 @@ export default function Navbar({ variant: explicitVariant }) {
               zIndex: 40,
               width: '100vw',
               height: '100vh',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              backgroundColor: 'rgba(0, 0, 0, 0.45)',
             }}
             className="sm:hidden"
           />,
