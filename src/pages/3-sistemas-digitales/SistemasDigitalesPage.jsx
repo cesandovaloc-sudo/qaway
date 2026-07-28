@@ -315,42 +315,49 @@ function HeroInicioBlockPractice() {
             </motion.div>
 
             <div className="relative z-20 hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
-              <div className="mb-8 text-center">
-                <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
-                <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                  Sistemas digitales
-                </p>
-                <p
-                  className="text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
-                  style={{ ...displayFont, fontWeight: 600 }}
-                >
-                  Automatización para negocios que necesitan operar mejor.
-                </p>
-              </div>
-
               <motion.div
-                className="mb-8 hidden lg:block"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full"
               >
-                <div
-                  className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
-                      <Brush size={22} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[1.35rem] font-bold tracking-tight text-[#161616]">
-                        +127%
-                      </span>
-                      <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                        Aumento promedio<br />en productividad
-                      </span>
-                    </span>
-                  </span>
-                  <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+                <div className="mb-8 text-center">
+                  <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
+                  <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                    Sistemas digitales
+                  </p>
+                  <p
+                    className="text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
+                    style={{ ...displayFont, fontWeight: 600 }}
+                  >
+                    Automatización para negocios que necesitan operar mejor.
+                  </p>
                 </div>
+
+                <motion.div
+                  className="mb-8 hidden lg:block"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
+                >
+                  <div
+                    className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+                        <Brush size={22} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[1.35rem] font-bold tracking-tight text-[#161616]">
+                          +127%
+                        </span>
+                        <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                          Aumento promedio<br />en productividad
+                        </span>
+                      </span>
+                    </span>
+                    <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+                  </div>
+                </motion.div>
               </motion.div>
             </div>
           </div>
