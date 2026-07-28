@@ -224,7 +224,12 @@ export default function Navbar({ variant: explicitVariant }) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 top-20 z-40 h-screen w-screen bg-black/55 backdrop-blur-md sm:hidden"
+              style={{
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                backgroundColor: 'rgba(0, 0, 0, 0.45)',
+              }}
+              className="fixed inset-0 z-40 h-screen w-screen sm:hidden"
             />,
             document.body
           )}
