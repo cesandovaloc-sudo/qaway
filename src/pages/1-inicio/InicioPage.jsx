@@ -840,22 +840,50 @@ function AcademyFeature() {
 
   return (
     <section id="academy" className="grid min-h-[40rem] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
-      <Reveal className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
-        <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Academy</p>
-        <h2
+      <div className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
+        <motion.p
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0}
+          className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]"
+        >
+          Academy
+        </motion.p>
+        <motion.h2
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.1}
           className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
           style={{ ...displayFont, fontWeight: 760 }}
         >
           <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
-        </h2>
-        <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+        </motion.h2>
+        <motion.p
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.2}
+          className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]"
+        >
           Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-7">
+        </motion.p>
+        <motion.div
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.3}
+          className="mt-7 flex flex-wrap gap-7"
+        >
           <ArrowLink to="/academy">Ver Academy</ArrowLink>
           <ArrowLink to="/recursos">Ver recursos</ArrowLink>
-        </div>
-      </Reveal>
+        </motion.div>
+      </div>
 
       <motion.div
         initial={reduceMotion ? false : "hidden"}
