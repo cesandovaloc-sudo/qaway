@@ -157,16 +157,26 @@ function Reveal({ children, className = '', delay = 0 }) {
 
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.16 }}
-      transition={{ duration: 0.68, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
       {children}
     </motion.div>
   )
 }
+
+const scaleUpImage = {
+  hidden: { opacity: 0, scale: 0.95, y: 28 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
+  },
+};
 
 function ArrowLink({ to, children, light = false, newTab = false }) {
   const classes = `group inline-flex items-center gap-4 border-b pb-2 text-sm font-medium transition-colors ${light
@@ -448,8 +458,16 @@ function BrandMarquee() {
 }
 
 function EcosystemPhoto() {
+  const reduceMotion = useReducedMotion()
+
   return (
-    <div className="group relative min-h-[34rem] overflow-visible border-[#20201f]/10 lg:min-h-[42rem]">
+    <motion.div
+      initial={reduceMotion ? false : "hidden"}
+      whileInView={reduceMotion ? undefined : "show"}
+      viewport={{ once: true, amount: 0.2 }}
+      variants={scaleUpImage}
+      className="group relative min-h-[34rem] overflow-visible border-[#20201f]/10 lg:min-h-[42rem]"
+    >
       <div
         className="absolute inset-0 overflow-hidden transition-shadow duration-500 group-hover:shadow-[0_38px_92px_rgba(32,32,31,0.18)]"
         style={{ boxShadow: '0 24px 64px rgba(32, 32, 31, 0.10)' }}
@@ -463,7 +481,7 @@ function EcosystemPhoto() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-white/8" />
         <div className="absolute inset-y-10 left-0 w-2 bg-[#ff4b0b]" />
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -836,11 +854,11 @@ function AcademyFeature() {
       </Reveal>
 
       <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? false : "hidden"}
+        whileInView={reduceMotion ? undefined : "show"}
         whileHover={reduceMotion ? undefined : { y: -3 }}
         viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        variants={scaleUpImage}
         className="order-2 relative min-h-[30rem] overflow-hidden cursor-pointer lg:order-1"
       >
         <img
