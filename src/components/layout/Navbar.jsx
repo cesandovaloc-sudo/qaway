@@ -215,25 +215,24 @@ export default function Navbar({ variant: explicitVariant }) {
       </header>
 
       {/* Backdrop blur independiente de pantalla completa vía Portal */}
-      <AnimatePresence>
-        {menuOpen &&
-          createPortal(
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                backgroundColor: 'rgba(0, 0, 0, 0.45)',
-              }}
-              className="fixed inset-0 z-40 h-screen w-screen sm:hidden"
-            />,
-            document.body
-          )}
-      </AnimatePresence>
+      {menuOpen &&
+        createPortal(
+          <div
+            onClick={() => setMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 40,
+              width: '100vw',
+              height: '100vh',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            }}
+            className="sm:hidden"
+          />,
+          document.body
+        )}
     </>
   )
 }
