@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
@@ -88,6 +89,7 @@ export default function Navbar({ variant: explicitVariant }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [headerVisible, setHeaderVisible] = useState(true)
   const [scrolled, setScrolled] = useState(false)
+  const menuContainerRef = useRef(null)
   const lastScrollY = useRef(0)
 
   useEffect(() => {
@@ -111,70 +113,75 @@ export default function Navbar({ variant: explicitVariant }) {
     setMenuOpen(false)
   }, [location.pathname])
 
+  // Cerrar menú al hacer clic o toque en cualquier parte fuera del menú
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleOutsideClick = (event) => {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(event.target)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('pointerdown', handleOutsideClick)
+    return () => document.removeEventListener('pointerdown', handleOutsideClick)
+  }, [menuOpen])
+
   const isActive = (path) => {
     if (path === '/blog') return location.pathname.startsWith('/blog')
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-30 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
-        } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
-        }`}
-    >
-      <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
-        <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] ${styles.logo}`}>
-          Qaway <span className="text-[#ff4b0b]">Lab</span>
-        </Link>
+    <>
+      <header
+        ref={menuContainerRef}
+        className={`fixed inset-x-0 top-0 z-30 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+          } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
+          }`}
+      >
+        <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
+          <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] ${styles.logo}`}>
+            Qaway <span className="text-[#ff4b0b]">Lab</span>
+          </Link>
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
-          {navLinks.map((link) => (
-            <Link
-              key={link.key}
-              to={link.path}
-              className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
-                  ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
-                  : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
-                }`}
+          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
+            {navLinks.map((link) => (
+              <Link
+                key={link.key}
+                to={link.path}
+                className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
+                    ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
+                    : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
+                  }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <a
+              href={WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`hidden min-h-12 rounded-none px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
             >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+              Cuentanos tu proyecto
+            </a>
 
-        <div className="flex items-center gap-4">
-          <a
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`hidden min-h-12 rounded-none px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
-          >
-            Cuentanos tu proyecto
-          </a>
-
-          <button
-            type="button"
-            aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((current) => !current)}
-            className={`sm:hidden ${styles.menuBtn}`}
-          >
-            <Menu size={22} />
-          </button>
+            <button
+              type="button"
+              aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((current) => !current)}
+              className={`sm:hidden ${styles.menuBtn}`}
+            >
+              <Menu size={22} />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 top-20 z-20 bg-black/40 backdrop-blur-md sm:hidden"
-            />
+        <AnimatePresence>
+          {menuOpen && (
             <motion.nav
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -203,9 +210,26 @@ export default function Navbar({ variant: explicitVariant }) {
                 </a>
               </div>
             </motion.nav>
-          </>
-        )}
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Backdrop blur independiente de pantalla completa vía Portal */}
+      <AnimatePresence>
+        {menuOpen &&
+          createPortal(
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 top-20 z-20 h-screen w-screen bg-black/45 backdrop-blur-md sm:hidden"
+            />,
+            document.body
+          )}
       </AnimatePresence>
-    </header>
+    </>
+  )
   )
 }
