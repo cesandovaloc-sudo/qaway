@@ -12,21 +12,29 @@ import {
   BrainCircuit,
   Brush,
   Check,
+  ChevronLeft,
+  ChevronRight,
   CircleUserRound,
   Clock3,
   Compass,
   Cpu,
   GraduationCap,
   Image as ImageIcon,
+  Layers3,
   MessageCircle,
   PenTool,
+  Play,
+  Quote,
   ScanSearch,
   Send,
   Settings,
   Sparkles,
+  Star,
+  Users,
   Workflow,
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import { carouselCourses, carouselLandings } from '@/data/academyCourses'
 import '@/pages/4-academy/academy.css'
 import { supabase } from '@/config/supabase'
 
@@ -1021,67 +1029,6 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
   )
 }
 
-const carouselCourses = [
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-identidad-visual-ia.png',
-    category: 'Diseño e IA',
-    title: 'Identidad visual con IA',
-    text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
-    format: 'Curso práctico',
-    duration: '6 módulos',
-    featured: 'Más solicitado',
-  },
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-whatsapp-business.png',
-    category: 'Ventas y atención',
-    title: 'WhatsApp B. para Negocios',
-    text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
-    format: 'Taller guiado',
-    duration: '4 sesiones',
-    featured: 'Aplicación inmediata',
-  },
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-antigravity-youtube.png',
-    category: 'YouTube',
-    title: 'Antigravity desde cero',
-    text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
-    format: 'Serie gratuita',
-    duration: 'En YouTube',
-    featured: 'Nuevo',
-  },
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
-    category: 'Productividad',
-    title: 'IA para equipos pequeños',
-    text: 'Organiza tareas, reuniones e información con un sistema sencillo y colaborativo.',
-    format: 'Programa',
-    duration: '5 semanas',
-    featured: null,
-  },
-]
-
-const carouselLandings = [
-  {
-    image: '/assets/pages/8-landings/2-identidad-visual/2.webp',
-    category: 'Landing',
-    title: 'Identidad visual con IA',
-    text: 'Construye una identidad coherente con criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
-    format: 'Landing',
-    duration: 'Página web',
-    link: '/landings/identidad-visual',
-    featured: null,
-  },
-  {
-    image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_modulo_control.webp',
-    category: 'Landing',
-    title: 'Notion para agencias',
-    text: 'Sistema de gestión y productividad para equipos creativos, con plantillas y flujos optimizados.',
-    format: 'Landing',
-    duration: 'Página web',
-    link: '/landings/sistema-contenido-notion',
-    featured: null,
-  },
-]
 
 function useCarousel(items) {
   const [index, setIndex] = useState(0)

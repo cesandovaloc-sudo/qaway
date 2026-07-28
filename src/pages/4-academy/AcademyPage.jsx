@@ -27,83 +27,12 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { featuredCourses, courseCatalog } from '@/data/academyCourses'
 import './academy.css'
 
 const heroImage = '/assets/pages/9-pruebas/academy/academy-hero-educator.png'
 
-const featuredCourses = [
-  {
-    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
-    category: 'Diseño',
-    title: 'Identidad Visual con IA',
-    text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
-    format: 'Curso práctico',
-    duration: '6 módulos',
-    featured: 'Más solicitado',
-    href: '/landings/identidad-visual',
-  },
-  {
-    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
-    category: 'Marketing',
-    title: 'WhatsApp Business para negocios',
-    text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
-    format: 'Taller guiado',
-    duration: '4 sesiones',
-    featured: 'Aplicación inmediata',
-    href: '#formulario',
-  },
-  {
-    image: '/assets/pages/4-academy/curso-antigravity-youtube2.png',
-    category: 'Inteligencia artificial',
-    title: 'Antigravity desde cero',
-    text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
-    format: 'Serie gratuita',
-    duration: 'En YouTube',
-    featured: 'Nuevo',
-    href: 'https://youtube.com/@qawaymyc?si=V1E5A54vbxPbDmIF',
-    external: true,
-  },
-]
 
-const courseCatalog = [
-  ...featuredCourses,
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
-    category: 'Productividad',
-    title: 'IA para equipos pequeños',
-    text: 'Organiza tareas, reuniones e información con un sistema sencillo y colaborativo.',
-    format: 'Programa',
-    duration: '5 semanas',
-    href: '#formulario',
-  },
-  {
-    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
-    category: 'Inteligencia artificial',
-    title: 'Sistema de contenido con IA',
-    text: 'Diseña una ruta sostenible para investigar, crear y adaptar contenido sin improvisar.',
-    format: 'Curso',
-    duration: '7 módulos',
-    href: '#formulario',
-  },
-  {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
-    category: 'Automatización',
-    title: 'Workflows sin código',
-    text: 'Conecta herramientas y construye automatizaciones útiles sin depender de desarrollo complejo.',
-    format: 'Taller',
-    duration: 'En vivo',
-    href: '#formulario',
-  },
-  {
-    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
-    category: 'Marketing',
-    title: 'Presencia digital para emprender',
-    text: 'Ordena tu propuesta, tus canales y tu comunicación para presentarte con claridad.',
-    format: 'Ruta',
-    duration: '4 semanas',
-    href: '#formulario',
-  },
-]
 
 const courseTopics = ['Todos', 'Inteligencia artificial', 'Productividad', 'Marketing', 'Diseño', 'Automatización']
 
