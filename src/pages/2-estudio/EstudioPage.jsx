@@ -486,7 +486,16 @@ function Services() {
               '#transformacion'
             ]
             return (
-              <a key={service.title} href={paths[index]} className="vl-service-link">
+              <motion.a
+                key={service.title}
+                href={paths[index]}
+                className="vl-service-link"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                custom={index * 0.15}
+                variants={revealUp}
+              >
                 <TiltPanel className={`vl-service vl-service--${index + 1}`}>
                   {service.image && <img src={`${ASSET}/${service.image}`} alt={`Servicio de ${service.title}`} loading="lazy" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
@@ -495,7 +504,7 @@ function Services() {
                     <ArrowRight className="vl-service__arrow" size={18} />
                   </div>
                 </TiltPanel>
-              </a>
+              </motion.a>
             )
           })}
         </div>
@@ -549,38 +558,48 @@ function TransformacionVisualCarousel() {
           </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
                 {slides.map((slide, index) => (
-                  <motion.button
+                  <motion.div
                     key={slide.id}
-                    onClick={() => setActiveSlide(index)}
-                    whileInView={
-                      activeSlide === index
-                        ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
-                        : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
-                    }
-                    viewport={{ once: false, amount: 0.5 }}
-                    transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '16px',
-                      padding: '16px 20px',
-                      border: '1px solid',
-                      borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
-                      backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
-                      color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
-                      textAlign: 'left'
-                    }}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.5 }}
+                    custom={index * 0.15}
+                    variants={revealUp}
+                    style={{ display: 'flex' }}
                   >
-                    <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
-                      0{index + 1}
-                    </span>
-                    <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
-                      {slide.title}
-                    </span>
-                  </motion.button>
+                    <motion.button
+                      onClick={() => setActiveSlide(index)}
+                      whileInView={
+                        activeSlide === index
+                          ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
+                          : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
+                      }
+                      viewport={{ once: false, amount: 0.5 }}
+                      transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        padding: '16px 20px',
+                        border: '1px solid',
+                        borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
+                        backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
+                        color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                        textAlign: 'left',
+                        width: '100%'
+                      }}
+                    >
+                      <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
+                        0{index + 1}
+                      </span>
+                      <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
+                        {slide.title}
+                      </span>
+                    </motion.button>
+                  </motion.div>
                 ))}
               </div>
         </motion.div>
@@ -714,6 +733,11 @@ function Method() {
               <motion.div
                 key={title}
                 className="vl-phase"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                custom={index * 0.15}
+                variants={revealUp}
                 onClick={() => setActivePhase(activePhase === index ? -1 : index)}
                 style={{
                   cursor: 'pointer',
