@@ -182,7 +182,7 @@ export default function Navbar({ variant: explicitVariant }) {
                   key={link.key}
                   to={link.path}
                   onClick={() => setMenuOpen(false)}
-                  className={`border-b border-[#20201f]/10 py-3 text-sm font-bold uppercase tracking-widest last:border-b-0 ${styles.mobileLink}`}
+                  className={`border-b border-[#20201f]/10 py-3 text-xs font-bold uppercase tracking-[0.14em] last:border-b-0 ${styles.mobileLink}`}
                 >
                   {link.label}
                 </Link>
@@ -191,7 +191,7 @@ export default function Navbar({ variant: explicitVariant }) {
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-5 py-3 text-sm font-bold text-white"
+                className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
               >
                 Cuentanos tu proyecto
               </a>
