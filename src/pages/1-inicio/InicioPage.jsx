@@ -527,22 +527,24 @@ function EstudioSection() {
   return (
     <section id="estudio" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f8f9f7] px-6 py-12 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
-        <Reveal className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
           <div className="flex flex-col">
-            <div>
-              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
-                Estudio creativo
-              </p>
-              <h2
-                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
-                style={{ ...displayFont, fontWeight: 760 }}
-              >
-                Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
-              </h2>
-              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-                Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
-              </p>
-            </div>
+            <Reveal>
+              <div>
+                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                  Estudio creativo
+                </p>
+                <h2
+                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
+                </h2>
+                <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                  Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
+                </p>
+              </div>
+            </Reveal>
 
             <div className="mt-8 grid min-h-0 grid-cols-2 content-stretch gap-2 sm:gap-3">
               {estudioServices.map(({ title, icon: Icon }, index) => (
@@ -576,12 +578,14 @@ function EstudioSection() {
               ))}
             </div>
 
-            <div className="mt-8 flex justify-start">
-              <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
-            </div>
+            <Reveal delay={0.15}>
+              <div className="mt-8 flex justify-start">
+                <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
+              </div>
+            </Reveal>
           </div>
 
-          <div className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2]">
+          <Reveal delay={0.3} className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2]">
             <AnimatePresence mode="wait">
               <motion.img
                 key={activeService.title}
@@ -599,8 +603,8 @@ function EstudioSection() {
             <span className="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white/60 drop-shadow-lg">
               {activeService.title}
             </span>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </div>
     </section>
   )
