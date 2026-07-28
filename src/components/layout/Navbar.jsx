@@ -6,7 +6,7 @@ import { WHATSAPP_LINK } from '@/data/navigation'
 import { getNavbarLinks } from '@/config/siteVisibility'
 
 const NavbarVariantContext = createContext('light')
-const NavbarSetVariantContext = createContext(() => {})
+const NavbarSetVariantContext = createContext(() => { })
 
 export function NavbarProvider({ children }) {
   const [variant, setVariant] = useState('light')
@@ -94,13 +94,13 @@ export default function Navbar({ variant: explicitVariant }) {
     const handleScroll = () => {
       const currentY = window.scrollY
       setScrolled(currentY > 20)
-      
+
       if (currentY > lastScrollY.current && currentY > 50) {
         setHeaderVisible(false) // Ocultar al bajar
       } else {
         setHeaderVisible(true)  // Mostrar al subir
       }
-      
+
       lastScrollY.current = currentY
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -118,11 +118,9 @@ export default function Navbar({ variant: explicitVariant }) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-30 h-20 border-b transition-[transform] duration-300 ${
-        headerVisible ? 'translate-y-0' : '-translate-y-full'
-      } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${
-        scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
-      }`}
+      className={`fixed inset-x-0 top-0 z-30 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
+        }`}
     >
       <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
         <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] ${styles.logo}`}>
@@ -134,11 +132,10 @@ export default function Navbar({ variant: explicitVariant }) {
             <Link
               key={link.key}
               to={link.path}
-              className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${
-                isActive(link.path)
+              className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
                   ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
                   : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
-              }`}
+                }`}
             >
               {link.label}
             </Link>
