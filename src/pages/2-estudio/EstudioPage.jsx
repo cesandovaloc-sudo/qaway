@@ -386,30 +386,24 @@ function BrandingSpotlight() {
           viewport={{ once: true, amount: .22 }}
         >
           <div>
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Branding digital / 01</p>
-            <h2
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Branding digital / 01</motion.p>
+            <motion.h2
+              variants={copyItem}
               className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Branding para que tu marca<br />se vea <span className="text-[#ff4b0b]">clara y profesional.</span>
-            </h2>
-            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
               Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales.
-            </p>
+            </motion.p>
           </div>
           <motion.div className="vl-branding__deliverables">
             {['Logo e identidad', 'Moodboard', 'Paleta y tipografía', 'Sistema visual'].map((item, index) => (
               <motion.span
                 key={item}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                variants={copyItem}
                 whileHover={{ y: -1, transition: { duration: 0.06, ease: "linear", delay: 0 } }}
-                viewport={{ once: true }}
-                transition={{
-                  delay: .32 + index * .05,
-                  duration: .08,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
               >
                 <small>0{index + 1}</small>{item}
               </motion.span>
@@ -661,14 +655,18 @@ function ContentSystem() {
             {formats.map((item, index) => (
               <motion.span
                 key={item}
-                initial={{ opacity: 0, x: -12 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                whileHover={{ x: 5.1 }}
-                viewport={{ once: true }}
-                transition={{
-                  delay: .12 + index * .07,
-                  x: { type: 'spring', stiffness: 260, damping: 22 },
+                variants={{
+                  hidden: { opacity: 0, x: -12 },
+                  show: {
+                    opacity: 1, x: 0,
+                    transition: {
+                      delay: .12 + index * .07,
+                      opacity: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+                      x: { type: 'spring', stiffness: 260, damping: 22 }
+                    }
+                  }
                 }}
+                whileHover={{ x: 5.1 }}
               >
                 {item}
               </motion.span>
