@@ -231,5 +231,4 @@ export default function Navbar({ variant: explicitVariant }) {
       </AnimatePresence>
     </>
   )
-  )
 }
