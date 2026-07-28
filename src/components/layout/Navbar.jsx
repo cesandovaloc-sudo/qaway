@@ -166,34 +166,44 @@ export default function Navbar({ variant: explicitVariant }) {
 
       <AnimatePresence>
         {menuOpen && (
-          <motion.nav
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className={`border-b ${styles.mobileBg} px-6 py-5 sm:hidden`}
-          >
-            <div className="flex flex-col">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.key}
-                  to={link.path}
-                  onClick={() => setMenuOpen(false)}
-                  className={`border-b border-[#20201f]/10 py-3 text-xs font-bold uppercase tracking-[0.14em] last:border-b-0 ${styles.mobileLink}`}
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMenuOpen(false)}
+              className="fixed inset-0 top-20 z-20 bg-black/40 backdrop-blur-md sm:hidden"
+            />
+            <motion.nav
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 sm:hidden`}
+            >
+              <div className="flex flex-col">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.key}
+                    to={link.path}
+                    onClick={() => setMenuOpen(false)}
+                    className={`border-b border-[#20201f]/10 py-3 text-xs font-bold uppercase tracking-[0.14em] last:border-b-0 ${styles.mobileLink}`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <a
+                  href={WHATSAPP_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
                 >
-                  {link.label}
-                </Link>
-              ))}
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
-              >
-                Cuentanos tu proyecto
-              </a>
-            </div>
-          </motion.nav>
+                  Cuentanos tu proyecto
+                </a>
+              </div>
+            </motion.nav>
+          </>
         )}
       </AnimatePresence>
     </header>
