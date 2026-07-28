@@ -135,11 +135,11 @@ const reveal = {
   transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] },
 }
 
-function TiltPanel({ children, className = '' }) {
+function TiltPanel({ children, className = '', ...props }) {
   return (
-    <article className={`vl-tilt ${className}`}>
+    <motion.article className={`vl-tilt ${className}`} {...props}>
       {children}
-    </article>
+    </motion.article>
   )
 }
 
@@ -486,18 +486,15 @@ function Services() {
               '#transformacion'
             ]
             return (
-              <motion.a
-                key={service.title}
-                href={paths[index]}
-                className="vl-service-link"
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.1 }}
-                custom={index * 0.15}
-                variants={revealUp}
-                style={{ display: 'block' }}
-              >
-                <TiltPanel className={`vl-service vl-service--${index + 1}`}>
+              <a key={service.title} href={paths[index]} className="vl-service-link">
+                <TiltPanel
+                  className={`vl-service vl-service--${index + 1}`}
+                  initial="hidden"
+                  whileInView="show"
+                  viewport={{ once: true, amount: 0.2 }}
+                  custom={index * 0.15}
+                  variants={revealUp}
+                >
                   {service.image && <img src={`${ASSET}/${service.image}`} alt={`Servicio de ${service.title}`} loading="lazy" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
                     <div className="vl-service__top"><span>{service.number}</span><Icon size={22} /></div>
@@ -505,7 +502,7 @@ function Services() {
                     <ArrowRight className="vl-service__arrow" size={18} />
                   </div>
                 </TiltPanel>
-              </motion.a>
+              </a>
             )
           })}
         </div>
@@ -557,52 +554,52 @@ function TransformacionVisualCarousel() {
               Transformamos tus imágenes de productos, servicios y perfiles comerciales en un portafolio visual moderno, profesional y listo para transmitir autoridad y confianza a tus clientes.
             </p>
           </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
-                {slides.map((slide, index) => (
-                  <motion.div
-                    key={slide.id}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, amount: 0.5 }}
-                    custom={index * 0.15}
-                    variants={revealUp}
-                    style={{ display: 'flex' }}
-                  >
-                    <motion.button
-                      onClick={() => setActiveSlide(index)}
-                      whileInView={
-                        activeSlide === index
-                          ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
-                          : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
-                      }
-                      viewport={{ once: false, amount: 0.5 }}
-                      transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '16px',
-                        padding: '16px 20px',
-                        border: '1px solid',
-                        borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
-                        backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
-                        color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
-                        textAlign: 'left',
-                        width: '100%'
-                      }}
-                    >
-                      <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
-                        0{index + 1}
-                      </span>
-                      <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
-                        {slide.title}
-                      </span>
-                    </motion.button>
-                  </motion.div>
-                ))}
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
+            {slides.map((slide, index) => (
+              <motion.div
+                key={slide.id}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.5 }}
+                custom={index * 0.15}
+                variants={revealUp}
+                style={{ display: 'flex' }}
+              >
+                <motion.button
+                  onClick={() => setActiveSlide(index)}
+                  whileInView={
+                    activeSlide === index
+                      ? { boxShadow: ["0px 0px 0px rgba(255,75,11,0)", "0px 0px 25px rgba(255,75,11,0.25)", "0px 0px 0px rgba(255,75,11,0)"] }
+                      : { boxShadow: "0px 0px 0px rgba(255,75,11,0)" }
+                  }
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    padding: '16px 20px',
+                    border: '1px solid',
+                    borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
+                    backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
+                    color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
+                    textAlign: 'left',
+                    width: '100%'
+                  }}
+                >
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
+                    0{index + 1}
+                  </span>
+                  <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
+                    {slide.title}
+                  </span>
+                </motion.button>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
@@ -660,23 +657,23 @@ function ContentSystem() {
               Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.
             </p>
           </div>
-              <div className="vl-format-rail">
-                {formats.map((item, index) => (
-                  <motion.span
-                    key={item}
-                    initial={{ opacity: 0, x: -12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    whileHover={{ x: 5.1 }}
-                    viewport={{ once: true }}
-                    transition={{
-                      delay: .12 + index * .07,
-                      x: { type: 'spring', stiffness: 260, damping: 22 },
-                    }}
-                  >
-                    {item}
-                  </motion.span>
-                ))}
-              </div>
+          <div className="vl-format-rail">
+            {formats.map((item, index) => (
+              <motion.span
+                key={item}
+                initial={{ opacity: 0, x: -12 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                whileHover={{ x: 5.1 }}
+                viewport={{ once: true }}
+                transition={{
+                  delay: .12 + index * .07,
+                  x: { type: 'spring', stiffness: 260, damping: 22 },
+                }}
+              >
+                {item}
+              </motion.span>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div
