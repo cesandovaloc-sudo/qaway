@@ -492,9 +492,10 @@ function Services() {
                 className="vl-service-link"
                 initial="hidden"
                 whileInView="show"
-                viewport={{ once: true, amount: 0.2 }}
+                viewport={{ once: true, amount: 0.1 }}
                 custom={index * 0.15}
                 variants={revealUp}
+                style={{ display: 'block' }}
               >
                 <TiltPanel className={`vl-service vl-service--${index + 1}`}>
                   {service.image && <img src={`${ASSET}/${service.image}`} alt={`Servicio de ${service.title}`} loading="lazy" style={{ objectPosition: service.position || 'center' }} />}
