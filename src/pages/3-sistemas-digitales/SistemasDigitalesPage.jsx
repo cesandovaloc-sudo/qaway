@@ -788,9 +788,14 @@ export default function SistemasDigitalesPage() {
                   const Icon = item.icon
                   const isActive = idx === activeIdx
                   return (
-                    <button
+                    <motion.button
                       key={item.title}
                       onClick={() => setActiveIdx(idx)}
+                      initial={reduceMotion ? false : "hidden"}
+                      whileInView={reduceMotion ? undefined : "show"}
+                      viewport={{ once: true, amount: 0.2 }}
+                      variants={revealUp}
+                      custom={0.08 * idx}
                       className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${isActive
                         ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
                         : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
@@ -800,7 +805,7 @@ export default function SistemasDigitalesPage() {
                       <span className={`text-[13px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
                         {item.title}
                       </span>
-                    </button>
+                    </motion.button>
                   )
                 })}
               </div>
@@ -1074,8 +1079,12 @@ export default function SistemasDigitalesPage() {
                 return (
                   <motion.div
                     key={col.title}
-                    whileHover={reduceMotion ? {} : { y: -3 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={revealUp}
+                    custom={0.1 * index}
+                    whileHover={reduceMotion ? {} : { y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
                     className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                       }`}
                   >
@@ -1124,8 +1133,12 @@ export default function SistemasDigitalesPage() {
                 return (
                   <motion.div
                     key={col.title}
-                    whileHover={reduceMotion ? {} : { y: -3 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={revealUp}
+                    custom={0.1 * index}
+                    whileHover={reduceMotion ? {} : { y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
                     style={{ scale: 0.73, transformOrigin: "top left" }}
                     className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                       }`}
@@ -1139,11 +1152,18 @@ export default function SistemasDigitalesPage() {
               })}
             </div>
 
-            <div className="mt-10">
+            <motion.div
+              initial={reduceMotion ? false : "hidden"}
+              whileInView={reduceMotion ? undefined : "show"}
+              viewport={{ once: true, amount: 0.2 }}
+              variants={revealUp}
+              custom={0.3}
+              className="mt-10"
+            >
               <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b] scale-[1.26] origin-left">
                 Ver proyectos
               </Link>
-            </div>
+            </motion.div>
           </motion.div>
 
           <motion.div
@@ -1233,12 +1253,19 @@ export default function SistemasDigitalesPage() {
                   </motion.div>
                 );
               })}
-              <div className="sm:col-span-2 mt-8 lg:mt-8 flex justify-start">
+              <motion.div
+                initial={reduceMotion ? false : "hidden"}
+                whileInView={reduceMotion ? undefined : "show"}
+                viewport={{ once: true, amount: 0.2 }}
+                variants={revealUp}
+                custom={0.4}
+                className="sm:col-span-2 mt-8 lg:mt-8 flex justify-start"
+              >
                 <a href="#diagnostico" className="group inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-white transition-colors hover:text-[#ff4b0b]">
                   Solicitar diagnóstico
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </a>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -1342,7 +1369,11 @@ export default function SistemasDigitalesPage() {
               </div>
 
               <div className="px-6 py-10 sm:px-8 lg:px-12 lg:py-12 flex flex-col justify-center">
-                <h2
+                <motion.h2
+                  initial={reduceMotion ? false : "hidden"}
+                  whileInView={reduceMotion ? undefined : "show"}
+                  viewport={{ once: true, amount: 0.2 }}
+                  variants={revealUp}
                   className="text-[clamp(2.1rem,4.8vw,3.6rem)] leading-[0.95] tracking-[-0.03em] text-[#191918]"
                   style={displayFont}
                 >
@@ -1351,10 +1382,17 @@ export default function SistemasDigitalesPage() {
                   <span className="text-[#ff4b0b]">Ahora Construimos</span>
                   <br />
                   Su Infraestructura.
-                </h2>
+                </motion.h2>
 
                 {formSubmitted ? (
-                  <div className="mt-8 flex flex-col items-start gap-3 border border-black/8 bg-[#f8f6f2] px-6 py-6">
+                  <motion.div
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={revealUp}
+                    custom={0.1}
+                    className="mt-8 flex flex-col items-start gap-3 border border-black/8 bg-[#f8f6f2] px-6 py-6"
+                  >
                     <CheckCircle2 className="h-7 w-7 text-[#ff4b0b]" />
                     <p className="text-[15px] font-semibold text-[#191918]">¡Solicitud enviada!</p>
                     <p className="text-sm text-black/56">Te contactamos en menos de 24 horas para definir el siguiente paso juntos.</p>
@@ -1364,9 +1402,17 @@ export default function SistemasDigitalesPage() {
                     >
                       Enviar otra consulta
                     </button>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <form onSubmit={handleContactSubmit} className="mt-8 space-y-4">
+                  <motion.form
+                    initial={reduceMotion ? false : "hidden"}
+                    whileInView={reduceMotion ? undefined : "show"}
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={revealUp}
+                    custom={0.1}
+                    onSubmit={handleContactSubmit}
+                    className="mt-8 space-y-4"
+                  >
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="flex flex-col gap-1.5">
                         <label htmlFor="sd-name" className="text-[11px] font-bold uppercase tracking-wider text-black/50">Nombre</label>
@@ -1448,7 +1494,7 @@ export default function SistemasDigitalesPage() {
                       <ArrowRight className="h-4 w-4" />
                     </button>
                     <p className="text-[11px] text-black/38">Usamos esta información únicamente para responder tu consulta.</p>
-                  </form>
+                  </motion.form>
                 )}
               </div>
             </div>
