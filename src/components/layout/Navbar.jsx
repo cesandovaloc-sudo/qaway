@@ -187,7 +187,7 @@ export default function Navbar({ variant: explicitVariant }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 sm:hidden`}
+              className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 lg:hidden`}
             >
               <div className="flex flex-col">
                 {navLinks.map((link) => (
@@ -229,7 +229,7 @@ export default function Navbar({ variant: explicitVariant }) {
               WebkitBackdropFilter: 'blur(5px)',
               backgroundColor: 'rgba(0, 0, 0, 0.25)',
             }}
-            className="sm:hidden"
+            className="lg:hidden"
           />,
           document.body
         )}
