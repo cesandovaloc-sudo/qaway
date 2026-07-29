@@ -518,8 +518,7 @@ export default function AcademyPage() {
             </motion.p>
           </div>
         </motion.div>
-
-        <div className="academy-featured-courses">
+        <div className="academy-featured-courses mt-12">
           {featuredCourses.map((course, index) => (
             <motion.div
               key={course.title}
@@ -540,23 +539,26 @@ export default function AcademyPage() {
               Encuentra tu <span className="text-[#ff4b0b]">siguiente curso.</span>
             </motion.h2>
           </div>
-          <motion.div variants={copyItem} className="academy-carousel-controls" style={{ marginTop: '2rem' }}>
+        </motion.div>
+
+        <div className="flex items-center justify-between mb-8 mt-6 max-w-[92rem] mx-auto">
+          <div className="academy-topic-filters m-0" aria-label="Filtrar cursos por tema">
+            {courseTopics.map((topic) => (
+              <button
+                key={topic}
+                type="button"
+                className={activeTopic === topic ? 'is-active' : ''}
+                onClick={() => setActiveTopic(topic)}
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+          
+          <motion.div variants={copyItem} className="academy-carousel-controls">
             <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
             <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
           </motion.div>
-        </motion.div>
-
-        <div className="academy-topic-filters" aria-label="Filtrar cursos por tema">
-          {courseTopics.map((topic) => (
-            <button
-              key={topic}
-              type="button"
-              className={activeTopic === topic ? 'is-active' : ''}
-              onClick={() => setActiveTopic(topic)}
-            >
-              {topic}
-            </button>
-          ))}
         </div>
 
         <div ref={carouselRef} className="academy-course-carousel">
@@ -578,10 +580,23 @@ export default function AcademyPage() {
             </motion.p>
           </div>
           <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
-            <a href="#formulario" className="academy-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ff4b0b', fontWeight: 'bold', textDecoration: 'none' }}>
+            <motion.a
+              href="#formulario"
+              className="academy-text-link"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ff4b0b', fontWeight: 'bold', textDecoration: 'none' }}
+              whileHover="hovered"
+              initial="rest"
+              animate="rest"
+            >
               Ver cómo aprendemos
-              <ArrowRight size={16} />
-            </a>
+              <motion.span
+                variants={{ rest: { x: 0 }, hovered: { x: 5 } }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                style={{ display: 'inline-flex' }}
+              >
+                <ArrowRight size={16} />
+              </motion.span>
+            </motion.a>
           </motion.div>
         </motion.div>
 
@@ -602,148 +617,72 @@ export default function AcademyPage() {
         </motion.div>
       </section>
 
-      <section className="academy-section academy-paths">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
-          <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Elige tu punto de partida</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Una Academy para <span className="text-[#ff4b0b]">quienes construyen.</span>
-            </motion.h2>
-          </div>
-        </motion.div>
-        <div className="academy-path-grid">
-          {learningPaths.map(({ icon: Icon, title, text }, index) => (
-            <motion.article
-              key={title}
-              {...reveal}
-              transition={{ ...reveal.transition, delay: index * 0.08 }}
-              className="academy-path-item"
-            >
-              <Icon size={24} strokeWidth={1.5} />
-              <h3>{title}</h3>
-              <p>{text}</p>
-              <a href="#formulario" className="academy-path-link">
-                Explorar ruta
-                <ChevronRight size={15} />
-              </a>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      <section id="testimonios" className="academy-section academy-testimonials">
-        <div className="academy-testimonials-layout">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
-          <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+      <section id="testimonios" className="academy-section academy-testimonials tst-ver-a">
+        <div className="tst-a-layout">
+          <div className="tst-a-heading">
+            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</p>
+            <h2 className="text-[clamp(2.2rem,3.5vw,3.8rem)] leading-[0.92] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
               Ellos ya <span className="text-[#ff4b0b]">aprendieron</span> con nosotros.
-            </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos en su trabajo, negocio o contenido.
-            </motion.p>
+            </h2>
+            <p className="mt-4 text-[clamp(0.9rem,1vw,1rem)] leading-[1.6] text-[#4e4d4a] max-w-[22rem]">
+              Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos.
+            </p>
           </div>
-        </motion.div>
 
-        <div className="academy-testimonial-showcase">
-        <div className="academy-testimonial-stage">
-          {testimonials.map((testimonial, index) => (
-            <motion.article
-              key={testimonial.name}
-              initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              animate={(() => {
-                const position = getTestimonialPosition(index, activeTestimonial, testimonials.length)
-
-                if (reduceMotion) {
-                  return {
-                    x: `${position * 15}%`,
-                    opacity: position === 0 ? 1 : 0.7,
-                  }
-                }
-
-                return {
-                  x:
-                    position === 0 ? '0%'
-                    : position === -1 ? '-35%'
-                    : position === 1 ? '35%'
-                    : position === -2 ? '-58%'
-                    : '58%',
-                  y:
-                    position === 0 ? 0
-                    : Math.abs(position) === 1 ? 30
-                    : 48,
-                  scale:
-                    position === 0 ? 1
-                    : Math.abs(position) === 1 ? 0.9
-                    : 0.8,
-                  opacity:
-                    position === 0 ? 1
-                    : Math.abs(position) === 1 ? 0.76
-                    : 0.46,
-                  rotateZ:
-                    position === 0 ? 0
-                    : position < 0 ? -1.4
-                    : 1.4,
-                }
-              })()}
-              transition={{ type: 'spring', stiffness: 92, damping: 22, mass: 0.95 }}
-              className={`academy-testimonial-card ${index === activeTestimonial ? 'is-active' : ''}`}
-              style={{
-                zIndex: 10 - Math.abs(getTestimonialPosition(index, activeTestimonial, testimonials.length)),
-                '--testimonial-accent': testimonial.accent,
-                '--testimonial-tint': testimonial.tint,
-              }}
-              onClick={() => setActiveTestimonial(index)}
-            >
-              <div className="academy-testimonial-card-shell">
-                <div className="academy-testimonial-portrait" aria-hidden="true">
-                  <img src={testimonial.portrait} alt="" loading="lazy" decoding="async" />
-                  <span>{testimonial.name.charAt(0)}</span>
-                </div>
-                <div className="academy-testimonial-card-copy">
-                  <Quote size={31} strokeWidth={1.3} />
-                  <div className="academy-stars" aria-label="5 de 5 estrellas">
-                    {Array.from({ length: 5 }).map((_, star) => (
-                      <Star key={star} size={14} fill="currentColor" />
-                    ))}
+          <div className="tst-a-stage">
+            <div className="tst-a-viewport">
+              {testimonials.map((t, index) => (
+                <motion.article
+                  key={t.name}
+                  className="tst-a-card"
+                  initial={false}
+                  animate={{
+                    opacity: index === activeTestimonial ? 1 : 0,
+                    x: index === activeTestimonial ? 0 : index < activeTestimonial ? -40 : 40,
+                    pointerEvents: index === activeTestimonial ? 'auto' : 'none',
+                  }}
+                  transition={{ duration: 0.45, ease: [0.32, 0, 0.67, 0] }}
+                  style={{ '--testimonial-accent': t.accent, '--testimonial-tint': t.tint }}
+                >
+                  <div className="tst-a-portrait">
+                    <img src={t.portrait} alt={t.name} loading="lazy" />
+                    <span>{t.name.charAt(0)}</span>
                   </div>
-                  <blockquote>{testimonial.quote}</blockquote>
-                  <footer>
-                    <div>
-                      <strong>{testimonial.name}</strong>
-                      <small>{testimonial.role}</small>
+                  <div className="tst-a-copy">
+                    <div className="academy-stars mb-3">
+                      {Array.from({ length: 5 }).map((_, s) => <Star key={s} size={13} fill="currentColor" />)}
                     </div>
-                    <span>{testimonial.city}</span>
-                  </footer>
-                </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
+                    <blockquote>"{t.quote}"</blockquote>
+                    <footer>
+                      <strong>{t.name}</strong>
+                      <small>{t.role}</small>
+                    </footer>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
 
-        <div className="academy-testimonial-navigation">
-          <button type="button" onClick={() => moveTestimonials(-1)} aria-label="Anterior testimonio">
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                type="button"
-                className={index === activeTestimonial ? 'is-active' : ''}
-                onClick={() => setActiveTestimonial(index)}
-                aria-label={`Ir al testimonio ${index + 1}`}
-              />
-            ))}
+            <div className="tst-a-nav">
+              <button type="button" onClick={() => moveTestimonials(-1)} aria-label="Anterior">
+                <ChevronLeft size={18} />
+              </button>
+              <div className="tst-a-dots">
+                {testimonials.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    className={i === activeTestimonial ? 'is-active' : ''}
+                    onClick={() => setActiveTestimonial(i)}
+                    aria-label={`Testimonio ${i + 1}`}
+                  />
+                ))}
+              </div>
+              <button type="button" onClick={() => moveTestimonials(1)} aria-label="Siguiente">
+                <ChevronRight size={18} />
+              </button>
+            </div>
           </div>
-          <button type="button" onClick={() => moveTestimonials(1)} aria-label="Siguiente testimonio">
-            <ChevronRight size={20} />
-          </button>
         </div>
-      </div>
-      </div>
       </section>
 
       <section id="formulario" className="academy-section academy-form-section">
