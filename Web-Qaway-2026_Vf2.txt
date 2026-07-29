@@ -28,6 +28,7 @@
 4.  Mapa de código real
     4.1  Estructura de directorios vs. documento
     4.2  Notas sobre archivos y versiones
+    4.3  Centralización de datos (Mock Data / Capa de Datos)
 
 5.  Apéndice: Matriz de servicios de Sistemas Digitales
     5.1  Automatización IA
@@ -411,6 +412,7 @@ conviven DOS arquitecturas:
 
 Código actual (portada):
   1-Frontend/src/pages/4-academy/AcademyPage.jsx
+  1-Frontend/src/data/academyCourses.js (fuente única de mock data)
 
 
 ───────────────────────────────────────────────────────────────
@@ -624,6 +626,25 @@ Código:
   • 3-sistemas-digitales/6-herramientas-internas/ —
     Existe en código pero no está listada en el documento
     como módulo separado. Decidir si mantener o reubicar.
+
+4.3  Centralización de datos (Mock Data / Capa de Datos)
+─────────────────────────────────────────────────────────
+
+  • Archivo central de cursos: 1-Frontend/src/data/academyCourses.js
+    Actúa como fuente única de verdad (mock data) para la información
+    de cursos y landings promocionales (títulos, descripciones,
+    formatos, categorías y rutas a assets de imágenes).
+
+  • Consumidores activos:
+    - 1-Frontend/src/pages/1-inicio/InicioPage.jsx (carrusel "Formación y soluciones")
+    - 1-Frontend/src/pages/4-academy/AcademyPage.jsx (cursos destacados y catálogo)
+
+  • Arquitectura y escalabilidad:
+    No mueve ninguna imagen de sus carpetas de assets locales. Funciona
+    como una capa intermedia desacoplada para mantener la sincronía entre
+    la portada del ecosistema y la sección Academy. Prepara el frontend
+    para conectar directamente con Supabase (`supabase.from('courses').select('*')`)
+    sin reescribir la maquetación visual.
 
 
 ═══════════════════════════════════════════════════════════════
