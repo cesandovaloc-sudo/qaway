@@ -173,7 +173,7 @@ export default function Navbar({ variant: explicitVariant }) {
               aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((current) => !current)}
-              className={`sm:hidden ${styles.menuBtn}`}
+              className={`lg:hidden ${styles.menuBtn}`}
             >
               <Menu size={22} />
             </button>

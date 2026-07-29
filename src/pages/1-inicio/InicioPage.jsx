@@ -247,6 +247,15 @@ se deben seguir estrictamente las siguientes reglas en la sección Hero:
      Si un título genera saltos de línea aislados o torre de filas (ej. "la" o "y" solas),
      se debe aplicar un micro-desplazamiento del 1% al 3% a la derecha (ej. `lg:grid-cols-[1.03fr_0.97fr_0.70fr]`)
      para dar aire al texto manteniendo intacta la escala tipográfica referente de Inicio.
+
+5. COMPORTAMIENTO RESPONSIVO EN MÓVILES Y TABLETS (< 1024px):
+   - El contenedor de la imagen principal debe llevar una restricción de altura en móviles 
+     (ej. `max-h-[50vh]` o `min-h-[40vh]`) con `overflow-hidden` o la imagen en `object-cover` 
+     para que la foto se recorte estratégicamente y no crezca desproporcionadamente. 
+     En pantallas grandes recupera su tamaño (ej. `lg:max-h-none`).
+   - El panel de contenido secundario (la tercera columna, si existe) debe ocultarse en 
+     móviles usando las clases de Tailwind `hidden lg:flex` o `hidden lg:grid` para evitar 
+     que se apile al final y rompa la fluidez del Hero.
 ================================================================================
 */
 

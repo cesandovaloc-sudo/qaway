@@ -114,6 +114,16 @@ const reveal = {
   transition: { duration: 0.68, ease: [0.22, 1, 0.36, 1] },
 }
 
+const copyStagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: .11 } },
+}
+
+const copyItem = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: .65, ease: [0.22, 1, 0.36, 1] } },
+}
+
 function MagneticLink({ children, className = '', ...props }) {
   const ref = useRef(null)
   const reduceMotion = useReducedMotion()
@@ -396,7 +406,7 @@ export default function AcademyPage() {
   return (
     <main className="academy-page">
       <section className="academy-hero">
-        <div className="academy-hero-grid">
+        <div className="relative mx-auto grid min-h-[100dvh] w-full max-w-[96rem] lg:grid-cols-[1.13fr_0.86fr_0.58fr]">
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 32 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -442,7 +452,7 @@ export default function AcademyPage() {
             initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
             animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="academy-hero-portrait"
+            className="academy-hero-portrait max-h-[50vh] overflow-hidden lg:max-h-none"
           >
             <span className="academy-frame-corner academy-frame-corner-top" />
             <span className="academy-frame-corner academy-frame-corner-bottom" />
@@ -459,7 +469,7 @@ export default function AcademyPage() {
             initial={reduceMotion ? false : { opacity: 0, x: 26 }}
             animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
             transition={{ delay: 0.18, duration: 0.78 }}
-            className="academy-hero-panel"
+            className="academy-hero-panel hidden lg:flex"
           >
             <div className="academy-panel-mark" />
             <h2 style={displayFont}>
@@ -485,12 +495,28 @@ export default function AcademyPage() {
       </section>
 
       <section id="programas" className="academy-section academy-programs">
-        <motion.div {...reveal} className="academy-section-heading">
+        <motion.div
+          className="vl-branding__copy"
+          variants={copyStagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: .22 }}
+        >
           <div>
-            <p className="academy-kicker">Cursos destacados</p>
-            <h2 style={displayFont}>Empieza por una <span className="academy-title-emphasis">habilidad concreta</span><span className="academy-title-punct">.</span></h2>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+              Cursos destacados
+            </motion.p>
+            <motion.h2
+              variants={copyItem}
+              className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+              style={{ ...displayFont, fontWeight: 760 }}
+            >
+              Empieza por una <span className="text-[#ff4b0b]">habilidad concreta.</span>
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Cursos visuales, cercanos y construidos alrededor de situaciones que ya forman parte de tu trabajo.
+            </motion.p>
           </div>
-          <p>Cursos visuales, cercanos y construidos alrededor de situaciones que ya forman parte de tu trabajo.</p>
         </motion.div>
 
         <div className="academy-featured-courses">
@@ -507,19 +533,17 @@ export default function AcademyPage() {
       </section>
 
       <section className="academy-section academy-catalog">
-        <motion.div {...reveal} className="academy-catalog-heading">
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
-            <p className="academy-kicker">Explora por tema</p>
-            <h2 style={displayFont}>Encuentra tu <span className="academy-title-emphasis">siguiente curso</span><span className="academy-title-punct">.</span></h2>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Explora por tema</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Encuentra tu <span className="text-[#ff4b0b]">siguiente curso.</span>
+            </motion.h2>
           </div>
-          <div className="academy-carousel-controls">
-            <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores">
-              <ChevronLeft size={20} />
-            </button>
-            <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos">
-              <ChevronRight size={20} />
-            </button>
-          </div>
+          <motion.div variants={copyItem} className="academy-carousel-controls" style={{ marginTop: '2rem' }}>
+            <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
+            <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
+          </motion.div>
         </motion.div>
 
         <div className="academy-topic-filters" aria-label="Filtrar cursos por tema">
@@ -543,18 +567,22 @@ export default function AcademyPage() {
       </section>
 
       <section id="metodo" className="academy-section academy-method">
-        <motion.div {...reveal} className="academy-method-copy">
-          <p className="academy-kicker">Método Qaway</p>
-          <h2 style={displayFont}>
-            Menos teoría suelta<span className="academy-title-punct">.</span> Más <span className="academy-title-emphasis">capacidad instalada</span><span className="academy-title-punct">.</span>
-          </h2>
-          <p>
-            Cada experiencia combina contexto, demostración, práctica guiada y una aplicación directa a tu trabajo.
-          </p>
-          <a href="#formulario" className="academy-text-link">
-            Ver cómo aprendemos
-            <ArrowRight size={16} />
-          </a>
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+          <div>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método Qaway</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Menos teoría suelta. Más <span className="text-[#ff4b0b]">capacidad instalada.</span>
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Cada experiencia combina contexto, demostración, práctica guiada y una aplicación directa a tu trabajo.
+            </motion.p>
+          </div>
+          <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
+            <a href="#formulario" className="academy-text-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ff4b0b', fontWeight: 'bold', textDecoration: 'none' }}>
+              Ver cómo aprendemos
+              <ArrowRight size={16} />
+            </a>
+          </motion.div>
         </motion.div>
 
         <motion.div {...reveal} className="academy-method-steps">
@@ -575,9 +603,13 @@ export default function AcademyPage() {
       </section>
 
       <section className="academy-section academy-paths">
-        <motion.div {...reveal} className="academy-path-title">
-          <p className="academy-kicker">Elige tu punto de partida</p>
-          <h2 style={displayFont}>Una Academy para <span className="academy-title-emphasis">quienes construyen</span><span className="academy-title-punct">.</span></h2>
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+          <div>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Elige tu punto de partida</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Una Academy para <span className="text-[#ff4b0b]">quienes construyen.</span>
+            </motion.h2>
+          </div>
         </motion.div>
         <div className="academy-path-grid">
           {learningPaths.map(({ icon: Icon, title, text }, index) => (
@@ -601,12 +633,16 @@ export default function AcademyPage() {
 
       <section id="testimonios" className="academy-section academy-testimonials">
         <div className="academy-testimonials-layout">
-        <motion.div {...reveal} className="academy-testimonial-heading">
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
-            <p className="academy-kicker">Experiencias reales</p>
-            <h2 style={displayFont}>Ellos ya <span className="academy-title-emphasis">aprendieron</span> con nosotros<span className="academy-title-punct">.</span></h2>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Ellos ya <span className="text-[#ff4b0b]">aprendieron</span> con nosotros.
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos en su trabajo, negocio o contenido.
+            </motion.p>
           </div>
-          <p>Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos en su trabajo, negocio o contenido.</p>
         </motion.div>
 
         <div className="academy-testimonial-showcase">
@@ -711,15 +747,21 @@ export default function AcademyPage() {
       </section>
 
       <section id="formulario" className="academy-section academy-form-section">
-        <motion.div {...reveal} className="academy-form-intro">
-          <p className="academy-kicker">Contacto</p>
-          <h2 style={displayFont}>Resuelve tus <span className="academy-title-emphasis">dudas</span><span className="academy-title-punct">.</span></h2>
-          <p>Escríbenos para consultar detalles sobre los programas, metodologías o coordinar capacitación para tu equipo.</p>
-          <div className="academy-form-points">
-            <span><Check size={16} /> Respuesta en menos de 24 horas</span>
-            <span><Check size={16} /> Orientación sin compromiso</span>
-            <span><Check size={16} /> Opciones personalizadas para empresas</span>
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+          <div>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Resuelve tus <span className="text-[#ff4b0b]">dudas.</span>
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Escríbenos para consultar detalles sobre los programas, metodologías o coordinar capacitación para tu equipo.
+            </motion.p>
           </div>
+          <motion.div variants={copyItem} className="academy-form-points" style={{ marginTop: '2rem' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Respuesta en menos de 24 horas</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Orientación sin compromiso</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Opciones personalizadas para empresas</span>
+          </motion.div>
         </motion.div>
 
         <motion.form
@@ -818,16 +860,22 @@ export default function AcademyPage() {
       </section>
 
       <section className="academy-final-cta">
-        <motion.div {...reveal}>
-          <p className="academy-kicker">Empieza con claridad</p>
-          <h2 style={displayFont}>
-            Aprende<span className="academy-title-punct">.</span> Aplica<span className="academy-title-punct">.</span> Hazlo parte de tu <span className="academy-title-emphasis">trabajo</span><span className="academy-title-punct">.</span>
-          </h2>
-          <p>Explora cursos, talleres y programas diseñados para producir cambios visibles desde la primera semana.</p>
-          <MagneticLink href="#programas" className="academy-dark-button">
-            Explorar Academy
-            <ArrowRight size={18} />
-          </MagneticLink>
+        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+          <div>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza con claridad</motion.p>
+            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Aprende. Aplica. Hazlo parte de tu <span className="text-[#ff4b0b]">trabajo.</span>
+            </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Explora cursos, talleres y programas diseñados para producir cambios visibles desde la primera semana.
+            </motion.p>
+          </div>
+          <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
+            <MagneticLink href="#programas" className="academy-dark-button">
+              Explorar Academy
+              <ArrowRight size={18} />
+            </MagneticLink>
+          </motion.div>
         </motion.div>
         <div className="academy-final-list">
           {['Cursos a tu ritmo', 'Talleres en vivo', 'Programas guiados', 'Comunidad y recursos'].map((item) => (
