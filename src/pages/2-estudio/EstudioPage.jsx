@@ -605,13 +605,13 @@ function TransformacionVisualCarousel() {
               backgroundColor: '#f3f1ee'
             }}
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.div
                 key={activeSlide}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
                 style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
               >
                 <SplitVisual
