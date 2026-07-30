@@ -834,7 +834,7 @@ export default function SistemasDigitalesPage() {
               variants={revealUp}
               custom={0.18}
             >
-              <div className="sticky top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
+              <div className="lg:sticky lg:top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
                 <div className="relative z-10 w-full flex items-center justify-center min-h-[620px]" style={{ perspective: 1000 }}>
