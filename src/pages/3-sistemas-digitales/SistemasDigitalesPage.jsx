@@ -779,7 +779,14 @@ export default function SistemasDigitalesPage() {
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
             {/* Left Column: Title and 2-column Buttons Grid */}
             <div className="lg:col-span-5 flex flex-col justify-start">
-              <div className="mb-8">
+              <motion.div
+                className="mb-8"
+                initial={reduceMotion ? false : "hidden"}
+                whileInView={reduceMotion ? undefined : "show"}
+                viewport={{ once: true, amount: 0.2 }}
+                variants={revealUp}
+                custom={0}
+              >
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">SERVICIOS DE SISTEMAS DIGITALES</div>
                 <h2 className="mt-4 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-white" style={displayFont}>
                   Soluciones digitales <br />
@@ -788,7 +795,7 @@ export default function SistemasDigitalesPage() {
                 <p className="mt-5 text-[15px] leading-relaxed text-zinc-400 max-w-xl">
                   Automatización, canales digitales, CRM y herramientas internas y más, para ordenar, conectar procesos e información y facilitar el trabajo diario.
                 </p>
-              </div>
+              </motion.div>
 
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 {items.map((item, idx) => {
@@ -819,7 +826,14 @@ export default function SistemasDigitalesPage() {
             </div>
 
             {/* Right Column: Widened preview image column */}
-            <div className="lg:col-span-7">
+            <motion.div
+              className="lg:col-span-7"
+              initial={reduceMotion ? false : "hidden"}
+              whileInView={reduceMotion ? undefined : "show"}
+              viewport={{ once: true, amount: 0.15 }}
+              variants={revealUp}
+              custom={0.18}
+            >
               <div className="sticky top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
@@ -912,7 +926,7 @@ export default function SistemasDigitalesPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
