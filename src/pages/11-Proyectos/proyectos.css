@@ -162,42 +162,29 @@
 .projects-filters__items {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
 }
 
 .projects-filters button {
   position: relative;
-  border: 0;
-  border-right: 1px solid var(--projects-line);
-  padding: 0 34px 22px;
+  border: 1px solid rgba(32, 32, 31, 0.18);
+  padding: 8px 18px;
   background: transparent;
   color: #51514c;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   cursor: pointer;
+  transition: all 220ms ease;
 }
 
-.projects-filters button:first-child {
-  padding-left: 0;
-}
-
-.projects-filters button:last-child {
-  border-right: 0;
-}
-
+.projects-filters button:hover,
 .projects-filters button.is-active {
-  color: var(--projects-acid);
-}
-
-.projects-filters button.is-active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 58px;
-  height: 2px;
   background: var(--projects-acid);
+  border-color: var(--projects-acid);
+  color: #ffffff;
 }
 
 .projects-legend {

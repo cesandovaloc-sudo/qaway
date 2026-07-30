@@ -926,7 +926,8 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
   return (
     <div className="academy-page">
       <section id="formulario" className="academy-section academy-form-section">
-        <Reveal className="academy-form-intro">
+        <div className="academy-form-layout">
+          <Reveal className="academy-form-intro">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
           <h2 className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
             Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
@@ -1033,6 +1034,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
             )}
           </form>
         </Reveal>
+        </div>
       </section>
     </div>
   )

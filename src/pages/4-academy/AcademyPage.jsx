@@ -704,10 +704,10 @@ export default function AcademyPage() {
           <div>
             <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
             <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Resuelve tus <span className="text-[#ff4b0b]">dudas.</span>
+              Inscripciones y <span className="text-[#ff4b0b]">orientación académica.</span>
             </motion.h2>
             <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Escríbenos para consultar detalles sobre los programas, metodologías o coordinar capacitación para tu equipo.
+              Escríbenos para resolver dudas sobre el contenido de los cursos, fechas de talleres o solicitar asesoría sobre qué programa se adapta a tus metas.
             </motion.p>
           </div>
           <motion.div variants={copyItem} className="academy-form-points" style={{ marginTop: '2rem' }}>
@@ -772,22 +772,23 @@ export default function AcademyPage() {
                     <option value="Profesional / Consultor">Profesional / Consultor</option>
                     <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
                     <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                    <option value="Equipo de empresa">Equipo de empresa</option>
-                    <option value="Otro">Otro</option>
+                    <option value="Equipo / Empresa (Capacitación a medida)">Equipo / Empresa (Capacitación a medida)</option>
+                    <option value="Estudiante / Aprendo desde cero">Estudiante / Aprendo desde cero</option>
                   </select>
                 </div>
                 <div className="academy-field">
-                  <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
+                  <label htmlFor="academy-interest">¿Qué programa o curso te interesa?</label>
                   <select id="academy-interest" name="interest" required>
-                    <option value="">Selecciona un interés</option>
-                    <option value="Identidad Visual con IA">Diseño — Identidad Visual con IA</option>
-                    <option value="WhatsApp Business para negocios">Marketing — WhatsApp Business para negocios</option>
-                    <option value="Antigravity desde cero">IA — Antigravity desde cero</option>
-                    <option value="IA para equipos pequeños">Productividad — IA para equipos pequeños</option>
-                    <option value="Sistema de contenido con IA">IA — Sistema de contenido con IA</option>
-                    <option value="Workflows sin código">Automatización — Workflows sin código</option>
-                    <option value="Presencia digital para emprender">Marketing — Presencia digital para emprender</option>
-                    <option value="Orientación general / Otro">Orientación general / Otro</option>
+                    <option value="">Selecciona un curso o programa</option>
+                    <option value="Diseño — Identidad Visual con IA">Diseño — Identidad Visual con IA</option>
+                    <option value="Marketing — WhatsApp Business para negocios">Marketing — WhatsApp Business para negocios</option>
+                    <option value="IA — Antigravity desde cero">IA — Antigravity desde cero</option>
+                    <option value="Productividad — IA para equipos pequeños">Productividad — IA para equipos pequeños</option>
+                    <option value="IA — Sistema de contenido con IA">IA — Sistema de contenido con IA</option>
+                    <option value="Automatización — Workflows sin código">Automatización — Workflows sin código</option>
+                    <option value="Marketing — Presencia digital para emprender">Marketing — Presencia digital para emprender</option>
+                    <option value="Capacitación Corporativa para Empresas">Capacitación Corporativa para Empresas</option>
+                    <option value="Orientación general / No sé por dónde empezar">Orientación general / No sé por dónde empezar</option>
                   </select>
                 </div>
               </div>
@@ -802,7 +803,7 @@ export default function AcademyPage() {
                 />
               </div>
               <button type="submit" className="academy-submit-button" disabled={submitting}>
-                {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR ORIENTACIÓN'}
+                {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR INFORMACIÓN DEL CURSO'}
                 <Send size={17} />
               </button>
               {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
