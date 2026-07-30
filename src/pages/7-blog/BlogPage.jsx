@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { isPublicSiteMode } from '@/config/siteVisibility'
+import qawayCalendarImage from '../6-recursos/assets/qaway-calendar.png'
 import {
   Newspaper,
   TrendingUp,
@@ -73,11 +74,11 @@ export const articles = [
       label: 'Guia publica',
       icon: 'book'
     },
-    image: '/recursos/qaway-calendar.png',
+    image: qawayCalendarImage,
     relatedCta: {
       title: 'Google Calendar Dominado',
       description: 'Descarga nuestra guía extendida y plantilla práctica para aplicar este sistema de productividad paso a paso y tomar el control de tu tiempo.',
-      image: '/recursos/qaway-calendar.png',
+      image: qawayCalendarImage,
       link: '/recursos/ebooks/google-calendar-dominado',
       buttonText: 'Acceder al Recurso'
     }

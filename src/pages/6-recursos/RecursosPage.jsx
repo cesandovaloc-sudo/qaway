@@ -6,6 +6,15 @@ import {
   Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Search
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import qawayCalendarImage from './assets/qaway-calendar.png'
+import notionSopImage from './assets/notion-sop.png'
+import qawayCalculadoraRoiImage from './assets/qaway-calculadora-roi.png'
+import qawayPromptCopysImage from './assets/qaway-prompt-copys.png'
+import qawayPromptIaImage from './assets/qaway-prompt-ia.png'
+import qawayChecklistAdsImage from './assets/qaway-checklist-ads.png'
+import qawayChecklistSeguridadImage from './assets/qaway-checklist-seguridad.png'
+import qawayScriptWhatsappImage from './assets/qaway-script-whatsapp.png'
+import qawayScriptBackupImage from './assets/qaway-script-backup.png'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
@@ -29,7 +38,7 @@ const resources = [
     public: true,
     homeSection: 'new',
     path: '/recursos/ebooks/google-calendar-dominado',
-    image: '/recursos/qaway-calendar.png'
+    image: qawayCalendarImage
   },
   {
     id: 'notion-manual-sops',
@@ -47,7 +56,7 @@ const resources = [
       icon: 'trending'
     },
     path: '/recursos/plantillas/notion-manual-sops',
-    image: '/recursos/notion-sop.png'
+    image: notionSopImage
   },
   {
     id: 'sheets-calculadora-leads',
@@ -65,7 +74,7 @@ const resources = [
       icon: 'star'
     },
     path: '/recursos/plantillas/sheets-calculadora-leads',
-    image: '/recursos/qaway-calculadora-roi.png'
+    image: qawayCalculadoraRoiImage
   },
   {
     id: 'prompt-generador-copys',
@@ -78,7 +87,7 @@ const resources = [
     publishedAt: '2026-06-28',
     homeSection: 'starter',
     path: '/recursos/prompts/prompt-generador-copys',
-    image: '/recursos/qaway-prompt-copys.png'
+    image: qawayPromptCopysImage
   },
   {
     id: 'prompt-calibracion-soporte',
@@ -91,7 +100,7 @@ const resources = [
     publishedAt: '2026-06-30',
     homeSection: 'starter',
     path: '/recursos/prompts/prompt-calibracion-soporte',
-    image: '/recursos/qaway-prompt-ia.png'
+    image: qawayPromptIaImage
   },
   {
     id: 'checklist-campana-ads',
@@ -104,7 +113,7 @@ const resources = [
     publishedAt: '2026-07-01',
     homeSection: 'starter',
     path: '/recursos/checklists/checklist-campana-ads',
-    image: '/recursos/qaway-checklist-ads.png'
+    image: qawayChecklistAdsImage
   },
   {
     id: 'checklist-auditoria-seguridad',
@@ -117,7 +126,7 @@ const resources = [
     publishedAt: '2026-07-09',
     homeSection: 'new',
     path: '/recursos/checklists/checklist-auditoria-seguridad',
-    image: '/recursos/qaway-checklist-seguridad.png'
+    image: qawayChecklistSeguridadImage
   },
   {
     id: 'script-whatsapp-notion',
@@ -130,7 +139,7 @@ const resources = [
     publishedAt: '2026-07-02',
     homeSection: 'starter',
     path: '/recursos/scripts/script-whatsapp-notion',
-    image: '/recursos/qaway-script-whatsapp.png'
+    image: qawayScriptWhatsappImage
   },
   {
     id: 'script-sheets-backup',
@@ -143,7 +152,7 @@ const resources = [
     publishedAt: '2026-07-11',
     homeSection: 'new',
     path: '/recursos/scripts/script-sheets-backup',
-    image: '/recursos/qaway-script-backup.png'
+    image: qawayScriptBackupImage
   }
 ]
 
