@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { WHATSAPP_LINK, WHATSAPP_PHONE_LINK } from '@/data/navigation';
 import { supabase } from '@/config/supabase';
-import { 
-  Sparkles, 
-  ArrowRight, 
-  Play, 
-  Palette, 
+import {
+  Sparkles,
+  ArrowRight,
+  Play,
+  Palette,
   CheckCircle2,
   Star,
   Send,
@@ -31,14 +31,14 @@ const goToCart = () => window.open(WA_COURSE_URL, '_blank', 'noopener,noreferrer
 // Navbar
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-md border-b border-gray-100 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link to="/" className="text-xl font-semibold tracking-[-0.055em] text-gray-900 hover:opacity-80 transition-opacity">
           Qaway <span className="text-gray-500">Lab</span>
         </Link>
-        
+
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
           <a href="#metodo" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Método</a>
@@ -46,16 +46,16 @@ const Navbar = () => {
           <a href="#proyectos-estudiantes" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Resultados</a>
           <a href="#precio" className="text-purple-600 font-bold">Ver precio</a>
         </div>
-        
+
         {/* Mobile Toggle */}
-        <button 
+        <button
           className="md:hidden p-2"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
-      
+
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-4">
@@ -71,7 +71,7 @@ const Navbar = () => {
 
 // Primary Button
 const PrimaryButton = ({ children, onClick, className = "" }) => (
-  <button 
+  <button
     onClick={onClick}
     className={`btn-primary ${className}`}
   >
@@ -105,7 +105,7 @@ const Hero = () => (
             Comenzar Ahora
             <ArrowRight size={20} />
           </PrimaryButton>
-          <button 
+          <button
             onClick={() => document.getElementById('contenido')?.scrollIntoView({ behavior: 'smooth' })}
             className="btn-secondary"
           >
@@ -118,18 +118,18 @@ const Hero = () => (
       <div className="relative">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-4">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 ease-out">
               <img src="https://images.unsplash.com/photo-1763705857736-2b4f16a33758?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Brand identity" className="w-full h-full object-cover" />
             </div>
-            <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform">
+            <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 ease-out">
               <img src="https://images.unsplash.com/photo-1633533451997-8b6079082e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Brand mockup" className="w-full h-full object-cover" />
             </div>
           </div>
           <div className="space-y-4 pt-8">
-            <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform">
+            <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 ease-out">
               <img src="https://images.unsplash.com/photo-1614036634955-ae5e90f9b9eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Yellow brand" className="w-full h-full object-cover" />
             </div>
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform">
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 ease-out">
               <img src="https://images.unsplash.com/photo-1616205255812-c07c8102cc02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" alt="Stationery" className="w-full h-full object-cover" />
             </div>
           </div>
@@ -214,11 +214,10 @@ const MethodSection = () => {
               <div
                 key={index}
                 onClick={() => setExpandedIndex(isExpanded ? null : index)}
-                className={`bg-white rounded-3xl p-8 border transition-all duration-300 relative overflow-hidden group flex flex-col justify-between cursor-pointer select-none ${
-                  isExpanded
+                className={`bg-white rounded-3xl p-8 border transition-all duration-300 relative overflow-hidden group flex flex-col justify-between cursor-pointer select-none ${isExpanded
                     ? 'border-purple-300 shadow-xl ring-1 ring-purple-100'
                     : 'border-gray-100 hover:shadow-xl hover:border-purple-200'
-                }`}
+                  }`}
               >
                 {/* Giant visually bleeding number cropped at card edges */}
                 <div
@@ -227,7 +226,7 @@ const MethodSection = () => {
                 >
                   {stepItem.step}
                 </div>
-                
+
                 <div className="relative z-10">
                   <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/10">
                     <Icon className="w-7 h-7" />
@@ -305,8 +304,8 @@ const LearningSection = () => (
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {learningItems.map((item, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="group bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100 hover:shadow-lg hover:border-purple-200 transition-all cursor-pointer"
           >
             <div className="text-3xl mb-3">{item.icon}</div>
@@ -343,14 +342,14 @@ const PortfolioSection = () => (
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {portfolioItems.map((item, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all cursor-pointer"
           >
-            <img 
-              src={item.src} 
-              alt={item.alt} 
-              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500" 
+            <img
+              src={item.src}
+              alt={item.alt}
+              className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute bottom-4 left-4 right-4">
@@ -377,14 +376,14 @@ const testimonials = [
 
 const Testimonials = () => {
   const [current, setCurrent] = useState(0);
-  
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
-  
+
   const prev = () => setCurrent((current - 1 + testimonials.length) % testimonials.length);
   const next = () => setCurrent((current + 1) % testimonials.length);
 
@@ -395,7 +394,7 @@ const Testimonials = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Lo que dicen</h2>
           <p className="text-xl text-gray-600">Nuestros estudiantes</p>
         </div>
-        
+
         <div className="relative">
           <AnimatePresence mode="wait">
             <motion.div
@@ -418,21 +417,21 @@ const Testimonials = () => {
               </div>
             </motion.div>
           </AnimatePresence>
-          
+
           {/* Navigation */}
-          <button 
+          <button
             onClick={prev}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all"
           >
             <ChevronLeft size={24} className="text-gray-600" />
           </button>
-          <button 
+          <button
             onClick={next}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 bg-white p-3 rounded-full shadow-lg hover:shadow-xl transition-all"
           >
             <ChevronRight size={24} className="text-gray-600" />
           </button>
-          
+
           {/* Dots */}
           <div className="flex justify-center gap-2 mt-8">
             {testimonials.map((_, i) => (
@@ -461,13 +460,13 @@ const Pricing = () => (
         </h2>
         <p className="text-xl text-gray-600">Tu marca profesional por menos de un café al día</p>
       </div>
-      
+
       <div className="max-w-lg mx-auto">
         <div className="bg-white rounded-3xl p-10 border-2 border-purple-200 shadow-2xl relative overflow-hidden transform hover:scale-[1.02] transition-transform">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-b-2xl font-bold text-lg">
             🎉 OFERTA ESPECIAL
           </div>
-          
+
           <div className="text-center mt-14 mb-8">
             <div className="flex items-center justify-center gap-4 mb-2">
               <span className="text-2xl text-gray-400 line-through">S/60.00</span>
@@ -478,7 +477,7 @@ const Pricing = () => (
             <span className="text-7xl font-black text-gray-900">S/29.00</span>
             <p className="text-gray-500 mt-2 text-lg">Pago único, sin suscripciones</p>
           </div>
-          
+
           <ul className="space-y-5 mb-10">
             {[
               "✅ Tu identidad visual lista para usar HOY",
@@ -492,7 +491,7 @@ const Pricing = () => (
               </li>
             ))}
           </ul>
-          
+
           <button
             onClick={goToCart}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-6 rounded-2xl font-bold text-xl hover:shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
@@ -500,7 +499,7 @@ const Pricing = () => (
             Inscribirse Ahora
             <ArrowRight size={24} />
           </button>
-          
+
           <p className="text-center text-gray-400 text-sm mt-4">
             🔒 Pago seguro • 30 días de garantía
           </p>
@@ -538,7 +537,7 @@ const ContactForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const textoMensaje = `Hola Qaway, mi nombre es ${formData.nombre} (${formData.email}). Tengo la siguiente consulta sobre el Curso de Identidad Visual: ${formData.mensaje}`;
     const waUrl = `${WHATSAPP_PHONE_LINK}?text=${encodeURIComponent(textoMensaje)}`;
 
@@ -570,7 +569,7 @@ const ContactForm = () => {
             Te respondemos en menos de 24 horas
           </p>
         </div>
-        
+
         {isSubmitted ? (
           <div className="bg-white/20 backdrop-blur-md text-white p-8 md:p-10 rounded-2xl text-center space-y-4">
             <div className="text-4xl">🎉</div>
@@ -578,7 +577,7 @@ const ContactForm = () => {
             <p className="text-purple-100 text-sm max-w-md mx-auto leading-relaxed">
               Te estamos redirigiendo a WhatsApp y registramos tu consulta en nuestro sistema para responderte de inmediato.
             </p>
-            <button 
+            <button
               onClick={() => setIsSubmitted(false)}
               className="mt-4 inline-block bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-sm hover:bg-purple-50 transition-all shadow-md"
             >
@@ -588,32 +587,32 @@ const ContactForm = () => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid md:grid-cols-2 gap-5">
-              <input 
-                type="text" 
-                placeholder="Tu nombre completo" 
+              <input
+                type="text"
+                placeholder="Tu nombre completo"
                 required
                 className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg"
                 value={formData.nombre}
-                onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               />
-              <input 
-                type="email" 
-                placeholder="Tu email" 
+              <input
+                type="email"
+                placeholder="Tu email"
                 required
                 className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
-            <textarea 
-              placeholder="¿Cómo podemos ayudarte? Cuéntanos tu situación..." 
+            <textarea
+              placeholder="¿Cómo podemos ayudarte? Cuéntanos tu situación..."
               required
               className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg h-40 resize-none"
               value={formData.mensaje}
-              onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
             ></textarea>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="w-full bg-white text-purple-600 py-6 rounded-2xl font-bold text-xl hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl"
             >
               Enviar mensaje <Send size={22} />
@@ -658,6 +657,10 @@ const Footer = () => (
    ============================================ */
 
 export default function IdentidadVisualLandingPage() {
+  useEffect(() => {
+    document.title = 'Curso Identidad Visual con IA | Qaway Lab';
+  }, []);
+
   return (
     <div className="size-full bg-white">
       <Navbar />
@@ -671,7 +674,7 @@ export default function IdentidadVisualLandingPage() {
       <CTASection />
       <ContactForm />
       <Footer />
-      
+
       {/* Meta Pixel */}
       <script
         dangerouslySetInnerHTML={{

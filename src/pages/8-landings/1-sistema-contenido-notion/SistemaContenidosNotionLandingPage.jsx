@@ -130,10 +130,9 @@ function NotionNavbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <a href="/" className="flex items-center">
-          <span className="text-xl font-bold tracking-tight text-white">Qaway</span>
-          <span className="text-xl font-bold tracking-tight text-[#ff4b0b] ml-1">LAB</span>
-        </a>
+        <Link to="/" className="text-xl font-semibold tracking-[-0.055em] text-white hover:opacity-80 transition-opacity">
+          Qaway <span className="text-white">Lab</span>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
           {links.map(l => (
@@ -575,6 +574,10 @@ function NotionFooter() {
 
 // ─── MAIN PAGE ───────────────────────────────────────────
 export default function SistemaContenidosNotionLandingPage() {
+  useEffect(() => {
+    document.title = 'Sistema de Contenido en Notion | Qaway Lab'
+  }, [])
+
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-black selection:text-white scroll-smooth">
       <NotionNavbar />
