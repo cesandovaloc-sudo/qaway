@@ -575,16 +575,16 @@ function TransformacionVisualCarousel() {
                   }
                   viewport={{ once: false, amount: 0.5 }}
                   transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
-                  className={`flex items-center gap-3 lg:gap-4 p-3 lg:p-4 border rounded-[6px] cursor-pointer transition-all duration-300 text-left w-full ${
+                  className={`flex items-center gap-2.5 lg:gap-4 p-2 lg:p-4 border rounded-[6px] cursor-pointer transition-all duration-300 text-left w-full ${
                     activeSlide === index
                       ? 'border-[#ff4b0b] bg-[#fcfbf7] text-[#ff4b0b]'
                       : 'border-black/10 bg-transparent text-[#8b8c88] hover:bg-black/5'
                   }`}
                 >
-                  <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
+                  <span className={`text-[11px] lg:text-[12px] font-bold ${activeSlide === index ? 'opacity-100' : 'opacity-50'}`}>
                     0{index + 1}
                   </span>
-                  <span style={{ fontSize: '15px', fontWeight: activeSlide === index ? 'bold' : 'normal' }}>
+                  <span className={`text-[13px] lg:text-[15px] ${activeSlide === index ? 'font-bold' : 'font-normal'}`}>
                     {slide.title}
                   </span>
                 </motion.button>
@@ -624,6 +624,16 @@ function TransformacionVisualCarousel() {
             </AnimatePresence>
           </div>
         </motion.div>
+      </div>
+
+      {/* Preload images to avoid delay on click */}
+      <div style={{ display: 'none' }}>
+        {slides.map(slide => (
+          <div key={slide.id}>
+            <img src={slide.beforeImage} alt="" loading="eager" />
+            <img src={slide.afterImage} alt="" loading="eager" />
+          </div>
+        ))}
       </div>
     </section>
   );
