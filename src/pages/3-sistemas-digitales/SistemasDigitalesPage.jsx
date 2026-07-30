@@ -776,7 +776,7 @@ export default function SistemasDigitalesPage() {
         <div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none top-1/2 right-[10%] -translate-y-1/2 z-0" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)" }} />
 
         <div className="relative z-10 mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+          <div className="grid gap-8 lg:gap-12 lg:grid-cols-12 lg:items-center">
             {/* Left Column: Title and 2-column Buttons Grid */}
             <div className="lg:col-span-5 flex flex-col justify-start">
               <motion.div
@@ -837,7 +837,7 @@ export default function SistemasDigitalesPage() {
               <div className="lg:sticky lg:top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
-                <div className="relative z-10 w-full flex items-center justify-center min-h-[620px]" style={{ perspective: 1000 }}>
+                <div className="relative z-10 w-full flex items-center justify-center py-4 lg:py-0 lg:min-h-[620px]" style={{ perspective: 1000 }}>
                   <div className="relative w-full max-w-[450px]" style={{ aspectRatio: '655/864' }}>
                     {items.map((item, idx) => {
                       const currentActive = activeIdx === null ? 0 : activeIdx
