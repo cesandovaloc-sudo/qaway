@@ -1,4 +1,4 @@
-﻿const SITE_MODE = import.meta.env.MODE || 'development'
+const SITE_MODE = import.meta.env.MODE || 'development'
 
 export const isPublicSiteMode = SITE_MODE === 'public'
 
@@ -8,11 +8,11 @@ const routeVisibility = {
   proyectos: true,
   brief: false,
   sistemasDigitales: true,
-  academy: true,
+  academy: false,
   hub: false,
   recursos: false,
   blog: true,
-  landings: false,
+  landings: true,
   auth: false,
   pruebas: false,
 }
@@ -22,7 +22,8 @@ const publicPathAllowList = new Set([
   '/estudio',
   '/proyectos',
   '/sistemas-digitales',
-  '/academy',
+  '/landings/sistema-contenido-notion',
+  '/landings/identidad-visual',
   '/blog',
 ])
 
