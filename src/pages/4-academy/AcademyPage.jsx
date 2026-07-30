@@ -9,7 +9,6 @@ import {
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
-  BookOpen,
   BriefcaseBusiness,
   Check,
   ChevronLeft,
@@ -235,7 +234,7 @@ function getTestimonialPosition(index, activeIndex, total) {
 }
 
 function leadEmailHtml(lead) {
-  const date = new Date().toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  const date = new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
   const rows = [
     { label: 'Nombre', value: lead.name },
     { label: 'Teléfono', value: lead.phone },
@@ -434,18 +433,7 @@ export default function AcademyPage() {
               </a>
             </div>
 
-            <div className="academy-hero-benefits">
-              {[
-                [GraduationCap, 'Aprendizaje práctico'],
-                [BookOpen, 'Recursos accionables'],
-                [Users, 'Enfoque para no desarrolladores'],
-              ].map(([Icon, text]) => (
-                <div key={text}>
-                  <Icon size={21} strokeWidth={1.6} />
-                  <span>{text}</span>
-                </div>
-              ))}
-            </div>
+
           </motion.div>
 
           <motion.div
@@ -478,18 +466,7 @@ export default function AcademyPage() {
             <div className="academy-small-rule" />
             <p>Convierte herramientas, ideas y procesos en capacidades reales para tu trabajo y tu negocio.</p>
 
-            <SpotlightCard className="academy-student-card">
-              <div className="academy-student-icon"><Users size={25} /></div>
-              <div>
-                <strong>Aprende aplicando</strong>
-                <span>Metodología clara, humana y accionable.</span>
-              </div>
-            </SpotlightCard>
 
-            <a href="#programas" className="academy-available">
-              <Play size={13} fill="currentColor" />
-              Programas disponibles
-            </a>
           </motion.aside>
         </div>
       </section>
@@ -553,6 +530,13 @@ export default function AcademyPage() {
                 {topic}
               </button>
             ))}
+            <Link
+              to="/academy/cursos"
+              className="academy-topic-filter-all"
+            >
+              Ver todos los cursos
+              <ArrowRight size={14} />
+            </Link>
           </div>
           <div className="academy-carousel-controls">
             <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
@@ -570,61 +554,65 @@ export default function AcademyPage() {
       <section id="metodo" className="academy-section academy-method">
         <div className="academy-method-layout">
           <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
-          <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método Qaway</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Menos teoría suelta. Más <span className="text-[#ff4b0b]">capacidad instalada.</span>
-            </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Cada experiencia combina contexto, demostración, práctica guiada y una aplicación directa a tu trabajo.
-            </motion.p>
-          </div>
-          <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
-            <motion.a
-              href="#formulario"
-              className="academy-text-link"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ff4b0b', fontWeight: 'bold', textDecoration: 'none' }}
-              whileHover="hovered"
-              initial="rest"
-              animate="rest"
-            >
-              Ver cómo aprendemos
-              <motion.span
-                variants={{ rest: { x: 0 }, hovered: { x: 5 } }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                style={{ display: 'inline-flex' }}
+            <div>
+              <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método Qaway</motion.p>
+              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+                Menos teoría suelta. Más <span className="text-[#ff4b0b]">capacidad instalada.</span>
+              </motion.h2>
+              <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Cada experiencia combina contexto, demostración, práctica guiada y una aplicación directa a tu trabajo.
+              </motion.p>
+            </div>
+            <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <Link to="/academy/cursos" className="academy-primary-button">
+                Ver todos los cursos
+                <ArrowRight size={17} />
+              </Link>
+              <motion.a
+                href="#formulario"
+                className="academy-text-link"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#ff4b0b', fontWeight: 'bold', textDecoration: 'none' }}
+                whileHover="hovered"
+                initial="rest"
+                animate="rest"
               >
-                <ArrowRight size={16} />
-              </motion.span>
-            </motion.a>
-          </motion.div>
-        </motion.div>
-
-        <div className="academy-method-steps">
-          {[
-            { title: 'Entiende',    text: 'Primero ves el problema completo y el criterio detrás de cada decisión.',   dir: { x: -60 } },
-            { title: 'Construye',   text: 'Después aplicas el método con herramientas y ejemplos cercanos.',           dir: { y:  60 } },
-            { title: 'Implementa',  text: 'Terminas con un sistema, flujo o recurso que puedes seguir usando.',        dir: { x:  60 } },
-          ].map(({ title, text, dir }, index) => (
-            <motion.div
-              key={title}
-              className="academy-method-step group"
-              initial={reduceMotion ? false : { opacity: 0, ...dir }}
-              whileInView={{ opacity: 1, x: 0, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 select-none text-[8.5rem] font-bold leading-none text-[#191918]/[0.08] transition-colors duration-500 group-hover:text-[#ff4b0b]/[0.1]">
-                0{index + 1}
-              </span>
-              <div className="relative z-10 ml-[7rem]">
-                <span className="mb-[0.4rem] block text-[0.77rem] font-bold text-[#ff4b0b]">0{index + 1}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </div>
+                Ver cómo aprendemos
+                <motion.span
+                  variants={{ rest: { x: 0 }, hovered: { x: 5 } }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  style={{ display: 'inline-flex' }}
+                >
+                  <ArrowRight size={16} />
+                </motion.span>
+              </motion.a>
             </motion.div>
-          ))}
-        </div>
+          </motion.div>
+
+          <div className="academy-method-steps">
+            {[
+              { title: 'Entiende', text: 'Primero ves el problema completo y el criterio detrás de cada decisión.', dir: { x: -60 } },
+              { title: 'Construye', text: 'Después aplicas el método con herramientas y ejemplos cercanos.', dir: { y: 60 } },
+              { title: 'Implementa', text: 'Terminas con un sistema, flujo o recurso que puedes seguir usando.', dir: { x: 60 } },
+            ].map(({ title, text, dir }, index) => (
+              <motion.div
+                key={title}
+                className="academy-method-step group"
+                initial={reduceMotion ? false : { opacity: 0, ...dir }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 select-none text-[8.5rem] font-bold leading-none text-[#191918]/[0.08] transition-colors duration-500 group-hover:text-[#ff4b0b]/[0.1]">
+                  0{index + 1}
+                </span>
+                <div className="relative z-10 ml-[7rem]">
+                  <span className="mb-[0.4rem] block text-[0.77rem] font-bold text-[#ff4b0b]">0{index + 1}</span>
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -700,117 +688,117 @@ export default function AcademyPage() {
 
       <section id="formulario" className="academy-section academy-form-section">
         <div className="academy-form-layout">
-        <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
-          <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Inscripciones y <span className="text-[#ff4b0b]">orientación académica.</span>
-            </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Escríbenos para resolver dudas sobre el contenido de los cursos, fechas de talleres o solicitar asesoría sobre qué programa se adapta a tus metas.
-            </motion.p>
-          </div>
-          <motion.div variants={copyItem} className="academy-form-points" style={{ marginTop: '2rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Respuesta en menos de 24 horas</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Orientación sin compromiso</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Opciones personalizadas para empresas</span>
-          </motion.div>
-        </motion.div>
-
-        <motion.form
-          onSubmit={submitInterest}
-          className="academy-interest-form"
-          {...reveal}
-        >
-          {submitted ? (
-            <div className="academy-form-success">
-              <div><Check size={28} /></div>
-              <h3>¡Consulta enviada!</h3>
-              <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
-              <button type="button" onClick={() => setSubmitted(false)}>Enviar otro mensaje</button>
+          <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+            <div>
+              <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
+              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+                Inscripciones y <span className="text-[#ff4b0b]">orientación académica.</span>
+              </motion.h2>
+              <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Escríbenos para resolver dudas sobre el contenido de los cursos, fechas de talleres o solicitar asesoría sobre qué programa se adapta a tus metas.
+              </motion.p>
             </div>
-          ) : (
-            <>
-              <div className="academy-field">
-                <label htmlFor="academy-name">¿Cómo te llamas?</label>
-                <input
-                  type="text"
-                  id="academy-name"
-                  name="name"
-                  required
-                  placeholder="Tu nombre completo"
-                />
+            <motion.div variants={copyItem} className="academy-form-points" style={{ marginTop: '2rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Respuesta en menos de 24 horas</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Orientación sin compromiso</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Check size={16} /> Opciones personalizadas para empresas</span>
+            </motion.div>
+          </motion.div>
+
+          <motion.form
+            onSubmit={submitInterest}
+            className="academy-interest-form"
+            {...reveal}
+          >
+            {submitted ? (
+              <div className="academy-form-success">
+                <div><Check size={28} /></div>
+                <h3>¡Consulta enviada!</h3>
+                <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
+                <button type="button" onClick={() => setSubmitted(false)}>Enviar otro mensaje</button>
               </div>
-              <div className="academy-field-row">
+            ) : (
+              <>
                 <div className="academy-field">
-                  <label htmlFor="academy-phone">Teléfono</label>
+                  <label htmlFor="academy-name">¿Cómo te llamas?</label>
                   <input
-                    type="tel"
-                    id="academy-phone"
-                    name="phone"
+                    type="text"
+                    id="academy-name"
+                    name="name"
                     required
-                    placeholder="+51 999 999 999"
+                    placeholder="Tu nombre completo"
                   />
                 </div>
+                <div className="academy-field-row">
+                  <div className="academy-field">
+                    <label htmlFor="academy-phone">Teléfono</label>
+                    <input
+                      type="tel"
+                      id="academy-phone"
+                      name="phone"
+                      required
+                      placeholder="+51 999 999 999"
+                    />
+                  </div>
+                  <div className="academy-field">
+                    <label htmlFor="academy-email">Correo</label>
+                    <input
+                      type="email"
+                      id="academy-email"
+                      name="email"
+                      required
+                      placeholder="tucorreo@empresa.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="academy-field-row">
+                  <div className="academy-field">
+                    <label htmlFor="academy-profile">¿A qué te dedicas?</label>
+                    <select id="academy-profile" name="profile" required>
+                      <option value="">Selecciona tu perfil</option>
+                      <option value="Profesional / Consultor">Profesional / Consultor</option>
+                      <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                      <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
+                      <option value="Equipo / Empresa (Capacitación a medida)">Equipo / Empresa (Capacitación a medida)</option>
+                      <option value="Estudiante / Aprendo desde cero">Estudiante / Aprendo desde cero</option>
+                    </select>
+                  </div>
+                  <div className="academy-field">
+                    <label htmlFor="academy-interest">¿Qué programa o curso te interesa?</label>
+                    <select id="academy-interest" name="interest" required>
+                      <option value="">Selecciona un curso o programa</option>
+                      <option value="Diseño — Identidad Visual con IA">Diseño — Identidad Visual con IA</option>
+                      <option value="Marketing — WhatsApp Business para negocios">Marketing — WhatsApp Business para negocios</option>
+                      <option value="IA — Antigravity desde cero">IA — Antigravity desde cero</option>
+                      <option value="Productividad — IA para equipos pequeños">Productividad — IA para equipos pequeños</option>
+                      <option value="IA — Sistema de contenido con IA">IA — Sistema de contenido con IA</option>
+                      <option value="Automatización — Workflows sin código">Automatización — Workflows sin código</option>
+                      <option value="Marketing — Presencia digital para emprender">Marketing — Presencia digital para emprender</option>
+                      <option value="Capacitación Corporativa para Empresas">Capacitación Corporativa para Empresas</option>
+                      <option value="Orientación general / No sé por dónde empezar">Orientación general / No sé por dónde empezar</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="academy-field">
-                  <label htmlFor="academy-email">Correo</label>
-                  <input
-                    type="email"
-                    id="academy-email"
-                    name="email"
-                    required
-                    placeholder="tucorreo@empresa.com"
+                  <label htmlFor="academy-message">Cuéntanos un poco más</label>
+                  <textarea
+                    id="academy-message"
+                    name="message"
+                    rows="4"
+                    placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
                   />
                 </div>
-              </div>
-
-              <div className="academy-field-row">
-                <div className="academy-field">
-                  <label htmlFor="academy-profile">¿A qué te dedicas?</label>
-                  <select id="academy-profile" name="profile" required>
-                    <option value="">Selecciona tu perfil</option>
-                    <option value="Profesional / Consultor">Profesional / Consultor</option>
-                    <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
-                    <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                    <option value="Equipo / Empresa (Capacitación a medida)">Equipo / Empresa (Capacitación a medida)</option>
-                    <option value="Estudiante / Aprendo desde cero">Estudiante / Aprendo desde cero</option>
-                  </select>
-                </div>
-                <div className="academy-field">
-                  <label htmlFor="academy-interest">¿Qué programa o curso te interesa?</label>
-                  <select id="academy-interest" name="interest" required>
-                    <option value="">Selecciona un curso o programa</option>
-                    <option value="Diseño — Identidad Visual con IA">Diseño — Identidad Visual con IA</option>
-                    <option value="Marketing — WhatsApp Business para negocios">Marketing — WhatsApp Business para negocios</option>
-                    <option value="IA — Antigravity desde cero">IA — Antigravity desde cero</option>
-                    <option value="Productividad — IA para equipos pequeños">Productividad — IA para equipos pequeños</option>
-                    <option value="IA — Sistema de contenido con IA">IA — Sistema de contenido con IA</option>
-                    <option value="Automatización — Workflows sin código">Automatización — Workflows sin código</option>
-                    <option value="Marketing — Presencia digital para emprender">Marketing — Presencia digital para emprender</option>
-                    <option value="Capacitación Corporativa para Empresas">Capacitación Corporativa para Empresas</option>
-                    <option value="Orientación general / No sé por dónde empezar">Orientación general / No sé por dónde empezar</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="academy-field">
-                <label htmlFor="academy-message">Cuéntanos un poco más</label>
-                <textarea
-                  id="academy-message"
-                  name="message"
-                  rows="4"
-                  placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
-                />
-              </div>
-              <button type="submit" className="academy-submit-button" disabled={submitting}>
-                {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR INFORMACIÓN DEL CURSO'}
-                <Send size={17} />
-              </button>
-              {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
-              <small>Usaremos esta información únicamente para responder tu consulta.</small>
-            </>
-          )}
-        </motion.form>
+                <button type="submit" className="academy-submit-button" disabled={submitting}>
+                  {submitting ? 'ENVIANDO CONSULTA...' : 'SOLICITAR INFORMACIÓN DEL CURSO'}
+                  <Send size={17} />
+                </button>
+                {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                <small>Usaremos esta información únicamente para responder tu consulta.</small>
+              </>
+            )}
+          </motion.form>
         </div>
       </section>
 
@@ -833,7 +821,7 @@ export default function AcademyPage() {
               </MagneticLink>
             </motion.div>
           </motion.div>
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-10 pt-4"
             initial="hidden"
             whileInView="visible"
@@ -851,7 +839,7 @@ export default function AcademyPage() {
             ].map((item, index) => {
               const Icon = item.icon
               return (
-                <motion.div 
+                <motion.div
                   key={item.title}
                   variants={{
                     hidden: { opacity: 0, y: 20 },

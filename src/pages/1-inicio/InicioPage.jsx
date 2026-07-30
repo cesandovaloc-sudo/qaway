@@ -407,11 +407,11 @@ function Hero() {
             viewport={{ once: true, amount: 0.35 }}
             variants={fadeUp}
             custom={0.22}
-            className="flex flex-col justify-center px-7 py-10 sm:px-10 lg:px-9"
+            className="flex flex-col justify-center items-center text-center px-7 py-10 sm:px-10 lg:px-9"
           >
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
             <h2
-              className="text-[clamp(1.4rem,3.8vw,2.5rem)] leading-[0.9] tracking-[-0.022em] text-balance"
+              className="text-[clamp(1.2rem,3.2vw,2.2rem)] leading-[0.9] tracking-[-0.022em] text-balance"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Todo lo que necesitas para crear,
