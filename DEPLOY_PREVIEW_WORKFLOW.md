@@ -13,6 +13,8 @@ Ruta base del proyecto:
 
 `C:\LEO\EMPRESAS\QAWAY LAB\1-Web-Qaway`
 
+
+> Nota Hostinger SPA: si una ruta interna como `/estudio`, `/sistemas-digitales`, `/proyectos`, `/blog` o una landing carga desde la navegacion pero falla con `404 this page does not exist` al refrescar o recargar en movil, falta configurar el fallback de SPA hacia `index.html` en Hostinger/public_html mediante `.htaccess` o regla equivalente del hosting.
 ## Idea central
 
 El proyecto puede seguir siendo un monorepo con varias carpetas:
