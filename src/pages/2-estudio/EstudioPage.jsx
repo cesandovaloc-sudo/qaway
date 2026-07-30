@@ -156,6 +156,13 @@ function SplitVisual({ beforeImage, afterImage, alt, dark = false }) {
         const position = Math.max(8, Math.min(92, ((event.clientX - rect.left) / rect.width) * 100));
         containerRef.current.style.setProperty('--split-position', `${position}%`);
       }}
+      onTouchMove={(event) => {
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientX = event.touches[0].clientX;
+        const position = Math.max(8, Math.min(92, ((clientX - rect.left) / rect.width) * 100));
+        containerRef.current.style.setProperty('--split-position', `${position}%`);
+      }}
       style={{ '--split-position': `50%`, width: '100%', height: '100%' }}
     >
       <img src={beforeImage} alt={`Original - ${alt}`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
@@ -568,21 +575,11 @@ function TransformacionVisualCarousel() {
                   }
                   viewport={{ once: false, amount: 0.5 }}
                   transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    padding: '16px 20px',
-                    border: '1px solid',
-                    borderColor: activeSlide === index ? 'var(--vl-acid)' : 'rgba(0,0,0,0.08)',
-                    backgroundColor: activeSlide === index ? '#fcfbf7' : 'transparent',
-                    color: activeSlide === index ? 'var(--vl-acid)' : '#8b8c88',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
-                    textAlign: 'left',
-                    width: '100%'
-                  }}
+                  className={`flex items-center gap-3 lg:gap-4 p-3 lg:p-4 border rounded-[6px] cursor-pointer transition-all duration-300 text-left w-full ${
+                    activeSlide === index
+                      ? 'border-[#ff4b0b] bg-[#fcfbf7] text-[#ff4b0b]'
+                      : 'border-black/10 bg-transparent text-[#8b8c88] hover:bg-black/5'
+                  }`}
                 >
                   <span style={{ fontSize: '12px', fontWeight: 'bold', opacity: activeSlide === index ? 1 : 0.5 }}>
                     0{index + 1}
