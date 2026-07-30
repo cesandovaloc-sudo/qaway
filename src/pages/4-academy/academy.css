@@ -2044,6 +2044,11 @@
     grid-template-columns: 1fr;
   }
 
+  .academy-form-layout {
+    grid-template-columns: 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
   .academy-featured-courses {
     grid-template-columns: 1fr;
   }
