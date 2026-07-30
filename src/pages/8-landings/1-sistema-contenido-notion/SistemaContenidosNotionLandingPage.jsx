@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowRight, Brain, Layout, Zap, Users, Menu, X, Target, Settings, TrendingUp,
@@ -546,18 +547,27 @@ function NotionCta() {
 // ─── Footer ──────────────────────────────────────────────
 function NotionFooter() {
   return (
-    <footer className="py-16 border-t border-gray-800 bg-gray-900">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-10">
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-2xl tracking-tight text-white">Qaway</span>
-          <span className="font-bold text-2xl tracking-tight text-[#FFD200]">LAB</span>
+    <footer className="border-t border-white/10 bg-[#111111] px-6 py-14 text-white sm:px-10 lg:px-14 lg:py-16">
+      <div className="mx-auto max-w-[94rem]">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
+          <div className="lg:pr-16">
+            <Link to="/" className="inline-flex items-center gap-2 text-2xl font-semibold tracking-[-0.05em]">
+              Qaway <span className="text-[#ff4b0b]">Lab</span>
+            </Link>
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/56">
+              Un ecosistema para construir marca, ordenar operación y activar aprendizaje con IA.
+            </p>
+          </div>
+          <nav className="flex flex-wrap gap-8 text-[15px] font-semibold text-white/80">
+            <a href="#herramientas" className="hover:text-white transition-colors">Módulos</a>
+            <a href="#metodo" className="hover:text-white transition-colors">Flujo</a>
+            <a href="#precios" className="text-[#ff4b0b] font-bold hover:text-[#df3900] transition-colors">Inversión</a>
+          </nav>
         </div>
-        <div className="flex gap-10 text-[10px] font-black uppercase tracking-[0.3em] text-white">
-          <a href="#herramientas" className="hover:text-orange-500 transition-colors">Módulos</a>
-          <a href="#metodo" className="hover:text-orange-500 transition-colors">Flujo</a>
-          <a href="#precios" className="hover:text-orange-500 transition-colors">Inversión</a>
+
+        <div className="mt-10 border-t border-white/10 pt-6 text-center">
+          <span className="text-xs font-medium uppercase tracking-[0.18em] text-white/50">&copy; 2026 Qaway Lab</span>
         </div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">2026 • LIMA • PERÚ</p>
       </div>
     </footer>
   )

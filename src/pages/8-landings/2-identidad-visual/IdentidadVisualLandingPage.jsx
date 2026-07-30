@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { WHATSAPP_LINK, WHATSAPP_PHONE_LINK } from '@/data/navigation';
+import { supabase } from '@/config/supabase';
 import { 
   Sparkles, 
   ArrowRight, 
@@ -18,8 +20,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CART_URL = 'https://qawaylab.com/product/curso-identidad-visual-con-ia/?v=0281a6ed1dc2';
-const goToCart = () => window.open(CART_URL, '_blank', 'noopener,noreferrer');
+const WA_COURSE_URL = `${WHATSAPP_PHONE_LINK}?text=${encodeURIComponent('Hola Qaway, quiero comenzar el curso de Identidad Visual con IA.')}`;
+const goToCart = () => window.open(WA_COURSE_URL, '_blank', 'noopener,noreferrer');
 
 /**
  * LANDING PRODUCTION AGENT
@@ -41,7 +43,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="#metodo" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Método</a>
           <a href="#contenido" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Qué aprenderás</a>
-          <a href="#testimonios" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Resultados</a>
+          <a href="#proyectos-estudiantes" className="text-gray-600 hover:text-purple-600 transition-colors font-medium">Resultados</a>
           <a href="#precio" className="text-purple-600 font-bold">Ver precio</a>
         </div>
         
@@ -59,7 +61,7 @@ const Navbar = () => {
         <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-4">
           <a href="#metodo" className="block text-gray-600 font-medium">Método</a>
           <a href="#contenido" className="block text-gray-600 font-medium">Qué aprenderás</a>
-          <a href="#testimonios" className="block text-gray-600 font-medium">Resultados</a>
+          <a href="#proyectos-estudiantes" className="block text-gray-600 font-medium">Resultados</a>
           <a href="#precio" className="block text-purple-600 font-bold">Ver precio</a>
         </div>
       )}
@@ -328,7 +330,7 @@ const portfolioItems = [
 ];
 
 const PortfolioSection = () => (
-  <section className="py-16 bg-white">
+  <section id="proyectos-estudiantes" className="py-16 bg-white">
     <div className="max-w-7xl mx-auto px-6">
       <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
@@ -466,7 +468,7 @@ const Pricing = () => (
             🎉 OFERTA ESPECIAL
           </div>
           
-          <div className="text-center mt-8 mb-8">
+          <div className="text-center mt-14 mb-8">
             <div className="flex items-center justify-center gap-4 mb-2">
               <span className="text-2xl text-gray-400 line-through">S/60.00</span>
               <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-bold">
@@ -534,10 +536,27 @@ const ContactForm = () => {
   const [formData, setFormData] = useState({ nombre: '', email: '', mensaje: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const textoMensaje = `Hola Qaway, mi nombre es ${formData.nombre} (${formData.email}). Tengo la siguiente consulta sobre el Curso de Identidad Visual: ${formData.mensaje}`;
+    const waUrl = `${WHATSAPP_PHONE_LINK}?text=${encodeURIComponent(textoMensaje)}`;
+
+    try {
+      await supabase.from('leads').insert([{
+        client_name: formData.nombre,
+        contact_info: formData.email,
+        source: 'Landing Identidad Visual',
+        stage: 'new',
+        metadata: { mensaje: formData.mensaje }
+      }]);
+    } catch (err) {
+      console.error('Error al guardar lead:', err);
+    }
+
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    setFormData({ nombre: '', email: '', mensaje: '' });
     setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 5000);
   };
 
   return (
@@ -553,8 +572,18 @@ const ContactForm = () => {
         </div>
         
         {isSubmitted ? (
-          <div className="bg-white/20 backdrop-blur-sm text-white p-8 rounded-2xl font-bold text-center text-xl">
-            ¡Mensaje enviado! Te responderemos pronto. 🎉
+          <div className="bg-white/20 backdrop-blur-md text-white p-8 md:p-10 rounded-2xl text-center space-y-4">
+            <div className="text-4xl">🎉</div>
+            <h3 className="text-2xl font-bold">¡Consulta enviada con éxito!</h3>
+            <p className="text-purple-100 text-sm max-w-md mx-auto leading-relaxed">
+              Te estamos redirigiendo a WhatsApp y registramos tu consulta en nuestro sistema para responderte de inmediato.
+            </p>
+            <button 
+              onClick={() => setIsSubmitted(false)}
+              className="mt-4 inline-block bg-white text-purple-600 px-6 py-3 rounded-xl font-bold text-sm hover:bg-purple-50 transition-all shadow-md"
+            >
+              Enviar otra consulta
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -596,12 +625,31 @@ const ContactForm = () => {
   );
 };
 
-// Footer - FONDO: gray-900
+// Footer - FONDO: #111111
 const Footer = () => (
-  <footer className="py-12 bg-gray-900 text-center">
-    <p className="text-gray-400">
-      © 2026 Qaway Lab. Identidad Visual con IA. Todos los derechos reservados.
-    </p>
+  <footer className="border-t border-white/10 bg-[#111111] px-6 py-14 text-white sm:px-10 lg:px-14 lg:py-16">
+    <div className="mx-auto max-w-[94rem]">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10">
+        <div className="lg:pr-16">
+          <Link to="/" className="inline-flex items-center gap-2 text-2xl font-semibold tracking-[-0.05em]">
+            Qaway <span className="text-[#ff4b0b]">Lab</span>
+          </Link>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-white/56">
+            Un ecosistema para construir marca, ordenar operación y activar aprendizaje con IA.
+          </p>
+        </div>
+        <nav className="flex flex-wrap gap-8 text-[15px] font-semibold text-white/80">
+          <a href="#metodo" className="hover:text-white transition-colors">Método</a>
+          <a href="#contenido" className="hover:text-white transition-colors">Qué aprenderás</a>
+          <a href="#proyectos-estudiantes" className="hover:text-white transition-colors">Resultados</a>
+          <a href="#precio" className="text-[#ff4b0b] font-bold hover:text-[#df3900] transition-colors">Ver precio</a>
+        </nav>
+      </div>
+
+      <div className="mt-10 border-t border-white/10 pt-6 text-center">
+        <span className="text-xs font-medium uppercase tracking-[0.18em] text-white/50">&copy; 2026 Qaway Lab</span>
+      </div>
+    </div>
   </footer>
 );
 

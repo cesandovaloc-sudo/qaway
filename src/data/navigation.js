@@ -70,3 +70,4 @@ export const socialLinks = [
 ]
 
 export const WHATSAPP_LINK = 'https://wa.me/message/3WAEIWEXAKA2C1'
+export const WHATSAPP_PHONE_LINK = 'https://wa.me/51930756781'

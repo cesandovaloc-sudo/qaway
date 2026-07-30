@@ -10,9 +10,9 @@ const routeVisibility = {
   sistemasDigitales: true,
   academy: true,
   hub: false,
-  recursos: true,
+  recursos: false,
   blog: true,
-  landings: true,
+  landings: false,
   auth: false,
   pruebas: false,
 }
@@ -23,13 +23,7 @@ const publicPathAllowList = new Set([
   '/proyectos',
   '/sistemas-digitales',
   '/academy',
-  '/recursos',
-  '/recursos/ebooks/google-calendar-dominado',
   '/blog',
-  '/blog/articulo/google-calendar-dominado-guia-productividad',
-  '/landings/sistema-contenido-notion',
-  '/landings/identidad-visual',
-  '/landings/restauracion-fotografica2',
 ])
 
 const navigationRegistry = [
@@ -44,13 +38,6 @@ const navigationRegistry = [
     key: 'sistemasDigitales',
     label: 'Sistemas digitales',
     path: '/sistemas-digitales',
-    navbar: true,
-    footerGroup: 'areas',
-  },
-  {
-    key: 'proyectos',
-    label: 'Proyectos',
-    path: '/proyectos',
     navbar: true,
     footerGroup: 'areas',
   },
@@ -81,6 +68,13 @@ const navigationRegistry = [
     path: '/blog',
     navbar: true,
     footerGroup: 'resources',
+  },
+  {
+    key: 'proyectos',
+    label: 'Proyectos',
+    path: '/proyectos',
+    navbar: true,
+    footerGroup: 'areas',
   },
 ]
 
@@ -116,3 +110,4 @@ export const publicRouteKeys = new Set(
 )
 
 export const publicPaths = Array.from(publicPathAllowList)
+
