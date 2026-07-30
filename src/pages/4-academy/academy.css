@@ -459,7 +459,7 @@
 .academy-course-card {
   display: grid;
   grid-template-rows: 12rem auto;
-  border-radius: 1rem;
+  border-radius: 6px;
   overflow: hidden;
   border: 1px solid rgba(32, 32, 31, 0.1);
   background: #fff;
@@ -589,8 +589,26 @@
 }
 
 .academy-catalog {
-  background: #e8e5df;
+  background: #252523;
+  color: #f7f5f1;
 }
+
+.academy-catalog .academy-topic-filters button {
+  border-color: rgba(247, 245, 241, 0.18);
+  color: rgba(247, 245, 241, 0.65);
+  background: transparent;
+}
+
+.academy-catalog .academy-carousel-controls button {
+  border-color: rgba(247, 245, 241, 0.2);
+  color: #f7f5f1;
+}
+
+.academy-catalog .academy-carousel-controls button:hover {
+  background: #f7f5f1;
+  color: #252523;
+}
+
 
 .academy-catalog-heading,
 .academy-testimonial-heading {
@@ -691,7 +709,7 @@
 
 .academy-course-carousel {
   display: grid;
-  grid-auto-columns: minmax(20rem, 29vw);
+  grid-auto-columns: 20rem;
   grid-auto-flow: column;
   gap: 1rem;
   max-width: 92rem;
@@ -701,6 +719,10 @@
   padding: 0.5rem 0 1.8rem;
   scroll-snap-type: inline mandatory;
   scrollbar-width: none;
+}
+
+.academy-course-carousel.is-medium {
+  grid-auto-columns: 26rem;
 }
 
 .academy-course-carousel .academy-course-card {
@@ -831,25 +853,19 @@
 }
 
 .academy-method {
+  background: #efeeeb;
+}
+
+.academy-method-layout {
   display: grid;
   grid-template-columns: 0.88fr 1.12fr;
   gap: clamp(4rem, 8vw, 10rem);
-  background: #e9e7e2;
+  max-width: 92rem;
+  margin: 0 auto;
 }
 
 .academy-method-copy {
   align-self: center;
-}
-
-.academy-method-copy h2 {
-  font-size: clamp(3.5rem, 5.4vw, 6.4rem);
-}
-
-.academy-method-copy>p {
-  max-width: 32rem;
-  margin: 1.8rem 0 2rem;
-  color: var(--academy-muted);
-  line-height: 1.65;
 }
 
 .academy-method-steps {
@@ -857,17 +873,15 @@
 }
 
 .academy-method-step {
-  display: grid;
-  grid-template-columns: 5rem 1fr;
-  gap: 2rem;
-  padding: 2.4rem 0;
+  position: relative;
+  overflow: hidden;
+  padding: 3.2rem 2rem 3.2rem 3.5rem;
   border-bottom: 1px solid rgba(32, 32, 31, 0.18);
+  transition: background 400ms ease;
 }
 
-.academy-method-step>span {
-  color: var(--academy-accent);
-  font-size: 0.77rem;
-  font-weight: 700;
+.academy-method-step:hover {
+  background: rgba(32, 32, 31, 0.025);
 }
 
 .academy-method-step h3 {
@@ -971,12 +985,16 @@
   background: #f0eee9;
 }
 
+.tst-ver-a {
+  background: #f8f7f4;
+  color: var(--academy-ink);
+}
+
 /* ── Versión A: Fade + Slide ── */
-.tst-ver-a { background: #f7f5f1; }
 
 .tst-a-layout {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1.4fr 1fr;
   gap: clamp(3rem, 6vw, 7rem);
   align-items: center;
   max-width: 92rem;
@@ -1074,6 +1092,7 @@
 
 .tst-a-nav {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
   margin-top: 1.5rem;
@@ -1699,13 +1718,18 @@
 }
 
 .academy-form-section {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 75, 11, 0.09), transparent 28rem),
+    var(--academy-white);
+}
+
+.academy-form-layout {
   display: grid;
   grid-template-columns: 0.82fr 1.18fr;
   gap: clamp(4rem, 8vw, 10rem);
   align-items: start;
-  background:
-    radial-gradient(circle at 10% 0%, rgba(255, 75, 11, 0.09), transparent 28rem),
-    var(--academy-white);
+  max-width: 92rem;
+  margin: 0 auto;
 }
 
 .academy-form-intro {
@@ -1929,13 +1953,19 @@
 }
 
 .academy-final-cta {
-  display: grid;
-  grid-template-columns: 1.35fr 0.65fr;
-  gap: 5rem;
-  align-items: end;
   padding: clamp(5rem, 8vw, 8rem) clamp(1.5rem, 5vw, 6rem);
   background: var(--academy-accent);
   color: white;
+}
+
+.academy-final-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(4rem, 6vw, 6rem);
+  align-items: center;
+  max-width: 92rem;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .academy-final-cta .academy-kicker {
@@ -2055,6 +2085,19 @@
 
   .academy-testimonial-card {
     width: min(18rem, 34vw);
+  }
+
+  .tst-a-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .tst-a-stage {
+    order: 2;
+  }
+  
+  .tst-a-copy {
+    order: 1;
   }
 
   .academy-form-intro {
@@ -2263,8 +2306,12 @@
   }
 
   .academy-final-cta {
-    gap: 3rem;
     padding: 5rem 1.25rem;
+  }
+
+  .academy-final-layout {
+    grid-template-columns: 1fr;
+    gap: 3rem;
   }
 }
 

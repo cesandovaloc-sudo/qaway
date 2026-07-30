@@ -1146,7 +1146,6 @@ export default function SistemasDigitalesPage() {
                     variants={revealUp}
                     custom={0.1 * index}
                     whileHover={reduceMotion ? {} : { y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
-                    style={{ scale: 0.73, transformOrigin: "top left" }}
                     className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                       }`}
                   >

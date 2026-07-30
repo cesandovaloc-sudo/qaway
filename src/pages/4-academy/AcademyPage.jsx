@@ -30,7 +30,7 @@ import { supabase } from '@/config/supabase'
 import { featuredCourses, courseCatalog } from '@/data/academyCourses'
 import './academy.css'
 
-const heroImage = '/assets/pages/9-pruebas/academy/academy-hero-educator.png'
+const heroImage = '/assets/pages/4-academy/academy-hero-educator.png'
 
 
 
@@ -38,47 +38,47 @@ const courseTopics = ['Todos', 'Inteligencia artificial', 'Productividad', 'Mark
 
 const testimonials = [
   {
-    quote: 'No sentí que estaba aprendiendo una herramienta aislada. Terminé con un sistema que ya uso cada semana.',
+    quote: 'No sentí que estaba aprendiendo a usar un programa. Terminé con un sistema claro para coordinar mis proyectos y presupuestos que ya uso todos los días con mis clientes.',
     name: 'Mariana Torres',
-    role: 'Consultora de marca',
+    role: 'Arquitecta',
     city: 'Lima',
-    portrait: '/assets/pages/9-pruebas/academy/testimonials/mariana.png',
+    portrait: '/assets/pages/4-academy/testimonials/mariana.png',
     accent: '#f0672f',
     tint: 'rgba(240, 103, 47, 0.16)',
   },
   {
-    quote: 'El enfoque fue directo y cercano. Pude ordenar WhatsApp Business y responder mejor sin pasar todo el día conectada.',
+    quote: 'El enfoque fue muy práctico. Pude ordenar el flujo de pedidos por WhatsApp y atender a mis proveedores sin estar pegada al celular las 24 horas.',
     name: 'Lucía Rojas',
-    role: 'Emprendedora',
+    role: 'Administradora de tienda',
     city: 'Arequipa',
-    portrait: '/assets/pages/9-pruebas/academy/testimonials/lucia.png',
+    portrait: '/assets/pages/4-academy/testimonials/lucia.png',
     accent: '#df5a2a',
     tint: 'rgba(223, 90, 42, 0.16)',
   },
   {
-    quote: 'Las clases explican el porqué antes del paso a paso. Eso me dio confianza para adaptar lo aprendido a mi trabajo.',
+    quote: 'Las clases explican el porqué antes de ir al paso a paso. Eso me dio la confianza necesaria para adaptar lo que aprendí a mis propios proyectos y para mis clientes.',
     name: 'Diego Salvatierra',
-    role: 'Creador de contenido',
+    role: 'Freelance',
     city: 'Cusco',
-    portrait: '/assets/pages/9-pruebas/academy/testimonials/diego.png',
+    portrait: '/assets/pages/4-academy/testimonials/diego.png',
     accent: '#c77427',
     tint: 'rgba(199, 116, 39, 0.16)',
   },
   {
-    quote: 'Aprendí a convertir ideas sueltas en una propuesta clara. Ahora tengo un proceso que me da más seguridad para vender.',
+    quote: 'Aprendí a convertir el caos de las reservas y seguimientos de pacientes en algo ordenado. Ahora tengo un proceso que me da muchísima más tranquilidad.',
     name: 'Paola Vargas',
-    role: 'Fundadora de estudio',
+    role: 'Psicóloga',
     city: 'Bogotá',
-    portrait: '/assets/pages/9-pruebas/academy/testimonials/paola.png',
+    portrait: '/assets/pages/4-academy/testimonials/paola.png',
     accent: '#b96a35',
     tint: 'rgba(185, 106, 53, 0.16)',
   },
   {
-    quote: 'Me gustó que todo aterriza en casos reales. No sentí distancia técnica, sentí acompañamiento y criterio.',
+    quote: 'Me gustó que todo aterriza en problemas del día a día. No sentí teoría aburrida, sentí acompañamiento y me llevé herramientas que empecé a aplicar desde la primera semana.',
     name: 'Renzo Medina',
-    role: 'Director comercial',
+    role: 'Asesor contable',
     city: 'Trujillo',
-    portrait: '/assets/pages/9-pruebas/academy/testimonials/renzo.png',
+    portrait: '/assets/pages/4-academy/testimonials/renzo.png',
     accent: '#92552f',
     tint: 'rgba(146, 85, 47, 0.18)',
   },
@@ -496,7 +496,7 @@ export default function AcademyPage() {
 
       <section id="programas" className="academy-section academy-programs">
         <motion.div
-          className="vl-branding__copy"
+          className="vl-branding__copy mx-auto max-w-[92rem] w-full"
           variants={copyStagger}
           initial="hidden"
           whileInView="visible"
@@ -532,7 +532,7 @@ export default function AcademyPage() {
       </section>
 
       <section className="academy-section academy-catalog">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+        <motion.div className="vl-branding__copy mx-auto max-w-[92rem] w-full" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
             <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Explora por tema</motion.p>
             <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
@@ -541,7 +541,7 @@ export default function AcademyPage() {
           </div>
         </motion.div>
 
-        <div className="flex items-center justify-between mb-8 mt-6 max-w-[92rem] mx-auto">
+        <motion.div {...reveal} className="flex items-center justify-between mb-8 mt-6 max-w-[92rem] mx-auto">
           <div className="academy-topic-filters m-0" aria-label="Filtrar cursos por tema">
             {courseTopics.map((topic) => (
               <button
@@ -554,22 +554,22 @@ export default function AcademyPage() {
               </button>
             ))}
           </div>
-          
-          <motion.div variants={copyItem} className="academy-carousel-controls">
+          <div className="academy-carousel-controls">
             <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
             <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
 
-        <div ref={carouselRef} className="academy-course-carousel">
+        <motion.div {...reveal} ref={carouselRef} className="academy-course-carousel is-medium">
           {visibleCourses.map((course) => (
             <CourseCard key={`${activeTopic}-${course.title}`} course={course} compact />
           ))}
-        </div>
+        </motion.div>
       </section>
 
       <section id="metodo" className="academy-section academy-method">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+        <div className="academy-method-layout">
+          <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
             <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método Qaway</motion.p>
             <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
@@ -600,36 +600,37 @@ export default function AcademyPage() {
           </motion.div>
         </motion.div>
 
-        <motion.div {...reveal} className="academy-method-steps">
+        <div className="academy-method-steps">
           {[
-            ['Entiende', 'Primero ves el problema completo y el criterio detrás de cada decisión.'],
-            ['Construye', 'Después aplicas el método con herramientas y ejemplos cercanos.'],
-            ['Implementa', 'Terminas con un sistema, flujo o recurso que puedes seguir usando.'],
-          ].map(([title, text], index) => (
-            <div key={title} className="academy-method-step">
-              <span>0{index + 1}</span>
-              <div>
+            { title: 'Entiende',    text: 'Primero ves el problema completo y el criterio detrás de cada decisión.',   dir: { x: -60 } },
+            { title: 'Construye',   text: 'Después aplicas el método con herramientas y ejemplos cercanos.',           dir: { y:  60 } },
+            { title: 'Implementa',  text: 'Terminas con un sistema, flujo o recurso que puedes seguir usando.',        dir: { x:  60 } },
+          ].map(({ title, text, dir }, index) => (
+            <motion.div
+              key={title}
+              className="academy-method-step group"
+              initial={reduceMotion ? false : { opacity: 0, ...dir }}
+              whileInView={{ opacity: 1, x: 0, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 select-none text-[8.5rem] font-bold leading-none text-[#191918]/[0.08] transition-colors duration-500 group-hover:text-[#ff4b0b]/[0.1]">
+                0{index + 1}
+              </span>
+              <div className="relative z-10 ml-[7rem]">
+                <span className="mb-[0.4rem] block text-[0.77rem] font-bold text-[#ff4b0b]">0{index + 1}</span>
                 <h3>{title}</h3>
                 <p>{text}</p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </motion.div>
+        </div>
+        </div>
       </section>
 
       <section id="testimonios" className="academy-section academy-testimonials tst-ver-a">
         <div className="tst-a-layout">
-          <div className="tst-a-heading">
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</p>
-            <h2 className="text-[clamp(2.2rem,3.5vw,3.8rem)] leading-[0.92] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Ellos ya <span className="text-[#ff4b0b]">aprendieron</span> con nosotros.
-            </h2>
-            <p className="mt-4 text-[clamp(0.9rem,1vw,1rem)] leading-[1.6] text-[#4e4d4a] max-w-[22rem]">
-              Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos.
-            </p>
-          </div>
-
-          <div className="tst-a-stage">
+          <motion.div className="tst-a-stage" {...reveal}>
             <div className="tst-a-viewport">
               {testimonials.map((t, index) => (
                 <motion.article
@@ -681,12 +682,25 @@ export default function AcademyPage() {
                 <ChevronRight size={18} />
               </button>
             </div>
-          </div>
+          </motion.div>
+
+          <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+            <div>
+              <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</motion.p>
+              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+                Ellos ya <span className="text-[#ff4b0b]">aprendieron</span> con nosotros.
+              </motion.h2>
+              <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                Historias breves de personas que aplicaron lo aprendido y vieron cambios concretos.
+              </motion.p>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       <section id="formulario" className="academy-section academy-form-section">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+        <div className="academy-form-layout">
+        <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
             <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
             <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
@@ -796,30 +810,65 @@ export default function AcademyPage() {
             </>
           )}
         </motion.form>
+        </div>
       </section>
 
       <section className="academy-final-cta">
-        <motion.div className="vl-branding__copy" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
-          <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza con claridad</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-              Aprende. Aplica. Hazlo parte de tu <span className="text-[#ff4b0b]">trabajo.</span>
-            </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              Explora cursos, talleres y programas diseñados para producir cambios visibles desde la primera semana.
-            </motion.p>
-          </div>
-          <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
-            <MagneticLink href="#programas" className="academy-dark-button">
-              Explorar Academy
-              <ArrowRight size={18} />
-            </MagneticLink>
+        <div className="academy-final-layout">
+          <motion.div className="vl-branding__copy max-w-xl" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
+            <div>
+              <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-white/90">Empieza con claridad</motion.p>
+              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-white" style={{ ...displayFont, fontWeight: 760 }}>
+                Aprende. Aplica. Hazlo parte de tu <span className="text-white/90">trabajo.</span>
+              </motion.h2>
+              <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-white/80">
+                Explora cursos, talleres y programas diseñados para producir cambios visibles desde la primera semana.
+              </motion.p>
+            </div>
+            <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
+              <MagneticLink href="#programas" className="academy-dark-button">
+                Explorar Academy
+                <ArrowRight size={18} />
+              </MagneticLink>
+            </motion.div>
           </motion.div>
-        </motion.div>
-        <div className="academy-final-list">
-          {['Cursos a tu ritmo', 'Talleres en vivo', 'Programas guiados', 'Comunidad y recursos'].map((item) => (
-            <span key={item}><Check size={16} /> {item}</span>
-          ))}
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-10 pt-4"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } }
+            }}
+          >
+            {[
+              { title: 'Cursos a tu ritmo', text: 'Aprende a tu velocidad con contenido práctico y directo.', icon: Play },
+              { title: 'Talleres en vivo', text: 'Sesiones interactivas para aplicar herramientas en tiempo real.', icon: Users },
+              { title: 'Programas guiados', text: 'Rutas de aprendizaje con acompañamiento paso a paso.', icon: GraduationCap },
+              { title: 'Comunidad y recursos', text: 'Acceso a plantillas, foros y una red de profesionales.', icon: MessageCircle }
+            ].map((item, index) => {
+              const Icon = item.icon
+              return (
+                <motion.div 
+                  key={item.title}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 }
+                  }}
+                  className={`group relative sm:pr-6 ${index % 2 === 0 ? 'sm:border-r sm:border-white/20' : ''}`}
+                >
+                  <Icon className="h-7 w-7 text-white mb-4 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" strokeWidth={1.5} />
+                  <h3 className="text-[1.15rem] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-white/80">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-[0.95rem] leading-[1.5] text-white/70">
+                    {item.text}
+                  </p>
+                </motion.div>
+              )
+            })}
+          </motion.div>
         </div>
       </section>
     </main>
