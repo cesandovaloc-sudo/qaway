@@ -891,7 +891,7 @@ function AcademyFeature() {
         whileHover={reduceMotion ? undefined : { y: -3 }}
         viewport={{ once: true, amount: 0.2 }}
         variants={scaleUpImage}
-        className="order-2 relative min-h-[30rem] overflow-hidden cursor-pointer lg:order-1"
+        className="order-2 relative my-auto h-[80%] min-h-[24rem] max-h-[34rem] w-[88%] mx-auto overflow-hidden cursor-pointer lg:order-1"
       >
         <img
           src={`${base}aprendizaje-aplicado2.webp`}
