@@ -21,6 +21,7 @@ import { AgentesIAPage } from '@/pages/3-sistemas-digitales/5-agentes-ia'
 import { HerramientasInternasPage } from '@/pages/3-sistemas-digitales/6-herramientas-internas'
 import { EstrategiaDigitalPage as SistemasEstrategiaDigitalPage } from '@/pages/3-sistemas-digitales/7-estrategia-digital'
 import AcademyPage from '@/pages/4-academy/AcademyPage'
+import AcademyCursosPage from '@/pages/4-academy/AcademyCursosPage'
 import HubPage from '@/pages/5-qaway-hub/HubPage'
 import BlogEditorPage from '@/pages/5-qaway-hub/blog-editor/BlogEditorPage'
 import CRMPage from '@/pages/5-qaway-hub/crm/CRMPage'
@@ -184,6 +185,7 @@ export default function AppRouter() {
           />
 
           <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
+          <Route path="academy/cursos" element={renderRoute('academy', <AcademyCursosPage />)} />
           <Route path="academy/*" element={renderRoute('academy', <AcademyPage />)} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />

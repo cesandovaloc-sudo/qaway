@@ -576,7 +576,7 @@ export default function AcademyPage() {
                 initial="rest"
                 animate="rest"
               >
-                Ver cómo aprendemos
+                Solicitar asesoría
                 <motion.span
                   variants={{ rest: { x: 0 }, hovered: { x: 5 } }}
                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -814,11 +814,15 @@ export default function AcademyPage() {
                 Explora cursos, talleres y programas diseñados para producir cambios visibles desde la primera semana.
               </motion.p>
             </div>
-            <motion.div variants={copyItem} style={{ marginTop: '2rem' }}>
+            <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
               <MagneticLink href="#programas" className="academy-dark-button">
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
+              <Link to="/academy/cursos" className="academy-white-button">
+                Ver todos los cursos
+                <ArrowRight size={17} />
+              </Link>
             </motion.div>
           </motion.div>
           <motion.div
