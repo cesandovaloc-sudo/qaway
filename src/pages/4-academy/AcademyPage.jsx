@@ -531,7 +531,7 @@ export default function AcademyPage() {
               </button>
             ))}
             <a
-              href="/academy/app/cursos"
+              href="http://localhost:7000/cursos"
               className="academy-topic-filter-all"
             >
               Ver todos los cursos
@@ -564,7 +564,7 @@ export default function AcademyPage() {
               </motion.p>
             </div>
             <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <a href="/academy/app/cursos" className="academy-primary-button">
+              <a href="http://localhost:7000/cursos" className="academy-primary-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
@@ -819,7 +819,7 @@ export default function AcademyPage() {
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
-              <a href="/academy/app/cursos" className="academy-white-button">
+              <a href="http://localhost:7000/cursos" className="academy-white-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
