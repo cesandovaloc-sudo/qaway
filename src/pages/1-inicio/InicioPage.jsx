@@ -114,21 +114,14 @@ const heroCapabilities = [
     title: 'Estudio creativo',
     description: 'Branding y Contenido',
     link: '#estudio',
-    placement: 'left-[0.5%] bottom-28 w-[14rem]',
-  },
-  {
-    icon: GraduationCap,
-    title: 'Academia',
-    description: 'Formación aplicada',
-    link: '#academy',
-    placement: '-right-10 top-16 w-[12.5rem]',
+    placement: 'left-[4.5%] bottom-28 w-[14rem]',
   },
   {
     icon: Workflow,
     title: 'Sistemas',
     description: 'Automatización e IA',
     link: '#sistemas',
-    placement: 'right-[-2%] bottom-32 w-[13rem]',
+    placement: 'right-[3%] bottom-[38%] w-[13rem]',
   },
 ]
 
@@ -273,7 +266,7 @@ function Hero() {
         }}
       />
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[.95fr_1.05fr_.7fr]">
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
         <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
@@ -286,7 +279,7 @@ function Hero() {
               Marcas, Automatización y formación con IA
             </p>
             <h1
-              className="max-w-[58rem] text-[clamp(3.0rem,5.0vw,6.3rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+              className="max-w-[58rem] text-[clamp(2.8rem,4.7vw,6.1rem)] leading-[0.85] tracking-[-0.055em] text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
@@ -404,7 +397,7 @@ function Hero() {
           >
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
             <h2
-              className="text-[clamp(1.0rem,2.8vw,2.0rem)] leading-[0.9] tracking-[-0.022em] text-balance"
+              className="text-[clamp(0.85rem,1.8vw,1.4rem)] leading-[1.0] tracking-[-0.022em] text-balance"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Todo lo que necesitas para crear,
