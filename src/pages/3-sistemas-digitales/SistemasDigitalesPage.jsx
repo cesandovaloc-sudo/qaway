@@ -217,6 +217,7 @@ function HeroInicioBlockPractice() {
   const reduceMotion = useReducedMotion();
 
   return (
+    <>
     <section className="relative min-h-[100dvh] overflow-hidden bg-[#161616] pt-20 font-sans text-white">
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
@@ -227,7 +228,7 @@ function HeroInicioBlockPractice() {
       ></div>
 
       <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] w-full">
-        <div className="relative flex min-w-0 flex-1 flex-col bg-[#161616]">
+        <div className="relative flex min-w-0 flex-1 flex-col bg-[#f8f9f7]">
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
             <div
               className="w-[120%] aspect-square"
@@ -249,7 +250,7 @@ function HeroInicioBlockPractice() {
           <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
-            <div className="relative flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
+            <div className="relative z-10 bg-[#f8f9f7] flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : 'hidden'}
                 animate={reduceMotion ? undefined : 'show'}
@@ -257,16 +258,16 @@ function HeroInicioBlockPractice() {
                 custom={0}
                 className="relative z-10"
               >
-                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#a3a19b]">
+                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#ff4b0b]">
                   Sistemas Digitales y Automatización con IA
                 </p>
                 <h1
                   className="max-w-[58rem] qw-hero-title text-[#20201f]"
                   style={{ ...displayFont, fontWeight: 700 }}
                 >
-                  <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
+                  <span className="block text-[#161616]">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
                 </h1>
-                <p className="mt-6 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#a8a6a2]">
+                <p className="mt-6 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#6b6a67]">
                   Implementamos automatizaciones, CRM, herramientas y procesos digitales para mejorar la operación de tu proyecto.
                 </p>
                 <div className="mt-5 flex flex-wrap items-center gap-5">
@@ -281,7 +282,7 @@ function HeroInicioBlockPractice() {
                   </a>
                   <a
                     href="#estrategia-digital"
-                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-white/85 transition-colors hover:text-[#ff4b0b]"
+                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#3e3d3b] transition-colors hover:text-[#ff4b0b]"
                   >
                     Elige por dónde empezar
                   </a>
@@ -293,16 +294,16 @@ function HeroInicioBlockPractice() {
               initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-20 min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
+              className="relative z-20 bg-[#161616] min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
             >
               <div className="absolute inset-0 overflow-visible lg:overflow-hidden flex items-end justify-center pt-4 lg:pt-0">
                 <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
                 <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
                 <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
                 <img
-                  src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales.png"
+                  src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales2.webp"
                   alt="Sistemas Digitales Qaway"
-                  className="relative z-10 h-[25rem] sm:h-[29rem] lg:h-[92%] xl:h-[96%] w-auto max-w-none object-contain object-bottom origin-bottom grayscale"
+                  className="absolute inset-0 z-10 h-full w-full object-cover object-[50%_38%] grayscale"
                   style={{
                     maskImage:
                       "linear-gradient(to bottom, black 75%, transparent 100%)",
@@ -314,7 +315,7 @@ function HeroInicioBlockPractice() {
               </div>
             </motion.div>
 
-            <div className="relative z-20 hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-white/5 lg:pl-10">
+            <div className="relative z-20 bg-[#f8f9f7] hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-black/5 lg:pl-10">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -327,15 +328,15 @@ function HeroInicioBlockPractice() {
                     Sistemas digitales
                   </p>
                   <h4
-                    className="text-balance text-[#ececec]"
-                    style={{ ...displayFont, fontWeight: 600 }}
+                    className="text-balance text-[#161616]"
+                    style={{ ...displayFont, fontWeight: 700 }}
                   >
                     Automatización para negocios que necesitan operar mejor.
                   </h4>
                 </div>
 
                 <motion.div
-                  className="mb-8 hidden lg:block"
+                  className="mb-8 hidden lg:flex justify-center"
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
                 >
@@ -361,65 +362,30 @@ function HeroInicioBlockPractice() {
               </motion.div>
             </div>
           </div>
-
-          <div className="hidden lg:grid w-full border-t-[3px] border-black/5 lg:grid-cols-4 bg-[#f8f9f7]">
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-              <Settings
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                Automatización
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-              <LayoutDashboard
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                Dashboards
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center lg:border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-              <Users
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                CRM
-              </span>
-            </div>
-            <div className="group flex flex-col lg:flex-row items-center gap-3 lg:gap-4 justify-center py-6 px-4 lg:pr-20 transition-all duration-300 hover:bg-black/[0.02]">
-              <Brain
-                className="w-7 h-7 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110"
-                strokeWidth={1.5}
-              />
-              <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">
-                IA aplicada
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute inset-y-0 right-0 z-20 hidden w-16 shrink-0 flex-col items-center justify-between bg-[#f8f9f7] py-10 text-[#1a1a1a] md:w-20 lg:flex">
-          <div className="flex flex-col items-center gap-4 text-gray-400">
-            <span className="text-2xl font-light">+</span>
-            <span className="w-px h-12 bg-gray-300"></span>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <p className="rotate-180" style={{ writingMode: "vertical-rl" }}>
-              <span className="uppercase tracking-[0.3em] text-[10px] md:text-xs font-semibold text-gray-500 whitespace-nowrap">
-                Sistemas que escalan contigo
-              </span>
-            </p>
-          </div>
-          <div className="w-full flex justify-end pr-2">
-            <div className="w-6 h-6 border-r-[3px] border-b-[3px] border-[#ff4b0b]"></div>
-          </div>
         </div>
       </div>
     </section>
+
+    {/* Banda de botones — fuera del hero, fila completa */}
+    <div className="w-full border-b-[3px] border-black/5 bg-[#f8f9f7] grid grid-cols-2 lg:grid-cols-4">
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+        <Settings className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Automatización</span>
+      </div>
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+        <LayoutDashboard className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Dashboards</span>
+      </div>
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+        <Users className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">CRM</span>
+      </div>
+      <div className="group flex items-center gap-3 justify-center py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+        <Brain className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">IA aplicada</span>
+      </div>
+    </div>
+    </>
   );
 }
 
