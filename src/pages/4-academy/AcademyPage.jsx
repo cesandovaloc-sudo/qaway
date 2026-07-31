@@ -459,12 +459,11 @@ export default function AcademyPage() {
             transition={{ delay: 0.18, duration: 0.78 }}
             className="academy-hero-panel hidden lg:flex"
           >
-            <div className="academy-panel-mark" />
+            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Academy</p>
             <h4 style={displayFont}>
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
             </h4>
             <div className="academy-small-rule" />
-            <p>Convierte herramientas, ideas y procesos en capacidades reales para tu trabajo y tu negocio.</p>
 
 
           </motion.aside>
