@@ -500,7 +500,7 @@ function EcosystemIntro() {
           <div className="text-center lg:text-left">
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Todo conectado</p>
             <h2
-              className="mx-auto lg:mx-0 max-w-[42rem] text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+              className="mx-auto lg:mx-0 max-w-[42rem] text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
@@ -542,7 +542,7 @@ function EstudioSection() {
                   Estudio creativo
                 </p>
                 <h2
-                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
                   Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
@@ -565,7 +565,7 @@ function EstudioSection() {
                   <button
                     type="button"
                     onClick={() => setActive(index)}
-                    className={`group flex h-full w-full items-center gap-3 border px-4 py-3 text-left transition-all duration-300 sm:px-5 sm:py-3.5 ${active === index
+                    className={`group flex h-full w-full items-center gap-2.5 border px-3.5 py-2.5 text-left transition-all duration-300 sm:px-4 sm:py-2.5 ${active === index
                       ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
                       : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
                       }`}
@@ -626,7 +626,7 @@ function PrimaryAreas() {
         <Reveal className="mb-12 lg:mb-16">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza aquí</p>
           <h2
-            className="text-[clamp(3.3rem,5.4vw,5.9rem)] leading-[0.86] tracking-[-0.03em]"
+            className="text-[clamp(3.1rem,5.0vw,5.5rem)] leading-[0.92] tracking-[-0.03em]"
             style={{ ...displayFont, fontWeight: 680 }}
           >
             <span className="text-[#8b8c88]">Elige el área que hoy</span><br />
@@ -791,7 +791,7 @@ function SistemasDigitalesSection() {
                 Sistemas digitales con IA
               </p>
               <h2
-                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
@@ -846,8 +846,8 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="grid min-h-[40rem] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
-      <div className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
+    <section id="academy" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] text-[#20201f] lg:grid lg:grid-cols-[55%_45%]">
+      <div className="order-1 flex flex-col justify-center px-6 py-12 sm:px-10 lg:px-14">
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
           whileInView={reduceMotion ? undefined : 'show'}
@@ -864,7 +864,7 @@ function AcademyFeature() {
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
           custom={0.1}
-          className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+          className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]"
           style={{ ...displayFont, fontWeight: 760 }}
         >
           <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
@@ -919,7 +919,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
         <div className="academy-form-layout">
           <Reveal className="academy-form-intro">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
-          <h2 className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+          <h2 className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
             Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
           </h2>
           <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
@@ -1054,7 +1054,7 @@ function CoursesLandings() {
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Formación y soluciones</p>
           <h2
-            className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+            className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.98] tracking-[-0.05em]"
             style={{ ...displayFont, fontWeight: 760 }}
           >
             Aprende y <span className="text-[#ff4b0b]">aplica.</span>
