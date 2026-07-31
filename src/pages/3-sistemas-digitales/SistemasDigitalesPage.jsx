@@ -323,7 +323,7 @@ function HeroInicioBlockPractice() {
               >
                 <div className="mb-8 text-center">
                   <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
-                  <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                  <p className="qw-panel-kicker">
                     Sistemas digitales
                   </p>
                   <h4

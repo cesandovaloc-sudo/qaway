@@ -342,7 +342,7 @@ function Hero() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Estudio Visual</p>
+            <p className="qw-panel-kicker">Estudio Visual</p>
             <h4 className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
               Identidad visual<br />
               lista para vender<span className="text-[#ff4b0b]">.</span>

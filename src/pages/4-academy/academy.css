@@ -260,7 +260,6 @@
 
 .academy-hero-panel h4 {
   max-width: 19rem;
-  margin-top: 1.5rem;
   font-size: clamp(1.65rem, 2.2vw, 2.7rem);
   font-weight: 760;
   letter-spacing: -0.04em;

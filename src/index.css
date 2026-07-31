@@ -132,6 +132,17 @@
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
+
+  /* Kicker de paneles secundarios — separa el label naranja del título h4 */
+  .qw-panel-kicker {
+    display: block;
+    margin-bottom: 1.25rem;   /* igual que mb-5 de Tailwind */
+    font-size: 0.75rem;       /* 12px */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: #ff4b0b;
+  }
 }
 
 @keyframes qaway-marquee {
