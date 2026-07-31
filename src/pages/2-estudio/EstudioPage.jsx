@@ -198,7 +198,7 @@ function Hero() {
         }}
       />
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.03fr_0.97fr_0.70fr]">
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
         {/* Columna 1: Texto Principal */}
         <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
           <motion.div
@@ -212,7 +212,7 @@ function Hero() {
               Estudio creativo / Branding, contenido y presencia digital
             </p>
             <h1
-              className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+              className="max-w-[58rem] qw-hero-title text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               <span className="block">Creamos la identidad y <span className="text-[#ff4b0b]">presencia digital para tu marca.</span></span>
@@ -251,17 +251,17 @@ function Hero() {
           <div className="absolute inset-0 z-10 hidden lg:block">
             {/* Tarjeta 1: Branding */}
             <motion.div
-              className="absolute left-[2%] top-[40%] w-[15rem]"
+              className="absolute left-[2%] top-[62%] w-[14rem]"
               animate={reduceMotion ? {} : { y: [0, -6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
             >
               <a
                 href="#branding"
-                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
               >
-                <span className="flex items-center gap-3">
-                  <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                    <PenTool size={22} strokeWidth={1.65} />
+                <span className="flex items-center gap-2.5">
+                  <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                    <PenTool size={20} strokeWidth={1.65} />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
@@ -278,17 +278,17 @@ function Hero() {
 
             {/* Tarjeta 2: Contenido Visual */}
             <motion.div
-              className="absolute right-[-2%] bottom-32 w-[15.5rem]"
+              className="absolute right-[5%] bottom-[22%] w-[14.5rem]"
               animate={reduceMotion ? {} : { y: [0, -6, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
             >
               <a
                 href="#contenido"
-                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
               >
-                <span className="flex items-center gap-3">
-                  <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                    <ImageIcon size={22} strokeWidth={1.65} />
+                <span className="flex items-center gap-2.5">
+                  <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                    <ImageIcon size={20} strokeWidth={1.65} />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
@@ -337,20 +337,17 @@ function Hero() {
         {/* Columna 3: Panel Derecho */}
         <div className="relative hidden lg:flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
           <motion.div
-            className="relative z-10"
+            className="relative z-10 flex flex-col items-center text-center"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">ESTUDIO VISUAL</p>
-            <h2 className="text-[clamp(1.8rem,2.8vw,3.6rem)] leading-[0.87] tracking-[-0.055em] text-[#20201f]" style={{ ...displayFont, fontWeight: 760 }}>
+            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Estudio Visual</p>
+            <h4 className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
               Identidad visual<br />
-              lista para vender.
-            </h2>
-            <div className="my-4 h-0.5 w-10 bg-[#ff4b0b]" />
-            <p className="text-[clamp(0.88rem,1vw,1rem)] leading-[1.65] text-[#6d6b68]">
-              Creamos identidad de marca y piezas gráficas para que tu marca se vea clara, actual y profesional en cada punto de contacto.
-            </p>
+              lista para vender<span className="text-[#ff4b0b]">.</span>
+            </h4>
+            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
           </motion.div>
         </div>
       </div>

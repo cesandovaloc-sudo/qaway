@@ -261,7 +261,7 @@ function HeroInicioBlockPractice() {
                   Sistemas Digitales y Automatización con IA
                 </p>
                 <h1
-                  className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+                  className="max-w-[58rem] qw-hero-title text-[#20201f]"
                   style={{ ...displayFont, fontWeight: 700 }}
                 >
                   <span className="block text-white">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
@@ -326,12 +326,12 @@ function HeroInicioBlockPractice() {
                   <p className="mb-[14px] text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
                     Sistemas digitales
                   </p>
-                  <p
-                    className="text-[clamp(1.34rem,1.9vw,1.94rem)] font-semibold leading-[0.95] tracking-[-0.04em] text-[#ececec]"
+                  <h4
+                    className="text-balance text-[#ececec]"
                     style={{ ...displayFont, fontWeight: 600 }}
                   >
                     Automatización para negocios que necesitan operar mejor.
-                  </p>
+                  </h4>
                 </div>
 
                 <motion.div

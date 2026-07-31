@@ -413,7 +413,7 @@ export default function AcademyPage() {
             className="academy-hero-copy"
           >
             <p className="academy-eyebrow">Academy <span>IA aplicada</span> Aprendizaje práctico</p>
-            <h1 style={displayFont}>
+            <h1 style={displayFont} className="qw-hero-title">
               Aprende a crear
               <span>sistemas, contenido</span>
               <span>y soluciones con <b>IA</b></span>
@@ -460,9 +460,9 @@ export default function AcademyPage() {
             className="academy-hero-panel hidden lg:flex"
           >
             <div className="academy-panel-mark" />
-            <h2 style={displayFont}>
+            <h4 style={displayFont}>
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
-            </h2>
+            </h4>
             <div className="academy-small-rule" />
             <p>Convierte herramientas, ideas y procesos en capacidades reales para tu trabajo y tu negocio.</p>
 

@@ -161,7 +161,7 @@ export default function ProyectosPage() {
             transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="projects-kicker">Proyectos / branding, contenido y presencia digital</p>
-            <h1>Proyectos que tomaron forma</h1>
+            <h1 className="qw-hero-title">Proyectos que tomaron forma</h1>
             <p className="projects-hero__lead">Una seleccion de trabajos donde combinamos direccion visual y sistemas aplicados a marcas reales.</p>
             <a className="projects-button" href="#proyectos-listado">Explorar proyectos <ArrowRight size={16} /></a>
           </motion.div>
@@ -235,7 +235,7 @@ export default function ProyectosPage() {
               </div>
               <div className="projects-featured__copy">
                 <p><i />Proyecto destacado</p>
-                <h2>Brenda y Ely Cafe</h2>
+                <h3>Brenda y Ely Cafe</h3>
                 <strong>Cafeteria joven en San Miguel</strong>
                 <span>Desarrollamos su identidad de marca, estrategia de contenido y aplicaciones en clave digital y fisica para conectar con una comunidad que valora el buen cafe y los momentos autenticos.</span>
                 <div className="projects-featured__tags">

@@ -114,14 +114,14 @@ const heroCapabilities = [
     title: 'Estudio creativo',
     description: 'Branding y Contenido',
     link: '#estudio',
-    placement: 'left-[4.5%] bottom-28 w-[14rem]',
+    placement: 'left-[4.5%] bottom-[25%] w-[14rem]',
   },
   {
     icon: Workflow,
     title: 'Sistemas',
     description: 'Automatización e IA',
     link: '#sistemas',
-    placement: 'right-[3%] bottom-[38%] w-[13rem]',
+    placement: 'right-[3%] bottom-[21%] w-[13rem]',
   },
 ]
 
@@ -279,10 +279,10 @@ function Hero() {
               Marcas, Automatización y formación con IA
             </p>
             <h1
-              className="max-w-[58rem] text-[clamp(2.8rem,4.7vw,6.1rem)] leading-[0.91] tracking-[-0.055em] text-[#20201f]"
+              className="max-w-[58rem] qw-hero-title text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con&nbsp;IA.</span></span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
@@ -396,13 +396,13 @@ function Hero() {
             className="flex flex-col justify-center items-center text-center px-7 py-10 sm:px-10 lg:px-9"
           >
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
-            <h2
-              className="text-[clamp(0.85rem,1.8vw,1.4rem)] leading-[1.06] tracking-[-0.022em] text-balance"
+            <h4
+              className="text-balance"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Todo lo que necesitas para crear,
               <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
-            </h2>
+            </h4>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
           </motion.div>
         </aside>
