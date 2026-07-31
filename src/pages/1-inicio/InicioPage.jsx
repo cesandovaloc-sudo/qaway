@@ -839,8 +839,8 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="grid min-h-[100dvh] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
-      <div className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
+    <section id="academy" className="grid min-h-auto py-12 bg-[#f8f9f7] text-[#20201f] lg:min-h-[100dvh] lg:py-0 lg:grid-cols-[55%_45%]">
+      <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
           whileInView={reduceMotion ? undefined : 'show'}
@@ -878,7 +878,7 @@ function AcademyFeature() {
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
           custom={0.3}
-          className="mt-7 flex flex-wrap gap-7"
+          className="mt-6 flex flex-wrap gap-7"
         >
           <ArrowLink to="/academy">Ver Academy</ArrowLink>
           <ArrowLink to="/recursos">Ver recursos</ArrowLink>
@@ -891,7 +891,7 @@ function AcademyFeature() {
         whileHover={reduceMotion ? undefined : { y: -3 }}
         viewport={{ once: true, amount: 0.2 }}
         variants={scaleUpImage}
-        className="order-2 relative my-auto h-[80%] min-h-[24rem] max-h-[34rem] w-[88%] mx-auto overflow-hidden cursor-pointer lg:order-1"
+        className="order-2 relative mt-4 aspect-[4/3] w-full max-w-[92%] mx-auto overflow-hidden cursor-pointer lg:order-1 lg:mt-0 lg:my-auto lg:h-[80%] lg:min-h-[24rem] lg:max-h-[34rem] lg:w-[88%]"
       >
         <img
           src={`${base}aprendizaje-aplicado2.webp`}
