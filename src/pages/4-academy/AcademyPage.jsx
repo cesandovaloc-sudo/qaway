@@ -416,7 +416,7 @@ export default function AcademyPage() {
             <h1 style={displayFont} className="qw-hero-title">
               Aprende a crear
               <span>sistemas, contenido</span>
-              <span>y soluciones <span className="academy-title-emphasis">con IA</span></span>
+              <span>y soluciones <b>con IA</b></span>
             </h1>
             <p className="academy-hero-intro">
               Formación práctica para aplicar IA con criterio, estructura y resultados reales.
