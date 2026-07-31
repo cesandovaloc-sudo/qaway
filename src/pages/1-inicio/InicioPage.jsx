@@ -775,7 +775,7 @@ function SistemasDigitalesSection() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f0f2ee] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f5f6f3] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div className="flex flex-col justify-center">
@@ -907,119 +907,119 @@ function AcademyFeature() {
 
 function AcademyContactSection({ submitted, submitting, submitError, onSubmit, onReset }) {
   return (
-    <div className="academy-page">
-      <section id="formulario" className="academy-section academy-form-section">
-        <div className="academy-form-layout">
-          <Reveal className="academy-form-intro">
-          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
-          <h2 className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
-            Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
-          </h2>
-          <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-            Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
-          </p>
-          <div className="academy-form-points mt-6">
-            <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
-            <span><Check size={16} /> Recibe orientación sin compromiso</span>
-            <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
-          </div>
-        </Reveal>
+    <section id="formulario" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+      <div className="mx-auto w-full max-w-[96rem]">
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14 items-center">
+          <Reveal>
+            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
+            <h2 className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
+            </h2>
+            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
+            </p>
+            <div className="academy-form-points mt-6">
+              <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
+              <span><Check size={16} /> Recibe orientación sin compromiso</span>
+              <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
+            </div>
+          </Reveal>
 
-        <Reveal>
-          <form
-            onSubmit={onSubmit}
-            className="academy-interest-form"
-          >
-            {submitted ? (
-              <div className="academy-form-success">
-                <div><Check size={28} /></div>
-                <h3>¡Consulta enviada!</h3>
-                <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-                <button type="button" onClick={onReset}>Enviar otro mensaje</button>
-              </div>
-            ) : (
-              <>
-                <div className="academy-field">
-                  <label htmlFor="academy-name">¿Cómo te llamas?</label>
-                  <input
-                    type="text"
-                    id="academy-name"
-                    name="name"
-                    required
-                    placeholder="Tu nombre completo"
-                  />
+          <Reveal>
+            <form
+              onSubmit={onSubmit}
+              className="academy-interest-form"
+            >
+              {submitted ? (
+                <div className="academy-form-success">
+                  <div><Check size={28} /></div>
+                  <h3>¡Consulta enviada!</h3>
+                  <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
+                  <button type="button" onClick={onReset}>Enviar otro mensaje</button>
                 </div>
-                <div className="academy-field-row">
+              ) : (
+                <>
                   <div className="academy-field">
-                    <label htmlFor="academy-phone">Teléfono</label>
+                    <label htmlFor="academy-name">¿Cómo te llamas?</label>
                     <input
-                      type="tel"
-                      id="academy-phone"
-                      name="phone"
+                      type="text"
+                      id="academy-name"
+                      name="name"
                       required
-                      placeholder="+51 999 999 999"
+                      placeholder="Tu nombre completo"
                     />
                   </div>
+                  <div className="academy-field-row">
+                    <div className="academy-field">
+                      <label htmlFor="academy-phone">Teléfono</label>
+                      <input
+                        type="tel"
+                        id="academy-phone"
+                        name="phone"
+                        required
+                        placeholder="+51 999 999 999"
+                      />
+                    </div>
+                    <div className="academy-field">
+                      <label htmlFor="academy-email">Correo</label>
+                      <input
+                        type="email"
+                        id="academy-email"
+                        name="email"
+                        required
+                        placeholder="tucorreo@empresa.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="academy-field-row">
+                    <div className="academy-field">
+                      <label htmlFor="academy-profile">¿A qué te dedicas?</label>
+                      <select id="academy-profile" name="profile" required>
+                        <option value="">Selecciona tu perfil</option>
+                        <option value="Profesional / Consultor">Profesional / Consultor</option>
+                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                        <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
+                        <option value="Equipo de empresa">Equipo de empresa</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <div className="academy-field">
+                      <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
+                      <select id="academy-interest" name="interest" required>
+                        <option value="">Selecciona un interés</option>
+                        <option value="Identidad Visual con IA">Identidad Visual con IA</option>
+                        <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
+                        <option value="IA para equipos pequeños">IA para equipos pequeños</option>
+                        <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
+                        <option value="Workflows sin código">Workflows sin código</option>
+                        <option value="Orientación general / Otro">Orientación general / Otro</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="academy-field">
-                    <label htmlFor="academy-email">Correo</label>
-                    <input
-                      type="email"
-                      id="academy-email"
-                      name="email"
-                      required
-                      placeholder="tucorreo@empresa.com"
+                    <label htmlFor="academy-message">Cuéntanos un poco más</label>
+                    <textarea
+                      id="academy-message"
+                      name="message"
+                      rows="4"
+                      placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
                     />
                   </div>
-                </div>
-
-                <div className="academy-field-row">
-                  <div className="academy-field">
-                    <label htmlFor="academy-profile">¿A qué te dedicas?</label>
-                    <select id="academy-profile" name="profile" required>
-                      <option value="">Selecciona tu perfil</option>
-                      <option value="Profesional / Consultor">Profesional / Consultor</option>
-                      <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
-                      <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                      <option value="Equipo de empresa">Equipo de empresa</option>
-                      <option value="Otro">Otro</option>
-                    </select>
-                  </div>
-                  <div className="academy-field">
-                    <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
-                    <select id="academy-interest" name="interest" required>
-                      <option value="">Selecciona un interés</option>
-                      <option value="Identidad Visual con IA">Identidad Visual con IA</option>
-                      <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
-                      <option value="IA para equipos pequeños">IA para equipos pequeños</option>
-                      <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
-                      <option value="Workflows sin código">Workflows sin código</option>
-                      <option value="Orientación general / Otro">Orientación general / Otro</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="academy-field">
-                  <label htmlFor="academy-message">Cuéntanos un poco más</label>
-                  <textarea
-                    id="academy-message"
-                    name="message"
-                    rows="4"
-                    placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
-                  />
-                </div>
-                <button type="submit" className="academy-submit-button" disabled={submitting}>
-                  {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
-                  <Send size={17} />
-                </button>
-                {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
-                <small>Usaremos esta información únicamente para responder tu consulta.</small>
-              </>
-            )}
-          </form>
-        </Reveal>
+                  <button type="submit" className="academy-submit-button" disabled={submitting}>
+                    {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
+                    <Send size={17} />
+                  </button>
+                  {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                  <small>Usaremos esta información únicamente para responder tu consulta.</small>
+                </>
+              )}
+            </form>
+          </Reveal>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
   )
 }
 
@@ -1042,7 +1042,7 @@ function CoursesLandings() {
   const landing = carouselLandings[landingIdx]
 
   return (
-    <section className="bg-[#f8f9f7] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col">
+    <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col">
       <div className="mx-auto flex w-full max-w-[94rem] flex-col flex-1">
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Formación y soluciones</p>
