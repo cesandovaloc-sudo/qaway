@@ -672,7 +672,7 @@ const visualDeck = [
   {
     title: 'Identificar lo repetitivo',
     src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero1.webp',
-    className: 'left-0 top-0 w-[60%] z-10',
+    className: 'left-[12%] top-0 w-[58%] z-10',
     rotation: -4,
     yPath: [0, -5, 0],
     duration: 4.5,
@@ -777,7 +777,7 @@ function SistemasDigitalesSection() {
   return (
     <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f0f2ee] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
-        <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-14">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div className="flex flex-col justify-center">
             <Reveal>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
@@ -823,7 +823,7 @@ function SistemasDigitalesSection() {
               ))}
             </div>
 
-            <Reveal className="mt-10 flex items-center gap-4 border-t border-black/10 pt-4">
+            <Reveal className="mt-10 flex items-center gap-4 pt-4">
               <ArrowLink to="/sistemas-digitales">Ver sistemas digitales</ArrowLink>
             </Reveal>
           </div>
@@ -839,7 +839,7 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="grid min-h-[40rem] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
+    <section id="academy" className="grid min-h-[100dvh] bg-[#f8f9f7] text-[#20201f] lg:grid-cols-[55%_45%]">
       <div className="order-1 flex flex-col justify-center px-8 py-16 sm:px-12 lg:order-2 lg:px-14">
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
