@@ -258,17 +258,18 @@
   border-left: 2px solid var(--academy-accent);
 }
 
-.academy-hero-panel h2 {
+.academy-hero-panel h4 {
   max-width: 19rem;
   margin-top: 1.5rem;
   font-size: clamp(1.65rem, 2.2vw, 2.7rem);
-  font-weight: 700;
+  font-weight: 760;
   letter-spacing: -0.04em;
   line-height: 0.98;
   text-align: center;
+  color: #20201f;
 }
 
-.academy-hero-panel h2 span {
+.academy-hero-panel h4 span {
   color: var(--academy-accent);
 }
 
@@ -279,14 +280,6 @@
   background: var(--academy-accent);
 }
 
-.academy-hero-panel>p {
-  max-width: 19rem;
-  margin-top: 1.6rem;
-  color: #4f4e4b;
-  font-size: 0.96rem;
-  line-height: 1.55;
-  text-align: center;
-}
 
 .academy-spotlight {
   position: relative;
@@ -2247,7 +2240,7 @@
     padding: 2rem 1.5rem;
   }
 
-  .academy-hero-panel h2 {
+  .academy-hero-panel h4 {
     font-size: 3rem;
   }
 

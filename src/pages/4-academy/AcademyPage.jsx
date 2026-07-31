@@ -460,7 +460,7 @@ export default function AcademyPage() {
             className="academy-hero-panel hidden lg:flex"
           >
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Academy</p>
-            <h4 style={displayFont}>
+            <h4 className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
             </h4>
             <div className="academy-small-rule" />
