@@ -530,13 +530,13 @@ export default function AcademyPage() {
                 {topic}
               </button>
             ))}
-            <Link
-              to="/academy/cursos"
+            <a
+              href="/academy/app/cursos"
               className="academy-topic-filter-all"
             >
               Ver todos los cursos
               <ArrowRight size={14} />
-            </Link>
+            </a>
           </div>
           <div className="academy-carousel-controls">
             <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
@@ -564,10 +564,10 @@ export default function AcademyPage() {
               </motion.p>
             </div>
             <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <Link to="/academy/cursos" className="academy-primary-button">
+              <a href="/academy/app/cursos" className="academy-primary-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
-              </Link>
+              </a>
               <motion.a
                 href="#formulario"
                 className="academy-text-link"
@@ -819,10 +819,10 @@ export default function AcademyPage() {
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
-              <Link to="/academy/cursos" className="academy-white-button">
+              <a href="/academy/app/cursos" className="academy-white-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
-              </Link>
+              </a>
             </motion.div>
           </motion.div>
           <motion.div
