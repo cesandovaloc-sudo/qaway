@@ -114,28 +114,21 @@ const heroCapabilities = [
     title: 'Estudio creativo',
     description: 'Branding y Contenido',
     link: '#estudio',
-    placement: 'left-[0.5%] bottom-28 w-[15.5rem]',
-  },
-  {
-    icon: Workflow,
-    title: 'Sistemas',
-    description: 'Automatización e IA',
-    link: '#sistemas',
-    placement: 'left-[2%] top-[40%] w-[14.5rem]',
+    placement: 'left-[0.5%] bottom-28 w-[14rem]',
   },
   {
     icon: GraduationCap,
     title: 'Academia',
     description: 'Formación aplicada',
     link: '#academy',
-    placement: '-right-12 top-16 w-[14rem]',
+    placement: '-right-10 top-16 w-[12.5rem]',
   },
   {
-    icon: MessageCircle,
-    title: 'Contacto',
-    description: 'Resolver dudas',
-    link: '#formulario',
-    placement: 'right-[-2%] bottom-32 w-[14rem]',
+    icon: Workflow,
+    title: 'Sistemas',
+    description: 'Automatización e IA',
+    link: '#sistemas',
+    placement: 'right-[-2%] bottom-32 w-[13rem]',
   },
 ]
 
@@ -293,7 +286,7 @@ function Hero() {
               Marcas, Automatización y formación con IA
             </p>
             <h1
-              className="max-w-[58rem] text-[clamp(3.2rem,5.5vw,6.5rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
+              className="max-w-[58rem] text-[clamp(3.0rem,5.0vw,6.3rem)] leading-[0.82] tracking-[-0.055em] text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con IA.</span></span>
@@ -357,11 +350,11 @@ function Hero() {
               >
                 <a
                   href={link}
-                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
                 >
-                  <span className="flex items-center gap-3">
-                    <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                      <Icon size={22} strokeWidth={1.65} />
+                  <span className="flex items-center gap-2.5">
+                    <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                      <Icon size={20} strokeWidth={1.65} />
                     </span>
                     <span className="min-w-0">
                       <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
@@ -411,16 +404,13 @@ function Hero() {
           >
             <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
             <h2
-              className="text-[clamp(1.2rem,3.2vw,2.2rem)] leading-[0.9] tracking-[-0.022em] text-balance"
+              className="text-[clamp(1.0rem,2.8vw,2.0rem)] leading-[0.9] tracking-[-0.022em] text-balance"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Todo lo que necesitas para crear,
               <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
             </h2>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
-            <p className="mt-4 text-sm leading-relaxed text-black/56">
-              Conectamos estudio creativo, sistemas digitales, automatización y formación en una ruta clara.
-            </p>
           </motion.div>
         </aside>
       </div>
