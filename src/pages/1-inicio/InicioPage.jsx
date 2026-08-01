@@ -798,8 +798,9 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="grid min-h-auto items-center py-12 bg-[#f8f9f7] text-[#20201f] lg:min-h-[100dvh] lg:content-center lg:py-0 lg:grid-cols-[55%_45%]">
-      <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
+    <section id="academy" className="flex min-h-[100dvh] flex-col justify-center bg-[#f8f9f7] text-[#20201f] py-12 lg:py-0">
+      <div className="grid items-center w-full lg:grid-cols-[55%_45%]">
+        <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
           whileInView={reduceMotion ? undefined : 'show'}
@@ -860,6 +861,7 @@ function AcademyFeature() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/18" />
       </motion.div>
+      </div>
     </section>
   )
 }
