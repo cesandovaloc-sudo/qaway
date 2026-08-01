@@ -380,7 +380,7 @@ function BrandingSpotlight() {
   }
 
   return (
-    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', paddingBottom: '60px', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div className="vl-shell vl-branding__grid">
         <motion.div
           className="vl-branding__copy order-1 lg:order-2"
@@ -537,7 +537,7 @@ function TransformacionVisualCarousel() {
   ];
 
   return (
-    <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div className="vl-shell vl-content-system grid grid-cols-1 lg:grid-cols-[.95fr_.95fr] gap-8 lg:gap-20">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
@@ -640,7 +640,7 @@ function ContentSystem() {
   const formats = ['Feed', 'Carrusel', 'Reels', 'Stories', 'Web']
 
   return (
-    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div className="vl-shell vl-content-system">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
