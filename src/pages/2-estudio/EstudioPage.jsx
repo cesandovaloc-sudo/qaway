@@ -416,8 +416,8 @@ function BrandingSpotlight() {
         </motion.div>
 
         <motion.figure
-          initial={{ opacity: 0, scale: .965, x: -34 }}
-          whileInView={{ opacity: 1, scale: 1, x: 0 }}
+          initial={{ opacity: 0, scale: .915, x: -34 }}
+          whileInView={{ opacity: 1, scale: 0.95, x: 0 }}
           viewport={{ once: true, amount: .18 }}
           transition={{ duration: .85, ease: [0.22, 1, 0.36, 1] }}
           className="vl-branding__visual order-2 lg:order-1"
