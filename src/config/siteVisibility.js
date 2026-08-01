@@ -8,7 +8,7 @@ const routeVisibility = {
   proyectos: true,
   brief: false,
   sistemasDigitales: true,
-  academy: false,
+  academy: true,
   hub: false,
   recursos: false,
   blog: true,
@@ -25,6 +25,7 @@ const publicPathAllowList = new Set([
   '/landings/sistema-contenido-notion',
   '/landings/identidad-visual',
   '/blog',
+  '/academy',
 ])
 
 const navigationRegistry = [

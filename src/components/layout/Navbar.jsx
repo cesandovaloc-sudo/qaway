@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
-import { WHATSAPP_LINK } from '@/data/navigation'
+import { WHATSAPP_LINK, navItems } from '@/data/navigation'
 import { getNavbarLinks } from '@/config/siteVisibility'
 
 const NavbarVariantContext = createContext('light')
@@ -84,7 +84,15 @@ export default function Navbar({ variant: explicitVariant }) {
 
   const styles = variantStyles[variant] || variantStyles.light
   const location = useLocation()
-  const navLinks = getNavbarLinks()
+  
+  const visibleLinks = getNavbarLinks()
+  const navLinks = visibleLinks.map(vLink => {
+    const sourceItem = navItems.find(item => item.label === vLink.label || item.path === vLink.path)
+    return {
+      ...vLink,
+      items: sourceItem?.items || []
+    }
+  })
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [headerVisible, setHeaderVisible] = useState(true)
@@ -145,16 +153,42 @@ export default function Navbar({ variant: explicitVariant }) {
 
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
             {navLinks.map((link) => (
-              <Link
-                key={link.key}
-                to={link.path}
-                className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
-                    ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
-                    : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
-                  }`}
-              >
-                {link.label}
-              </Link>
+              <div key={link.key} className="group relative flex h-full items-center">
+                <Link
+                  to={link.path}
+                  className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
+                      ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
+                      : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
+                    }`}
+                >
+                  {link.label}
+                </Link>
+                {link.items && link.items.length > 0 && (
+                  <div className="absolute left-1/2 top-[calc(100%+12px)] -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <div className={`flex flex-col min-w-[200px] rounded-xl p-3 shadow-xl ${styles.mobileBg}`}>
+                      {link.items.map(subItem => (
+                        subItem.external ? (
+                          <a
+                            key={subItem.label}
+                            href={subItem.path}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${styles.link}`}
+                          >
+                            {subItem.label}
+                          </a>
+                        ) : (
+                          <Link
+                            key={subItem.label}
+                            to={subItem.path}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
+                          >
+                            {subItem.label}
+                          </Link>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
@@ -191,14 +225,41 @@ export default function Navbar({ variant: explicitVariant }) {
             >
               <div className="flex flex-col">
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.key}
-                    to={link.path}
-                    onClick={() => setMenuOpen(false)}
-                    className={`border-b border-[#20201f]/10 py-3 text-xs font-bold uppercase tracking-[0.14em] last:border-b-0 ${styles.mobileLink}`}
-                  >
-                    {link.label}
-                  </Link>
+                  <div key={link.key} className="border-b border-[#20201f]/10 last:border-b-0">
+                    <Link
+                      to={link.path}
+                      onClick={() => {
+                        if (!link.items || link.items.length === 0) setMenuOpen(false)
+                      }}
+                      className={`block py-3 text-xs font-bold uppercase tracking-[0.14em] ${styles.mobileLink}`}
+                    >
+                      {link.label}
+                    </Link>
+                    {link.items && link.items.length > 0 && (
+                      <div className="flex flex-col pl-4 pb-2">
+                        {link.items.map(subItem => (
+                          subItem.external ? (
+                            <a
+                              key={subItem.label}
+                              href={subItem.path}
+                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
+                            >
+                              {subItem.label}
+                            </a>
+                          ) : (
+                            <Link
+                              key={subItem.label}
+                              to={subItem.path}
+                              onClick={() => setMenuOpen(false)}
+                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider ${isActive(subItem.path) ? styles.linkActive : `opacity-60 hover:opacity-100 ${styles.mobileLink}`}`}
+                            >
+                              {subItem.label}
+                            </Link>
+                          )
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
                 <a
                   href={WHATSAPP_LINK}
