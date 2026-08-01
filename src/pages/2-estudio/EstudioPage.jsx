@@ -380,7 +380,7 @@ function BrandingSpotlight() {
   }
 
   return (
-    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', paddingBottom: '60px' }}>
+    <section id="branding" className="vl-section vl-branding flex flex-col justify-center min-h-[100dvh]" style={{ backgroundColor: '#f3f1ee', paddingBottom: '60px' }}>
       <div className="vl-shell vl-branding__grid">
         <motion.div
           className="vl-branding__copy order-1 lg:order-2"
@@ -537,7 +537,7 @@ function TransformacionVisualCarousel() {
   ];
 
   return (
-    <section id="transformacion" className="vl-section" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
+    <section id="transformacion" className="vl-section flex flex-col justify-center min-h-[100dvh]" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system grid grid-cols-1 lg:grid-cols-[.95fr_.95fr] gap-8 lg:gap-20">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
@@ -640,7 +640,7 @@ function ContentSystem() {
   const formats = ['Feed', 'Carrusel', 'Reels', 'Stories', 'Web']
 
   return (
-    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
+    <section id="contenido" className="vl-section vl-social flex flex-col justify-center min-h-[100dvh]" style={{ backgroundColor: '#ffffff', color: '#191918', paddingTop: '60px' }}>
       <div className="vl-shell vl-content-system">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
@@ -709,7 +709,7 @@ function Method() {
   const [activePhase, setActivePhase] = useState(0)
 
   return (
-    <section id="metodo" className="vl-dark vl-section vl-method">
+    <section id="metodo" className="vl-dark vl-section vl-method flex flex-col justify-center min-h-[100dvh]">
       <div className="vl-shell">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
@@ -859,7 +859,7 @@ function Diagnostic() {
   const resetForm = () => setSubmitted(false)
 
   return (
-    <section id="diagnostico" className="vl-diagnostic">
+    <section id="diagnostico" className="vl-diagnostic flex flex-col justify-center min-h-[100dvh]">
       <div className="vl-diagnostic__form academy-section academy-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
           <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
