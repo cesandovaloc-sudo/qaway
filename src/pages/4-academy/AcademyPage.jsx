@@ -818,7 +818,7 @@ export default function AcademyPage() {
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
-              <a href="http://localhost:7000/cursos" className="academy-white-button">
+              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} className="academy-white-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
