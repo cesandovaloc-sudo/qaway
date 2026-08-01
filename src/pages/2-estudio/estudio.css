@@ -1200,9 +1200,9 @@
 }
 /* ==================== DIAGNOSTIC ==================== */
 
-.estudio-page .vl-diagnostic { display: grid; grid-template-columns: 56% 44%; min-height: 100vh; color: var(--vl-ink); background: var(--vl-paper); }
-.estudio-page .vl-diagnostic__form { padding: clamp(40px, 5vh, 100px) clamp(28px, 6vw, 100px); display: flex; flex-direction: column; justify-content: center; }
-.estudio-page .vl-diagnostic form { display: grid; gap: 16px; max-width: 760px; }
+.estudio-page .vl-diagnostic { display: grid; grid-template-columns: 61% 39%; min-height: 100vh; color: var(--vl-ink); background: var(--vl-paper); }
+.estudio-page .vl-diagnostic__form { padding: clamp(20px, 3vh, 80px) clamp(28px, 6vw, 100px); display: flex; flex-direction: column; justify-content: center; }
+.estudio-page .vl-diagnostic form { display: grid; gap: 12px; max-width: 760px; }
 .estudio-page .vl-diagnostic label { display: grid; gap: 6px; color: #5f615a; font-size: 10px; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
 .estudio-page .vl-diagnostic textarea,
 .estudio-page .vl-diagnostic input,
@@ -1219,7 +1219,7 @@
   text-transform: none;
   transition: border-color .3s, background .3s;
 }
-.estudio-page .vl-diagnostic textarea { min-height: 70px; padding: 12px 0; resize: vertical; }
+.estudio-page .vl-diagnostic textarea { min-height: 60px; padding: 10px 0; resize: vertical; }
 .estudio-page .vl-diagnostic input,
 .estudio-page .vl-diagnostic select { min-height: 42px; padding: 0; }
 .estudio-page .vl-diagnostic textarea:focus,
