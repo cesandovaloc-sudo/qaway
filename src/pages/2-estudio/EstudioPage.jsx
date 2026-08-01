@@ -864,7 +864,7 @@ function Diagnostic() {
   const resetForm = () => setSubmitted(false)
 
   return (
-    <section id="diagnostico" className="vl-diagnostic" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
+    <section id="diagnostico" className="vl-diagnostic">
       <div className="vl-diagnostic__form academy-section academy-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
           <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
