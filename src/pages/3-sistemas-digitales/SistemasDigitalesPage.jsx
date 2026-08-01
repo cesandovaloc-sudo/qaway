@@ -945,7 +945,7 @@ export default function SistemasDigitalesPage() {
                           <Icon className="h-4 w-4" />
                         </span>
                       </div>
-                      <h3 className="text-[16px] font-bold leading-tight text-[#191918]">
+                      <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918]">
                         {card.title}
                       </h3>
                       <p className="mt-2 text-[13px] leading-relaxed text-black/60">
@@ -1070,7 +1070,7 @@ export default function SistemasDigitalesPage() {
                       }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
                     <p className="mt-2 text-[13px] leading-relaxed text-black/60">
@@ -1121,7 +1121,7 @@ export default function SistemasDigitalesPage() {
                       }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="text-[16px] font-medium leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <h3 className="no-qw text-[16px] font-medium leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
                   </motion.div>
@@ -1218,7 +1218,7 @@ export default function SistemasDigitalesPage() {
                         0{index + 1}
                       </span>
                     </div>
-                    <h3 className="mt-4 text-[16px] font-semibold leading-tight text-white">
+                    <h3 className="no-qw mt-4 text-[16px] font-semibold leading-tight text-white">
                       {area.title}
                     </h3>
                     <p className="mt-2 text-[12px] leading-relaxed text-white/56">
@@ -1289,7 +1289,7 @@ export default function SistemasDigitalesPage() {
                     </div>
                   </div>
                   <div className="px-6 py-6">
-                    <h3 className="text-[1.55rem] font-semibold leading-tight text-[#191918]">
+                    <h3 className="no-qw text-[1.55rem] font-semibold leading-tight text-[#191918]">
                       {card.title}
                     </h3>
                     <ul className="mt-5 space-y-3">
