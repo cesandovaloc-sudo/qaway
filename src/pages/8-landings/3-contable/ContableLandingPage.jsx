@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '@/config/supabase'
 import {
   ArrowRight, Check, ChevronDown, ShieldCheck, HelpCircle,
   Calculator, Users, FileText, TrendingUp, Scale,
@@ -577,13 +578,43 @@ function ContableCTA() {
   const [formData, setFormData] = useState({ nombre: '', ruc: '', celular: '', mensaje: '' })
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitted(true)
     setTimeout(() => setIsSubmitted(false), 8000)
-    // Armar enlace para WhatsApp con datos del formulario
+    
     const contactMsg = encodeURIComponent(`Hola Qaway, soy ${formData.nombre}, RUC: ${formData.ruc}, celular: ${formData.celular}. Mensaje: ${formData.mensaje}`)
-    window.open(`https://wa.me/51930756781?text=${contactMsg}`, '_blank')
+    const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
+
+    try {
+      await supabase.from('leads').insert([{
+        client_name: formData.nombre,
+        contact_info: formData.celular,
+        source: 'Landing Contable',
+        stage: 'new',
+        metadata: { ruc: formData.ruc, mensaje: formData.mensaje }
+      }]);
+
+      const apiKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || '';
+      if (apiKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: apiKey.trim(),
+            subject: `Nueva consulta Landing Contable`,
+            from_name: 'Qaway Lab Landing',
+            name: formData.nombre,
+            phone: formData.celular,
+            message: `RUC: ${formData.ruc} | Mensaje: ${formData.mensaje || 'Sin mensaje adicional'}`,
+          }),
+        });
+      }
+    } catch (err) {
+      console.error('Error al procesar formulario:', err);
+    }
+
+    window.open(waUrl, '_blank')
   }
 
   return (
