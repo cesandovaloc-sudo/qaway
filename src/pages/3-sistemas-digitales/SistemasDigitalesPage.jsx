@@ -291,8 +291,8 @@ function HeroInicioBlockPractice() {
             </div>
 
             <motion.div
-              initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               className="relative z-20 bg-[#161616] min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
             >
@@ -368,19 +368,19 @@ function HeroInicioBlockPractice() {
 
     {/* Banda de botones — fuera del hero, fila completa */}
     <div className="w-full border-b-[3px] border-black/5 bg-[#f8f9f7] grid grid-cols-2 lg:grid-cols-4">
-      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
         <Settings className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Automatización</span>
       </div>
-      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
         <LayoutDashboard className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Dashboards</span>
       </div>
-      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+      <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
         <Users className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">CRM</span>
       </div>
-      <div className="group flex items-center gap-3 justify-center py-6 px-4 transition-all duration-300 hover:bg-black/[0.02]">
+      <div className="group flex items-center gap-3 justify-center py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
         <Brain className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">IA aplicada</span>
       </div>

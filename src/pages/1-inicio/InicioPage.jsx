@@ -308,8 +308,8 @@ function Hero() {
         </div>
 
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
         >
@@ -322,68 +322,7 @@ function Hero() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
-          <div className="absolute inset-0 z-10 hidden lg:block">
-            {heroCapabilities.map(({ icon: Icon, title, description, link, placement }, index) => (
-              <motion.div
-                key={title}
-                className={`absolute ${placement}`}
-                animate={
-                  reduceMotion
-                    ? {}
-                    : {
-                      y: [0, -6, 0],
-                    }
-                }
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: index * 1.2,
-                }}
-              >
-                <a
-                  href={link}
-                  className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
-                >
-                  <span className="flex items-center gap-2.5">
-                    <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                      <Icon size={20} strokeWidth={1.65} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                        {title}
-                      </span>
-                      <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                        {description}
-                      </span>
-                    </span>
-                  </span>
-                  <span
-                    className={`absolute h-px bg-[#ff4b0b]/80 ${index % 2 === 0 ? '-right-10 top-1/2 w-10' : '-left-10 top-1/2 w-10'
-                      }`}
-                  />
-                </a>
-              </motion.div>
-            ))}
-          </div>
 
-          <div className="hidden">
-            {heroCapabilities.map(({ icon: Icon, title, description, link }) => (
-              <a
-                key={title}
-                href={link}
-                className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
-              >
-                <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
-                  <Icon size={21} strokeWidth={1.65} />
-                </span>
-                <span>
-                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">{title}</span>
-                  <span className="mt-1 block text-xs text-[#3e3d3b]">{description}</span>
-                </span>
-              </a>
-            ))}
-          </div>
         </motion.div>
 
         <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-[#f8f9f7] text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
@@ -403,7 +342,27 @@ function Hero() {
               Todo lo que necesitas para crear,
               <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
             </h4>
-            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
+            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b] hidden" />
+
+            <a
+              href="#sistemas"
+              className="group relative mt-8 block w-[14rem] border border-[#ff4b0b]/50 bg-white/72 p-2.5 text-left text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.12)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+            >
+              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-[#f8f9f7]" /></span>
+              <span className="flex items-center gap-2.5">
+                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                  <Workflow size={20} strokeWidth={1.65} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                    Sistemas
+                  </span>
+                  <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                    Automatización e IA
+                  </span>
+                </span>
+              </span>
+            </a>
           </motion.div>
         </aside>
       </div>
@@ -810,7 +769,7 @@ function SistemasDigitalesSection() {
                     <Icon size={13} strokeWidth={1.5} />
                   </span>
                   <div className="relative">
-                    <h3 className="text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#20201f]">
+                    <h3 className="no-qw text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#20201f]">
                       {title}
                     </h3>
                     <div className="pointer-events-none absolute left-0 top-full z-10 w-[min(20rem,100%)] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
@@ -839,7 +798,7 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="grid min-h-auto py-12 bg-[#f8f9f7] text-[#20201f] lg:min-h-[100dvh] lg:py-0 lg:grid-cols-[55%_45%]">
+    <section id="academy" className="grid min-h-auto items-center py-12 bg-[#f8f9f7] text-[#20201f] lg:min-h-[100dvh] lg:content-center lg:py-0 lg:grid-cols-[55%_45%]">
       <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
@@ -891,7 +850,7 @@ function AcademyFeature() {
         whileHover={reduceMotion ? undefined : { y: -3 }}
         viewport={{ once: true, amount: 0.2 }}
         variants={scaleUpImage}
-        className="order-2 relative mt-4 aspect-[4/3] w-full max-w-[92%] mx-auto overflow-hidden cursor-pointer lg:order-1 lg:mt-0 lg:my-auto lg:h-[80%] lg:min-h-[24rem] lg:max-h-[34rem] lg:w-[88%]"
+        className="order-2 relative mt-4 aspect-[4/3] w-full max-w-[92%] mx-auto overflow-hidden cursor-pointer lg:order-1 lg:mt-0 lg:self-center lg:w-[88%] xl:w-[84%]"
       >
         <img
           src={`${base}aprendizaje-aplicado2.webp`}
@@ -1065,7 +1024,7 @@ function CoursesLandings() {
                 <Compass size={21} strokeWidth={1.45} />
               </span>
               <div>
-                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Soluciones digitales
                 </h3>
                 <div className="relative mt-2">
@@ -1085,7 +1044,7 @@ function CoursesLandings() {
                       </div>
                       <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{landing.category}</p>
-                        <h3>{landing.title}</h3>
+                        <h3 className="no-qw">{landing.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
@@ -1108,7 +1067,7 @@ function CoursesLandings() {
                 <GraduationCap size={21} strokeWidth={1.45} />
               </span>
               <div>
-                <h3 className="text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Cursos aplicados
                 </h3>
                 <div className="relative mt-2">
@@ -1128,7 +1087,7 @@ function CoursesLandings() {
                       </div>
                       <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
                         <p>{course.category}</p>
-                        <h3>{course.title}</h3>
+                        <h3 className="no-qw">{course.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>

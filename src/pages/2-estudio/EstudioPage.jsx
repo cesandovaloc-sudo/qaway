@@ -234,8 +234,8 @@ function Hero() {
 
         {/* Columna 2: Imagen Central con Tarjetas Ancladas */}
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={reduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
         >
