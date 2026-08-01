@@ -450,14 +450,14 @@ function EcosystemIntro() {
       <div className="mx-auto max-w-[94rem]">
         <Reveal className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="text-center lg:text-left">
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Todo conectado</p>
+            <p className="qw-section-kicker">Todo conectado</p>
             <h2
-              className="mx-auto lg:mx-0 max-w-[42rem] text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]"
+              className="qw-section-title mx-auto lg:mx-0 max-w-[42rem]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
             </h2>
-            <p className="mt-4 mx-auto lg:mx-0 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <p className="qw-section-copy mx-auto lg:mx-0">
               No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.
             </p>
           </div>
@@ -490,16 +490,16 @@ function EstudioSection() {
           <div className="flex flex-col">
             <Reveal>
               <div>
-                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+                <p className="qw-section-kicker">
                   Estudio creativo
                 </p>
                 <h2
-                  className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]"
+                  className="qw-section-title"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
                   Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
                 </h2>
-                <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+                <p className="qw-section-copy">
                   Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
                 </p>
               </div>
@@ -739,18 +739,18 @@ function SistemasDigitalesSection() {
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div className="flex flex-col justify-center">
             <Reveal>
-              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">
+              <p className="qw-section-kicker">
                 Sistemas digitales con IA
               </p>
               <h2
-                className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]"
+                className="qw-section-title"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
                 <br />
                 <span className="text-[#ff4b0b]">la carga manual.</span>
               </h2>
-              <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              <p className="qw-section-copy">
                 Organiza tus herramientas, automatiza tareas repetitivas y conecta tus procesos con apoyo de IA.
               </p>
             </Reveal>
@@ -806,7 +806,7 @@ function AcademyFeature() {
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
           custom={0}
-          className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]"
+          className="qw-section-kicker"
         >
           Academy
         </motion.p>
@@ -816,7 +816,7 @@ function AcademyFeature() {
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
           custom={0.1}
-          className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]"
+          className="qw-section-title"
           style={{ ...displayFont, fontWeight: 760 }}
         >
           <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
@@ -827,7 +827,7 @@ function AcademyFeature() {
           viewport={{ once: true, amount: 0.2 }}
           variants={fadeUp}
           custom={0.2}
-          className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]"
+          className="qw-section-copy"
         >
           Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
         </motion.p>
@@ -870,11 +870,11 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14 items-center">
           <Reveal>
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
-            <h2 className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+            <p className="qw-section-kicker">Contacto</p>
+            <h2 className="qw-section-title" style={{ ...displayFont, fontWeight: 760 }}>
               Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
             </h2>
-            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <p className="qw-section-copy">
               Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
             </p>
             <div className="academy-form-points mt-6">
@@ -1004,9 +1004,9 @@ function CoursesLandings() {
     <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col">
       <div className="mx-auto flex w-full max-w-[94rem] flex-col flex-1">
         <Reveal className="mb-3 lg:mb-4 text-center">
-          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Formación y soluciones</p>
+          <p className="qw-section-kicker">Formación y soluciones</p>
           <h2
-            className="text-[clamp(2.3rem,3.8vw,4.1rem)] leading-[0.95] tracking-[-0.05em]"
+            className="qw-section-title"
             style={{ ...displayFont, fontWeight: 760 }}
           >
             Aprende y <span className="text-[#ff4b0b]">aplica.</span>

@@ -327,7 +327,7 @@ export default function BlogPage() {
               </div>
 
               <motion.h1
-                className="text-[clamp(3rem,6.5vw,5rem)] font-bold uppercase leading-[0.85] tracking-[-0.03em] text-[#191918]"
+                className="qw-hero-title font-bold uppercase text-[#191918]"
                 style={displayFont}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

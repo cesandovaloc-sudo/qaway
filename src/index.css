@@ -22,21 +22,21 @@
   }
 
   /* Estandarización tipográfica global para toda la web (Excluyendo Blog/Editor) */
-  :not(.blog-content):not(.blog-editor) > h1,
+  :not(.blog-content):not(.blog-editor) > h1:not(.blog-title):not(.no-qw),
   h1:not(.blog-title):not(.no-qw) {
     font-size: clamp(2.6rem, 4.2vw, 5.5rem);
     line-height: 0.91;
     letter-spacing: -0.055em;
   }
 
-  :not(.blog-content):not(.blog-editor) > h2,
+  :not(.blog-content):not(.blog-editor) > h2:not(.blog-subtitle):not(.no-qw),
   h2:not(.blog-subtitle):not(.no-qw) {
     font-size: clamp(2.3rem, 3.8vw, 4.1rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
 
-  :not(.blog-content):not(.blog-editor) > h3,
+  :not(.blog-content):not(.blog-editor) > h3:not(.blog-subtitle):not(.no-qw),
   h3:not(.blog-subtitle):not(.no-qw) {
     font-size: clamp(1.4rem, 2.7vw, 2.4rem);
     line-height: 1.02;
@@ -119,12 +119,50 @@
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .text-pretty { text-wrap: pretty; }
-  
-  /* Sistema Centralizado de Títulos Qaway Lab */
+  /* Sistema tipografico central Qaway Lab */
+  .qw-hero-kicker {
+    display: block;
+    margin-bottom: 1rem;
+    color: #ff4b0b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.015em;
+    text-transform: uppercase;
+  }
+
   .qw-hero-title {
     font-size: clamp(2.6rem, 4.2vw, 5.5rem);
     line-height: 0.91;
     letter-spacing: -0.055em;
+  }
+
+  .qw-hero-copy {
+    margin-top: 1rem;
+    max-width: 34rem;
+    color: #4e4d4a;
+    font-size: clamp(0.88rem, 1vw, 1rem);
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+
+  .qw-hero-actions {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .qw-section-kicker {
+    display: block;
+    margin-bottom: 1.25rem;
+    color: #ff4b0b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
   }
 
   .qw-section-title {
@@ -133,15 +171,39 @@
     letter-spacing: -0.05em;
   }
 
-  /* Kicker de paneles secundarios — separa el label naranja del título h4 */
+  .qw-section-copy {
+    margin-top: 1rem;
+    max-width: 36rem;
+    color: #4e4d4a;
+    font-size: clamp(0.94rem, 1.05vw, 1.06rem);
+    line-height: 1.5;
+    letter-spacing: 0;
+  }
+
+  .qw-section-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.75rem;
+  }
+
+  /* Kicker de paneles secundarios: label naranja sobre h3/h4 del hero */
   .qw-panel-kicker {
     display: block;
-    margin-bottom: 1.25rem;   /* igual que mb-5 de Tailwind */
-    font-size: 0.75rem;       /* 12px */
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
+    margin-bottom: 1.25rem;
     color: #ff4b0b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .qw-panel-title {
+    font-size: clamp(1.05rem, 2.2vw, 1.75rem);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
   }
 }
 
