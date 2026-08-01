@@ -541,14 +541,14 @@ function TransformacionVisualCarousel() {
       <div className="vl-shell vl-content-system grid grid-cols-1 lg:grid-cols-[.95fr_.95fr] gap-8 lg:gap-20">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Transformación visual / 04</p>
+            <p className="qw-section-kicker">Transformación visual / 04</p>
             <h2
-              className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+              className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Tu imagen también<br /><span className="text-[#ff4b0b]">comunica profesionalismo.</span>
             </h2>
-            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <p className="qw-section-copy">
               Transformamos tus imágenes de productos, servicios y perfiles comerciales en un portafolio visual moderno, profesional y listo para transmitir autoridad y confianza a tus clientes.
             </p>
           </div>
@@ -644,14 +644,14 @@ function ContentSystem() {
       <div className="vl-shell vl-content-system">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contenido para redes sociales / 02</p>
+            <p className="qw-section-kicker">Contenido para redes sociales / 02</p>
             <h2
-              className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+              className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Diseñamos contenido visual<br />para una <span className="text-[#ff4b0b]">marca coherente.</span>
             </h2>
-            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <p className="qw-section-copy">
               Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.
             </p>
           </div>
@@ -715,9 +715,9 @@ function Method() {
           <div>
             <div className="flex flex-col gap-10">
               <div className="border-b border-red-500/20 pb-6">
-                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método híbrido / 05</p>
+                <p className="qw-section-kicker">Método híbrido / 05</p>
                 <h2
-                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  className="qw-section-title"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
                   IA para acelerar el proceso.<br /><span className="text-[#ff4b0b]">Dirección para cuidar el resultado.</span>
@@ -864,9 +864,9 @@ function Diagnostic() {
         <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
           <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
             <div>
-              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
+              <p className="qw-section-kicker">Contacto</p>
               <h2
-                className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                className="qw-section-title"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Hablemos de tu <span className="text-[#ff4b0b]">proyecto.</span>
