@@ -753,12 +753,12 @@ export default function SistemasDigitalesPage() {
                 variants={revealUp}
                 custom={0}
               >
-                <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">SERVICIOS DE SISTEMAS DIGITALES</div>
-                <h2 className="mt-4 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-white" style={displayFont}>
+                <p className="qw-section-kicker">SERVICIOS DE SISTEMAS DIGITALES</p>
+                <h2 className="qw-section-title text-white">
                   Soluciones digitales <br />
                   adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
-                <p className="mt-5 text-[15px] leading-relaxed text-zinc-400 max-w-xl">
+                <p className="qw-section-copy text-zinc-400">
                   Automatización, canales digitales, CRM y herramientas internas y más, para ordenar, conectar procesos e información y facilitar el trabajo diario.
                 </p>
               </motion.div>
@@ -906,20 +906,17 @@ export default function SistemasDigitalesPage() {
             variants={revealUp}
             custom={0}
           >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+            <p className="qw-section-kicker">
               Automatización y flujos de trabajo / 01
             </p>
-            <h2
-              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
-              style={displayFont}
-            >
+            <h2 className="qw-section-title">
               Automatizamos tareas repetitivas
               <br />
               <span className="text-[#ff4b0b]">
                 y procesos de trabajo.
               </span>
             </h2>
-            <p className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <p className="qw-section-copy">
               Conectamos formularios, correos, documentos y tareas para registrar información, asignar responsables, enviar alertas y dar seguimiento sin repetir cada paso manualmente.
             </p>
 
@@ -1045,18 +1042,15 @@ export default function SistemasDigitalesPage() {
             custom={0}
             className="order-1 lg:order-2"
           >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+            <p className="qw-section-kicker">
               CRM y seguimiento comercial / 02
             </p>
-            <h2
-              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
-              style={displayFont}
-            >
+            <h2 className="qw-section-title">
               Organizamos contactos, consultas y
               <br />
               <span className="text-[#ff4b0b]">seguimiento comercial.</span>
             </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+            <p className="qw-section-copy">
               Implementamos un CRM para registrar contactos, ordenar oportunidades y centralizar el seguimiento comercial. Configuramos paneles para visualizar pendientes, avances y resultados.
             </p>
 
@@ -1099,18 +1093,15 @@ export default function SistemasDigitalesPage() {
             variants={revealUp}
             custom={0}
           >
-            <p className="text-[#ff4b0b] text-[12px] font-bold uppercase tracking-[0.12em]">
+            <p className="qw-section-kicker">
               Desarrollo web y páginas de captación / 03
             </p>
-            <h2
-              className="mt-3 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
-              style={displayFont}
-            >
+            <h2 className="qw-section-title">
               Páginas web para presentar,
               <br />
               <span className="text-[#ff4b0b]">captar y convertir.</span>
             </h2>
-            <p className="mt-3 max-w-xl text-[16px] leading-[1.62] text-[#666] sm:text-[17px]">
+            <p className="qw-section-copy">
               Desarrollamos plataformas web de alto rendimiento. Desde la estructura visual hasta la integración técnica, diseñamos páginas preparadas para recibir tráfico, captar consultas y registrar cada oportunidad.
             </p>
 
@@ -1182,11 +1173,8 @@ export default function SistemasDigitalesPage() {
               variants={revealUp}
               custom={0}
             >
-              <SectionLabel inverse>Arquitectura conectada</SectionLabel>
-              <h2
-                className="mt-6 text-[clamp(2.3rem,5.3vw,4.0rem)] uppercase leading-[0.9] tracking-[-0.04em] text-white"
-                style={displayFont}
-              >
+              <p className="qw-section-kicker">Arquitectura conectada</p>
+              <h2 className="qw-section-title text-white uppercase">
                 El sistema de contenido
                 <br />
                 no vive solo<span className="text-[#ff4b0b]">.</span>
@@ -1267,11 +1255,8 @@ export default function SistemasDigitalesPage() {
             custom={0}
             className="mb-14 max-w-4xl mx-auto text-center"
           >
-            <SectionLabel>Aplicaciones reales</SectionLabel>
-            <h2
-              className="mt-6 text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-[#191918]"
-              style={displayFont}
-            >
+            <p className="qw-section-kicker">Aplicaciones reales</p>
+            <h2 className="qw-section-title">
               Diseñamos infraestructura para{" "}
               <span className="text-[#ff4b0b]">creadores</span>,{" "}
               equipos y proyectos.
@@ -1355,13 +1340,13 @@ export default function SistemasDigitalesPage() {
               </div>
 
               <div className="px-6 py-10 sm:px-8 lg:px-12 lg:py-12 flex flex-col justify-center">
+                <motion.p variants={revealUp} className="qw-section-kicker text-left mb-2">Contacto</motion.p>
                 <motion.h2
                   initial={reduceMotion ? false : "hidden"}
                   whileInView={reduceMotion ? undefined : "show"}
                   viewport={{ once: true, amount: 0.2 }}
                   variants={revealUp}
-                  className="text-[clamp(2.1rem,4.8vw,3.6rem)] leading-[0.95] tracking-[-0.03em] text-[#191918]"
-                  style={displayFont}
+                  className="qw-section-title"
                 >
                   Ya tienes la Idea.
                   <br />
