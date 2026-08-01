@@ -1174,7 +1174,7 @@ export default function SistemasDigitalesPage() {
               custom={0}
             >
               <p className="qw-section-kicker">Arquitectura conectada</p>
-              <h2 className="qw-section-title text-white uppercase">
+              <h2 className="qw-section-title text-white">
                 El sistema de contenido
                 <br />
                 no vive solo<span className="text-[#ff4b0b]">.</span>
