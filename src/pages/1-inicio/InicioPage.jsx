@@ -1143,7 +1143,7 @@ export default function InicioPage() {
       }])
       if (error) throw error
 
-      const academyKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || ''
+      const academyKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || ''
       if (academyKey.trim()) {
         await fetch('https://api.web3forms.com/submit', {
           method: 'POST',

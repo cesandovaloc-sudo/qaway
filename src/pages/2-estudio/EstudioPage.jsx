@@ -829,7 +829,7 @@ function Diagnostic() {
       }])
       if (error) throw error
 
-      const apiKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || ''
+      const apiKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || ''
       if (apiKey.trim()) {
         await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
