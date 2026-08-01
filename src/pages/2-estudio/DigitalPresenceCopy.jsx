@@ -56,7 +56,7 @@ export default function DigitalPresenceCopy() {
   }, []);
 
   return (
-    <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
       <div className="vl-shell">
         <div className="vl-digital-copy__grid grid lg:grid-cols-[1.2fr_0.8fr] gap-16 xl:gap-24 items-stretch">
 
