@@ -56,7 +56,7 @@ export default function DigitalPresenceCopy() {
   }, []);
 
   return (
-    <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918' }}>
+    <section id="estrategia-digital" className="vl-section vl-digital" style={{ backgroundColor: '#f3f1ee', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
       <div className="vl-shell">
         <div className="vl-digital-copy__grid grid lg:grid-cols-[1.2fr_0.8fr] gap-16 xl:gap-24 items-stretch">
 
@@ -69,9 +69,9 @@ export default function DigitalPresenceCopy() {
               transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
             >
               <div>
-                <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Estrategia digital / 03</p>
+                <p className="qw-section-kicker">Estrategia digital / 03</p>
                 <h2
-                  className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                  className="qw-section-title"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
                   Tu marca lista<br /><span className="text-[#ff4b0b]">para vivir online.</span>

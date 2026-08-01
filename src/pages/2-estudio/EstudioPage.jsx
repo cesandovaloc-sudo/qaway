@@ -390,15 +390,15 @@ function BrandingSpotlight() {
           viewport={{ once: true, amount: .22 }}
         >
           <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Branding digital / 01</motion.p>
+            <motion.p variants={copyItem} className="qw-section-kicker">Branding digital / 01</motion.p>
             <motion.h2
               variants={copyItem}
-              className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+              className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               Branding para que tu marca<br />se vea <span className="text-[#ff4b0b]">clara y profesional.</span>
             </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+            <motion.p variants={copyItem} className="qw-section-copy">
               Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales.
             </motion.p>
           </div>
