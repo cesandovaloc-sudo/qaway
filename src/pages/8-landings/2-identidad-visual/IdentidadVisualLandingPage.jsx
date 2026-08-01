@@ -549,8 +549,24 @@ const ContactForm = () => {
         stage: 'new',
         metadata: { mensaje: formData.mensaje }
       }]);
+
+      const apiKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || '';
+      if (apiKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: apiKey.trim(),
+            subject: `Nueva consulta Curso Identidad Visual`,
+            from_name: 'Qaway Lab Landing',
+            name: formData.nombre,
+            email: formData.email,
+            message: formData.mensaje || 'Sin mensaje adicional',
+          }),
+        });
+      }
     } catch (err) {
-      console.error('Error al guardar lead:', err);
+      console.error('Error al procesar formulario:', err);
     }
 
     window.open(waUrl, '_blank', 'noopener,noreferrer');
