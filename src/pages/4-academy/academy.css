@@ -367,32 +367,6 @@
   padding: clamp(3rem, 5vw, 4rem) clamp(1.5rem, 5vw, 6rem);
 }
 
-.academy-section-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  max-width: 92rem;
-  margin: 0 auto 3rem;
-}
-
-.academy-section-heading h2,
-.academy-method-copy h2,
-.academy-path-title h2,
-.academy-final-cta h2 {
-  max-width: 56rem;
-  margin-top: 0.85rem;
-  font-size: clamp(3.6rem, 6.5vw, 7rem);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.86;
-}
-
-.academy-section-heading>p {
-  max-width: 42rem;
-  color: var(--academy-muted);
-  line-height: 1.65;
-}
-
 .academy-programs {
   background: var(--academy-white);
 }
@@ -613,50 +587,6 @@
   color: #252523;
 }
 
-
-.academy-catalog-heading,
-.academy-testimonial-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 3rem;
-  max-width: 92rem;
-  margin: 0 auto;
-}
-
-.academy-testimonials-layout {
-  display: grid;
-  grid-template-columns: minmax(16rem, 0.38fr) minmax(0, 0.62fr);
-  gap: clamp(2.5rem, 6vw, 6.5rem);
-  max-width: 92rem;
-  margin: 0 auto;
-  align-items: center;
-}
-
-.academy-testimonial-heading {
-  display: flex;
-  min-height: 23rem;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 1.15rem;
-  padding-top: 0;
-}
-
-.academy-catalog-heading h2,
-.academy-testimonial-heading h2 {
-  max-width: 62rem;
-  margin-top: 0.8rem;
-  font-size: clamp(3.6rem, 6vw, 6.8rem);
-  font-weight: 700;
-  letter-spacing: -0.055em;
-  line-height: 0.86;
-}
-
-.academy-testimonial-heading h2 {
-  max-width: 20rem;
-  line-height: 0.92;
-}
 
 .academy-carousel-controls {
   display: flex;
@@ -909,10 +839,6 @@
   margin: 0 auto;
 }
 
-.academy-method-copy {
-  align-self: center;
-}
-
 .academy-method-steps {
   border-top: 1px solid rgba(32, 32, 31, 0.18);
 }
@@ -943,14 +869,6 @@
 
 .academy-paths {
   background: var(--academy-white);
-}
-
-.academy-path-title {
-  max-width: 80rem;
-}
-
-.academy-path-title h2 {
-  max-width: 70rem;
 }
 
 .academy-path-grid {
@@ -1527,12 +1445,6 @@
   color: var(--academy-ink);
 }
 
-.academy-testimonial-heading>p {
-  max-width: 22rem;
-  color: var(--academy-muted);
-  line-height: 1.65;
-}
-
 .academy-testimonial-showcase {
   display: grid;
   justify-items: center;
@@ -2104,7 +2016,6 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .academy-section-heading,
   .academy-method,
   .academy-form-section,
   .academy-final-cta {
@@ -2134,10 +2045,6 @@
 
   .academy-course-carousel {
     grid-auto-columns: minmax(20rem, 44vw);
-  }
-
-  .academy-testimonial-heading {
-    min-height: 0;
   }
 
   .academy-testimonials-layout {
@@ -2255,18 +2162,6 @@
     padding: 5.5rem 1.25rem;
   }
 
-  .academy-section-heading {
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .academy-section-heading h2,
-  .academy-method-copy h2,
-  .academy-path-title h2,
-  .academy-final-cta h2 {
-    font-size: clamp(3.35rem, 15vw, 5rem);
-  }
-
   .academy-program-grid,
   .academy-path-grid {
     grid-template-columns: 1fr;
@@ -2279,17 +2174,6 @@
   .academy-featured-courses>div:first-child .academy-course-image,
   .academy-featured-courses>div:not(:first-child) .academy-course-image {
     min-height: 18rem;
-  }
-
-  .academy-catalog-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .academy-catalog-heading h2,
-  .academy-testimonial-heading h2 {
-    font-size: clamp(3.35rem, 15vw, 5rem);
   }
 
   .academy-carousel-controls {

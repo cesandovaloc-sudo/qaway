@@ -465,7 +465,22 @@ export default function AcademyPage() {
             </h4>
             <div className="academy-small-rule" />
 
-
+            <a
+              href="#programas"
+              className="group mt-7 flex w-full items-center gap-2.5 border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+            >
+              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                <GraduationCap size={20} strokeWidth={1.65} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                  Programas
+                </span>
+                <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                  Cursos y talleres con IA
+                </span>
+              </span>
+            </a>
           </motion.aside>
         </div>
       </section>
@@ -484,8 +499,7 @@ export default function AcademyPage() {
             </motion.p>
             <motion.h2
               variants={copyItem}
-              className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
-              style={{ ...displayFont, fontWeight: 760 }}
+              className="qw-section-title"
             >
               Empieza por una <span className="text-[#ff4b0b]">habilidad concreta.</span>
             </motion.h2>
@@ -511,7 +525,7 @@ export default function AcademyPage() {
         <motion.div className="vl-branding__copy mx-auto max-w-[92rem] w-full" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
             <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Explora por tema</motion.p>
-            <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+            <motion.h2 variants={copyItem} className="qw-section-title">
               Encuentra tu <span className="text-[#ff4b0b]">siguiente curso.</span>
             </motion.h2>
           </div>
@@ -555,7 +569,7 @@ export default function AcademyPage() {
           <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
             <div>
               <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Método Qaway</motion.p>
-              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              <motion.h2 variants={copyItem} className="qw-section-title">
                 Menos teoría suelta. Más <span className="text-[#ff4b0b]">capacidad instalada.</span>
               </motion.h2>
               <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
@@ -674,7 +688,7 @@ export default function AcademyPage() {
           <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
             <div>
               <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Experiencias reales</motion.p>
-              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              <motion.h2 variants={copyItem} className="qw-section-title">
                 Ellos ya <span className="text-[#ff4b0b]">aprendieron</span> con nosotros.
               </motion.h2>
               <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
@@ -690,7 +704,7 @@ export default function AcademyPage() {
           <motion.div className="vl-branding__copy self-center" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
             <div>
               <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</motion.p>
-              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]" style={{ ...displayFont, fontWeight: 760 }}>
+              <motion.h2 variants={copyItem} className="qw-section-title">
                 Inscripciones y <span className="text-[#ff4b0b]">orientación académica.</span>
               </motion.h2>
               <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
@@ -806,7 +820,7 @@ export default function AcademyPage() {
           <motion.div className="vl-branding__copy max-w-xl" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
             <div>
               <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-white/90">Empieza con claridad</motion.p>
-              <motion.h2 variants={copyItem} className="text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em] text-white" style={{ ...displayFont, fontWeight: 760 }}>
+              <motion.h2 variants={copyItem} className="qw-section-title text-white">
                 Aprende. Aplica. Hazlo parte de tu <span className="text-white/90">trabajo.</span>
               </motion.h2>
               <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-white/80">

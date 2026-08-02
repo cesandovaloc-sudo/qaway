@@ -248,62 +248,6 @@ function Hero() {
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
-          <div className="absolute inset-0 z-10 hidden lg:block">
-            {/* Tarjeta 1: Branding */}
-            <motion.div
-              className="absolute left-[2%] top-[62%] w-[14rem]"
-              animate={reduceMotion ? {} : { y: [0, -6, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
-            >
-              <a
-                href="#branding"
-                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
-              >
-                <span className="flex items-center gap-2.5">
-                  <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                    <PenTool size={20} strokeWidth={1.65} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                      Branding
-                    </span>
-                    <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                      Identidad clara y propia
-                    </span>
-                  </span>
-                </span>
-                <span className="absolute -left-6 top-1/2 h-px w-6 bg-[#ff4b0b]/80" />
-              </a>
-            </motion.div>
-
-            {/* Tarjeta 2: Contenido Visual */}
-            <motion.div
-              className="absolute right-[5%] bottom-[22%] w-[14.5rem]"
-              animate={reduceMotion ? {} : { y: [0, -6, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
-            >
-              <a
-                href="#contenido"
-                className="group block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
-              >
-                <span className="flex items-center gap-2.5">
-                  <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
-                    <ImageIcon size={20} strokeWidth={1.65} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
-                      Contenido Visual
-                    </span>
-                    <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
-                      Piezas y videos profesionales
-                    </span>
-                  </span>
-                </span>
-                <span className="absolute -right-6 top-1/2 h-px w-6 bg-[#ff4b0b]/80" />
-              </a>
-            </motion.div>
-          </div>
-
           {/* Bloque Móvil Responsivo (Oculto en celulares para mantener la foto limpia) */}
           <div className="hidden">
             <a
@@ -348,6 +292,23 @@ function Hero() {
               lista para vender<span className="text-[#ff4b0b]">.</span>
             </h4>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
+
+            <a
+              href="#branding"
+              className="group mt-7 flex w-full items-center gap-2.5 border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+            >
+              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                <PenTool size={20} strokeWidth={1.65} />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                  Branding
+                </span>
+                <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                  Identidad clara y propia
+                </span>
+              </span>
+            </a>
           </motion.div>
         </div>
       </div>

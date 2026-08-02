@@ -87,7 +87,8 @@ export default function Navbar({ variant: explicitVariant }) {
   
   const visibleLinks = getNavbarLinks()
   const navLinks = visibleLinks.map(vLink => {
-    const sourceItem = navItems.find(item => item.label === vLink.label || item.path === vLink.path)
+    const isAcademy = vLink.key === 'academy' || vLink.label === 'Academy'
+    const sourceItem = isAcademy ? navItems.find(item => item.label === vLink.label || item.path === vLink.path) : null
     return {
       ...vLink,
       items: sourceItem?.items || []
