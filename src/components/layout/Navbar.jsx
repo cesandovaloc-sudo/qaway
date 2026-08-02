@@ -166,15 +166,13 @@ export default function Navbar({ variant: explicitVariant }) {
                 </Link>
                 {link.items && link.items.length > 0 && (
                   <div className="absolute left-1/2 top-[calc(100%+12px)] -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className={`flex flex-col min-w-[200px] rounded-xl p-3 shadow-xl ${styles.mobileBg}`}>
+                    <div className={`flex flex-col min-w-[200px] rounded-[6px] p-3 shadow-xl ${styles.mobileBg}`}>
                       {link.items.map(subItem => (
                         subItem.external ? (
                           <a
                             key={subItem.label}
                             href={subItem.path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${styles.link}`}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[4px] transition-colors ${styles.link}`}
                           >
                             {subItem.label}
                           </a>
@@ -182,7 +180,7 @@ export default function Navbar({ variant: explicitVariant }) {
                           <Link
                             key={subItem.label}
                             to={subItem.path}
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[4px] transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
                           >
                             {subItem.label}
                           </Link>
@@ -245,8 +243,7 @@ export default function Navbar({ variant: explicitVariant }) {
                             <a
                               key={subItem.label}
                               href={subItem.path}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              onClick={() => setMenuOpen(false)}
                               className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
                             >
                               {subItem.label}
