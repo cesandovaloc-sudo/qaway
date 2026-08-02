@@ -172,6 +172,8 @@ export default function Navbar({ variant: explicitVariant }) {
                           <a
                             key={subItem.label}
                             href={subItem.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${styles.link}`}
                           >
                             {subItem.label}
@@ -243,6 +245,8 @@ export default function Navbar({ variant: explicitVariant }) {
                             <a
                               key={subItem.label}
                               href={subItem.path}
+                              target="_blank"
+                              rel="noopener noreferrer"
                               className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
                             >
                               {subItem.label}

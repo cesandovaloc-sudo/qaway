@@ -31,10 +31,6 @@ import './academy.css'
 
 const heroImage = '/assets/pages/4-academy/academy-hero-educator.png'
 
-
-
-const courseTopics = ['Todos', 'Inteligencia artificial', 'Productividad', 'Marketing', 'Diseño', 'Automatización']
-
 const testimonials = [
   {
     quote: 'No sentí que estaba aprendiendo a usar un programa. Terminé con un sistema claro para coordinar mis proyectos y presupuestos que ya uso todos los días con mis clientes.',
@@ -207,7 +203,7 @@ function CourseCard({ course, compact = false }) {
       </div>
       <div className="academy-course-content">
         <p>{course.category}</p>
-        <h3>{course.title}</h3>
+        <h3 className="no-qw">{course.title}</h3>
         <div className="academy-course-description">{course.text}</div>
         <div className="academy-course-meta">
           <span>{course.format}</span>
@@ -270,15 +266,12 @@ function leadEmailHtml(lead) {
 export default function AcademyPage() {
   const reduceMotion = useReducedMotion()
   const carouselRef = useRef(null)
-  const [activeTopic, setActiveTopic] = useState('Todos')
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const visibleCourses = activeTopic === 'Todos'
-    ? courseCatalog
-    : courseCatalog.filter((course) => course.category === activeTopic)
+  const visibleCourses = courseCatalog
 
   // Auto-rotate testimonials
   useEffect(() => {
@@ -524,33 +517,27 @@ export default function AcademyPage() {
       <section className="academy-section academy-catalog">
         <motion.div className="vl-branding__copy mx-auto max-w-[92rem] w-full" variants={copyStagger} initial="hidden" whileInView="visible" viewport={{ once: true, amount: .22 }}>
           <div>
-            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Explora por tema</motion.p>
+            <motion.p variants={copyItem} className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Catálogo</motion.p>
             <motion.h2 variants={copyItem} className="qw-section-title">
               Encuentra tu <span className="text-[#ff4b0b]">siguiente curso.</span>
             </motion.h2>
+            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
+              La academia completa vive en la app. Explora el catálogo y empieza hoy.
+            </motion.p>
+            <motion.a
+              variants={copyItem}
+              href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="academy-primary-button mt-8"
+            >
+              Ir a la app de Academy
+              <ArrowRight size={16} />
+            </motion.a>
           </div>
         </motion.div>
 
         <motion.div {...reveal} className="flex items-center justify-between mb-8 mt-6 max-w-[92rem] mx-auto">
-          <div className="academy-topic-filters m-0" aria-label="Filtrar cursos por tema">
-            {courseTopics.map((topic) => (
-              <button
-                key={topic}
-                type="button"
-                className={activeTopic === topic ? 'is-active' : ''}
-                onClick={() => setActiveTopic(topic)}
-              >
-                {topic}
-              </button>
-            ))}
-            <a
-              href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
-              className="academy-topic-filter-all"
-            >
-              Ver todos los cursos
-              <ArrowRight size={14} />
-            </a>
-          </div>
           <div className="academy-carousel-controls">
             <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
             <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
@@ -559,7 +546,7 @@ export default function AcademyPage() {
 
         <motion.div {...reveal} ref={carouselRef} className="academy-course-carousel is-medium">
           {visibleCourses.map((course) => (
-            <CourseCard key={`${activeTopic}-${course.title}`} course={course} compact />
+            <CourseCard key={course.title} course={course} compact />
           ))}
         </motion.div>
       </section>
@@ -577,7 +564,7 @@ export default function AcademyPage() {
               </motion.p>
             </div>
             <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} className="academy-primary-button">
+              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} target="_blank" rel="noopener noreferrer" className="academy-primary-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
@@ -832,7 +819,7 @@ export default function AcademyPage() {
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
-              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} className="academy-white-button">
+              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} target="_blank" rel="noopener noreferrer" className="academy-white-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
