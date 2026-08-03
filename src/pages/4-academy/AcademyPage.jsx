@@ -852,7 +852,7 @@ export default function AcademyPage() {
                   className={`group relative sm:pr-6 ${index % 2 === 0 ? 'sm:border-r sm:border-white/20' : ''}`}
                 >
                   <Icon className="h-7 w-7 text-white mb-4 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" strokeWidth={1.5} />
-                  <h3 className="text-[1.15rem] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-white/80">
+                  <h3 className="no-qw text-[1.4rem] font-bold leading-tight text-white transition-colors duration-300 group-hover:text-white/80">
                     {item.title}
                   </h3>
                   <p className="mt-2 text-[0.95rem] leading-[1.5] text-white/70">
