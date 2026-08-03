@@ -287,10 +287,10 @@ function Hero() {
             transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             <p className="qw-panel-kicker">Estudio Visual</p>
-            <h4 className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
+            <p className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
               Identidad visual<br />
               lista para vender<span className="text-[#ff4b0b]">.</span>
-            </h4>
+            </p>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b]" />
 
             <a

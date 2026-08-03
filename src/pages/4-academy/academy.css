@@ -427,6 +427,9 @@
   justify-content: center;
   padding: 1.5rem;
 }
+.academy-featured-courses > div:not(:first-child) .academy-course-content h3 {
+  font-size: 1.35rem;
+}
 
 .academy-course-card {
   display: grid;

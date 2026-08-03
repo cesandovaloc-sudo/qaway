@@ -453,9 +453,9 @@ export default function AcademyPage() {
             className="academy-hero-panel hidden lg:flex"
           >
             <p className="qw-panel-kicker">Academy</p>
-            <h4 className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
+            <p className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
-            </h4>
+            </p>
             <div className="academy-small-rule" />
 
             <a
