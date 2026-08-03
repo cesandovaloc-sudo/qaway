@@ -420,8 +420,13 @@ export default function AcademyPage() {
                 Ver programas
                 <ArrowRight size={17} />
               </a>
-              <a href="#metodo" className="academy-text-link">
-                Conocer Academy
+              <a
+                href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="academy-text-link"
+              >
+                Conocer todos los cursos
                 <ArrowRight size={16} />
               </a>
             </div>
@@ -521,26 +526,21 @@ export default function AcademyPage() {
             <motion.h2 variants={copyItem} className="qw-section-title">
               Encuentra tu <span className="text-[#ff4b0b]">siguiente curso.</span>
             </motion.h2>
-            <motion.p variants={copyItem} className="mt-4 max-w-xl text-[clamp(0.94rem,1.05vw,1.06rem)] leading-[1.5] text-[#4e4d4a]">
-              La academia completa vive en la app. Explora el catálogo y empieza hoy.
-            </motion.p>
-            <motion.a
-              variants={copyItem}
-              href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="academy-primary-button mt-8"
-            >
-              Ir a la app de Academy
-              <ArrowRight size={16} />
-            </motion.a>
-          </div>
-        </motion.div>
-
-        <motion.div {...reveal} className="flex items-center justify-between mb-8 mt-6 max-w-[92rem] mx-auto">
-          <div className="academy-carousel-controls">
-            <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
-            <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
+            <div className="mt-8 flex flex-wrap items-center gap-6 pb-10">
+              <a
+                href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="academy-primary-button"
+              >
+                Ver todos los cursos
+                <ArrowRight size={16} />
+              </a>
+              <div className="academy-carousel-controls">
+                <button type="button" onClick={() => moveCarousel(-1)} aria-label="Ver cursos anteriores"><ChevronLeft size={20} /></button>
+                <button type="button" onClick={() => moveCarousel(1)} aria-label="Ver más cursos"><ChevronRight size={20} /></button>
+              </div>
+            </div>
           </div>
         </motion.div>
 

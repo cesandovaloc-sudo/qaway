@@ -428,7 +428,8 @@
   padding: 1.5rem;
 }
 .academy-featured-courses > div:not(:first-child) .academy-course-content h3 {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
+  font-weight: 760;
 }
 
 .academy-course-card {
@@ -582,7 +583,7 @@
 }
 
 .academy-catalog .academy-carousel-controls button {
-  border-color: rgba(247, 245, 241, 0.2);
+  border-color: rgba(247, 245, 241, 0.35);
   color: #f7f5f1;
 }
 
