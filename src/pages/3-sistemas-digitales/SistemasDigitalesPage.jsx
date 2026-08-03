@@ -323,22 +323,17 @@ function HeroInicioBlockPractice() {
                 className="relative z-10 w-full"
               >
                 <div className="mb-8 text-center">
-                  <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b]"></div>
-                  <p className="qw-panel-kicker">
+                  <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b] hidden"></div>
+                  <p className="qw-hero-secondary-kicker">
                     Sistemas digitales
                   </p>
-                  <h4
-                    className="text-balance text-[#161616]"
-                    style={{ ...displayFont, fontWeight: 700 }}
-                  >
-                    Automatización para negocios que necesitan operar mejor.
-                  </h4>
+                  <p className="qw-hero-secondary-title text-balance">
+                    Automatización para negocios que necesitan operar mejor<span className="text-[#ff4b0b]">.</span>
+                  </p>
                 </div>
 
-                <motion.div
+                <div
                   className="mb-8 hidden lg:flex justify-center"
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 0 }}
                 >
                   <div
                     className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
@@ -358,7 +353,7 @@ function HeroInicioBlockPractice() {
                     </span>
                     <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
                   </div>
-                </motion.div>
+                </div>
               </motion.div>
             </div>
           </div>

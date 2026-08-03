@@ -163,7 +163,7 @@ function OpsImageStage({ reduceMotion }) {
             transition={
               reduceMotion ? undefined : {
                 opacity: { duration: 0.8, delay: 0.4 + idx * 0.4, ease: 'easeOut' },
-                y: { duration: image.duration, repeat: Infinity, ease: 'easeInOut' }
+                y: { duration: 0.8, delay: 0.4 + idx * 0.4, ease: 'easeOut' }
               }
             }
             className={`absolute transform-gpu will-change-transform ${image.className}`}
@@ -183,9 +183,7 @@ function OpsImageStage({ reduceMotion }) {
           </motion.figure>
         ))}
 
-        <motion.div
-          animate={reduceMotion ? undefined : { x: ['-20%', '120%'] }}
-          transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
+        <div
           className="absolute left-0 top-1/2 h-px w-full bg-gradient-to-r from-transparent via-qaway-accent to-transparent opacity-60"
         />
       </div>

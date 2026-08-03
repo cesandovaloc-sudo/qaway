@@ -452,15 +452,15 @@ export default function AcademyPage() {
             transition={{ delay: 0.18, duration: 0.78 }}
             className="academy-hero-panel hidden lg:flex"
           >
-            <p className="qw-panel-kicker">Academy</p>
-            <p className="text-[#20201f] text-balance" style={{ ...displayFont, fontWeight: 760 }}>
+            <p className="qw-hero-secondary-kicker">Academy</p>
+            <p className="qw-hero-secondary-title text-balance">
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
             </p>
             <div className="academy-small-rule" />
 
             <a
               href="#programas"
-              className="group mt-7 flex w-full items-center gap-2.5 border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-2.5 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+              className="qw-hero-secondary-card-btn group"
             >
               <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
                 <GraduationCap size={20} strokeWidth={1.65} />

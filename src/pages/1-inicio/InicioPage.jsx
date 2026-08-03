@@ -334,19 +334,16 @@ function Hero() {
             custom={0.22}
             className="flex flex-col justify-center items-center text-center px-7 py-10 sm:px-10 lg:px-9"
           >
-            <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Qaway Lab</p>
-            <h4
-              className="text-balance"
-              style={{ ...displayFont, fontWeight: 760 }}
-            >
+            <p className="qw-hero-secondary-kicker">Qaway Lab</p>
+            <p className="qw-hero-secondary-title text-balance">
               Todo lo que necesitas para crear,
               <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
-            </h4>
+            </p>
             <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b] hidden" />
 
             <a
               href="#sistemas"
-              className="group relative mt-8 block w-[14rem] border border-[#ff4b0b]/50 bg-white/72 p-2.5 text-left text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.12)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[#ff4b0b] hover:bg-white"
+              className="qw-hero-secondary-card-btn group"
             >
               <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-[#f8f9f7]" /></span>
               <span className="flex items-center gap-2.5">
