@@ -217,6 +217,17 @@
     font-size: clamp(2.3rem, 3.8vw, 4.1rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
+    max-width: 42rem;
+  }
+
+  .qw-section-title--sm {
+    font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif;
+    font-stretch: condensed;
+    font-weight: 760;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    max-width: none;
   }
 
   .qw-section-copy {

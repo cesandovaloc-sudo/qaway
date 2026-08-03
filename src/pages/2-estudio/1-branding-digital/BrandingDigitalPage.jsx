@@ -110,6 +110,7 @@ export default function BrandingDigitalPage() {
             title="Todo para construir una identidad digital sólida"
             description="Desde la conceptualización hasta la implementación completa de tu identidad de marca."
             align="center"
+            size="qw"
           />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service, i) => (
@@ -140,6 +141,7 @@ export default function BrandingDigitalPage() {
             title="Cómo construimos tu identidad"
             description="Un proceso estructurado que garantiza resultados profesionales."
             align="center"
+            size="qw"
           />
           <div className="grid md:grid-cols-4 gap-6">
             {process.map((p, i) => (

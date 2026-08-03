@@ -202,7 +202,7 @@ function VisualProofSection({ reduceMotion }) {
         {/* Section Header: Structured like Home and Visual Lab block headers */}
         <div className="mb-16 md:w-2/3">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-qaway-accent">Estructura & Flujo</div>
-          <h2 className="mt-4 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white text-balance leading-none">
+          <h2 className="qw-section-title text-white">
             La IA no se ve como magia.<br />
             Se ve como <span className="italic text-qaway-accent">orden.</span>
           </h2>
@@ -372,7 +372,7 @@ function SystemsInteractiveSection({ reduceMotion }) {
       <div className="relative z-10 mx-auto max-w-7xl px-8">
         <div className="mb-12 text-center mx-auto max-w-3xl">
           <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-qaway-accent">Sistema Completo</div>
-          <h2 className="mt-4 text-5xl font-bold tracking-tight text-white text-balance leading-none mx-auto">
+          <h2 className="qw-section-title text-white mx-auto">
             Lo que puede quedar funcionando <br />
             dentro de <span className="italic text-qaway-accent">tu proyecto.</span>
           </h2>
@@ -655,7 +655,7 @@ export default function AutomatizacionPage() {
         <div className="relative z-10 mx-auto max-w-7xl px-8">
           <div className="max-w-3xl">
             <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-black/45">Arquitectura operativa</div>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight text-black sm:text-5xl">
+            <h2 className="qw-section-title text-black">
               No instalamos herramientas. Diseñamos una forma de operar.
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-black/60">
@@ -698,7 +698,7 @@ export default function AutomatizacionPage() {
         <div className="mx-auto max-w-7xl px-8">
           <div className="text-center">
             <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-black/45">Método</div>
-            <h2 className="mx-auto mt-4 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
+            <h2 className="qw-section-title mx-auto">
               De caos operativo a sistema repetible.
             </h2>
           </div>
@@ -731,7 +731,7 @@ export default function AutomatizacionPage() {
             <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-5">
                 <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-qaway-accent">Stack operativo</div>
-                <h2 className="mt-4 text-4xl font-bold tracking-tight">Herramientas conectadas con criterio.</h2>
+                <h2 className="qw-section-title">Herramientas conectadas con criterio.</h2>
               </div>
               <div className="lg:col-span-7">
                 <div className="flex flex-wrap gap-3">
@@ -752,7 +752,7 @@ export default function AutomatizacionPage() {
         <div className="mx-auto max-w-7xl overflow-hidden rounded-[44px] bg-qaway-accent p-10 shadow-[0_34px_110px_rgba(255,210,0,0.30)] lg:p-14">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-8">
-              <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">Tu operación puede sentirse más simple.</h2>
+              <h2 className="qw-section-title">Tu operación puede sentirse más simple.</h2>
               <p className="mt-4 max-w-2xl text-lg text-black/70">
                 Empecemos con un diagnóstico y definamos qué sistema conviene automatizar primero.
               </p>

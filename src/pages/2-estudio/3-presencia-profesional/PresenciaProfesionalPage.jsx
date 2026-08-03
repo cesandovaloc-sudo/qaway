@@ -100,7 +100,7 @@ export default function PresenciaProfesionalPage() {
       {/* Services */}
       <section id="servicios" className="py-20">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Servicios" title="Todo para tu presencia profesional" description="Cada servicio está diseñado para potenciar tu imagen y abrirte oportunidades." align="center" />
+          <SectionTitle badge="Servicios" title="Todo para tu presencia profesional" description="Cada servicio está diseñado para potenciar tu imagen y abrirte oportunidades." align="center" size="qw" />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service, i) => (
               <motion.div
@@ -125,7 +125,7 @@ export default function PresenciaProfesionalPage() {
       {/* Platforms */}
       <section className="py-20 bg-white/[0.01] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Plataformas" title="Presencia en las plataformas correctas" description="Cada plataforma tiene su propio lenguaje. Te ayudamos a dominarlas todas." align="center" />
+          <SectionTitle badge="Plataformas" title="Presencia en las plataformas correctas" description="Cada plataforma tiene su propio lenguaje. Te ayudamos a dominarlas todas." align="center" size="qw" />
           <div className="grid md:grid-cols-4 gap-4">
             {platforms.map((p, i) => (
               <motion.div

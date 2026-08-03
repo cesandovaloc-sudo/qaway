@@ -17,7 +17,9 @@ export default function SectionTitle({
         ? 'text-3xl md:text-4xl'
         : size === 'hero'
           ? 'text-5xl sm:text-6xl lg:text-7xl'
-          : 'text-display-sm md:text-display-md'
+          : size === 'qw'
+            ? 'qw-section-title'
+            : 'text-display-sm md:text-display-md'
 
   const descClass =
     size === 'sm'
@@ -25,6 +27,11 @@ export default function SectionTitle({
       : size === 'md'
         ? 'text-base md:text-lg'
         : 'text-lg'
+
+  const titleExtra =
+    size === 'qw' ? 'mb-5' : 'font-bold tracking-tight leading-[1.1] mb-5'
+
+  const titleTone = light ? 'text-gray-900' : 'text-white'
 
   return (
     <motion.div
@@ -47,15 +54,11 @@ export default function SectionTitle({
         </span>
       )}
       {as === 'h1' ? (
-        <h1 className={`${titleClass} font-bold tracking-tight leading-[1.1] mb-5 ${
-          light ? 'text-gray-900' : 'text-white'
-        }`}>
+        <h1 className={`${titleClass} ${titleExtra} ${titleTone}`}>
           {title}
         </h1>
       ) : (
-        <h2 className={`${titleClass} font-bold tracking-tight leading-[1.1] mb-5 ${
-          light ? 'text-gray-900' : 'text-white'
-        }`}>
+        <h2 className={`${titleClass} ${titleExtra} ${titleTone}`}>
           {title}
         </h2>
       )}

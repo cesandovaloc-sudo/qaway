@@ -99,7 +99,7 @@ export default function ConsultoriaPage() {
       {/* Approach */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Enfoque" title="Nuestra forma de consultoría" description="No damos recetas. Construimos soluciones contigo." align="center" />
+          <SectionTitle badge="Enfoque" title="Nuestra forma de consultoría" description="No damos recetas. Construimos soluciones contigo." align="center" size="qw" />
           <div className="grid md:grid-cols-3 gap-6">
             {approach.map((a, i) => (
               <motion.div
@@ -124,7 +124,7 @@ export default function ConsultoriaPage() {
       {/* Services */}
       <section id="servicios" className="py-20 bg-white/[0.01] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Servicios" title="Áreas de consultoría estratégica" description="Acompañamiento profesional en cada aspecto de tu presencia digital." align="center" />
+          <SectionTitle badge="Servicios" title="Áreas de consultoría estratégica" description="Acompañamiento profesional en cada aspecto de tu presencia digital." align="center" size="qw" />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service, i) => (
               <motion.div

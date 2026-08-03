@@ -460,7 +460,7 @@ export default function RecursosPage() {
               {highlighted.length > 0 && (
                 <>
                   <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-                    <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Para empezar</h2>
+                    <h2 className="qw-section-title--sm uppercase text-[#191918]" style={displayFont}>Para empezar</h2>
                     <Link to="/recursos/prompts" className="flex items-center gap-2 text-sm font-bold text-[#191918]/60 transition-colors hover:text-[#ff4b0b]">
                       Ver Mas <ArrowRight size={16} />
                     </Link>
@@ -475,7 +475,7 @@ export default function RecursosPage() {
               {newResources.length > 0 && (
                 <>
                   <div className="mb-6 flex items-center justify-between border-b border-black/10 pb-4">
-                    <h2 className="text-2xl font-bold uppercase tracking-tight text-[#191918]" style={displayFont}>Recien agregados</h2>
+                    <h2 className="qw-section-title--sm uppercase text-[#191918]" style={displayFont}>Recien agregados</h2>
                   </div>
                   <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {newResources.map((res, idx) => (
@@ -511,7 +511,7 @@ export default function RecursosPage() {
             </motion.div>
           )}          <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
             <div className="flex-1 min-w-[300px]">
-              <h2 className="mb-3 text-[clamp(1.4rem,3vw,2rem)] font-bold uppercase leading-tight tracking-tight text-[#ff4b0b]" style={{ ...displayFont }}>
+              <h2 className="qw-section-title--sm mb-3 uppercase text-[#ff4b0b]" style={{ ...displayFont }}>
                 Acelera con Qaway Academy
               </h2>
               <p className="mb-6 text-sm leading-relaxed text-[#191918]/70">

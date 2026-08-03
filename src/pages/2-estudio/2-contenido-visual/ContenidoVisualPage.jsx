@@ -102,7 +102,7 @@ export default function ContenidoVisualPage() {
       {/* Formats Table */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Formatos" title="Tipos de contenido que creamos" description="Cada formato está diseñado para maximizar el impacto en su plataforma." align="center" />
+          <SectionTitle badge="Formatos" title="Tipos de contenido que creamos" description="Cada formato está diseñado para maximizar el impacto en su plataforma." align="center" size="qw" />
           <div className="overflow-hidden rounded-2xl border border-white/5">
             <div className="grid grid-cols-3 gap-px bg-white/5">
               {['Formato', 'Duración', 'Plataforma'].map((h, i) => (
@@ -126,7 +126,7 @@ export default function ContenidoVisualPage() {
       {/* Services */}
       <section id="servicios" className="py-20 bg-white/[0.01] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Servicios" title="Todo lo que necesitas para tu contenido" align="center" />
+          <SectionTitle badge="Servicios" title="Todo lo que necesitas para tu contenido" align="center" size="qw" />
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {services.map((service, i) => (
               <motion.div

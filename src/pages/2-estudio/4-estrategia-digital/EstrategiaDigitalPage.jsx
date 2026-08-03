@@ -110,7 +110,7 @@ export default function EstrategiaDigitalPage() {
       {/* Funnel */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Embudo" title="Estrategia para cada etapa del funnel" description="Cada fase del customer journey requiere un enfoque y contenido diferente." align="center" />
+          <SectionTitle badge="Embudo" title="Estrategia para cada etapa del funnel" description="Cada fase del customer journey requiere un enfoque y contenido diferente." align="center" size="qw" />
           <div className="grid md:grid-cols-4 gap-4">
             {funnelStages.map((f, i) => (
               <motion.div
@@ -137,7 +137,7 @@ export default function EstrategiaDigitalPage() {
       {/* Services */}
       <section id="servicios" className="py-20 bg-white/[0.01] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-8">
-          <SectionTitle badge="Servicios" title="Todo lo que necesitas para tu estrategia digital" description="Desde la planificación hasta la ejecución y medición de resultados." align="center" />
+          <SectionTitle badge="Servicios" title="Todo lo que necesitas para tu estrategia digital" description="Desde la planificación hasta la ejecución y medición de resultados." align="center" size="qw" />
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {services.map((service, i) => (
               <motion.div

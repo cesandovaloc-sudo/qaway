@@ -796,6 +796,7 @@ function AcademyFeature() {
 
   return (
     <section id="academy" className="flex min-h-[100dvh] flex-col justify-center bg-[#f8f9f7] text-[#20201f] py-12 lg:py-0">
+      <div className="mx-auto w-full max-w-[96rem]">
       <div className="grid items-center w-full lg:grid-cols-[55%_45%]">
         <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
         <motion.p
@@ -858,6 +859,7 @@ function AcademyFeature() {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/18" />
       </motion.div>
+      </div>
       </div>
     </section>
   )
@@ -1005,7 +1007,7 @@ function CoursesLandings() {
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="qw-section-kicker">Formación y soluciones</p>
           <h2
-            className="qw-section-title"
+            className="qw-section-title mx-auto"
             style={{ ...displayFont, fontWeight: 760 }}
           >
             Aprende y <span className="text-[#ff4b0b]">aplica.</span>
