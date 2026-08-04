@@ -308,8 +308,8 @@ function Hero() {
         </div>
 
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
         >

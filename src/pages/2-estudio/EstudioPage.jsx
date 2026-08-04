@@ -35,15 +35,6 @@ const displayFont = {
   fontWeight: 700,
 }
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 18 },
-  show: (delay = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.72, delay, ease: [0.22, 1, 0.36, 1] },
-  }),
-}
-
 const revealUp = {
   hidden: { opacity: 0, y: 32 },
   show: function (delay) {
@@ -202,10 +193,9 @@ function Hero() {
         {/* Columna 1: Texto Principal */}
         <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
           <motion.div
-            initial={reduceMotion ? false : 'hidden'}
-            animate={reduceMotion ? undefined : 'show'}
-            variants={fadeUp}
-            custom={0}
+            initial={reduceMotion ? false : { opacity: 0, y: 32 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10"
           >
             <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
@@ -234,8 +224,8 @@ function Hero() {
 
         {/* Columna 2: Imagen Central con Tarjetas Ancladas */}
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
           transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
         >
@@ -280,12 +270,7 @@ function Hero() {
 
         {/* Columna 3: Panel Derecho */}
         <div className="relative hidden lg:flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
-          <motion.div
-            className="relative z-10 flex flex-col items-center text-center"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <div className="qw-hero-secondary-enter relative z-10 flex flex-col items-center text-center">
             <p className="qw-hero-secondary-kicker">Estudio Visual</p>
             <p className="qw-hero-secondary-title text-balance">
               Identidad visual<br />
@@ -309,7 +294,7 @@ function Hero() {
                 </span>
               </span>
             </a>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
@@ -457,7 +442,7 @@ function Services() {
                   {service.image && <img src={`${ASSET}/${service.image}`} alt={`Servicio de ${service.title}`} loading="lazy" style={{ objectPosition: service.position || 'center' }} />}
                   <div className="vl-service__body">
                     <div className="vl-service__top"><span>{service.number}</span><Icon size={22} /></div>
-                    <h3>{service.title}</h3>
+                    <h3 className="no-qw">{service.title}</h3>
                     <ArrowRight className="vl-service__arrow" size={18} />
                   </div>
                 </TiltPanel>

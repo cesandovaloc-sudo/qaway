@@ -451,12 +451,7 @@ export default function AcademyPage() {
             <div className="academy-portrait-glow" />
           </motion.div>
 
-          <motion.aside
-            initial={reduceMotion ? false : { opacity: 0, x: 26 }}
-            animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={{ delay: 0.18, duration: 0.78 }}
-            className="academy-hero-panel hidden lg:flex"
-          >
+          <aside className="qw-hero-secondary-enter academy-hero-panel hidden lg:flex">
             <p className="qw-hero-secondary-kicker">Academy</p>
             <p className="qw-hero-secondary-title text-balance">
               Formación para avanzar con <span className="academy-title-emphasis">claridad</span><span className="academy-title-punct">.</span>
@@ -479,7 +474,7 @@ export default function AcademyPage() {
                 </span>
               </span>
             </a>
-          </motion.aside>
+          </aside>
         </div>
       </section>
 

@@ -24,6 +24,8 @@
 }
 .estudio-page a { text-decoration: none; }
 
+
+
 .estudio-page .vl-shell { width: min(1504px, calc(100% - 64px)); margin: 0 auto; }
 .estudio-page .vl-section { padding: 140px 0; }
 .estudio-page .vl-paper { background: var(--vl-paper); color: var(--vl-ink); }
@@ -665,7 +667,7 @@
 .estudio-page .vl-service--3 > img,
 .estudio-page .vl-service--4 > img { opacity: .2; }
 .estudio-page .vl-service:hover > img { opacity: .95; }
-.estudio-page .vl-service h3 { max-width: 380px; font-size: clamp(1.15rem, 1.8vw, 2.1rem); line-height: 1; letter-spacing: -.035em; opacity: .9; transition: opacity .5s cubic-bezier(0.22, 1, 0.36, 1); }
+.estudio-page .vl-service h3 { max-width: 380px; font-size: clamp(1.1rem, 1.4vw, 1.6rem); line-height: 1; letter-spacing: -.035em; opacity: .9; transition: opacity .5s cubic-bezier(0.22, 1, 0.36, 1); }
 .estudio-page .vl-service:hover h3 { opacity: 0; }
 
 .estudio-page .vl-service__body {
