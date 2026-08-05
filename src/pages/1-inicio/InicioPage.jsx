@@ -795,7 +795,7 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="flex min-h-[100dvh] flex-col justify-center bg-[#f8f9f7] text-[#20201f] py-12 lg:py-0">
+    <section id="academy" className="flex flex-col justify-center bg-[#f8f9f7] text-[#20201f] py-12 lg:min-h-[100dvh] lg:py-0">
       <div className="mx-auto w-full max-w-[96rem]">
       <div className="grid items-center w-full lg:grid-cols-[55%_45%]">
         <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
@@ -839,7 +839,9 @@ function AcademyFeature() {
           className="mt-6 flex flex-wrap gap-7"
         >
           <ArrowLink to="/academy">Ver Academy</ArrowLink>
-          <ArrowLink to="/recursos">Ver recursos</ArrowLink>
+          <ArrowLink to={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} newTab>
+            Ver todos los cursos
+          </ArrowLink>
         </motion.div>
       </div>
 
@@ -1044,8 +1046,8 @@ function CoursesLandings() {
                         {landing.featured && <span>{landing.featured}</span>}
                       </div>
                       <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p>{landing.category}</p>
-                        <h3 className="no-qw">{landing.title}</h3>
+                        <p className="text-[#ff4b0b]">{landing.category}</p>
+                        <h3 className="no-qw text-[#20201f]">{landing.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
@@ -1087,8 +1089,8 @@ function CoursesLandings() {
                         {course.featured && <span>{course.featured}</span>}
                       </div>
                       <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p>{course.category}</p>
-                        <h3 className="no-qw">{course.title}</h3>
+                        <p className="text-[#ff4b0b]">{course.category}</p>
+                        <h3 className="no-qw text-[#20201f]">{course.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
