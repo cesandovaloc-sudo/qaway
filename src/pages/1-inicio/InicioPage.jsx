@@ -36,6 +36,7 @@ import {
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { carouselCourses, carouselLandings } from '@/data/academyCourses'
 import '@/pages/4-academy/academy.css'
+import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
 
 const base = '/assets/pages/1-inicio/'
@@ -880,7 +881,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
             <p className="qw-section-copy">
               Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
             </p>
-            <div className="academy-form-points mt-6">
+            <div className="qw-form-points mt-6">
               <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
               <span><Check size={16} /> Recibe orientación sin compromiso</span>
               <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
@@ -890,10 +891,10 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
           <Reveal>
             <form
               onSubmit={onSubmit}
-              className="academy-interest-form"
+              className="qw-form"
             >
               {submitted ? (
-                <div className="academy-form-success">
+                <div className="qw-form-success">
                   <div><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
@@ -901,32 +902,32 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                 </div>
               ) : (
                 <>
-                  <div className="academy-field">
-                    <label htmlFor="academy-name">¿Cómo te llamas?</label>
+                  <div className="qw-field">
+                    <label htmlFor="qw-name">¿Cómo te llamas?</label>
                     <input
                       type="text"
-                      id="academy-name"
+                      id="qw-name"
                       name="name"
                       required
                       placeholder="Tu nombre completo"
                     />
                   </div>
-                  <div className="academy-field-row">
-                    <div className="academy-field">
-                      <label htmlFor="academy-phone">Teléfono</label>
+                  <div className="qw-field-row">
+                    <div className="qw-field">
+                      <label htmlFor="qw-phone">Teléfono</label>
                       <input
                         type="tel"
-                        id="academy-phone"
+                        id="qw-phone"
                         name="phone"
                         required
                         placeholder="+51 999 999 999"
                       />
                     </div>
-                    <div className="academy-field">
-                      <label htmlFor="academy-email">Correo</label>
+                    <div className="qw-field">
+                      <label htmlFor="qw-email">Correo</label>
                       <input
                         type="email"
-                        id="academy-email"
+                        id="qw-email"
                         name="email"
                         required
                         placeholder="tucorreo@empresa.com"
@@ -934,10 +935,10 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                     </div>
                   </div>
 
-                  <div className="academy-field-row">
-                    <div className="academy-field">
-                      <label htmlFor="academy-profile">¿A qué te dedicas?</label>
-                      <select id="academy-profile" name="profile" required>
+                  <div className="qw-field-row">
+                    <div className="qw-field">
+                      <label htmlFor="qw-profile">¿A qué te dedicas?</label>
+                      <select id="qw-profile" name="profile" required>
                         <option value="">Selecciona tu perfil</option>
                         <option value="Profesional / Consultor">Profesional / Consultor</option>
                         <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
@@ -946,9 +947,9 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                         <option value="Otro">Otro</option>
                       </select>
                     </div>
-                    <div className="academy-field">
-                      <label htmlFor="academy-interest">¿Qué Servicio o Curso te interesa?</label>
-                      <select id="academy-interest" name="interest" required>
+                    <div className="qw-field">
+                      <label htmlFor="qw-interest">¿Qué Servicio o Curso te interesa?</label>
+                      <select id="qw-interest" name="interest" required>
                         <option value="">Selecciona un interés</option>
                         <option value="Identidad Visual con IA">Identidad Visual con IA</option>
                         <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
@@ -960,20 +961,20 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                     </div>
                   </div>
 
-                  <div className="academy-field">
-                    <label htmlFor="academy-message">Cuéntanos un poco más</label>
+                  <div className="qw-field">
+                    <label htmlFor="qw-message">Cuéntanos un poco más</label>
                     <textarea
-                      id="academy-message"
+                      id="qw-message"
                       name="message"
                       rows="4"
                       placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
                     />
                   </div>
-                  <button type="submit" className="academy-submit-button" disabled={submitting}>
+                  <button type="submit" className="qw-submit-button" disabled={submitting}>
                     {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
                     <Send size={17} />
                   </button>
-                  {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                  {submitError && <p className="qw-form-error" role="alert">{submitError}</p>}
                   <small>Usaremos esta información únicamente para responder tu consulta.</small>
                 </>
               )}

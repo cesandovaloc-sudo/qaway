@@ -1406,8 +1406,6 @@
 
 /* ESTUDIO CONTACT FORM - formulario propio de Estudio, desacoplado de Academy */
 .estudio-page #diagnostico .vl-form-intro { position: sticky; top: 2rem; }
-.estudio-page #diagnostico .vl-form-intro h2 { max-width: 44rem; margin-top: 0.85rem; font-size: clamp(3.6rem, 5.3vw, 6rem); font-weight: 700; letter-spacing: -0.055em; line-height: 0.87; }
-.estudio-page #diagnostico .vl-form-intro > p { max-width: 31rem; margin-top: 1.6rem; color: #6d6b68; line-height: 1.65; }
 .estudio-page #diagnostico .vl-form {
   display: grid;
   gap: 0;
@@ -1475,7 +1473,6 @@
   .estudio-page #diagnostico .vl-form-intro { position: static; }
 }
 @media (max-width: 760px) {
-  .estudio-page #diagnostico .vl-form-intro h2 { font-size: clamp(3.35rem, 15vw, 5rem); }
   .estudio-page #diagnostico .vl-form { min-height: 0; padding: 1.4rem; }
   .estudio-page #diagnostico .vl-field-row { grid-template-columns: 1fr; gap: 0; }
 }
