@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T00:00:00.000Z",
+  "title": "Design System: QawayLab Web",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Acid Orange", "canonical": "#ff4b0b" },
+      "primary-light": { "role": "primary", "displayName": "Acid Light", "canonical": "#ff7a45" },
+      "primary-bright": { "role": "primary", "displayName": "Acid Bright", "canonical": "#ff9b73" },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#111111" },
+      "ink-2": { "role": "neutral", "displayName": "Ink 2", "canonical": "#18181b" },
+      "ink-3": { "role": "neutral", "displayName": "Ink 3", "canonical": "#1f1f23" },
+      "ink-4": { "role": "neutral", "displayName": "Ink 4", "canonical": "#27272a" },
+      "muted": { "role": "neutral", "displayName": "Muted", "canonical": "#71717a" },
+      "muted-light": { "role": "neutral", "displayName": "Muted Light", "canonical": "#a1a1aa" },
+      "surface": { "role": "neutral", "displayName": "Surface", "canonical": "#f5f5f5" },
+      "surface-muted": { "role": "neutral", "displayName": "Surface Muted", "canonical": "#f2f1ef" },
+      "warm": { "role": "neutral", "displayName": "Warm", "canonical": "#efede8" },
+      "warm-muted": { "role": "neutral", "displayName": "Warm Muted", "canonical": "#e5e3dd" },
+      "warm-dark": { "role": "neutral", "displayName": "Warm Dark", "canonical": "#dcd9cf" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines only; tight negative tracking." },
+      "display-condensed": { "displayName": "Display Condensed", "purpose": "Campaign and editorial-detail surfaces." },
+      "body": { "displayName": "Body", "purpose": "Article and UI body copy." },
+      "mono": { "displayName": "Mono", "purpose": "Meta, eyebrows, and technical labels." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)", "purpose": "Resting cards on light surfaces." },
+      { "name": "card-hover", "value": "0 20px 40px rgba(0,0,0,0.08), 0 6px 12px rgba(0,0,0,0.06)", "purpose": "Hover lift for cards." },
+      { "name": "glow-accent", "value": "0 0 30px rgba(255,75,11,0.3)", "purpose": "Primary CTA glow." },
+      { "name": "glow-accent-sm", "value": "0 0 15px rgba(255,75,11,0.2)", "purpose": "Subtle accent glow." },
+      { "name": "glow-gold", "value": "0 0 40px rgba(255,75,11,0.25), 0 0 80px rgba(255,75,11,0.1)", "purpose": "Hero-level accent emphasis." },
+      { "name": "elevated", "value": "0 25px 50px -12px rgba(0,0,0,0.25)", "purpose": "Floating panels and overlays." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Default easing for reveals and transitions." },
+      { "name": "fade-in", "value": "fadeIn 0.5s ease-out", "purpose": "Load-in." },
+      { "name": "fade-in-up", "value": "fadeInUp 0.6s ease-out", "purpose": "Section reveals." },
+      { "name": "float", "value": "float 6s ease-in-out infinite", "purpose": "Ambient floating accents." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single action CTA of the system.",
+      "html": "<button class=\"ds-btn-primary\">EMPEZAR</button>",
+      "css": ".ds-btn-primary { background: #ff4b0b; color: #ffffff; font-family: Inter, system-ui, sans-serif; font-weight: 500; padding: 1rem 2rem; border-radius: 1rem; border: none; cursor: pointer; box-shadow: 0 0 30px rgba(255, 75, 11, 0.3); transition: background 0.2s, transform 0.2s; } .ds-btn-primary:hover { background: #ff7a45; transform: translateY(-2px); } .ds-btn-primary:focus-visible { outline: 2px solid #ff4b0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary action on light and dark surfaces.",
+      "html": "<button class=\"ds-btn-ghost\">VER MÁS</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #111111; font-family: Inter, system-ui, sans-serif; font-weight: 500; padding: 1rem 2rem; border-radius: 1rem; border: 1px solid rgba(17, 17, 17, 0.3); cursor: pointer; transition: border-color 0.2s, color 0.2s; } .ds-btn-ghost:hover { border-color: #ff4b0b; color: #ff4b0b; } .ds-btn-ghost:focus-visible { outline: 2px solid #ff4b0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Top navigation with display-weight links and accent on active state.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-active\" href=\"#\">Inicio</a><a class=\"ds-nav-link\" href=\"#\">Estudio</a><a class=\"ds-nav-link\" href=\"#\">Sistemas</a><a class=\"ds-nav-link\" href=\"#\">Academy</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 2rem; padding: 1rem 2rem; background: #111111; border-radius: 1rem; } .ds-nav-link { font-family: Space Grotesk, Inter, sans-serif; font-size: 1rem; color: #a1a1aa; text-decoration: none; transition: color 0.2s; } .ds-nav-link:hover { color: #ffffff; } .ds-nav-active { color: #ff4b0b; } .ds-nav-link:focus-visible { outline: 2px solid #ff4b0b; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Standard content card on light surfaces.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-label\">SERVICIO</p><h3 class=\"ds-card-title\">Automatización</h3><p class=\"ds-card-body\">Flujos que reducen tareas repetitivas.</p></div>",
+      "css": ".ds-card { background: #ffffff; border-radius: 1rem; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06); font-family: Inter, system-ui, sans-serif; transition: box-shadow 0.2s, transform 0.2s; } .ds-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.08), 0 6px 12px rgba(0,0,0,0.06); transform: translateY(-4px); } .ds-card-label { font-family: JetBrains Mono, monospace; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #ff4b0b; margin: 0 0 0.5rem; } .ds-card-title { font-family: Space Grotesk, Inter, sans-serif; font-size: 1.5rem; margin: 0 0 0.5rem; color: #111111; } .ds-card-body { font-size: 1rem; color: #71717a; margin: 0; line-height: 1.5; }"
+    },
+    {
+      "name": "Tag / Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Category or filter chip.",
+      "html": "<span class=\"ds-chip\">IA · AGENTES</span>",
+      "css": ".ds-chip { display: inline-block; font-family: JetBrains Mono, monospace; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: #111111; background: #efede8; border: 1px solid rgba(17,17,17,0.12); padding: 0.4rem 0.75rem; border-radius: 1rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Editorial Laboratory",
+    "overview": "The system reads as a print studio that went digital: warm paper surfaces, near-black ink, and a single acid-orange accent that strikes like a highlighter across editorial spreads. Hierarchy is built from type weight and scale rather than ornament; space is generous; the accent is rationed so it always means \"act here.\"",
+    "keyCharacteristics": [
+      "Warm paper / near-black ink pairing with one acid-orange accent reserved for action.",
+      "Editorial display type (Space Grotesk; condensed Arial Narrow on campaign surfaces) over Inter body.",
+      "Flat surfaces that lift on hover; soft corners; glow reserved for primary CTAs.",
+      "Generous, calm spacing; large display scale with tight negative tracking."
+    ],
+    "rules": [
+      { "name": "The Acid Ration Rule", "body": "The accent appears on a minority of any screen. Its rarity is what makes it mean \"act.\"", "section": "colors" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces rest flat. Shadows appear only on hover, elevation, or focus.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use the acid orange only for action and selection.",
+      "Do lead hierarchy with type weight and scale, not color.",
+      "Do keep light sections warm paper, dark sections near-black ink.",
+      "Do reserve glow for primary CTAs and hero emphasis."
+    ],
+    "donts": [
+      "Don't introduce a second saturated accent color.",
+      "Don't mix warm and cool grays within the same section.",
+      "Don't add resting shadows to flat surfaces.",
+      "Don't stack multiple display sizes in one viewport."
+    ]
+  }
+}
