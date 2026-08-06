@@ -27,8 +27,8 @@ export function LogosMarquee() {
         {/* Intentionally minimal: let logos speak */}
 
         <div className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-white to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-white to-transparent" />
 
           <div className="flex gap-10 whitespace-nowrap will-change-transform animate-[qaway-marquee_28s_linear_infinite]">
             {row.map((name, i) => (
@@ -42,4 +42,4 @@ export function LogosMarquee() {
     </section>
   )
 }
-
+

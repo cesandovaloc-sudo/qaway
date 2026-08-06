@@ -222,7 +222,7 @@ export default function ArticleDetailPage() {
   if (!article) {
     return (
       <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-8 mt-[73px]">
-        <div className="text-center max-w-md bg-white p-8 rounded-[15px] border border-zinc-200 shadow-sm">
+        <div className="text-center max-w-md bg-white p-8 rounded-[15px] border border-zinc-200 shadow-xs">
           <BookOpen className="w-12 h-12 text-zinc-400 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-zinc-950 mb-2">Artículo no encontrado</h2>
           <p className="text-zinc-500 text-sm mb-6">El artículo que estás buscando no existe o ha sido movido.</p>
@@ -248,7 +248,7 @@ export default function ArticleDetailPage() {
       {/* Barra de progreso de lectura pegajosa justo debajo del Navbar */}
       <div className="fixed top-[80px] left-0 right-0 h-1 bg-zinc-100 z-40">
         <div 
-          className="h-full bg-gradient-to-r from-qaway-accent to-qaway-accent-dark transition-all duration-100" 
+          className="h-full bg-linear-to-r from-qaway-accent to-qaway-accent-dark transition-all duration-100" 
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
@@ -308,7 +308,7 @@ export default function ArticleDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="relative h-[250px] md:h-[400px] rounded-[15px] overflow-hidden bg-zinc-900 mb-12 border border-black/5 shadow-sm"
+          className="relative h-[250px] md:h-[400px] rounded-[15px] overflow-hidden bg-zinc-900 mb-12 border border-black/5 shadow-xs"
         >
           <img
             src={article.image}
@@ -329,7 +329,7 @@ export default function ArticleDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-sm text-zinc-800 text-base md:text-lg leading-relaxed space-y-6"
+              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs text-zinc-800 text-base md:text-lg leading-relaxed space-y-6"
             >
               <div 
                 dangerouslySetInnerHTML={{ __html: article.content }} 
@@ -383,7 +383,7 @@ export default function ArticleDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-sm space-y-6"
+              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs space-y-6"
             >
               <h3 className="text-base font-extrabold uppercase tracking-widest text-zinc-800 flex items-center gap-2 border-b border-zinc-100 pb-3">
                 Comentarios y Opiniones
@@ -477,7 +477,7 @@ export default function ArticleDetailPage() {
           <div className="space-y-8 lg:sticky lg:top-[85px]">
             
             {/* Widget: Progreso de Lectura */}
-            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-sm">
+            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-xs">
               <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3">Lectura</h4>
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-zinc-500 font-semibold">Leído hasta:</span>
@@ -492,8 +492,8 @@ export default function ArticleDetailPage() {
             </div>
 
             {/* Widget: Newsletter (Captación) */}
-            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-qaway-accent/60 via-qaway-accent to-qaway-accent/60 rounded-t-[15px]" />
+            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-xs relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-qaway-accent/60 via-qaway-accent to-qaway-accent/60 rounded-t-[15px]" />
               <h4 className="text-[9px] font-extrabold text-qaway-accent uppercase tracking-widest mb-2 flex items-center gap-1 mt-1">
                 <Sparkles className="w-3 h-3" /> Boletín Semanal
               </h4>
@@ -519,7 +519,7 @@ export default function ArticleDetailPage() {
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="Tu correo electrónico"
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-zinc-300 focus:bg-white transition-all font-semibold"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-zinc-300 focus:bg-white transition-all font-semibold"
                     />
                   </div>
                   {newsletterError && (

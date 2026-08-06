@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 const cardVariants = {
   default: 'bg-[#1a1a1a] border border-white/5 hover:border-white/10',
   glass: 'glass-card',
-  gradient: 'bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5',
+  gradient: 'bg-linear-to-br from-white/[0.03] to-transparent border border-white/5',
   accent: 'bg-qaway-accent text-black border border-qaway-accent/20',
 }
 

@@ -59,7 +59,7 @@ export function ArchitectureSection() {
 
   return (
     <section className="pt-10 pb-10 bg-white relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent via-white/[0.02] to-transparent" />
       
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         <SectionTitle
@@ -88,7 +88,7 @@ export function ArchitectureSection() {
                 className="relative"
               >
                 <div className="bg-white border border-gray-200/60 rounded-2xl p-6 transition-all duration-300 hover:border-qaway-accent/30 hover:shadow-lg hover:shadow-qaway-accent/10 group cursor-default">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${layer.color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
+                  <div className={`absolute inset-0 bg-linear-to-br ${layer.color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                   
                   <div className="relative z-10">
                     <div className="w-10 h-10 rounded-xl bg-qaway-accent/10 flex items-center justify-center mb-4">
@@ -115,4 +115,4 @@ export function ArchitectureSection() {
 
 // ═══════════════════════════════════════════════════════════
 // ▢ LIGHT BLOCK 2 — LANDINGS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

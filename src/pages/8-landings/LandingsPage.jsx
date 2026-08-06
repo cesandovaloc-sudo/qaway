@@ -19,7 +19,7 @@ export default function LandingsPage() {
   return (
     <>
       <section className="relative pt-24 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-pink-500/5 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-pink-500/5 via-transparent to-transparent" />
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <SectionTitle
             badge="Landings"
@@ -42,7 +42,7 @@ export default function LandingsPage() {
                   whileHover={{ y: -6 }}
                   className="group bg-[#1a1a1a] border border-white/5 hover:border-white/10 rounded-2xl p-6 md:p-8 transition-all duration-500"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500/20 to-transparent border border-pink-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-pink-500/20 to-transparent border border-pink-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
                     <landing.icon className="w-6 h-6 text-pink-400" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-3 group-hover:text-pink-400 transition-colors">{landing.title}</h3>

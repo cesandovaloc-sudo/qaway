@@ -177,14 +177,14 @@ function OpsImageStage({ reduceMotion }) {
                   loading="lazy"
                   decoding="async"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
               </div>
             </div>
           </motion.figure>
         ))}
 
         <div
-          className="absolute left-0 top-1/2 h-px w-full bg-gradient-to-r from-transparent via-qaway-accent to-transparent opacity-60"
+          className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-qaway-accent to-transparent opacity-60"
         />
       </div>
     </motion.div>
@@ -234,7 +234,7 @@ function VisualProofSection({ reduceMotion }) {
                 const Icon = item.icon
                 return (
                   <div key={idx} className="flex gap-6 items-start">
-                    <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-qaway-accent rounded-sm shrink-0">
+                    <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-qaway-accent rounded-xs shrink-0">
                       <Icon className="h-5 w-5 text-qaway-accent" />
                     </div>
                     <div>
@@ -248,7 +248,7 @@ function VisualProofSection({ reduceMotion }) {
 
             {/* Right Column: Workflow Mockup (Translucent window frame) */}
             <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0f0f11]/5 p-6 backdrop-blur-sm">
+              <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0f0f11]/5 p-6 backdrop-blur-xs">
                 {/* Windows dots header */}
                 <div className="flex justify-between items-center opacity-70 mb-6">
                   <div className="flex gap-2">
@@ -549,7 +549,7 @@ export default function AutomatizacionPage() {
           }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_72%_30%,rgba(255,210,0,0.20),transparent_60%),linear-gradient(90deg,rgba(0,0,0,0.95)_0%,rgba(0,0,0,0.68)_48%,rgba(0,0,0,0.88)_100%)]" />
-        <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-qaway-accent/60 to-transparent" />
+        <div className="absolute left-0 right-0 top-0 h-px bg-linear-to-r from-transparent via-qaway-accent/60 to-transparent" />
 
         <div className="relative z-10 mx-auto grid min-h-[calc(100vh-8rem)] max-w-7xl grid-cols-1 items-center gap-14 px-8 py-16 lg:grid-cols-12">
           <div className="lg:col-span-7">
@@ -704,7 +704,7 @@ export default function AutomatizacionPage() {
           </div>
 
           <div className="relative mt-16 grid gap-5 lg:grid-cols-4">
-            <div className="absolute left-0 right-0 top-10 hidden h-px bg-gradient-to-r from-transparent via-black/20 to-transparent lg:block" />
+            <div className="absolute left-0 right-0 top-10 hidden h-px bg-linear-to-r from-transparent via-black/20 to-transparent lg:block" />
             {flow.map((item, i) => (
               <motion.div
                 key={item.step}

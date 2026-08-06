@@ -33,7 +33,7 @@ export function TrustBandSection() {
             { icon: Network, text: 'Sistemas digitales' },
           ].map((item) => (
             <div key={item.text} className="flex flex-col items-center justify-center text-center group">
-              <div className="w-12 h-12 bg-white rounded-full shadow-sm border border-black/10 flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
+              <div className="w-12 h-12 bg-white rounded-full shadow-xs border border-black/10 flex items-center justify-center mb-4 group-hover:-translate-y-1 transition-transform">
                 <item.icon size={20} className="text-black" />
               </div>
               <span className="text-sm font-bold text-black/80">{item.text}</span>
@@ -44,4 +44,4 @@ export function TrustBandSection() {
     </section>
   )
 }
-
+

@@ -241,7 +241,7 @@ function ContableNavbar() {
 // ─── Hero ────────────────────────────────────────────────
 function ContableHero() {
   return (
-    <section className="bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 min-h-screen flex items-center relative overflow-hidden px-6 pt-32 pb-16">
+    <section className="bg-linear-to-b from-zinc-950 via-zinc-900 to-zinc-950 min-h-screen flex items-center relative overflow-hidden px-6 pt-32 pb-16">
       {/* Background radial overlays */}
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-emerald-500/10 blur-[130px] rounded-full -translate-x-1/2 -translate-y-1/3 pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-600/5 blur-[150px] rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none" />
@@ -254,7 +254,7 @@ function ContableHero() {
             </div>
             <h1 className="text-5xl md:text-6xl xl:text-7xl font-extrabold text-white leading-tight tracking-tight mb-4">
               Ordenamos tu Contabilidad, <br />
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Evitamos Multas</span> de SUNAT.
+              <span className="bg-linear-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Evitamos Multas</span> de SUNAT.
             </h1>
             <p className="text-zinc-400 text-lg md:text-xl leading-relaxed mb-8 max-w-2xl">
               Deja las hojas de cálculo y las preocupaciones tributarias en nuestras manos. Nos encargamos de tus impuestos, planillas y declaraciones mensuales con reportes claros en tiempo real.
@@ -649,7 +649,7 @@ function ContableCTA() {
                   type="text"
                   placeholder="Tu nombre completo o de tu empresa"
                   required
-                  className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder-zinc-500"
+                  className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder:text-zinc-500"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                 />
@@ -658,7 +658,7 @@ function ContableCTA() {
                     type="text"
                     placeholder="RUC (opcional)"
                     maxLength="11"
-                    className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder-zinc-500"
+                    className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder:text-zinc-500"
                     value={formData.ruc}
                     onChange={(e) => setFormData({ ...formData, ruc: e.target.value })}
                   />
@@ -666,7 +666,7 @@ function ContableCTA() {
                     type="tel"
                     placeholder="WhatsApp Celular"
                     required
-                    className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder-zinc-500"
+                    className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder:text-zinc-500"
                     value={formData.celular}
                     onChange={(e) => setFormData({ ...formData, celular: e.target.value })}
                   />
@@ -674,7 +674,7 @@ function ContableCTA() {
                 <textarea
                   placeholder="Cuéntanos brevemente sobre tu negocio y en qué régimen te encuentras..."
                   required
-                  className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder-zinc-500 h-28 resize-none"
+                  className="w-full bg-zinc-950 border border-zinc-800 px-5 py-4 rounded-xl text-white outline-none focus:border-emerald-500 transition-colors text-sm placeholder:text-zinc-500 h-28 resize-none"
                   value={formData.mensaje}
                   onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
                 />

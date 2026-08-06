@@ -62,7 +62,7 @@ export default function FotografiaLinkedinHeroPage() {
             alt="Retrato profesional editorial en perfil"
             className="absolute inset-0 w-full h-full object-cover object-[48%_center] grayscale"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-[#efede8]/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-[#efede8]/10 pointer-events-none" />
         </aside>
 
         <section className="relative min-h-[52rem] xl:min-h-[100dvh] bg-[#191918] overflow-hidden">
@@ -178,7 +178,7 @@ export default function FotografiaLinkedinHeroPage() {
               alt="Retrato profesional en blanco y negro"
               className="absolute inset-0 w-full h-full object-cover object-[68%_center] grayscale"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/30 via-transparent to-transparent pointer-events-none" />
             <div className="absolute left-5 bottom-5 inline-flex items-center gap-2 text-[9px] uppercase tracking-[0.2em] text-white/55">
               <Sparkles size={12} className="text-[#ff4b0b]" />
               Imagen con intención

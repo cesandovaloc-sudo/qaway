@@ -332,7 +332,7 @@ function Hero() {
               alt="Profesional creativo retratado con dirección editorial"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
           <div className="absolute inset-0 z-10 hidden lg:block">
@@ -435,8 +435,8 @@ function BrandMarquee() {
           }
         `}
       </style>
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#151514] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#151514] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-[#151514] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-[#151514] to-transparent" />
       <div className="mx-auto mb-5 flex max-w-[94rem] items-center justify-between gap-6 px-6 sm:px-10 lg:px-14">
         <p className="text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Marcas que toman forma</p>
         <div className="hidden h-px flex-1 bg-white/10 sm:block" />
@@ -470,7 +470,7 @@ function EcosystemPhoto() {
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-white/8" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/8 via-transparent to-white/8" />
         <div className="absolute inset-y-10 left-0 w-2 bg-[#ff4b0b]" />
       </div>
     </div>
@@ -560,7 +560,7 @@ function AcademyFeature() {
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/18" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-black/18" />
       </div>
 
       <Reveal className="flex flex-col justify-center px-8 py-16 sm:px-12 lg:px-14">

@@ -73,7 +73,7 @@ export default function InstagramExtractorPage() {
 
         {/* Header */}
         <div className="mb-12">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-200/40 flex items-center justify-center mb-5">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-purple-500/20 to-pink-500/20 border border-purple-200/40 flex items-center justify-center mb-5">
                             <svg className="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="2" y="2" width="20" height="20" rx="5" />
                 <circle cx="12" cy="12" r="5" />
@@ -89,9 +89,9 @@ export default function InstagramExtractorPage() {
         </div>
 
         {/* Input */}
-        <div className="bg-white border border-[#EAEAEA] rounded-2xl p-2 flex items-center gap-2 shadow-sm mb-6">
+        <div className="bg-white border border-[#EAEAEA] rounded-2xl p-2 flex items-center gap-2 shadow-xs mb-6">
           <div className="flex-1 flex items-center gap-3 px-4">
-            <Link2 className="w-4 h-4 text-zinc-300 flex-shrink-0" strokeWidth={1.5} />
+            <Link2 className="w-4 h-4 text-zinc-300 shrink-0" strokeWidth={1.5} />
             <input
               type="url"
               value={url}
@@ -124,7 +124,7 @@ export default function InstagramExtractorPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-red-50 border border-red-100 rounded-xl px-5 py-4 flex items-start gap-3 mb-6"
           >
-            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+            <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" strokeWidth={1.5} />
             <span className="text-sm text-red-600 font-medium">{error}</span>
           </motion.div>
         )}

@@ -60,7 +60,7 @@ export default function ConsultoriaPage() {
     <>
       {/* Hero */}
       <section className="relative pt-24 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-600/10 via-qaway-accent/5 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-b from-cyan-600/10 via-qaway-accent/5 to-transparent" />
         <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px]" />
         <div className="max-w-7xl mx-auto px-8 relative z-10">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -110,7 +110,7 @@ export default function ConsultoriaPage() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="bg-[#1a1a1a] border border-white/5 rounded-2xl p-8 text-center"
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center mx-auto mb-5">
+                <div className="w-12 h-12 rounded-full bg-linear-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center mx-auto mb-5">
                   <span className="text-lg font-bold text-qaway-accent">{i + 1}</span>
                 </div>
                 <h3 className="text-base font-bold text-white mb-3">{a.title}</h3>
@@ -135,7 +135,7 @@ export default function ConsultoriaPage() {
                 transition={{ duration: 0.5, delay: i * 0.05 }}
                 className="group bg-[#1a1a1a] border border-white/5 hover:border-qaway-accent/20 rounded-2xl p-6 transition-all duration-500"
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-lg bg-linear-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <service.icon className="w-5 h-5 text-qaway-accent" />
                 </div>
                 <h3 className="text-sm font-bold text-white mb-2">{service.title}</h3>
@@ -153,7 +153,7 @@ export default function ConsultoriaPage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-qaway-accent/10 via-transparent to-cyan-600/10 border border-white/5 p-10 md:p-16 text-center"
+            className="relative overflow-hidden rounded-3xl bg-linear-to-br from-qaway-accent/10 via-transparent to-cyan-600/10 border border-white/5 p-10 md:p-16 text-center"
           >
             <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px]" />
             <div className="relative z-10">

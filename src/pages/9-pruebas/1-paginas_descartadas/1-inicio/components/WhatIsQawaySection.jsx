@@ -38,14 +38,14 @@ export function WhatIsQawaySection() {
               'Aprende y ejecuta con herramientas, sistemas y formacion estructurada.',
             ].map((text) => (
               <li key={text} className="flex items-start">
-                <CheckCircle size={20} className="text-qaway-accent mt-1 mr-3 flex-shrink-0" />
+                <CheckCircle size={20} className="text-qaway-accent mt-1 mr-3 shrink-0" />
                 <span className="text-black font-semibold">{text}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="relative h-[400px] w-full bg-white border border-black/10 rounded-3xl p-8 shadow-sm flex items-center justify-center overflow-hidden">
+        <div className="relative h-[400px] w-full bg-white border border-black/10 rounded-3xl p-8 shadow-xs flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:24px_24px]" />
 
           <div className="relative w-full h-full">
@@ -81,4 +81,4 @@ export function WhatIsQawaySection() {
     </section>
   )
 }
-
+

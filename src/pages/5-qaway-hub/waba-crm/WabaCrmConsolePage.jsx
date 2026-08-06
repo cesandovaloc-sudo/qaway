@@ -185,7 +185,7 @@ function IaSelectorCompact({ stage, isBriefMaestro }) {
               )}
 
               <div className="flex items-center justify-between pt-1 gap-2">
-                <div className="flex-grow">
+                <div className="grow">
                   <AnimatePresence>
                     {showSavedToast && (
                       <motion.span
@@ -1507,14 +1507,14 @@ export default function WabaCrmConsolePage() {
 
             {/* ACCIONES Y BOTONES DE NAVEGACIÓN */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-5 border-t border-zinc-150">
-              <div className="flex-grow">
+              <div className="grow">
                 {fileLoading ? (
                   <div className="flex items-center gap-2 text-zinc-650 font-bold text-xs bg-zinc-50 border border-zinc-200 rounded-[10px] px-3.5 py-2.5 animate-pulse max-w-md">
                     <RefreshCw className="w-3.5 h-3.5 text-zinc-400 animate-spin" />
                     <span>{generatingMessage}</span>
                   </div>
                 ) : uploadedFile ? (
-                  <div className="flex items-center gap-2 text-emerald-700 font-extrabold text-xs bg-emerald-50/50 border border-[#bbf7d0] rounded-[10px] px-3.5 py-2.5 max-w-md shadow-sm">
+                  <div className="flex items-center gap-2 text-emerald-700 font-extrabold text-xs bg-emerald-50/50 border border-[#bbf7d0] rounded-[10px] px-3.5 py-2.5 max-w-md shadow-xs">
                     <Check className="w-4 h-4 text-emerald-500" />
                     <span className="line-clamp-1">Extracción exitosa: <strong className="text-emerald-800">{uploadedFile.name}</strong></span>
                   </div>
@@ -1534,7 +1534,7 @@ export default function WabaCrmConsolePage() {
                   type="button"
                   onClick={() => fileInputRef.current.click()}
                   disabled={fileLoading || isGenerating}
-                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 font-extrabold px-5 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 font-extrabold px-5 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-xs active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                 >
                   <Upload className="w-4 h-4 text-zinc-400" />
                   Subir otro archivo
@@ -1549,7 +1549,7 @@ export default function WabaCrmConsolePage() {
                     }
                     setActiveModule('diagnostico');
                   }}
-                  className={`font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-sm active:scale-[0.98] text-xs ${
+                  className={`font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-xs active:scale-[0.98] text-xs ${
                     missingFields.length > 0
                       ? 'bg-zinc-100 border border-zinc-200 text-zinc-400 cursor-not-allowed'
                       : 'bg-zinc-900 hover:bg-zinc-800 text-white'
@@ -2026,7 +2026,7 @@ export default function WabaCrmConsolePage() {
 
             {/* ACCIONES Y BOTONES DE NAVEGACIÓN */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-5 border-t border-zinc-150 mt-6">
-              <div className="flex-grow">
+              <div className="grow">
                 {missingDiagFields.length > 0 ? (
                   <div className="text-[11px] text-amber-700 bg-amber-50/50 border border-amber-200/60 rounded-[8px] px-3.5 py-2 font-bold flex items-center gap-1.5 max-w-xs shadow-3xs">
                     <span>⚠️ Faltan {missingDiagFields.length} campos estratégicos para aprobar.</span>
@@ -2119,7 +2119,7 @@ export default function WabaCrmConsolePage() {
 
                     setActiveModule('organico'); // Moves to 03A Investigación y Tendencias
                   }}
-                  className={`font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-sm active:scale-[0.98] text-xs ${
+                  className={`font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition-all shadow-xs active:scale-[0.98] text-xs ${
                     missingDiagFields.length > 0
                       ? 'bg-zinc-100 border border-zinc-200 text-zinc-400 cursor-not-allowed'
                       : 'bg-zinc-950 hover:bg-zinc-800 text-white'
@@ -2232,7 +2232,7 @@ export default function WabaCrmConsolePage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">Agresividad:</span>
-                    <span className="text-xs font-black text-zinc-800 bg-white border border-zinc-200 px-3 py-1 rounded-[10px] shadow-sm">{et.agresividad}</span>
+                    <span className="text-xs font-black text-zinc-800 bg-white border border-zinc-200 px-3 py-1 rounded-[10px] shadow-xs">{et.agresividad}</span>
                   </div>
                 </div>
               ))}
@@ -2241,7 +2241,7 @@ export default function WabaCrmConsolePage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => triggerIaProcessing('embudo')}
-                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-sm"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-xs"
               >
                 Aprobar Estructura de Embudo
                 <Check className="w-4 h-4 text-emerald-400" />
@@ -2269,7 +2269,7 @@ export default function WabaCrmConsolePage() {
                     onClick={() => setSelectedAssetIndex(idx)}
                     className={`w-full text-left rounded-[10px] p-3 border.5 transition ${
                       selectedAssetIndex === idx
-                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
                         : 'bg-zinc-50/50 border-zinc-200 text-zinc-700 hover:bg-zinc-100/50'
                     }`}
                   >
@@ -2285,7 +2285,7 @@ export default function WabaCrmConsolePage() {
               {/* Columna Derecha: Detalles, Variantes y Prompt */}
               <div className="bg-zinc-50 border border-zinc-200 rounded-[10px] p-5 space-y-4">
                 <div>
-                  <span className="text-[9px] text-zinc-800 bg-white border border-zinc-200 px-2 py-0.5 rounded-[10px] font-extrabold uppercase tracking-widest shadow-sm">
+                  <span className="text-[9px] text-zinc-800 bg-white border border-zinc-200 px-2 py-0.5 rounded-[10px] font-extrabold uppercase tracking-widest shadow-xs">
                     Formato: {currentAsset.formato}
                   </span>
                   <h3 className="text-zinc-950 text-base font-extrabold mt-2 leading-snug">{currentAsset.idea}</h3>
@@ -2293,7 +2293,7 @@ export default function WabaCrmConsolePage() {
 
                 <div className="space-y-1">
                   <h4 className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Especificaciones e Idea Visual</h4>
-                  <p className="text-zinc-600 text-xs leading-relaxed bg-white border border-zinc-200 rounded-[10px] p-4 shadow-sm">
+                  <p className="text-zinc-600 text-xs leading-relaxed bg-white border border-zinc-200 rounded-[10px] p-4 shadow-xs">
                     {currentAsset.promptVisual}
                   </p>
                 </div>
@@ -2340,10 +2340,10 @@ export default function WabaCrmConsolePage() {
                         updated.assets[selectedAssetIndex].copies[selectedCopyTone] = e.target.value
                         setCampaignData(updated)
                       }}
-                      className="w-full bg-white border border-zinc-200 rounded-[10px] p-4 text-xs text-zinc-700 leading-relaxed font-sans min-h-[140px] focus:outline-none focus:border-zinc-400 shadow-sm"
+                      className="w-full bg-white border border-zinc-200 rounded-[10px] p-4 text-xs text-zinc-700 leading-relaxed font-sans min-h-[140px] focus:outline-none focus:border-zinc-400 shadow-xs"
                     />
 
-                    <div className="bg-white border border-zinc-200 rounded-[10px] p-3 flex items-center justify-between shadow-sm">
+                    <div className="bg-white border border-zinc-200 rounded-[10px] p-3 flex items-center justify-between shadow-xs">
                       <div className="space-y-0.5">
                         <span className="text-[8px] text-zinc-400 font-bold uppercase tracking-widest block">Llamado a la Acción (CTA)</span>
                         <span className="text-xs text-zinc-800 font-bold">{currentAsset.cta[selectedCopyTone]}</span>
@@ -2360,7 +2360,7 @@ export default function WabaCrmConsolePage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => triggerIaProcessing('copies')}
-                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-sm"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-xs"
               >
                 Aprobar Assets & Copies
                 <Check className="w-4 h-4 text-emerald-400" />
@@ -2401,7 +2401,7 @@ export default function WabaCrmConsolePage() {
                       onClick={() => setSelectedWaStep(idx)}
                       className={`w-full text-left rounded-[10px] p-3 border transition ${
                         selectedWaStep === idx
-                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
                           : 'bg-zinc-50/50 border-zinc-200 text-zinc-700 hover:bg-zinc-100/50'
                       }`}
                     >
@@ -2413,7 +2413,7 @@ export default function WabaCrmConsolePage() {
               </div>
 
               {/* Columna Derecha: Simulador de WhatsApp Light Realista */}
-              <div className="bg-[#efeae2] border border-zinc-200 rounded-[10px] p-4 flex flex-col h-[500px] shadow-sm relative overflow-hidden">
+              <div className="bg-[#efeae2] border border-zinc-200 rounded-[10px] p-4 flex flex-col h-[500px] shadow-xs relative overflow-hidden">
                 {/* Textura de fondo sutil simulada */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/gray-lines.png')] opacity-[0.04] pointer-events-none"></div>
 
@@ -2431,7 +2431,7 @@ export default function WabaCrmConsolePage() {
                 {/* Pantalla de mensajes */}
                 <div className="flex-1 py-4 overflow-y-auto space-y-3 pr-1 custom-scrollbar relative z-10">
                   <div className="flex justify-start">
-                    <div className="bg-white border border-zinc-150 rounded-[10px] rounded-tl-none p-3 max-w-[85%] shadow-sm">
+                    <div className="bg-white border border-zinc-150 rounded-[10px] rounded-tl-none p-3 max-w-[85%] shadow-xs">
                       <p className="text-xs text-zinc-850 leading-relaxed">Hola, me interesa conocer más detalles sobre el producto.</p>
                       <span className="text-[9px] text-zinc-400 block text-right mt-1">10:30 AM</span>
                     </div>
@@ -2445,7 +2445,7 @@ export default function WabaCrmConsolePage() {
                       exit={{ opacity: 0 }}
                       className="flex justify-end"
                     >
-                      <div className="bg-[#d9fdd3] border border-[#c5eebf] rounded-[10px] rounded-tr-none p-3 max-w-[85%] shadow-sm">
+                      <div className="bg-[#d9fdd3] border border-[#c5eebf] rounded-[10px] rounded-tr-none p-3 max-w-[85%] shadow-xs">
                         <p className="text-xs text-zinc-800 leading-relaxed whitespace-pre-wrap">{waSteps[selectedWaStep].text}</p>
                         <span className="text-[9px] text-emerald-600 block text-right mt-1">10:31 AM</span>
                       </div>
@@ -2460,7 +2460,7 @@ export default function WabaCrmConsolePage() {
                   </div>
                   <button
                     onClick={() => handleCopyText(waSteps[selectedWaStep].text)}
-                    className="bg-[#005c4b] hover:bg-[#004d3e] p-2.5 rounded-[10px] text-white transition shadow-sm"
+                    className="bg-[#005c4b] hover:bg-[#004d3e] p-2.5 rounded-[10px] text-white transition shadow-xs"
                     title="Copiar mensaje"
                   >
                     <Copy className="w-4 h-4" />
@@ -2472,7 +2472,7 @@ export default function WabaCrmConsolePage() {
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => triggerIaProcessing('whatsapp')}
-                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-sm"
+                className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-xs"
               >
                 Aprobar Flujo de WhatsApp
                 <Check className="w-4 h-4 text-emerald-400" />
@@ -2601,7 +2601,7 @@ export default function WabaCrmConsolePage() {
           <div className="grid lg:grid-cols-[270px_1fr] gap-6">
             
             {/* BARRA LATERAL: Control de Ruta Premium SaaS */}
-            <aside className="bg-zinc-50 border border-zinc-200/80 rounded-[10px] p-4 h-fit lg:sticky lg:top-28 space-y-4 shadow-sm">
+            <aside className="bg-zinc-50 border border-zinc-200/80 rounded-[10px] p-4 h-fit lg:sticky lg:top-28 space-y-4 shadow-xs">
               <div>
                 <p className="text-[9px] text-zinc-400 font-extrabold uppercase tracking-widest px-1">Progreso Estratégico</p>
                 <div className="w-full bg-zinc-200 h-1.5 rounded-[10px] overflow-hidden mt-2">
@@ -2632,7 +2632,7 @@ export default function WabaCrmConsolePage() {
                       }}
                       className={`w-full text-left rounded-[10px] p-2.5 border transition flex items-center justify-between gap-3 ${
                         isActive
-                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm font-bold'
+                          ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs font-bold'
                           : isUnlocked
                           ? 'bg-transparent border-transparent text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
                           : 'bg-transparent border-transparent text-zinc-300 cursor-not-allowed opacity-40'
@@ -2663,7 +2663,7 @@ export default function WabaCrmConsolePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              className="bg-white border border-zinc-200/80 rounded-[10px] p-5 md:p-6 shadow-sm"
+              className="bg-white border border-zinc-200/80 rounded-[10px] p-5 md:p-6 shadow-xs"
             >
               {/* Cabecera del Lienzo */}
               <div className="mb-5 border-b border-zinc-150 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">

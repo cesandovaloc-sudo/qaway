@@ -195,7 +195,7 @@ function CRMContent() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar contactos, empresas, oportunidades..." 
-                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-12 py-1.5 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[300px] transition-colors" 
+                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-12 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[300px] transition-colors" 
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">⌘</kbd>

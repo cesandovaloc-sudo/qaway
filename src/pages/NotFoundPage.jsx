@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react'
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-qaway-accent/5 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-qaway-accent/5 via-transparent to-transparent" />
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-qaway-accent/5 blur-[100px] rounded-full" />
 
       <motion.div

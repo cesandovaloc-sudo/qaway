@@ -76,12 +76,12 @@ export function MainAreasSection() {
                     </div>
                     <div className="flex flex-col gap-4">
                       <div className="bg-zinc-900 rounded-xl flex-1 relative overflow-hidden border border-white/5">
-                        <div className="absolute inset-0 bg-gradient-to-b from-[#A855F7]/20 to-transparent" />
+                        <div className="absolute inset-0 bg-linear-to-b from-[#A855F7]/20 to-transparent" />
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <span className="text-5xl font-serif font-light tracking-[0.08em] text-white/95 leading-none" style={{ fontFamily: "'Playfair Display', 'Times New Roman', serif" }}>
                             Aa
                           </span>
-                          <div className="mt-3 w-6 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                          <div className="mt-3 w-6 h-px bg-linear-to-r from-transparent via-white/30 to-transparent" />
                           <span className="mt-2 text-[9px] font-sans tracking-[0.25em] uppercase text-zinc-400/60">
                             Branding
                           </span>
@@ -207,4 +207,4 @@ export function MainAreasSection() {
 
 // ═══════════════════════════════════════════════════════════
 // MAIN PAGE — Alternating Dark / Light blocks
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

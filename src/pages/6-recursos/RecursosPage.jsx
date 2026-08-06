@@ -260,7 +260,7 @@ export default function RecursosPage() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          whileHover={{ y: -6, boxShadow: style.shadow }}
+          whileHover={{ y: -6, boxShadow: style.shadow-sm }}
         >
           <img 
             src={res.image} 
@@ -374,9 +374,9 @@ export default function RecursosPage() {
             }}
           >
             <div className="absolute inset-0 opacity-[0.14] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px]" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
-            <div className="absolute inset-0 bg-gradient-to-l from-black/30 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-l from-black/30 via-transparent to-transparent" />
             <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10" />
           </div>
         </div>
@@ -407,7 +407,7 @@ export default function RecursosPage() {
               <button
                 type="button"
                 onClick={() => selectCategory(null)}
-                className={`group flex w-[110px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
+                className={`group flex w-[110px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
                   activeCategory === null ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
                 }`}
               >
@@ -421,7 +421,7 @@ export default function RecursosPage() {
                     key={i}
                     type="button"
                     onClick={() => selectCategory(cat.key)}
-                    className={`group flex w-[130px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-sm ${
+                    className={`group flex w-[130px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
                       isActive ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
                     }`}
                   >

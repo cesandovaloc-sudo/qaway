@@ -71,7 +71,7 @@ export function EcosystemSection() {
 
   return (
     <section className="pt-10 pb-10 bg-white relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent via-white/[0.02] to-transparent" />
       
       <div className="max-w-7xl mx-auto px-8 relative z-10">
         {/* Header removed: redundant with La Arquitectura block */}
@@ -85,9 +85,9 @@ export function EcosystemSection() {
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 whileHover={{ y: -6 }}
-                className="group relative bg-white border border-gray-200/60 hover:border-qaway-accent/30 rounded-2xl p-6 md:p-8 transition-all duration-500 h-full shadow-sm hover:shadow-qaway-accent/10 hover:shadow-xl"
+                className="group relative bg-white border border-gray-200/60 hover:border-qaway-accent/30 rounded-2xl p-6 md:p-8 transition-all duration-500 h-full shadow-xs hover:shadow-qaway-accent/10 hover:shadow-xl"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${area.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
+                <div className={`absolute inset-0 bg-linear-to-br ${area.gradient} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
                 
                 <div className="relative z-10">
                   <div className={`w-12 h-12 rounded-xl ${area.light} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
@@ -117,4 +117,4 @@ export function EcosystemSection() {
 
 // ═══════════════════════════════════════════════════════════
 // ■ DARK BLOCK 2 — SERVICES
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

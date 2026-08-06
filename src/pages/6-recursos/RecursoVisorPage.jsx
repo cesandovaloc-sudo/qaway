@@ -444,7 +444,7 @@ export default function RecursoVisorPage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,210,0,0.05),transparent_50%)] pointer-events-none" />
         
         <div className="max-w-7xl mx-auto px-8 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div className="flex-grow">
+          <div className="grow">
             <Link 
               to="/recursos" 
               className="inline-flex items-center gap-2 text-zinc-400 hover:text-qaway-accent text-xs font-bold uppercase tracking-wider mb-6 transition-colors"
@@ -472,7 +472,7 @@ export default function RecursoVisorPage() {
               href={WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-grow md:flex-initial inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-qaway-accent px-6 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-colors"
+              className="grow md:flex-initial inline-flex items-center justify-center gap-2 bg-white text-black hover:bg-qaway-accent px-6 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
               Obtener Recurso Real
@@ -486,7 +486,7 @@ export default function RecursoVisorPage() {
         <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-12 gap-12 items-start">
           
           {/* LEFT COLUMN: Simulated Interactive Preview/Tool */}
-          <div className="lg:col-span-8 bg-zinc-50 border border-zinc-200 rounded-[24px] p-6 md:p-8 shadow-sm">
+          <div className="lg:col-span-8 bg-zinc-50 border border-zinc-200 rounded-[24px] p-6 md:p-8 shadow-xs">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-4 mb-6">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-black text-white flex items-center justify-center font-bold text-xs">
@@ -600,7 +600,7 @@ export default function RecursoVisorPage() {
                 </div>
 
                 {/* Cover & Header */}
-                <div className="relative h-28 bg-gradient-to-r from-zinc-800 via-zinc-900 to-zinc-950 overflow-hidden">
+                <div className="relative h-28 bg-linear-to-r from-zinc-800 via-zinc-900 to-zinc-950 overflow-hidden">
                   <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top_right,rgba(255,210,0,0.15),transparent_50%)]" />
                   <div className="absolute bottom-2 right-4 text-[10px] text-zinc-500 font-mono">v1.2.4 • Estandarizado</div>
                 </div>
@@ -809,7 +809,7 @@ export default function RecursoVisorPage() {
                                           : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300'
                                       }`}
                                     >
-                                      <div className={`w-3.5 h-3.5 rounded border mt-0.5 flex items-center justify-center flex-shrink-0 transition-colors ${
+                                      <div className={`w-3.5 h-3.5 rounded border mt-0.5 flex items-center justify-center shrink-0 transition-colors ${
                                         isChecked ? 'bg-black border-black text-white' : 'bg-white border-zinc-300'
                                       }`}>
                                         {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
@@ -1044,7 +1044,7 @@ export default function RecursoVisorPage() {
                     <span className="text-[10px] font-mono text-zinc-400">Prueba Chat de Agente IA</span>
                   </div>
 
-                  <div className="flex-grow flex flex-col gap-3.5 overflow-y-auto max-h-[220px] mb-4 text-xs pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+                  <div className="grow flex flex-col gap-3.5 overflow-y-auto max-h-[220px] mb-4 text-xs pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
                     {chatMessages.map((msg, i) => (
                       <div 
                         key={i} 
@@ -1068,7 +1068,7 @@ export default function RecursoVisorPage() {
                     <input 
                       type="text" 
                       placeholder="Escribe: '¿Tienen soporte técnico?' o '¿Cuánto cuestan sus servicios?'"
-                      className="flex-grow bg-[#111116] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-qaway-accent"
+                      className="grow bg-[#111116] border border-white/5 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-qaway-accent"
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       disabled={isTyping}
@@ -1115,7 +1115,7 @@ export default function RecursoVisorPage() {
             {(id === 'checklist-campana-ads' || id === 'checklist-auditoria-seguridad') && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between gap-4 bg-zinc-100 p-4 rounded-xl border border-zinc-200">
-                  <div className="flex-grow">
+                  <div className="grow">
                     <div className="flex justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                       <span>Progreso de Auditoría</span>
                       <span>{progressPercent}%</span>
@@ -1148,7 +1148,7 @@ export default function RecursoVisorPage() {
                             : 'bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 hover:border-zinc-300'
                         }`}
                       >
-                        <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center flex-shrink-0 transition-colors ${
+                        <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center shrink-0 transition-colors ${
                           isChecked ? 'bg-black border-black text-white' : 'bg-white border-zinc-300'
                         }`}>
                           {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
