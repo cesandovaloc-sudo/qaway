@@ -37,6 +37,7 @@ import { useSetNavbarVariant } from "@/components/layout/Navbar"
 import HeroPrimitive from "@/components/typography/HeroPrimitive";
 import '@/pages/4-academy/academy.css'
 import SEO from "@/components/seo/SEO";
+import { supabase } from "@/config/supabase";
 import { WHATSAPP_LINK } from "@/data/navigation";
 
 const ASSET = '/assets/pages/2-estudio'
@@ -670,30 +671,69 @@ export default function SistemasDigitalesPage() {
     setFormSubmitting(true);
     setFormError('');
     try {
-      const data = Object.fromEntries(new FormData(e.target));
-      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const formElement = e.currentTarget;
+      const form = new FormData(formElement);
+      const lead = {
+        name: String(form.get('name') || '').trim(),
+        phone: String(form.get('phone') || '').trim(),
+        email: String(form.get('email') || '').trim().toLowerCase(),
+        profile: String(form.get('profile') || '').trim(),
+        interest: String(form.get('service') || '').trim(),
+        message: String(form.get('message') || '').trim(),
+      };
 
-      if (isLocal) {
-        console.log('Modo Desarrollo: Simulando envío de lead', data);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        await fetch('https://hook.us2.make.com/p519xo2f741g1z29z213fctk4o9u0wro', {
+      const { error } = await supabase.from('leads').insert([{
+        client_name: lead.name,
+        contact_info: lead.phone,
+        source: 'Sistemas Digitales',
+        stage: 'new',
+        metadata: {
+          email: lead.email,
+          profile: lead.profile,
+          interest: lead.interest,
+          message: lead.message || 'Sin mensaje adicional',
+        },
+      }]);
+      if (error) throw error;
+
+      const proyectosKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || '';
+      if (proyectosKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({
-            origen: 'Sistemas Digitales',
-            nombre: data.name,
-            telefono: data.phone,
-            email: data.email,
-            perfil: data.profile,
-            interes: data.service,
-            mensaje: data.message || 'Sin mensaje adicional',
+            access_key: proyectosKey.trim(),
+            subject: `Nueva consulta Sistemas Digitales: ${lead.interest || 'Orientación'}`,
+            from_name: 'Qaway Lab Sistemas Digitales',
+            name: lead.name,
+            phone: lead.phone,
+            email: lead.email,
+            profile: lead.profile,
+            interest: lead.interest,
+            message: lead.message || 'Sin mensaje adicional',
           }),
         });
       }
+
+      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || '';
+      if (backupKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: backupKey.trim(),
+            subject: `[Copia] Nueva consulta Sistemas Digitales: ${lead.interest || 'Orientación'}`,
+            from_name: 'Qaway Lab Sistemas Digitales',
+            to_email: 'qaway.myc@gmail.com',
+          }),
+        });
+      }
+
       setFormSubmitted(true);
+
+      const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`);
+      const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
     } catch {
       setFormError('Ocurrió un error al enviar. Intenta de nuevo.');
     } finally {
@@ -1322,7 +1362,7 @@ export default function SistemasDigitalesPage() {
                   decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 border border-white/16 bg-black/45 px-5 py-4 backdrop-blur-md">
+                <div className="absolute bottom-6 left-6 right-6 hidden border border-white/16 bg-black/45 px-5 py-4 backdrop-blur-md sm:block">
                   <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
                     Asesoría y acompañamiento
                   </span>
