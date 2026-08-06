@@ -420,14 +420,17 @@ const crmEditorialColumns = [
 const webCapEditorialColumns = [
   {
     title: "Presentación clara",
+    text: "Sitios con mensaje directo.",
     icon: Globe,
   },
   {
     title: "Captación de consultas",
+    text: "Formularios que captan leads.",
     icon: FileText,
   },
   {
     title: "Contacto directo",
+    text: "WhatsApp conectado a un clic.",
     icon: Cloud,
   },
 ];
@@ -1110,9 +1113,12 @@ export default function SistemasDigitalesPage() {
                       }`}
                   >
                     <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="no-qw text-[16px] font-medium leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
                       {col.title}
                     </h3>
+                    <p className="mt-2 text-[13px] leading-relaxed text-black/60">
+                      {col.text}
+                    </p>
                   </motion.div>
                 );
               })}
@@ -1139,7 +1145,7 @@ export default function SistemasDigitalesPage() {
             variants={scaleUpImage}
             className="relative flex w-full items-center justify-center"
           >
-            <div className="group relative mx-auto flex w-full justify-center lg:w-[105%] lg:-translate-x-10 xl:-translate-x-14">
+            <div className="group relative mx-auto flex w-full justify-center lg:w-[105%] lg:translate-x-2 xl:translate-x-4">
               <img
                 src="/assets/pages/3-sistemas-digitales/desarrollo-web-paginas-captacion3.webp"
                 alt="Desarrollo web y páginas de captación para proyectos"
