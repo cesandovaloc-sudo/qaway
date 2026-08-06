@@ -38,7 +38,7 @@ export default function Footer() {
                 <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Áreas</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 lg:grid lg:gap-3 lg:text-sm">
                   {areaLinks.map((link) => (
-                    <Link key={link.key} to={link.path} className="hover:text-white">
+                    <Link key={link.key} to={link.path} className="text-white/50 hover:text-white">
                       {link.label}
                     </Link>
                   ))}
@@ -51,7 +51,7 @@ export default function Footer() {
                 <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Recursos</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 lg:grid lg:gap-3 lg:text-sm">
                   {resourceLinks.map((link) => (
-                    <Link key={link.key} to={link.path} className="hover:text-white">
+                    <Link key={link.key} to={link.path} className="text-white/50 hover:text-white">
                       {link.label}
                     </Link>
                   ))}
@@ -62,7 +62,7 @@ export default function Footer() {
             <div>
               <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Contacto</p>
               <div className="flex flex-wrap gap-x-4 gap-y-2 lg:grid lg:gap-3 lg:text-sm">
-                <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="hover:text-white">
+                <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white">
                   Escribir por WhatsApp
                 </a>
               </div>

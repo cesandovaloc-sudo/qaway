@@ -1404,67 +1404,32 @@
   .estudio-page .vl-diagnostic__frame { inset: 8% 6%; }
 }
 
-/* ACADEMY FORM COPIED STYLES */
-.academy-form-intro { position: sticky; top: 2rem; }
-.academy-form-intro h2 { max-width: 44rem; margin-top: 0.85rem; font-size: clamp(3.6rem, 5.3vw, 6rem); font-weight: 700; letter-spacing: -0.055em; line-height: 0.87; }
-.academy-form-intro > p { max-width: 31rem; margin-top: 1.6rem; color: #6d6b68; line-height: 1.65; }
-.academy-interest-form { min-height: 0; padding: clamp(1.4rem, 2vw, 1.8rem) clamp(1.8rem, 4vw, 4rem) 1rem clamp(1.8rem, 4vw, 4rem); border: 1px solid rgba(32, 32, 31, 0.11); background: #eeece7; box-shadow: 0 26px 65px rgba(75, 55, 44, 0.08); transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 450ms cubic-bezier(0.16, 1, 0.3, 1); }
-.academy-interest-form:hover, .academy-interest-form:focus-within { transform: translateY(-2px); box-shadow: 0 32px 75px rgba(75, 55, 44, 0.12), 0 8px 24px rgba(255, 75, 11, 0.02); }
-.academy-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.academy-field { display: grid; gap: 0.55rem; margin-bottom: 0.8rem; }
-.academy-field label { color: #474642; font-size: 0.74rem; font-weight: 700; }
-.academy-field input, .academy-field select, .academy-field textarea { width: 100%; border: 1px solid rgba(32, 32, 31, 0.14); border-radius: 0; outline: 0; background: rgba(255, 255, 255, 0.72); color: #20201f; font: inherit; font-size: 0.85rem; transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease; }
-.academy-field input, .academy-field select { min-height: 2.4rem; padding: 0 1rem; }
-.academy-field textarea { min-height: 4.5rem; resize: vertical; padding: 0.8rem 1rem; }
-.academy-field input::placeholder, .academy-field textarea::placeholder { color: #a6a39e; }
-.academy-field input:focus, .academy-field select:focus, .academy-field textarea:focus { border-color: #ff4b0b; background: #fff; box-shadow: 0 0 0 3px rgba(255, 75, 11, 0.1); }
-.academy-submit-button { display: flex; width: 100%; min-height: 3.6rem; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 0.5rem; background: #ff4b0b; color: white; font-size: 0.82rem; font-weight: 700; transition: background 220ms ease, transform 220ms ease; border: none; cursor: pointer; }
-.academy-submit-button:hover { background: #df3900; }
-.academy-submit-button:active { transform: scale(0.985); }
-.academy-submit-button:disabled { cursor: wait; opacity: 0.68; }
-.academy-form-error { margin-top: 0.9rem; color: #a62f11; font-size: 0.72rem; font-weight: 600; line-height: 1.45; text-align: center; }
-.academy-interest-form > small { display: block; margin-top: 1rem; color: #77746f; font-size: 0.66rem; text-align: center; }
-.academy-form-success { display: flex; min-height: 31rem; flex-direction: column; align-items: flex-start; justify-content: center; }
-.academy-form-success > div { display: grid; width: 4rem; height: 4rem; place-items: center; }
-@media (max-width: 1024px) { .academy-form-intro { position: static; } }
-@media (max-width: 760px) { .academy-form-intro h2 { font-size: clamp(3.35rem, 15vw, 5rem); } .academy-interest-form { min-height: 0; padding: 1.4rem; } .academy-field-row { grid-template-columns: 1fr; gap: 0; } }
-
-
-/* ESTUDIO CONTACT FORM - match Inicio form styling */
-.estudio-page #diagnostico .academy-interest-form {
+/* ESTUDIO CONTACT FORM - formulario propio de Estudio, desacoplado de Academy */
+.estudio-page #diagnostico .vl-form-intro { position: sticky; top: 2rem; }
+.estudio-page #diagnostico .vl-form-intro h2 { max-width: 44rem; margin-top: 0.85rem; font-size: clamp(3.6rem, 5.3vw, 6rem); font-weight: 700; letter-spacing: -0.055em; line-height: 0.87; }
+.estudio-page #diagnostico .vl-form-intro > p { max-width: 31rem; margin-top: 1.6rem; color: #6d6b68; line-height: 1.65; }
+.estudio-page #diagnostico .vl-form {
   display: grid;
   gap: 0;
   max-width: 760px;
+  min-height: 0;
   padding: clamp(1.8rem, 4vw, 4rem);
   border: 1px solid rgba(32, 32, 31, 0.11);
   background: #eeece7;
   box-shadow: 0 26px 65px rgba(75, 55, 44, 0.08);
+  transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 450ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-.estudio-page #diagnostico .academy-interest-form:hover,
-.estudio-page #diagnostico .academy-interest-form:focus-within {
+.estudio-page #diagnostico .vl-form:hover,
+.estudio-page #diagnostico .vl-form:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 32px 75px rgba(75, 55, 44, 0.12), 0 8px 24px rgba(255, 75, 11, 0.02);
 }
-
-.estudio-page #diagnostico .academy-field {
-  display: grid;
-  gap: 0.55rem;
-  margin-bottom: 1.1rem;
-}
-
-.estudio-page #diagnostico .academy-field label {
-  display: block;
-  color: #474642;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.estudio-page #diagnostico .academy-field input,
-.estudio-page #diagnostico .academy-field select,
-.estudio-page #diagnostico .academy-field textarea {
+.estudio-page #diagnostico .vl-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.estudio-page #diagnostico .vl-field { display: grid; gap: 0.55rem; margin-bottom: 1.1rem; }
+.estudio-page #diagnostico .vl-field label { display: block; color: #474642; font-size: 0.74rem; font-weight: 700; letter-spacing: 0; text-transform: none; }
+.estudio-page #diagnostico .vl-field input,
+.estudio-page #diagnostico .vl-field select,
+.estudio-page #diagnostico .vl-field textarea {
   width: 100%;
   border: 1px solid rgba(32, 32, 31, 0.14);
   border-radius: 0;
@@ -1475,43 +1440,44 @@
   font-size: 0.85rem;
   transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
 }
-
-.estudio-page #diagnostico .academy-field input,
-.estudio-page #diagnostico .academy-field select {
-  min-height: 3.4rem;
-  padding: 0 1rem;
-}
-
-.estudio-page #diagnostico .academy-field textarea {
-  min-height: 8.5rem;
-  resize: vertical;
-  padding: 1rem;
-}
-
-.estudio-page #diagnostico .academy-field input:focus,
-.estudio-page #diagnostico .academy-field select:focus,
-.estudio-page #diagnostico .academy-field textarea:focus {
-  border-color: #ff4b0b;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(255, 75, 11, 0.1);
-}
-
-.estudio-page #diagnostico .academy-submit-button {
+.estudio-page #diagnostico .vl-field input,
+.estudio-page #diagnostico .vl-field select { min-height: 3.4rem; padding: 0 1rem; }
+.estudio-page #diagnostico .vl-field textarea { min-height: 8.5rem; resize: vertical; padding: 1rem; }
+.estudio-page #diagnostico .vl-field input::placeholder,
+.estudio-page #diagnostico .vl-field textarea::placeholder { color: #a6a39e; }
+.estudio-page #diagnostico .vl-field input:focus,
+.estudio-page #diagnostico .vl-field select:focus,
+.estudio-page #diagnostico .vl-field textarea:focus { border-color: #ff4b0b; background: #fff; box-shadow: 0 0 0 3px rgba(255, 75, 11, 0.1); }
+.estudio-page #diagnostico .vl-submit-button {
+  display: flex;
   width: 100%;
   min-height: 3.6rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   margin-top: 0.5rem;
   border: none;
   background: #ff4b0b;
   color: white;
   font-size: 0.82rem;
   font-weight: 700;
+  cursor: pointer;
   transition: background 220ms ease, transform 220ms ease;
 }
-
-.estudio-page #diagnostico .academy-submit-button:hover {
-  background: #df3900;
-  color: white;
-  transform: none;
+.estudio-page #diagnostico .vl-submit-button:hover { background: #df3900; color: white; transform: none; }
+.estudio-page #diagnostico .vl-submit-button:active { transform: scale(0.985); }
+.estudio-page #diagnostico .vl-submit-button:disabled { cursor: wait; opacity: 0.68; }
+.estudio-page #diagnostico .vl-form-error { margin-top: 0.9rem; color: #a62f11; font-size: 0.72rem; font-weight: 600; line-height: 1.45; text-align: center; }
+.estudio-page #diagnostico .vl-form > small { display: block; margin-top: 1rem; color: #77746f; font-size: 0.66rem; text-align: center; }
+.estudio-page #diagnostico .vl-form-success { display: flex; min-height: 31rem; flex-direction: column; align-items: flex-start; justify-content: center; }
+.estudio-page #diagnostico .vl-form-success > div { display: grid; width: 4rem; height: 4rem; place-items: center; }
+@media (max-width: 1024px) {
+  .estudio-page #diagnostico .vl-form-intro { position: static; }
+}
+@media (max-width: 760px) {
+  .estudio-page #diagnostico .vl-form-intro h2 { font-size: clamp(3.35rem, 15vw, 5rem); }
+  .estudio-page #diagnostico .vl-form { min-height: 0; padding: 1.4rem; }
+  .estudio-page #diagnostico .vl-field-row { grid-template-columns: 1fr; gap: 0; }
 }
 /* Nuevo bloque derecho en el Hero */
 .estudio-page .vl-hero__right-pane {

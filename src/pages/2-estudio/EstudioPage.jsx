@@ -793,6 +793,20 @@ function Diagnostic() {
           }),
         })
       }
+
+      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
+      if (backupKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: backupKey.trim(),
+            subject: `[Copia] Nueva consulta Estudio: ${lead.interest || 'Orientación'}`,
+            from_name: 'Visual Lab Estudio',
+            to_email: 'qaway.myc@gmail.com',
+          }),
+        })
+      }
       setSubmitted(true)
       formElement.reset()
       
@@ -811,9 +825,9 @@ function Diagnostic() {
 
   return (
     <section id="diagnostico" className="vl-diagnostic">
-      <div className="vl-diagnostic__form academy-section academy-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="vl-diagnostic__form vl-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
-          <motion.div {...reveal} className="academy-form-intro" style={{ marginBottom: '20px' }}>
+          <motion.div {...reveal} className="vl-form-intro" style={{ marginBottom: '20px' }}>
             <div>
               <p className="qw-section-kicker">Contacto</p>
               <h2
@@ -826,9 +840,9 @@ function Diagnostic() {
           </motion.div>
 
           <motion.div {...reveal}>
-            <form onSubmit={submit} className="academy-interest-form">
+            <form onSubmit={submit} className="vl-form">
               {submitted ? (
-                <div className="academy-form-success">
+                <div className="vl-form-success">
                   <div><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos lo antes posible para ayudarte a elegir tu siguiente paso.</p>
@@ -836,25 +850,25 @@ function Diagnostic() {
                 </div>
               ) : (
                 <>
-                  <div className="academy-field">
-                    <label htmlFor="academy-name">¿Cómo te llamas?</label>
-                    <input type="text" id="academy-name" name="name" required placeholder="Tu nombre completo" />
+                  <div className="vl-field">
+                    <label htmlFor="vl-name">¿Cómo te llamas?</label>
+                    <input type="text" id="vl-name" name="name" required placeholder="Tu nombre completo" />
                   </div>
-                  <div className="academy-field-row">
-                    <div className="academy-field">
-                      <label htmlFor="academy-phone">Teléfono</label>
-                      <input type="tel" id="academy-phone" name="phone" required placeholder="+51 999 999 999" />
+                  <div className="vl-field-row">
+                    <div className="vl-field">
+                      <label htmlFor="vl-phone">Teléfono</label>
+                      <input type="tel" id="vl-phone" name="phone" required placeholder="+51 999 999 999" />
                     </div>
-                    <div className="academy-field">
-                      <label htmlFor="academy-email">Correo</label>
-                      <input type="email" id="academy-email" name="email" required placeholder="tucorreo@empresa.com" />
+                    <div className="vl-field">
+                      <label htmlFor="vl-email">Correo</label>
+                      <input type="email" id="vl-email" name="email" required placeholder="tucorreo@empresa.com" />
                     </div>
                   </div>
 
-                  <div className="academy-field-row">
-                    <div className="academy-field">
-                      <label htmlFor="academy-profile">¿A qué te dedicas?</label>
-                      <select id="academy-profile" name="profile" required>
+                  <div className="vl-field-row">
+                    <div className="vl-field">
+                      <label htmlFor="vl-profile">¿A qué te dedicas?</label>
+                      <select id="vl-profile" name="profile" required>
                         <option value="">Selecciona tu perfil</option>
                         <option value="Profesional">Profesional</option>
                         <option value="Emprendedor o dueño de negocio">Emprendedor o dueño de negocio</option>
@@ -865,9 +879,9 @@ function Diagnostic() {
                         <option value="Otro">Otro</option>
                       </select>
                     </div>
-                    <div className="academy-field">
-                      <label htmlFor="academy-interest">¿En qué servicio estás interesado/a?</label>
-                      <select id="academy-interest" name="interest" required>
+                    <div className="vl-field">
+                      <label htmlFor="vl-interest">¿En qué servicio estás interesado/a?</label>
+                      <select id="vl-interest" name="interest" required>
                         <option value="">Selecciona un interés</option>
                         <option value="Branding digital">Branding digital</option>
                         <option value="Contenido visual">Contenido visual</option>
@@ -879,15 +893,15 @@ function Diagnostic() {
                     </div>
                   </div>
 
-                  <div className="academy-field">
-                    <label htmlFor="academy-message">Cuéntanos un poco más</label>
-                    <textarea id="academy-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
+                  <div className="vl-field">
+                    <label htmlFor="vl-message">Cuéntanos un poco más</label>
+                    <textarea id="vl-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
                   </div>
-                  <button type="submit" className="academy-submit-button" disabled={submitting}>
+                  <button type="submit" className="vl-submit-button" disabled={submitting}>
                     {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
                     <Send size={17} />
                   </button>
-                  {submitError && <p className="academy-form-error" role="alert">{submitError}</p>}
+                  {submitError && <p className="vl-form-error" role="alert">{submitError}</p>}
                 </>
               )}
             </form>

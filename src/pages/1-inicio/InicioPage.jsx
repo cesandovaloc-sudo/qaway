@@ -1004,8 +1004,8 @@ function CoursesLandings() {
   const landing = carouselLandings[landingIdx]
 
   return (
-    <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col">
-      <div className="mx-auto flex w-full max-w-[94rem] flex-col flex-1">
+    <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">
+      <div className="mx-auto flex w-full max-w-[94rem] flex-col">
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="qw-section-kicker">Formación y soluciones</p>
           <h2
