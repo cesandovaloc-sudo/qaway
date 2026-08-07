@@ -543,17 +543,18 @@ function EstudioSection() {
           </div>
 
           <Reveal delay={0.3} className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2]">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               <motion.img
                 key={activeService.title}
                 src={activeService.image}
                 alt={activeService.title}
-                initial={reduceMotion ? false : { opacity: 0, scale: 1.04 }}
+                initial={reduceMotion ? false : { opacity: 0, scale: 1.015 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                transition={{ duration: 0.26, ease: 'easeInOut' }}
                 className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
               />
             </AnimatePresence>
             <div className="absolute inset-0 bg-linear-to-t from-white/5 to-transparent" />
@@ -561,6 +562,13 @@ function EstudioSection() {
               {activeService.title}
             </span>
           </Reveal>
+
+          {/* Precarga de imágenes: transición instantánea sin destello blanco */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            {estudioServices.map(service => (
+              <img key={service.title} src={service.image} alt="" loading="eager" decoding="async" />
+            ))}
+          </div>
         </div>
       </div>
     </section>
