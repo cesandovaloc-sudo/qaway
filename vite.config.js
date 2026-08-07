@@ -52,7 +52,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 4000,
+    port: process.env.PORT ? Number(process.env.PORT) : 4100,
     host: true,
   },
 })
