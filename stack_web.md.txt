@@ -1,0 +1,91 @@
+Antiguo
+
+📊 Comparación real (leyendo los  package.json )
+┌────────────┬──────────────────────────────────┬────────────────────────────────┐
+│ Tecnología │ 🌐 Web (1-qawaylab-web)          │ 🩺 Clínica / Academy (apps     │
+│            │                                  │ nuevas)                        │
+├────────────┼──────────────────────────────────┼────────────────────────────────┤
+│ React      │ 18.3.1 ⚠️ viejo                  │ 19.2.7 ✅ moderno              │
+│ Vite       │ 5.4.1 ⚠️ viejo                   │ 8.1.1 ✅ moderno               │
+│ Tailwind   │ 3.4.1 ⚠️ viejo (con              │ 4.3.2 ✅ moderno (vía @theme,  │
+│            │ tailwind.config.js + PostCSS)    │ sin config file)               │
+│ framer-mot │ 11.0.0                           │ 12.43.0                        │
+│ ion        │                                  │                                │
+│ lucide-rea │ 0.400.0                          │ 1.28.0                         │
+│ ct         │                                  │                                │
+│ supabase-j │ 2.107.0                          │ 2.110.0                        │
+│ s          │                                  │                                │
+│ react-rout │ 7.15.1                           │ 7.18.1                         │
+│ er         │                                  │                                │
+└────────────┴──────────────────────────────────┴────────────────────────────────┘
+🔍 Qué tiene la web que las apps nuevas NO tienen
+La web no es más moderna, pero sí más rica en extras que solo ella tiene:
+- GSAP ( 3.15 ) + @gsap/react → animaciones premium de scroll (las apps nuevas no lo usan)
+- Recharts ( 3.8 ) → gráficos y dashboards
+- react-helmet-async → SEO (meta tags dinámicos)
+- prop-types → validación de props
+- @tailwindcss/forms → estilos de formularios
+
+Moderno:
+
+Listo ✅. Te dejo todo lo pedido:
+1️⃣ Puerto dedicado para rama  tree  → http://localhost:4100
+- Configuré  vite.config.js  con puerto 4100 (antes era 4000, que ahora queda libre — ya maté ese server viejo)
+- Es configurable: si algún día necesitas otro,  PORT=4300 npm run dev 
+- La rama  main-web  no se tocó (cuando hagamos merge, este puerto viaja con la rama o lo reajustamos, como prefieras)
+2️⃣ Enlace para abrir y revisar
+👉 http://localhost:4100 — ya está corriendo (Vite v8.2.0, HTTP 200 ✓, árbol limpio)
+3️⃣ 📦 STACK TÉCNICO — Web Qaway (rama  tree )
+🎯 Núcleo Frontend
+┌────────────────┬─────────────────┬──────────────────────────────────────────────────────┐
+│ Tecnología     │ Versión         │ Uso                                                  │
+├────────────────┼─────────────────┼──────────────────────────────────────────────────────┤
+│ React          │ ^19.2.7         │ Framework UI (última estable, con hooks)             │
+│ Vite           │ ^8.1.1          │ Bundler + dev server (puerto 4100)                   │
+│                │ (corriendo      │                                                      │
+│                │ 8.2.0)          │                                                      │
+│ Tailwind CSS   │ ^4.3.2          │ Estilos utilitarios — v4, CSS-first (@theme en       │
+│                │                 │ index.css, sin tailwind.config.js)                   │
+│ @tailwindcss/v │ ^4.3.2          │ Plugin oficial de Tailwind para Vite                 │
+│ ite            │                 │                                                      │
+│ @vitejs/plugin │ ^6.0.3          │ Plugin React de Vite (Fast Refresh)                  │
+│ -react         │                 │                                                      │
+└────────────────┴─────────────────┴──────────────────────────────────────────────────────┘
+🧭 Enrutado, UI y animación
+┌───────────────────┬────────────────┬────────────────────────────────────────────────────┐
+│ Tecnología        │ Versión        │ Uso                                                │
+├───────────────────┼────────────────┼────────────────────────────────────────────────────┤
+│ react-router-dom  │ ^7.18.1        │ Rutas de toda la web                               │
+│ framer-motion     │ ^12.43.0       │ Animaciones                                        │
+│ GSAP +            │ ^3.15.0 /      │ Animaciones premium de scroll                      │
+│ @gsap/react       │ ^2.1.2         │                                                    │
+│ lucide-react      │ ^0.475.0 ⚠️    │ Iconos — fijado (v1.x elimina iconos de marca, ver │
+│                   │                │ nota)                                              │
+│ recharts          │ ^3.8.1         │ Gráficos y dashboards                              │
+│ react-helmet-asyn │ ^3.0.0         │ SEO (meta tags dinámicos)                          │
+│ c                 │                │                                                    │
+│ prop-types        │ ^15.8.1        │ Validación de props                                │
+└───────────────────┴────────────────┴────────────────────────────────────────────────────┘
+🗄️ Backend / Datos
+┌───────────────────────┬──────────┬─────────────────────────────────────┐
+│ Tecnología            │ Versión  │ Uso                                 │
+├───────────────────────┼──────────┼─────────────────────────────────────┤
+│ @supabase/supabase-js │ ^2.110.0 │ Auth + base de datos Postgres + RLS │
+└───────────────────────┴──────────┴─────────────────────────────────────┘
+🛠️ Dev tools
+┌──────────────────┬──────────┬──────────────────────┐
+│ Tecnología       │ Versión  │ Uso                  │
+├──────────────────┼──────────┼──────────────────────┤
+│ @types/react     │ ^19.2.17 │ Tipos para el editor │
+│ @types/react-dom │ ^19.2.3  │ Tipos para el editor │
+└──────────────────┴──────────┴──────────────────────┘
+⚙️ Configuración clave
+-  vite.config.js : alias  @  →  src/ , puerto 4100 (configurable con  PORT ), plugins  react()  +  tailwindcss() 
+-  index.css  (Tailwind v4 sin config file):  @theme  con la paleta Qaway ( --color-qaway-accent: #ff4b0b , etc.)
+- ⚠️ lucide-react fijado en 0.475.0: la web usa ~150 iconos de marca (Instagram, WhatsApp, LinkedIn…) que lucide elimina en 1.x. Documentado en README.
+────────────────────────────────────────────────────────────────────────────────
+Respuesta obligatoria:
+- Tu rama:  tree 
+- Tu último commit:  88b2314  ·  chore: puerto dedicado 4100 para rama tree (configurable via PORT) 
+- Tu carpeta repo:  C:\LEO\EMPRESAS\QAWAY LAB\1-QawayLab-Digital\1-qawaylab-web 
+Revísala en http://localhost:4100 y cuando estés conforme hacemos el merge a  main-web .
