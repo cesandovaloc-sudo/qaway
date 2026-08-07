@@ -29,7 +29,7 @@ export default function CampaignsView() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-[15px] border border-zinc-200 shadow-sm overflow-hidden"
+              className="bg-white rounded-[15px] border border-zinc-200 shadow-xs overflow-hidden"
             >
               <div className="p-5 border-b border-zinc-100 flex justify-between items-start">
                 <div>

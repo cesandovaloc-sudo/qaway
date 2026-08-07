@@ -95,7 +95,7 @@ export function EcosystemQuickNav() {
               className="group relative overflow-hidden rounded-[15px] border border-black/10 bg-[#f3f4f6] text-black p-6 transition-all duration-500 shadow-card hover:-translate-y-1 hover:bg-white"
             >
               {/* Soft gradient + subtle pattern */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${it.accent} to-transparent opacity-60`} />
+              <div className={`absolute inset-0 bg-linear-to-br ${it.accent} to-transparent opacity-60`} />
               <div
                 className="absolute inset-0 opacity-[0.18]"
                 style={{
@@ -127,4 +127,4 @@ export function EcosystemQuickNav() {
     </section>
   )
 }
-
+

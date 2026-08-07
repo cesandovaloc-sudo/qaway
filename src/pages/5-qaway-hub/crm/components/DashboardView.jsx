@@ -84,9 +84,9 @@ export default function DashboardView() {
       <span className="text-[10px] font-bold text-black/50 uppercase tracking-widest ml-2 mr-2">Filtrar por:</span>
       <button
         onClick={() => setSelectedCampaignId('all')}
-        className={`px-4 py-1.5 text-xs font-semibold rounded-sm transition-colors ${
+        className={`px-4 py-1.5 text-xs font-semibold rounded-xs transition-colors ${
           selectedCampaignId === 'all'
-            ? 'bg-[#ff4b0b] text-white shadow-sm'
+            ? 'bg-[#ff4b0b] text-white shadow-xs'
             : 'bg-transparent text-[#191918] hover:bg-black/5'
         }`}
       >
@@ -96,9 +96,9 @@ export default function DashboardView() {
         <button
           key={camp.id}
           onClick={() => setSelectedCampaignId(camp.id)}
-          className={`px-4 py-1.5 text-xs font-semibold rounded-sm transition-colors ${
+          className={`px-4 py-1.5 text-xs font-semibold rounded-xs transition-colors ${
             selectedCampaignId === camp.id
-              ? 'bg-[#ff4b0b] text-white shadow-sm'
+              ? 'bg-[#ff4b0b] text-white shadow-xs'
               : 'bg-transparent text-[#191918] hover:bg-black/5'
           }`}
         >

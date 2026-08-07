@@ -125,7 +125,7 @@ function NotionNavbar() {
     <nav
       className={`fixed top-0 w-full z-50 transition-all duration-700 ${
         scrolled
-          ? 'py-4 bg-gray-900/95 backdrop-blur-xl shadow-sm border-b border-gray-800'
+          ? 'py-4 bg-gray-900/95 backdrop-blur-xl shadow-xs border-b border-gray-800'
           : 'py-10 bg-transparent'
       }`}
     >
@@ -188,7 +188,7 @@ function NotionHero() {
         <div className="lg:col-span-3 text-white">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
             <div className="flex items-center gap-3 mb-4">
-              <span className="bg-black text-white text-[11px] md:text-[13px] font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-sm">KIT NOTION SYSTEM PARA PROYECTOS</span>
+              <span className="bg-black text-white text-[11px] md:text-[13px] font-bold tracking-[0.1em] uppercase px-3 py-1 rounded-xs">KIT NOTION SYSTEM PARA PROYECTOS</span>
             </div>
             <h1 className="text-6xl md:text-[90px] font-bold text-white leading-[0.9] tracking-tighter mb-4">
               Sistema Estratégico <br />
@@ -251,10 +251,10 @@ function NotionHerramientas() {
           {tools.map((tool) => (
             <motion.button key={tool.id} onClick={() => setActiveTool(tool.id)}
               className={`py-4 px-6 rounded-xl border text-left transition-all relative ${
-                activeTool === tool.id ? 'border-gray-200 bg-gray-50 shadow-sm' : 'border-gray-100 hover:bg-gray-50'
+                activeTool === tool.id ? 'border-gray-200 bg-gray-50 shadow-xs' : 'border-gray-100 hover:bg-gray-50'
               }`}
             >
-              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-3 shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center mb-3 shadow-xs">
                 <tool.icon size={22} className={activeTool === tool.id ? "text-gray-800" : "text-gray-400"} />
               </div>
               <h4 className={`font-bold text-[13px] md:text-sm uppercase tracking-tight leading-tight mt-1 ${
@@ -279,7 +279,7 @@ function NotionHerramientas() {
               className="bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100 p-6 md:p-8 min-h-[400px] flex items-center"
             >
               <div className="grid md:grid-cols-[1.8fr_1fr] gap-8 md:gap-14 items-center w-full">
-                <div className="rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center">
+                <div className="rounded-xl overflow-hidden border border-gray-100 shadow-xs bg-gray-50 flex items-center justify-center">
                   <motion.img 
                     key={activeTool}
                     initial={{ opacity: 0, scale: 0.98 }}
@@ -291,7 +291,7 @@ function NotionHerramientas() {
                   />
                 </div>
                 <div className="text-center md:text-left flex flex-col items-center md:items-start md:pl-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-sm" style={{ backgroundColor: `${tools[activeTool].color}10` }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-xs" style={{ backgroundColor: `${tools[activeTool].color}10` }}>
                     {(() => {
                       const Icon = tools[activeTool].icon
                       return <Icon size={24} style={{ color: tools[activeTool].color }} />
@@ -308,7 +308,7 @@ function NotionHerramientas() {
                     <ul className="space-y-3 w-full">
                       {tools[activeTool].benefits.map((benefit, idx) => (
                         <li key={idx} className="flex items-start gap-2.5 text-left">
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ backgroundColor: `${tools[activeTool].color}15` }}>
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${tools[activeTool].color}15` }}>
                             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                               <path d="M2.5 6L5 8.5L9.5 3.5" stroke={tools[activeTool].color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                             </svg>
@@ -353,7 +353,7 @@ function NotionMetodo() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: i * 0.3, ease: "easeOut" }}
-              className="relative z-10 bg-white/5 backdrop-blur-sm p-8 rounded-xl border border-white/10 text-center hover:bg-white/10 transition-colors duration-300"
+              className="relative z-10 bg-white/5 backdrop-blur-xs p-8 rounded-xl border border-white/10 text-center hover:bg-white/10 transition-colors duration-300"
             >
               <div className="w-16 h-16 bg-[#f35a37] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-orange-500/20">
                 <m.icon size={28} className="text-white" />
@@ -381,7 +381,7 @@ function NotionEquipos() {
           {teams.map((team) => (
             <div key={team.id} className="bg-white rounded-2xl border border-gray-100 p-8 group hover:border-[#f35a37]/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <div className="flex items-start gap-5">
-                <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center flex-shrink-0 group-hover:bg-[#f35a37] transition-colors duration-300 shadow-md">
+                <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center shrink-0 group-hover:bg-[#f35a37] transition-colors duration-300 shadow-md">
                   {(() => {
                     const Icon = team.icon
                     return <Icon size={22} className="text-white" />
@@ -425,7 +425,7 @@ function NotionPrecios() {
 
         <div className="max-w-md mx-auto">
           <div className="relative group">
-            <div className="absolute -bottom-20 left-0 right-0 h-40 bg-gradient-to-b from-[#FF5733] to-transparent opacity-30 blur-2xl transition-all duration-700 group-hover:opacity-60 group-hover:blur-xl" />
+            <div className="absolute -bottom-20 left-0 right-0 h-40 bg-linear-to-b from-[#FF5733] to-transparent opacity-30 blur-2xl transition-all duration-700 group-hover:opacity-60 group-hover:blur-xl" />
             <div className="absolute -inset-[2px] rounded-2xl bg-[#FF5733] opacity-25 blur-md transition-all duration-700 group-hover:opacity-70" />
 
             <div className="relative p-10 rounded-2xl bg-zinc-950/90 backdrop-blur-xl border border-white/10 text-center transition-all duration-700 group-hover:border-[#FF5733]/40">
@@ -481,10 +481,10 @@ function NotionFaq() {
         <SectionTitle title="Preguntas Frecuentes" subtitle="Resolvemos tus dudas sobre implementación y escalabilidad." />
         <div className="space-y-4">
           {faqs.map((faq, i) => (
-            <div key={i} className="border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+            <div key={i} className="border border-gray-100 rounded-xl overflow-hidden shadow-xs">
               <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 group transition-colors">
                 <span className="font-bold text-lg text-black tracking-tight group-hover:text-[#f35a37] transition-colors">{faq.q}</span>
-                <ChevronDown className={`transition-transform duration-300 flex-shrink-0 ml-4 ${activeFaq === i ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`transition-transform duration-300 shrink-0 ml-4 ${activeFaq === i ? 'rotate-180' : ''}`} />
               </button>
               <div className={`grid transition-all duration-300 ease-in-out ${activeFaq === i ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
                 <div className="overflow-hidden min-h-0">

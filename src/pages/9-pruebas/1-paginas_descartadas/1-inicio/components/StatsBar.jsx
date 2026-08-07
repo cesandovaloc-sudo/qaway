@@ -31,10 +31,10 @@ export function StatsBar() {
         {/* Straddle between hero and next block using negative margin */}
         <div className="relative">
           {/* Border like a premium card (subtle gradient) */}
-          <div className="relative rounded-3xl p-[1px] bg-gradient-to-br from-white/20 via-white/10 to-transparent shadow-elevated">
+          <div className="relative rounded-3xl p-[1px] bg-linear-to-br from-white/20 via-white/10 to-transparent shadow-elevated">
             <div className="relative rounded-3xl overflow-hidden bg-[#1b1b1f]">
               {/* Soft surface + noise */}
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.10] via-white/[0.06] to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-b from-white/[0.10] via-white/[0.06] to-transparent" />
               <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(1100px_420px_at_15%_0%,rgba(255,255,255,0.12),transparent_60%),radial-gradient(900px_360px_at_85%_120%,rgba(255,255,255,0.10),transparent_55%)]" />
               <div
                 className="absolute inset-0 opacity-[0.08]"
@@ -94,4 +94,4 @@ export function StatsBar() {
 </section>
 )
 }
-
+

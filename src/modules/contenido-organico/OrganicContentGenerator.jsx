@@ -179,7 +179,7 @@ export default function OrganicContentGenerator({
           <button
             onClick={handleGenerate}
             disabled={isGenerating || !selectedOpportunity}
-            className="w-full bg-zinc-900 hover:bg-zinc-850 text-white font-extrabold py-3.5 rounded-[8px] flex items-center justify-center gap-2 transition active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider shadow-sm mt-3"
+            className="w-full bg-zinc-900 hover:bg-zinc-850 text-white font-extrabold py-3.5 rounded-[8px] flex items-center justify-center gap-2 transition active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-[11px] uppercase tracking-wider shadow-xs mt-3"
           >
             {isGenerating ? (
               <>
@@ -203,7 +203,7 @@ export default function OrganicContentGenerator({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="bg-white border border-zinc-200 rounded-[10px] p-5 space-y-4 shadow-sm"
+                className="bg-white border border-zinc-200 rounded-[10px] p-5 space-y-4 shadow-xs"
               >
                 
                 {/* Header Preview */}
@@ -392,7 +392,7 @@ export default function OrganicContentGenerator({
                         <span className="text-[9px] font-black text-zinc-450 uppercase tracking-widest block">Textos Overlay en Pantalla (Subtítulos rápidos)</span>
                         <div className="flex flex-wrap gap-2 pt-1">
                           {generatedPiece.data.textoEnPantalla?.map((t, ti) => (
-                            <span key={ti} className="bg-zinc-800 text-[#FFD200] px-3 py-1.5 rounded-[6px] font-mono text-[9px] font-bold shadow-sm border border-zinc-700">
+                            <span key={ti} className="bg-zinc-800 text-[#FFD200] px-3 py-1.5 rounded-[6px] font-mono text-[9px] font-bold shadow-xs border border-zinc-700">
                               {t}
                             </span>
                           ))}
@@ -438,7 +438,7 @@ export default function OrganicContentGenerator({
                   
                   <button
                     onClick={handleApprove}
-                    className="bg-zinc-900 hover:bg-zinc-800 text-white text-[10px] font-black uppercase tracking-wider px-5 py-2.5 rounded-[8px] flex items-center gap-1.5 transition shadow-sm active:scale-[0.98]"
+                    className="bg-zinc-900 hover:bg-zinc-800 text-white text-[10px] font-black uppercase tracking-wider px-5 py-2.5 rounded-[8px] flex items-center gap-1.5 transition shadow-xs active:scale-[0.98]"
                   >
                     <Check className="w-3.5 h-3.5 text-emerald-400" />
                     Aprobar y Guardar Pieza
@@ -524,7 +524,7 @@ export default function OrganicContentGenerator({
       <div className="flex justify-end pt-3 border-t border-zinc-150 mt-5">
         <button
           onClick={onFinishModule}
-          className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-sm active:scale-[0.98] text-xs uppercase"
+          className="bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold px-6 py-3.5 rounded-[10px] flex items-center gap-2 transition shadow-xs active:scale-[0.98] text-xs uppercase"
         >
           Aprobar contenido orgánico y pasar a Embudo de Atracción
           <Check className="w-4 h-4 text-emerald-400" />

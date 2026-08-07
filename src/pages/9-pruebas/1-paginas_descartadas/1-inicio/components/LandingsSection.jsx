@@ -46,8 +46,8 @@ export function LandingsSection() {
         />
 
         <div className="mt-10 relative max-w-5xl mx-auto">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-white to-transparent" />
 
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 px-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {landings.map((landing, i) => (
@@ -58,7 +58,7 @@ export function LandingsSection() {
                   viewport={{ once: true, margin: '-60px' }}
                   transition={{ duration: 0.45, delay: i * 0.06 }}
                   whileHover={{ y: -6, transition: { duration: 0.15, ease: "easeOut" } }}
-                  className="group relative bg-white border border-gray-200/60 hover:border-gray-300 rounded-2xl p-6 transition-all duration-150 h-full overflow-hidden shadow-sm hover:shadow-xl hover:shadow-black/5"
+                  className="group relative bg-white border border-gray-200/60 hover:border-gray-300 rounded-2xl p-6 transition-all duration-150 h-full overflow-hidden shadow-xs hover:shadow-xl hover:shadow-black/5"
                 >
                   <div className="relative z-10">
                     <div className="flex items-start justify-between gap-4">
@@ -79,7 +79,7 @@ export function LandingsSection() {
                     </div>
                   </div>
 
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-qaway-accent/[0.03] to-transparent rounded-bl-[100px]" />
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-linear-to-br from-qaway-accent/[0.03] to-transparent rounded-bl-[100px]" />
                 </motion.div>
               </Link>
             ))}
@@ -92,4 +92,4 @@ export function LandingsSection() {
 
 // ═══════════════════════════════════════════════════════════
 // ■ DARK BLOCK 3 — CTA
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

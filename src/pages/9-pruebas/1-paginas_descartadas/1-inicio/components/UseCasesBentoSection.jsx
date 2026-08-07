@@ -70,7 +70,7 @@ export function UseCasesBentoSection() {
           {cards.map((card) => (
             <div key={card.title} className="bg-white rounded-2xl border border-gray-100 p-8 group hover:border-qaway-accent/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <div className="flex items-start gap-5">
-                <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center flex-shrink-0 group-hover:bg-qaway-accent transition-colors duration-300 shadow-md">
+                <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center shrink-0 group-hover:bg-qaway-accent transition-colors duration-300 shadow-md">
                   <card.icon size={22} className="text-white group-hover:text-black transition-colors duration-300" />
                 </div>
                 <div>
@@ -92,4 +92,4 @@ export function UseCasesBentoSection() {
     </section>
   )
 }
-
+

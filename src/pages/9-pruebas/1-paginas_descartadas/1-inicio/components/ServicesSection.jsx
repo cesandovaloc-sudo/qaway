@@ -51,7 +51,7 @@ export function ServicesSection() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-32 -right-32 w-[520px] h-[520px] bg-qaway-accent/10 blur-[120px] rounded-full" />
         <div className="absolute -bottom-40 -left-40 w-[620px] h-[620px] bg-black/[0.03] blur-[140px] rounded-full" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] via-transparent to-black/[0.01]" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/[0.02] via-transparent to-black/[0.01]" />
       </div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_rgba(232,168,48,0.03)_0%,_transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(232,168,48,0.02)_0%,_transparent_50%)]" />
@@ -76,7 +76,7 @@ export function ServicesSection() {
                 className="group bg-white border border-black/10 hover:border-qaway-accent/30 rounded-2xl p-8 transition-all duration-500 shadow-card"
               >
                 <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-qaway-accent/20 to-transparent border border-qaway-accent/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <service.icon className="w-7 h-7 text-qaway-accent" />
                   </div>
                   <div className="flex-1">
@@ -86,7 +86,7 @@ export function ServicesSection() {
                     <ul className="space-y-2">
                       {service.items.map((item, j) => (
                         <li key={j} className="flex items-center gap-2.5 text-sm text-black/60">
-                          <CheckCircle className="w-3.5 h-3.5 text-qaway-accent/80 flex-shrink-0" />
+                          <CheckCircle className="w-3.5 h-3.5 text-qaway-accent/80 shrink-0" />
                           {item}
                         </li>
                       ))}
@@ -104,4 +104,4 @@ export function ServicesSection() {
 
 // ═══════════════════════════════════════════════════════════
 // ▢ LIGHT BLOCK 2 — ARCHITECTURE
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

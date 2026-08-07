@@ -235,7 +235,7 @@ function Hero() {
               alt="Transformación visual dirigida por Qaway Lab"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
           {/* Bloque Móvil Responsivo (Oculto en celulares para mantener la foto limpia) */}

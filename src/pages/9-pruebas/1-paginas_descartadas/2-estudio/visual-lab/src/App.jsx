@@ -75,8 +75,8 @@ const Hero = () => (
       }}
     />
     
-    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-    <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black/20" />
+    <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
+    <div className="absolute inset-0 bg-linear-to-r from-black via-transparent to-black/20" />
     
     <div className="absolute top-1/2 left-1/4 w-[400px] h-[400px] bg-[#FFD200]/10 blur-[120px] rounded-full pointer-events-none" />
 
@@ -160,9 +160,9 @@ const VisualSectors = () => (
             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100" 
             alt="Editorial Portrait"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-transparent to-transparent opacity-60" />
           <div className="absolute bottom-0 left-0 p-12 text-white">
-            <span className="inline-block bg-[#FFD200] text-black text-[9px] font-black px-3 py-1 mb-6 rounded-sm uppercase tracking-widest">New Standard</span>
+            <span className="inline-block bg-[#FFD200] text-black text-[9px] font-black px-3 py-1 mb-6 rounded-xs uppercase tracking-widest">New Standard</span>
             <h3 className="text-4xl font-bold mb-4 tracking-tighter">Identity Lab</h3>
             <p className="text-zinc-300 text-sm max-w-sm font-light leading-relaxed">
               Retratos que capturan la esencia humana con una precisión que desafía la realidad. Estética cinematográfica aplicada a la marca personal corporativa.
@@ -243,7 +243,7 @@ const CinematicStatement = () => (
         backgroundSize: 'cover'
       }}
     />
-    <div className="absolute inset-0 bg-gradient-to-b from-black via-black/60 to-black" />
+    <div className="absolute inset-0 bg-linear-to-b from-black via-black/60 to-black" />
     
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -279,7 +279,7 @@ const StrategySection = () => (
                 { icon: <Film size={18} />, title: "Coherencia de Marca", desc: "Modelos entrenados con su ADN visual único." }
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-6 items-start">
-                  <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-[#FFD200] rounded-sm">
+                  <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-[#FFD200] rounded-xs">
                     {item.icon}
                   </div>
                   <div>

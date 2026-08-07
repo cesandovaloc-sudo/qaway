@@ -81,7 +81,7 @@ const PrimaryButton = ({ children, onClick, className = "" }) => (
 
 // Hero Section - FONDO: gradient purple-50 → pink-50 → blue-50
 const Hero = () => (
-  <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+  <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5Q0EzQUYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2djRoNHYtNGgtNHptMCA4djRoNHYtNGgtNHptLTggOHY0aDR2LTRoLTR6bTggMHY0aDR2LTRoLTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-40"></div>
 
     <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
@@ -93,7 +93,7 @@ const Hero = () => (
         </div>
 
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-          Crea tu <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Identidad Visual</span> con Inteligencia Artificial
+          Crea tu <span className="bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Identidad Visual</span> con Inteligencia Artificial
         </h1>
 
         <p className="text-xl text-gray-600 leading-relaxed">
@@ -192,7 +192,7 @@ const MethodSection = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
 
   return (
-    <section id="metodo" className="py-24 bg-gradient-to-b from-gray-50 via-white to-gray-50 border-y border-gray-100">
+    <section id="metodo" className="py-24 bg-linear-to-b from-gray-50 via-white to-gray-50 border-y border-gray-100">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <span className="text-purple-600 font-bold text-xs uppercase tracking-widest bg-purple-50 px-4 py-2 rounded-full border border-purple-100">
@@ -228,7 +228,7 @@ const MethodSection = () => {
                 </div>
 
                 <div className="relative z-10">
-                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/10">
+                  <div className="w-14 h-14 bg-linear-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-purple-500/10">
                     <Icon className="w-7 h-7" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">
@@ -306,7 +306,7 @@ const LearningSection = () => (
         {learningItems.map((item, index) => (
           <div
             key={index}
-            className="group bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100 hover:shadow-lg hover:border-purple-200 transition-all cursor-pointer"
+            className="group bg-linear-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100 hover:shadow-lg hover:border-purple-200 transition-all cursor-pointer"
           >
             <div className="text-3xl mb-3">{item.icon}</div>
             <h3 className="font-bold text-gray-900 mb-1">{item.title}</h3>
@@ -351,9 +351,9 @@ const PortfolioSection = () => (
               alt={item.alt}
               className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute bottom-4 left-4 right-4">
-                <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-sm px-3 py-1 rounded-full">
+                <span className="inline-block bg-white/20 backdrop-blur-xs text-white text-sm px-3 py-1 rounded-full">
                   {item.type}
                 </span>
               </div>
@@ -388,7 +388,7 @@ const Testimonials = () => {
   const next = () => setCurrent((current + 1) % testimonials.length);
 
   return (
-    <section id="testimonios" className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+    <section id="testimonios" className="py-20 bg-linear-to-br from-purple-50 to-pink-50">
       <div className="max-w-4xl mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Lo que dicen</h2>
@@ -452,7 +452,7 @@ const Testimonials = () => {
 
 // Pricing Section - FONDO: white
 const Pricing = () => (
-  <section id="precio" className="py-20 bg-gradient-to-br from-purple-50 to-pink-50">
+  <section id="precio" className="py-20 bg-linear-to-br from-purple-50 to-pink-50">
     <div className="max-w-7xl mx-auto px-6">
       <div className="text-center mb-12">
         <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
@@ -463,7 +463,7 @@ const Pricing = () => (
 
       <div className="max-w-lg mx-auto">
         <div className="bg-white rounded-3xl p-10 border-2 border-purple-200 shadow-2xl relative overflow-hidden transform hover:scale-[1.02] transition-transform">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-b-2xl font-bold text-lg">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-linear-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-b-2xl font-bold text-lg">
             🎉 OFERTA ESPECIAL
           </div>
 
@@ -494,7 +494,7 @@ const Pricing = () => (
 
           <button
             onClick={goToCart}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-6 rounded-2xl font-bold text-xl hover:shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+            className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white py-6 rounded-2xl font-bold text-xl hover:shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
           >
             Inscribirse Ahora
             <ArrowRight size={24} />
@@ -511,7 +511,7 @@ const Pricing = () => (
 
 // CTA Section - FONDO: gradient purple-600 to pink-600
 const CTASection = () => (
-  <section className="py-24 bg-gradient-to-r from-purple-600 to-pink-600">
+  <section className="py-24 bg-linear-to-r from-purple-600 to-pink-600">
     <div className="max-w-4xl mx-auto px-6 text-center">
       <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
         Transforma tu marca hoy mismo
@@ -576,7 +576,7 @@ const ContactForm = () => {
 
   return (
     <section className="max-w-3xl mx-auto px-6 py-20">
-      <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl p-10 md:p-14 shadow-2xl">
+      <div className="bg-linear-to-br from-purple-600 to-pink-600 rounded-3xl p-10 md:p-14 shadow-2xl">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
             ¿Tienes dudas?
@@ -607,7 +607,7 @@ const ContactForm = () => {
                 type="text"
                 placeholder="Tu nombre completo"
                 required
-                className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg"
+                className="w-full bg-white/90 backdrop-blur-xs px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder:text-gray-500 text-lg"
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
               />
@@ -615,7 +615,7 @@ const ContactForm = () => {
                 type="email"
                 placeholder="Tu email"
                 required
-                className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg"
+                className="w-full bg-white/90 backdrop-blur-xs px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder:text-gray-500 text-lg"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -623,7 +623,7 @@ const ContactForm = () => {
             <textarea
               placeholder="¿Cómo podemos ayudarte? Cuéntanos tu situación..."
               required
-              className="w-full bg-white/90 backdrop-blur-sm px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder-gray-500 text-lg h-40 resize-none"
+              className="w-full bg-white/90 backdrop-blur-xs px-6 py-5 rounded-2xl outline-none border-2 border-transparent focus:border-white/50 transition-all text-gray-900 placeholder:text-gray-500 text-lg h-40 resize-none"
               value={formData.mensaje}
               onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
             ></textarea>

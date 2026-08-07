@@ -791,7 +791,7 @@ export default function EbookDigitalPage() {
 
                   {/* SIMULADOR DE GOOGLE CALENDAR EN VIVO */}
                   <div className="bg-[#0a0a0f] border border-white/5 rounded-2xl p-4 md:p-6 shadow-2xl relative overflow-hidden min-h-[460px] flex flex-col justify-between mb-8 text-white">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-linear-to-tr from-cyan-500/5 via-transparent to-transparent pointer-events-none" />
                     
                     <div className="flex items-center justify-between border-b border-white/5 pb-4 relative z-10">
                       <div className="flex items-center gap-3">
@@ -816,7 +816,7 @@ export default function EbookDigitalPage() {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-5 gap-2 my-4 relative z-10 flex-grow">
+                    <div className="grid grid-cols-5 gap-2 my-4 relative z-10 grow">
                       {['Lun', 'Mar', 'Mié', 'Jue', 'Vie'].map(day => {
                         const dayEvents = events.filter(e => e.day === day)
                         return (
@@ -845,7 +845,7 @@ export default function EbookDigitalPage() {
                             </AnimatePresence>
                             
                             {dayEvents.length === 0 && (
-                              <div className="flex-grow flex items-center justify-center border border-dashed border-white/5 rounded-lg">
+                              <div className="grow flex items-center justify-center border border-dashed border-white/5 rounded-lg">
                                 <span className="text-[8px] text-zinc-700 uppercase tracking-widest font-mono">Libre</span>
                               </div>
                             )}
@@ -855,7 +855,7 @@ export default function EbookDigitalPage() {
                     </div>
 
                     <div className="bg-[#12121c] border border-white/5 rounded-xl p-3 flex items-center gap-3 min-h-[56px] relative z-10 text-left">
-                      <div className="w-6 h-6 rounded-full bg-cyan-400/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-cyan-400/10 flex items-center justify-center shrink-0">
                         {simStep === 1 || simStep === 2 ? (
                           <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
                         ) : simStep === 3 ? (
@@ -898,7 +898,7 @@ export default function EbookDigitalPage() {
                               <span className="font-bold text-[11px] group-hover:text-[#ffd200] transition-colors">{p.label}</span>
                               <span className="text-[9px] text-zinc-500 truncate max-w-[150px]">{p.text}</span>
                             </div>
-                            <div className="w-6 h-6 rounded-lg bg-white/3 border border-white/5 flex items-center justify-center flex-shrink-0 group-hover:bg-[#ffd200] group-hover:text-black transition-all">
+                            <div className="w-6 h-6 rounded-lg bg-white/3 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-[#ffd200] group-hover:text-black transition-all">
                               {isActive && simStep === 3 ? (
                                 <Check className="w-3.5 h-3.5 text-emerald-400" />
                               ) : (

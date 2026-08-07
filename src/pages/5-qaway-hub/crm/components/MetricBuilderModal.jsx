@@ -37,7 +37,7 @@ export default function MetricBuilderModal({ onClose }) {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
       <div
         className="bg-white rounded-[15px] w-full max-w-xl overflow-hidden shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-200"
       >

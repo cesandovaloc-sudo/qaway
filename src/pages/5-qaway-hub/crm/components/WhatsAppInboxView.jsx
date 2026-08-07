@@ -73,7 +73,7 @@ export default function WhatsAppInboxView() {
   // --- EMPTY STATE PARA EVITAR PANTALLA BLANCA ---
   if (!leads || leads.length === 0 || !selectedLead?.id) {
     return (
-      <div className="bg-white border border-zinc-200 rounded-[15px] overflow-hidden flex items-center justify-center h-[75vh] shadow-sm text-zinc-400">
+      <div className="bg-white border border-zinc-200 rounded-[15px] overflow-hidden flex items-center justify-center h-[75vh] shadow-xs text-zinc-400">
         <div className="text-center">
           <MessageSquare className="w-12 h-12 mx-auto mb-3 text-zinc-200" />
           <p className="text-sm font-medium">Bandeja Vacía</p>
@@ -86,7 +86,7 @@ export default function WhatsAppInboxView() {
   return (
     <div 
       ref={containerRef}
-      className="bg-white border border-zinc-200 rounded-[15px] overflow-hidden flex flex-col md:flex-row h-[75vh] shadow-sm relative"
+      className="bg-white border border-zinc-200 rounded-[15px] overflow-hidden flex flex-col md:flex-row h-[75vh] shadow-xs relative"
     >
       
       {/* 1. Panel Izquierdo: Lista de Chats Activos */}
@@ -116,7 +116,7 @@ export default function WhatsAppInboxView() {
                   }`}>
                     {lead.name}
                   </h5>
-                  <span className="text-[9px] bg-zinc-100 text-zinc-500 font-bold px-2 py-0.5 rounded border border-zinc-200/50 flex-shrink-0">
+                  <span className="text-[9px] bg-zinc-100 text-zinc-500 font-bold px-2 py-0.5 rounded border border-zinc-200/50 shrink-0">
                     {(lead.campaignName || '').includes('Notion') ? 'Notion' : 'Visual Academy'}
                   </span>
                 </div>
@@ -137,7 +137,7 @@ export default function WhatsAppInboxView() {
                   </span>
 
                   {lead.unreadCount > 0 && (
-                    <span className="w-5 h-5 rounded-full bg-green-500 text-white font-extrabold text-[10px] flex items-center justify-center shadow-sm">
+                    <span className="w-5 h-5 rounded-full bg-green-500 text-white font-extrabold text-[10px] flex items-center justify-center shadow-xs">
                       {lead.unreadCount}
                     </span>
                   )}
@@ -191,7 +191,7 @@ export default function WhatsAppInboxView() {
               <div key={index} className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] rounded-[15px] p-3.5 text-[13px] leading-relaxed ${
                   isAgent
-                    ? 'bg-zinc-950 text-white font-medium rounded-tr-none shadow-sm'
+                    ? 'bg-zinc-950 text-white font-medium rounded-tr-none shadow-xs'
                     : 'bg-white text-zinc-800 rounded-tl-none border border-zinc-200/80 shadow-xs'
                 }`}>
                   <p className="whitespace-pre-line">{msg.text}</p>
@@ -230,7 +230,7 @@ export default function WhatsAppInboxView() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={`Escribe a ${selectedLead.name}...`}
-            className="flex-1 bg-zinc-50 border border-zinc-200 rounded-[15px] px-4 py-3 text-[13px] text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all"
+            className="flex-1 bg-zinc-50 border border-zinc-200 rounded-[15px] px-4 py-3 text-[13px] text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all"
           />
           <button
             type="submit"
@@ -265,7 +265,7 @@ export default function WhatsAppInboxView() {
           
           <div className="space-y-4 text-xs">
             <div className="flex items-start gap-2">
-              <Phone className="w-4 h-4 text-zinc-400 mt-0.5 flex-shrink-0" />
+              <Phone className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-[9px] text-zinc-400 font-bold uppercase">WhatsApp</p>
                 <p className="text-zinc-800 font-bold">{selectedLead.whatsapp}</p>
@@ -273,7 +273,7 @@ export default function WhatsAppInboxView() {
             </div>
 
             <div className="flex items-start gap-2">
-              <Mail className="w-4 h-4 text-zinc-400 mt-0.5 flex-shrink-0" />
+              <Mail className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-[9px] text-zinc-400 font-bold uppercase">Correo</p>
                 <p className="text-zinc-800 font-bold truncate max-w-[140px]">{selectedLead.email}</p>
@@ -281,7 +281,7 @@ export default function WhatsAppInboxView() {
             </div>
 
             <div className="flex items-start gap-2">
-              <Megaphone className="w-4 h-4 text-zinc-400 mt-0.5 flex-shrink-0" />
+              <Megaphone className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-[9px] text-zinc-400 font-bold uppercase">Adquisición</p>
                 <p className="text-zinc-800 font-bold truncate">{selectedLead.campaignName}</p>
@@ -290,7 +290,7 @@ export default function WhatsAppInboxView() {
 
             {selectedLead.metadata?.wooCommerce && (
               <div className="flex items-start gap-2 pt-3 border-t border-zinc-200/50">
-                <ShoppingCart className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                <ShoppingCart className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[9px] text-purple-600 font-bold uppercase">Compra en Web (WooCommerce)</p>
                   <p className="text-zinc-800 font-bold text-[10px]">Orden: {selectedLead.metadata.wooCommerce.orderId}</p>
@@ -302,7 +302,7 @@ export default function WhatsAppInboxView() {
 
             {selectedLead.metadata?.mailing && (
               <div className="flex items-start gap-2 pt-3 border-t border-zinc-200/50">
-                <MailOpen className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                <MailOpen className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                 <div>
                   <p className="text-[9px] text-blue-600 font-bold uppercase">Interacción Mailing</p>
                   <p className="text-zinc-800 font-bold text-[10px] truncate max-w-[140px]">{selectedLead.metadata.mailing.campaignName}</p>

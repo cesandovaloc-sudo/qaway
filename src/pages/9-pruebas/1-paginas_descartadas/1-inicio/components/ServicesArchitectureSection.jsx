@@ -74,7 +74,7 @@ export function ServicesArchitectureSection() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 -right-40 w-[680px] h-[680px] bg-qaway-accent/10 blur-[160px] rounded-full" />
         <div className="absolute -bottom-52 -left-48 w-[740px] h-[740px] bg-white/5 blur-[180px] rounded-full" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] via-transparent to-white/[0.02]" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/[0.03] via-transparent to-white/[0.02]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-8 relative z-10">
@@ -115,8 +115,8 @@ export function ServicesArchitectureSection() {
                 {b.variant !== 'accent' && (
                   <>
                     <div className="absolute inset-0 z-0 grayscale opacity-15" style={{ backgroundImage: b.bgImage, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/55 to-black/90 z-10" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/40 z-10" />
+                    <div className="absolute inset-0 bg-linear-to-b from-black/85 via-black/55 to-black/90 z-10" />
+                    <div className="absolute inset-0 bg-linear-to-r from-black/60 via-transparent to-black/40 z-10" />
                   </>
                 )}
 
@@ -127,7 +127,7 @@ export function ServicesArchitectureSection() {
                       <h3 className={`font-bold mb-3 ${textTitle} ${b.variant === 'tall' ? 'text-3xl' : 'text-2xl'}`}>{b.title}</h3>
                       <p className={`text-sm leading-relaxed mb-5 ${textBody}`}>{b.description}</p>
                     </div>
-                    <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center flex-shrink-0 ${b.variant === 'accent' ? 'bg-black/10' : 'bg-white/5 border border-white/10'}`}>
+                    <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 ${b.variant === 'accent' ? 'bg-black/10' : 'bg-white/5 border border-white/10'}`}>
                       <b.icon className={`w-6 h-6 ${b.variant === 'accent' ? 'text-black' : 'text-qaway-accent'}`} />
                     </div>
                   </div>
@@ -135,7 +135,7 @@ export function ServicesArchitectureSection() {
                   <ul className={`mt-2 space-y-2 ${b.variant === 'accent' ? 'text-black/80' : 'text-white/70'}`}>
                     {(b.variant === 'tall' ? b.items : b.items.slice(0, 2)).map((it) => (
                       <li key={it} className="flex items-center gap-2.5 text-sm">
-                        <CheckCircle className={`w-3.5 h-3.5 flex-shrink-0 ${b.variant === 'accent' ? 'text-black/60' : 'text-qaway-accent/70'}`} />
+                        <CheckCircle className={`w-3.5 h-3.5 shrink-0 ${b.variant === 'accent' ? 'text-black/60' : 'text-qaway-accent/70'}`} />
                         <span className="truncate">{it}</span>
                       </li>
                     ))}
@@ -158,4 +158,4 @@ export function ServicesArchitectureSection() {
 
 // ═══════════════════════════════════════════════════════════
 // ▢ LIGHT BLOCK 1 — STATS
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════

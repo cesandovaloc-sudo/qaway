@@ -23,7 +23,7 @@ export function CTASection() {
       <div className="absolute inset-0">
         <div className="absolute -top-40 -left-40 w-[560px] h-[560px] bg-qaway-accent/10 blur-[140px] rounded-full" />
         <div className="absolute -bottom-44 -right-44 w-[640px] h-[640px] bg-white/5 blur-[160px] rounded-full" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] via-transparent to-white/[0.02]" />
+        <div className="absolute inset-0 bg-linear-to-b from-white/[0.04] via-transparent to-white/[0.02]" />
       </div>
 
       <div className="max-w-4xl mx-auto px-8 relative z-10 text-center">
@@ -34,14 +34,14 @@ export function CTASection() {
           className="bg-black/70 backdrop-blur-2xl border border-white/[0.08] rounded-3xl p-12 md:p-20 relative overflow-hidden"
         >
           {/* Top glow — gold */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-qaway-accent/40 to-transparent" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-linear-to-r from-transparent via-qaway-accent/40 to-transparent" />
 
           {/* Gold glow orb */}
           <div className="absolute top-1/2 right-0 w-64 h-64 bg-qaway-accent/5 rounded-full blur-[100px]" />
 
           <h2 className="text-display-sm md:text-display-md font-bold text-white tracking-tight mb-6 text-balance relative z-10">
             ¿Listo para construir<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-qaway-accent via-[#F5D44A] to-qaway-accent">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-qaway-accent via-[#F5D44A] to-qaway-accent">
               tu ecosistema digital
             </span>
             ?
@@ -74,4 +74,4 @@ export function CTASection() {
   )
 }
 
-// Positioning + structure blocks
+// Positioning + structure blocks

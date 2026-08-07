@@ -49,8 +49,8 @@ const Hero = () => {
         }}
       />
       
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/40 to-black pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-b from-black via-black/40 to-black pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-r from-black/50 via-transparent to-black/50 pointer-events-none" />
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -69,7 +69,7 @@ const Hero = () => {
         >
           <h1 className="text-5xl md:text-8xl font-bold text-white tracking-tighter leading-[0.9] mb-12 text-balance">
             Sistemas Visuales <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-300 via-white to-zinc-500 font-light">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-300 via-white to-zinc-500 font-light">
               impulsados
             </span>
             <span className="text-[#FFD200] font-medium"> por IA</span>
@@ -92,7 +92,7 @@ const Hero = () => {
             Explorar el lab <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
           </Link>
 
-          <button className="px-10 py-5 rounded-[6px] font-black text-white border border-white/20 hover:bg-white/10 transition-all text-[11px] tracking-[0.25em] uppercase backdrop-blur-sm hover:-translate-y-1 duration-300">
+          <button className="px-10 py-5 rounded-[6px] font-black text-white border border-white/20 hover:bg-white/10 transition-all text-[11px] tracking-[0.25em] uppercase backdrop-blur-xs hover:-translate-y-1 duration-300">
             Ver portafolio
           </button>
         </motion.div>
@@ -132,9 +132,9 @@ const VisualSectors = () => (
             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100" 
             alt="Editorial Portrait"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
           <div className="absolute bottom-0 left-0 p-12 text-white">
-            <span className="inline-block bg-[#FFD200] text-black text-[9px] font-black px-3 py-1 mb-6 rounded-sm uppercase tracking-widest">Nuevo Estándar</span>
+            <span className="inline-block bg-[#FFD200] text-black text-[9px] font-black px-3 py-1 mb-6 rounded-xs uppercase tracking-widest">Nuevo Estándar</span>
             <h3 className="text-4xl font-bold mb-4 tracking-tighter">Identidad Ejecutiva</h3>
             <p className="text-zinc-300 text-sm max-w-sm font-light leading-relaxed">
               Construcción de imagen profesional. Generamos retratos corporativos y avatares fotorealistas de alta gama mediante IA, diseñados para proyectar absoluta autoridad en cualquier entorno digital.
@@ -237,7 +237,7 @@ const VisualSectors = () => (
 
 const CinematicStatement = () => (
   <section className="py-12 px-8 bg-zinc-950 flex items-center justify-center relative overflow-hidden border-y border-white/5">
-    <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black pointer-events-none" />
+    <div className="absolute inset-0 bg-linear-to-b from-black via-zinc-950 to-black pointer-events-none" />
     <div className="max-w-4xl mx-auto text-center relative mt-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -274,7 +274,7 @@ const StrategySection = () => (
                 { icon: <Film size={18} />, title: "Coherencia de Marca", desc: "Modelos entrenados con tu ADN visual único." }
               ].map((item, idx) => (
                 <div key={idx} className="flex gap-6 items-start">
-                  <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-[#FFD200] rounded-sm">
+                  <div className="w-12 h-12 bg-zinc-900 border border-white/5 flex items-center justify-center text-[#FFD200] rounded-xs">
                     {item.icon}
                   </div>
                   <div>
@@ -462,7 +462,7 @@ const DiagnosticForm = () => {
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="bg-white border border-zinc-200 p-7 md:p-10 shadow-[0_24px_80px_-44px_rgba(24,24,27,0.45)] rounded-[10px] relative z-10"
         >
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-transparent via-[#FFD200] to-transparent opacity-60" />
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-linear-to-r from-transparent via-[#FFD200] to-transparent opacity-60" />
           
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7">
             <div className="md:col-span-2 flex flex-col gap-2.5">

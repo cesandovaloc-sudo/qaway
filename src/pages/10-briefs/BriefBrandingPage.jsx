@@ -126,7 +126,7 @@ export default function BriefBrandingPage() {
           ))}
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-10">
+        <div className="bg-white rounded-3xl shadow-xs border border-gray-100 p-8 md:p-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -189,7 +189,7 @@ export default function BriefBrandingPage() {
                             onClick={() => togglePersonalidad(opt)}
                             className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider border transition-all ${
                               active
-                                ? 'bg-qaway-accent text-gray-900 border-qaway-accent shadow-sm'
+                                ? 'bg-qaway-accent text-gray-900 border-qaway-accent shadow-xs'
                                 : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
                             }`}
                           >
@@ -235,7 +235,7 @@ export default function BriefBrandingPage() {
                   onClick={() => setStep(s => s + 1)}
                   className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all ${
                     canProceed()
-                      ? 'bg-qaway-accent text-gray-900 hover:bg-qaway-accent-light shadow-sm'
+                      ? 'bg-qaway-accent text-gray-900 hover:bg-qaway-accent-light shadow-xs'
                       : 'bg-gray-100 text-gray-300 cursor-not-allowed'
                   }`}
                 >
@@ -248,7 +248,7 @@ export default function BriefBrandingPage() {
                   className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold uppercase tracking-wider transition-all ${
                     sending
                       ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                      : 'bg-qaway-accent text-gray-900 hover:bg-qaway-accent-light shadow-sm'
+                      : 'bg-qaway-accent text-gray-900 hover:bg-qaway-accent-light shadow-xs'
                   }`}
                 >
                   {sending ? 'Enviando...' : 'Enviar Brief'} <Send className="w-4 h-4" />

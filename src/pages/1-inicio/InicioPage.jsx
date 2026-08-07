@@ -320,7 +320,7 @@ function Hero() {
               alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/12" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
 
@@ -392,8 +392,8 @@ function BrandMarquee() {
           }
         `}
       </style>
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#151514] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#151514] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-[#151514] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-[#151514] to-transparent" />
       <div className="mx-auto mb-5 flex max-w-[94rem] items-center justify-between gap-6 px-6 sm:px-10 lg:px-14">
         <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Marcas que toman forma</p>
         <div className="hidden h-px flex-1 bg-white/10 sm:block" />
@@ -435,7 +435,7 @@ function EcosystemPhoto() {
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/8 via-transparent to-white/8" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/8 via-transparent to-white/8" />
         <div className="absolute inset-y-10 left-0 w-2 bg-[#ff4b0b]" />
       </div>
     </motion.div>
@@ -543,24 +543,32 @@ function EstudioSection() {
           </div>
 
           <Reveal delay={0.3} className="relative aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2]">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               <motion.img
                 key={activeService.title}
                 src={activeService.image}
                 alt={activeService.title}
-                initial={reduceMotion ? false : { opacity: 0, scale: 1.04 }}
+                initial={reduceMotion ? false : { opacity: 0, scale: 1.015 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                transition={{ duration: 0.26, ease: 'easeInOut' }}
                 className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
+                loading="eager"
+                decoding="async"
               />
             </AnimatePresence>
-            <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-white/5 to-transparent" />
             <span className="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white/60 drop-shadow-lg">
               {activeService.title}
             </span>
           </Reveal>
+
+          {/* Precarga de imágenes: transición instantánea sin destello blanco */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            {estudioServices.map(service => (
+              <img key={service.title} src={service.image} alt="" loading="eager" decoding="async" />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -680,7 +688,7 @@ function OpsImageStage({ reduceMotion }) {
                 loading="lazy"
                 decoding="async"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/5 to-transparent" />
             </div>
           </motion.figure>
         ))}
@@ -688,7 +696,7 @@ function OpsImageStage({ reduceMotion }) {
         <motion.div
           animate={reduceMotion ? undefined : { x: ['-20%', '120%'] }}
           transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-0 top-1/2 h-px w-full bg-gradient-to-r from-transparent via-[#ff4b0b] to-transparent opacity-50"
+          className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-[#ff4b0b] to-transparent opacity-50"
         />
       </div>
     </div>
@@ -860,7 +868,7 @@ function AcademyFeature() {
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/18" />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-black/18" />
       </motion.div>
       </div>
       </div>

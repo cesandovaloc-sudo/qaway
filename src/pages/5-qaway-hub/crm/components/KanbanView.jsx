@@ -43,7 +43,7 @@ export default function KanbanView() {
     <div className="space-y-4 bg-white text-zinc-900">
       
       {/* CABECERA Y PANEL DE CONFIGURACIÓN DE COLUMNAS */}
-      <div className="flex justify-between items-center bg-zinc-50 p-5 rounded-[15px] border border-zinc-200/60 shadow-sm">
+      <div className="flex justify-between items-center bg-zinc-50 p-5 rounded-[15px] border border-zinc-200/60 shadow-xs">
         <div>
           <h4 className="text-sm font-bold text-zinc-800 uppercase tracking-wider">Embudo Comercial</h4>
           <p className="text-[11px] text-zinc-400 mt-0.5">Control visual y progresión de los prospectos en el proceso de ventas.</p>
@@ -124,7 +124,7 @@ export default function KanbanView() {
                           {lead.name}
                         </h5>
                         {lead.priority === 'high' && (
-                          <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                          <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
                         )}
                       </div>
 

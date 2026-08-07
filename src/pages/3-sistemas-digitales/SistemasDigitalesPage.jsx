@@ -248,7 +248,7 @@ function HeroInicioBlockPractice() {
               }}
             />
           </div>
-          <div className="absolute left-0 top-0 w-12 h-12 bg-gradient-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
+          <div className="absolute left-0 top-0 w-12 h-12 bg-linear-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
             <div className="relative z-10 bg-[#f8f9f7] flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
@@ -311,7 +311,7 @@ function HeroInicioBlockPractice() {
                       "linear-gradient(to bottom, black 75%, transparent 100%)",
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
               </div>
             </motion.div>
 
@@ -334,7 +334,7 @@ function HeroInicioBlockPractice() {
                     className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-sm">
+                      <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-xs">
                         <Brush size={22} />
                       </span>
                       <span className="min-w-0">
@@ -1318,8 +1318,8 @@ export default function SistemasDigitalesPage() {
                       loading="lazy"
                       decoding="async"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                    <div className="absolute bottom-5 left-5 border border-white/20 bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
+                    <div className="absolute bottom-5 left-5 border border-white/20 bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white backdrop-blur-xs">
                       {card.tag}
                     </div>
                   </div>
@@ -1361,7 +1361,7 @@ export default function SistemasDigitalesPage() {
                   loading="lazy"
                   decoding="async"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 hidden border border-white/16 bg-black/45 px-5 py-4 backdrop-blur-md sm:block">
                   <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
                     Asesoría y acompañamiento
