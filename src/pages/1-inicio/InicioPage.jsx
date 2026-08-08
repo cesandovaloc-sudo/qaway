@@ -996,22 +996,22 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
 }
 
 
-function useCarousel(items) {
-  const [index, setIndex] = useState(0)
+function useCarouselTick(intervalMs = 7000) {
+  // Tick ÚNICO y compartido: ambas tarjetas derivan su índice de este mismo
+  // contador, por lo que sus imágenes rotan al mismo tiempo.
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    // items.length puede ser 0 (carga/fallback): evitar índice NaN.
-    const id = setInterval(() => setIndex(i => (items.length === 0 ? 0 : (i + 1) % items.length)), 7000)
+    const id = setInterval(() => setTick(t => t + 1), intervalMs)
     return () => clearInterval(id)
-  }, [items.length])
+  }, [intervalMs])
 
-  return index
+  return tick
 }
 
-function AcademyCoursesInner() {
+function AcademyCoursesInner({ tick }) {
   const { status, courses, fallbackCards, error } = useFeaturedCourses(4)
-  const courseIdx = useCarousel(status === 'success' ? courses : [])
-  const course = status === 'success' && courses.length > 0 ? courses[courseIdx % courses.length] : null
+  const course = status === 'success' && courses.length > 0 ? courses[tick % courses.length] : null
   const neutral = fallbackCards[0]
 
   if (status === 'loading') {
@@ -1082,7 +1082,8 @@ function AcademyCoursesInner() {
 }
 
 function CoursesLandings() {
-  const landingIdx = useCarousel(carouselLandings)
+  const tick = useCarouselTick(7000)
+  const landingIdx = tick % carouselLandings.length
   const landing = carouselLandings[landingIdx]
   const academyHref = (import.meta.env.VITE_ACADEMY_URL || '').replace(/\/+$/, '')
   const cursosHref = academyHref ? `${academyHref}/cursos` : '/academy'
@@ -1108,10 +1109,10 @@ function CoursesLandings() {
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <div className="mb-5 flex items-center gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
-                  <Compass size={21} strokeWidth={1.45} />
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <Compass size={19} strokeWidth={1.45} />
                 </span>
-                <h3 className="no-qw text-[clamp(1.45rem,2.3vw,2.45rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.35rem,2.2vw,2.35rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Soluciones digitales
                 </h3>
               </div>
@@ -1152,15 +1153,15 @@ function CoursesLandings() {
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <div className="mb-5 flex items-center gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
-                  <GraduationCap size={21} strokeWidth={1.45} />
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <GraduationCap size={19} strokeWidth={1.45} />
                 </span>
-                <h3 className="no-qw text-[clamp(1.45rem,2.3vw,2.45rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.35rem,2.2vw,2.35rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Cursos aplicados
                 </h3>
               </div>
               <div>
-                <AcademyCoursesInner />
+                <AcademyCoursesInner tick={tick} />
                 <a
                   href={cursosHref}
                   target={academyHref ? '_blank' : undefined}
