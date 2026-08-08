@@ -779,7 +779,7 @@ function SistemasDigitalesSection() {
                       {title}
                     </h3>
                     <div className="pointer-events-none absolute left-0 top-full z-10 w-[min(20rem,100%)] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                      <p className="pt-2 text-[11px] leading-relaxed text-black/38">
+                      <p className="pt-2 text-[11px] leading-relaxed text-[#20201f]">
                         {description}
                       </p>
                     </div>
@@ -1032,13 +1032,15 @@ function CoursesLandings() {
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
-              <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
-                <Compass size={21} strokeWidth={1.45} />
-              </span>
-              <div>
-                <h3 className="no-qw text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+              <div className="mb-5 flex items-center gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <Compass size={21} strokeWidth={1.45} />
+                </span>
+                <h3 className="no-qw text-[clamp(1.45rem,2.3vw,2.45rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Soluciones digitales
                 </h3>
+              </div>
+              <div>
                 <div className="relative mt-2">
                   <AnimatePresence mode="wait">
                     <motion.article
@@ -1054,9 +1056,9 @@ function CoursesLandings() {
                         <img src={landing.image} alt="" loading="lazy" decoding="async" />
                         {landing.featured && <span>{landing.featured}</span>}
                       </div>
-                      <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p className="text-[#ff4b0b]">{landing.category}</p>
-                        <h3 className="no-qw text-[#20201f]">{landing.title}</h3>
+                      <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
+                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{landing.category}</p>
+                        <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{landing.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
@@ -1075,13 +1077,15 @@ function CoursesLandings() {
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
-              <span className="mb-5 grid h-12 w-12 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
-                <GraduationCap size={21} strokeWidth={1.45} />
-              </span>
-              <div>
-                <h3 className="no-qw text-[clamp(1.6rem,2.5vw,2.6rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+              <div className="mb-5 flex items-center gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <GraduationCap size={21} strokeWidth={1.45} />
+                </span>
+                <h3 className="no-qw text-[clamp(1.45rem,2.3vw,2.45rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Cursos aplicados
                 </h3>
+              </div>
+              <div>
                 <div className="relative mt-2">
                   <AnimatePresence mode="wait">
                     <motion.article
@@ -1097,9 +1101,9 @@ function CoursesLandings() {
                         <img src={course.image} alt="" loading="lazy" decoding="async" />
                         {course.featured && <span>{course.featured}</span>}
                       </div>
-                      <div style={{ padding: '1.2rem 1.3rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p className="text-[#ff4b0b]">{course.category}</p>
-                        <h3 className="no-qw text-[#20201f]">{course.title}</h3>
+                      <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
+                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{course.category}</p>
+                        <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{course.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
