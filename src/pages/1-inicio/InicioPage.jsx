@@ -34,7 +34,8 @@ import {
   Workflow,
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
-import { carouselCourses, carouselLandings } from '@/data/academyCourses'
+import { carouselLandings } from '@/data/academyCourses'
+import { useFeaturedCourses } from '@/features/academy-catalog'
 import '@/pages/4-academy/academy.css'
 import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
@@ -999,18 +1000,92 @@ function useCarousel(items) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setIndex(i => (i + 1) % items.length), 7000)
+    // items.length puede ser 0 (carga/fallback): evitar índice NaN.
+    const id = setInterval(() => setIndex(i => (items.length === 0 ? 0 : (i + 1) % items.length)), 7000)
     return () => clearInterval(id)
   }, [items.length])
 
   return index
 }
 
+function AcademyCoursesInner() {
+  const { status, courses, fallbackCards, error } = useFeaturedCourses(4)
+  const courseIdx = useCarousel(status === 'success' ? courses : [])
+  const course = status === 'success' && courses.length > 0 ? courses[courseIdx % courses.length] : null
+  const neutral = fallbackCards[0]
+
+  if (status === 'loading') {
+    return (
+      <div className="relative mt-2" aria-busy="true" aria-label="Cargando cursos">
+        <div style={{ minHeight: '14rem' }} className="academy-course-card is-compact animate-pulse bg-[#20201f]/5" />
+      </div>
+    )
+  }
+
+  if (course) {
+    return (
+      <div className="relative mt-2">
+        <AnimatePresence mode="wait">
+          <motion.a
+            key={course.slug}
+            href={course.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.30, ease: "linear" }}
+            style={{ gridTemplateRows: '14rem 1fr', display: 'grid' }}
+            className="academy-course-card is-compact"
+          >
+            <div style={{ minHeight: '14rem' }} className="academy-course-image">
+              {course.imageUrl ? (
+                <img src={course.imageUrl} alt={course.title} loading="lazy" decoding="async" />
+              ) : (
+                <span className="grid h-full w-full place-items-center bg-[#20201f]/5 text-[#20201f]/30">
+                  <GraduationCap size={40} strokeWidth={1.2} />
+                </span>
+              )}
+              {course.badgeText && <span>{course.badgeText}</span>}
+            </div>
+            <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
+              <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{course.category || 'Curso'}</p>
+              <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{course.title}</h3>
+            </div>
+          </motion.a>
+        </AnimatePresence>
+      </div>
+    )
+  }
+
+  // Respuesta válida sin destacados, caché caducada o error sin caché:
+  // tarjeta NEUTRAL (sin precios, duraciones ni badges inventados).
+  return (
+    <div className="relative mt-2" role="status">
+      <div style={{ gridTemplateRows: '14rem 1fr', minHeight: '14rem' }} className="academy-course-card is-compact">
+        <div style={{ minHeight: '14rem' }} className="academy-course-image">
+          <span className="grid h-full w-full place-items-center bg-[#20201f]/5 text-[#20201f]/30">
+            <GraduationCap size={40} strokeWidth={1.2} />
+          </span>
+        </div>
+        <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
+          <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>Formación</p>
+          <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{neutral.title}</h3>
+          <p className="text-[0.95rem] leading-relaxed text-[#20201f]/72" style={{ marginBottom: '0.6rem' }}>{neutral.text}</p>
+        </div>
+      </div>
+      {status === 'error' && error && (
+        <p className="mt-2 text-[0.75rem] text-[#20201f]/50">{error}</p>
+      )}
+    </div>
+  )
+}
+
 function CoursesLandings() {
-  const courseIdx = useCarousel(carouselCourses)
   const landingIdx = useCarousel(carouselLandings)
-  const course = carouselCourses[courseIdx]
   const landing = carouselLandings[landingIdx]
+  const academyHref = (import.meta.env.VITE_ACADEMY_URL || '').replace(/\/+$/, '')
+  const cursosHref = academyHref ? `${academyHref}/cursos` : '/academy'
 
   return (
     <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">
@@ -1072,8 +1147,10 @@ function CoursesLandings() {
           </Reveal>
 
           <Reveal delay={0.06}>
-            <Link
-              to="/academy"
+            <a
+              href={cursosHref}
+              target={academyHref ? '_blank' : undefined}
+              rel={academyHref ? 'noopener noreferrer' : undefined}
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
@@ -1086,34 +1163,13 @@ function CoursesLandings() {
                 </h3>
               </div>
               <div>
-                <div className="relative mt-2">
-                  <AnimatePresence mode="wait">
-                    <motion.article
-                      key={course.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.30, ease: "linear" }}
-                      style={{ gridTemplateRows: '14rem 1fr' }}
-                      className="academy-course-card is-compact"
-                    >
-                      <div style={{ minHeight: '14rem' }} className="academy-course-image">
-                        <img src={course.image} alt="" loading="lazy" decoding="async" />
-                        {course.featured && <span>{course.featured}</span>}
-                      </div>
-                      <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{course.category}</p>
-                        <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{course.title}</h3>
-                      </div>
-                    </motion.article>
-                  </AnimatePresence>
-                </div>
+                <AcademyCoursesInner />
                 <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
                   Ver formación
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                 </span>
               </div>
-            </Link>
+            </a>
           </Reveal>
         </div>
       </div>
