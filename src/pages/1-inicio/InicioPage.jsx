@@ -1112,7 +1112,7 @@ function CoursesLandings() {
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                   <Compass size={19} strokeWidth={1.45} />
                 </span>
-                <h3 className="no-qw text-[clamp(1.35rem,2.2vw,2.35rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Soluciones digitales
                 </h3>
               </div>
@@ -1156,7 +1156,7 @@ function CoursesLandings() {
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                   <GraduationCap size={19} strokeWidth={1.45} />
                 </span>
-                <h3 className="no-qw text-[clamp(1.35rem,2.2vw,2.35rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
                   Cursos aplicados
                 </h3>
               </div>
