@@ -123,7 +123,7 @@ export const carouselLandings = [
     featured: null,
   },
   {
-    image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_modulo_control.webp',
+    image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_portada.webp',
     category: 'Landing',
     title: 'Notion para agencias',
     text: 'Sistema de gestión y productividad para equipos creativos, con plantillas y flujos optimizados.',

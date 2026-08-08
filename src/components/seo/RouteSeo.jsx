@@ -45,6 +45,7 @@ const seoByPath = {
   '/landings/sistema-contenido-notion': {
     title: 'Sistema de Contenidos en Notion | Qaway Lab',
     description: 'Organiza un mes de contenido con un sistema estrategico en Notion para planificar, producir y publicar con claridad.',
+    image: `${SITE_URL}/assets/pages/8-landings/1-sistema-contenido-notion/notion_portada.webp`,
   },
   '/landings/identidad-visual': {
     title: 'Curso Identidad Visual con IA | Qaway Lab',
@@ -107,17 +108,23 @@ export default function RouteSeo() {
     document.title = seo.title
     setMeta('description', seo.description)
     setMeta('robots', isAllowed ? 'index,follow' : 'noindex,nofollow')
+    // Imagen Open Graph: cada ruta puede declarar su propia portada; si no,
+    // se usa la imagen genérica de la web (DEFAULT_IMAGE).
+    const pageImage = seo.image || DEFAULT_IMAGE
     setMeta('twitter:card', 'summary_large_image')
     setMeta('twitter:title', seo.title)
     setMeta('twitter:description', seo.description)
-    setMeta('twitter:image', DEFAULT_IMAGE)
+    setMeta('twitter:image', pageImage)
     setPropertyMeta('og:locale', 'es_PE')
     setPropertyMeta('og:type', 'website')
     setPropertyMeta('og:site_name', 'Qaway Lab')
     setPropertyMeta('og:title', seo.title)
     setPropertyMeta('og:description', seo.description)
     setPropertyMeta('og:url', canonicalUrl)
-    setPropertyMeta('og:image', DEFAULT_IMAGE)
+    setPropertyMeta('og:image', pageImage)
+    setPropertyMeta('og:image:width', '768')
+    setPropertyMeta('og:image:height', '512')
+    setPropertyMeta('og:image:alt', seo.title)
     setCanonical(canonicalUrl)
 
     setJsonLd('qaway-route-schema', {
