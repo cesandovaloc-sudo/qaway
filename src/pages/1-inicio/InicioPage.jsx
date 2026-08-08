@@ -1147,10 +1147,7 @@ function CoursesLandings() {
           </Reveal>
 
           <Reveal delay={0.06}>
-            <a
-              href={cursosHref}
-              target={academyHref ? '_blank' : undefined}
-              rel={academyHref ? 'noopener noreferrer' : undefined}
+            <div
               style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
@@ -1164,12 +1161,17 @@ function CoursesLandings() {
               </div>
               <div>
                 <AcademyCoursesInner />
-                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
+                <a
+                  href={cursosHref}
+                  target={academyHref ? '_blank' : undefined}
+                  rel={academyHref ? 'noopener noreferrer' : undefined}
+                  className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]"
+                >
                   Ver formación
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
-                </span>
+                </a>
               </div>
-            </a>
+            </div>
           </Reveal>
         </div>
       </div>
