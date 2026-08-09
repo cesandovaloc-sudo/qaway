@@ -314,6 +314,24 @@
     max-width: none;
   }
 
+  /*
+    REGLA ESTÁNDAR PARA SECCIONES DE ALTO IMPACTO.
+    Uso: className="qw-section-title qw-section-title--impact"
+    NUNCA definas tamaños inline (text-[clamp(...)]) ni reglas locales que
+    pisen font-size: esto rompe la lógica centralizada (1 regla = todas las
+    secciones se mueven juntas). Si una sección necesita un tamaño distinto,
+    crea aquí una variante nueva (--impact, --lg, etc.) con este patrón.
+  */
+  .qw-section-title--impact {
+    font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif;
+    font-stretch: condensed;
+    font-weight: 760;
+    font-size: clamp(2.9rem, 4.7vw, 5.2rem);
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    max-width: none;
+  }
+
   .qw-section-copy {
     margin-top: 1rem;
     max-width: 36rem;

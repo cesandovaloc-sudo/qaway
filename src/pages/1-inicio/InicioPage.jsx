@@ -585,7 +585,7 @@ function PrimaryAreas() {
         <Reveal className="mb-12 lg:mb-16">
           <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza aquí</p>
           <h2
-            className="text-[clamp(2.9rem,4.7vw,5.2rem)] leading-[0.92] tracking-[-0.03em]"
+            className="qw-section-title qw-section-title--impact"
             style={{ ...displayFont, fontWeight: 680 }}
           >
             <span className="text-[#8b8c88]">Elige el área que hoy</span><br />

@@ -411,7 +411,7 @@ function Services() {
             <div>
               <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Servicios Creativos</p>
               <h2
-                className="mx-auto text-[clamp(2.7rem,4.6vw,4.9rem)] leading-[0.89] tracking-[-0.05em]"
+                className="qw-section-title mx-auto"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
                 Servicios creativos<br />para <span className="text-white">construir tu marca.</span>
