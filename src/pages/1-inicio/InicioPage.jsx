@@ -776,11 +776,11 @@ function SistemasDigitalesSection() {
                     <Icon size={13} strokeWidth={1.5} />
                   </span>
                   <div className="relative">
-                    <h3 className="no-qw text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#20201f]">
+                    <h3 className="no-qw text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#414140] sm:text-[#20201f]">
                       {title}
                     </h3>
                     <div className="transition-all duration-300 sm:pointer-events-none sm:absolute sm:left-0 sm:top-full sm:z-10 sm:w-[min(20rem,100%)] sm:translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
-                      <p className="pt-2 text-[11px] leading-relaxed text-[#20201f]">
+                      <p className="pt-2 text-[11px] leading-relaxed text-[#414140] sm:text-[#20201f]">
                         {description}
                       </p>
                     </div>
