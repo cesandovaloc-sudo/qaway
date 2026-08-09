@@ -655,7 +655,7 @@ function Method() {
   const [activePhase, setActivePhase] = useState(0)
 
   return (
-    <section id="metodo" className="vl-dark vl-section vl-method" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
+    <section id="metodo" className="vl-dark vl-section vl-method" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: 'clamp(40px, 4vh, 80px) 0' }}>
       <div className="vl-shell">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
           <div>
@@ -722,17 +722,18 @@ function Method() {
               </motion.div>
             ))}
           </div>
-          <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-80px' }}>
-            <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
-          </motion.figure>
-        </div>
-
-        <div className="vl-trust" style={{ marginTop: '20px' }}>
-          {[
-            [LockKeyhole, 'Archivos protegidos'],
-            [CircleUserRound, 'Revisión estética humana'],
-            [Layers3, 'Entregables organizados'],
-          ].map(([Icon, label]) => <div key={label}><Icon size={18} /><span>{label}</span></div>)}
+          <div className="flex flex-col">
+            <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-80px' }}>
+              <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
+            </motion.figure>
+            <div className="vl-trust" style={{ marginTop: '16px' }}>
+              {[
+                [LockKeyhole, 'Archivos protegidos'],
+                [CircleUserRound, 'Revisión estética humana'],
+                [Layers3, 'Entregables organizados'],
+              ].map(([Icon, label]) => <div key={label}><Icon size={18} /><span>{label}</span></div>)}
+            </div>
+          </div>
         </div>
       </div>
     </section>
