@@ -31,7 +31,7 @@ afterEach(() => {
 describe('academy-courses.mapper', () => {
   it('convierte price string→number, resuelve imagen y href', () => {
     vi.stubEnv('VITE_ACADEMY_URL', 'https://academy.qawaylab.com')
-    vi.stubEnv('VITE_ACADEMY_ASSETS_URL', 'https://cdn.qawaylab.com')
+    vi.stubEnv('VITE_PUBLIC_ASSETS_URL', 'https://cdn.qawaylab.com')
     const v1 = mapAcademyCourseRowToV1(row)
     expect(v1.price).toBe(149)
     expect(v1.imageUrl).toBe('https://cdn.qawaylab.com/assets/pages/4-academy/curso-identidad-visual-ia2.png')
@@ -47,7 +47,7 @@ describe('academy-courses.mapper', () => {
 
   it('usa ACADEMY_URL como fallback de assets', () => {
     vi.stubEnv('VITE_ACADEMY_URL', 'https://academy.qawaylab.com')
-    vi.stubEnv('VITE_ACADEMY_ASSETS_URL', '')
+    vi.stubEnv('VITE_PUBLIC_ASSETS_URL', '')
     expect(resolveAcademyImageUrl('/assets/x.png')).toBe('https://academy.qawaylab.com/assets/x.png')
   })
 

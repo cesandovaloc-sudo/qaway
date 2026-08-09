@@ -39,7 +39,7 @@ describe('SupabaseAcademyCoursesAdapter', () => {
       VITE_ACADEMY_SUPABASE_URL: 'https://academy.example.supabase.co',
       VITE_ACADEMY_SUPABASE_ANON_KEY: 'anon-key-fake',
       VITE_ACADEMY_URL: 'https://academy.qawaylab.com',
-      VITE_ACADEMY_ASSETS_URL: '',
+      VITE_PUBLIC_ASSETS_URL: '',
     })
   })
 

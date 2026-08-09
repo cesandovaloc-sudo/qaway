@@ -19,5 +19,5 @@ export function getAcademyUrl(): string {
 }
 
 export function getAcademyAssetsUrl(): string {
-  return (import.meta.env.VITE_ACADEMY_ASSETS_URL as string | undefined) ?? ''
+  return (import.meta.env.VITE_PUBLIC_ASSETS_URL as string | undefined) ?? ''
 }
