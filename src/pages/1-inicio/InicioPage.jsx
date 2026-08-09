@@ -543,7 +543,7 @@ function EstudioSection() {
             </Reveal>
           </div>
 
-          <Reveal delay={0.3} className="relative mx-auto aspect-[4/3] w-[85%] overflow-hidden lg:aspect-[3/2]">
+          <Reveal delay={0.3} className="relative mx-auto aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2] lg:w-[90%]">
             <AnimatePresence initial={false}>
               <motion.img
                 key={activeService.title}
