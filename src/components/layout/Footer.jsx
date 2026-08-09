@@ -34,7 +34,7 @@ export default function Footer() {
 
           <div className="grid grid-cols-1 gap-8 text-xs text-white/72 sm:grid-cols-3 lg:contents">
             {areaLinks.length > 0 && (
-              <div>
+              <div className="hidden lg:block">
                 <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Áreas</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 lg:grid lg:gap-3 lg:text-sm">
                   {areaLinks.map((link) => (
@@ -47,7 +47,7 @@ export default function Footer() {
             )}
 
             {resourceLinks.length > 0 && (
-              <div>
+              <div className="hidden lg:block">
                 <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#ff4b0b]">Recursos</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 lg:grid lg:gap-3 lg:text-sm">
                   {resourceLinks.map((link) => (

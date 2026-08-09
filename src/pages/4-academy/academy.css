@@ -1911,11 +1911,18 @@
 
 .academy-form-success button {
   margin-top: 2rem;
-  padding-bottom: 0.4rem;
+  padding: 0 0 0.4rem 0;
+  border: none;
   border-bottom: 2px solid var(--academy-accent);
+  background: transparent;
   color: var(--academy-ink);
   font-size: 0.78rem;
   font-weight: 700;
+  cursor: pointer;
+}
+.academy-form-success button:hover {
+  background: transparent;
+  color: var(--academy-ink);
 }
 
 .academy-final-cta {

@@ -790,7 +790,7 @@ export default function SistemasDigitalesPage() {
                   Soluciones digitales <br />
                   adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
                 </h2>
-                <p className="qw-section-copy text-zinc-400">
+                <p className="qw-section-copy !text-zinc-200" style={{ color: 'rgba(255, 255, 255, 0.78)' }}>
                   Automatización, canales digitales, CRM y herramientas internas y más, para ordenar, conectar procesos e información y facilitar el trabajo diario.
                 </p>
               </motion.div>
@@ -1172,7 +1172,7 @@ export default function SistemasDigitalesPage() {
               custom={0.3}
               className="mt-10"
             >
-              <Link to="/portafolio" className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b] scale-[1.26] origin-left">
+              <Link to="/portafolio" className="inline-flex items-center gap-3 border-b-2 border-[#ff4b0b] pb-1.5 text-xs sm:text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]">
                 Ver proyectos
               </Link>
             </motion.div>
@@ -1288,10 +1288,10 @@ export default function SistemasDigitalesPage() {
             viewport={{ once: true, amount: 0.2 }}
             variants={revealUp}
             custom={0}
-            className="mb-14 max-w-4xl mx-auto text-center"
+            className="mb-14 flex flex-col items-center text-center"
           >
             <p className="qw-section-kicker">Aplicaciones reales</p>
-            <h2 className="qw-section-title">
+            <h2 className="qw-section-title mx-auto text-center">
               Diseñamos infraestructura para{" "}
               <span className="text-[#ff4b0b]">creadores</span>,{" "}
               equipos y proyectos.
@@ -1382,6 +1382,7 @@ export default function SistemasDigitalesPage() {
                   viewport={{ once: true, amount: 0.2 }}
                   variants={revealUp}
                   className="qw-section-title"
+                  style={{ ...displayFont, fontWeight: 760 }}
                 >
                   Ya tienes la Idea.
                   <br />
@@ -1397,14 +1398,21 @@ export default function SistemasDigitalesPage() {
                     viewport={{ once: true, amount: 0.2 }}
                     variants={revealUp}
                     custom={0.1}
-                    className="mt-8 flex flex-col items-start gap-3 border border-black/8 bg-[#f8f6f2] px-6 py-6"
+                    className="mt-8 flex min-h-[22rem] flex-col items-start justify-center"
                   >
-                    <CheckCircle2 className="h-7 w-7 text-[#ff4b0b]" />
-                    <p className="text-[15px] font-semibold text-[#191918]">¡Solicitud enviada!</p>
-                    <p className="text-sm text-black/56">Te contactamos en menos de 24 horas para definir el siguiente paso juntos.</p>
+                    <div className="grid h-16 w-16 place-items-center bg-[#ff4b0b] text-white">
+                      <Check size={28} />
+                    </div>
+                    <h3 className="mt-7 text-3xl font-semibold tracking-[-0.05em] text-[#191918]">
+                      ¡Solicitud enviada!
+                    </h3>
+                    <p className="mt-4 max-w-md text-base text-black/60 leading-relaxed">
+                      Te contactamos en menos de 24 horas para definir el siguiente paso juntos.
+                    </p>
                     <button
+                      type="button"
                       onClick={() => setFormSubmitted(false)}
-                      className="mt-2 text-xs font-bold uppercase tracking-wider text-[#ff4b0b] hover:underline"
+                      className="mt-8 border-b-2 border-[#ff4b0b] pb-1 text-xs font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]"
                     >
                       Enviar otra consulta
                     </button>

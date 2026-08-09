@@ -722,7 +722,7 @@ function Method() {
               </motion.div>
             ))}
           </div>
-          <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-20px' }}>
+          <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-80px' }}>
             <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
           </motion.figure>
         </div>
@@ -826,7 +826,7 @@ function Diagnostic() {
   return (
     <section id="diagnostico" className="vl-diagnostic">
       <div className="vl-diagnostic__form vl-form-section" style={{ padding: '0', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ padding: 'clamp(30px, 4vh, 70px) clamp(28px, 6vw, 100px)' }}>
+        <div style={{ padding: 'clamp(50px, 6vh, 90px) clamp(28px, 6vw, 100px)' }}>
           <motion.div {...reveal} className="vl-form-intro" style={{ marginBottom: '20px' }}>
             <div>
               <p className="qw-section-kicker">Contacto</p>
@@ -895,7 +895,7 @@ function Diagnostic() {
 
                   <div className="vl-field">
                     <label htmlFor="vl-message">Cuéntanos un poco más</label>
-                    <textarea id="vl-message" name="message" rows="4" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
+                    <textarea id="vl-message" name="message" rows="3" placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?" />
                   </div>
                   <button type="submit" className="vl-submit-button" disabled={submitting}>
                     {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}

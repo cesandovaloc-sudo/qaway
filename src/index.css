@@ -326,8 +326,8 @@
     font-family: 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif;
     font-stretch: condensed;
     font-weight: 760;
-    font-size: clamp(2.7rem, 4.5vw, 5rem);
-    line-height: 0.9;
+    font-size: clamp(2.3rem, 3.8vw, 4.1rem);
+    line-height: 0.95;
     letter-spacing: -0.05em;
     max-width: none;
   }

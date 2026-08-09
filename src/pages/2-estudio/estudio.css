@@ -1458,8 +1458,12 @@
 .estudio-page #diagnostico .vl-submit-button:disabled { cursor: wait; opacity: 0.68; }
 .estudio-page #diagnostico .vl-form-error { margin-top: 0.9rem; color: #a62f11; font-size: 0.72rem; font-weight: 600; line-height: 1.45; text-align: center; }
 .estudio-page #diagnostico .vl-form > small { display: block; margin-top: 1rem; color: #77746f; font-size: 0.66rem; text-align: center; }
-.estudio-page #diagnostico .vl-form-success { display: flex; min-height: 31rem; flex-direction: column; align-items: flex-start; justify-content: center; }
-.estudio-page #diagnostico .vl-form-success > div { display: grid; width: 4rem; height: 4rem; place-items: center; }
+.estudio-page #diagnostico .vl-form-success { display: flex; min-height: 24rem; flex-direction: column; align-items: flex-start; justify-content: center; }
+.estudio-page #diagnostico .vl-form-success > div { display: grid; width: 4rem; height: 4rem; place-items: center; background: #ff4b0b; color: white; }
+.estudio-page #diagnostico .vl-form-success h3 { margin-top: 1.8rem; font-size: clamp(2rem, 3vw, 3rem); letter-spacing: -0.05em; color: #20201f; }
+.estudio-page #diagnostico .vl-form-success p { max-width: 32rem; margin-top: 1rem; color: #6d6b68; line-height: 1.6; }
+.estudio-page #diagnostico .vl-form-success button { margin-top: 2rem; padding: 0 0 0.4rem 0; min-height: 0; border: none; border-bottom: 2px solid #ff4b0b; background: transparent; color: #20201f; font-size: 0.78rem; font-weight: 700; cursor: pointer; transform: none; }
+.estudio-page #diagnostico .vl-form-success button:hover { background: transparent; color: #20201f; transform: none; }
 @media (max-width: 1024px) {
   .estudio-page #diagnostico .vl-form-intro { position: static; }
 }
