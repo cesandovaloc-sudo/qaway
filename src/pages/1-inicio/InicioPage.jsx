@@ -779,7 +779,7 @@ function SistemasDigitalesSection() {
                     <h3 className="no-qw text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#20201f]">
                       {title}
                     </h3>
-                    <div className="pointer-events-none absolute left-0 top-full z-10 w-[min(20rem,100%)] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                    <div className="transition-all duration-300 sm:pointer-events-none sm:absolute sm:left-0 sm:top-full sm:z-10 sm:w-[min(20rem,100%)] sm:translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
                       <p className="pt-2 text-[11px] leading-relaxed text-[#20201f]">
                         {description}
                       </p>
