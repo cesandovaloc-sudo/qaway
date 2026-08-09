@@ -5,7 +5,10 @@
 #formulario .qw-form { min-height: 0; padding: clamp(1.8rem, 4vw, 4rem); border: 1px solid rgba(32, 32, 31, 0.11); background: #eeece7; box-shadow: 0 26px 65px rgba(75, 55, 44, 0.08); transition: transform 450ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 450ms cubic-bezier(0.16, 1, 0.3, 1); }
 #formulario .qw-form:hover,
 #formulario .qw-form:focus-within { transform: translateY(-2px); box-shadow: 0 32px 75px rgba(75, 55, 44, 0.12), 0 8px 24px rgba(255, 75, 11, 0.02); }
-#formulario .qw-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+#formulario .qw-field-row { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 640px) {
+  #formulario .qw-field-row { grid-template-columns: 1fr 1fr; }
+}
 #formulario .qw-field { display: grid; gap: 0.55rem; margin-bottom: 1.1rem; }
 #formulario .qw-field label { color: #474642; font-size: 0.74rem; font-weight: 700; }
 #formulario .qw-field input,
