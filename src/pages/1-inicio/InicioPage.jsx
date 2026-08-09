@@ -960,11 +960,11 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                       <label htmlFor="qw-interest">¿Qué Servicio o Curso te interesa?</label>
                       <select id="qw-interest" name="interest" required>
                         <option value="">Selecciona un interés</option>
-                        <option value="Identidad Visual con IA">Identidad Visual con IA</option>
-                        <option value="WhatsApp Business para negocios">WhatsApp Business para negocios</option>
-                        <option value="IA para equipos pequeños">IA para equipos pequeños</option>
-                        <option value="Sistema de contenido con IA">Sistema de contenido con IA</option>
-                        <option value="Workflows sin código">Workflows sin código</option>
+                        <option value="Identidad visual / Branding">Identidad visual / Branding</option>
+                        <option value="Creación de sitios web y landings">Creación de sitios web y landings</option>
+                        <option value="Automatización de procesos">Automatización de procesos</option>
+                        <option value="CRM y seguimiento comercial">CRM y seguimiento comercial</option>
+                        <option value="Formación / Cursos (Academy)">Formación / Cursos (Academy)</option>
                         <option value="Orientación general / Otro">Orientación general / Otro</option>
                       </select>
                     </div>
