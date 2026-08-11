@@ -194,7 +194,7 @@ export default function ProyectosPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="projects-kicker">Proyectos / branding, contenido y presencia digital</p>
+            <p className="projects-kicker">Proyectos / Branding y automatización</p>
             <h1 className="qw-hero-title">Proyectos que tomaron forma</h1>
             <p className="projects-hero__lead">Una seleccion de trabajos donde combinamos direccion visual y sistemas aplicados a marcas reales.</p>
             <a className="projects-button" href="#proyectos-listado">Explorar proyectos <ArrowRight size={16} /></a>

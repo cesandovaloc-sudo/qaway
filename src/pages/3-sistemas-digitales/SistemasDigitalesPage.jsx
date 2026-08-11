@@ -258,7 +258,7 @@ function HeroInicioBlockPractice() {
                 transition={{ duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
                 className="relative z-10"
               >
-                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#ff4b0b]">
+                <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
                   Sistemas Digitales y Automatización con IA
                 </p>
                 <h1
@@ -775,10 +775,10 @@ export default function SistemasDigitalesPage() {
 
         <div className="relative z-10 mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           <div className="grid gap-8 lg:gap-12 lg:grid-cols-12 lg:items-center">
-            {/* Left Column: Title and 2-column Buttons Grid */}
+            {/* Left Column: Title and Desktop Buttons Grid */}
             <div className="lg:col-span-5 flex flex-col justify-start">
               <motion.div
-                className="mb-8"
+                className="mb-6 lg:mb-8"
                 initial={reduceMotion ? false : "hidden"}
                 whileInView={reduceMotion ? undefined : "show"}
                 viewport={{ once: true, amount: 0.2 }}
@@ -795,7 +795,8 @@ export default function SistemasDigitalesPage() {
                 </p>
               </motion.div>
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              {/* Botones selectores en DESKTOP */}
+              <div className="hidden lg:grid grid-cols-2 gap-x-4 gap-y-3">
                 {items.map((item, idx) => {
                   const Icon = item.icon
                   const isActive = idx === activeIdx
@@ -823,7 +824,7 @@ export default function SistemasDigitalesPage() {
               </div>
             </div>
 
-            {/* Right Column: Widened preview image column */}
+            {/* Visor 3D Interactivo Original con todas sus animaciones */}
             <motion.div
               className="lg:col-span-7"
               initial={reduceMotion ? false : "hidden"}
@@ -832,10 +833,10 @@ export default function SistemasDigitalesPage() {
               variants={revealUp}
               custom={0.18}
             >
-              <div className="lg:sticky lg:top-28 flex items-center justify-center overflow-hidden relative p-4 md:p-6">
+              <div className="lg:sticky lg:top-28 flex items-center justify-center overflow-hidden relative p-2 md:p-6">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:1.5rem_1.5rem] pointer-events-none" />
 
-                <div className="relative z-10 w-full flex items-center justify-center py-4 lg:py-0 lg:min-h-[620px]" style={{ perspective: 1000 }}>
+                <div className="relative z-10 w-full flex items-center justify-center pt-4 pb-0 lg:py-0 lg:min-h-[620px]" style={{ perspective: 1000 }}>
                   <div className="relative w-full max-w-[450px]" style={{ aspectRatio: '655/864' }}>
                     {items.map((item, idx) => {
                       const currentActive = activeIdx === null ? 0 : activeIdx
@@ -925,6 +926,31 @@ export default function SistemasDigitalesPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* En MÓVIL: Botones selectores ubicados DEBAJO de la animación 3D */}
+            <div className="block lg:hidden col-span-1 mt-1 mb-2">
+              <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+                {items.map((item, idx) => {
+                  const Icon = item.icon
+                  const isActive = idx === activeIdx
+                  return (
+                    <button
+                      key={`mob-${item.title}`}
+                      onClick={() => setActiveIdx(idx)}
+                      className={`text-left flex items-center gap-2 p-2 border transition-all duration-300 w-full rounded-[5px] ${isActive
+                        ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/10 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
+                        : 'border-white/10 bg-white/[0.02] text-zinc-400'
+                        }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0 text-[#ff4b0b]" />
+                      <span className={`text-[12px] font-bold tracking-tight ${isActive ? 'text-white' : 'text-zinc-400 font-medium'}`}>
+                        {item.title}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </section>

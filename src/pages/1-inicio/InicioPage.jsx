@@ -504,6 +504,24 @@ function EstudioSection() {
               </div>
             </Reveal>
 
+            {/* En móvil: la imagen se ubica inmediatamente debajo del título */}
+            <div className="mt-6 block lg:hidden">
+              <Reveal delay={0.15} className="relative mx-auto aspect-[4/3] w-full overflow-hidden">
+                <AnimatePresence initial={false}>
+                  <motion.img
+                    key={activeService.title}
+                    src={activeService.image}
+                    alt={activeService.title}
+                    initial={reduceMotion ? false : { opacity: 0, scale: 1.015 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                    transition={{ duration: 0.26, ease: 'easeInOut' }}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </AnimatePresence>
+              </Reveal>
+            </div>
+
             <div className="mt-8 grid min-h-0 grid-cols-2 content-stretch gap-2 sm:gap-3">
               {estudioServices.map(({ title, icon: Icon }, index) => (
                 <motion.div
@@ -543,7 +561,8 @@ function EstudioSection() {
             </Reveal>
           </div>
 
-          <Reveal delay={0.3} className="relative mx-auto aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2] lg:w-[90%]">
+          {/* En desktop: la imagen se muestra en la columna derecha */}
+          <Reveal delay={0.3} className="hidden lg:block relative mx-auto aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2] lg:w-[90%]">
             <AnimatePresence initial={false}>
               <motion.img
                 key={activeService.title}

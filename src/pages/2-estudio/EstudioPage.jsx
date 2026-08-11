@@ -218,7 +218,7 @@ function Hero() {
             className="relative z-10"
           >
             <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-              Estudio creativo / Branding, contenido y presencia digital
+              Branding, contenido y presencia digital
             </p>
             <h1
               className="max-w-[58rem] qw-hero-title text-[#20201f]"
@@ -517,6 +517,28 @@ function TransformacionVisualCarousel() {
               Transformamos tus imágenes de productos, servicios y perfiles comerciales en un portafolio visual moderno, profesional y listo para transmitir autoridad y confianza a tus clientes.
             </p>
           </div>
+
+          {/* En móvil: imagen interactiva inmediatamente debajo del título */}
+          <div className="mt-6 block lg:hidden w-full h-[320px] relative overflow-hidden border border-black/12 rounded-[6px] bg-[#f3f1ee]">
+            <AnimatePresence>
+              <motion.div
+                key={activeSlide}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full h-full absolute inset-0"
+              >
+                <SplitVisual
+                  beforeImage={slides[activeSlide].beforeImage}
+                  afterImage={slides[activeSlide].afterImage}
+                  alt={slides[activeSlide].alt}
+                  dark={false}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginTop: '24px' }}>
             {slides.map((slide, index) => (
               <motion.div
@@ -555,7 +577,8 @@ function TransformacionVisualCarousel() {
           </div>
         </motion.div>
 
-        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
+        {/* En desktop: imagen interactiva en la columna derecha */}
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="hidden lg:block vl-content-showcase w-full h-[380px] lg:h-[75vh] min-h-[380px] lg:min-h-[550px]" style={{ padding: 0, background: 'none' }}>
           <div
             style={{
               width: '100%',

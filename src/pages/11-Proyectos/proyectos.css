@@ -30,7 +30,7 @@
 
 .projects-kicker {
   margin-bottom: 1.25rem;
-  color: #ff4b0b;
+  color: #73716d;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -89,6 +89,9 @@
   overflow: hidden;
   border-radius: 8px;
   background: #ece7df;
+  isolation: isolate;
+  transform-origin: center center;
+  will-change: transform, opacity;
 }
 
 .projects-hero__visual img {
@@ -96,6 +99,8 @@
   height: 100%;
   display: block;
   object-fit: cover;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .projects-hero__visual figcaption {
@@ -661,8 +666,8 @@
 
   .projects-filters {
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: 14px;
     overflow: visible;
   }
@@ -682,7 +687,7 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-bottom: 4px;
+    padding-bottom: 0;
   }
 
   .projects-filters__items::-webkit-scrollbar {
@@ -690,9 +695,7 @@
   }
 
   .projects-legend {
-    width: 100%;
-    justify-content: flex-start;
-    padding-top: 6px;
+    display: none !important;
   }
 
   .projects-grid {
