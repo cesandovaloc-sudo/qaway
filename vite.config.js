@@ -40,7 +40,7 @@ export default defineConfig({
             return
           }
 
-          if (normalizedId.includes('/src/pages/1-inicio/') || normalizedId.includes('/src/pages/4-academy/')) {
+          if (normalizedId.includes('/src/pages/1-inicio/')) {
             return 'page-brand-core'
           }
 

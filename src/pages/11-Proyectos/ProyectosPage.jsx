@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { supabase } from '@/config/supabase'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -148,7 +149,34 @@ export default function ProyectosPage() {
   useSetNavbarVariant('brand')
   const { index, setIndex, slide } = useHeroCarousel()
   const [activeFilter, setActiveFilter] = useState('Todos')
-  const visibleProjects = projects.slice(1).filter((project) => activeFilter === 'Todos' || project.categories.includes(activeFilter))
+  const [dbProjects, setDbProjects] = useState(projects)
+  const [dynamicFilters, setDynamicFilters] = useState(() => ['Todos', ...Array.from(new Set(projects.flatMap((p) => p.categories || [])))])
+  const filtersRef = useRef(null)
+
+  useEffect(() => {
+    async function loadProjectsFromSupabase() {
+      try {
+        const { data, error } = await supabase.from('projects').select('*')
+        if (!error && data && data.length > 0) {
+          setDbProjects(data)
+          const categoriesSet = new Set(data.flatMap((p) => p.categories || []))
+          setDynamicFilters(['Todos', ...Array.from(categoriesSet)])
+        }
+      } catch (err) {
+        console.warn('Fallback a datos de proyectos:', err)
+      }
+    }
+    loadProjectsFromSupabase()
+  }, [])
+
+  const visibleProjects = dbProjects.slice(1).filter((project) => activeFilter === 'Todos' || (project.categories && project.categories.includes(activeFilter)))
+
+  const scrollFilters = (direction) => {
+    if (filtersRef.current) {
+      const amount = direction === 'left' ? -160 : 160
+      filtersRef.current.scrollBy({ left: amount, behavior: 'smooth' })
+    }
+  }
 
   return (
     <main className="projects-page">
@@ -201,17 +229,35 @@ export default function ProyectosPage() {
       <section id="proyectos-listado" className="projects-listing">
         <div className="projects-shell">
           <div className="projects-filters" aria-label="Categorias de proyectos">
-            <div className="projects-filters__items">
-              {filters.map((filter) => (
-                <button
-                  key={filter}
-                  type="button"
-                  className={activeFilter === filter ? 'is-active' : ''}
-                  onClick={() => setActiveFilter(filter)}
-                >
-                  {filter}
-                </button>
-              ))}
+            <div className="projects-filters-container">
+              <button
+                type="button"
+                className="projects-filters-scroll-btn projects-filters-scroll-btn--left"
+                onClick={() => scrollFilters('left')}
+                aria-label="Desplazar filtros a la izquierda"
+              >
+                <ChevronLeft size={18} strokeWidth={2.25} />
+              </button>
+              <div ref={filtersRef} className="projects-filters__items">
+                {dynamicFilters.map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    className={activeFilter === filter ? 'is-active' : ''}
+                    onClick={() => setActiveFilter(filter)}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="projects-filters-scroll-btn projects-filters-scroll-btn--right"
+                onClick={() => scrollFilters('right')}
+                aria-label="Desplazar filtros a la derecha"
+              >
+                <ChevronRight size={18} strokeWidth={2.25} />
+              </button>
             </div>
             <div className="projects-legend">
               <span><i className="is-project" />Proyecto</span>

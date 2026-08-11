@@ -1,20 +1,15 @@
+# Qaway Lab - SPA Fallback para Hostinger
+# Permite que rutas como /estudio, /sistemas-digitales funcionen al recargar
+
 RewriteEngine On
 RewriteBase /
 
-# Si el archivo o directorio existe, servirlo directamente
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
+# Si el archivo o carpeta no existe, servir index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
 
-# Fallback SPA: todo lo demás va a index.html
-RewriteRule ^ /index.html [L]
-
-# Seguridad: ocultar archivos sensibles
-<FilesMatch "(\.env|\.git|package\.json|vite\.config\.js)$">
-  Require all denied
-</FilesMatch>
-
-# Compresión GZIP
+# Compresión gzip
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>
@@ -22,10 +17,10 @@ RewriteRule ^ /index.html [L]
 # Cache de assets
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
   ExpiresByType image/png "access plus 1 year"
   ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
   ExpiresByType image/svg+xml "access plus 1 year"
-  ExpiresByType text/css "access plus 1 month"
-  ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
