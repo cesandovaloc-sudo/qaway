@@ -31,7 +31,13 @@ const heroSlides = [
   },
 ]
 
-const filters = ['Todos', 'Branding', 'Contenido visual', 'Presencia digital', 'Web']
+const OFFICIAL_CATEGORIES = ['Branding', 'Contenido visual', 'Sistemas digitales', 'Automatización', 'Páginas web']
+
+function extractVigenteCategories(projectsList) {
+  const activeSet = new Set(projectsList.flatMap((p) => p.categories || []))
+  const vigenteOfficial = OFFICIAL_CATEGORIES.filter((cat) => activeSet.has(cat))
+  return ['Todos', ...vigenteOfficial]
+}
 
 const projects = [
   {
@@ -39,7 +45,7 @@ const projects = [
     subtitle: 'Cafeteria joven en San Miguel',
     image: `${estudioAssets}estudio-proyecto-cafe.webp`,
     tags: ['Branding', 'Contenido visual', 'Aplicaciones de marca'],
-    categories: ['Branding', 'Contenido visual', 'Presencia digital'],
+    categories: ['Branding', 'Contenido visual'],
     kind: 'Proyecto',
     featured: true,
   },
@@ -55,16 +61,16 @@ const projects = [
     title: 'Rapigo',
     subtitle: 'Sistema visual para servicio digital',
     image: `${sistemasAssets}content-ops-command-center.webp`,
-    tags: ['Branding', 'Web', 'Sistema digital'],
-    categories: ['Branding', 'Presencia digital', 'Web'],
+    tags: ['Sistemas digitales', 'Páginas web', 'Automatización'],
+    categories: ['Sistemas digitales', 'Páginas web', 'Automatización'],
     kind: 'Proyecto',
   },
   {
     title: 'Estudio Juridico',
     subtitle: 'Presencia digital sobria y profesional',
     image: `${estudioAssets}estudio-copy-showcase-web.webp`,
-    tags: ['Branding', 'Web'],
-    categories: ['Branding', 'Presencia digital', 'Web'],
+    tags: ['Branding', 'Páginas web'],
+    categories: ['Branding', 'Páginas web'],
     kind: 'Caso aplicado por rubro',
   },
   {
@@ -72,15 +78,15 @@ const projects = [
     subtitle: 'Presencia profesional para servicio local',
     image: `${estudioAssets}estudio-servicio-presencia.webp`,
     tags: ['Branding', 'Contenido visual'],
-    categories: ['Branding', 'Contenido visual', 'Presencia digital'],
+    categories: ['Branding', 'Contenido visual'],
     kind: 'Caso aplicado por rubro',
   },
   {
     title: 'Qaway Academy',
     subtitle: 'Experiencia educativa y sistema de contenidos',
     image: '/assets/pages/1-inicio/aprendizaje-aplicado.webp',
-    tags: ['Contenido visual', 'Web'],
-    categories: ['Contenido visual', 'Web'],
+    tags: ['Contenido visual', 'Sistemas digitales', 'Páginas web'],
+    categories: ['Contenido visual', 'Sistemas digitales', 'Páginas web'],
     kind: 'Proyecto',
   },
   {
@@ -150,7 +156,7 @@ export default function ProyectosPage() {
   const { index, setIndex, slide } = useHeroCarousel()
   const [activeFilter, setActiveFilter] = useState('Todos')
   const [dbProjects, setDbProjects] = useState(projects)
-  const [dynamicFilters, setDynamicFilters] = useState(() => ['Todos', ...Array.from(new Set(projects.flatMap((p) => p.categories || [])))])
+  const [dynamicFilters, setDynamicFilters] = useState(() => extractVigenteCategories(projects))
   const filtersRef = useRef(null)
 
   useEffect(() => {
@@ -159,17 +165,17 @@ export default function ProyectosPage() {
         const { data, error } = await supabase.from('projects').select('*')
         if (!error && data && data.length > 0) {
           setDbProjects(data)
-          const categoriesSet = new Set(data.flatMap((p) => p.categories || []))
-          setDynamicFilters(['Todos', ...Array.from(categoriesSet)])
+          setDynamicFilters(extractVigenteCategories(data))
         }
       } catch (err) {
         console.warn('Fallback a datos de proyectos:', err)
+        setDynamicFilters(extractVigenteCategories(projects))
       }
     }
     loadProjectsFromSupabase()
   }, [])
 
-  const visibleProjects = dbProjects.slice(1).filter((project) => activeFilter === 'Todos' || (project.categories && project.categories.includes(activeFilter)))
+  const visibleProjects = dbProjects.filter((project) => activeFilter === 'Todos' || (project.categories && project.categories.includes(activeFilter)))
 
   const scrollFilters = (direction) => {
     if (filtersRef.current) {
@@ -267,7 +273,7 @@ export default function ProyectosPage() {
 
           {activeFilter === 'Todos' && (
             <motion.article
-              className="projects-featured"
+              className="projects-featured hidden md:grid"
               initial={{ opacity: 0, y: 26 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
@@ -296,7 +302,9 @@ export default function ProyectosPage() {
 
           <div className="projects-grid">
             {visibleProjects.map((project, projectIndex) => (
-              <ProjectCard key={project.title} project={project} index={projectIndex} />
+              <div key={project.title} className={activeFilter === 'Todos' && projectIndex === 0 ? 'hidden md:contents' : 'contents'}>
+                <ProjectCard project={project} index={projectIndex} />
+              </div>
             ))}
           </div>
         </div>
