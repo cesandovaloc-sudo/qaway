@@ -8,7 +8,7 @@ const routeVisibility = {
   proyectos: true,
   brief: false,
   sistemasDigitales: true,
-  academy: false,
+  academy: true,
   hub: false,
   recursos: false,
   blog: false,
@@ -21,9 +21,11 @@ const publicPathAllowList = new Set([
   '/',
   '/estudio',
   '/proyectos',
+  '/proyectos/horizonte',
   '/sistemas-digitales',
   '/landings/sistema-contenido-notion',
   '/landings/identidad-visual',
+  '/academy',
 ])
 
 const navigationRegistry = [
@@ -45,8 +47,8 @@ const navigationRegistry = [
     key: 'academy',
     label: 'Academy',
     path: '/academy',
-    navbar: true,
-    footerGroup: 'areas',
+    navbar: false,
+    footerGroup: null,
   },
   {
     key: 'hub',
