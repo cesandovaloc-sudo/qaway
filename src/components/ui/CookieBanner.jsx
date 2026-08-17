@@ -34,38 +34,38 @@ export default function CookieBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 z-[9999] md:max-w-md bg-[#191918] border border-white/10 rounded-2xl p-5 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-[#f2f1ef]"
+          className="fixed bottom-4 left-4 right-4 md:bottom-8 md:left-8 z-[9999] md:max-w-md bg-white border border-black/10 rounded-2xl p-5 md:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.1)] text-[#191918]"
         >
           <div className="flex items-start gap-4">
-            <div className="mt-1 w-10 h-10 rounded-full bg-[#ff4b0b]/10 flex items-center justify-center shrink-0">
-              <Cookie className="text-[#ff4b0b]" size={20} />
+            <div className="mt-1 w-10 h-10 rounded-full bg-[#f5f5f4] flex items-center justify-center shrink-0">
+              <Cookie className="text-[#191918]" size={20} />
             </div>
             
             <div className="flex-1">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="font-bold text-[13px] uppercase tracking-widest text-white">Privacidad y Cookies</h3>
+                <h3 className="font-bold text-[13px] uppercase tracking-widest text-[#191918]">Privacidad y Cookies</h3>
                 <button 
                   onClick={declineCookies} 
-                  className="text-white/40 hover:text-white transition-colors"
+                  className="text-[#191918]/40 hover:text-[#191918] transition-colors"
                   aria-label="Cerrar"
                 >
                   <X size={16} />
                 </button>
               </div>
-              <p className="text-xs text-white/60 leading-relaxed mb-4">
+              <p className="text-xs text-[#191918]/60 leading-relaxed mb-4">
                 Utilizamos cookies esenciales para que el sitio funcione y cookies analíticas para entender cómo navegas. Todo con el objetivo de mejorar tu experiencia.
               </p>
               
               <div className="flex items-center gap-3">
                 <button
                   onClick={acceptCookies}
-                  className="flex-1 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white text-[11px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors"
+                  className="flex-1 bg-[#191918] hover:bg-black text-white text-[11px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors"
                 >
                   Aceptar todo
                 </button>
                 <button
                   onClick={declineCookies}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors"
+                  className="flex-1 bg-[#f5f5f4] hover:bg-[#e7e5e4] text-[#191918] text-[11px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-colors"
                 >
                   Rechazar
                 </button>
