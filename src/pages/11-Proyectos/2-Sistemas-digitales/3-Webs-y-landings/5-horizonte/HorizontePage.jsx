@@ -248,9 +248,9 @@ export default function HorizontePage() {
               alt="Fondo Textura"
               className="w-full h-full object-cover fixed"
             />
-            <div className="absolute inset-0 bg-black/30" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
-            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,0.3)' }} />
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/15" />
+            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,0.1)' }} />
           </div>
 
           {/* Contenedor central */}
