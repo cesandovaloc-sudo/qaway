@@ -246,9 +246,11 @@ export default function HorizontePage() {
             <img 
               src="/assets/horizonte/bg-real-estate.jpg" 
               alt="Fondo Textura"
-              className="w-full h-full object-cover opacity-20"
+              className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#f8f9f7] via-transparent to-[#050505]" />
+            <div className="absolute inset-0 bg-black/55" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,0.5)' }} />
           </div>
 
           {/* Contenedor central */}
