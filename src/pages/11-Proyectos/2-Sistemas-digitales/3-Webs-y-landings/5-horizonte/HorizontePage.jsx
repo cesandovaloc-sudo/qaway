@@ -334,10 +334,10 @@ export default function HorizontePage() {
         </section>
 
         {/* 4b. IMPACTO OPERATIVO (duplicado bajo Identidad Visual) */}
-        <section className="py-24 md:py-32 px-6 max-w-[1440px] mx-auto">
+        <section className="py-8 md:py-12 px-6 max-w-[1440px] mx-auto">
           <SectionLabel n="04" title="Impacto Operativo" color="text-[#ff4b0b]" />
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 mt-6">
             <div className="border-t border-white/10 pt-6">
               <div className="font-serif text-5xl md:text-6xl mb-4">3x</div>
               <h4 className="font-bold text-sm mb-2 uppercase tracking-widest">Aumento de leads</h4>
@@ -400,10 +400,10 @@ export default function HorizontePage() {
         </section>
 
         {/* 4. IMPACTO / RESULTADOS (El valor de Qaway Lab) */}
-        <section className="py-24 md:py-32 px-6 max-w-[1440px] mx-auto">
+        <section className="py-8 md:py-12 px-6 max-w-[1440px] mx-auto">
           <SectionLabel n="03" title="Impacto Operativo" color="text-[#ff4b0b]" />
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 mt-6">
             <div className="border-t border-white/10 pt-6">
               <div className="font-serif text-5xl md:text-6xl mb-4">3x</div>
               <h4 className="font-bold text-sm mb-2 uppercase tracking-widest">Aumento de leads</h4>
