@@ -246,11 +246,11 @@ export default function HorizontePage() {
             <img 
               src="/assets/horizonte/bg-real-estate.jpg" 
               alt="Fondo Textura"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover fixed"
             />
-            <div className="absolute inset-0 bg-black/55" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
-            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,0.5)' }} />
+            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
+            <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,0.3)' }} />
           </div>
 
           {/* Contenedor central */}
