@@ -260,7 +260,7 @@ export default function RecursosPage() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.55 }}
-          whileHover={{ y: -6, boxShadow: style.shadow-sm }}
+          whileHover={{ y: -6, boxShadow: style.shadow }}
         >
           <img 
             src={res.image} 
