@@ -240,7 +240,7 @@ export default function HorizontePage() {
         </section>
 
         {/* 4. IDENTIDAD VISUAL (Lógica inmersiva de pantalla completa) */}
-        <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 bg-[#050505] text-white">
+        <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white">
           {/* Fondo inmersivo */}
           <div className="absolute inset-0 z-0">
             <img 
