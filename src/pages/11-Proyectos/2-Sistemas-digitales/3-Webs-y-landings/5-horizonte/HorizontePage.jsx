@@ -977,6 +977,363 @@ export default function HorizontePage() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          NUEVA VERSIÓN — CASE STUDY EDITORIAL QAWAY LAB
+          Versión alternativa estilo Behance/Dribbble: editorial, compacto,
+          fondos neutros, trabajo dentro de mockups.
+          ═══════════════════════════════════════════════════════════════════ */}
+
+      {/* — HERO EDITORIAL — */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-20 md:py-32 px-6">
+        <div className="max-w-[1000px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Caso de Estudio</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+            </div>
+            <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight mb-8">
+              Horizonte<br/>Inmobiliaria
+            </h1>
+            <p className="text-sm md:text-base text-[#111210]/60 leading-relaxed max-w-xl mb-10">
+              Sitio web corporativo y plataforma de captación para proyectos inmobiliarios premium. Diseño, desarrollo e integración con CRM y WhatsApp.
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-[#111210]/10 pt-8">
+              <div>
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Cliente</div>
+                <div className="text-xs font-medium text-[#111210]">Horizonte Inmobiliaria</div>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Servicio</div>
+                <div className="text-xs font-medium text-[#111210]">Web · CRM · WhatsApp</div>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Año</div>
+                <div className="text-xs font-medium text-[#111210]">2024</div>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Stack</div>
+                <div className="text-xs font-medium text-[#111210]">React · Tailwind · Supabase</div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-10">
+              <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
+                Ver sitio en vivo <ArrowUpRight size={14} />
+              </a>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — MOCKUP HERO (Browser frame) — */}
+      <section className="bg-[#f8f9f7] px-6 pb-20 md:pb-32">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="rounded-2xl overflow-hidden border border-[#111210]/10 bg-white shadow-2xl"
+          >
+            <div className="bg-[#f0f0f0] px-4 py-3 flex items-center gap-2 border-b border-[#111210]/5">
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+              </div>
+              <div className="mx-auto font-mono text-[9px] text-[#111210]/30 tracking-widest">horizonte-inmobiliaria.com</div>
+            </div>
+            <div className="aspect-[16/9] relative bg-[#0D1B17]">
+              <img 
+                src="/assets/horizonte/bg-real-estate.jpg" 
+                alt="Sitio web de Horizonte Inmobiliaria — vista general" 
+                loading="lazy" 
+                decoding="async" 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — CONTEXTO: EL PROBLEMA Y LA SOLUCIÓN — */}
+      <section className="bg-white text-[#111210] py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1000px] mx-auto">
+          <motion.div {...fade}>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">El Problema</span>
+            </div>
+            <h2 className="font-serif text-2xl md:text-3xl leading-tight max-w-2xl mb-6">
+              Dependía de métodos de venta manuales. La falta de presencia digital generaba un embudo lento, donde los prospectos perdían interés antes de recibir el primer contacto.
+            </h2>
+          </motion.div>
+
+          <motion.div {...fade} className="mt-16 border-t border-[#111210]/10 pt-12">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">La Solución</span>
+            </div>
+            <h2 className="font-serif text-2xl md:text-3xl leading-tight max-w-2xl mb-6">
+              Diseñamos y desarrollamos una plataforma web de alta conversión. Un canal digital sólido para perfilar prospectos de forma eficiente desde el primer clic.
+            </h2>
+            <div className="flex flex-wrap gap-2 mt-8">
+              {['React', 'Tailwind CSS', 'Supabase', 'WhatsApp API'].map(t => (
+                <span key={t} className="px-3 py-1.5 rounded-full border border-[#111210]/10 text-[10px] font-mono text-[#111210]/60">{t}</span>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — IDENTIDAD VISUAL (Dentro de mockup, no inmersivo) — */}
+      <section className="bg-[#f8f9f7] py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1000px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">01</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Identidad Visual</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Creación basada en su identidad de marca.</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+            {/* Tipografía */}
+            <motion.div {...fade} transition={{ delay: 0.1 }}>
+              <div className="mb-8">
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-3 border-b border-[#111210]/10 pb-3">Primaria</div>
+                <div className="font-serif text-5xl md:text-6xl text-[#111210]">Playfair Display</div>
+              </div>
+              <div>
+                <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-3 border-b border-[#111210]/10 pb-3">Secundaria</div>
+                <div className="font-sans text-3xl md:text-4xl text-[#111210] font-medium tracking-tight">DM Sans</div>
+              </div>
+            </motion.div>
+
+            {/* Paleta */}
+            <motion.div {...fade} transition={{ delay: 0.2 }}>
+              <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-4 border-b border-[#111210]/10 pb-3">Paleta de Color</div>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { name: 'Bosque', hex: '#0D1B17', bg: '#0D1B17', text: '#F6F4F1' },
+                  { name: 'Oliva', hex: '#1E2A25', bg: '#1E2A25', text: '#F6F4F1' },
+                  { name: 'Dorado', hex: '#C49A44', bg: '#C49A44', text: '#0D1B17' },
+                  { name: 'Crema', hex: '#F6F4F1', bg: '#F6F4F1', text: '#0D1B17' },
+                ].map(c => (
+                  <div key={c.hex} className="aspect-[4/3] rounded-xl p-4 flex flex-col justify-between border border-[#111210]/5" style={{ background: c.bg }}>
+                    <span className="font-serif text-xs" style={{ color: c.text }}>{c.name}</span>
+                    <span className="font-mono text-[10px] uppercase" style={{ color: c.text, opacity: 0.6 }}>{c.hex}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* — SHOWCASE DESKTOP + MÓVIL (Enmarcado en fondo neutro) — */}
+      <section className="bg-white py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">02</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Ecosistema Digital</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Interfaces diseñadas para convertir.</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Desktop */}
+            <motion.div {...fade} transition={{ delay: 0.1 }} className="lg:col-span-8">
+              <div className="rounded-2xl overflow-hidden border border-[#111210]/10 bg-[#f0f0f0] shadow-xl">
+                <div className="bg-[#e8e8e8] px-4 py-3 flex items-center gap-2 border-b border-[#111210]/5">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#111210]/15" />
+                  </div>
+                  <div className="mx-auto font-mono text-[9px] text-[#111210]/30 tracking-widest">horizonte-inmobiliaria.com</div>
+                </div>
+                <div className="aspect-[16/10] relative bg-[#0D1B17]">
+                  <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Vista del sitio web de Horizonte en escritorio" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-90" />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Mobile */}
+            <motion.div {...fade} transition={{ delay: 0.2 }} className="lg:col-span-4 lg:-ml-8 z-10 mt-8 lg:mt-0">
+              <div className="rounded-[2rem] p-2 border border-[#111210]/10 bg-[#1a1a1a] shadow-2xl w-[220px] lg:w-[260px] mx-auto">
+                <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
+                  <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Vista del sitio web de Horizonte en móvil" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-90" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* — FLUJOS MÓVILES (4 mockups en fila) — */}
+      <section className="bg-[#f8f9f7] py-20 md:py-28 px-6 border-t border-[#111210]/5 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">03</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Estrategia de Navegación</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Cada pantalla tiene un propósito claro.</h2>
+          </motion.div>
+
+          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
+            {[
+              { img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0 },
+              { img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.1 },
+              { img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.2 },
+              { img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.3 }
+            ].map((mock, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: mock.delay }}
+                className={`${i % 2 !== 0 ? 'md:mt-16' : ''}`}
+              >
+                <div className="rounded-[2rem] p-2 border border-[#111210]/10 bg-[#1a1a1a] shadow-xl w-[180px] lg:w-[220px]">
+                  <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
+                    <img src={mock.img} alt={`Pantalla móvil ${i + 1} del sitio Horizonte`} loading="lazy" decoding="async" className="w-full h-full object-cover opacity-90" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* — APLICACIÓN DE MARCA (Mockups editoriales) — */}
+      <section className="bg-white py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">04</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Aplicación de Marca</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Presencia editorial y materialidad.</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Panorámico */}
+            <motion.div {...fade} transition={{ delay: 0.1 }} className="md:col-span-2 relative rounded-2xl overflow-hidden aspect-[21/9] bg-[#0D1B17] group">
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Pieza editorial de marca Horizonte" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-8">
+                <h3 className="font-serif text-3xl md:text-5xl text-white tracking-tight">HORIZONTE</h3>
+                <p className="font-sans text-xs text-white/60 tracking-widest uppercase mt-2">Arquitectura · Sofisticación · Lima</p>
+              </div>
+            </motion.div>
+
+            {/* Tótem */}
+            <motion.div {...fade} transition={{ delay: 0.2 }} className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#0D1B17] group">
+              <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Mockup de señalética urbana Horizonte" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-6">
+                <div className="border-l-2 border-[#C49A44] pl-4">
+                  <span className="font-mono text-[9px] tracking-widest text-[#C49A44] uppercase">Señalética Urbana</span>
+                  <h4 className="font-serif text-lg text-white mt-1">Presencia en Punto de Venta</h4>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Materialidad */}
+            <motion.div {...fade} transition={{ delay: 0.3 }} className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-[#0D1B17] group">
+              <img src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Detalle de acabados y materiales premium Horizonte" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex flex-col justify-end p-6">
+                <div className="border-l-2 border-white/40 pl-4">
+                  <span className="font-mono text-[9px] tracking-widest text-white/50 uppercase">Materialidad</span>
+                  <h4 className="font-serif text-lg text-white mt-1">Acabados y Papelería Premium</h4>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* — RESULTADOS Y MÉTRICAS — */}
+      <section className="bg-[#111210] text-white py-20 md:py-28 px-6">
+        <div className="max-w-[1000px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">05</span>
+              <span className="w-8 h-px bg-[#C49A44]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">Resultados</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Impacto medible.</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { value: '3x', label: 'Aumento de leads', desc: 'En los primeros 3 meses' },
+              { value: '100%', label: 'Atención automatizada', desc: 'Vía WhatsApp API' },
+              { value: '-60%', label: 'Carga operativa', desc: 'Agentes enfocados en cierre' },
+              { value: '<0.8s', label: 'Tiempo de carga', desc: 'Lighthouse 100/100' },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="border-t border-white/10 pt-6"
+              >
+                <div className="font-serif text-4xl md:text-5xl mb-3 text-[#C49A44]">{stat.value}</div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-1">{stat.label}</div>
+                <div className="text-[11px] text-white/50">{stat.desc}</div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div {...fade} className="mt-16 border-t border-white/10 pt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="font-serif text-2xl mb-3">Velocidad que convierte.</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  El sitio carga en menos de 0.8 segundos. Arquitectura de componentes moderna, generación estática y SEO impecable.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['React', 'Tailwind CSS', 'Framer Motion', 'Vite', 'Supabase', 'Vercel'].map(tech => (
+                  <span key={tech} className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-mono text-white/70">{tech}</span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — CTA FINAL EDITORIAL — */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[800px] mx-auto text-center">
+          <motion.div {...fade}>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight mb-6">
+              ¿Tienes un proyecto similar en mente?
+            </h2>
+            <p className="text-sm text-[#111210]/60 mb-8 max-w-md mx-auto">
+              Creamos sitios web, identidades y sistemas digitales adaptados a las necesidades de cada proyecto.
+            </p>
+            <a href="#contacto" className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
+              HABLEMOS DE TU PROYECTO <ArrowUpRight size={14} />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer / Navegación */}
       <footer id="contacto" className="bg-[#0a0a0a] text-white py-12 px-6 border-t border-white/5">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
