@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, CircleDot, Compass, Database, Eye, Layout, MapPin, MessageCircle, MousePointer2, Palette, Smartphone, Target, Users, Play, Monitor, CheckCircle, Search, PenTool, Code, LineChart, X } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Layout, MapPin, X } from 'lucide-react'
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
+import SEO from '@/components/seo/SEO'
 import './horizonte.css'
 import '../../../proyectos.css'
 
@@ -28,24 +29,7 @@ const fade = {
   viewport: { once: true, amount: 0.1 },
   transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
 }
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15 }
-  }
-}
 
-/* ── Micro-components ────────────────────────────────────── */
-function SectionLabel({ n, title, color = "text-[#c9a35a]" }) {
-  return (
-    <div className={`flex items-center gap-4 text-xs font-mono tracking-widest uppercase ${color}`}>
-      <span>{n}</span>
-      <span className="h-px w-8 bg-current opacity-40" />
-      <span>{title}</span>
-    </div>
-  )
-}
 
 /* ── Page ────────────────────────────────────────────────── */
 export default function HorizontePage() {
@@ -67,6 +51,28 @@ export default function HorizontePage() {
 
   return (
     <main className="min-h-screen bg-[#0D1B17] text-[#F6F4F1] font-sans selection:bg-[#C49A44] selection:text-[#0D1B17]">
+      <SEO
+        title="Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab"
+        description="Caso de estudio: sitio web corporativo y plataforma de captación para Horizonte Inmobiliaria. Diseño, desarrollo e integración con CRM y WhatsApp."
+        canonical="https://qawaylab.com/proyectos/horizonte"
+        type="website"
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "name": "Horizonte Inmobiliaria — Sitio Web Corporativo",
+          "description": "Sitio web corporativo y plataforma de captación para proyectos inmobiliarios. Diseño, desarrollo e integración con CRM y WhatsApp.",
+          "author": {
+            "@type": "Organization",
+            "name": "Qaway Lab"
+          },
+          "provider": {
+            "@type": "Organization",
+            "name": "Qaway Lab"
+          },
+          "dateCreated": "2024",
+          "keywords": ["inmobiliaria", "sitio web", "React", "Tailwind", "Supabase", "WhatsApp"]
+        }}
+      />
       
       {/* Header Sticky */}
       <header className="fixed top-0 left-0 right-0 z-50 h-20 border-b border-white/10 bg-black/40 backdrop-blur-xl">
@@ -308,7 +314,7 @@ export default function HorizontePage() {
                   <div className="font-serif text-6xl md:text-7xl mb-16 text-[#F6F4F1]">Playfair Display</div>
 
                   <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Tipografía Secundaria</h4>
-                  <div className="font-sans text-4xl md:text-5xl text-[#F6F4F1] font-medium tracking-tight">Inter</div>
+                  <div className="font-sans text-4xl md:text-5xl text-[#F6F4F1] font-medium tracking-tight">DM Sans</div>
                 </motion.div>
 
                 {/* Paleta de Color */}
@@ -996,15 +1002,6 @@ export default function HorizontePage() {
         </div>
       </footer>
 
-      {/* ========================================================================= */}
-      {/* SECCIONES ANTIGUAS (Mantenidas por seguridad abajo, ocultas o separadas) */}
-      {/* ========================================================================= */}
-      <div className="hidden">
-        {/* Aquí podrían ir las secciones viejas si quieres mantener el código, 
-            pero al reescribir toda la página hemos integrado el contenido anterior en 
-            las nuevas secciones. Si realmente necesitas verlas en el DOM, quita el 'hidden'. */}
-      </div>
-
       {/* Floating CTA (Aparece al hacer scroll hacia arriba) */}
       <AnimatePresence>
         {showFloatingCTA && !isDismissed && (
@@ -1048,11 +1045,4 @@ export default function HorizontePage() {
   )
 }
 
-/* Micro icons for features */
-function MenuIcon() {
-  return <div className="space-y-1 w-8"><div className="h-1 bg-white/40 w-full rounded" /><div className="h-1 bg-white/40 w-full rounded" /><div className="h-1 bg-white/40 w-2/3 rounded" /></div>
-}
 function HomeIcon() { return <div className="w-8 h-8 border border-white/40 flex items-center justify-center rounded"><Layout size={16} /></div> }
-function TreeIcon() { return <div className="w-8 h-8 border border-white/40 flex items-center justify-center rounded"><CircleDot size={16} /></div> }
-function PoolIcon() { return <div className="w-8 h-8 border border-white/40 flex items-center justify-center rounded"><Database size={16} /></div> }
-function SecurityIcon() { return <div className="w-8 h-8 border border-white/40 flex items-center justify-center rounded"><Target size={16} /></div> }

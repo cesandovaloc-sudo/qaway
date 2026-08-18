@@ -51,6 +51,11 @@ const seoByPath = {
     title: 'Curso Identidad Visual con IA | Qaway Lab',
     description: 'Aprende a crear logos, paletas y un kit de marca con inteligencia artificial y criterio visual aplicado.',
   },
+  '/proyectos/horizonte': {
+    title: 'Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab',
+    description: 'Caso de estudio: sitio web corporativo y plataforma de captación para Horizonte Inmobiliaria. Diseño, desarrollo e integración con CRM y WhatsApp.',
+    image: `${SITE_URL}/assets/horizonte/bg-real-estate.jpg`,
+  },
 }
 
 function setMeta(name, content) {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, CircleDot, Compass, Database, Eye, Layout, MapPin, MessageCircle, MousePointer2, Palette, Smartphone, Target, Users, Play, Monitor, CheckCircle, Search, PenTool, Code, LineChart, X } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, CircleDot, Database, Eye, Layout, MapPin, MessageCircle, Smartphone, Target, Users, Play, Monitor, Search, PenTool, Code, LineChart, X } from 'lucide-react'
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 import './horizonte.css'
 import '../../../proyectos.css'
@@ -37,7 +37,7 @@ const staggerContainer = {
 }
 
 /* ── Micro-components ────────────────────────────────────── */
-function SectionLabel({ n, title, color = "text-[#c9a35a]" }) {
+function SectionLabel({ n, title, color = "text-[#C49A44]" }) {
   return (
     <div className={`flex items-center gap-4 text-xs font-mono tracking-widest uppercase ${color}`}>
       <span>{n}</span>
@@ -329,29 +329,6 @@ export default function HorizontePage() {
                 </motion.div>
               </div>
 
-            </div>
-          </div>
-        </section>
-
-        {/* 4b. IMPACTO OPERATIVO (duplicado bajo Identidad Visual) */}
-        <section className="py-24 md:py-32 px-6 max-w-[1440px] mx-auto">
-          <SectionLabel n="04" title="Impacto Operativo" color="text-[#ff4b0b]" />
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-            <div className="border-t border-white/10 pt-6">
-              <div className="font-serif text-5xl md:text-6xl mb-4">3x</div>
-              <h4 className="font-bold text-sm mb-2 uppercase tracking-widest">Aumento de leads</h4>
-              <p className="text-xs text-white/50 leading-relaxed">La nueva estructura optimizada para conversión triplicó el ingreso de prospectos calificados en 3 meses.</p>
-            </div>
-            <div className="border-t border-white/10 pt-6">
-              <div className="font-serif text-5xl md:text-6xl mb-4">100%</div>
-              <h4 className="font-bold text-sm mb-2 uppercase tracking-widest">Atención automatizada</h4>
-              <p className="text-xs text-white/50 leading-relaxed">Integración total con WhatsApp Business API, pre-filtrando clientes antes de llegar a ventas.</p>
-            </div>
-            <div className="border-t border-white/10 pt-6">
-              <div className="font-serif text-5xl md:text-6xl mb-4">-60%</div>
-              <h4 className="font-bold text-sm mb-2 uppercase tracking-widest">Carga operativa</h4>
-              <p className="text-xs text-white/50 leading-relaxed">Los agentes inmobiliarios dejaron de responder preguntas frecuentes, enfocándose solo en cierres.</p>
             </div>
           </div>
         </section>
