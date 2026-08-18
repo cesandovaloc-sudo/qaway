@@ -1459,6 +1459,35 @@ export default function HorizontePage() {
         </div>
       </section>
 
+      {/* — SELECCIÓN FOTOGRÁFICA (Grid 4 imágenes) — */}
+      <section className="bg-[#f0f0f0]">
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {[
+            { img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", span: "col-span-2 row-span-2" },
+            { img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", span: "" },
+            { img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", span: "" },
+            { img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", span: "col-span-2" },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: i * 0.1 }}
+              className={`${item.span} aspect-square overflow-hidden`}
+            >
+              <img 
+                src={item.img} 
+                alt={`Arquitectura y estilo de vida Horizonte ${i + 1}`} 
+                loading="lazy" 
+                decoding="async" 
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" 
+              />
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* — FULL-BLEED: IDENTIDAD VISUAL — */}
       <section className="bg-[#0D1B17] py-20 md:py-32 px-6 md:px-12">
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
@@ -1549,6 +1578,109 @@ export default function HorizontePage() {
         </div>
       </section>
 
+      {/* — SHOWCASE VISUAL (Desktop + Mobile juntos) — */}
+      <section className="bg-[#111210] py-20 md:py-32 px-6">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="lg:col-span-8"
+          >
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#1a1a1a]">
+              <div className="bg-[#222] px-4 py-3 flex items-center gap-2 border-b border-white/5">
+                <div className="flex gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-white/15" />
+                  <div className="w-2 h-2 rounded-full bg-white/15" />
+                  <div className="w-2 h-2 rounded-full bg-white/15" />
+                </div>
+                <div className="mx-auto font-mono text-[8px] text-white/20 tracking-widest">horizonte-inmobiliaria.com</div>
+              </div>
+              <div className="aspect-[16/10] relative bg-[#0D1B17]">
+                <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80" alt="Vista del sitio Horizonte en escritorio" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="lg:col-span-4 lg:-ml-12 z-10 mt-8 lg:mt-0"
+          >
+            <div className="rounded-[2.5rem] p-[6px] border border-white/10 bg-[#1a1a1a] shadow-2xl w-[220px] lg:w-[260px] mx-auto">
+              <div className="rounded-[2rem] overflow-hidden aspect-[9/19.5] bg-[#0D1B17]">
+                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Vista del sitio Horizonte en móvil" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — FLUJOS MÓVILES (4 phones en fila) — */}
+      <section className="bg-white py-20 md:py-28 px-6 overflow-hidden">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="flex flex-wrap justify-center items-center gap-6 md:gap-8">
+            {[
+              { img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0 },
+              { img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.1 },
+              { img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.2 },
+              { img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.3 },
+            ].map((mock, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: mock.delay }}
+                className={`${i % 2 !== 0 ? 'md:mt-16' : ''}`}
+              >
+                <div className="rounded-[2rem] p-[5px] border border-[#111210]/10 bg-[#1a1a1a] shadow-lg w-[170px] lg:w-[210px]">
+                  <div className="rounded-[1.5rem] overflow-hidden aspect-[9/19.5] bg-[#0D1B17]">
+                    <img src={mock.img} alt={`Pantalla móvil ${i + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* — EXPERIENCIA INTERACTIVA (Tarjetas de propiedades) — */}
+      <section className="bg-[#f8f9f7] py-20 md:py-28 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { type: "Apartamento", beds: "2 Hab", loc: "San Isidro", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+              { type: "Penthouse", beds: "3 Hab", loc: "Miraflores", img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+              { type: "Estudio", beds: "1 Hab", loc: "Barranco", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 * i }}
+              >
+                <div className="rounded-xl overflow-hidden bg-white border border-[#111210]/5 shadow-sm group cursor-pointer hover:-translate-y-2 transition-transform duration-500">
+                  <div className="aspect-[4/3] overflow-hidden relative">
+                    <img src={item.img} alt={`Propiedad Horizonte — ${item.type}`} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  </div>
+                  <div className="p-5">
+                    <h4 className="font-serif text-lg text-[#111210] mb-2 group-hover:text-[#C49A44] transition-colors">{item.type}</h4>
+                    <div className="flex gap-4 text-[10px] font-mono tracking-wider text-[#111210]/40 uppercase">
+                      <span>{item.beds}</span>
+                      <span>{item.loc}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* — MÉTRICAS (Minimalistas) — */}
       <section className="bg-[#111210] py-20 md:py-28 px-6">
         <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -1569,6 +1701,32 @@ export default function HorizontePage() {
               <div className="font-mono text-[10px] tracking-widest text-white/40 uppercase">{stat.label}</div>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* — STACK TECNOLÓGICO — */}
+      <section className="bg-white py-16 md:py-24 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[800px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <h3 className="font-serif text-2xl md:text-3xl text-[#111210] mb-3">Velocidad que convierte.</h3>
+            <p className="text-sm text-[#111210]/50">El sitio carga en menos de 0.8 segundos. Lighthouse 100/100 en todas las categorías.</p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="flex flex-wrap justify-center gap-3"
+          >
+            {['React', 'Tailwind CSS', 'Framer Motion', 'Vite', 'Supabase', 'Vercel', 'WhatsApp API'].map(tech => (
+              <span key={tech} className="px-4 py-2 rounded-full border border-[#111210]/10 text-xs font-mono text-[#111210]/60">{tech}</span>
+            ))}
+          </motion.div>
         </div>
       </section>
 
