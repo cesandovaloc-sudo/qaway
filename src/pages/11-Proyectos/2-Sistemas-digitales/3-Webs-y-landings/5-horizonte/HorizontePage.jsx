@@ -264,6 +264,36 @@ export default function HorizontePage() {
           </div>
         </section>
 
+        {/* — VERSIÓN EDITORIAL: CONTEXTO (Comparar con sección de arriba) — */}
+        <section className="bg-white text-[#111210] py-20 md:py-28 px-6 border-t border-[#111210]/5">
+          <div className="max-w-[1000px] mx-auto">
+            <motion.div {...fade} className="mb-12">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">El Problema</span>
+              </div>
+              <h2 className="font-serif text-2xl md:text-3xl leading-tight max-w-2xl">
+                Dependía de métodos de venta manuales. La falta de presencia digital generaba un embudo lento, donde los prospectos perdían interés antes de recibir el primer contacto.
+              </h2>
+            </motion.div>
+
+            <motion.div {...fade} className="mt-16 border-t border-[#111210]/10 pt-12">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">La Solución</span>
+              </div>
+              <h2 className="font-serif text-2xl md:text-3xl leading-tight max-w-2xl mb-6">
+                Diseñamos y desarrollamos una plataforma web de alta conversión. Un canal digital sólido para perfilar prospectos de forma eficiente desde el primer clic.
+              </h2>
+              <div className="flex flex-wrap gap-2 mt-8">
+                {['React', 'Tailwind CSS', 'Supabase', 'WhatsApp API'].map(t => (
+                  <span key={t} className="px-3 py-1.5 rounded-full border border-[#111210]/10 text-[10px] font-mono text-[#111210]/60">{t}</span>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* 4. PREÁMBULO IDENTIDAD VISUAL (Fondo Blanco) */}
         <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
           <div className="max-w-[1200px] mx-auto">
