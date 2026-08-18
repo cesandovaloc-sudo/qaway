@@ -350,7 +350,7 @@ export default function HorizontePage() {
           </div>
         </section>
 
-        {/* 5. PREÁMBULO SHOWCASE VISUAL (Fondo Blanco) */}
+        {/* 5. PREÁMBULO SELECCIÓN FOTOGRÁFICA (Fondo Blanco) */}
         <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
           <div className="max-w-[1200px] mx-auto">
             <motion.div 
@@ -363,17 +363,95 @@ export default function HorizontePage() {
                 <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">05</span>
                 <span className="w-8 h-px bg-[#ff4b0b]"></span>
                 <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
-                  Ecosistema Digital
+                  Dirección de Arte
                 </span>
               </div>
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
-                Visualización de interfaces y selección fotográfica.
+                Selección Fotográfica
               </h2>
             </motion.div>
           </div>
         </section>
 
-        {/* 5. SHOWCASE VISUAL INMERSIVO (Mismo formato que Identidad Visual) */}
+        {/* 5. SELECCIÓN FOTOGRÁFICA INMERSIVA */}
+        <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
+          {/* Fondo inmersivo parallax (Fotografía principal) */}
+          <div 
+            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+            style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+          />
+
+          {/* Contenedor central flotante oscuro */}
+          <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+            
+            <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+            </div>
+
+            <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="mb-12"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="w-8 h-px bg-[#C49A44]"></span>
+                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                    Estilo de vida & Arquitectura
+                  </span>
+                </div>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-center">
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="col-span-1">
+                  <div className="aspect-[4/5] rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                    <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                  </div>
+                </motion.div>
+                
+                <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.4 }} className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4 md:gap-8">
+                  <div className="col-span-2 aspect-[21/9] rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                  </div>
+                  <div className="col-span-1 aspect-square rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                    <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                  </div>
+                  <div className="col-span-1 aspect-square rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. PREÁMBULO SHOWCASE VISUAL (Fondo Blanco) */}
+        <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-2"
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">06</span>
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                  Ecosistema Digital
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+                Visualización de interfaces
+              </h2>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* 6. SHOWCASE VISUAL INMERSIVO (Mismo formato que Identidad Visual) */}
         <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
           {/* Fondo inmersivo parallax (Usando una imagen abstracta/arquitectónica elegante) */}
           <div 
@@ -418,7 +496,7 @@ export default function HorizontePage() {
                       <div className="mx-auto font-mono text-[9px] text-white/30 tracking-widest">horizonte-inmobiliaria.com</div>
                     </div>
                     <div className="aspect-[16/10] relative bg-[#0D1B17]">
-                      <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Desktop UI" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-700" />
+                      <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Desktop UI" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-700" />
                     </div>
                   </div>
                 </motion.div>
@@ -427,7 +505,7 @@ export default function HorizontePage() {
                 <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.4 }} className="lg:col-span-4 lg:-ml-12 z-10 mt-8 lg:mt-0">
                   <div className="rounded-[2rem] p-2 border border-white/10 bg-[#1a1a1a] shadow-2xl w-[220px] lg:w-[260px] mx-auto">
                     <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
-                      <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mobile UI" className="w-full h-full object-cover opacity-80" />
+                      <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mobile UI" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80" />
                     </div>
                   </div>
                 </motion.div>
@@ -436,467 +514,437 @@ export default function HorizontePage() {
           </div>
         </section>
 
-        {/* 6. IMPACTO OPERATIVO (Cierre de Resultados, Fondo Blanco de Marca) */}
-        <section className="bg-[#f8f9f7] text-[#111210] py-8 md:py-12 px-6 border-t border-[#111210]/5">
-          <div className="max-w-[1200px] mx-auto">
+      </div>
+
+      {/* 07. PREÁMBULO SHOWCASE MÓVIL (Fondo Blanco) */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">07</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Estrategia de Navegación
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Cada pantalla tiene un propósito claro.
+            </h2>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 07. SHOWCASE MÓVIL INMERSIVO */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5 overflow-hidden">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1E2A25]/50 to-transparent opacity-80" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center items-center">
+            
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex items-center gap-3 mb-8"
+              transition={{ duration: 0.6 }}
+              className="mb-16 text-center w-full"
             >
-              <span className="font-mono text-[10px] tracking-widest text-[#ff4b0b]">06</span>
-              <span className="w-8 h-px bg-[#ff4b0b]"></span>
-              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
-                Impacto Operativo
-              </span>
-            </motion.div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="border-t border-[#111210]/10 pt-8"
-              >
-                <div className="font-serif text-6xl md:text-7xl mb-6 text-[#111210]">3x</div>
-                <h4 className="font-sans font-bold text-sm mb-3 uppercase tracking-widest text-[#111210]">Aumento de leads</h4>
-                <p className="text-sm text-[#111210]/70 leading-relaxed font-sans">
-                  La nueva estructura optimizada para conversión triplicó el ingreso de prospectos calificados en 3 meses.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="border-t border-[#111210]/10 pt-8"
-              >
-                <div className="font-serif text-6xl md:text-7xl mb-6 text-[#111210]">100%</div>
-                <h4 className="font-sans font-bold text-sm mb-3 uppercase tracking-widest text-[#111210]">Atención automatizada</h4>
-                <p className="text-sm text-[#111210]/70 leading-relaxed font-sans">
-                  Integración total con WhatsApp Business API, pre-filtrando clientes antes de llegar a ventas.
-                </p>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="border-t border-[#111210]/10 pt-8"
-              >
-                <div className="font-serif text-6xl md:text-7xl mb-6 text-[#111210]">-60%</div>
-                <h4 className="font-sans font-bold text-sm mb-3 uppercase tracking-widest text-[#111210]">Carga operativa</h4>
-                <p className="text-sm text-[#111210]/70 leading-relaxed font-sans">
-                  Los agentes inmobiliarios dejaron de responder preguntas frecuentes, enfocándose solo en cierres.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-      {/* 01 — Hero */}
-      <section className="relative min-h-screen flex items-end pt-32 pb-16 md:pb-24 px-6 overflow-hidden bg-[#0a0a0a]">
-        <video 
-          autoPlay loop muted playsInline 
-          className="absolute inset-0 w-full h-full object-cover opacity-60 z-0"
-          src="/assets/horizonte/hero-urban-apartment.mp4"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B17] via-transparent to-transparent" />
-
-        <div className="relative z-10 max-w-[1440px] mx-auto w-full">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 items-end">
-            <motion.div {...fade} className="md:col-span-8">
-              <div className="font-mono text-xs tracking-widest text-[#C49A44] mb-6 uppercase">PROYECTO WEB</div>
-              <h1 className="font-serif text-5xl md:text-[6.5rem] leading-[0.9] tracking-tight mb-6">
-                Horizonte<br />Inmobiliaria
-              </h1>
-              <p className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10">
-                Sitio web corporativo y plataforma de captación para proyectos inmobiliarios.
-              </p>
-              
-              <div className="flex flex-wrap gap-4 items-center">
-                <a href={project.liveUrl} className="inline-flex items-center gap-2 px-6 py-3.5 text-xs font-bold tracking-wider hover:opacity-90 transition-opacity" style={{ background: project.brand.gold, color: project.brand.forest }}>
-                  VER SITIO EN VIVO <ArrowUpRight size={16} />
-                </a>
+              <div className="inline-flex items-center justify-center gap-3 w-full">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Arquitectura de Flujos Móviles
+                </span>
+                <span className="w-8 h-px bg-[#C49A44]"></span>
               </div>
             </motion.div>
-            
-            <motion.div {...fade} transition={{ delay: 0.2, duration: 0.6 }} className="md:col-span-4">
-              <div className="flex flex-col gap-6 text-sm text-white/80">
-                {[
-                  [Users, 'CLIENTE', project.client],
-                  [Target, 'SERVICIO', project.service],
-                  [CircleDot, 'AÑO', project.year],
-                  [Code, 'TECNOLOGÍAS', project.technologies],
-                ].map(([Icon, k, v]) => (
-                  <div key={k} className="flex gap-4">
-                    <div className="mt-1 text-[#C49A44]"><Icon size={20} strokeWidth={1.5} /></div>
-                    <div>
-                      <div className="font-mono text-[10px] tracking-widest text-white/50 mb-1 uppercase">{k}</div>
-                      <div className="font-medium text-[13px] leading-snug">{v}</div>
+
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16">
+              {[
+                { img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0 },
+                { img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.2 },
+                { img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.4 },
+                { img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.6 }
+              ].map((mock, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true, margin: "-100px" }} 
+                  transition={{ duration: 0.8, delay: mock.delay, type: "spring", bounce: 0.4 }} 
+                  className={`z-10 ${i % 2 !== 0 ? 'md:mt-24' : ''}`}
+                >
+                  <div className="rounded-[2rem] p-2 border border-white/10 bg-[#1a1a1a] shadow-2xl w-[200px] lg:w-[240px] hover:-translate-y-4 transition-transform duration-500 cursor-pointer">
+                    <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
+                      <img src={mock.img} alt={`Mobile UI ${i+1}`} loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500 hover:scale-105" />
                     </div>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* NUEVAS SECCIONES BASADAS EN EL DISEÑO BEHANCE */}
-      {/* ========================================================================= */}
-
-      {/* 01. EL PROYECTO (Flujo Horizontal) */}
-      <section className="py-24 px-6 bg-[#F6F4F1] text-[#0D1B17]">
-        <div className="max-w-[1440px] mx-auto">
-          <SectionLabel n="01" title="EL PROYECTO" color="text-[#0D1B17]/50" />
-          <motion.h2 {...fade} className="font-serif text-4xl md:text-5xl mt-8 max-w-3xl leading-tight">
-            Creamos una experiencia digital para convertir visitantes en oportunidades.
-          </motion.h2>
-
-          <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative">
-            {/* Línea conectora */}
-            <div className="hidden lg:block absolute top-6 left-12 right-12 h-px border-t border-dashed border-[#0D1B17]/20" />
-            
-            {[
-              [Users, 'PROBLEMA', 'La empresa no contaba con presencia digital ni canales eficientes de captación.'],
-              [Target, 'DIRECCIÓN', 'Diseñamos una identidad y experiencia enfocada en transmitir confianza y valor de cada proyecto.'],
-              [Monitor, 'SOLUCIÓN', 'Desarrollo de sitio web corporativo con integración WhatsApp y formularios estratégicos.'],
-              [LineChart, 'RESULTADO', 'Más consultas calificadas, procesos automatizados y mayor presencia digital.']
-            ].map(([Icon, title, desc], i) => (
-              <motion.div variants={fade} initial="initial" whileInView="whileInView" transition={{ delay: i * 0.1 }} key={title} className="relative z-10">
-                <div className="w-12 h-12 rounded-full border border-[#0D1B17]/20 bg-[#F6F4F1] flex items-center justify-center mb-6">
-                  <Icon size={20} className="text-[#0D1B17]" strokeWidth={1.5} />
-                </div>
-                <h3 className="font-bold text-[11px] font-mono tracking-widest mb-3">{title}</h3>
-                <p className="text-[#0D1B17]/70 text-sm leading-relaxed">{desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 02. EXPERIENCIA DIGITAL (Mockups) */}
-      <section className="relative py-24 px-6 bg-[#0D1B17] text-white overflow-hidden">
-        {/* Background Image Parallax */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center bg-fixed opacity-40"
-          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
-        />
-        {/* Overlay más suave para no tapar tanto la imagen */}
-        <div className="absolute inset-0 bg-[#0D1B17]/60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0D1B17]/90 via-transparent to-[#0D1B17]/40" />
-        
-        <div className="relative z-10 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <motion.div {...fade} className="lg:col-span-4 z-10 relative">
-            <SectionLabel n="02" title="EXPERIENCIA DIGITAL" />
-            <h2 className="font-serif text-4xl md:text-5xl mt-8 leading-tight mb-12">
-              Diseñada para inspirar<br />y convertir.
-            </h2>
-            
-            <div className="flex gap-8">
-              {[
-                [Smartphone, 'Responsive'],
-                [Eye, 'Intuitiva'],
-                [Target, 'Estratégica'],
-                [Database, 'Conectada']
-              ].map(([Icon, label]) => (
-                <div key={label} className="text-center">
-                  <Icon size={24} className="mx-auto mb-3 text-[#C49A44]" strokeWidth={1.5} />
-                  <div className="text-[10px] font-mono tracking-wider text-white/50">{label}</div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </motion.div>
+          </div>
+        </div>
+      </section>
 
-          <motion.div {...fade} className="lg:col-span-8 relative">
-            {/* Desktop Mockup */}
-            <div className="relative w-full max-w-[800px] ml-auto">
-              <div className="bg-[#1a1a1a] p-2 md:p-4 rounded-t-xl border-x border-t border-white/10 shadow-2xl relative z-10">
-                <div className="aspect-[16/10] bg-black rounded overflow-hidden relative">
-                  <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Web Desktop" className="w-full h-full object-cover opacity-80" />
-                  {/* Faux UI overlay to look like the design */}
-                  <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-8">
-                    <h3 className="font-serif text-3xl md:text-5xl mb-4">Vive en la mejor<br/>zona de la ciudad</h3>
-                    <div className="w-12 h-1 bg-[#C49A44] mb-6" />
-                  </div>
-                </div>
-              </div>
-              <div className="h-4 bg-[#2a2a2a] rounded-b-xl border border-white/10 shadow-2xl relative z-10" />
-              
-              {/* Mobile Mockup overlapping */}
-              <div className="absolute -bottom-10 -right-4 md:-right-10 w-[140px] md:w-[220px] z-20">
-                <div className="bg-black p-2 md:p-3 rounded-[2rem] border-4 border-[#2a2a2a] shadow-2xl relative">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-4 bg-[#2a2a2a] rounded-b-xl z-30" />
-                  <div className="aspect-[9/19] bg-[#0D1B17] rounded-[1.5rem] overflow-hidden relative">
-                    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Web Mobile" className="w-full h-full object-cover opacity-60" />
-                    <div className="absolute inset-0 flex flex-col p-4 bg-gradient-to-b from-black/80 to-transparent">
-                       <h3 className="font-serif text-lg mt-8 leading-tight">Vive en la mejor<br/>zona</h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* 08. PREÁMBULO APLICACIÓN DE MARCA (Fondo Blanco) */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">08</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Aplicación de Marca
+              </span>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 03. IDENTIDAD VISUAL */}
-      <section className="py-24 px-6 bg-[#1E2A25] text-white">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <motion.div {...fade} className="lg:col-span-3">
-            <SectionLabel n="03" title="IDENTIDAD VISUAL" />
-            <h2 className="font-serif text-4xl mt-8 leading-tight">Una identidad que refleja solidez, elegancia y confianza.</h2>
-          </motion.div>
-
-          <motion.div {...fade} className="lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-8">
-              <div>
-                <div className="font-mono text-[10px] tracking-widest text-white/50 mb-4 uppercase">Logotipo</div>
-                <div className="flex gap-4">
-                  <div className="w-32 h-32 bg-[#0D1B17] flex flex-col items-center justify-center border border-white/5">
-                    <div className="w-10 h-10 border border-[#C49A44] mb-2" />
-                  </div>
-                  <div className="w-32 h-32 bg-white flex flex-col items-center justify-center text-[#0D1B17]">
-                    <div className="w-10 h-10 border border-[#0D1B17] mb-2" />
-                    <span className="font-serif text-[10px] font-bold">HORIZONTE</span>
-                  </div>
-                  <div className="w-32 h-32 bg-[#0D1B17] flex flex-col items-center justify-center border border-white/5 text-white">
-                    <div className="w-10 h-10 border border-[#C49A44] mb-2" />
-                    <span className="font-serif text-[10px] font-bold">HORIZONTE</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="font-mono text-[10px] tracking-widest text-white/50 mb-4 uppercase">Tipografías</div>
-                <div className="font-serif text-4xl mb-2">Playfair Display</div>
-                <div className="font-sans text-2xl">Inter</div>
-              </div>
-            </div>
-            
-            <div className="space-y-8">
-              <div>
-                <div className="font-mono text-[10px] tracking-widest text-white/50 mb-4 uppercase">Paleta de color</div>
-                <div className="flex text-[9px] font-mono">
-                  {[['#0D1B17', 'white'], ['#1E2A25', 'white'], ['#C49A44', 'black'], ['#F6F4F1', 'black'], ['#FFFFFF', 'black']].map(([hex, txt]) => (
-                    <div key={hex} className="w-20 h-20 flex items-end p-2" style={{ backgroundColor: hex, color: txt }}>
-                      {hex}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <img src="https://images.unsplash.com/photo-1542382103-6258ff093c8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="w-full aspect-[4/3] object-cover" alt="Stationery" />
-                <img src="https://images.unsplash.com/photo-1579737119028-eb2874de30e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="w-full aspect-[4/3] object-cover" alt="Stationery" />
-                <img src="https://images.unsplash.com/photo-1621021443714-3658dc76e82a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="w-full aspect-[4/3] object-cover" alt="Stationery" />
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 04. CÓMO CONSTRUIMOS LA EXPERIENCIA */}
-      <section className="py-24 px-6 bg-[#F6F4F1] text-[#0D1B17]">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-12">
-          <motion.div {...fade} className="lg:col-span-1">
-            <SectionLabel n="04" title="CÓMO CONSTRUIMOS LA EXPERIENCIA" color="text-[#0D1B17]/50" />
-            <h2 className="font-serif text-3xl mt-8 leading-tight">Un proceso estratégico centrado en las personas y los resultados.</h2>
-          </motion.div>
-          
-          <motion.div {...fade} className="lg:col-span-3 grid grid-cols-2 md:grid-cols-5 gap-6 relative">
-            <div className="hidden md:block absolute top-6 left-6 right-6 h-px border-t border-dashed border-[#0D1B17]/20" />
-            {[
-              [Search, 'INVESTIGACIÓN', 'Entendemos al usuario y al negocio.'],
-              [Target, 'ESTRATEGIA', 'Definimos objetivos, estructura y mensajes clave.'],
-              [PenTool, 'DISEÑO', 'Creamos una experiencia visual alineada a la identidad.'],
-              [Code, 'DESARROLLO', 'Construimos soluciones rápidas, seguras y escalables.'],
-              [Users, 'CONVERSIÓN', 'Implementamos canales que generan resultados medibles.']
-            ].map(([Icon, title, desc]) => (
-              <div key={title} className="relative z-10">
-                <div className="w-12 h-12 rounded-full border border-[#0D1B17]/20 bg-[#F6F4F1] flex items-center justify-center mb-4">
-                  <Icon size={18} strokeWidth={1.5} />
-                </div>
-                <h3 className="font-bold text-[10px] font-mono tracking-widest mb-2">{title}</h3>
-                <p className="text-[#0D1B17]/60 text-xs leading-relaxed pr-4">{desc}</p>
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 05. PÁGINAS PRINCIPALES */}
-      <section className="py-24 px-6 bg-[#0a0a0a] text-white">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row gap-12">
-          <motion.div {...fade} className="w-full md:w-1/4">
-            <SectionLabel n="05" title="PÁGINAS PRINCIPALES" />
-            <h2 className="font-serif text-4xl mt-8 leading-tight">Cada página cumple un propósito.</h2>
-          </motion.div>
-          
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true }} className="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-4">
-            {project.pages.map((page, i) => (
-              <motion.div variants={fade} key={page} className="text-center">
-                <div className="font-mono text-[9px] tracking-widest uppercase mb-3 opacity-50">{page}</div>
-                <div className="aspect-[1/2] rounded-md overflow-hidden bg-[#1a1a1a] border border-white/10">
-                  <img src={`https://picsum.photos/seed/fullpage${i}/400/800`} alt={page} className="w-full h-full object-cover opacity-80" />
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 06. DETALLES QUE MARCAN LA DIFERENCIA (Bento Grid) */}
-      <section className="py-24 px-6 bg-[#0D1B17] text-white border-y border-white/5">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <motion.div {...fade} className="lg:col-span-1 p-6 flex flex-col justify-center">
-            <SectionLabel n="06" title="DETALLES QUE MARCAN LA DIFERENCIA" />
-            <h2 className="font-serif text-4xl mt-6 leading-tight">Pensamos en cada detalle para ofrecer una experiencia superior.</h2>
-          </motion.div>
-          
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true }} className="lg:col-span-3 grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Top row */}
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col items-center text-center">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Navegación Intuitiva</div>
-              <div className="flex-1 w-full bg-[#1a1a1a] rounded border border-white/10 mt-auto flex items-center justify-center min-h-[100px]">
-                 <MenuIcon />
-              </div>
-            </motion.div>
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col items-center text-center">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Llamadas a la acción</div>
-              <div className="flex-1 w-full flex items-center justify-center min-h-[100px]">
-                <button className="bg-[#C49A44] text-[#0D1B17] px-6 py-2 rounded text-xs font-bold">AGENDAR VISITA</button>
-              </div>
-            </motion.div>
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col items-center text-center">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Formularios Optimizados</div>
-              <div className="flex-1 w-full space-y-2 mt-auto">
-                <div className="h-6 bg-white/10 rounded w-full" />
-                <div className="h-6 bg-white/10 rounded w-full" />
-                <div className="h-6 bg-white/10 rounded w-full" />
-              </div>
-            </motion.div>
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col items-center text-center">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Integración WhatsApp</div>
-              <div className="flex-1 w-full flex items-center justify-center min-h-[100px]">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center"><MessageCircle /></div>
-              </div>
-            </motion.div>
-            
-            {/* Bottom row */}
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col md:col-span-2">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Galería Inmersiva</div>
-              <div className="flex-1 w-full bg-[#1a1a1a] min-h-[140px] rounded overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" className="w-full h-full object-cover opacity-70" alt="Galeria" />
-              </div>
-            </motion.div>
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Mapa Interactivo</div>
-              <div className="flex-1 w-full bg-white/10 min-h-[140px] rounded flex items-center justify-center relative overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale" alt="Map" />
-                <MapPin className="text-[#C49A44] relative z-10" size={32} />
-              </div>
-            </motion.div>
-            <motion.div variants={fade} className="border border-white/10 bg-white/5 p-6 flex flex-col items-center">
-              <div className="font-mono text-[9px] tracking-widest uppercase mb-4 opacity-50">Iconografía</div>
-              <div className="flex-1 w-full grid grid-cols-2 gap-4 place-items-center opacity-70 mt-4 min-h-[100px]">
-                <HomeIcon /> <TreeIcon /> <PoolIcon /> <SecurityIcon />
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 07. ASÍ FUNCIONA EL PROYECTO (Video) */}
-      <section className="py-24 px-6 bg-[#0a0a0a] text-white overflow-hidden relative">
-        <img 
-          src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
-          alt="Bg" 
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-[#0a0a0a]/80 to-transparent" />
-        
-        <div className="relative z-10 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <motion.div {...fade} className="lg:col-span-4">
-            <SectionLabel n="07" title="ASÍ FUNCIONA EL PROYECTO" />
-            <h2 className="font-serif text-4xl md:text-5xl mt-6 leading-tight mb-8">
-              Recorrido completo por la experiencia digital.
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Presencia editorial y materialidad.
             </h2>
-            <button className="inline-flex items-center gap-3 text-xs tracking-widest font-mono uppercase hover:text-[#C49A44] transition-colors border border-white/20 rounded-full pl-2 pr-6 py-2">
-              <div className="w-8 h-8 rounded-full border border-current flex items-center justify-center">
-                <Play size={12} fill="currentColor" />
-              </div>
-              VER VIDEO
-            </button>
           </motion.div>
+        </div>
+      </section>
+
+      {/* 08. EDITORIAL & BRAND MOCKUPS INMERSIVO */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5 overflow-hidden">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
           
-          <motion.div {...fade} className="lg:col-span-8 flex items-center justify-end relative">
-            <div className="w-full max-w-[700px] bg-[#1a1a1a] p-2 md:p-3 rounded-xl border border-white/10 shadow-2xl relative">
-              <div className="aspect-[16/10] bg-black rounded overflow-hidden">
-                <video 
-                  autoPlay loop muted playsInline 
-                  className="w-full h-full object-cover opacity-80"
-                  src="/assets/horizonte/hero-urban-apartment.mp4"
-                />
-              </div>
-              <div className="h-3 w-1/4 mx-auto bg-[#2a2a2a] rounded-b-xl" />
-            </div>
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/95 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-60" />
+          </div>
+
+          <div className="relative z-10 p-4 md:p-8 lg:p-10 h-full flex flex-col justify-center">
             
-            <div className="absolute -right-4 md:right-10 w-[100px] md:w-[160px] bg-black p-2 rounded-[1.5rem] border-2 border-[#2a2a2a] shadow-2xl">
-              <div className="aspect-[9/19] bg-[#0D1B17] rounded-xl overflow-hidden">
-                 <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Web Mobile" className="w-full h-full object-cover opacity-60" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-8 px-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Identidad Editorial & Señalética
+                </span>
               </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+            </motion.div>
 
-      {/* 08. APLICACIONES DE MARCA */}
-      <section className="py-24 px-6 bg-[#1E2A25] text-white">
-        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <motion.div {...fade} className="lg:col-span-1 p-6">
-            <SectionLabel n="08" title="APLICACIONES DE MARCA" />
-            <h2 className="font-serif text-3xl mt-6 leading-tight">La identidad se expande en todos los puntos de contacto.</h2>
-          </motion.div>
-          
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true }} className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <motion.img variants={fade} src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" className="w-full aspect-square object-cover" />
-            <motion.img variants={fade} src="https://images.unsplash.com/photo-1542382103-6258ff093c8d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" className="w-full aspect-square object-cover" />
-            <motion.img variants={fade} src="https://images.unsplash.com/photo-1579737119028-eb2874de30e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" className="w-full aspect-[2/1] md:aspect-square object-cover col-span-2 md:col-span-1" />
-            <motion.img variants={fade} src="https://images.unsplash.com/photo-1621021443714-3658dc76e82a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" className="w-full aspect-[2/1] md:aspect-square object-cover col-span-2 md:col-span-1" />
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 09. RESULTADOS */}
-      <section className="py-24 px-6 bg-[#0D1B17] text-white border-t border-white/5">
-        <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row gap-12">
-          <motion.div {...fade} className="w-full md:w-1/3">
-            <SectionLabel n="09" title="RESULTADOS" />
-            <h2 className="font-serif text-4xl mt-6 leading-tight">Una solución digital que genera impacto.</h2>
-          </motion.div>
-          
-          <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true }} className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              [Layout, 'PRESENTACIÓN CLARA', 'Información organizada para facilitar la decisión.'],
-              [Users, 'MAYOR CAPTACIÓN', 'Formularios y canales de contacto que generan más consultas.'],
-              [Smartphone, 'EXPERIENCIA RESPONSIVE', 'Diseño adaptado a todos los dispositivos para mejor navegación.'],
-              [Database, 'CONEXIÓN DIGITAL', 'Integración con WhatsApp, formularios y CRM para una gestión eficiente.']
-            ].map(([Icon, title, desc]) => (
-              <motion.div variants={fade} key={title} className="text-left">
-                <Icon size={32} className="text-[#C49A44] mb-4" strokeWidth={1} />
-                <h3 className="font-bold text-[10px] font-mono tracking-widest mb-3 uppercase">{title}</h3>
-                <p className="text-white/60 text-sm leading-relaxed pr-4">{desc}</p>
+            {/* Grid Editorial Monumental que cubre prácticamente todo el contenedor */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+              
+              {/* Bloque Superior Panorámico / Portada con Tipografía Monumental */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                className="lg:col-span-12 relative rounded-2xl overflow-hidden aspect-[21/9] md:aspect-[24/9] border border-white/10 bg-black group"
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" 
+                  alt="Editorial Horizonte" 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-between p-6 md:p-10">
+                  <div className="text-right">
+                    <span className="font-mono text-[9px] md:text-[11px] tracking-[0.25em] text-white/70 uppercase">Colección Residencial 2026</span>
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-4xl sm:text-6xl md:text-8xl tracking-tight text-white font-light leading-none">
+                      HORIZONTE
+                    </h3>
+                    <p className="font-sans text-xs md:text-sm text-white/70 tracking-widest uppercase mt-2">
+                      Arquitectura • Sofisticación • Lima
+                    </p>
+                  </div>
+                </div>
               </motion.div>
-            ))}
+
+              {/* Columna Izquierda: Mockup Tótem / Mupi Urbano Exterior */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="lg:col-span-6 relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-[16/10] border border-white/10 bg-black group"
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                  alt="Totem & Mupi Branding" 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 md:p-8">
+                  <div className="border-l-2 border-[#C49A44] pl-4">
+                    <span className="font-mono text-[9px] tracking-widest text-[#C49A44] uppercase">Señalética Urbana</span>
+                    <h4 className="font-serif text-xl md:text-2xl text-white mt-1">Presencia en Punto de Venta</h4>
+                    <p className="font-sans text-xs text-white/60 mt-1 max-w-sm">Tótems interactivos de alta definición instalados en salas de venta y avenidas principales.</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Columna Derecha: Detalle de Materialidad & Tag Mockup */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="lg:col-span-6 relative rounded-2xl overflow-hidden aspect-[4/3] md:aspect-[16/10] border border-white/10 bg-black group"
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
+                  alt="Detalle de Materiales y Marca" 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-6 md:p-8">
+                  <div className="border-l-2 border-white/40 pl-4">
+                    <span className="font-mono text-[9px] tracking-widest text-white/50 uppercase">Materialidad & Texturas</span>
+                    <h4 className="font-serif text-xl md:text-2xl text-white mt-1">Acabados y Papelería Premium</h4>
+                    <p className="font-sans text-xs text-white/60 mt-1 max-w-sm">Muestrarios de acabados, brochures de lujo y certificados de propiedad grabados en relieve.</p>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 09. PREÁMBULO EXPERIENCIA INTERACTIVA (Fondo Blanco) */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">09</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Experiencia Interactiva
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Diseño de tarjetas y micro-interacciones.
+            </h2>
           </motion.div>
+        </div>
+      </section>
+
+      {/* 09. SISTEMA DE COMPONENTES INMERSIVO */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-12"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Sistema de Componentes UI
+                </span>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+              {[
+                { id: 1, type: "Apartamento", beds: "2 Hab", loc: "San Isidro", img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+                { id: 2, type: "Penthouse", beds: "3 Hab", loc: "Miraflores", img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" },
+                { id: 3, type: "Estudio", beds: "1 Hab", loc: "Barranco", img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" }
+              ].map((item, i) => (
+                <motion.div 
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true }} 
+                  transition={{ duration: 0.6, delay: 0.2 * i }} 
+                  className="col-span-1"
+                >
+                  <div className="rounded-xl overflow-hidden border border-white/10 bg-[#1a1a1a] shadow-2xl relative group cursor-pointer hover:-translate-y-2 transition-transform duration-500">
+                    <div className="aspect-[4/3] bg-black overflow-hidden relative">
+                      <img src={item.img} alt="Propiedad" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    </div>
+                    <div className="p-6 relative">
+                      <div className="absolute top-0 right-6 -translate-y-1/2 w-10 h-10 bg-[#C49A44] rounded-full flex items-center justify-center text-[#0D1B17] shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <ArrowUpRight size={18} strokeWidth={2.5} />
+                      </div>
+                      <h4 className="font-serif text-xl mb-3 text-white group-hover:text-[#C49A44] transition-colors">{item.type}</h4>
+                      <div className="flex gap-4 text-[10px] font-mono tracking-wider text-white/50 uppercase">
+                        <span className="flex items-center gap-1.5"><HomeIcon /> {item.beds}</span>
+                        <span className="flex items-center gap-1.5"><MapPin size={12} strokeWidth={1.5} /> {item.loc}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. PREÁMBULO STACK TECNOLÓGICO (Fondo Blanco) */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">10</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Ingeniería
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Stack Tecnológico y Rendimiento.
+            </h2>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 10. RENDIMIENTO Y MÉTRICAS INMERSIVO */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-30 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1E2A25] to-transparent opacity-80" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-12"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Métricas de Carga & Lighthouse
+                </span>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              
+              {/* Métricas Visuales */}
+              <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "Performance", score: "100", color: "text-green-400" },
+                  { label: "Accessibility", score: "100", color: "text-green-400" },
+                  { label: "Best Practices", score: "100", color: "text-green-400" },
+                  { label: "SEO", score: "100", color: "text-green-400" }
+                ].map((metric, i) => (
+                  <div key={metric.label} className="bg-black/50 border border-white/5 rounded-xl p-6 flex flex-col items-center justify-center text-center">
+                    <svg className="w-20 h-20 mb-4 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        className="text-white/10"
+                        strokeWidth="3"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className={metric.color}
+                        strokeWidth="3"
+                        strokeDasharray="100, 100"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <text x="18" y="22.5" className={`text-xs font-mono font-bold ${metric.color}`} textAnchor="middle">{metric.score}</text>
+                    </svg>
+                    <div className="font-mono text-[10px] tracking-widest text-white/50 uppercase">{metric.label}</div>
+                  </div>
+                ))}
+              </motion.div>
+
+              {/* Stack Info */}
+              <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="space-y-8">
+                <div className="space-y-4">
+                  <h4 className="font-serif text-2xl text-white">Velocidad que convierte.</h4>
+                  <p className="text-white/60 text-sm leading-relaxed max-w-md">
+                    El sitio carga en menos de 0.8 segundos. Utilizamos una arquitectura de componentes moderna y generación de sitios estáticos para garantizar un rendimiento óptimo y un SEO impecable.
+                  </p>
+                </div>
+                
+                <div className="space-y-4 pt-6 border-t border-white/10">
+                  <div className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-4">TECNOLOGÍAS IMPLEMENTADAS</div>
+                  <div className="flex flex-wrap gap-3">
+                    {['React', 'Tailwind CSS', 'Framer Motion', 'Vite', 'Supabase', 'Vercel'].map(tech => (
+                      <div key={tech} className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-xs font-mono text-white/80">
+                        {tech}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
+          </div>
         </div>
       </section>
 
