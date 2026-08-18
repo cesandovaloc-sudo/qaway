@@ -1334,6 +1334,262 @@ export default function HorizontePage() {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════════════════
+          VERSIÓN BEHANCE — FULL-BLEED, NARRATIVA VISUAL
+          Mockups a pantalla completa, sin frames, sin numeración.
+          El trabajo habla por sí solo.
+          ═══════════════════════════════════════════════════════════════════ */}
+
+      {/* — HERO FULL-BLEED — */}
+      <section className="relative h-[85vh] md:h-screen w-full flex items-end">
+        <img 
+          src="/assets/horizonte/bg-real-estate.jpg" 
+          alt="Horizonte Inmobiliaria — proyecto web corporativo" 
+          className="absolute inset-0 w-full h-full object-cover" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="relative z-10 w-full px-6 md:px-12 lg:px-20 pb-16 md:pb-24 max-w-[1440px] mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <p className="font-mono text-[10px] tracking-[0.25em] text-white/60 uppercase mb-4">Caso de Estudio</p>
+            <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-6">
+              Horizonte<br/>Inmobiliaria
+            </h1>
+            <div className="flex flex-wrap gap-x-8 gap-y-2 font-mono text-[10px] tracking-widest text-white/50 uppercase">
+              <span>Web Corporativo</span>
+              <span>2024</span>
+              <span>React · Tailwind · Supabase</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — METADATA STRIP — */}
+      <section className="bg-white py-10 md:py-14 px-6 md:px-12">
+        <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <div className="font-mono text-[9px] tracking-widest text-[#111210]/30 uppercase mb-2">Cliente</div>
+            <div className="text-xs text-[#111210]">Horizonte Inmobiliaria</div>
+          </div>
+          <div>
+            <div className="font-mono text-[9px] tracking-widest text-[#111210]/30 uppercase mb-2">Servicio</div>
+            <div className="text-xs text-[#111210]">Diseño, desarrollo e integración</div>
+          </div>
+          <div>
+            <div className="font-mono text-[9px] tracking-widest text-[#111210]/30 uppercase mb-2">Año</div>
+            <div className="text-xs text-[#111210]">2024</div>
+          </div>
+          <div>
+            <div className="font-mono text-[9px] tracking-widest text-[#111210]/30 uppercase mb-2">Stack</div>
+            <div className="text-xs text-[#111210]">React, Tailwind, Supabase, WhatsApp</div>
+          </div>
+        </div>
+      </section>
+
+      {/* — TEXTO: CONTEXTO — */}
+      <section className="bg-white py-16 md:py-24 px-6 md:px-12">
+        <div className="max-w-[680px] mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-lg md:text-xl text-[#111210] leading-relaxed"
+          >
+            Horizonte dependía de métodos de venta manuales. La falta de presencia digital generaba un embudo lento, donde los prospectos perdían interés antes de recibir el primer contacto. Diseñamos y desarrollamos una plataforma web de alta conversión orientada a resultados.
+          </motion.p>
+        </div>
+      </section>
+
+      {/* — FULL-BLEED: SITIO EN ESCRITORIO — */}
+      <section className="bg-[#f0f0f0]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Sitio web de Horizonte Inmobiliaria — vista de escritorio" 
+            loading="lazy" 
+            decoding="async" 
+            className="w-full h-auto" 
+          />
+        </motion.div>
+      </section>
+
+      {/* — FULL-BLEED: SITIO EN MÓVIL — */}
+      <section className="bg-[#111210] py-16 md:py-24">
+        <div className="max-w-[400px] mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="rounded-[2.5rem] p-[6px] border border-white/10 bg-[#1a1a1a] shadow-2xl"
+          >
+            <div className="rounded-[2rem] overflow-hidden aspect-[9/19.5] bg-[#0D1B17]">
+              <img 
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Sitio web de Horizonte Inmobiliaria — vista móvil" 
+                loading="lazy" 
+                decoding="async" 
+                className="w-full h-full object-cover" 
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — TEXTO: IDENTIDAD — */}
+      <section className="bg-white py-16 md:py-24 px-6 md:px-12">
+        <div className="max-w-[680px] mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-lg md:text-xl text-[#111210] leading-relaxed"
+          >
+            La identidad visual combina tipografía serif con una paleta de bosque profundo y dorado, transmitiendo confianza y sofisticación en cada punto de contacto.
+          </motion.p>
+        </div>
+      </section>
+
+      {/* — FULL-BLEED: IDENTIDAD VISUAL — */}
+      <section className="bg-[#0D1B17] py-20 md:py-32 px-6 md:px-12">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="font-serif text-7xl md:text-8xl text-[#F6F4F1] leading-none mb-6">Ag</div>
+            <div className="font-serif text-2xl text-[#F6F4F1] mb-2">Playfair Display</div>
+            <div className="font-sans text-lg text-white/50">DM Sans</div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="grid grid-cols-2 gap-4"
+          >
+            <div className="aspect-square rounded-2xl bg-[#0D1B17] border border-white/10 flex items-center justify-center">
+              <span className="font-mono text-[10px] text-white/40">#0D1B17</span>
+            </div>
+            <div className="aspect-square rounded-2xl bg-[#1E2A25] border border-white/10 flex items-center justify-center">
+              <span className="font-mono text-[10px] text-white/40">#1E2A25</span>
+            </div>
+            <div className="aspect-square rounded-2xl bg-[#C49A44] flex items-center justify-center">
+              <span className="font-mono text-[10px] text-[#0D1B17]/60">#C49A44</span>
+            </div>
+            <div className="aspect-square rounded-2xl bg-[#F6F4F1] flex items-center justify-center">
+              <span className="font-mono text-[10px] text-[#0D1B17]/60">#F6F4F1</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — FULL-BLEED: SHOWCASE PANORÁMICO — */}
+      <section className="bg-white">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Horizonte Inmobiliaria — identidad de marca aplicada" 
+            loading="lazy" 
+            decoding="async" 
+            className="w-full h-auto" 
+          />
+        </motion.div>
+      </section>
+
+      {/* — FULL-BLEED: APLICACIÓN DE MARCA — */}
+      <section className="bg-[#f8f9f7]">
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="aspect-square md:aspect-auto md:h-full"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+              alt="Señalética urbana Horizonte" 
+              loading="lazy" 
+              decoding="async" 
+              className="w-full h-full object-cover" 
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="aspect-square md:aspect-auto md:h-full"
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+              alt="Detalle de acabados y materiales Horizonte" 
+              loading="lazy" 
+              decoding="async" 
+              className="w-full h-full object-cover" 
+            />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — MÉTRICAS (Minimalistas) — */}
+      <section className="bg-[#111210] py-20 md:py-28 px-6">
+        <div className="max-w-[1000px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { value: '3x', label: 'Leads' },
+            { value: '100%', label: 'Automatización' },
+            { value: '-60%', label: 'Carga operativa' },
+            { value: '<0.8s', label: 'Carga' },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+            >
+              <div className="font-serif text-4xl md:text-5xl text-[#C49A44] mb-2">{stat.value}</div>
+              <div className="font-mono text-[10px] tracking-widest text-white/40 uppercase">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* — CTA BEHANCE — */}
+      <section className="bg-white py-24 md:py-32 px-6">
+        <div className="max-w-[680px] mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="font-serif text-3xl md:text-4xl text-[#111210] leading-tight mb-6">
+              ¿Tienes un proyecto similar?
+            </h2>
+            <a href="#contacto" className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
+              Hablemos <ArrowUpRight size={14} />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer / Navegación */}
       <footer id="contacto" className="bg-[#0a0a0a] text-white py-12 px-6 border-t border-white/5">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
