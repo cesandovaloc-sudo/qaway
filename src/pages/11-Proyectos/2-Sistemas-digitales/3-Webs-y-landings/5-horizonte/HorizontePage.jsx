@@ -264,61 +264,6 @@ export default function HorizontePage() {
           </div>
         </section>
 
-        {/* — VERSIÓN EDITORIAL: CONTEXTO (Comparar con sección de arriba) — */}
-        <section className="bg-white text-[#111210] py-20 md:py-28 px-6 border-t border-[#111210]/5">
-          <div className="max-w-[1000px] mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
-              <motion.div {...fade}>
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="w-8 h-px bg-[#ff4b0b]"></span>
-                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">El Problema</span>
-                </div>
-                <h2 className="font-serif text-2xl md:text-3xl leading-tight">
-                  Dependía de métodos de venta manuales. La falta de presencia digital generaba un embudo lento, donde los prospectos perdían interés antes de recibir el primer contacto.
-                </h2>
-              </motion.div>
-
-              <motion.div {...fade} transition={{ delay: 0.15 }}>
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="w-8 h-px bg-[#ff4b0b]"></span>
-                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">La Solución</span>
-                </div>
-                <h2 className="font-serif text-2xl md:text-3xl leading-tight mb-6">
-                  Diseñamos y desarrollamos una plataforma web de alta conversión. Un canal digital sólido para perfilar prospectos de forma eficiente desde el primer clic.
-                </h2>
-                <div className="flex flex-wrap gap-2 mt-6">
-                  {['React', 'Tailwind CSS', 'Supabase', 'WhatsApp API'].map(t => (
-                    <span key={t} className="px-3 py-1.5 rounded-full border border-[#111210]/10 text-[10px] font-mono text-[#111210]/60">{t}</span>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. PREÁMBULO IDENTIDAD VISUAL (Fondo Blanco) */}
-        <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
-          <div className="max-w-[1200px] mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mb-2"
-            >
-              <div className="flex items-center gap-3 mb-5">
-                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">04</span>
-                <span className="w-8 h-px bg-[#ff4b0b]"></span>
-                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
-                  Identidad Visual
-                </span>
-              </div>
-              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
-                Creación basada en su Identidad Visual
-              </h2>
-            </motion.div>
-          </div>
-        </section>
-
         {/* 4. IDENTIDAD VISUAL INMERSIVA (Lógica inmersiva de pantalla completa) */}
         <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white">
           {/* Fondo inmersivo (Fijo al hacer scroll) */}
