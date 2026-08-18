@@ -43,6 +43,7 @@ import DiscardedInicioPage from '@/pages/9-pruebas/1-paginas_descartadas/1-inici
 import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
 import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
 import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
+import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -142,6 +143,7 @@ export default function AppRouter() {
           <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
+          <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
           <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
           <Route
