@@ -1730,24 +1730,6 @@ export default function HorizonteBackupPage() {
         </div>
       </section>
 
-      {/* — CTA BEHANCE — */}
-      <section className="bg-white py-24 md:py-32 px-6">
-        <div className="max-w-[680px] mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="font-serif text-3xl md:text-4xl text-[#111210] leading-tight mb-6">
-              ¿Tienes un proyecto similar?
-            </h2>
-            <a href="#contacto" className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
-              Hablemos <ArrowUpRight size={14} />
-            </a>
-          </motion.div>
-        </div>
-      </section>
-
       {/* — RESULTADOS Y MÉTRICAS — */}
       <section className="bg-[#111210] text-white py-20 md:py-28 px-6">
         <div className="max-w-[1000px] mx-auto">
