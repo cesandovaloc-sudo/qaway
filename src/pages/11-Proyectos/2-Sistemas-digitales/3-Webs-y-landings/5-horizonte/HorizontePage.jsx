@@ -97,33 +97,52 @@ export default function HorizontePage() {
       
       <div className="bg-[#050505] text-white selection:bg-[#ff4b0b] selection:text-white">
         
-        {/* 1. HERO ESTILO PÁGINA DE PROYECTOS (CENTRADO) */}
-        <div className="projects-page bg-[#f8f9f7]">
-          <section className="projects-hero flex flex-col justify-center items-center" style={{ paddingBottom: '64px', paddingTop: '120px' }}>
-            <div className="projects-shell w-full flex flex-col items-center justify-center">
-              
-              <motion.div
-                className="projects-hero__copy flex flex-col items-center text-center !m-0 !max-w-[800px]"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <p className="projects-kicker">PROYECTO</p>
-                <h1 className="qw-hero-title">Website Proyecto Inmobiliario</h1>
-                
-                <div className="flex gap-4 mt-4 flex-wrap justify-center">
-                  <a className="projects-button" href={project.liveUrl} target="_blank" rel="noreferrer" style={{ background: '#111210', color: '#ffffff' }}>
-                    Ver sitio web <ArrowUpRight size={16} />
-                  </a>
-                  <a className="projects-button" href="#proceso" style={{ background: 'transparent', color: '#111210', border: '1px solid #111210' }}>
-                    Conocer el proceso <ArrowDown size={16} />
-                  </a>
-                </div>
-              </motion.div>
+        {/* 1. HERO EDITORIAL */}
+        <section className="bg-[#f8f9f7] text-[#111210] py-20 md:py-32 px-6">
+          <div className="max-w-[1000px] mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">Caso de Estudio</span>
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              </div>
+              <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl leading-[0.95] tracking-tight mb-8">
+                Horizonte<br/>Inmobiliaria
+              </h1>
+              <p className="text-sm md:text-base text-[#111210]/60 leading-relaxed max-w-xl mb-10">
+                Sitio web corporativo y plataforma de captación para proyectos inmobiliarios premium. Diseño, desarrollo e integración con CRM y WhatsApp.
+              </p>
 
-            </div>
-          </section>
-        </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-[#111210]/10 pt-8">
+                <div>
+                  <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Cliente</div>
+                  <div className="text-xs font-medium text-[#111210]">Horizonte Inmobiliaria</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Servicio</div>
+                  <div className="text-xs font-medium text-[#111210]">Web · CRM · WhatsApp</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Año</div>
+                  <div className="text-xs font-medium text-[#111210]">2024</div>
+                </div>
+                <div>
+                  <div className="font-mono text-[9px] tracking-widest text-[#111210]/40 uppercase mb-2">Stack</div>
+                  <div className="text-xs font-medium text-[#111210]">React · Tailwind · Supabase</div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-10">
+                <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
+                  Ver sitio en vivo <ArrowUpRight size={14} />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
 
 
