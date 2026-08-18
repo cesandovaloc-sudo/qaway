@@ -264,90 +264,69 @@ export default function HorizontePage() {
           </div>
         </section>
 
-        {/* 4. IDENTIDAD VISUAL INMERSIVA (Lógica inmersiva de pantalla completa) */}
-        <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white">
-          {/* Fondo inmersivo (Fijo al hacer scroll) */}
-          <div 
-            className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-50"
-            style={{ backgroundImage: 'url("/assets/horizonte/bg-real-estate.jpg")' }}
-          />
+        {/* 4. IDENTIDAD VISUAL */}
+        <section className="bg-[#0D1B17] text-white py-20 md:py-32 px-6">
+          <div className="max-w-[1000px] mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-16"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Identidad Visual
+                </span>
+              </div>
+            </motion.div>
 
-          {/* Contenedor central */}
-          <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
-            
-            {/* Caja de contenido inmersivo (misma lógica que la caja del video) */}
-            <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
-            </div>
-
-            <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
-              
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+              {/* Tipografía */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="mb-16"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="lg:col-span-5"
               >
-                <div className="flex items-center gap-3">
-                  <span className="w-8 h-px bg-[#C49A44]"></span>
-                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
-                    Identidad Visual
-                  </span>
-                </div>
+                <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Tipografía Primaria</h4>
+                <div className="font-serif text-6xl md:text-7xl mb-16 text-[#F6F4F1]">Playfair Display</div>
+
+                <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Tipografía Secundaria</h4>
+                <div className="font-sans text-4xl md:text-5xl text-[#F6F4F1] font-medium tracking-tight">DM Sans</div>
               </motion.div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-                {/* Tipografía */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="lg:col-span-5"
-                >
-                  <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Tipografía Primaria</h4>
-                  <div className="font-serif text-6xl md:text-7xl mb-16 text-[#F6F4F1]">Playfair Display</div>
-
-                  <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Tipografía Secundaria</h4>
-                  <div className="font-sans text-4xl md:text-5xl text-[#F6F4F1] font-medium tracking-tight">DM Sans</div>
-                </motion.div>
-
-                {/* Paleta de Color */}
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="lg:col-span-7"
-                >
-                  <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Patrones de Color</h4>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* Bosque */}
-                    <div className="aspect-square bg-[#0D1B17] rounded-xl p-4 flex flex-col justify-between border border-white/5 shadow-xl">
-                      <span className="font-serif text-white/80 text-xs">Bosque</span>
-                      <span className="font-mono text-[10px] text-white/40 uppercase">#0D1B17</span>
-                    </div>
-                    {/* Verde Oscuro */}
-                    <div className="aspect-square bg-[#1E2A25] rounded-xl p-4 flex flex-col justify-between border border-white/5 shadow-xl">
-                      <span className="font-serif text-white/80 text-xs">Oliva</span>
-                      <span className="font-mono text-[10px] text-white/40 uppercase">#1E2A25</span>
-                    </div>
-                    {/* Dorado */}
-                    <div className="aspect-square bg-[#C49A44] rounded-xl p-4 flex flex-col justify-between border border-[#0D1B17]/10 shadow-xl">
-                      <span className="font-serif text-[#0D1B17] font-medium text-xs">Dorado</span>
-                      <span className="font-mono text-[10px] text-[#0D1B17]/60 uppercase">#C49A44</span>
-                    </div>
-                    {/* Crema */}
-                    <div className="aspect-square bg-[#F6F4F1] rounded-xl p-4 flex flex-col justify-between shadow-xl">
-                      <span className="font-serif text-[#0D1B17] font-medium text-xs">Crema</span>
-                      <span className="font-mono text-[10px] text-[#0D1B17]/60 uppercase">#F6F4F1</span>
-                    </div>
+              {/* Paleta de Color */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="lg:col-span-7"
+              >
+                <h4 className="font-mono text-[10px] tracking-widest text-white/40 uppercase mb-8 border-b border-white/10 pb-4">Patrones de Color</h4>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="aspect-square bg-[#0D1B17] rounded-xl p-4 flex flex-col justify-between border border-white/5 shadow-xl">
+                    <span className="font-serif text-white/80 text-xs">Bosque</span>
+                    <span className="font-mono text-[10px] text-white/40 uppercase">#0D1B17</span>
                   </div>
-                </motion.div>
-              </div>
-
+                  <div className="aspect-square bg-[#1E2A25] rounded-xl p-4 flex flex-col justify-between border border-white/5 shadow-xl">
+                    <span className="font-serif text-white/80 text-xs">Oliva</span>
+                    <span className="font-mono text-[10px] text-white/40 uppercase">#1E2A25</span>
+                  </div>
+                  <div className="aspect-square bg-[#C49A44] rounded-xl p-4 flex flex-col justify-between border border-[#0D1B17]/10 shadow-xl">
+                    <span className="font-serif text-[#0D1B17] font-medium text-xs">Dorado</span>
+                    <span className="font-mono text-[10px] text-[#0D1B17]/60 uppercase">#C49A44</span>
+                  </div>
+                  <div className="aspect-square bg-[#F6F4F1] rounded-xl p-4 flex flex-col justify-between shadow-xl">
+                    <span className="font-serif text-[#0D1B17] font-medium text-xs">Crema</span>
+                    <span className="font-mono text-[10px] text-[#0D1B17]/60 uppercase">#F6F4F1</span>
+                  </div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
