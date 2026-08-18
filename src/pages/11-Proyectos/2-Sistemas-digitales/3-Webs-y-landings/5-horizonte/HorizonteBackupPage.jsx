@@ -1748,6 +1748,75 @@ export default function HorizonteBackupPage() {
         </div>
       </section>
 
+      {/* — RESULTADOS Y MÉTRICAS — */}
+      <section className="bg-[#111210] text-white py-20 md:py-28 px-6">
+        <div className="max-w-[1000px] mx-auto">
+          <motion.div {...fade} className="mb-12">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">05</span>
+              <span className="w-8 h-px bg-[#C49A44]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">Resultados</span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight">Impacto medible.</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { value: '3x', label: 'Aumento de leads', desc: 'En los primeros 3 meses' },
+              { value: '100%', label: 'Atención automatizada', desc: 'Vía WhatsApp API' },
+              { value: '-60%', label: 'Carga operativa', desc: 'Agentes enfocados en cierre' },
+              { value: '<0.8s', label: 'Tiempo de carga', desc: 'Lighthouse 100/100' },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="border-t border-white/10 pt-6"
+              >
+                <div className="font-serif text-4xl md:text-5xl mb-3 text-[#C49A44]">{stat.value}</div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-1">{stat.label}</div>
+                <div className="text-[11px] text-white/50">{stat.desc}</div>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div {...fade} className="mt-16 border-t border-white/10 pt-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="font-serif text-2xl mb-3">Velocidad que convierte.</h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  El sitio carga en menos de 0.8 segundos. Arquitectura de componentes moderna, generación estática y SEO impecable.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['React', 'Tailwind CSS', 'Framer Motion', 'Vite', 'Supabase', 'Vercel'].map(tech => (
+                  <span key={tech} className="px-3 py-1.5 rounded-full border border-white/10 text-[10px] font-mono text-white/70">{tech}</span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* — CTA — */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-20 md:py-28 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[800px] mx-auto text-center">
+          <motion.div {...fade}>
+            <h2 className="font-serif text-3xl md:text-4xl leading-tight mb-6">
+              ¿Tienes un proyecto similar en mente?
+            </h2>
+            <p className="text-sm text-[#111210]/60 mb-8 max-w-md mx-auto">
+              Creamos sitios web, identidades y sistemas digitales adaptados a las necesidades de cada proyecto.
+            </p>
+            <a href="#contacto" className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-[#111210] text-white text-xs font-bold tracking-wider hover:bg-[#111210]/80 transition-colors">
+              HABLEMOS DE TU PROYECTO <ArrowUpRight size={14} />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer / Navegación */}
       <footer id="contacto" className="bg-[#0a0a0a] text-white py-12 px-6 border-t border-white/5">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between font-mono text-[10px] uppercase tracking-widest">
