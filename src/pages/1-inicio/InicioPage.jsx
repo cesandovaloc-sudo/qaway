@@ -36,6 +36,7 @@ import {
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { carouselLandings } from '@/data/academyCourses'
 import { useFeaturedCourses } from '@/features/academy-catalog'
+import { getLocalFallbackCourseImage } from '@/integrations/academy'
 import '@/pages/4-academy/academy.css'
 import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
@@ -1058,13 +1059,27 @@ function AcademyCoursesInner({ tick }) {
             className="academy-course-card is-compact"
           >
             <div style={{ minHeight: '14rem' }} className="academy-course-image">
-              {course.imageUrl ? (
-                <img src={course.imageUrl} alt={course.title} loading="lazy" decoding="async" />
-              ) : (
-                <span className="grid h-full w-full place-items-center bg-[#20201f]/5 text-[#20201f]/30">
-                  <GraduationCap size={40} strokeWidth={1.2} />
-                </span>
-              )}
+              {(() => {
+                const imgSource = course.imageUrl || getLocalFallbackCourseImage(course.slug)
+                return imgSource ? (
+                  <img
+                    src={imgSource}
+                    alt={course.title}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const fallback = getLocalFallbackCourseImage(course.slug)
+                      if (fallback && e.currentTarget.src !== fallback && !e.currentTarget.src.endsWith(fallback)) {
+                        e.currentTarget.src = fallback
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="grid h-full w-full place-items-center bg-[#20201f]/5 text-[#20201f]/30">
+                    <GraduationCap size={40} strokeWidth={1.2} />
+                  </span>
+                )
+              })()}
               {course.badgeText && <span>{course.badgeText}</span>}
             </div>
             <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">

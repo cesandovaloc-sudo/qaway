@@ -91,13 +91,6 @@ const services = [
 
 const featuredServices = services
 
-const phases = [
-  ['01', 'Diagnóstico de marca', 'Qué comunica, a quién habla y cómo debe verse.'],
-  ['02', 'Dirección visual', 'Estilo, tono y criterios para mantener coherencia.'],
-  ['03', 'Piezas clave', 'Identidad, contenido y materiales comerciales.'],
-  ['04', 'Formatos finales', 'Listos para redes, web, presentación o venta.'],
-]
-
 const brandingProjects = [
   {
     name: 'Hospitalidad',
@@ -299,9 +292,9 @@ function Hero() {
 
             <a
               href="#branding"
-              className="qw-hero-secondary-card-btn group"
+              className="qw-hero-secondary-card-btn group rounded-[6px]"
             >
-              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center rounded-[4px] bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
                 <PenTool size={20} strokeWidth={1.65} />
               </span>
               <span className="min-w-0">
@@ -693,95 +686,6 @@ function ContentSystem() {
   )
 }
 
-function Method() {
-  const [activePhase, setActivePhase] = useState(0)
-
-  return (
-    <section id="metodo" className="vl-dark vl-section vl-method" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: 'clamp(40px, 4vh, 80px) 0' }}>
-      <div className="vl-shell">
-        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-heading-row vl-heading-row--dark" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '5px', marginBottom: '0' }}>
-          <div>
-            <div className="flex flex-col gap-10">
-              <div className="border-b border-red-500/20 pb-6">
-                <p className="qw-section-kicker">Método híbrido / 05</p>
-                <h2
-                  className="qw-section-title"
-                  style={{ ...displayFont, fontWeight: 760 }}
-                >
-                  IA para acelerar el proceso.<br /><span className="text-[#ff4b0b]">Dirección para cuidar el resultado.</span>
-                </h2>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="vl-method__body" style={{ marginTop: '32px', alignItems: 'flex-start' }}>
-          <div className="vl-method__phases" style={{ gap: '0px', display: 'flex', flexDirection: 'column' }}>
-            {phases.map(([number, title, copy], index) => (
-              <motion.div
-                key={title}
-                className="vl-phase"
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.2 }}
-                custom={index * 0.15}
-                variants={revealUp}
-                onClick={() => setActivePhase(activePhase === index ? -1 : index)}
-                style={{
-                  cursor: 'pointer',
-                  padding: '16px 0',
-                  borderBottom: '1px solid rgba(255,255,255,0.08)',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '24px'
-                }}
-              >
-                <span style={{ color: activePhase === index ? 'var(--vl-acid)' : '#666', font: 'bold 13px monospace' }}>{number}</span>
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ margin: 0, fontSize: '18px', color: activePhase === index ? '#fff' : '#8b8c88', transition: 'color 0.3s' }}>
-                    {title}
-                  </h3>
-                  <motion.p
-                    animate={{
-                      maxHeight: activePhase === index ? 88 : 0,
-                      opacity: activePhase === index ? 1 : 0,
-                      y: activePhase === index ? 0 : -3,
-                      paddingTop: activePhase === index ? 10 : 0,
-                    }}
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    style={{ overflow: 'hidden', margin: 0, color: '#aaa99f', fontSize: '15px', lineHeight: 1.6 }}
-                  >
-                    {copy}
-                  </motion.p>
-                </div>
-                <motion.div
-                  animate={{ rotate: activePhase === index ? 180 : 0 }}
-                  transition={{ duration: 0.16, ease: 'easeOut' }}
-                  style={{ color: activePhase === index ? 'var(--vl-acid)' : '#666' }}
-                >
-                  <ChevronDown size={18} />
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-          <div className="flex flex-col">
-            <motion.figure initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={scaleUpImage} className="vl-method__image" style={{ minHeight: 'unset', height: '350px', borderRadius: '8px', marginTop: '-80px' }}>
-              <img src={`${ASSET}/estudio-servicio-contenido.webp`} alt="Dirección humana de un proceso visual asistido por IA" loading="lazy" style={{ borderRadius: '8px' }} />
-            </motion.figure>
-            <div className="vl-trust" style={{ marginTop: '16px' }}>
-              {[
-                [LockKeyhole, 'Archivos protegidos'],
-                [CircleUserRound, 'Revisión estética humana'],
-                [Layers3, 'Entregables organizados'],
-              ].map(([Icon, label]) => <div key={label}><Icon size={18} /><span>{label}</span></div>)}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function Diagnostic() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -1022,7 +926,6 @@ export default function EstudioPage() {
       <ContentSystem />
       <DigitalPresenceCopy />
       <TransformacionVisualCarousel />
-      <Method />
       <Diagnostic />
     </div>
   )

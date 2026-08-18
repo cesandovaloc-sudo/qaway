@@ -22,6 +22,22 @@ export interface AcademyCourseRow {
 
 const VALID_LEVELS = ['Principiante', 'Intermedio', 'Avanzado'] as const
 
+const LOCAL_COURSE_FALLBACK_IMAGES: Record<string, string> = {
+  'identidad-visual-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
+  'whatsapp-business-para-negocios': '/assets/pages/4-academy/curso-whatsapp-business2.png',
+  'antigravity-desde-cero': '/assets/pages/4-academy/curso-antigravity-youtube2.png',
+  'ia-para-equipos-pequenos': '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
+  'sistema-de-contenido-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
+  'workflows-sin-codigo': '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
+  'presencia-digital-para-emprender': '/assets/pages/4-academy/curso-whatsapp-business2.png',
+}
+
+/** Obtiene la ruta de imagen local empaquetada como contingencia pasiva. */
+export function getLocalFallbackCourseImage(slug?: string | null): string | null {
+  if (!slug) return null
+  return LOCAL_COURSE_FALLBACK_IMAGES[slug] || null
+}
+
 /** Resuelve rutas relativas de imagen a URLs públicas estables de Academy. */
 export function resolveAcademyImageUrl(imageUrl: string | null): string | null {
   if (!imageUrl) return null

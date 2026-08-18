@@ -5,6 +5,7 @@ export {
   mapAcademyCourseRowsToV1,
   resolveAcademyImageUrl,
   buildAcademyCourseHref,
+  getLocalFallbackCourseImage,
 } from './academy-courses.mapper'
 export type { AcademyCourseRow } from './academy-courses.mapper'
 export { academyClient, academyConfigured, getAcademyUrl, getAcademyAssetsUrl } from './academy.client'

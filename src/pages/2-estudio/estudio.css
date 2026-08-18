@@ -611,9 +611,9 @@
 
 
 
-.estudio-page .vl-branding__visual { position: relative; min-height: 550px; overflow: hidden; }
-.estudio-page .vl-branding__visual > img { width: calc(100% + 6vw); height: 100%; position: absolute; left: -6vw; top: 0; object-fit: cover; }
-.estudio-page .vl-branding__overlay { position: absolute; inset: 0; left: -6vw; width: calc(100% + 6vw); z-index: 2; }
+.estudio-page .vl-branding__visual { position: relative; min-height: 550px; overflow: hidden; border-radius: 6px; }
+.estudio-page .vl-branding__visual > img { width: calc(100% + 6vw); height: 100%; position: absolute; left: -6vw; top: 0; object-fit: cover; border-radius: 6px; }
+.estudio-page .vl-branding__overlay { position: absolute; inset: 0; left: -6vw; width: calc(100% + 6vw); z-index: 2; border-radius: 6px; }
 .estudio-page .vl-branding__visual figcaption { position: absolute; left: 24px; bottom: 60px; z-index: 2; display: grid; gap: 4px; color: white; }
 .estudio-page .vl-branding__visual figcaption span { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; opacity: .6; }
 .estudio-page .vl-branding__visual figcaption strong { font-size: 13px; max-width: 280px; }
@@ -644,6 +644,7 @@
   position: relative;
   transition: transform .5s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
+  border-radius: 6px;
   outline: 1px solid transparent;
 }
 .estudio-page .vl-tilt:hover {
@@ -765,6 +766,7 @@
   position: relative;
   min-height: 520px;
   overflow: hidden;
+  border-radius: 6px;
 }
 
 .estudio-page .vl-content-showcase video {
@@ -773,12 +775,14 @@
   position: absolute;
   inset: 0;
   object-fit: cover;
+  border-radius: 6px;
   filter: contrast(1.16) brightness(0.90) saturate(1.28);
 }
 
 .estudio-page .vl-content-showcase__veil {
   position: absolute;
   inset: 0;
+  border-radius: 6px;
   background: linear-gradient(0deg, rgba(248,249,247,.46), transparent 46%, transparent 72%, rgba(248,249,247,.06));
 }
 
