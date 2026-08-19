@@ -189,6 +189,245 @@ export default function HorizonteBackupPage() {
           </div>
         </section>
 
+        {/* 05. DIRECCIÓN DE ARTE — Selección Fotográfica */}
+        <section className="bg-[#f8f9f7] text-[#111210] py-16 md:py-24 px-6 border-t border-[#111210]/5">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div {...fade} className="mb-12 md:mb-16">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">05</span>
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                  Dirección de Arte
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+                Selección Fotográfica
+              </h2>
+              <p className="text-sm text-[#111210]/60 mt-4 max-w-xl font-sans">
+                Estilo de vida & Arquitectura
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Fotografía', img: '/assets/horizonte/photo-1.jpg' },
+                { label: 'Fotografía', img: '/assets/horizonte/photo-2.jpg' },
+                { label: 'Fotografía', img: '/assets/horizonte/photo-3.jpg' },
+                { label: 'Fotografía', img: '/assets/horizonte/photo-4.jpg' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  className="group relative overflow-hidden rounded-lg aspect-[4/5]"
+                >
+                  <img
+                    src={item.img}
+                    alt={item.label}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="absolute bottom-4 left-4 font-mono text-[10px] tracking-widest uppercase text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    {item.label}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 06. ECOSISTEMA DIGITAL — Visualización de Interfaces */}
+        <section className="bg-[#0a0f0d] text-white py-16 md:py-24 px-6 border-t border-white/5">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div {...fade} className="mb-12 md:mb-16">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">06</span>
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Ecosistema Digital
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl">
+                Visualización de interfaces
+              </h2>
+              <p className="text-sm text-white/50 mt-4 max-w-xl font-sans">
+                Diseño UI / UX
+              </p>
+            </motion.div>
+
+            <motion.div {...fade} transition={{ delay: 0.1 }}>
+              <p className="font-mono text-[11px] tracking-widest text-white/40 uppercase mb-6">
+                horizonte-inmobiliaria.com
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="relative overflow-hidden rounded-xl bg-[#111513] ring-1 ring-white/10"
+              >
+                <div className="aspect-[16/10] flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Desktop UI</span>
+                    <div className="mt-4 w-full max-w-[500px] aspect-[16/10] bg-[#0D1B17] rounded-lg ring-1 ring-white/10 flex items-center justify-center">
+                      <span className="text-white/20 text-xs">Desktop Preview</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.15 }}
+                className="relative overflow-hidden rounded-xl bg-[#111513] ring-1 ring-white/10"
+              >
+                <div className="aspect-[16/10] flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Mobile UI</span>
+                    <div className="mt-4 w-[180px] aspect-[9/19] bg-[#0D1B17] rounded-2xl ring-1 ring-white/10 flex items-center justify-center">
+                      <span className="text-white/20 text-xs">Mobile Preview</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* 07. ESTRATEGIA DE NAVEGACIÓN — Flujos Móviles */}
+        <section className="bg-[#f8f9f7] text-[#111210] py-16 md:py-24 px-6 border-t border-[#111210]/5">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div {...fade} className="mb-12 md:mb-16">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">07</span>
+                <span className="w-8 h-px bg-[#ff4b0b]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                  Estrategia de Navegación
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+                Cada pantalla tiene un propósito claro.
+              </h2>
+              <p className="text-sm text-[#111210]/60 mt-4 max-w-xl font-sans">
+                Arquitectura de Flujos Móviles
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { label: 'Mobile UI 1', num: '01' },
+                { label: 'Mobile UI 2', num: '02' },
+                { label: 'Mobile UI 3', num: '03' },
+                { label: 'Mobile UI 4', num: '04' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  className="flex flex-col items-center"
+                >
+                  <div className="w-full max-w-[200px] aspect-[9/19] bg-white rounded-2xl ring-1 ring-[#111210]/10 flex items-center justify-center overflow-hidden shadow-lg">
+                    <span className="text-[#111210]/20 text-xs">{item.label}</span>
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="font-mono text-[10px] tracking-widest text-[#ff4b0b] uppercase">{item.num}</span>
+                    <p className="text-xs text-[#111210]/60 mt-1 font-sans">{item.label}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 08. APLICACIÓN DE MARCA — Presencia Editorial */}
+        <section className="bg-[#0a0f0d] text-white py-16 md:py-24 px-6 border-t border-white/5">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div {...fade} className="mb-12 md:mb-16">
+              <div className="flex items-center gap-3 mb-5">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">08</span>
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Aplicación de Marca
+                </span>
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl">
+                Presencia editorial y materialidad.
+              </h2>
+              <p className="text-sm text-white/50 mt-4 max-w-xl font-sans">
+                Identidad Editorial & Señalética
+              </p>
+            </motion.div>
+
+            {/* Editorial Horizonte */}
+            <motion.div {...fade} transition={{ delay: 0.1 }} className="mb-16">
+              <div className="relative overflow-hidden rounded-xl bg-[#111513] ring-1 ring-white/10 p-8 md:p-12">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#C49A44]/5 to-transparent" />
+                <div className="relative z-10">
+                  <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Editorial Horizonte</span>
+                  <h3 className="font-serif text-2xl md:text-3xl mt-4 mb-2">Colección Residencial 2026</h3>
+                  <div className="font-serif text-5xl md:text-7xl lg:text-8xl tracking-tight text-white/10 mt-6">
+                    HORIZONTE
+                  </div>
+                  <p className="text-xs text-white/40 mt-4 font-sans tracking-widest uppercase">
+                    Arquitectura • Sofisticación • Lima
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Señalética */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="relative overflow-hidden rounded-xl bg-[#111513] ring-1 ring-white/10 p-8"
+              >
+                <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Totem & Mupi Branding</span>
+                <h4 className="font-serif text-xl mt-4 mb-3">Señalética Urbana</h4>
+                <p className="text-sm text-white/50 font-sans">
+                  Presencia en Punto de Venta
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="relative overflow-hidden rounded-xl bg-[#111513] ring-1 ring-white/10 p-8"
+              >
+                <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Tótems interactivos</span>
+                <h4 className="font-serif text-xl mt-4 mb-3">Alta definición</h4>
+                <p className="text-sm text-white/50 font-sans">
+                  Instalados en salas de venta y avenidas principales.
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Materialidad */}
+            <motion.div {...fade} transition={{ delay: 0.2 }}>
+              <div className="border-t border-white/10 pt-8">
+                <span className="font-mono text-[10px] tracking-widest text-[#C49A44] uppercase">Detalle de Materiales y Marca</span>
+                <h4 className="font-serif text-xl mt-4 mb-3">Materialidad & Texturas</h4>
+                <p className="text-sm text-white/50 font-sans max-w-xl">
+                  Acabados y Papelería Premium. Muestrarios de acabados, brochures de lujo y certificados de propiedad grabados en relieve.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* 3. CONTEXTO Y DESAFÍO (Fondo Blanco de Marca) */}
         <section id="proceso" className="bg-[#f8f9f7] text-[#111210] py-12 md:py-16 px-6 border-t border-[#111210]/5">
           <div className="max-w-[1200px] mx-auto">
