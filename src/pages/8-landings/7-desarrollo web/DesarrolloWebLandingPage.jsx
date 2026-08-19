@@ -298,13 +298,14 @@ export default function DesarrolloWebLandingPage() {
         viewport={{ once: true, amount: 0.3 }}
       >
         {[
-          [Monitor, 'Diseño\npersonalizado', 'A la medida de tu marca y objetivos.'],
-          [Smartphone, '100%\nresponsive', 'Tu web se ve perfecta en cualquier dispositivo.'],
-          [MessageCircle, 'WhatsApp\nintegrado', 'Conecta con tus clientes en un clic.'],
-          [Rocket, 'Rápidas y\noptimizadas', 'Cargan rápido y están listas para escalar.'],
-        ].map(([Icon, title, text], i) => (
+          [Monitor, 'Diseño personalizado'],
+          [Smartphone, '100% responsive'],
+          [MessageCircle, 'WhatsApp integrado'],
+          [Rocket, 'Rápidas y optimizadas'],
+        ].map(([Icon, title], i) => (
           <motion.div key={i} custom={i} variants={staggerItem}>
-            <Icon /><strong>{title.split('\n').map((l, j) => <span key={j}>{l}{j === 0 && <br />}</span>)}</strong><span>{text}</span>
+            <Icon size={24} strokeWidth={2} />
+            <strong>{title}</strong>
           </motion.div>
         ))}
       </motion.section>
