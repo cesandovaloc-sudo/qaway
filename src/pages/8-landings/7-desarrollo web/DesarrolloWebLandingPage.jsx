@@ -532,8 +532,101 @@ export default function DesarrolloWebLandingPage() {
         </div>
       </div>
 
-      {/* ─── BLOQUE OSCURO EMPAQUETADO 1 (Proyectos + Testimonios) ─── */}
+      {/* ─── BLOQUE OSCURO EMPAQUETADO 1 (Identidad + Proyectos + Testimonios) ─── */}
       <div className="dark-packaged-block" id="proyectos">
+        {/* Identidad Visual & Selección Fotográfica */}
+        <section className="brand-identity-showcase" id="identidad">
+          <div className="section-heading">
+            <div>
+              <div className="eyebrow">DIRECCIÓN DE ARTE & MARCA</div>
+              <h2>Identidad Visual & Curaduría</h2>
+            </div>
+            <p className="brand-identity-subtitle">
+              Cada proyecto web parte de una base estética sólida: tipografía con carácter, paleta cromática exclusiva y selección fotográfica de alto impacto.
+            </p>
+          </div>
+
+          {/* Grid de Tipografía + Paleta */}
+          <div className="brand-identity-grid">
+            <div className="typography-box">
+              <div className="type-specimen">
+                <span className="type-label">Tipografía Primaria</span>
+                <div className="font-primary-display">Playfair Display</div>
+              </div>
+              <div className="type-specimen">
+                <span className="type-label">Tipografía Secundaria</span>
+                <div className="font-secondary-display">DM Sans</div>
+              </div>
+            </div>
+
+            <div className="colors-box">
+              <span className="type-label">Patrones de Color</span>
+              <div className="color-swatches-grid">
+                <div className="color-swatch" style={{ background: '#0D1B17', color: '#F6F4F1' }}>
+                  <span className="swatch-name">Bosque</span>
+                  <span className="swatch-hex">#0D1B17</span>
+                </div>
+                <div className="color-swatch" style={{ background: '#1E2A25', color: '#F6F4F1' }}>
+                  <span className="swatch-name">Oliva</span>
+                  <span className="swatch-hex">#1E2A25</span>
+                </div>
+                <div className="color-swatch" style={{ background: '#C49A44', color: '#0D1B17' }}>
+                  <span className="swatch-name">Dorado</span>
+                  <span className="swatch-hex">#C49A44</span>
+                </div>
+                <div className="color-swatch" style={{ background: '#F6F4F1', color: '#0D1B17' }}>
+                  <span className="swatch-name">Crema</span>
+                  <span className="swatch-hex">#F6F4F1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="packaged-block-divider" style={{ margin: '38px 0' }} />
+
+          {/* Selección Fotográfica */}
+          <div className="photo-selection-wrapper">
+            <div className="photo-selection-header">
+              <span className="type-label">Selección Fotográfica & Moodboard</span>
+              <p>Composición fotográfica curada para transmitir confianza, modernidad y sofisticación.</p>
+            </div>
+            <div className="photo-grid-showcase">
+              <div className="photo-item photo-tall">
+                <img
+                  src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  alt="Arquitectura & Espacios"
+                  loading="lazy"
+                />
+              </div>
+              <div className="photo-subgrid">
+                <div className="photo-item photo-wide">
+                  <img
+                    src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                    alt="Diseño de Interiores"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="photo-item photo-square">
+                  <img
+                    src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Detalles & Acabados"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="photo-item photo-square">
+                  <img
+                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Estructura & Modernidad"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="packaged-block-divider" />
+
         {/* Proyectos Destacados */}
         <section className="portfolio">
           <div className="section-heading">
