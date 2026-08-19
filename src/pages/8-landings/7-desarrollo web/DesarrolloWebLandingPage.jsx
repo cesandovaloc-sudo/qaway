@@ -130,16 +130,16 @@ function DeviceMockup() {
 function HeroTrustBadge() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay: 0.3, ease: 'easeOut' }}
       className="trust-badge-wrap"
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
+        gap: '18px',
         marginTop: '36px',
-        paddingTop: '20px',
+        paddingTop: '22px',
         borderTop: '1px solid rgba(255, 255, 255, 0.08)'
       }}
     >
@@ -147,18 +147,18 @@ function HeroTrustBadge() {
         {trustAvatars.map((av, index) => (
           <motion.div
             key={av.name}
-            whileHover={{ scale: 1.2, zIndex: 10, y: -2 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            whileHover={{ scale: 1.08, zIndex: 10, y: -1 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             style={{
-              width: '34px',
-              height: '34px',
+              width: '44px',
+              height: '44px',
               borderRadius: '50%',
-              marginLeft: index === 0 ? '0' : '-8px',
-              border: '2px solid #061016',
+              marginLeft: index === 0 ? '0' : '-10px',
+              border: '2.5px solid #061016',
               overflow: 'hidden',
               position: 'relative',
               cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+              boxShadow: '0 4px 14px rgba(0,0,0,0.35)'
             }}
             title={av.name}
           >
@@ -171,39 +171,41 @@ function HeroTrustBadge() {
           </motion.div>
         ))}
         <motion.div
-          whileHover={{ scale: 1.15, zIndex: 10 }}
+          whileHover={{ scale: 1.06, zIndex: 10 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
           style={{
-            width: '34px',
-            height: '34px',
+            width: '44px',
+            height: '44px',
             borderRadius: '50%',
-            marginLeft: '-8px',
-            border: '2px solid #061016',
+            marginLeft: '-10px',
+            border: '2.5px solid #061016',
             background: 'rgba(255, 75, 11, 0.16)',
             color: '#ff4b0b',
-            fontSize: '11px',
+            fontSize: '12px',
             fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            cursor: 'default'
+            cursor: 'default',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.35)'
           }}
         >
           +50
         </motion.div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div style={{ display: 'flex', gap: '2px', color: '#ffb020' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '3px', color: '#ffb020' }}>
             {[...Array(5)].map((_, i) => (
-              <Star key={i} size={11} fill="currentColor" stroke="none" />
+              <Star key={i} size={14} fill="currentColor" stroke="none" />
             ))}
           </div>
-          <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '11px', lineHeight: 1 }}>5.0</span>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', lineHeight: 1 }}>/ 5.0</span>
+          <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '13px', lineHeight: 1 }}>5.0</span>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', lineHeight: 1 }}>/ 5.0</span>
         </div>
-        <p style={{ margin: 0, fontSize: '11px', color: '#adb6bb', lineHeight: 1.3, fontWeight: 500 }}>
+        <p style={{ margin: 0, fontSize: '13px', color: '#b2bcc2', lineHeight: 1.35, fontWeight: 500 }}>
           Más de 50 negocios confían en nosotros
         </p>
       </div>
