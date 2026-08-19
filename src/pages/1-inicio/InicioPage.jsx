@@ -1060,7 +1060,8 @@ function AcademyCoursesInner({ tick }) {
           >
             <div style={{ minHeight: '14rem' }} className="academy-course-image">
               {(() => {
-                const imgSource = course.imageUrl || getLocalFallbackCourseImage(course.slug)
+                const fallback = getLocalFallbackCourseImage(course.slug, course.title)
+                const imgSource = course.imageUrl || fallback
                 return imgSource ? (
                   <img
                     src={imgSource}
@@ -1068,8 +1069,8 @@ function AcademyCoursesInner({ tick }) {
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      const fallback = getLocalFallbackCourseImage(course.slug)
-                      if (fallback && e.currentTarget.src !== fallback && !e.currentTarget.src.endsWith(fallback)) {
+                      if (!e.currentTarget.dataset.hasFallback && fallback) {
+                        e.currentTarget.dataset.hasFallback = 'true'
                         e.currentTarget.src = fallback
                       }
                     }}

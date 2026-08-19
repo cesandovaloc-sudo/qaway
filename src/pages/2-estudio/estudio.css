@@ -26,7 +26,7 @@
 
 
 
-.estudio-page .vl-shell { width: min(1504px, calc(100% - 64px)); margin: 0 auto; }
+.estudio-page .vl-shell { width: min(1360px, calc(100% - 96px)); margin: 0 auto; }
 .estudio-page .vl-section { padding: 140px 0; }
 .estudio-page .vl-paper { background: var(--vl-paper); color: var(--vl-ink); }
 .estudio-page .vl-dark { position: relative; background: var(--vl-ink); color: var(--vl-paper); }
@@ -1338,8 +1338,12 @@
   .estudio-page .vl-section-cut { display: none; }
 }
 
+@media (max-width: 1024px) {
+  .estudio-page .vl-shell { width: min(100% - 48px, 1360px); }
+}
+
 @media (max-width: 720px) {
-  .estudio-page .vl-shell { width: min(100% - 36px, 1440px); }
+  .estudio-page .vl-shell { width: min(100% - 32px, 1360px); }
   .estudio-page .vl-section { padding: 80px 0; }
 
   .estudio-page .vl-hero { min-height: 100dvh; padding-top: 120px; }

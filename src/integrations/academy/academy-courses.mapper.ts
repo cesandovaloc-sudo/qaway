@@ -33,9 +33,25 @@ const LOCAL_COURSE_FALLBACK_IMAGES: Record<string, string> = {
 }
 
 /** Obtiene la ruta de imagen local empaquetada como contingencia pasiva. */
-export function getLocalFallbackCourseImage(slug?: string | null): string | null {
-  if (!slug) return null
-  return LOCAL_COURSE_FALLBACK_IMAGES[slug] || null
+export function getLocalFallbackCourseImage(slug?: string | null, title?: string | null): string {
+  if (slug && LOCAL_COURSE_FALLBACK_IMAGES[slug]) {
+    return LOCAL_COURSE_FALLBACK_IMAGES[slug]
+  }
+  const clean = `${slug || ''} ${title || ''}`.toLowerCase()
+  
+  if (clean.includes('whatsapp')) {
+    return '/assets/pages/4-academy/curso-whatsapp-business2.png'
+  }
+  if (clean.includes('identidad') || clean.includes('visual') || clean.includes('marca')) {
+    return '/assets/pages/4-academy/curso-identidad-visual-ia2.png'
+  }
+  if (clean.includes('antigravity') || clean.includes('youtube')) {
+    return '/assets/pages/4-academy/curso-antigravity-youtube2.png'
+  }
+  if (clean.includes('productividad') || clean.includes('equipo') || clean.includes('workflow')) {
+    return '/assets/pages/4-academy/curso-productividad-ia.png'
+  }
+  return '/assets/pages/4-academy/curso-whatsapp-business2.png'
 }
 
 /** Resuelve rutas relativas de imagen a URLs públicas estables de Academy. */

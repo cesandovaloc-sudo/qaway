@@ -198,7 +198,7 @@ export default function Navbar({ variant: explicitVariant }) {
               href={WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className={`hidden min-h-12 rounded-none px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
+              className={`hidden min-h-12 rounded-[6px] px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
             >
               Cuentanos tu proyecto
             </a>
@@ -267,7 +267,7 @@ export default function Navbar({ variant: explicitVariant }) {
                   href={WHATSAPP_LINK}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex justify-center rounded-none bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
+                  className="mt-4 inline-flex justify-center rounded-[6px] bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
                 >
                   Cuentanos tu proyecto
                 </a>

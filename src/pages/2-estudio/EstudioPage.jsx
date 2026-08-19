@@ -621,7 +621,7 @@ function ContentSystem() {
   const formats = ['Feed', 'Carrusel', 'Reels', 'Stories', 'Web']
 
   return (
-    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
+    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#f3f1ee', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(60px, 6vh, 100px) 0' }}>
       <div className="vl-shell vl-content-system">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>
@@ -664,7 +664,7 @@ function ContentSystem() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
           variants={scaleUpImage}
-          className="vl-content-showcase"
+          className="vl-content-showcase relative overflow-hidden rounded-[6px] border border-black/12 shadow-[0_20px_50px_rgba(0,0,0,0.08)] bg-black"
           onMouseMove={(event) => {
             const rect = event.currentTarget.getBoundingClientRect()
             event.currentTarget.style.setProperty('--showcase-x', `${((event.clientX - rect.left) / rect.width) * 100}%`)
