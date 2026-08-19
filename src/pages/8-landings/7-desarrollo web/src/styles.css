@@ -487,10 +487,10 @@
 }
 
 .desarrollo-web-landing .feature-bar>div {
-  padding: 18px 24px;
+  padding: 26px 30px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   border-right: 1px solid #263940;
   transition: background-color 0.25s ease;
   cursor: default;
@@ -506,8 +506,8 @@
 
 .desarrollo-web-landing .feature-bar svg {
   color: var(--orange);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
   transition: transform 0.25s ease;
 }
@@ -517,9 +517,9 @@
 }
 
 .desarrollo-web-landing .feature-bar strong {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.25;
   color: #ffffff;
   letter-spacing: -0.2px;
 }
