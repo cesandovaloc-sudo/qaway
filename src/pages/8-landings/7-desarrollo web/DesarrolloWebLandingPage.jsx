@@ -489,9 +489,9 @@ export default function DesarrolloWebLandingPage() {
         />
 
         {/* Contenedor central flotante oscuro */}
-        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
-          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12 rounded-[16px] overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-[16px] ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50 rounded-[16px]" />
           </div>
 
           <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
@@ -565,9 +565,9 @@ export default function DesarrolloWebLandingPage() {
         />
 
         {/* Contenedor central flotante oscuro */}
-        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
-          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12 rounded-[16px] overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-[16px] ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50 rounded-[16px]" />
           </div>
 
           <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
@@ -649,9 +649,9 @@ export default function DesarrolloWebLandingPage() {
         />
 
         {/* Contenedor central flotante oscuro */}
-        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
-          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
-            <div className="absolute inset-0 bg-gradient-to-tr from-[#1E2A25]/50 to-transparent opacity-80" />
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12 rounded-[16px] overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 z-0 overflow-hidden rounded-[16px] ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1E2A25]/50 to-transparent opacity-80 rounded-[16px]" />
           </div>
 
           <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center items-center">
