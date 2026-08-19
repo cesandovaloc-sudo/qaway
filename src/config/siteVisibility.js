@@ -25,7 +25,6 @@ const publicPathAllowList = new Set([
   '/sistemas-digitales',
   '/landings/sistema-contenido-notion',
   '/landings/identidad-visual',
-  '/landings/desarrollo-web',
   '/academy',
 ])
 
@@ -48,8 +47,8 @@ const navigationRegistry = [
     key: 'academy',
     label: 'Academy',
     path: '/academy',
-    navbar: false,
-    footerGroup: null,
+    navbar: true,
+    footerGroup: 'areas',
   },
   {
     key: 'hub',
