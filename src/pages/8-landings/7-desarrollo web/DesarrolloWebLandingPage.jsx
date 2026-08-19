@@ -11,10 +11,19 @@ import {
   Smartphone,
   ShoppingBag,
   Sparkles,
+  Star,
   Zap,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import './src/styles.css'
+
+const trustAvatars = [
+  { name: 'Mariana R.', img: '/assets/pages/4-academy/testimonials/mariana.png' },
+  { name: 'Diego M.', img: '/assets/pages/4-academy/testimonials/diego.png' },
+  { name: 'Lucía V.', img: '/assets/pages/4-academy/testimonials/lucia.png' },
+  { name: 'Renzo S.', img: '/assets/pages/4-academy/testimonials/renzo.png' },
+]
 
 const projects = [
   {
@@ -118,6 +127,90 @@ function DeviceMockup() {
   )
 }
 
+function HeroTrustBadge() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="trust-badge-wrap"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+        marginTop: '36px',
+        paddingTop: '20px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {trustAvatars.map((av, index) => (
+          <motion.div
+            key={av.name}
+            whileHover={{ scale: 1.2, zIndex: 10, y: -2 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            style={{
+              width: '34px',
+              height: '34px',
+              borderRadius: '50%',
+              marginLeft: index === 0 ? '0' : '-8px',
+              border: '2px solid #061016',
+              overflow: 'hidden',
+              position: 'relative',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            }}
+            title={av.name}
+          >
+            <img
+              src={av.img}
+              alt={av.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              loading="lazy"
+            />
+          </motion.div>
+        ))}
+        <motion.div
+          whileHover={{ scale: 1.15, zIndex: 10 }}
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            marginLeft: '-8px',
+            border: '2px solid #061016',
+            background: 'rgba(255, 75, 11, 0.16)',
+            color: '#ff4b0b',
+            fontSize: '11px',
+            fontWeight: 800,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            cursor: 'default'
+          }}
+        >
+          +50
+        </motion.div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '2px', color: '#ffb020' }}>
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={11} fill="currentColor" stroke="none" />
+            ))}
+          </div>
+          <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '11px', lineHeight: 1 }}>5.0</span>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px', lineHeight: 1 }}>/ 5.0</span>
+        </div>
+        <p style={{ margin: 0, fontSize: '11px', color: '#adb6bb', lineHeight: 1.3, fontWeight: 500 }}>
+          Más de 50 negocios confían en nosotros
+        </p>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function DesarrolloWebLandingPage() {
   return (
     <main className="desarrollo-web-landing">
@@ -134,10 +227,7 @@ export default function DesarrolloWebLandingPage() {
             <a className="primary-btn" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">Quiero crear mi web <ArrowRight size={18} /></a>
             <a className="text-btn light" href="#proyectos">Ver proyectos <ArrowRight size={17} /></a>
           </div>
-          <div className="trust">
-            <div className="avatars"><i>●</i><i>●</i><i>●</i><b>+</b></div>
-            <span>Más de 50 negocios<br />confían en nosotros</span>
-          </div>
+          <HeroTrustBadge />
         </div>
         <DeviceMockup />
       </section>
