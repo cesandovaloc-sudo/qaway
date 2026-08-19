@@ -457,18 +457,6 @@ export default function DesarrolloWebLandingPage() {
         ))}
       </motion.section>
 
-      {/* ─── Tech & Trust Marquee ────────────────── */}
-      <div className="marquee-wrap">
-        <div className="marquee-track">
-          {[...techStack, ...techStack].map((tech, idx) => (
-            <div className="marquee-item" key={idx}>
-              <span className="dot" />
-              <span>{tech}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ─── Types of Websites ───────────────────── */}
       <section className="types section-light" id="tipos">
         <div className="section-intro">
@@ -531,6 +519,18 @@ export default function DesarrolloWebLandingPage() {
           ))}
         </div>
       </section>
+
+      {/* ─── Tech & Trust Marquee (Puente a Proyectos) ── */}
+      <div className="marquee-wrap">
+        <div className="marquee-track">
+          {[...techStack, ...techStack].map((tech, idx) => (
+            <div className="marquee-item" key={idx}>
+              <span className="dot" />
+              <span>{tech}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ─── Featured Projects Showcase ──────────── */}
       <section className="portfolio dark-section" id="proyectos">
