@@ -614,6 +614,66 @@
   color: #fff;
 }
 
+/* ─── Master Dark Packaged Block ───────────────── */
+.desarrollo-web-landing .dark-packaged-block {
+  max-width: 1320px;
+  width: calc(100% - 56px);
+  margin: 40px auto;
+  border-radius: 16px;
+  background: #081116;
+  border: 1px solid #1d2c33;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  color: #fff;
+}
+
+.desarrollo-web-landing .dark-packaged-block .portfolio {
+  padding: 55px 45px 40px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.desarrollo-web-landing .dark-packaged-block .testimonials-section {
+  padding: 45px 45px 55px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.desarrollo-web-landing .dark-packaged-block .process {
+  padding: 55px 45px 40px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.desarrollo-web-landing .dark-packaged-block .faq-section {
+  padding: 45px 45px 55px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.desarrollo-web-landing .packaged-block-divider {
+  height: 1px;
+  width: calc(100% - 90px);
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .desarrollo-web-landing .portfolio {
   max-width: 1320px;
   width: calc(100% - 56px);

@@ -532,80 +532,85 @@ export default function DesarrolloWebLandingPage() {
         </div>
       </div>
 
-      {/* ─── Featured Projects Showcase ──────────── */}
-      <section className="portfolio dark-section" id="proyectos">
-        <div className="section-heading">
-          <div>
-            <div className="eyebrow">PROYECTOS DESTACADOS</div>
-            <h2>Algunas webs que<br />hemos creado.</h2>
+      {/* ─── BLOQUE OSCURO EMPAQUETADO 1 (Proyectos + Testimonios) ─── */}
+      <div className="dark-packaged-block" id="proyectos">
+        {/* Proyectos Destacados */}
+        <section className="portfolio">
+          <div className="section-heading">
+            <div>
+              <div className="eyebrow">PROYECTOS DESTACADOS</div>
+              <h2>Algunas webs que<br />hemos creado.</h2>
+            </div>
+            <a className="text-btn light" href="#contacto">Ver todos los proyectos <ArrowRight size={17} /></a>
           </div>
-          <a className="text-btn light" href="#contacto">Ver todos los proyectos <ArrowRight size={17} /></a>
-        </div>
-        <div className="project-grid">
-          {projects.map((project, i) => (
-            <motion.article
-              className="project-card"
-              key={project.name}
-              custom={i}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerItem}
-            >
-              <div className={`project-visual ${project.className}`}>
-                <img src={project.image} alt={project.name} />
-                <div className="project-window">
-                  <div className="window-bar"><b>{project.name}</b><span>Inicio　Proyectos　Contacto</span></div>
-                  <div className="window-content"><strong>{project.name}</strong><em>Una presencia digital pensada para crecer.</em></div>
+          <div className="project-grid">
+            {projects.map((project, i) => (
+              <motion.article
+                className="project-card"
+                key={project.name}
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={staggerItem}
+              >
+                <div className={`project-visual ${project.className}`}>
+                  <img src={project.image} alt={project.name} />
+                  <div className="project-window">
+                    <div className="window-bar"><b>{project.name}</b><span>Inicio　Proyectos　Contacto</span></div>
+                    <div className="window-content"><strong>{project.name}</strong><em>Una presencia digital pensada para crecer.</em></div>
+                  </div>
                 </div>
-              </div>
-              <h3>{project.name}</h3>
-              <p>{project.type}</p>
-            </motion.article>
-          ))}
-        </div>
-      </section>
-
-      {/* ─── Real Testimonials & Proof ───────────── */}
-      <section className="testimonials-section" id="testimonios">
-        <div className="section-heading">
-          <div>
-            <div className="eyebrow">RESULTADOS COMPROBADOS</div>
-            <h2>Lo que dicen las marcas<br />que confían en nosotros.</h2>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ffb020' }}>
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={16} fill="currentColor" stroke="none" />
+                <h3>{project.name}</h3>
+                <p>{project.type}</p>
+              </motion.article>
             ))}
-            <span style={{ color: '#fff', fontSize: '13px', fontWeight: 700, marginLeft: '6px' }}>5.0 / 5.0 Rating</span>
           </div>
-        </div>
-        <div className="testimonials-grid">
-          {testimonials.map((testi, i) => (
-            <motion.div
-              key={testi.name}
-              className="testimonial-card"
-              custom={i}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerItem}
-            >
-              <span className="testimonial-metric-badge">
-                <Sparkles size={13} /> {testi.metric}
-              </span>
-              <p className="testimonial-quote">"{testi.quote}"</p>
-              <div className="testimonial-author">
-                <img src={testi.img} alt={testi.name} className="testimonial-avatar" />
-                <div className="testimonial-info">
-                  <strong>{testi.name}</strong>
-                  <span>{testi.role}</span>
+        </section>
+
+        <div className="packaged-block-divider" />
+
+        {/* Testimonios & Casos de Éxito */}
+        <section className="testimonials-section" id="testimonios">
+          <div className="section-heading">
+            <div>
+              <div className="eyebrow">RESULTADOS COMPROBADOS</div>
+              <h2>Lo que dicen las marcas<br />que confían en nosotros.</h2>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ffb020' }}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={16} fill="currentColor" stroke="none" />
+              ))}
+              <span style={{ color: '#fff', fontSize: '13px', fontWeight: 700, marginLeft: '6px' }}>5.0 / 5.0 Rating</span>
+            </div>
+          </div>
+          <div className="testimonials-grid">
+            {testimonials.map((testi, i) => (
+              <motion.div
+                key={testi.name}
+                className="testimonial-card"
+                custom={i}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={staggerItem}
+              >
+                <span className="testimonial-metric-badge">
+                  <Sparkles size={13} /> {testi.metric}
+                </span>
+                <p className="testimonial-quote">"{testi.quote}"</p>
+                <div className="testimonial-author">
+                  <img src={testi.img} alt={testi.name} className="testimonial-avatar" />
+                  <div className="testimonial-info">
+                    <strong>{testi.name}</strong>
+                    <span>{testi.role}</span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </div>
 
       {/* ─── What's Included ─────────────────────── */}
       <section className="included section-light" id="incluye">
@@ -676,73 +681,78 @@ export default function DesarrolloWebLandingPage() {
         </div>
       </section>
 
-      {/* ─── 4-Step Process ──────────────────────── */}
-      <section className="process dark-section" id="proceso">
-        <div className="process-copy">
-          <div className="eyebrow">NUESTRO PROCESO</div>
-          <h2>Así trabajamos<br />tu proyecto.</h2>
-          <p>Un proceso claro, colaborativo y enfocado en resultados.</p>
-          <a className="text-btn light" href="#contacto">Conoce más <ArrowRight size={17} /></a>
-        </div>
-        <div className="steps">
-          {steps.map(([num, title, text], index) => (
-            <motion.div
-              className="step"
-              key={num}
-              custom={index}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerItem}
-            >
-              <div className="step-line"><span>{num}</span>{index < steps.length - 1 && <i />}</div>
-              <strong>{title}</strong>
-              <p>{text}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      {/* ─── BLOQUE OSCURO EMPAQUETADO 2 (Proceso + FAQ) ─── */}
+      <div className="dark-packaged-block" id="proceso">
+        {/* Nuestro Proceso */}
+        <section className="process">
+          <div className="process-copy">
+            <div className="eyebrow">NUESTRO PROCESO</div>
+            <h2>Así trabajamos<br />tu proyecto.</h2>
+            <p>Un proceso claro, colaborativo y enfocado en resultados.</p>
+            <a className="text-btn light" href="#contacto">Conoce más <ArrowRight size={17} /></a>
+          </div>
+          <div className="steps">
+            {steps.map(([num, title, text], index) => (
+              <motion.div
+                className="step"
+                key={num}
+                custom={index}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={staggerItem}
+              >
+                <div className="step-line"><span>{num}</span>{index < steps.length - 1 && <i />}</div>
+                <strong>{title}</strong>
+                <p>{text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-      {/* ─── FAQ Interactive Accordion ───────────── */}
-      <section className="faq-section" id="faq">
-        <div className="section-intro" style={{ maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>
-          <div className="eyebrow">PREGUNTAS FRECUENTES</div>
-          <h2 style={{ fontSize: '38px', lineHeight: 1.15 }}>Resolvemos tus dudas<br /><span>antes de empezar.</span></h2>
-          <p style={{ margin: '14px auto 0', fontSize: '15px' }}>
-            Todo lo que necesitas saber sobre plazos, entregas, dominios y formas de pago.
-          </p>
-        </div>
-        <div className="faq-list">
-          {faqs.map((faq, index) => {
-            const isOpen = openFaq === index
-            return (
-              <div key={index} className={`faq-item ${isOpen ? 'active' : ''}`}>
-                <button
-                  className="faq-question"
-                  onClick={() => toggleFaq(index)}
-                  aria-expanded={isOpen}
-                >
-                  <span>{faq.q}</span>
-                  <ChevronDown size={20} />
-                </button>
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      className="faq-answer"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease }}
-                    >
-                      {faq.a}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )
-          })}
-        </div>
-      </section>
+        <div className="packaged-block-divider" />
+
+        {/* Preguntas Frecuentes */}
+        <section className="faq-section" id="faq">
+          <div className="section-intro" style={{ maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>
+            <div className="eyebrow">PREGUNTAS FRECUENTES</div>
+            <h2 style={{ fontSize: '38px', lineHeight: 1.15 }}>Resolvemos tus dudas<br /><span>antes de empezar.</span></h2>
+            <p style={{ margin: '14px auto 0', fontSize: '15px' }}>
+              Todo lo que necesitas saber sobre plazos, entregas, dominios y formas de pago.
+            </p>
+          </div>
+          <div className="faq-list">
+            {faqs.map((faq, index) => {
+              const isOpen = openFaq === index
+              return (
+                <div key={index} className={`faq-item ${isOpen ? 'active' : ''}`}>
+                  <button
+                    className="faq-question"
+                    onClick={() => toggleFaq(index)}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown size={20} />
+                  </button>
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        className="faq-answer"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease }}
+                      >
+                        {faq.a}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      </div>
 
       {/* ─── CTA + Quick Diagnosis Form ──────────── */}
       <motion.section
