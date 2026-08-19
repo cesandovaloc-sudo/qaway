@@ -13,6 +13,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react'
+import { WHATSAPP_LINK } from '@/data/navigation'
 import './src/styles.css'
 
 const projects = [
@@ -119,7 +120,7 @@ function DeviceMockup() {
 
 export default function DesarrolloWebLandingPage() {
   return (
-    <main>
+    <main className="desarrollo-web-landing">
       <section className="hero" id="inicio">
         <div className="hero-copy">
           <div className="eyebrow">CREACIÓN DE WEBS</div>
@@ -130,8 +131,8 @@ export default function DesarrolloWebLandingPage() {
           </h1>
           <p>Diseñamos sitios web modernos, rápidos y estratégicos que atraen clientes y generan resultados.</p>
           <div className="hero-actions">
-            <a className="primary-btn" href="#contacto">Quiero crear mi web <ArrowRight size={18} /></a>
-            <a className="text-btn" href="#proyectos">Ver proyectos <ArrowRight size={17} /></a>
+            <a className="primary-btn" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">Quiero crear mi web <ArrowRight size={18} /></a>
+            <a className="text-btn light" href="#proyectos">Ver proyectos <ArrowRight size={17} /></a>
           </div>
           <div className="trust">
             <div className="avatars"><i>●</i><i>●</i><i>●</i><b>+</b></div>
@@ -230,7 +231,7 @@ export default function DesarrolloWebLandingPage() {
           <div className="eyebrow">¿LISTO PARA CREAR TU WEB?</div>
           <h2>Hablemos de tu proyecto</h2>
           <p>Cuéntanos tu idea y te ayudamos a crear una web que impulse tu negocio.</p>
-          <a className="primary-btn" href="https://wa.me/" target="_blank" rel="noreferrer">Cuéntanos tu proyecto <ArrowRight size={18} /></a>
+          <a className="primary-btn" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">Cuéntanos tu proyecto <ArrowRight size={18} /></a>
         </div>
         <div className="cta-laptop">
           <div>Qaway <span>Lab</span></div>
