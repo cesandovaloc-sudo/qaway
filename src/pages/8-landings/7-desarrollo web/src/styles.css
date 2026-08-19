@@ -615,7 +615,14 @@
 }
 
 .desarrollo-web-landing .portfolio {
-  padding: 70px max(28px, calc((100% - 1320px) / 2));
+  max-width: 1320px;
+  width: calc(100% - 56px);
+  margin: 35px auto;
+  border-radius: 14px;
+  border: 1px solid #1d2c33;
+  padding: 55px 45px;
+  background: #081116;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
 
 .desarrollo-web-landing .section-heading {
@@ -759,9 +766,12 @@
 .desarrollo-web-landing .process {
   max-width: 1320px;
   width: calc(100% - 56px);
-  margin: 0 auto 24px;
-  border-radius: 10px;
-  padding: 45px 5%;
+  margin: 35px auto;
+  border-radius: 14px;
+  border: 1px solid #1d2c33;
+  padding: 55px 45px;
+  background: #081116;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
   display: grid;
   grid-template-columns: 30% 70%;
   gap: 30px;
@@ -1097,9 +1107,15 @@
 
 /* ─── Testimonials Section ────────────────────── */
 .desarrollo-web-landing .testimonials-section {
-  padding: 85px max(28px, calc((100% - 1320px) / 2));
-  background: var(--dark);
+  max-width: 1320px;
+  width: calc(100% - 56px);
+  margin: 35px auto;
+  border-radius: 14px;
+  border: 1px solid #1d2c33;
+  padding: 55px 45px;
+  background: #081116;
   color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
 
 .desarrollo-web-landing .testimonials-grid {
@@ -1319,9 +1335,15 @@
 
 /* ─── FAQ Section ─────────────────────────────── */
 .desarrollo-web-landing .faq-section {
-  padding: 90px max(28px, calc((100% - 1320px) / 2));
-  background: var(--dark);
+  max-width: 1320px;
+  width: calc(100% - 56px);
+  margin: 35px auto;
+  border-radius: 14px;
+  border: 1px solid #1d2c33;
+  padding: 55px 45px;
+  background: #081116;
   color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
 }
 
 .desarrollo-web-landing .faq-list {
