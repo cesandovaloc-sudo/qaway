@@ -91,11 +91,28 @@ const projects = [
   },
 ]
 
-const webTypes = [
-  { icon: LayoutTemplate, title: 'Landing Pages', text: 'Páginas de alta conversión para lanzar productos, captar clientes o campañas publicitarias.' },
-  { icon: Globe2, title: 'Web Comercial', text: 'Sitio corporativo estructurado para presentar tu empresa, servicios y recibir consultas.' },
-  { icon: Sparkles, title: 'Web Personalizada', text: 'Diseño y arquitectura exclusiva adaptada a las necesidades singulares de tu negocio.' },
-  { icon: ShoppingBag, title: 'E-commerce & Tiendas', text: 'Tiendas online preparadas para vender 24/7 con carrito y pasarelas de pago seguras.' },
+const webShowcases = [
+  {
+    title: 'Cloudy Platform',
+    category: 'Landing Page & SaaS de Alta Conversión',
+    url: 'cloudy.app',
+    tag: 'SaaS & Tech UI',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    title: 'Express Digital',
+    category: 'Sitio Web Comercial & Corporativo',
+    url: 'express-agency.com',
+    tag: 'Business & Trust',
+    image: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1200&q=80',
+  },
+  {
+    title: 'Galaxy Suite',
+    category: 'Arquitectura Web & Experiencia Personalizada',
+    url: 'galaxy-systems.io',
+    tag: 'Ecosistema UI/UX',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80',
+  },
 ]
 
 const testimonials = [
@@ -457,29 +474,50 @@ export default function DesarrolloWebLandingPage() {
         ))}
       </motion.section>
 
-      {/* ─── Types of Websites ───────────────────── */}
-      <section className="types section-light" id="tipos">
-        <div className="section-intro">
-          <div className="eyebrow">TIPOS DE WEBS</div>
-          <h2>Tenemos el tipo<br />de web que <span>tu negocio</span><br />necesita.</h2>
-          <p>Soluciones pensadas para cada etapa de tu proyecto.</p>
-          <a className="text-btn orange" href="#planes">Ver planes y precios <ArrowRight size={17} /></a>
+      {/* ─── Web Showcase & Project Types ────────────── */}
+      <section className="web-showcase-section section-light" id="tipos">
+        <div className="section-intro showcase-intro">
+          <div className="eyebrow">PORTAFOLIO & MODELOS WEB</div>
+          <h2>Diseñamos la web exacta que <span>tu negocio</span> necesita.</h2>
+          <p>
+            Desde landing pages de alta conversión hasta plataformas corporativas con arquitectura digital de vanguardia.
+          </p>
         </div>
-        <div className="type-grid">
-          {webTypes.map(({ icon: Icon, title, text }, i) => (
+
+        <div className="showcase-cards-grid">
+          {webShowcases.map((item, i) => (
             <motion.article
-              className="type-card"
-              key={title}
+              className="showcase-card"
+              key={item.title}
               custom={i}
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, amount: 0.2 }}
               variants={staggerItem}
             >
-              <div className="icon-circle"><Icon size={22} /></div>
-              <h3>{title}</h3>
-              <p>{text}</p>
-              <a href="#contacto">Cotizar este tipo <ArrowRight size={16} /></a>
+              <div className="showcase-preview-frame">
+                <div className="showcase-browser-bar">
+                  <div className="browser-dots">
+                    <span className="dot dot-red"></span>
+                    <span className="dot dot-yellow"></span>
+                    <span className="dot dot-green"></span>
+                  </div>
+                  <span className="browser-url">{item.url}</span>
+                </div>
+                <div className="showcase-screen-wrap">
+                  <img src={item.image} alt={item.title} className="showcase-img" loading="lazy" decoding="async" />
+                  <div className="showcase-hover-overlay">
+                    <span className="overlay-badge">{item.tag}</span>
+                    <a href="#contacto" className="overlay-btn">
+                      Cotizar este modelo <ArrowRight size={15} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="showcase-footer">
+                <h3>{item.title}</h3>
+                <span className="showcase-type">{item.category}</span>
+              </div>
             </motion.article>
           ))}
         </div>
