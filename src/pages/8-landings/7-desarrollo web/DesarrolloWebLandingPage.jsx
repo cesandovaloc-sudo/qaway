@@ -18,6 +18,8 @@ import { motion } from 'framer-motion'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import './src/styles.css'
 
+const ease = [0.16, 1, 0.3, 1]
+
 const trustAvatars = [
   { name: 'Mariana R.', img: '/assets/pages/4-academy/testimonials/mariana.png' },
   { name: 'Diego M.', img: '/assets/pages/4-academy/testimonials/diego.png' },
@@ -82,11 +84,23 @@ function DeviceMockup() {
     <div className="device-stage">
       <div className="orbit orbit-a" />
       <div className="orbit orbit-b" />
-      <div className="floating-card card-top">
+
+      <motion.div
+        className="floating-card card-top"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 1, ease }}
+      >
         <Sparkles size={18} />
         <span>Diseño estratégico<br />que convierte</span>
-      </div>
-      <div className="laptop">
+      </motion.div>
+
+      <motion.div
+        className="laptop"
+        initial={{ opacity: 0, y: 40, rotate: -3 }}
+        animate={{ opacity: 1, y: 0, rotate: -1 }}
+        transition={{ duration: 0.8, delay: 0.2, ease }}
+      >
         <div className="screen">
           <div className="mock-nav">
             <strong>Nexo</strong>
@@ -107,8 +121,14 @@ function DeviceMockup() {
           </div>
         </div>
         <div className="base" />
-      </div>
-      <div className="phone">
+      </motion.div>
+
+      <motion.div
+        className="phone"
+        initial={{ opacity: 0, x: 50, rotate: 8 }}
+        animate={{ opacity: 1, x: 0, rotate: 4 }}
+        transition={{ duration: 0.7, delay: 0.5, ease }}
+      >
         <div className="phone-screen">
           <div className="phone-top">Nexo <span>☰</span></div>
           <div className="phone-image" />
@@ -118,11 +138,17 @@ function DeviceMockup() {
             <i /><i /><i />
           </div>
         </div>
-      </div>
-      <div className="floating-card card-bottom">
+      </motion.div>
+
+      <motion.div
+        className="floating-card card-bottom"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 1.2, ease }}
+      >
         <span className="number">25+</span>
         <span>Proyectos<br />entregados</span>
-      </div>
+      </motion.div>
     </div>
   )
 }
@@ -213,33 +239,75 @@ function HeroTrustBadge() {
   )
 }
 
+const staggerItem = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.1, ease },
+  }),
+}
+
 export default function DesarrolloWebLandingPage() {
   return (
     <main className="desarrollo-web-landing">
       <section className="hero" id="inicio">
         <div className="hero-copy">
-          <div className="eyebrow">CREACIÓN DE WEBS</div>
-          <h1>
+          <motion.div
+            className="eyebrow"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1, ease }}
+          >
+            CREACIÓN DE WEBS
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease }}
+          >
             Creamos webs
             <br />que hacen crecer
             <br /><span>tu negocio.</span>
-          </h1>
-          <p>Diseñamos sitios web modernos, rápidos y estratégicos que atraen clientes y generan resultados.</p>
-          <div className="hero-actions">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35, ease }}
+          >
+            Diseñamos sitios web modernos, rápidos y estratégicos que atraen clientes y generan resultados.
+          </motion.p>
+          <motion.div
+            className="hero-actions"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.45, ease }}
+          >
             <a className="primary-btn" href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">Quiero crear mi web <ArrowRight size={18} /></a>
             <a className="text-btn light" href="#proyectos">Ver proyectos <ArrowRight size={17} /></a>
-          </div>
+          </motion.div>
           <HeroTrustBadge />
         </div>
         <DeviceMockup />
       </section>
 
-      <section className="feature-bar">
-        <div><Monitor /><strong>Diseño<br />personalizado</strong><span>A la medida de tu marca y objetivos.</span></div>
-        <div><Smartphone /><strong>100%<br />responsive</strong><span>Tu web se ve perfecta en cualquier dispositivo.</span></div>
-        <div><MessageCircle /><strong>WhatsApp<br />integrado</strong><span>Conecta con tus clientes en un clic.</span></div>
-        <div><Rocket /><strong>Rápidas y<br />optimizadas</strong><span>Cargan rápido y están listas para escalar.</span></div>
-      </section>
+      <motion.section
+        className="feature-bar"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+      >
+        {[
+          [Monitor, 'Diseño\npersonalizado', 'A la medida de tu marca y objetivos.'],
+          [Smartphone, '100%\nresponsive', 'Tu web se ve perfecta en cualquier dispositivo.'],
+          [MessageCircle, 'WhatsApp\nintegrado', 'Conecta con tus clientes en un clic.'],
+          [Rocket, 'Rápidas y\noptimizadas', 'Cargan rápido y están listas para escalar.'],
+        ].map(([Icon, title, text], i) => (
+          <motion.div key={i} custom={i} variants={staggerItem}>
+            <Icon /><strong>{title.split('\n').map((l, j) => <span key={j}>{l}{j === 0 && <br />}</span>)}</strong><span>{text}</span>
+          </motion.div>
+        ))}
+      </motion.section>
 
       <section className="types section-light" id="tipos">
         <div className="section-intro">
@@ -249,13 +317,21 @@ export default function DesarrolloWebLandingPage() {
           <a className="text-btn orange" href="#contacto">Ver todas las opciones <ArrowRight size={17} /></a>
         </div>
         <div className="type-grid">
-          {webTypes.map(({ icon: Icon, title, text }) => (
-            <article className="type-card" key={title}>
+          {webTypes.map(({ icon: Icon, title, text }, i) => (
+            <motion.article
+              className="type-card"
+              key={title}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerItem}
+            >
               <div className="icon-circle"><Icon size={22} /></div>
               <h3>{title}</h3>
               <p>{text}</p>
               <a href="#contacto">Saber más <ArrowRight size={16} /></a>
-            </article>
+            </motion.article>
           ))}
         </div>
       </section>
@@ -269,8 +345,16 @@ export default function DesarrolloWebLandingPage() {
           <a className="text-btn light" href="#contacto">Ver todos los proyectos <ArrowRight size={17} /></a>
         </div>
         <div className="project-grid">
-          {projects.map((project) => (
-            <article className="project-card" key={project.name}>
+          {projects.map((project, i) => (
+            <motion.article
+              className="project-card"
+              key={project.name}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerItem}
+            >
               <div className={`project-visual ${project.className}`}>
                 <img src={project.image} alt="" />
                 <div className="project-window">
@@ -280,7 +364,7 @@ export default function DesarrolloWebLandingPage() {
               </div>
               <h3>{project.name}</h3>
               <p>{project.type}</p>
-            </article>
+            </motion.article>
           ))}
         </div>
       </section>
@@ -289,12 +373,20 @@ export default function DesarrolloWebLandingPage() {
         <div className="eyebrow">LO QUE TU WEB NECESITA</div>
         <h2>Incluye todo lo que tu web necesita.</h2>
         <div className="included-grid">
-          {included.map(([Icon, title, text]) => (
-            <div className="included-item" key={title}>
+          {included.map(([Icon, title, text], i) => (
+            <motion.div
+              className="included-item"
+              key={title}
+              custom={i}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerItem}
+            >
               <Icon />
               <strong>{title}</strong>
               <span>{text}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -308,16 +400,31 @@ export default function DesarrolloWebLandingPage() {
         </div>
         <div className="steps">
           {steps.map(([num, title, text], index) => (
-            <div className="step" key={num}>
+            <motion.div
+              className="step"
+              key={num}
+              custom={index}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={staggerItem}
+            >
               <div className="step-line"><span>{num}</span>{index < steps.length - 1 && <i />}</div>
               <strong>{title}</strong>
               <p>{text}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      <section className="cta" id="contacto">
+      <motion.section
+        className="cta"
+        id="contacto"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6, ease }}
+      >
         <div className="cta-image" />
         <div className="cta-content">
           <div className="eyebrow">¿LISTO PARA CREAR TU WEB?</div>
@@ -328,7 +435,7 @@ export default function DesarrolloWebLandingPage() {
         <div className="cta-laptop">
           <div>Qaway <span>Lab</span></div>
         </div>
-      </section>
+      </motion.section>
     </main>
   )
 }
