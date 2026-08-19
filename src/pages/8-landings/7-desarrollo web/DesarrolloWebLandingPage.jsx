@@ -457,6 +457,247 @@ export default function DesarrolloWebLandingPage() {
         ))}
       </motion.section>
 
+      {/* ─── 05. PREÁMBULO SELECCIÓN FOTOGRÁFICA ─── */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">05</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Dirección de Arte
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Selección Fotográfica
+            </h2>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── 05. SELECCIÓN FOTOGRÁFICA INMERSIVA ─── */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
+        {/* Fondo inmersivo parallax (Fotografía principal) */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-12"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Estilo de vida & Arquitectura
+                </span>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-center">
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="col-span-1">
+                <div className="aspect-[4/5] rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                  <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                </div>
+              </motion.div>
+              
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.4 }} className="col-span-1 md:col-span-2 grid grid-cols-2 gap-4 md:gap-8">
+                <div className="col-span-2 aspect-[21/9] rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                  <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                </div>
+                <div className="col-span-1 aspect-square rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                  <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                </div>
+                <div className="col-span-1 aspect-square rounded-xl overflow-hidden border border-white/10 bg-black shadow-2xl relative group">
+                  <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fotografía" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-100 transition-all duration-700 group-hover:scale-105" />
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 06. PREÁMBULO SHOWCASE VISUAL ─── */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">06</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Ecosistema Digital
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Visualización de interfaces
+            </h2>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── 06. SHOWCASE VISUAL INMERSIVO ─── */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#C49A44]/10 to-transparent opacity-50" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-16"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Diseño UI / UX
+                </span>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              {/* Desktop Mockup Principal */}
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="lg:col-span-8 relative">
+                <div className="rounded-2xl overflow-hidden border border-white/10 bg-black shadow-2xl">
+                  <div className="bg-[#1a1a1a] px-4 py-3 flex items-center gap-2 border-b border-white/10">
+                    <div className="flex gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-white/20" />
+                    </div>
+                    <div className="mx-auto font-mono text-[9px] text-white/30 tracking-widest">horizonte-inmobiliaria.com</div>
+                  </div>
+                  <div className="aspect-[16/10] relative bg-[#0D1B17]">
+                    <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Desktop UI" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-700" />
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Mobile Mockup */}
+              <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.4 }} className="lg:col-span-4 lg:-ml-12 z-10 mt-8 lg:mt-0">
+                <div className="rounded-[2rem] p-2 border border-white/10 bg-[#1a1a1a] shadow-2xl w-[220px] lg:w-[260px] mx-auto">
+                  <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
+                    <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Mobile UI" loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80" />
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 07. PREÁMBULO SHOWCASE MÓVIL ─── */}
+      <section className="bg-[#f8f9f7] text-[#111210] py-12 px-6 border-t border-[#111210]/5">
+        <div className="max-w-[1200px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">07</span>
+              <span className="w-8 h-px bg-[#ff4b0b]"></span>
+              <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#ff4b0b]">
+                Estrategia de Navegación
+              </span>
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl leading-tight max-w-3xl text-[#111210]">
+              Cada pantalla tiene un propósito claro.
+            </h2>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── 07. SHOWCASE MÓVIL INMERSIVO ─── */}
+      <section className="relative min-h-[90vh] w-full flex flex-col justify-center pt-12 pb-12 md:pb-24 px-6 md:px-12 text-white border-y border-white/5 overflow-hidden">
+        {/* Fondo inmersivo parallax */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat bg-fixed opacity-40 mix-blend-luminosity"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
+        />
+
+        {/* Contenedor central flotante oscuro */}
+        <div className="relative z-10 max-w-[1440px] mx-auto w-full flex-grow flex flex-col justify-center mt-12">
+          <div className="absolute inset-0 z-0 overflow-hidden ring-1 ring-white/10 bg-[#0D1B17]/90 backdrop-blur-2xl">
+            <div className="absolute inset-0 bg-gradient-to-tr from-[#1E2A25]/50 to-transparent opacity-80" />
+          </div>
+
+          <div className="relative z-10 p-8 md:p-12 lg:p-16 h-full flex flex-col justify-center items-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="mb-16 text-center w-full"
+            >
+              <div className="inline-flex items-center justify-center gap-3 w-full">
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#C49A44]">
+                  Arquitectura de Flujos Móviles
+                </span>
+                <span className="w-8 h-px bg-[#C49A44]"></span>
+              </div>
+            </motion.div>
+
+            <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16">
+              {[
+                { img: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0 },
+                { img: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.2 },
+                { img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.4 },
+                { img: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80", delay: 0.6 }
+              ].map((mock, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }} 
+                  whileInView={{ opacity: 1, y: 0 }} 
+                  viewport={{ once: true, margin: "-100px" }} 
+                  transition={{ duration: 0.8, delay: mock.delay, type: "spring", bounce: 0.4 }} 
+                  className={`z-10 ${i % 2 !== 0 ? 'md:mt-24' : ''}`}
+                >
+                  <div className="rounded-[2rem] p-2 border border-white/10 bg-[#1a1a1a] shadow-2xl w-[200px] lg:w-[240px] hover:-translate-y-4 transition-transform duration-500 cursor-pointer">
+                    <div className="aspect-[9/19] rounded-[1.5rem] overflow-hidden relative bg-[#0D1B17]">
+                      <img src={mock.img} alt={`Mobile UI ${i+1}`} loading="lazy" decoding="async" className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal hover:opacity-100 transition-all duration-500 hover:scale-105" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── Types of Websites ───────────────────── */}
       <section className="types section-light" id="tipos">
         <div className="section-intro">
