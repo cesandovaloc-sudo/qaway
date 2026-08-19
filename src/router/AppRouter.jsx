@@ -107,6 +107,10 @@ export default function AppRouter() {
           element={renderPublicPathRoute('landings', '/landings/desarrollo-web', <DesarrolloWebLandingPage />)}
         />
         <Route
+          path="/proyectos/panaderia-josue"
+          element={renderRoute('proyectos', <PanaderiaPage />)}
+        />
+        <Route
           path="/pruebas/inicio-descartado"
           element={renderRoute('pruebas', <DiscardedInicioPage />)}
         />

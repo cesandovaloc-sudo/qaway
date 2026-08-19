@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
 import './josue-landing.css';
-import { Header } from './components/Header.jsx';
-import { Hero } from './components/Hero.jsx';
-import { Benefits } from './components/Benefits.jsx';
-import { Products } from './components/Products.jsx';
-import { BestSellers } from './components/BestSellers.jsx';
-import { PromiseSection } from './components/PromiseSection.jsx';
-import { ProcessSection } from './components/ProcessSection.jsx';
-import { Neighborhood } from './components/Neighborhood.jsx';
-import { Testimonials } from './components/Testimonials.jsx';
-import { SpecialOrder } from './components/SpecialOrder.jsx';
-import { Contact } from './components/Contact.jsx';
-import { Footer } from './components/Footer.jsx';
+import { Header } from './josue-panaderia-nextjs/components/Header.jsx';
+import { Hero } from './josue-panaderia-nextjs/components/Hero.jsx';
+import { Benefits } from './josue-panaderia-nextjs/components/Benefits.jsx';
+import { Products } from './josue-panaderia-nextjs/components/Products.jsx';
+import { BestSellers } from './josue-panaderia-nextjs/components/BestSellers.jsx';
+import { PromiseSection } from './josue-panaderia-nextjs/components/PromiseSection.jsx';
+import { ProcessSection } from './josue-panaderia-nextjs/components/ProcessSection.jsx';
+import { Neighborhood } from './josue-panaderia-nextjs/components/Neighborhood.jsx';
+import { Testimonials } from './josue-panaderia-nextjs/components/Testimonials.jsx';
+import { SpecialOrder } from './josue-panaderia-nextjs/components/SpecialOrder.jsx';
+import { Contact } from './josue-panaderia-nextjs/components/Contact.jsx';
+import { Footer } from './josue-panaderia-nextjs/components/Footer.jsx';
 
 const schema = {
   "@context": "https://schema.org",
