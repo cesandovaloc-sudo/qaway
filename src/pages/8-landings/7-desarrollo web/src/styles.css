@@ -483,14 +483,21 @@
   grid-template-columns: repeat(4, 1fr);
   box-shadow: 0 15px 35px rgba(0, 0, 0, .15);
   color: #fff;
+  overflow: hidden;
 }
 
 .desarrollo-web-landing .feature-bar>div {
-  padding: 22px 25px;
+  padding: 24px 26px;
   display: grid;
-  grid-template-columns: 38px 1fr;
-  column-gap: 10px;
+  grid-template-columns: 36px 1fr;
+  column-gap: 12px;
   border-right: 1px solid #263940;
+  transition: background-color 0.25s ease;
+  cursor: default;
+}
+
+.desarrollo-web-landing .feature-bar>div:hover {
+  background-color: rgba(255, 255, 255, 0.035);
 }
 
 .desarrollo-web-landing .feature-bar>div:last-child {
@@ -500,20 +507,28 @@
 .desarrollo-web-landing .feature-bar svg {
   grid-row: span 2;
   color: var(--orange);
-  width: 24px;
+  width: 26px;
+  height: 26px;
+  transition: transform 0.25s ease;
+}
+
+.desarrollo-web-landing .feature-bar>div:hover svg {
+  transform: translateY(-2px);
 }
 
 .desarrollo-web-landing .feature-bar strong {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
+  color: #ffffff;
+  letter-spacing: -0.2px;
 }
 
 .desarrollo-web-landing .feature-bar span {
-  font-size: 9px;
+  font-size: 12px;
   color: #aab5b9;
   line-height: 1.4;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .desarrollo-web-landing .section-light {
