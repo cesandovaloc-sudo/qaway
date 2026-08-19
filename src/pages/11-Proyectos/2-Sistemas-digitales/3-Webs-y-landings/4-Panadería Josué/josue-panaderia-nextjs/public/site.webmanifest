@@ -1,0 +1,17 @@
+{
+  "name": "Josué Panadería",
+  "short_name": "Josué Panadería",
+  "description": "Pan fresco, panes tradicionales, bocaditos y pedidos especiales en San Miguel, Lima.",
+  "lang": "es-PE",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f7f2f",
+  "icons": [
+    {
+      "src": "/assets/logo/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

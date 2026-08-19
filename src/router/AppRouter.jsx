@@ -47,6 +47,7 @@ import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-
 import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'
 import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'
 import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
+import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -153,6 +154,7 @@ export default function AppRouter() {
           <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
           <Route path="proyectos/plantora" element={renderRoute('proyectos', <PlantoraPage />)} />
           <Route path="proyectos/aurea-skincare" element={renderRoute('proyectos', <AureaSkincarePage />)} />
+          <Route path="proyectos/panaderia-josue" element={renderRoute('proyectos', <PanaderiaPage />)} />
           <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
           <Route
