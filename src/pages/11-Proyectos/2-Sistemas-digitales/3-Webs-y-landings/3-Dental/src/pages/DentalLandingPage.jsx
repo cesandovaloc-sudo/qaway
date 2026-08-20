@@ -110,7 +110,7 @@ const initialForm = {
 
 function SectionEyebrow({ children }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-blush-200/80 bg-white/90 px-4 py-1.5 text-[0.8rem] font-semibold uppercase tracking-[0.14em] text-blush-600 shadow-sm backdrop-blur-md">
+    <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-blush-200/80 bg-white/90 px-3 py-1 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-blush-600 shadow-sm backdrop-blur-md">
       <span className="h-1.5 w-1.5 rounded-full bg-blush-500" />
       {children}
     </span>
@@ -245,8 +245,8 @@ export function DentalLandingPage() {
 
                 <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
                   {heroBadges.map(({ icon: Icon, label }) => (
-                    <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-ink/80 shadow-[0_8px_20px_rgba(255,137,172,0.1)] sm:text-sm" key={label}>
-                      <span className="rounded-full bg-blush-100 p-1 text-blush-600">
+                    <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/30 px-3 py-1 text-xs font-medium text-ink/65 backdrop-blur-sm sm:text-[0.82rem]" key={label}>
+                      <span className="rounded-full bg-blush-100/60 p-1 text-blush-500">
                         <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
                       </span>
                       {label}
