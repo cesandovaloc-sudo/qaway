@@ -1,0 +1,30 @@
+import { Reveal } from "./Reveal.jsx";
+import { testimonials } from "../data/content.js";
+
+export function Testimonials() {
+  return (
+    <section className="section">
+      <div className="container">
+        <Reveal className="centerHeading">
+          <p className="eyebrow">Opiniones reales</p>
+          <h2>Lo que dicen nuestros clientes</h2>
+        </Reveal>
+        <Reveal className="testimonialsGrid">
+          {testimonials.map(t => (
+            <blockquote key={t.name} className="testimonial">
+              <div className="stars" aria-label="5 de 5 estrellas">★★★★★</div>
+              <p>"{t.text}"</p>
+              <footer>
+                <img className="avatar" src={t.avatar} alt={`Foto de ${t.name}`} loading="lazy" />
+                <div>
+                  <strong>{t.name}</strong>
+                  <small>{t.district}</small>
+                </div>
+              </footer>
+            </blockquote>
+          ))}
+        </Reveal>
+      </div>
+    </section>
+  );
+}
