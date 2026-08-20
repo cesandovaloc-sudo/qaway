@@ -49,6 +49,7 @@ import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-lan
 import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
 import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
 import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
+import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -122,6 +123,10 @@ export default function AppRouter() {
         <Route
           path="/proyectos/saniclick"
           element={renderRoute('proyectos', <SaniclickPage />)}
+        />
+        <Route
+          path="/proyectos/dental"
+          element={renderRoute('proyectos', <DentalPage />)}
         />
         <Route
           path="/pruebas/inicio-descartado"

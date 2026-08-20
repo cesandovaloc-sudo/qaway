@@ -1,0 +1,39 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap");
+
+.dental-landing {
+  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  background: #fff7f9;
+  color: #1f2433;
+  min-height: 100vh;
+}
+
+.dental-landing * {
+  box-sizing: border-box;
+}
+
+.dental-landing a {
+  text-decoration: none;
+}
+
+.dental-landing .bg-blush-50 { background-color: #fff6f8; }
+.dental-landing .bg-blush-100 { background-color: #ffeef3; }
+.dental-landing .bg-blush-200 { background-color: #ffd8e5; }
+.dental-landing .bg-blush-300 { background-color: #ffbfd4; }
+.dental-landing .bg-blush-400 { background-color: #ff8eb1; }
+.dental-landing .bg-blush-500 { background-color: #ff5f91; }
+.dental-landing .bg-blush-600 { background-color: #f0447d; }
+.dental-landing .text-blush-500 { color: #ff5f91; }
+.dental-landing .text-blush-600 { color: #f0447d; }
+.dental-landing .text-blush-700 { color: #cb2d62; }
+.dental-landing .text-blush-800 { color: #a92854; }
+.dental-landing .text-blush-900 { color: #6d1b37; }
+.dental-landing .border-blush-100 { border-color: #ffeef3; }
+.dental-landing .border-blush-200 { border-color: #ffd8e5; }
+.dental-landing .border-blush-300 { border-color: #ffbfd4; }
+.dental-landing .border-blush-400 { border-color: #ff8eb1; }
+.dental-landing .border-blush-500 { border-color: #ff5f91; }
+.dental-landing .from-blush-500 { --tw-gradient-from: #ff5f91; --tw-gradient-to: rgb(255 95 145 / 0); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.dental-landing .to-blush-600 { --tw-gradient-to: #f0447d; }
+.dental-landing .shadow-soft { box-shadow: 0 24px 70px rgba(245, 104, 150, 0.16); }
+.dental-landing .shadow-glow { box-shadow: 0 18px 45px rgba(255, 95, 145, 0.28); }
+.dental-landing .bg-page-glow { background-image: radial-gradient(circle at top left, rgba(255, 192, 213, 0.65), transparent 30%), radial-gradient(circle at 85% 10%, rgba(255, 232, 239, 0.95), transparent 20%), linear-gradient(180deg, #fffdfd 0%, #fff4f7 100%); }

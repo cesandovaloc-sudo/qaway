@@ -58,5 +58,10 @@ export default defineConfig({
   server: {
     port: process.env.PORT ? Number(process.env.PORT) : 4100,
     host: true,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+      ignored: ['**/tsconfig.node.json', '**/.git/**'],
+    },
   },
 })
