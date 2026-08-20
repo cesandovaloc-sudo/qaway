@@ -232,7 +232,7 @@ export function DentalLandingPage() {
         </header>
 
         <main className="mt-6 space-y-6" id="inicio">
-          <section className="overflow-hidden rounded-[40px] border border-white/80 bg-white/70 shadow-soft backdrop-blur-xl">
+          <section className="overflow-hidden rounded-3xl border border-white/80 bg-white/70 shadow-soft backdrop-blur-xl lg:rounded-[36px]">
             <div className="grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
               <div className="flex flex-col justify-center py-2 lg:pr-4">
                 <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
@@ -269,8 +269,8 @@ export function DentalLandingPage() {
               </div>
 
               <div className="relative flex min-h-[440px] items-end">
-                <div className="absolute inset-3 rounded-[32px] bg-[radial-gradient(circle_at_30%_12%,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,232,239,0.2))]" />
-                <div className="relative h-[440px] w-full overflow-hidden rounded-[32px] bg-[#fce7ee] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)] sm:h-[500px] lg:h-[540px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }} />
+                <div className="absolute inset-3 rounded-2xl bg-[radial-gradient(circle_at_30%_12%,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,232,239,0.2))] lg:rounded-[24px]" />
+                <div className="relative h-[440px] w-full overflow-hidden rounded-2xl bg-[#fce7ee] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)] sm:h-[500px] lg:h-[540px] lg:rounded-[24px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }} />
               </div>
             </div>
           </section>
