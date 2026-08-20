@@ -1,2 +1,0 @@
-import Image from "next/image"; import { Reveal } from "@/components/Reveal"; import { benefits } from "@/data/content";
-export function Benefits(){return <section className="benefits sectionCompact"><Reveal className="container benefitsGrid">{benefits.map(item=><article className="benefit" key={item.title}><Image src={item.icon} alt="" width={48} height={48}/><h3>{item.title}</h3><p>{item.text}</p></article>)}</Reveal></section>}
