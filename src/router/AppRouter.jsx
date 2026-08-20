@@ -48,6 +48,7 @@ import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Web
 import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'
 import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
 import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
+import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -117,6 +118,10 @@ export default function AppRouter() {
         <Route
           path="/proyectos/plantora"
           element={renderRoute('proyectos', <PlantoraPage />)}
+        />
+        <Route
+          path="/proyectos/saniclick"
+          element={renderRoute('proyectos', <SaniclickPage />)}
         />
         <Route
           path="/pruebas/inicio-descartado"

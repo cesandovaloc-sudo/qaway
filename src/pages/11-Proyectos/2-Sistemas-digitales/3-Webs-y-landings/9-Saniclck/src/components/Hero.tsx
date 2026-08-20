@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Sparkles, Wrench, X, Users, Leaf } from "lucide-react";
 import { Header } from "./Header";
 

@@ -1,6 +1,6 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { useReveal } from "@/hooks/useReveal";
+import { useReveal } from "../hooks/useReveal";
 
 type Props = {
   children: ReactNode;

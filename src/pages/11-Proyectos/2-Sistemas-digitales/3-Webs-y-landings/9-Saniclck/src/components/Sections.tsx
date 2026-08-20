@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Star } from "lucide-react";
-import { serviceCategories, services, projects, testimonials, faqs } from "@/data/site";
-import { Icon } from "@/lib/icons";
+import { serviceCategories, services, projects, testimonials, faqs } from "../data/site";
+import { Icon } from "../lib/icons";
 import { Reveal } from "./Reveal";
 
 export function CategorySection() {

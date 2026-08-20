@@ -1,8 +1,8 @@
-import { Hero } from "@/components/Hero";
+import { Hero } from "./components/Hero";
 import {
   CategorySection, ServicesSection, FeatureBanners, ProjectsSection,
   QualityBar, TestimonialSection, FAQSection, CTASection, Footer,
-} from "@/components/Sections";
+} from "./components/Sections";
 
 export default function App() {
   return (
