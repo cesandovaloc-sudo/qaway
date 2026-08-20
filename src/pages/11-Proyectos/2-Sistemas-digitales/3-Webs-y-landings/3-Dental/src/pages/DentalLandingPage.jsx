@@ -233,44 +233,44 @@ export function DentalLandingPage() {
 
         <main className="mt-6 space-y-6" id="inicio">
           <section className="overflow-hidden rounded-[40px] border border-white/80 bg-white/70 shadow-soft backdrop-blur-xl">
-            <div className="grid min-h-[820px] gap-8 px-6 py-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.95fr)] lg:px-8 lg:py-8 xl:px-10">
+            <div className="grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
               <div className="flex flex-col justify-center py-2 lg:pr-4">
                 <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
-                <h1 className="mt-6 max-w-[8ch] text-[3.4rem] font-semibold leading-[0.93] tracking-[-0.06em] sm:text-[4.5rem] lg:text-[5.6rem]">
+                <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
                   Brackets que alinean <span className="text-blush-500">tu sonrisa</span> y tu confianza
                 </h1>
-                <p className="mt-6 max-w-[18ch] text-lg leading-relaxed text-ink/62 sm:text-2xl">
+                <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-ink/70 sm:text-lg">
                   Tratamientos personalizados, seguros y comodos para lograr la sonrisa que mereces.
                 </p>
 
-                <div className="mt-8 flex flex-wrap gap-3">
+                <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
                   {heroBadges.map(({ icon: Icon, label }) => (
-                    <div className="inline-flex items-center gap-3 rounded-full border border-white/90 bg-white/80 px-4 py-2.5 text-sm font-medium text-ink/80 shadow-[0_12px_28px_rgba(255,137,172,0.12)]" key={label}>
-                      <span className="rounded-full bg-blush-100 p-1.5 text-blush-600">
-                        <Icon className="h-4 w-4" strokeWidth={1.9} />
+                    <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-white/90 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-ink/80 shadow-[0_8px_20px_rgba(255,137,172,0.1)] sm:text-sm" key={label}>
+                      <span className="rounded-full bg-blush-100 p-1 text-blush-600">
+                        <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
                       </span>
                       {label}
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <a className="island-btn bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow" href="#contacto">
                     <span>Agenda tu evaluacion</span>
                     <span className="island-btn__icon">
                       <CalendarDays className="h-4 w-4" strokeWidth={2} />
                     </span>
                   </a>
-                  <a className="inline-flex min-h-[56px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-7 text-base font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
+                  <a className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-6 text-sm font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
                     <Play className="mr-2 h-4 w-4 text-blush-600" fill="currentColor" strokeWidth={1.8} />
                     Conoce tu tratamiento
                   </a>
                 </div>
               </div>
 
-              <div className="relative flex min-h-[520px] items-end">
-                <div className="absolute inset-4 rounded-[36px] bg-[radial-gradient(circle_at_30%_12%,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,232,239,0.2))]" />
-                <div className="relative h-[560px] w-full overflow-hidden rounded-[36px] bg-[#fce7ee] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)] sm:h-[640px] lg:h-[740px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }} />
+              <div className="relative flex min-h-[440px] items-end">
+                <div className="absolute inset-3 rounded-[32px] bg-[radial-gradient(circle_at_30%_12%,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,232,239,0.2))]" />
+                <div className="relative h-[440px] w-full overflow-hidden rounded-[32px] bg-[#fce7ee] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)] sm:h-[500px] lg:h-[540px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }} />
               </div>
             </div>
           </section>
