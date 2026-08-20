@@ -25,6 +25,9 @@ const publicPathAllowList = new Set([
   '/sistemas-digitales',
   '/landings/sistema-contenido-notion',
   '/landings/identidad-visual',
+  '/landings/desarrollo-web',
+  '/landings/desarrollo-web-superpower',
+  '/landings/desarrollo-web-v2',
   '/academy',
 ])
 
