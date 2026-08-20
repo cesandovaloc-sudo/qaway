@@ -89,30 +89,30 @@
     color: #000;
   }
 
-  /* Estandarizacion tipografica global para toda la web (Excluyendo Blog/Editor) */
-  :not(.blog-content):not(.blog-editor) > h1:not(.blog-title):not(.no-qw),
-  h1:not(.blog-title):not(.no-qw) {
+  /* Estandarizacion tipografica global para toda la web (Excluyendo Blog/Editor/Josue) */
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *) > h1:not(.blog-title):not(.no-qw),
+  h1:not(.blog-title):not(.no-qw):not(.josue-landing *):not(.josue-landing) {
     font-size: clamp(2.6rem, 4.2vw, 5.5rem);
     line-height: 0.91;
     letter-spacing: -0.055em;
   }
 
-  :not(.blog-content):not(.blog-editor) > h2:not(.blog-subtitle):not(.no-qw),
-  h2:not(.blog-subtitle):not(.no-qw) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *) > h2:not(.blog-subtitle):not(.no-qw),
+  h2:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing) {
     font-size: clamp(2.3rem, 3.8vw, 4.1rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
 
-  :not(.blog-content):not(.blog-editor) > h3:not(.blog-subtitle):not(.no-qw),
-  h3:not(.blog-subtitle):not(.no-qw) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *) > h3:not(.blog-subtitle):not(.no-qw),
+  h3:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing) {
     font-size: clamp(1.4rem, 2.7vw, 2.4rem);
     line-height: 1.02;
     letter-spacing: -0.035em;
   }
 
-  :not(.blog-content):not(.blog-editor) > h4,
-  h4:not(.blog-subtitle):not(.no-qw) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *) > h4,
+  h4:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing) {
     font-size: clamp(1.05rem, 2.2vw, 1.75rem);
     line-height: 1.06;
     letter-spacing: -0.025em;
