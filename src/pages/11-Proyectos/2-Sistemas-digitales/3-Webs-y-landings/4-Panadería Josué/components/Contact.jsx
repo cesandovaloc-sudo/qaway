@@ -1,3 +1,4 @@
+import { Clock, MapPin, MessageCircle } from "lucide-react";
 import { Map } from "./Map.jsx";
 import { Reveal } from "./Reveal.jsx";
 import { site, whatsappUrl } from "../data/site.js";
@@ -8,14 +9,14 @@ export function Contact() {
       <div className="container">
         <Reveal className="contactCards">
           <article>
-            <img src="/assets/icons/icon-clock.svg" alt="" width={42} height={42} />
+            <Clock size={38} color="#4f7f2f" strokeWidth={1.8} />
             <div>
               <strong>Horarios de atención</strong>
               <span>{site.schedule}</span>
             </div>
           </article>
           <article id="ubicacion">
-            <img src="/assets/icons/icon-pin.svg" alt="" width={42} height={42} />
+            <MapPin size={38} color="#4f7f2f" strokeWidth={1.8} />
             <div>
               <strong>Visítanos</strong>
               <a href={site.mapsUrl} target="_blank" rel="noreferrer">
@@ -24,7 +25,7 @@ export function Contact() {
             </div>
           </article>
           <article>
-            <img src="/assets/icons/icon-whatsapp.svg" alt="" width={42} height={42} />
+            <MessageCircle size={38} color="#4f7f2f" strokeWidth={1.8} />
             <div>
               <strong>Escríbenos</strong>
               <a href={whatsappUrl("Hola, quisiera información.")} target="_blank" rel="noreferrer">

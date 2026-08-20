@@ -72,7 +72,7 @@ export default function PanaderiaPage() {
   }, []);
 
   return (
-    <div className="josue-panaderia-root">
+    <div className="josue-panaderia-root josue-landing">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <Header />
       <main>

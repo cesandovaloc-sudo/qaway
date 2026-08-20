@@ -584,8 +584,8 @@
 }
 
 .desarrollo-web-landing .showcase-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.1);
 }
 
 .desarrollo-web-landing .showcase-preview-frame {
@@ -601,30 +601,14 @@
   border-radius: 8px 8px 0 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 12px;
   border: 1px solid #dbe0e4;
   border-bottom: 0;
 }
 
-.desarrollo-web-landing .browser-dots {
-  display: flex;
-  gap: 5px;
-}
-
-.desarrollo-web-landing .browser-dots .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.desarrollo-web-landing .dot-red { background: #ff5f56; }
-.desarrollo-web-landing .dot-yellow { background: #ffbd2e; }
-.desarrollo-web-landing .dot-green { background: #27c93f; }
-
 .desarrollo-web-landing .browser-url {
-  font-size: 10px;
+  font-size: 11px;
   color: #8c979d;
   font-family: monospace;
   letter-spacing: 0.5px;
@@ -645,29 +629,19 @@
   height: 100%;
   object-fit: cover;
   object-position: top;
-  transition: transform 0.6s ease;
+  transition: transform 0.5s ease;
+  display: block;
 }
 
 .desarrollo-web-landing .showcase-card:hover .showcase-img {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
-.desarrollo-web-landing .showcase-hover-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 17, 22, 0.72);
-  opacity: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  transition: opacity 0.3s ease;
-  backdrop-filter: blur(3px);
-}
-
-.desarrollo-web-landing .showcase-card:hover .showcase-hover-overlay {
-  opacity: 1;
+.desarrollo-web-landing .showcase-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
 }
 
 .desarrollo-web-landing .overlay-badge {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   ArrowRight,
   BarChart3,
@@ -395,6 +395,62 @@ const staggerItem = {
   }),
 }
 
+function ShowcaseCardItem({ item, i }) {
+  const videoRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {})
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+  }
+
+  return (
+    <motion.article
+      className="showcase-card"
+      key={item.title}
+      custom={i}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={staggerItem}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="showcase-preview-frame">
+        <div className="showcase-browser-bar">
+          <span className="browser-url">{item.url}</span>
+        </div>
+        <div className="showcase-screen-wrap">
+          {item.video ? (
+            <video
+              ref={videoRef}
+              src={item.video}
+              poster={item.image}
+              muted
+              loop
+              playsInline
+              className="showcase-img showcase-video"
+            />
+          ) : (
+            <img src={item.image} alt={item.title} className="showcase-img" loading="lazy" decoding="async" />
+          )}
+        </div>
+      </div>
+      <div className="showcase-footer">
+        <h3>{item.title}</h3>
+        <span className="showcase-type">{item.category}</span>
+      </div>
+    </motion.article>
+  )
+}
+
 export default function DesarrolloWebLandingPage() {
   const [openFaq, setOpenFaq] = useState(null)
   const [clientName, setClientName] = useState('')
@@ -486,39 +542,7 @@ export default function DesarrolloWebLandingPage() {
 
         <div className="showcase-cards-grid">
           {webShowcases.map((item, i) => (
-            <motion.article
-              className="showcase-card"
-              key={item.title}
-              custom={i}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              variants={staggerItem}
-            >
-              <div className="showcase-preview-frame">
-                <div className="showcase-browser-bar">
-                  <div className="browser-dots">
-                    <span className="dot dot-red"></span>
-                    <span className="dot dot-yellow"></span>
-                    <span className="dot dot-green"></span>
-                  </div>
-                  <span className="browser-url">{item.url}</span>
-                </div>
-                <div className="showcase-screen-wrap">
-                  <img src={item.image} alt={item.title} className="showcase-img" loading="lazy" decoding="async" />
-                  <div className="showcase-hover-overlay">
-                    <span className="overlay-badge">{item.tag}</span>
-                    <a href="#contacto" className="overlay-btn">
-                      Cotizar este modelo <ArrowRight size={15} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="showcase-footer">
-                <h3>{item.title}</h3>
-                <span className="showcase-type">{item.category}</span>
-              </div>
-            </motion.article>
+            <ShowcaseCardItem key={item.title} item={item} i={i} />
           ))}
         </div>
       </section>

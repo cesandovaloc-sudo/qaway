@@ -6,8 +6,8 @@ export function Footer() {
     <footer className="footer">
       <Reveal className="container footerGrid">
         <div>
-          <img src="/assets/logo/logo-primary.svg" alt="Josué Panadería" width={180} height={55} />
-          <p>Pan fresco todos los días, hecho con calidad y cariño para tu familia.</p>
+          <img className="footerLogo" src="/assets/logo/logo-primary.svg" alt="Josué Panadería" width={160} height={52} />
+          <p className="footerText">Pan fresco todos los días, hecho con calidad y cariño para tu familia.</p>
         </div>
         <div>
           <strong>Enlaces</strong>
