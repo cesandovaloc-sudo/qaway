@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Star } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ChevronLeft, ChevronRight, MessageCircle, Star, Leaf } from "lucide-react";
 import { serviceCategories, services, projects, testimonials, faqs } from "../data/site";
 import { Icon } from "../lib/icons";
 import { Reveal } from "./Reveal";
