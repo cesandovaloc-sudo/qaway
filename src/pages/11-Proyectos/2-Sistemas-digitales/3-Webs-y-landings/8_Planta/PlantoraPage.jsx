@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search, Heart, ShoppingBag, ArrowRight, Truck, ShieldCheck, Sprout,
   Headphones, Star, ChevronDown, Instagram, Facebook, Menu, X, Plus
@@ -42,6 +42,10 @@ export default function PlantoraPage(){
   const [menu, setMenu] = useState(false);
   const [cart, setCart] = useState(0);
   const [faq, setFaq] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const add = () => setCart(c => c + 1);
 

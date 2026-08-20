@@ -115,6 +115,10 @@ export default function AppRouter() {
           element={renderRoute('proyectos', <AureaSkincarePage />)}
         />
         <Route
+          path="/proyectos/plantora"
+          element={renderRoute('proyectos', <PlantoraPage />)}
+        />
+        <Route
           path="/pruebas/inicio-descartado"
           element={renderRoute('pruebas', <DiscardedInicioPage />)}
         />
@@ -160,7 +164,6 @@ export default function AppRouter() {
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
           <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
-          <Route path="proyectos/plantora" element={renderRoute('proyectos', <PlantoraPage />)} />
           <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
           <Route
