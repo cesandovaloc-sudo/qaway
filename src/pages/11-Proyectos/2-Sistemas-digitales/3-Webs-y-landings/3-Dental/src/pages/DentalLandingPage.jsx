@@ -110,7 +110,8 @@ const initialForm = {
 
 function SectionEyebrow({ children }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-blush-200/70 bg-white/80 px-4 py-2 text-sm font-semibold uppercase tracking-[0.12em] text-blush-600 shadow-sm">
+    <span className="inline-flex items-center gap-2 rounded-full border border-blush-200/80 bg-white/90 px-4 py-1.5 text-[0.8rem] font-semibold uppercase tracking-[0.14em] text-blush-600 shadow-sm backdrop-blur-md">
+      <span className="h-1.5 w-1.5 rounded-full bg-blush-500" />
       {children}
     </span>
   );
@@ -183,7 +184,7 @@ export function DentalLandingPage() {
   return (
     <div className="min-h-[100dvh] bg-page-glow text-ink">
       <div className="mx-auto w-full max-w-[1380px] px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-        <header className="sticky top-4 z-30 rounded-[32px] border border-white/80 bg-white/78 px-5 py-4 shadow-soft backdrop-blur-xl">
+        <header className="sticky top-4 z-30 rounded-[32px] border border-white/90 bg-white/82 px-5 py-4 shadow-soft backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
             <a className="flex items-center gap-3" href="#inicio">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blush-100 text-blush-600 shadow-inner">
@@ -204,8 +205,9 @@ export function DentalLandingPage() {
             </nav>
 
             <div className="flex items-center gap-3">
-              <a className="hidden rounded-full bg-gradient-to-r from-blush-500 to-blush-600 px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 sm:inline-flex" href="#contacto">
+              <a className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-blush-500 to-blush-600 px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 sm:inline-flex" href="#contacto">
                 Agenda tu evaluacion
+                <ChevronRight className="h-4 w-4" strokeWidth={2} />
               </a>
               <button
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-blush-100 bg-white text-ink/70 lg:hidden"
@@ -243,8 +245,8 @@ export function DentalLandingPage() {
 
                 <div className="mt-8 flex flex-wrap gap-3">
                   {heroBadges.map(({ icon: Icon, label }) => (
-                    <div className="inline-flex items-center gap-3 rounded-full border border-white/80 bg-white/72 px-4 py-3 text-sm font-medium text-ink/76 shadow-[0_16px_34px_rgba(255,137,172,0.13)]" key={label}>
-                      <span className="rounded-full bg-blush-100 p-2 text-blush-600">
+                    <div className="inline-flex items-center gap-3 rounded-full border border-white/90 bg-white/80 px-4 py-2.5 text-sm font-medium text-ink/80 shadow-[0_12px_28px_rgba(255,137,172,0.12)]" key={label}>
+                      <span className="rounded-full bg-blush-100 p-1.5 text-blush-600">
                         <Icon className="h-4 w-4" strokeWidth={1.9} />
                       </span>
                       {label}
@@ -252,12 +254,14 @@ export function DentalLandingPage() {
                   ))}
                 </div>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <a className="inline-flex min-h-[58px] items-center justify-center rounded-full bg-gradient-to-r from-blush-500 to-blush-600 px-7 text-base font-semibold text-white shadow-glow transition hover:-translate-y-0.5 active:scale-[0.98]" href="#contacto">
-                    <CalendarDays className="mr-2 h-5 w-5" strokeWidth={1.9} />
-                    Agenda tu evaluacion
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <a className="island-btn bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow" href="#contacto">
+                    <span>Agenda tu evaluacion</span>
+                    <span className="island-btn__icon">
+                      <CalendarDays className="h-4 w-4" strokeWidth={2} />
+                    </span>
                   </a>
-                  <a className="inline-flex min-h-[58px] items-center justify-center rounded-full border border-blush-200 bg-white/82 px-7 text-base font-semibold text-ink transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
+                  <a className="inline-flex min-h-[56px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-7 text-base font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
                     <Play className="mr-2 h-4 w-4 text-blush-600" fill="currentColor" strokeWidth={1.8} />
                     Conoce tu tratamiento
                   </a>
@@ -295,23 +299,23 @@ export function DentalLandingPage() {
             <div className="grid gap-6">
               <div className="grid gap-6 md:grid-cols-2">
                 {benefits.map(({ icon: Icon, title, body }) => (
-                  <article className="rounded-[32px] border border-white/80 bg-white/80 p-7 shadow-soft backdrop-blur-xl transition hover:-translate-y-1" key={title}>
-                    <div className="inline-flex rounded-2xl bg-blush-100 p-3 text-blush-600">
-                      <Icon className="h-6 w-6" strokeWidth={1.8} />
+                  <article className="group rounded-[32px] border border-white/90 bg-white/85 p-7 shadow-double-bezel backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-blush-200" key={title}>
+                    <div className="inline-flex rounded-2xl border border-blush-200/60 bg-blush-100/80 p-3.5 text-blush-600 transition group-hover:scale-105">
+                      <Icon className="h-6 w-6" strokeWidth={1.9} />
                     </div>
                     <h3 className="mt-6 text-3xl font-semibold leading-[1] tracking-[-0.05em]">{title}</h3>
-                    <p className="mt-4 text-base leading-7 text-ink/62">{body}</p>
+                    <p className="mt-4 text-base leading-7 text-ink/65">{body}</p>
                   </article>
                 ))}
               </div>
 
-              <article className="flex flex-col items-start justify-between gap-6 rounded-[34px] border border-white/80 bg-gradient-to-r from-white/88 to-blush-50/80 p-7 shadow-soft sm:flex-row sm:items-center">
+              <article className="flex flex-col items-start justify-between gap-6 rounded-[34px] border border-white/90 bg-gradient-to-r from-white/95 to-blush-50/90 p-7 shadow-soft sm:flex-row sm:items-center">
                 <div>
                   <SectionEyebrow>Sin costo, sin compromiso</SectionEyebrow>
                   <h3 className="mt-4 text-4xl font-semibold tracking-[-0.05em]">
                     Evaluacion inicial <span className="text-blush-500">sin costo</span>
                   </h3>
-                  <p className="mt-3 max-w-[44ch] text-base leading-7 text-ink/62">
+                  <p className="mt-3 max-w-[44ch] text-base leading-7 text-ink/65">
                     Conoce el estado de tu sonrisa, recibe un diagnostico profesional y un plan personalizado desde la primera visita.
                   </p>
                 </div>
@@ -322,7 +326,7 @@ export function DentalLandingPage() {
             </div>
           </section>
 
-          <section className="rounded-[38px] border border-white/80 bg-white/74 p-7 shadow-soft backdrop-blur-xl sm:p-8" id="tratamientos">
+          <section className="rounded-[38px] border border-white/85 bg-white/78 p-7 shadow-soft backdrop-blur-xl sm:p-8" id="tratamientos">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <SectionEyebrow>Mas opciones para tu sonrisa</SectionEyebrow>
@@ -330,19 +334,19 @@ export function DentalLandingPage() {
                   Explora otros <span className="text-blush-500">tratamientos</span>
                 </h2>
               </div>
-              <p className="max-w-[36ch] text-base leading-7 text-ink/62">
+              <p className="max-w-[36ch] text-base leading-7 text-ink/65">
                 Soluciones disenadas para cada etapa de tu sonrisa, con opciones funcionales y esteticas segun tu necesidad.
               </p>
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-3">
               {treatments.map((item) => (
-                <article className="overflow-hidden rounded-[32px] border border-white/80 bg-white/82 shadow-soft transition hover:-translate-y-1" key={item.title}>
-                  <div className="h-[240px] bg-[#f9dbe4]" style={{ backgroundImage: `url(${treatmentsSource})`, backgroundPosition: item.position, backgroundSize: "cover" }} />
+                <article className="group overflow-hidden rounded-[32px] border border-white/90 bg-white/88 shadow-double-bezel transition duration-300 hover:-translate-y-1 hover:border-blush-200" key={item.title}>
+                  <div className="h-[240px] bg-[#f9dbe4] transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${treatmentsSource})`, backgroundPosition: item.position, backgroundSize: "cover" }} />
                   <div className="p-7">
                     <h3 className="text-3xl font-semibold tracking-[-0.05em]">{item.title}</h3>
-                    <p className="mt-4 text-base leading-7 text-ink/62">{item.body}</p>
-                    <a className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blush-600" href="#contacto">
+                    <p className="mt-4 text-base leading-7 text-ink/65">{item.body}</p>
+                    <a className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blush-600 transition group-hover:gap-3" href="#contacto">
                       Ver tratamiento
                       <ChevronRight className="h-4 w-4" strokeWidth={2} />
                     </a>
@@ -459,7 +463,7 @@ export function DentalLandingPage() {
                 ].map((field) => (
                   <label className="grid gap-2" key={field.label}>
                     <span className="text-sm font-medium text-ink/72">{field.label}</span>
-                    <span className="flex min-h-[58px] items-center gap-3 rounded-[20px] border border-blush-100 bg-mist px-4">
+                    <span className="flex min-h-[58px] items-center gap-3 rounded-[20px] border border-blush-100 bg-mist px-4 transition focus-within:border-blush-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-blush-200/50">
                       <field.icon className="h-5 w-5 shrink-0 text-ink/45" strokeWidth={1.8} />
                       <input
                         className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink/35"
@@ -476,7 +480,7 @@ export function DentalLandingPage() {
 
                 <label className="grid gap-2 md:col-span-2">
                   <span className="text-sm font-medium text-ink/72">Que te gustaria mejorar?</span>
-                  <span className="flex min-h-[58px] items-center gap-3 rounded-[20px] border border-blush-100 bg-mist px-4">
+                  <span className="flex min-h-[58px] items-center gap-3 rounded-[20px] border border-blush-100 bg-mist px-4 transition focus-within:border-blush-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-blush-200/50">
                     <Stethoscope className="h-5 w-5 shrink-0 text-ink/45" strokeWidth={1.8} />
                     <select className="w-full bg-transparent text-sm text-ink outline-none" name="treatmentInterest" value={formData.treatmentInterest} onChange={handleChange}>
                       <option>Ortodoncia</option>
@@ -490,7 +494,7 @@ export function DentalLandingPage() {
 
                 <label className="grid gap-2 md:col-span-2">
                   <span className="text-sm font-medium text-ink/72">Cuentanos brevemente tu caso</span>
-                  <span className="flex gap-3 rounded-[24px] border border-blush-100 bg-mist px-4 py-4">
+                  <span className="flex gap-3 rounded-[24px] border border-blush-100 bg-mist px-4 py-4 transition focus-within:border-blush-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-blush-200/50">
                     <MessageCircleMore className="mt-1 h-5 w-5 shrink-0 text-ink/45" strokeWidth={1.8} />
                     <textarea
                       className="min-h-[140px] w-full resize-none bg-transparent text-sm text-ink outline-none placeholder:text-ink/35"
@@ -511,9 +515,11 @@ export function DentalLandingPage() {
                   {formStatus.message}
                 </div>
 
-                <button className="inline-flex min-h-[60px] items-center justify-center rounded-full bg-gradient-to-r from-blush-500 to-blush-600 px-7 text-base font-semibold text-white shadow-glow transition hover:-translate-y-0.5 active:scale-[0.98] md:col-span-2 disabled:cursor-not-allowed disabled:opacity-70" type="submit" disabled={isSubmitting}>
-                  <CalendarDays className="mr-2 h-5 w-5" strokeWidth={1.9} />
-                  {isSubmitting ? "Enviando evaluacion..." : "Agendar mi evaluacion gratuita"}
+                <button className="island-btn w-full justify-center bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow md:col-span-2 disabled:cursor-not-allowed disabled:opacity-70" type="submit" disabled={isSubmitting}>
+                  <span>{isSubmitting ? "Enviando evaluacion..." : "Agendar mi evaluacion gratuita"}</span>
+                  <span className="island-btn__icon">
+                    <CalendarDays className="h-5 w-5" strokeWidth={1.9} />
+                  </span>
                 </button>
               </form>
             </div>
