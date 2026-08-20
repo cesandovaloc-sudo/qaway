@@ -423,11 +423,8 @@ function ShowcaseCardItem({ item, i }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="showcase-preview-frame">
-        <div className="showcase-browser-bar">
-          <span className="browser-url">{item.url}</span>
-        </div>
-        <div className="showcase-screen-wrap">
+      <div className="showcase-canvas">
+        <div className="showcase-mockup-inner">
           {item.video ? (
             <video
               ref={videoRef}
@@ -443,9 +440,8 @@ function ShowcaseCardItem({ item, i }) {
           )}
         </div>
       </div>
-      <div className="showcase-footer">
+      <div className="showcase-footer-clean">
         <h3>{item.title}</h3>
-        <span className="showcase-type">{item.category}</span>
       </div>
     </motion.article>
   )
