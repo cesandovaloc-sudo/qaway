@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="12" fill="#f4f1eb"/>
+  <rect x="6" y="6" width="52" height="52" rx="8" stroke="#9f2d26" stroke-width="3"/>
+  <text x="32" y="39" text-anchor="middle" font-family="Georgia, serif" font-size="23" font-weight="700" fill="#121211">MS</text>
+  <circle cx="46" cy="18" r="4" fill="#9f2d26"/>
+</svg>

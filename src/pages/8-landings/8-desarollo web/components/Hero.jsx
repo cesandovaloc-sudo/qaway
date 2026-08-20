@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 export function Hero() {
   return (
-    <section id="inicio" className="sp-hero">
+    <section id="inicio" className="sp-hero sp-hero-cinematic">
       <div className="sp-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

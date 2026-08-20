@@ -71,3 +71,24 @@
 .dental-landing .island-btn:hover .island-btn__icon {
   transform: scale(1.08);
 }
+
+/* Rendering performance */
+.dental-landing main > section {
+  contain: layout style;
+}
+
+.dental-landing article:not([id]) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
+  contain: layout style paint;
+}
+
+.dental-landing .overflow-hidden {
+  overflow: clip;
+}
+
+@supports not (overflow: clip) {
+  .dental-landing .overflow-hidden {
+    overflow: hidden;
+  }
+}

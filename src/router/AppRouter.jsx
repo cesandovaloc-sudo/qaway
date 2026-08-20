@@ -51,6 +51,7 @@ import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-
 import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
 import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
 import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
+import MesaSelectaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -114,10 +115,6 @@ export default function AppRouter() {
           element={renderPublicPathRoute('landings', '/landings/desarrollo-web-superpower', <DesarrolloWebSuperpowerPage />)}
         />
         <Route
-          path="/landings/desarrollo-web-v2"
-          element={renderPublicPathRoute('landings', '/landings/desarrollo-web-v2', <DesarrolloWebSuperpowerPage />)}
-        />
-        <Route
           path="/proyectos/panaderia-josue"
           element={renderRoute('proyectos', <PanaderiaPage />)}
         />
@@ -136,6 +133,10 @@ export default function AppRouter() {
         <Route
           path="/proyectos/dental"
           element={renderRoute('proyectos', <DentalPage />)}
+        />
+        <Route
+          path="/proyectos/mesa-selecta"
+          element={renderRoute('proyectos', <MesaSelectaPage />)}
         />
         <Route
           path="/pruebas/inicio-descartado"

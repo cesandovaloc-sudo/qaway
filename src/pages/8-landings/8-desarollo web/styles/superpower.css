@@ -185,11 +185,36 @@
 }
 
 /* Hero Section */
+/* Hero Section */
 .superpower-landing-root .sp-hero {
   padding-top: 150px;
   padding-bottom: 90px;
   text-align: center;
   position: relative;
+}
+
+.superpower-landing-root .sp-hero-cinematic {
+  position: relative;
+  background-image: linear-gradient(180deg, rgba(8, 11, 14, 0.72) 0%, rgba(8, 11, 14, 0.45) 45%, rgba(8, 11, 14, 0.85) 100%), url('https://cdn.prod.website-files.com/63792ff4f3d6aa3d62071b61/69dee1b70c6f9c87bea4d2c9_Home.png');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  color: #ffffff;
+}
+
+.superpower-landing-root .sp-hero-cinematic h1 {
+  color: #ffffff;
+}
+
+.superpower-landing-root .sp-hero-cinematic p {
+  color: #e2e8f0;
+}
+
+.superpower-landing-root .sp-hero-cinematic .eyebrow-badge {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
 }
 
 .superpower-landing-root .sp-hero h1 {
