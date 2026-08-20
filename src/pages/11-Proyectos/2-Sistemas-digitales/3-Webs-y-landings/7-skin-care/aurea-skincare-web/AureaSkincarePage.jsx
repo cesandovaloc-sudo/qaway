@@ -57,6 +57,10 @@ export default function AureaSkincarePage() {
   const active = formulas[formula] ?? formulas[0];
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive:true });
