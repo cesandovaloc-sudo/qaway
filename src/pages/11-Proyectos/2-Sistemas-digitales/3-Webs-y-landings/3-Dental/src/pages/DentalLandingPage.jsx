@@ -280,14 +280,14 @@ export function DentalLandingPage() {
             ))}
           </section>
 
-          {/* COMPARATIVA - OPCIÓN 2: HERO CON FONDO COMPLETO Y BARRA MÉTRICAS A 50% OVERLAY */}
-          <div className="mt-12 rounded-3xl border border-blush-300 bg-white/60 p-4 shadow-sm">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
-              Opción 2: Hero Integrado + Barra de Métricas 50% Overlay
+          {/* COMPARATIVA - OPCIÓN 2: HERO ANCHO COMPLETO + FOTO NÍTIDA + BARRA 50% OVERLAY */}
+          <div className="mt-14">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+              Opción 2: Hero Ancho Completo + Foto Nítida + Barra 50% Overlay
             </div>
 
-            <section className="relative overflow-hidden rounded-3xl pb-16 lg:rounded-[36px] lg:pb-20" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/40 to-transparent" />
+            <section className="relative overflow-hidden rounded-3xl pb-20 shadow-soft lg:rounded-[36px] lg:pb-24" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/15 to-transparent" />
               <div className="relative grid min-h-[520px] gap-6 px-6 py-8 lg:min-h-[560px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-10 xl:px-10">
                 <div className="flex flex-col justify-center py-2 lg:pr-4">
                   <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
@@ -300,8 +300,8 @@ export function DentalLandingPage() {
 
                   <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
                     {heroBadges.map(({ icon: Icon, label }) => (
-                      <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/30 px-3 py-1 text-xs font-medium text-ink/65 backdrop-blur-sm sm:text-[0.82rem]" key={`opt2-badge-${label}`}>
-                        <span className="rounded-full bg-blush-100/60 p-1 text-blush-500">
+                      <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/40 px-3 py-1 text-xs font-medium text-ink/75 backdrop-blur-sm sm:text-[0.82rem]" key={`opt2-badge-${label}`}>
+                        <span className="rounded-full bg-blush-100/70 p-1 text-blush-500">
                           <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
                         </span>
                         {label}
@@ -325,7 +325,7 @@ export function DentalLandingPage() {
               </div>
             </section>
 
-            <div className="relative z-20 -mt-12 px-2 sm:px-4 lg:-mt-14 lg:px-6">
+            <div className="relative z-20 -mt-14 px-4 sm:px-6 lg:-mt-16 lg:px-8">
               <div className="mx-auto grid max-w-[1240px] gap-px overflow-hidden rounded-[28px] border border-white/90 bg-white/90 shadow-soft backdrop-blur-xl md:grid-cols-2 xl:grid-cols-4">
                 {metrics.map((metric) => (
                   <article className="bg-white/80 px-6 py-6 text-center" key={`opt2-${metric.label}`}>
