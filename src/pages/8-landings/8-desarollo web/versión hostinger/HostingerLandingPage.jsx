@@ -1,32 +1,42 @@
 import { useEffect } from "react";
-import { HostingerTopBanner } from "./components/HostingerTopBanner.jsx";
-import { HostingerNavbar } from "./components/HostingerNavbar.jsx";
-import { HostingerHeroInteractive } from "./components/HostingerHeroInteractive.jsx";
-import { HostingerFeatureTabs } from "./components/HostingerFeatureTabs.jsx";
-import { HostingerPricingMatrix } from "./components/HostingerPricingMatrix.jsx";
-import { HostingerAiToolsBento } from "./components/HostingerAiToolsBento.jsx";
+import { HostingerHeader } from "./components/HostingerHeader.jsx";
+import { HostingerHeroReal } from "./components/HostingerHeroReal.jsx";
+import { HostingerTrustBar } from "./components/HostingerTrustBar.jsx";
+import { HostingerAiCards } from "./components/HostingerAiCards.jsx";
+import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.jsx";
+import { HostingerFastPerformance } from "./components/HostingerFastPerformance.jsx";
+import { HostingerKodeeAi } from "./components/HostingerKodeeAi.jsx";
+import { HostingerSecurityGrid } from "./components/HostingerSecurityGrid.jsx";
+import { HostingerMigrationDarkBanner } from "./components/HostingerMigrationDarkBanner.jsx";
 import { HostingerTestimonialsSlider } from "./components/HostingerTestimonialsSlider.jsx";
-import { HostingerFAQAccordion } from "./components/HostingerFAQAccordion.jsx";
+import { HostingerEcommerceBanner } from "./components/HostingerEcommerceBanner.jsx";
+import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
+import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import "./styles/hostinger.css";
 
 export default function HostingerLandingPage() {
   useEffect(() => {
-    document.title = "Hosting Administrado para WordPress con IA | Rápido y Seguro | Hostinger";
+    document.title = "Hosting administrado para WordPress | Rápido y accesible | Hostinger";
     window.scrollTo(0, 0);
   }, []);
 
   return (
     <div className="hostinger-landing-root">
-      <HostingerTopBanner />
-      <HostingerNavbar />
+      <HostingerHeader />
       <main>
-        <HostingerHeroInteractive />
-        <HostingerFeatureTabs />
-        <HostingerPricingMatrix />
-        <HostingerAiToolsBento />
+        <HostingerHeroReal />
+        <HostingerTrustBar />
+        <HostingerAiCards />
+        <HostingerEmailMarketing />
+        <HostingerFastPerformance />
+        <HostingerKodeeAi />
+        <HostingerSecurityGrid />
+        <HostingerMigrationDarkBanner />
         <HostingerTestimonialsSlider />
-        <HostingerFAQAccordion />
+        <HostingerEcommerceBanner />
+        <HostingerPricingReal />
+        <HostingerFAQReal />
       </main>
       <HostingerFooterFull />
     </div>
