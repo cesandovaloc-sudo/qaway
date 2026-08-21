@@ -232,56 +232,59 @@ export function DentalLandingPage() {
         </header>
 
 <main className="mt-6 space-y-6" id="inicio">
-          <section className="relative overflow-hidden rounded-3xl lg:rounded-[36px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/10 to-transparent" />
-            <div className="relative grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
-              <div className="flex flex-col justify-center py-2 lg:pr-4">
-                <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
-                <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
-                  Brackets que alinean <span className="text-blush-500">tu sonrisa</span> y tu confianza
-                </h1>
-                <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-ink/70 sm:text-lg">
-                  Tratamientos personalizados, seguros y comodos para lograr la sonrisa que mereces.
-                </p>
+          {/* HERO 1 INICIAL (CONSERVADO INTACTO EN CÓDIGO PERO VISUALMENTE OCULTO) */}
+          <div className="hidden">
+            <section className="relative overflow-hidden rounded-3xl lg:rounded-[36px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/10 to-transparent" />
+              <div className="relative grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
+                <div className="flex flex-col justify-center py-2 lg:pr-4">
+                  <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
+                  <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
+                    Brackets que alinean <span className="text-blush-500">tu sonrisa</span> y tu confianza
+                  </h1>
+                  <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-ink/70 sm:text-lg">
+                    Tratamientos personalizados, seguros y comodos para lograr la sonrisa que mereces.
+                  </p>
 
-                <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
-                  {heroBadges.map(({ icon: Icon, label }) => (
-                    <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/30 px-3 py-1 text-xs font-medium text-ink/65 backdrop-blur-sm sm:text-[0.82rem]" key={label}>
-                      <span className="rounded-full bg-blush-100/60 p-1 text-blush-500">
-                        <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
+                  <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
+                    {heroBadges.map(({ icon: Icon, label }) => (
+                      <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/30 px-3 py-1 text-xs font-medium text-ink/65 backdrop-blur-sm sm:text-[0.82rem]" key={label}>
+                        <span className="rounded-full bg-blush-100/60 p-1 text-blush-500">
+                          <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        </span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <a className="island-btn bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow" href="#contacto">
+                      <span>Agenda tu evaluacion</span>
+                      <span className="island-btn__icon">
+                        <CalendarDays className="h-4 w-4" strokeWidth={2} />
                       </span>
-                      {label}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                  <a className="island-btn bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow" href="#contacto">
-                    <span>Agenda tu evaluacion</span>
-                    <span className="island-btn__icon">
-                      <CalendarDays className="h-4 w-4" strokeWidth={2} />
-                    </span>
-                  </a>
-                  <a className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-6 text-sm font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
-                    <Play className="mr-2 h-4 w-4 text-blush-600" fill="currentColor" strokeWidth={1.8} />
-                    Conoce tu tratamiento
-                  </a>
+                    </a>
+                    <a className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-6 text-sm font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
+                      <Play className="mr-2 h-4 w-4 text-blush-600" fill="currentColor" strokeWidth={1.8} />
+                      Conoce tu tratamiento
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section className="grid gap-px overflow-hidden rounded-[34px] border border-white/80 bg-white/75 shadow-soft backdrop-blur-xl md:grid-cols-2 xl:grid-cols-4">
-            {metrics.map((metric) => (
-              <article className="bg-white/72 px-6 py-8 text-center" key={metric.label}>
-                <p className="text-4xl font-semibold tracking-[-0.05em] text-blush-500">{metric.value}</p>
-                <p className="mt-2 text-base text-ink/60">{metric.label}</p>
-              </article>
-            ))}
-          </section>
+            <section className="grid gap-px overflow-hidden rounded-[34px] border border-white/80 bg-white/75 shadow-soft backdrop-blur-xl md:grid-cols-2 xl:grid-cols-4">
+              {metrics.map((metric) => (
+                <article className="bg-white/72 px-6 py-8 text-center" key={metric.label}>
+                  <p className="text-4xl font-semibold tracking-[-0.05em] text-blush-500">{metric.value}</p>
+                  <p className="mt-2 text-base text-ink/60">{metric.label}</p>
+                </article>
+              ))}
+            </section>
+          </div>
 
-          {/* COMPARATIVA - OPCIÓN 2: HERO 100vw DE PARED A PARED + FOTO 100% NÍTIDA + DEGRADADO BLANCO */}
-          <div className="relative left-1/2 -translate-x-1/2 w-[100vw] mt-14 overflow-hidden">
+          {/* HERO OPCIÓN 2 ACTIVO: DESDE EL BORDE SUPERIOR ABSOLUTO (TOP 0) DETRÁS DE LA NAVBAR */}
+          <div className="relative left-1/2 -translate-x-1/2 w-[100vw] -mt-24 pt-24 overflow-hidden">
             <div className="mx-auto max-w-[1380px] mb-3 px-4 sm:px-6 lg:px-8">
               <div className="inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
                 Opción 2: Hero 100vw (Pared a Pared) + Foto Nítida + Barra 50% Overlay
