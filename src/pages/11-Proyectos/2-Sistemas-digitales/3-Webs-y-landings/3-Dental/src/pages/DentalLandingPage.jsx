@@ -280,6 +280,63 @@ export function DentalLandingPage() {
             ))}
           </section>
 
+          {/* COMPARATIVA - OPCIÓN 2: HERO CON FONDO COMPLETO Y BARRA MÉTRICAS A 50% OVERLAY */}
+          <div className="mt-12 rounded-3xl border border-blush-300 bg-white/60 p-4 shadow-sm">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white">
+              Opción 2: Hero Integrado + Barra de Métricas 50% Overlay
+            </div>
+
+            <section className="relative overflow-hidden rounded-3xl pb-16 lg:rounded-[36px] lg:pb-20" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/40 to-transparent" />
+              <div className="relative grid min-h-[520px] gap-6 px-6 py-8 lg:min-h-[560px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-10 xl:px-10">
+                <div className="flex flex-col justify-center py-2 lg:pr-4">
+                  <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
+                  <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
+                    Brackets que alinean <span className="text-blush-500">tu sonrisa</span> y tu confianza
+                  </h1>
+                  <p className="mt-4 max-w-[36ch] text-base leading-relaxed text-ink/70 sm:text-lg">
+                    Tratamientos personalizados, seguros y comodos para lograr la sonrisa que mereces.
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap items-center gap-2.5 lg:flex-nowrap">
+                    {heroBadges.map(({ icon: Icon, label }) => (
+                      <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-blush-200/50 bg-white/30 px-3 py-1 text-xs font-medium text-ink/65 backdrop-blur-sm sm:text-[0.82rem]" key={`opt2-badge-${label}`}>
+                        <span className="rounded-full bg-blush-100/60 p-1 text-blush-500">
+                          <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
+                        </span>
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <a className="island-btn bg-gradient-to-r from-blush-500 to-blush-600 text-white shadow-glow" href="#contacto">
+                      <span>Agenda tu evaluacion</span>
+                      <span className="island-btn__icon">
+                        <CalendarDays className="h-4 w-4" strokeWidth={2} />
+                      </span>
+                    </a>
+                    <a className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-blush-200/90 bg-white/85 px-6 text-sm font-semibold text-ink shadow-sm transition hover:-translate-y-0.5 active:scale-[0.98]" href="#tratamientos">
+                      <Play className="mr-2 h-4 w-4 text-blush-600" fill="currentColor" strokeWidth={1.8} />
+                      Conoce tu tratamiento
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="relative z-20 -mt-12 px-2 sm:px-4 lg:-mt-14 lg:px-6">
+              <div className="mx-auto grid max-w-[1240px] gap-px overflow-hidden rounded-[28px] border border-white/90 bg-white/90 shadow-soft backdrop-blur-xl md:grid-cols-2 xl:grid-cols-4">
+                {metrics.map((metric) => (
+                  <article className="bg-white/80 px-6 py-6 text-center" key={`opt2-${metric.label}`}>
+                    <p className="text-3xl font-semibold tracking-[-0.05em] text-blush-500 sm:text-4xl">{metric.value}</p>
+                    <p className="mt-1 text-xs text-ink/65 sm:text-sm">{metric.label}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <section className="grid gap-6 xl:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]" id="servicios">
             <div className="rounded-[38px] border border-white/80 bg-white/72 p-7 shadow-soft backdrop-blur-xl sm:p-8">
               <SectionEyebrow>Tu sonrisa, nuestro compromiso</SectionEyebrow>
