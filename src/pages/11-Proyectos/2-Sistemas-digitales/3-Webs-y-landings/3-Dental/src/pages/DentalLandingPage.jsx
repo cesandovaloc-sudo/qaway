@@ -289,7 +289,7 @@ export function DentalLandingPage() {
             </div>
 
             <section className="relative min-h-[580px] w-full" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/80 via-35% to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-[55%] bg-gradient-to-r from-white via-white/90 to-transparent" />
               <div className="relative mx-auto max-w-[1380px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div className="flex max-w-[640px] flex-col justify-center">
                   <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
