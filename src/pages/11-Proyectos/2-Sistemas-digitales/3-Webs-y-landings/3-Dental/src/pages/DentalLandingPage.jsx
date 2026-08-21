@@ -280,16 +280,18 @@ export function DentalLandingPage() {
             ))}
           </section>
 
-          {/* COMPARATIVA - OPCIÓN 2: HERO ANCHO COMPLETO + FOTO NÍTIDA + BARRA 50% OVERLAY */}
-          <div className="mt-14">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
-              Opción 2: Hero Ancho Completo + Foto Nítida + Barra 50% Overlay
+          {/* COMPARATIVA - OPCIÓN 2: HERO FULL-WIDTH (DE BORDE A BORDE DE PANTALLA) */}
+          <div className="mt-14 -mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="mb-3 px-4 sm:px-6 lg:px-8">
+              <div className="inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                Opción 2: Hero Full-Width (De Borde a Borde de Pantalla) + Barra 50% Overlay
+              </div>
             </div>
 
-            <section className="relative overflow-hidden rounded-3xl pb-20 shadow-soft lg:rounded-[36px] lg:pb-24" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/15 to-transparent" />
-              <div className="relative grid min-h-[520px] gap-6 px-6 py-8 lg:min-h-[560px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-10 xl:px-10">
-                <div className="flex flex-col justify-center py-2 lg:pr-4">
+            <section className="relative min-h-[580px] w-full overflow-hidden" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/20 to-transparent" />
+              <div className="relative mx-auto max-w-[1380px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+                <div className="flex max-w-[640px] flex-col justify-center">
                   <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
                   <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
                     Brackets que alinean <span className="text-blush-500">tu sonrisa</span> y tu confianza
@@ -325,6 +327,7 @@ export function DentalLandingPage() {
               </div>
             </section>
 
+            {/* Barra de métricas 50% overlay centrada */}
             <div className="relative z-20 -mt-14 px-4 sm:px-6 lg:-mt-16 lg:px-8">
               <div className="mx-auto grid max-w-[1240px] gap-px overflow-hidden rounded-[28px] border border-white/90 bg-white/90 shadow-soft backdrop-blur-xl md:grid-cols-2 xl:grid-cols-4">
                 {metrics.map((metric) => (
