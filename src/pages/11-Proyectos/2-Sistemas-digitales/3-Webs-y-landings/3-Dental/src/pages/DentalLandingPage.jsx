@@ -280,16 +280,16 @@ export function DentalLandingPage() {
             ))}
           </section>
 
-          {/* COMPARATIVA - OPCIÓN 2: HERO FULL-WIDTH (DE BORDE A BORDE DE PANTALLA) */}
-          <div className="mt-14 -mx-4 sm:-mx-6 lg:-mx-8">
-            <div className="mb-3 px-4 sm:px-6 lg:px-8">
+          {/* COMPARATIVA - OPCIÓN 2: HERO 100vw DE PARED A PARED + FOTO 100% NÍTIDA + DEGRADADO BLANCO */}
+          <div className="relative left-1/2 -translate-x-1/2 w-[100vw] mt-14 overflow-hidden">
+            <div className="mx-auto max-w-[1380px] mb-3 px-4 sm:px-6 lg:px-8">
               <div className="inline-flex items-center gap-2 rounded-full bg-blush-500 px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                Opción 2: Hero Full-Width (De Borde a Borde de Pantalla) + Barra 50% Overlay
+                Opción 2: Hero 100vw (Pared a Pared) + Foto Nítida + Barra 50% Overlay
               </div>
             </div>
 
-            <section className="relative min-h-[580px] w-full overflow-hidden" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
-              <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/20 to-transparent" />
+            <section className="relative min-h-[580px] w-full" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white via-white/80 via-35% to-transparent" />
               <div className="relative mx-auto max-w-[1380px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
                 <div className="flex max-w-[640px] flex-col justify-center">
                   <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
