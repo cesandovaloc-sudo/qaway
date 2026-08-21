@@ -186,13 +186,13 @@ export function DentalLandingPage() {
       <div className="mx-auto w-full max-w-[1380px] px-4 pb-10 pt-5 sm:px-6 lg:px-8">
         <header className="sticky top-4 z-30 rounded-[32px] border border-white/90 bg-white/82 px-5 py-4 shadow-soft backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
-<a className="flex items-center gap-3" href="#inicio">
+            <a className="flex items-center gap-3" href="#inicio">
               <div className="flex h-6 w-6 items-center justify-center rounded-2xl bg-blush-100 text-blush-600 shadow-inner">
                 <SmilePlus className="h-3 w-3" strokeWidth={1.8} />
               </div>
               <div className="leading-none">
-                <p className="text-[1.75rem] font-semibold tracking-[0.18em]">SONRISA</p>
-                <p className="mt-1 text-[0.72rem] tracking-[0.28em] text-ink/50">CLINICA DENTAL</p>
+                <p className="text-xl font-semibold tracking-[0.18em]">SONRISA</p>
+                <p className="mt-0.5 text-[0.65rem] tracking-[0.28em] text-ink/50">CLINICA DENTAL</p>
               </div>
             </a>
 
