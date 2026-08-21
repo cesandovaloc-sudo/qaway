@@ -3,36 +3,19 @@ import { motion } from "framer-motion";
 
 const showcases = [
   {
-    title: "Landing de Conversión Instantánea",
-    tag: "High-Speed Funnel",
-    desc: "Estructurada para campañas de tráfico pago (Meta Ads, Google Ads) y captación directa por WhatsApp con tiempos de carga inferiores a 1 segundo.",
+    title: "Landings de Conversión Inmediata",
+    tag: "01 / TRÁFICO & VENTAS",
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-    tech: ["React 19", "Vite", "Mobile First", "WhatsApp Direct"],
-    colSpan: "sp-bento-col-8",
   },
   {
-    title: "Sitio Web Comercial & Marca",
-    tag: "Brand Authority",
-    desc: "Presencia corporativa multi-sección con dirección de arte a medida y catálogo interactivo de servicios.",
+    title: "Sitios Web Comerciales de Autoridad",
+    tag: "02 / POSICIONAMIENTO",
     image: "https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1200&q=80",
-    tech: ["UI Editorial", "SEO Pro", "SSL Cloud"],
-    colSpan: "sp-bento-col-4",
   },
   {
-    title: "E-Commerce & Catálogo Digital",
-    tag: "Sales Engine",
-    desc: "Tienda online con checkout directo, panel autoadministrable y sincronización de pedidos por WhatsApp y pasarela de pago.",
+    title: "Plataformas Web & E-Commerce a Medida",
+    tag: "03 / ESCALABILIDAD",
     image: "https://images.unsplash.com/photo-1556742049-0a67e557b56e?auto=format&fit=crop&w=1200&q=80",
-    tech: ["Carrito Rápido", "Pasarela de Pagos", "Inventario"],
-    colSpan: "sp-bento-col-6",
-  },
-  {
-    title: "Plataformas Web a Medida & SaaS",
-    tag: "Custom Architecture",
-    desc: "Arquitectura escalable para startups y portales con base de datos en tiempo real, dashboards y lógica personalizada.",
-    image: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1200&q=80",
-    tech: ["Supabase", "Fastify Node", "Full Responsive"],
-    colSpan: "sp-bento-col-6",
   },
 ];
 
@@ -56,7 +39,7 @@ export function ShowcaseBento() {
           {showcases.map((item, idx) => (
             <motion.div
               key={item.title}
-              className={`sp-bento-card ${item.colSpan}`}
+              className="sp-bento-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.15 }}
@@ -70,24 +53,6 @@ export function ShowcaseBento() {
               <div className="sp-bento-body">
                 <span className="sp-bento-tag">{item.tag}</span>
                 <h3 className="sp-bento-title">{item.title}</h3>
-                <p className="sp-bento-desc">{item.desc}</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto" }}>
-                  {item.tech.map((t) => (
-                    <span
-                      key={t}
-                      style={{
-                        fontSize: "0.72rem",
-                        fontWeight: "600",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        background: "#f4f4f0",
-                        color: "#4b5563",
-                      }}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
               </div>
             </motion.div>
           ))}

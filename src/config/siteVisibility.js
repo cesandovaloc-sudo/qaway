@@ -27,6 +27,8 @@ const publicPathAllowList = new Set([
   '/landings/identidad-visual',
   '/landings/desarrollo-web',
   '/landings/desarrollo-web-superpower',
+  '/landings/hostinger',
+  '/landings/desarrollo-web-hostinger',
   '/academy',
 ])
 

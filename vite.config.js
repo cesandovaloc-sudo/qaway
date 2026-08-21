@@ -17,41 +17,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          const normalizedId = id.replace(/\\/g, '/')
-
-          if (normalizedId.includes('node_modules')) {
-            if (normalizedId.includes('react') || normalizedId.includes('react-dom') || normalizedId.includes('react-router-dom')) {
-              return 'vendor-react'
-            }
-
-            if (normalizedId.includes('@supabase')) {
-              return 'vendor-supabase'
-            }
-
-            if (normalizedId.includes('recharts')) {
-              return 'vendor-charts'
-            }
-
-            if (normalizedId.includes('gsap') || normalizedId.includes('framer-motion')) {
-              return 'vendor-motion'
-            }
-
-            return
-          }
-
-          if (normalizedId.includes('/src/pages/1-inicio/')) {
-            return 'page-brand-core'
-          }
-
-          if (normalizedId.includes('/src/pages/2-estudio/')) return 'page-estudio'
-          if (normalizedId.includes('/src/pages/3-sistemas-digitales/')) return 'page-sistemas'
-          if (normalizedId.includes('/src/pages/5-qaway-hub/')) return 'page-hub'
-          if (normalizedId.includes('/src/pages/6-recursos/')) return 'page-recursos'
-          if (normalizedId.includes('/src/pages/7-blog/')) return 'page-blog'
-          if (normalizedId.includes('/src/pages/8-landings/')) return 'page-landings'
-          if (normalizedId.includes('/src/pages/9-pruebas/')) return 'page-pruebas'
-        },
+        // manualChunks removido — estándar v3 #25: "No usar manualChunks por costumbre"
       },
     },
   },

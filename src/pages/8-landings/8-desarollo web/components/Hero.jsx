@@ -1,10 +1,22 @@
 import { ArrowRight, Gauge, ShieldCheck, Sparkles, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { ShapeGrid } from "./ShapeGrid.jsx";
 
 export function Hero() {
   return (
-    <section id="inicio" className="sp-hero sp-hero-cinematic">
-      <div className="sp-container">
+    <section id="inicio" className="sp-hero">
+      <div className="sp-hero-backdrop">
+        <ShapeGrid
+          shape="diamond"
+          gridGap={44}
+          shapeSize={12}
+          color="rgba(255, 255, 255, 0.08)"
+          activeColor="rgba(255, 255, 255, 0.45)"
+          speed={0.0006}
+          waveIntensity={2.5}
+        />
+      </div>
+      <div className="sp-container sp-hero-content">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

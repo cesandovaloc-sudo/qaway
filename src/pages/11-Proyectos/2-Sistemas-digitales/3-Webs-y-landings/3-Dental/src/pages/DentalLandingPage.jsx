@@ -186,9 +186,9 @@ export function DentalLandingPage() {
       <div className="mx-auto w-full max-w-[1380px] px-4 pb-10 pt-5 sm:px-6 lg:px-8">
         <header className="sticky top-4 z-30 rounded-[32px] border border-white/90 bg-white/82 px-5 py-4 shadow-soft backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
-            <a className="flex items-center gap-3" href="#inicio">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blush-100 text-blush-600 shadow-inner">
-                <SmilePlus className="h-6 w-6" strokeWidth={1.8} />
+<a className="flex items-center gap-3" href="#inicio">
+              <div className="flex h-6 w-6 items-center justify-center rounded-2xl bg-blush-100 text-blush-600 shadow-inner">
+                <SmilePlus className="h-3 w-3" strokeWidth={1.8} />
               </div>
               <div className="leading-none">
                 <p className="text-[1.75rem] font-semibold tracking-[0.18em]">SONRISA</p>
@@ -231,9 +231,10 @@ export function DentalLandingPage() {
           ) : null}
         </header>
 
-        <main className="mt-6 space-y-6" id="inicio">
-          <section className="overflow-hidden rounded-3xl border border-white/80 bg-white/70 shadow-soft backdrop-blur-xl lg:rounded-[36px]">
-            <div className="grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
+<main className="mt-6 space-y-6" id="inicio">
+          <section className="relative overflow-hidden rounded-3xl lg:rounded-[36px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/10 to-transparent" />
+            <div className="relative grid min-h-[560px] gap-6 px-6 py-6 lg:min-h-[580px] lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:px-8 lg:py-6 xl:px-10">
               <div className="flex flex-col justify-center py-2 lg:pr-4">
                 <SectionEyebrow>Ortodoncia personalizada</SectionEyebrow>
                 <h1 className="mt-4 max-w-[14ch] text-[2.4rem] font-semibold leading-[1.05] tracking-[-0.04em] sm:text-[3rem] lg:text-[3.6rem]">
@@ -266,11 +267,6 @@ export function DentalLandingPage() {
                     Conoce tu tratamiento
                   </a>
                 </div>
-              </div>
-
-              <div className="relative flex min-h-[440px] items-end">
-                <div className="absolute inset-3 rounded-2xl bg-[radial-gradient(circle_at_30%_12%,rgba(255,255,255,0.9),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,232,239,0.2))] lg:rounded-[24px]" />
-                <div className="relative h-[440px] w-full overflow-hidden rounded-2xl bg-[#fce7ee] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.65)] sm:h-[500px] lg:h-[540px] lg:rounded-[24px]" style={{ backgroundImage: `url(${heroSource})`, backgroundPosition: "78% center", backgroundSize: "cover" }} />
               </div>
             </div>
           </section>
