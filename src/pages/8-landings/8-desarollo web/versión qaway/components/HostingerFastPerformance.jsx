@@ -28,7 +28,7 @@ export function HostingerFastPerformance() {
   return (
     <section id="rendimiento" style={{ padding: "80px 0", background: "#f8f9fc" }}>
       <div className="h-container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "start" }}>
+        <div className="h-split-grid">
           {/* Izquierda */}
           <div>
             <span style={{ fontSize: "11.5px", fontWeight: "800", color: "#56596e", letterSpacing: "0.08em", textTransform: "uppercase", background: "#e6e8ee", padding: "4px 10px", borderRadius: "4px", display: "inline-block", marginBottom: "16px" }}>

@@ -520,6 +520,54 @@
   color: #ffffff !important;
 }
 
+/* Hero Showcase Desktop */
+.qaway-landing-root .h-hero-showcase-container {
+  position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.qaway-landing-root .h-hero-layer-back {
+  position: absolute;
+  top: -15px;
+  right: 10px;
+  width: 88%;
+  max-width: 480px;
+  z-index: 2;
+  border-radius: 0px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0,0,0,0.1);
+  background: #ffffff;
+}
+
+.qaway-landing-root .h-hero-layer-front {
+  position: relative;
+  width: 90%;
+  max-width: 490px;
+  z-index: 10;
+  border-radius: 0px;
+  overflow: hidden;
+  box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+}
+
+.qaway-landing-root .h-hero-layer-img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.qaway-landing-root .h-security-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
 /* Footer Styles */
 .qaway-landing-root .h-footer {
   background-color: #1e2026;
@@ -537,18 +585,40 @@
 }
 
 @media (max-width: 900px) {
+  .qaway-landing-root .h-hero-showcase-container {
+    min-height: 400px;
+  }
+  .qaway-landing-root .h-hero-layer-img {
+    height: 360px;
+  }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
   }
   .qaway-landing-root .h-split-grid,
-  .qaway-landing-root .h-real-pricing-grid {
+  .qaway-landing-root .h-real-pricing-grid,
+  .qaway-landing-root .h-security-grid {
     grid-template-columns: 1fr;
     gap: 32px;
   }
 }
 
 @media (max-width: 640px) {
+  .qaway-landing-root .h-hero-showcase-container {
+    min-height: 270px;
+    margin-top: 10px;
+  }
+  .qaway-landing-root .h-hero-layer-back {
+    right: 0px;
+    width: 88%;
+    top: -8px;
+  }
+  .qaway-landing-root .h-hero-layer-front {
+    width: 92%;
+  }
+  .qaway-landing-root .h-hero-layer-img {
+    height: 250px;
+  }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -558,5 +628,8 @@
   }
   .qaway-landing-root .h-ai-three-cards-section {
     padding: 50px 0;
+  }
+  .qaway-landing-root .h-container {
+    padding: 0 16px;
   }
 }

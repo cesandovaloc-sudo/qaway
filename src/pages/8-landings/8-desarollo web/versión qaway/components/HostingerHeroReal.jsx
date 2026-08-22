@@ -133,37 +133,19 @@ export function HostingerHeroReal() {
           </div>
 
           {/* Columna Derecha: Composición en Capas Invertida (Bordes rectos, sin marco y con más parte inferior) */}
-          <div style={{ position: "relative", minHeight: "520px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="h-hero-showcase-container">
             
             {/* CAPA 1: IMAGEN DE ATRÁS (Agencia Creativa - Asomando 50% recta y con sombra suave) */}
             <motion.div
               initial={{ opacity: 0, y: 30, x: 40 }}
               animate={{ opacity: 1, y: 0, x: 36 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              style={{
-                position: "absolute",
-                top: "-15px",
-                right: "10px",
-                width: "88%",
-                maxWidth: "480px",
-                zIndex: 2,
-                borderRadius: "0px",
-                overflow: "hidden",
-                border: "none",
-                boxShadow: "0 25px 50px -10px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0,0,0,0.1)",
-                background: "#ffffff",
-              }}
+              className="h-hero-layer-back"
             >
               <img
                 src={heroBackImg}
                 alt="Agencia creativa diseño web"
-                style={{
-                  width: "100%",
-                  height: "440px",
-                  objectFit: "cover",
-                  objectPosition: "top center",
-                  display: "block",
-                }}
+                className="h-hero-layer-img"
               />
             </motion.div>
 
@@ -172,28 +154,12 @@ export function HostingerHeroReal() {
               initial={{ opacity: 0, y: 30, x: -20 }}
               animate={{ opacity: 1, y: 0, x: -18 }}
               transition={{ duration: 0.8, delay: 0.35, ease: "easeOut" }}
-              style={{
-                position: "relative",
-                width: "90%",
-                maxWidth: "490px",
-                zIndex: 10,
-                borderRadius: "0px",
-                overflow: "hidden",
-                border: "none",
-                boxShadow: "0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)",
-                background: "#ffffff",
-              }}
+              className="h-hero-layer-front"
             >
               <img
                 src={heroFrontImg}
                 alt="Soluciones TI y desarrollo web"
-                style={{
-                  width: "100%",
-                  height: "450px",
-                  objectFit: "cover",
-                  objectPosition: "top center",
-                  display: "block",
-                }}
+                className="h-hero-layer-img"
               />
             </motion.div>
           </div>

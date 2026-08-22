@@ -4,7 +4,7 @@ export function HostingerKodeeAi() {
   return (
     <section style={{ padding: "80px 0", background: "#ffffff" }}>
       <div className="h-container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
+        <div className="h-split-grid">
           {/* Izquierda: Lista de Capacidades */}
           <div>
             <h2 style={{ marginBottom: "24px" }}>

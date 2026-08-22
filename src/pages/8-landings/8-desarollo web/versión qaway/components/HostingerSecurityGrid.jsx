@@ -13,7 +13,7 @@ export function HostingerSecurityGrid() {
           </p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+        <div className="h-security-grid">
           {/* Card 1 */}
           <div style={{ background: "#ffffff", border: "1px solid #e2e5e9", borderRadius: "16px", padding: "28px" }}>
             <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f4f0ff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
