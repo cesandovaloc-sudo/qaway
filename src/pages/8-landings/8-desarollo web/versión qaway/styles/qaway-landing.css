@@ -52,13 +52,13 @@
   letter-spacing: -0.035em !important;
 }
 
-/* Títulos de Sección Unificados (Mismo peso 800 y tipografía que Hero, 1 punto menos de tamaño) */
+/* Títulos de Sección Unificados (Peso 700 equilibrado, 1 punto menos que Hero) */
 .qaway-landing-root h2 {
   font-family: var(--qw-font-display) !important;
-  font-weight: 800 !important;
-  letter-spacing: -0.035em !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
   line-height: 1.15 !important;
-  font-size: clamp(2.0rem, 3.2vw, 2.7rem) !important;
+  font-size: clamp(1.9rem, 3vw, 2.5rem) !important;
   color: var(--qw-text-primary);
 }
 
@@ -165,10 +165,10 @@
 }
 
 .qaway-landing-root .h-hero-title-real {
-  font-size: clamp(2.4rem, 4vw, 3.4rem);
-  font-weight: 600;
-  line-height: 1.12;
-  color: #111111;
+  font-size: clamp(2.5rem, 4.2vw, 3.5rem);
+  font-weight: 800 !important;
+  line-height: 1.1;
+  color: var(--qw-text-primary);
   margin: 0 0 24px;
 }
 
