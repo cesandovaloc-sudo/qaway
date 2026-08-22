@@ -83,8 +83,8 @@
 .qaway-landing-root .h-btn-cta-purple {
   background: #24262e !important;
   color: #ffffff !important;
-  padding: 12px 28px;
-  border-radius: 8px;
+  padding: 13px 32px;
+  border-radius: 9999px !important;
   font-size: 15px;
   font-weight: 700;
   border: 1px solid #2e313a !important;
@@ -109,8 +109,8 @@
   background: #ffffff !important;
   color: #24262e !important;
   border: 1.5px solid #24262e !important;
-  padding: 12px 28px;
-  border-radius: 8px;
+  padding: 13px 32px;
+  border-radius: 9999px !important;
   font-size: 15px;
   font-weight: 700;
   text-decoration: none;
@@ -337,7 +337,7 @@
 .qaway-landing-root .h-ai-feature-card {
   background: #fafafa;
   border: 1px solid #e4e4e7;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
   text-align: left;
   display: flex;

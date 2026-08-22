@@ -534,6 +534,12 @@ export default function DesarrolloWebLandingPage() {
         ))}
       </motion.section>
 
+      {/* ─── DEMO ESTILO 1: MOSAICO DE PÍXELES ─── */}
+      <PixelGridDivider />
+
+      {/* ─── DEMO ESTILO 2: CARD OVERLAP ─── */}
+      <CardOverlapDivider />
+
       {/* ─── Web Showcase & Project Types ────────────── */}
       <section className="web-showcase-section section-light" id="tipos">
         <div className="section-intro showcase-intro">
