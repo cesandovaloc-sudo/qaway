@@ -342,9 +342,13 @@
   text-align: center;
 }
 
+.qaway-landing-root .h-ai-three-cards-section .h-container {
+  max-width: 1280px;
+}
+
 .qaway-landing-root .h-three-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 28px;
   margin: 48px 0 40px;
   align-items: stretch;
