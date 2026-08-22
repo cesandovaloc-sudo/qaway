@@ -12,9 +12,9 @@ const trustAvatars = [
 
 export function HostingerHeroReal() {
   return (
-    <section id="inicio" className="h-hero-section-real" style={{ overflow: "hidden", position: "relative", padding: "120px 0 80px" }}>
+    <section id="inicio" className="h-hero-section-real">
       <div className="h-container">
-        <div className="h-hero-grid-real" style={{ gridTemplateColumns: "1fr 1.25fr", gap: "52px", alignItems: "center" }}>
+        <div className="h-hero-grid-real">
           
           {/* Columna Izquierda */}
           <div>
