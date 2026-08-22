@@ -24,6 +24,14 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import {
+  PixelGridDivider,
+  CardOverlapDivider,
+  TechBlueprintDivider,
+  RadialGlowDivider,
+  PrecisionLineDivider,
+  SlantedAngleDivider
+} from './components/TransitionDividers.jsx'
 import './src/styles.css'
 
 const ease = [0.16, 1, 0.3, 1]

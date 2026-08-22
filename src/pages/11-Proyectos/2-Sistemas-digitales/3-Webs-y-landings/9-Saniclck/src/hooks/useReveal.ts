@@ -9,8 +9,9 @@ export function useReveal<T extends HTMLElement>() {
     if (!node) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
           setVisible(true);
           observer.disconnect();
         }

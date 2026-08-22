@@ -1,0 +1,546 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --qw-primary: #ff4b0b;
+  --qw-hover: #fd5605;
+  --qw-dark: #cc3c09;
+  --qw-card-dark: #24262e;
+  --qw-light-accent: #fff2eb;
+  
+  --qw-bg-dark: #1e2026;
+  --qw-text-primary: #1e2026;
+  --qw-text-secondary: #52525b;
+  --qw-text-muted: #71717a;
+  
+  --qw-green-success: #00b090;
+  
+  --qw-border-light: #e4e4e7;
+  --qw-border-subtle: #f4f4f5;
+  --qw-bg-light: #fafafa;
+  
+  --qw-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --qw-font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
+  --qw-font-mono: "JetBrains Mono", monospace;
+}
+
+.qaway-landing-root {
+  background-color: #ffffff;
+  color: var(--qw-text-primary);
+  font-family: var(--qw-font-sans);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.qaway-landing-root * {
+  box-sizing: border-box;
+}
+
+/* Tipografía de Marca Qaway Lab */
+.qaway-landing-root h1,
+.qaway-landing-root h2,
+.qaway-landing-root h3,
+.qaway-landing-root h4,
+.qaway-landing-root .h-hero-title-real,
+.qaway-landing-root .h-hero-overline-real,
+.qaway-landing-root .h-canvas-heading-box h2,
+.qaway-landing-root .h-plan-price-num,
+.qaway-landing-root .h-brand-logo {
+  font-family: var(--qw-font-display) !important;
+  letter-spacing: -0.035em !important;
+}
+
+.qaway-landing-root p,
+.qaway-landing-root ul,
+.qaway-landing-root li,
+.qaway-landing-root span,
+.qaway-landing-root button,
+.qaway-landing-root .h-accordion-header-custom {
+  font-family: var(--qw-font-sans);
+}
+
+.qaway-landing-root .h-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Header & Nav */
+.qaway-landing-root .h-header-nav {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #f4f4f5;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.qaway-landing-root .h-btn-cta-purple {
+  background: #24262e !important;
+  color: #ffffff !important;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid #2e313a !important;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(30, 32, 38, 0.2);
+}
+
+.qaway-landing-root .h-btn-cta-purple:hover {
+  background: #2f323c !important;
+  color: #ffffff !important;
+  border-color: #3d414d !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 32, 38, 0.28);
+}
+
+.qaway-landing-root .h-btn-outline-black {
+  background: #ffffff !important;
+  color: #24262e !important;
+  border: 1.5px solid #24262e !important;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qaway-landing-root .h-btn-outline-black:hover {
+  background: #f4f4f5 !important;
+  transform: translateY(-1px);
+}
+
+/* Hero Section */
+.qaway-landing-root .h-hero-section-real {
+  padding: 50px 0 60px;
+  background: #ffffff;
+}
+
+.qaway-landing-root .h-hero-grid-real {
+  display: grid;
+  grid-template-columns: 1.05fr 1.2fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.qaway-landing-root .h-hero-overline-real {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  max-width: 440px;
+}
+
+.qaway-landing-root .h-hero-title-real {
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.12;
+  color: #111111;
+  margin: 0 0 24px;
+}
+
+.qaway-landing-root .h-hero-checks-real {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qaway-landing-root .h-hero-check-item-real {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.qaway-landing-root .h-hero-check-item-real svg {
+  color: var(--qw-green-success);
+  flex-shrink: 0;
+}
+
+/* Hero Mockup Builder Window */
+.qaway-landing-root .h-mockup-wrapper-real {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.qaway-landing-root .h-mockup-sidebar-real {
+  width: 48px;
+  background: #18181b;
+  border-radius: 12px 0 0 12px;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #a1a1aa;
+  z-index: 2;
+  box-shadow: 4px 0 16px rgba(0,0,0,0.1);
+}
+
+.qaway-landing-root .h-mockup-sidebar-icon.active {
+  color: var(--qw-primary);
+  background: #27272a;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.qaway-landing-root .h-mockup-window-real {
+  flex-grow: 1;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 0 16px 16px 0;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.qaway-landing-root .h-mockup-topbar-real {
+  background: #ffffff;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e4e4e7;
+  font-size: 12px;
+  color: #52525b;
+}
+
+.qaway-landing-root .h-mockup-canvas-real {
+  background: #fafafa;
+  padding: 24px 32px;
+  min-height: 380px;
+  position: relative;
+}
+
+.qaway-landing-root .h-canvas-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #3f3f46;
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+}
+
+.qaway-landing-root .h-canvas-floating-bubble {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  margin-bottom: 12px;
+}
+
+.qaway-landing-root .h-canvas-heading-box {
+  border: 1.5px solid var(--qw-primary);
+  padding: 8px 16px;
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.6);
+  margin-bottom: 20px;
+}
+
+.qaway-landing-root .h-canvas-heading-box h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0;
+}
+
+/* Floating Card on Hero Right */
+.qaway-landing-root .h-floating-hero-card {
+  position: absolute;
+  right: -24px;
+  bottom: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  width: 210px;
+  z-index: 10;
+  border: 1px solid #e4e4e7;
+}
+
+.qaway-landing-root .h-floating-ai-pill {
+  position: absolute;
+  left: -40px;
+  bottom: 20px;
+  background: #ffffff;
+  border: 1px solid var(--qw-primary);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--qw-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(255, 75, 11, 0.2);
+}
+
+/* Trust Bar */
+.qaway-landing-root .h-trust-bar-real {
+  padding: 30px 0;
+  border-top: 1px solid #f4f4f5;
+  border-bottom: 1px solid #f4f4f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  font-size: 14.5px;
+  color: #111111;
+  flex-wrap: wrap;
+}
+
+/* 3 Cards Section */
+.qaway-landing-root .h-ai-three-cards-section {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.qaway-landing-root .h-three-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+  margin: 48px 0 40px;
+  align-items: stretch;
+}
+
+.qaway-landing-root .h-ai-feature-card {
+  background: #fafafa;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.qaway-landing-root .h-ai-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.06);
+}
+
+.qaway-landing-root .h-ai-feature-card-media {
+  background: #f8f9fc;
+  padding: 20px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.qaway-landing-root .h-ai-feature-card-media > div {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.qaway-landing-root .h-ai-feature-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.qaway-landing-root .h-ai-feature-card-body h3 {
+  font-size: 19px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0 0 10px;
+  font-family: var(--qw-font-display);
+  letter-spacing: -0.02em;
+}
+
+.qaway-landing-root .h-ai-feature-card-body p {
+  font-size: 14px;
+  color: var(--qw-text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Showcase de Pilares de Diseño */
+.qaway-landing-root .qaway-pillars-grid {
+  grid-template-columns: 1.05fr 1.15fr;
+}
+
+@media (max-width: 960px) {
+  .qaway-landing-root .qaway-pillars-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+/* Split Section */
+.qaway-landing-root .h-split-section {
+  padding: 70px 0;
+}
+
+.qaway-landing-root .h-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+/* Accordion Component */
+.qaway-landing-root .h-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qaway-landing-root .h-accordion-item-custom {
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.qaway-landing-root .h-accordion-header-custom {
+  width: 100%;
+  padding: 18px 22px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.qaway-landing-root .h-accordion-body-custom {
+  padding: 0 22px 18px;
+  font-size: 14px;
+  color: var(--qw-text-secondary);
+  line-height: 1.6;
+}
+
+/* Dark Migration Banner */
+.qaway-landing-root .h-dark-banner-migration {
+  background: #1e2026;
+  color: #ffffff;
+  padding: 70px 0;
+  margin: 60px 0;
+}
+
+/* Pricing Section */
+.qaway-landing-root .h-real-pricing-section {
+  padding: 80px 0;
+  background: #ffffff;
+}
+
+.qaway-landing-root .h-real-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  margin-top: 48px;
+}
+
+.qaway-landing-root .h-real-plan-card {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 18px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.qaway-landing-root .h-real-plan-card.unlimited-popular {
+  background: #24262e;
+  color: #ffffff;
+  border: 2px solid var(--qw-primary);
+  box-shadow: 0 20px 50px rgba(255, 75, 11, 0.15);
+}
+
+.qaway-landing-root .h-real-plan-card.unlimited-popular h3,
+.qaway-landing-root .h-real-plan-card.unlimited-popular .h-plan-price-num {
+  color: #ffffff !important;
+}
+
+.qaway-landing-root .h-real-plan-card.unlimited-popular p,
+.qaway-landing-root .h-real-plan-card.unlimited-popular small {
+  color: #a1a1aa !important;
+}
+
+.qaway-landing-root .h-real-plan-card.unlimited-popular .h-feature-check-text {
+  color: #ffffff !important;
+}
+
+/* Footer Styles */
+.qaway-landing-root .h-footer {
+  background-color: #1e2026;
+  color: #ffffff;
+  padding: 80px 0 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Responsive Breakpoints Profesionales */
+@media (max-width: 1100px) {
+  .qaway-landing-root .h-hero-grid-real {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .qaway-landing-root .h-three-cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .qaway-landing-root .h-split-grid,
+  .qaway-landing-root .h-real-pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 640px) {
+  .qaway-landing-root .h-three-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .qaway-landing-root .h-hero-title-real {
+    font-size: 2.2rem;
+  }
+  .qaway-landing-root .h-ai-three-cards-section {
+    padding: 50px 0;
+  }
+}

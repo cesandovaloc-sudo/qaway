@@ -1,10 +1,51 @@
-import React, {useState} from "react";
+import React, {useState, Component} from "react";
 import {createRoot} from "react-dom/client";
 import {
   Search, Heart, ShoppingBag, ArrowRight, Truck, ShieldCheck, Sprout,
   Headphones, Star, ChevronDown, Instagram, Facebook, Menu, X, Plus
 } from "lucide-react";
 import "./styles.css";
+
+class RootErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("RootErrorBoundary caught:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: "2rem", textAlign: "center", fontFamily: "system-ui, sans-serif" }}>
+          <h1 style={{ color: "#dc2626", marginBottom: "1rem" }}>Algo salió mal</h1>
+          <p style={{ color: "#52525b", marginBottom: "1.5rem" }}>No se pudo cargar la aplicación.</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: "0.75rem 1.5rem",
+              background: "#486a39",
+              color: "white",
+              border: "none",
+              borderRadius: "0.5rem",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            Recargar página
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const IMG = {
   hero: "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=85",
@@ -173,4 +214,8 @@ function App(){
 function SectionTitle({title,link}){return <div className="section-title"><h2>{title}</h2><a href="#plantas">{link} <ArrowRight size={16}/></a></div>}
 function Review({text,name}){return <article className="review"><div className="stars">{[1,2,3,4,5].map(x=><Star key={x} size={15} fill="currentColor"/>)}</div><p>“{text}”</p><b>{name}</b><small>Cliente verificado</small></article>}
 
-createRoot(document.getElementById("root")).render(<App/>);
+createRoot(document.getElementById("root")).render(
+  <RootErrorBoundary>
+    <App />
+  </RootErrorBoundary>
+);

@@ -179,7 +179,7 @@ export function QualityBar() {
           <div className="quality-bar">
             {items.map(([title, text, icon], index) => (
               <div key={title} className={`quality-item ${index < items.length - 1 ? "lg:border-r lg:border-[#0c6671]/15" : ""}`}>
-                <div className="quality-icon"><Icon name={icon} size={26} /></div>
+                <div className="quality-icon"><Icon name={icon as string} size={26} /></div>
                 <div><h3>{title}</h3><p>{text}</p></div>
               </div>
             ))}
@@ -195,6 +195,8 @@ export function TestimonialSection() {
   const t = testimonials[index];
 
   const move = (dir: 1 | -1) => setIndex((current) => (current + dir + testimonials.length) % testimonials.length);
+
+  if (!t) return null;
 
   return (
     <section id="nosotros" className="section-white pb-24">

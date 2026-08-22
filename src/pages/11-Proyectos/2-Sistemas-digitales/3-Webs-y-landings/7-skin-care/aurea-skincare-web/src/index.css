@@ -284,3 +284,30 @@ h1,h2,h3 { font-family:"DM Serif Display", Georgia, serif; font-weight:400; lett
   *, *::before, *::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
   .reveal { opacity:1; transform:none; }
 }
+
+/* Rendering performance (v3 #25.1) */
+.aurea-landing main > section,
+.aurea-landing .section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+.aurea-landing article,
+.aurea-landing .benefit,
+.aurea-landing .product-card,
+.aurea-landing .commitment-card,
+.aurea-landing .editorial-feature,
+.aurea-landing .why-item,
+.aurea-landing .news-benefit,
+.aurea-landing .footer-col {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+  contain: layout style paint;
+}
+.aurea-landing .overflow-hidden {
+  overflow: clip;
+}
+@supports not (overflow: clip) {
+  .aurea-landing .overflow-hidden {
+    overflow: hidden;
+  }
+}

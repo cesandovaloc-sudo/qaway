@@ -184,3 +184,28 @@
     transition-duration:.01ms !important;
   }
 }
+
+/* Rendering performance (v3 #25.1) */
+.saniclick-landing main > section,
+.saniclick-landing .section-white > section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+.saniclick-landing article,
+.saniclick-landing .service-card,
+.saniclick-landing .project-card,
+.saniclick-landing .category-card,
+.saniclick-landing .feature-item,
+.saniclick-landing .quality-item {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+  contain: layout style paint;
+}
+.saniclick-landing .overflow-hidden {
+  overflow: clip;
+}
+@supports not (overflow: clip) {
+  .saniclick-landing .overflow-hidden {
+    overflow: hidden;
+  }
+}
