@@ -6,8 +6,8 @@ export function HostingerAiCards() {
   return (
     <section id="beneficios" className="h-ai-three-cards-section">
       <div className="h-container">
-        <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: "800", color: "#111111", letterSpacing: "-0.03em", marginBottom: "14px" }}>
-          Ahorra tiempo gestionando<br />WordPress con IA
+        <h2 style={{ marginBottom: "14px" }}>
+          Ahorra tiempo gestionando WordPress con IA
         </h2>
         <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "620px", margin: "0 auto 40px", lineHeight: "1.5" }}>
           Herramientas inteligentes integradas para optimizar la velocidad, corregir anomalías y potenciar la conversión.

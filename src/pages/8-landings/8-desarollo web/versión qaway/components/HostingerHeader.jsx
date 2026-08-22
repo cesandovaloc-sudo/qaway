@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
@@ -12,18 +12,33 @@ const navLinks = [
 
 export function HostingerHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const currentY = window.scrollY;
+      setScrolled(currentY > 20);
+
+      // Ocultar al hacer scroll hacia abajo, mostrar al hacer scroll hacia arriba
+      if (currentY > lastScrollY.current && currentY > 50) {
+        setHeaderVisible(false); // Ocultar al bajar
+      } else {
+        setHeaderVisible(true);  // Reaparecer al subir
+      }
+
+      lastScrollY.current = currentY;
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
-      className={`sticky top-0 z-50 h-20 w-full border-b transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-50 h-20 w-full border-b transition-[transform,background-color,border-color] duration-300 ${
+        headerVisible ? "translate-y-0" : "-translate-y-full"
+      } ${
         scrolled
           ? "bg-[#f8f7f4]/95 border-[#20201f]/10 backdrop-blur-md shadow-sm"
           : "bg-[#f8f9f7] border-[#20201f]/5"

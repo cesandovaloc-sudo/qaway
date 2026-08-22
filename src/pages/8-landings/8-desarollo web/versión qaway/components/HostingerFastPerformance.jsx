@@ -34,7 +34,7 @@ export function HostingerFastPerformance() {
             <span style={{ fontSize: "11.5px", fontWeight: "800", color: "#56596e", letterSpacing: "0.08em", textTransform: "uppercase", background: "#e6e8ee", padding: "4px 10px", borderRadius: "4px", display: "inline-block", marginBottom: "16px" }}>
               HOSTING ADMINISTRADO PARA WORDPRESS
             </span>
-            <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: "800", color: "#12131a", lineHeight: "1.15", margin: 0 }}>
+            <h2 style={{ margin: 0 }}>
               Rendimiento ultrarrápido y tiempo de actividad en el que puedes confiar
             </h2>
           </div>

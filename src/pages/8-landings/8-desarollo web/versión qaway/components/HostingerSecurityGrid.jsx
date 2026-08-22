@@ -5,7 +5,7 @@ export function HostingerSecurityGrid() {
     <section id="seguridad" style={{ padding: "80px 0", background: "#f8f9fc" }}>
       <div className="h-container">
         <div style={{ textAlign: "center", maxWidth: "680px", margin: "0 auto 48px" }}>
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.7rem)", fontWeight: "800", color: "#12131a", marginBottom: "12px" }}>
+          <h2 style={{ marginBottom: "12px" }}>
             Máxima protección del sitio web
           </h2>
           <p style={{ color: "#56596e", fontSize: "15.5px", margin: 0 }}>

@@ -87,17 +87,7 @@ export function QawayDesignPillarsSection() {
                   {current.tag}
                 </span>
 
-                <h2
-                  style={{
-                    fontSize: "clamp(2rem, 3.2vw, 2.7rem)",
-                    fontWeight: "800",
-                    color: "#ffffff",
-                    letterSpacing: "-0.035em",
-                    lineHeight: "1.12",
-                    margin: "0 0 16px",
-                    fontFamily: "var(--qw-font-display)",
-                  }}
-                >
+                <h2 style={{ color: "#ffffff", margin: "0 0 16px" }}>
                   {current.title}
                 </h2>
 

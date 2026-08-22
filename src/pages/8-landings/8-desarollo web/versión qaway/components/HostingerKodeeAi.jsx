@@ -7,7 +7,7 @@ export function HostingerKodeeAi() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "60px", alignItems: "center" }}>
           {/* Izquierda: Lista de Capacidades */}
           <div>
-            <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: "800", color: "#12131a", marginBottom: "24px" }}>
+            <h2 style={{ marginBottom: "24px" }}>
               Kodee puede:
             </h2>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "16px" }}>

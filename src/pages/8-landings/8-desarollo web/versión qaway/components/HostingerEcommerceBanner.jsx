@@ -11,7 +11,7 @@ export function HostingerEcommerceBanner() {
           color: "#ffffff",
         }}
       >
-        <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.5rem)", fontWeight: "800", color: "#ffffff", marginBottom: "12px" }}>
+        <h2 style={{ marginBottom: "12px" }}>
           Crear un imperio de ecommerce ahora es más fácil
         </h2>
         <p style={{ color: "#a0a3bd", fontSize: "15px", marginBottom: "28px" }}>

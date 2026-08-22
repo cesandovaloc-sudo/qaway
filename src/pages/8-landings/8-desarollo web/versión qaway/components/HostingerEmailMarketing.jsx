@@ -24,7 +24,7 @@ export function HostingerEmailMarketing() {
 
           {/* Texto Derecha */}
           <div>
-            <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.6rem)", fontWeight: "800", color: "#12131a", marginBottom: "18px", lineHeight: "1.2" }}>
+            <h2 style={{ marginBottom: "18px" }}>
               Conecta tu sitio a la herramienta de email marketing con IA con un solo clic
             </h2>
             <p style={{ color: "#56596e", fontSize: "16px", lineHeight: "1.6", marginBottom: "28px" }}>

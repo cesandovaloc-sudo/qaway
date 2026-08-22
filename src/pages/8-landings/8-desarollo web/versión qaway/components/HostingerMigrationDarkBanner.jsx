@@ -3,7 +3,7 @@ export function HostingerMigrationDarkBanner() {
     <section className="h-dark-banner-migration">
       <div className="h-container">
         <div style={{ maxWidth: "700px" }}>
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.7rem)", fontWeight: "800", color: "#ffffff", marginBottom: "16px" }}>
+          <h2 style={{ marginBottom: "16px" }}>
             Migraciones rápidas, gratuitas e ilimitadas
           </h2>
           <p style={{ color: "#a0a3bd", fontSize: "15px", lineHeight: "1.6", marginBottom: "20px" }}>

@@ -12,7 +12,7 @@ export function HostingerPricingReal() {
             <span>Recomendado por <strong>WordPress.org</strong></span>
           </div>
 
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: "800", color: "#12131a", marginBottom: "14px", lineHeight: "1.15" }}>
+          <h2 style={{ marginBottom: "14px" }}>
             Explora los planes de hosting administrado para WordPress
           </h2>
           <p style={{ color: "#56596e", fontSize: "15px", margin: 0 }}>
