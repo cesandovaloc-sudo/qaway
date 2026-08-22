@@ -52,6 +52,22 @@
   letter-spacing: -0.035em !important;
 }
 
+/* Títulos de Sección Unificados (Mismo peso 800 y tipografía que Hero, 1 punto menos de tamaño) */
+.qaway-landing-root h2 {
+  font-family: var(--qw-font-display) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.15 !important;
+  font-size: clamp(2.0rem, 3.2vw, 2.7rem) !important;
+  color: var(--qw-text-primary);
+}
+
+.qaway-landing-root .h-dark-banner-migration h2,
+.qaway-landing-root .h-ecommerce-banner h2,
+.qaway-landing-root .h-footer h2 {
+  color: #ffffff !important;
+}
+
 .qaway-landing-root p,
 .qaway-landing-root ul,
 .qaway-landing-root li,

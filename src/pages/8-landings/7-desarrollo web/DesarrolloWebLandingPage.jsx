@@ -604,6 +604,9 @@ export default function DesarrolloWebLandingPage() {
         </div>
       </div>
 
+      {/* ─── DEMO ESTILO 3: TECH BLUEPRINT ─── */}
+      <TechBlueprintDivider />
+
       {/* ─── BLOQUE OSCURO EMPAQUETADO 1 (Identidad + Proyectos + Testimonios) ─── */}
       <div className="dark-packaged-block" id="proyectos">
         {/* Identidad Visual & Selección Fotográfica */}
@@ -800,6 +803,9 @@ export default function DesarrolloWebLandingPage() {
         </div>
       </section>
 
+      {/* ─── DEMO ESTILO 4: HAZ DE LUZ / RADIAL GLOW ─── */}
+      <RadialGlowDivider />
+
       {/* ─── Pricing Plans ───────────────────────── */}
       <section className="pricing-section" id="planes">
         <div className="section-intro" style={{ maxWidth: '780px', margin: '0 auto', textAlign: 'center' }}>
@@ -845,6 +851,9 @@ export default function DesarrolloWebLandingPage() {
           ))}
         </div>
       </section>
+
+      {/* ─── DEMO ESTILO 5: LÍNEA DE PRECISIÓN NEÓN ─── */}
+      <PrecisionLineDivider />
 
       {/* ─── BLOQUE OSCURO EMPAQUETADO 2 (Proceso + FAQ) ─── */}
       <div className="dark-packaged-block" id="proceso">
@@ -1159,6 +1168,9 @@ export default function DesarrolloWebLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ─── DEMO ESTILO 6: CORTE DIAGONAL ANGULADO ─── */}
+      <SlantedAngleDivider />
 
       {/* ─── CTA + Quick Diagnosis Form ──────────── */}
       <motion.section
