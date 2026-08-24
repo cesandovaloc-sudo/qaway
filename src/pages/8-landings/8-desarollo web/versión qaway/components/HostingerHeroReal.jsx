@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Info, ShieldCheck, Star } from "lucide-react";
+import { Check, MessageCircle, Star } from "lucide-react";
 import heroFrontImg from "../assets/hero-showcase-front.png";
 import heroBackImg from "../assets/hero-showcase-back.png";
 
@@ -19,11 +19,11 @@ export function HostingerHeroReal() {
           {/* Columna Izquierda */}
           <div>
             <div className="h-hero-overline-real" style={{ color: "#71717a", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
-              CREACIÓN DE WEBS & SISTEMAS DIGITALES
+              CREACIÓN DE WEBS & TIENDAS DIGITALES
             </div>
 
             <h1 className="h-hero-title-real">
-              Gestiona tu sitio web WordPress de manera sencilla
+              Diseñamos tu sitio web profesional listo para captar clientes
             </h1>
 
             <ul className="h-hero-checks-real">
@@ -47,12 +47,31 @@ export function HostingerHeroReal() {
                 className="h-btn-cta-purple h-btn-cta-orange"
                 style={{ padding: "14px 38px", fontSize: "15px" }}
               >
-                Empezar ya
+                Cotizar mi proyecto
               </a>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52525b", fontSize: "13px", fontWeight: "600" }}>
-                <ShieldCheck size={16} color="#00b090" />
-                <span>Garantía de reembolso de 30 días</span>
-              </div>
+              <a
+                href="https://wa.me/51921820468?text=Hola%20Qaway%20Lab%2C%20quiero%20cotizar%20un%20proyecto%20web"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  color: "#15803d",
+                  background: "#f0fdf4",
+                  border: "1.5px solid #bbf7d0",
+                  padding: "12px 22px",
+                  borderRadius: "9999px",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 8px rgba(34, 197, 94, 0.08)",
+                }}
+              >
+                <MessageCircle size={18} color="#16a34a" />
+                <span>Hablar por WhatsApp</span>
+              </a>
             </div>
 
             {/* Círculos Animados de Recomendados (Social Proof) */}
@@ -115,7 +134,7 @@ export function HostingerHeroReal() {
                     cursor: "pointer",
                   }}
                 >
-                  +50
+                  +20
                 </motion.div>
               </div>
 
@@ -125,11 +144,11 @@ export function HostingerHeroReal() {
                     <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
                   ))}
                   <span style={{ fontSize: "12px", fontWeight: "800", color: "#111111", marginLeft: "4px" }}>
-                    5.0 / 5.0
+                    4.5 / 5.0
                   </span>
                 </div>
                 <small style={{ color: "#71717a", fontSize: "11.5px", fontWeight: "500" }}>
-                  Más de 50 negocios confían en nosotros
+                  Más de 20 negocios confían en nosotros
                 </small>
               </div>
             </motion.div>
