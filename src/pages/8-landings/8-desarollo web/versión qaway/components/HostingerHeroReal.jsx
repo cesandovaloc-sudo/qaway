@@ -29,16 +29,15 @@ export function HostingerHeroReal() {
             <ul className="h-hero-checks-real">
               <li className="h-hero-check-item-real">
                 <Check size={18} strokeWidth={3} />
-                <span>Dominio gratis</span>
-                <Info size={14} color="#84879c" style={{ cursor: "pointer" }} />
+                <span>Diseño profesional adaptado a tu marca</span>
               </li>
               <li className="h-hero-check-item-real">
                 <Check size={18} strokeWidth={3} />
-                <span>Migración de sitios web gratuita e ilimitada</span>
+                <span>Carga ultra rápida y responsiva para celulares</span>
               </li>
               <li className="h-hero-check-item-real">
                 <Check size={18} strokeWidth={3} />
-                <span>Sitios web WordPress mantenidos para ti</span>
+                <span>Variedad de formatos para cada objetivo</span>
               </li>
             </ul>
 
