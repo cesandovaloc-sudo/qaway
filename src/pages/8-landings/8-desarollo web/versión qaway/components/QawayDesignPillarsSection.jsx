@@ -326,7 +326,6 @@ export function QawayDesignPillarsSection() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
     </section>
   );
 }
