@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import pilar1Img from "../ChatGPT Image 24 ago 2026, 12_16_16.png";
+import pilar2Img from "../ChatGPT Image 24 ago 2026, 13_32_04.png";
+import pilar3Img from "../ChatGPT Image 24 ago 2026, 13_31_41.png";
 
 const pillarsData = [
   {
@@ -19,7 +21,7 @@ const pillarsData = [
     tag: "PILAR 02 · IMPACTO MULTIDISPOSITIVO",
     title: "Mockups de Marca Hiperrealistas",
     desc: "Presentamos tu negocio en pantallas Retina y dispositivos móviles de última generación para generar credibilidad instantánea en tus clientes.",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=85",
+    image: pilar2Img,
     highlight: "Composición Multidispositivo 3D",
     subHighlight: "Adaptación exacta en Desktop, Tablet y Smartphone",
     badges: ["Retina Display", "Mobile First", "Perspectiva 3D", "UI/UX Fluido"],
@@ -29,7 +31,7 @@ const pillarsData = [
     tag: "PILAR 03 · JERARQUÍA EDITORIAL",
     title: "Tipografía de Precisión",
     desc: "Combinamos Space Grotesk para titulares de gran fuerza visual con Inter para párrafos de lectura óptima, garantizando una jerarquía clara y sin fatiga.",
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=85",
+    image: pilar3Img,
     highlight: "Space Grotesk + Inter Sans",
     subHighlight: "Micro-tracking y pesos editoriales calibrados al píxel",
     badges: ["Space Grotesk", "Inter UI", "Micro-Tracking", "Legibilidad 100%"],
