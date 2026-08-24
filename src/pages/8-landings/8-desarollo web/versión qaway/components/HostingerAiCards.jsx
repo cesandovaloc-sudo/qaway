@@ -1,6 +1,7 @@
 import mockup1 from "../../Diseño sin título (1).png";
 import mockup2 from "../../Diseño sin título.png";
 import mockup3 from "../../ChatGPT Image 21 ago 2026, 18_38_46.png";
+import { Layers, Sparkles, TrendingUp, Gauge, Search, Smartphone } from "lucide-react";
 
 export function HostingerAiCards() {
   return (
@@ -75,7 +76,144 @@ export function HostingerAiCards() {
           </div>
         </div>
 
-        <div>
+        {/* Bloque Integrado: Todo lo que tu presencia digital necesita */}
+        <div style={{ marginTop: "90px", textAlign: "left" }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: "800",
+              color: "#fe6612",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              display: "block",
+              marginBottom: "12px",
+            }}
+          >
+            SERVICIOS
+          </span>
+
+          <h2
+            style={{
+              fontSize: "clamp(1.9rem, 3.2vw, 2.5rem)",
+              fontWeight: "700",
+              color: "#111111",
+              lineHeight: "1.2",
+              maxWidth: "680px",
+              margin: "0 0 44px 0",
+              textAlign: "left",
+            }}
+          >
+            Todo lo que tu presencia digital necesita, en un solo equipo.
+          </h2>
+
+          {/* Contenedor Grid 3x2 con Bordes Interiores */}
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e4e4e7",
+              borderRadius: "20px",
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+            }}
+          >
+            {/* Fila 1 */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                borderBottom: "1px solid #e4e4e7",
+              }}
+            >
+              {/* Celda 1: Webs corporativas */}
+              <div style={{ padding: "36px 32px", borderRight: "1px solid #e4e4e7" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <Layers size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  Webs corporativas
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Sitios institucionales que transmiten autoridad y ordenan tu propuesta comercial.
+                </p>
+              </div>
+
+              {/* Celda 2: Marca personal */}
+              <div style={{ padding: "36px 32px", borderRight: "1px solid #e4e4e7" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <Sparkles size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  Marca personal
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Portafolios y landings que convierten tu reputación en clientes reales.
+                </p>
+              </div>
+
+              {/* Celda 3: E-commerce */}
+              <div style={{ padding: "36px 32px" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <TrendingUp size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  E-commerce
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Tiendas rápidas con checkout impecable, pagos y métricas desde el día uno.
+                </p>
+              </div>
+            </div>
+
+            {/* Fila 2 */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              }}
+            >
+              {/* Celda 4: Performance */}
+              <div style={{ padding: "36px 32px", borderRight: "1px solid #e4e4e7" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <Gauge size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  Performance
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Carga en menos de 1.5s, Core Web Vitals en verde y hosting optimizado.
+                </p>
+              </div>
+
+              {/* Celda 5: SEO técnico */}
+              <div style={{ padding: "36px 32px", borderRight: "1px solid #e4e4e7" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <Search size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  SEO técnico
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Estructura semántica, datos enriquecidos e indexación limpia en Google.
+                </p>
+              </div>
+
+              {/* Celda 6: Diseño responsive */}
+              <div style={{ padding: "36px 32px" }}>
+                <div style={{ marginBottom: "20px" }}>
+                  <Smartphone size={26} color="#fe6612" strokeWidth={1.8} />
+                </div>
+                <h3 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
+                  Diseño responsive
+                </h3>
+                <p style={{ color: "#71717a", fontSize: "14px", lineHeight: "1.6", margin: 0 }}>
+                  Una sola experiencia impecable en móvil, tablet y escritorio.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: "60px" }}>
           <a href="#planes" className="h-btn-cta-purple h-btn-cta-orange" style={{ padding: "14px 42px", fontSize: "15px" }}>
             Comenzar ahora
           </a>
