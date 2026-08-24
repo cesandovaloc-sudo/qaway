@@ -81,7 +81,7 @@ export function QawayDesignPillarsSection() {
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <span
               style={{
-                color: "#fe6612",
+                color: "#71717a",
                 fontSize: "11.5px",
                 fontWeight: "800",
                 letterSpacing: "0.1em",
