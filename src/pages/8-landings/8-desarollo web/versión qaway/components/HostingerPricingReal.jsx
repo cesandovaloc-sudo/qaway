@@ -4,55 +4,64 @@ import { Check } from "lucide-react";
 export function HostingerPricingReal() {
   const plans = [
     {
-      id: "landing",
-      name: "Landing",
+      id: "web-comercial",
+      name: "Web Comercial",
       price: "490",
-      prefix: "S/ ",
-      desc: "Una página de alto impacto para campañas y lanzamientos.",
+      prefix: "Desde S/ ",
+      desc: "Una web completa para negocios que necesitan presentar sus servicios y generar consultas.",
       popular: false,
-      btnText: "Empezar con Landing",
+      btnText: "Quiero mi Web Comercial",
       btnClass: "h-btn-plan-dark",
       features: [
-        "1 página con hasta 7 secciones",
-        "Diseño a medida + copy guiado",
-        "Formulario y WhatsApp",
-        "SEO básico y velocidad optimizada",
-        "Entrega en 7 días",
+        "Hasta 5 páginas principales",
+        "Diseño personalizado",
+        "Responsive",
+        "WhatsApp y formularios",
+        "Google Maps",
+        "SEO básico",
+        "Analítica básica",
+        "Publicación online",
       ],
     },
     {
-      id: "empresarial",
-      name: "Empresarial",
-      price: "1.290",
+      id: "one-web",
+      name: "One Web",
+      price: "79.90",
+      oldPrice: "S/ 149",
       prefix: "S/ ",
-      desc: "El estándar para empresas que necesitan presencia sólida.",
+      desc: "Una web de una sola página para presentar un producto, servicio o proyecto.",
       popular: true,
-      badge: "Más elegido",
-      btnText: "Empezar con Empresarial",
+      badge: "Oferta especial",
+      btnText: "Quiero mi One Web",
       btnClass: "h-btn-plan-orange",
       features: [
-        "Hasta 7 páginas internas",
-        "Blog y panel autoadministrable",
-        "SEO técnico completo",
-        "Integración analítica y píxeles",
-        "Soporte 60 días",
+        "1 página",
+        "Diseño adaptado",
+        "Responsive",
+        "WhatsApp integrado",
+        "Formulario básico",
+        "SEO básico",
+        "Publicación online",
       ],
     },
     {
-      id: "ecommerce",
-      name: "E-commerce",
-      price: "2.490",
+      id: "tienda-online",
+      name: "Tienda Online",
+      price: "990",
       prefix: "Desde S/ ",
-      desc: "Tienda completa lista para vender y escalar.",
+      desc: "Una tienda online para mostrar productos y gestionar ventas desde la web.",
       popular: false,
-      btnText: "Empezar con E-commerce",
+      btnText: "Quiero mi Tienda Online",
       btnClass: "h-btn-plan-dark",
       features: [
-        "Catálogo y pasarela de pagos",
-        "Carrito, cupones y envíos",
-        "Automatización de correos",
-        "Capacitación del equipo",
-        "Soporte 90 días",
+        "Catálogo de productos",
+        "Carrito de compras",
+        "Integración de pagos",
+        "Gestión de pedidos",
+        "Diseño responsive",
+        "WhatsApp",
+        "SEO básico",
+        "Publicación online",
       ],
     },
   ];
@@ -114,7 +123,7 @@ export function HostingerPricingReal() {
                   </div>
 
                   {/* Precio */}
-                  <div style={{ marginBottom: "12px", display: "flex", alignItems: "baseline" }}>
+                  <div style={{ marginBottom: "12px", display: "flex", alignItems: "baseline", flexWrap: "wrap" }}>
                     {p.prefix && (
                       <span style={{ fontSize: "21px", fontWeight: "700", color: "#111111", marginRight: "4px" }}>
                         {p.prefix}
@@ -123,6 +132,11 @@ export function HostingerPricingReal() {
                     <span style={{ fontSize: "38px", fontWeight: "800", color: "#111111", letterSpacing: "-0.04em" }}>
                       {p.price}
                     </span>
+                    {p.oldPrice && (
+                      <span style={{ fontSize: "15px", fontWeight: "600", textDecoration: "line-through", color: "#a1a1aa", marginLeft: "10px" }}>
+                        {p.oldPrice}
+                      </span>
+                    )}
                   </div>
 
                   {/* Descripción */}
