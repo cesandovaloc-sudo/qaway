@@ -1,6 +1,6 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Send, Check } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/config/supabase";
 
 export function QawayLeadContactForm() {
   const [submitting, setSubmitting] = useState(false);
