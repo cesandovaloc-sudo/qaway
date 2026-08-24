@@ -9,13 +9,13 @@ const pillarsData = [
   {
     id: "branding",
     tag: "PILAR 01 · IDENTIDAD CORPORATIVA",
-    title: "Branding & Dirección de Arte Exclusiva",
+    title: "Branding & Identidad Visual",
     desc: "Construimos una presencia cromática coherente, logotipos vectoriales de precisión y activos gráficos que transmiten autoridad corporativa inmediata frente a tu competencia.",
     image: pilar1Img,
     highlight: "Paleta Cromática & Manual de Marca Digital",
     subHighlight: "Armonización visual de alto contraste y balance cromático",
     badges: ["Color Tokens", "Logo Vectorial", "Design System", "Activos SVG"],
-    featureTag: "DIRECCIÓN DE ARTE & UI",
+    featureTag: "✨ DIRECCIÓN DE ARTE & UI",
   },
   {
     id: "mockup",
@@ -83,7 +83,7 @@ export function QawayDesignPillarsSection() {
           </span>
 
           <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: 0, lineHeight: "1.2" }}>
-            Diseño web profesional con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
+            Diseño web profesional <span style={{ color: "#fe6612" }}>adaptado a tu marca</span>
           </h2>
         </div>
 
