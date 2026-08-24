@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Check, MessageCircle, Star } from "lucide-react";
-import heroFrontImg from "../assets/hero-showcase-front.png";
+import heroFrontImg from "../ChatGPT Image 24 ago 2026, 16_58_52.png";
 import heroBackImg from "../assets/hero-showcase-back.png";
 
 const trustAvatars = [

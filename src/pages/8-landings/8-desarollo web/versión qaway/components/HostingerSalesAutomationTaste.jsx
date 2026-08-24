@@ -125,7 +125,7 @@ export function HostingerSalesAutomationTaste() {
             {/* Píldora minimalista */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
               <span style={{ background: "rgba(37, 211, 102, 0.12)", color: "#15803d", fontSize: "11px", fontWeight: "700", padding: "4px 9px", borderRadius: "6px" }}>
-                🟢 Conexión Activa
+                Conexión Activa
               </span>
             </div>
           </div>
@@ -190,10 +190,10 @@ export function HostingerSalesAutomationTaste() {
             {/* Píldoras minimalistas de pago */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
               <span style={{ background: "#f4f4f5", color: "#18181b", fontSize: "11px", fontWeight: "700", padding: "4px 8px", borderRadius: "6px" }}>
-                📱 Yape / Plin
+                Yape / Plin
               </span>
               <span style={{ background: "#f4f4f5", color: "#18181b", fontSize: "11px", fontWeight: "700", padding: "4px 8px", borderRadius: "6px" }}>
-                💳 Tarjetas & Stripe
+                Tarjetas & Stripe
               </span>
             </div>
           </div>
@@ -258,7 +258,7 @@ export function HostingerSalesAutomationTaste() {
             {/* Píldora minimalista */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
               <span style={{ background: "#f4f4f5", color: "#0284c7", fontSize: "11px", fontWeight: "700", padding: "4px 9px", borderRadius: "6px" }}>
-                ⚡ Notificación en 0.4s
+                Notificación en 0.4s
               </span>
             </div>
           </div>
@@ -323,7 +323,7 @@ export function HostingerSalesAutomationTaste() {
             {/* Píldora minimalista */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
               <span style={{ background: "#f4f4f5", color: "#7c3aed", fontSize: "11px", fontWeight: "700", padding: "4px 9px", borderRadius: "6px" }}>
-                📈 Eventos Lead / Compra
+                Eventos Lead / Compra
               </span>
             </div>
           </div>
