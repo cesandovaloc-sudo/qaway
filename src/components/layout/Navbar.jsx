@@ -30,19 +30,19 @@ export function useSetNavbarVariant(variant) {
 
 const variantStyles = {
   light: {
-    headerScrolled: 'bg-[#f8f7f4]/95 border-[#20201f]/10',
-    headerInitial: 'bg-[#f8f9f7] border-transparent',
+    headerScrolled: 'bg-white/95 border-[#20201f]/10 backdrop-blur-md',
+    headerInitial: 'bg-white border-transparent',
     link: 'text-[#292927]/80 hover:text-[#292927]',
     linkActive: 'text-[#ff4b0b]',
     logo: 'text-[#20201f]',
     cta: 'bg-[#ff4b0b] text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] hover:bg-[#df3900]',
     menuBtn: 'text-[#292927]',
-    mobileBg: 'bg-[#f8f7f4] border-[#20201f]/10',
+    mobileBg: 'bg-white border-[#20201f]/10',
     mobileLink: 'text-[#292927]',
   },
   dark: {
-    headerScrolled: 'bg-[#111]/95 border-white/10',
-    headerInitial: 'bg-[#f8f9f7] border-transparent',
+    headerScrolled: 'bg-[#111]/95 border-white/10 backdrop-blur-md',
+    headerInitial: 'bg-[#111] border-transparent',
     link: 'text-gray-300 hover:text-white',
     linkActive: 'text-[#ff4b0b]',
     logo: 'text-white',
@@ -52,7 +52,7 @@ const variantStyles = {
     mobileLink: 'text-white/72',
   },
   transparent: {
-    headerScrolled: 'bg-[#111]/95 border-white/10',
+    headerScrolled: 'bg-[#111]/95 border-white/10 backdrop-blur-md',
     headerInitial: 'bg-transparent border-transparent',
     link: 'text-white/80 hover:text-white',
     linkActive: 'text-white',
@@ -63,14 +63,14 @@ const variantStyles = {
     mobileLink: 'text-white/72',
   },
   brand: {
-    headerScrolled: 'bg-[#f8f9f7] border-[#20201f]/10',
-    headerInitial: 'bg-[#f8f9f7] border-[#20201f]/10',
+    headerScrolled: 'bg-white/95 border-[#20201f]/10 backdrop-blur-md',
+    headerInitial: 'bg-white border-[#20201f]/10',
     link: 'text-[#292927]/80 hover:text-[#292927]',
     linkActive: 'text-[#ff4b0b]',
     logo: 'text-[#20201f]',
     cta: 'bg-[#ff4b0b] text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] hover:bg-[#df3900]',
     menuBtn: 'text-[#292927]',
-    mobileBg: 'bg-[#f8f9f7] border-[#20201f]/10',
+    mobileBg: 'bg-white border-[#20201f]/10',
     mobileLink: 'text-[#292927]',
   },
 }

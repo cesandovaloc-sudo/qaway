@@ -229,7 +229,7 @@ function HeroInicioBlockPractice() {
       ></div>
 
       <div className="relative z-10 flex min-h-[calc(100dvh-5rem)] w-full">
-        <div className="relative flex min-w-0 flex-1 flex-col bg-[#f8f9f7]">
+        <div className="relative flex min-w-0 flex-1 flex-col bg-white">
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
             <div
               className="w-[120%] aspect-square"
@@ -251,7 +251,7 @@ function HeroInicioBlockPractice() {
           <div className="absolute left-0 top-0 w-12 h-12 bg-linear-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
-            <div className="relative z-10 bg-[#f8f9f7] flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
+            <div className="relative z-10 bg-white flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">
               <motion.div
                 initial={reduceMotion ? false : { opacity: 0, y: 32 }}
                 animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -315,7 +315,7 @@ function HeroInicioBlockPractice() {
               </div>
             </motion.div>
 
-            <div className="relative z-20 bg-[#f8f9f7] hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-black/5 lg:pl-10">
+            <div className="relative z-20 bg-white hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-black/5 lg:pl-10">
               <div className="qw-hero-secondary-enter relative z-10 w-full">
                 <div className="mb-8 text-center">
                   <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b] hidden"></div>
