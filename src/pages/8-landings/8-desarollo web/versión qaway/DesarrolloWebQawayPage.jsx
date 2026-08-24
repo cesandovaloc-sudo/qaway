@@ -39,8 +39,8 @@ export default function DesarrolloWebQawayPage() {
 
         <HostingerAiCards />
         <QawayDesignPillarsSection />
-        <HostingerEmailMarketing />
         <HostingerFastPerformance />
+        <HostingerEmailMarketing />
         <HostingerKodeeAi />
         <HostingerSecurityGrid />
         <HostingerMigrationDarkBanner />
