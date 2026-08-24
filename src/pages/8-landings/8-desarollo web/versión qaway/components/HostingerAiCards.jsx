@@ -8,7 +8,7 @@ export function HostingerAiCards() {
     <>
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}
       <section id="beneficios" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
-        <div className="h-container">
+        <div className="h-container" style={{ maxWidth: "1260px" }}>
           <h2 style={{ marginBottom: "14px" }}>
             Elige el tipo de web que <span style={{ color: "#fe6612" }}>necesita tu marca</span>
           </h2>
@@ -19,7 +19,7 @@ export function HostingerAiCards() {
           <div className="h-three-cards-grid">
             {/* Tarjeta 1: Landing Pages */}
             <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
-              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "330px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
                     src={mockup1}
@@ -39,7 +39,7 @@ export function HostingerAiCards() {
 
             {/* Tarjeta 2: Sitios Corporativos */}
             <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
-              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "330px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
                     src={mockup2}
@@ -59,7 +59,7 @@ export function HostingerAiCards() {
 
             {/* Tarjeta 3: Tiendas Online */}
             <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
-              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+              <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "330px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
                     src={mockup3}
@@ -76,6 +76,17 @@ export function HostingerAiCards() {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Botón CTA */}
+          <div style={{ marginTop: "46px", textAlign: "center" }}>
+            <a
+              href="#planes"
+              className="h-btn-cta-purple h-btn-cta-orange"
+              style={{ padding: "14px 42px", fontSize: "15px" }}
+            >
+              Comenzar ahora
+            </a>
           </div>
         </div>
       </section>
