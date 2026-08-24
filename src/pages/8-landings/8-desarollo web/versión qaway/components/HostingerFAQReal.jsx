@@ -3,18 +3,30 @@ import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
 const realFaqs = [
-  { q: "¿Para qué se usa WordPress?", a: "WordPress es el sistema de gestión de contenidos (CMS) más popular del mundo, utilizado para crear desde blogs y sitios web corporativos hasta tiendas virtuales WooCommerce de gran escala." },
-  { q: "¿Qué es el hosting administrado para WordPress?", a: "Es un servicio de alojamiento optimizado específicamente para WordPress donde nosotros nos encargamos de las actualizaciones de seguridad, copias de seguridad automáticas y optimizaciones de velocidad del servidor." },
-  { q: "¿Cuáles son los límites de CPU, RAM, inodos y disco de los planes de hosting administrado para WordPress?", a: "Los planes cuentan con recursos garantizados: hasta 3 GB de RAM dedicada, almacenamiento NVMe de ultra alta velocidad y millones de inodos para soportar miles de visitas simultáneas." },
-  { q: "¿Cuánto cuesta el hosting económico para WordPress?", a: "Nuestros planes comienzan desde 2,59 US$/mes con dominio gratis y certificados SSL ilimitados incluidos." },
-  { q: "¿Cuáles son las diferencias entre el hosting para WordPress y los servicios de hosting generales?", a: "El hosting para WordPress incluye servidor LiteSpeed Enterprise, plugin LSCache preconfigurado, herramientas de IA exclusivas y un equipo de soporte especializado en resolver dudas de WordPress 24/7." },
-  { q: "¿Necesito hosting para WordPress?", a: "Sí, para que tu sitio web sea accesible en Internet las 24 horas del día, necesitas un servidor web donde almacenar tus archivos y bases de datos." },
-  { q: "¿Cómo puedo proteger mi hosting para WordPress?", a: "Hostinger protege tu web automáticamente con cortafuegos de aplicaciones web (WAF), escáner de malware continuo y protección contra ataques DDoS de Cloudflare." },
-  { q: "¿Cómo puedo transferir mi sitio de WordPress a Hostinger?", a: "Ofrecemos una herramienta de migración 100% gratuita y automática. Solo ingresas los datos de tu sitio anterior y nosotros nos encargamos del traslado sin caídas." },
-  { q: "¿Cuántos sitios web puedo migrar a Hostinger?", a: "Puedes migrar todos los sitios web que desees de forma completamente gratuita e ilimitada." },
-  { q: "¿Cómo crear un sitio web en WordPress?", a: "Con nuestro creador con IA, solo describes tu idea de negocio en un prompt y el sistema genera la estructura, los textos y el diseño en menos de 1 minuto." },
-  { q: "¿Existe una opción de hosting para WordPress para agencias o autónomos que gestionen varios sitios web?", a: "Sí, el plan Unlimited y Cloud Startup permiten alojar hasta 100 y 300 sitios web respectivamente con acceso multiusuario y panel centralizado." },
-  { q: "¿Los planes de WordPress son compatibles con WooCommerce?", a: "Totalmente compatibles. Incluyen optimización de base de datos para tiendas online y pasarelas de pago listas para operar." },
+  {
+    q: "¿Qué tipo de web necesita mi negocio?",
+    a: "Depende de tu objetivo comercial: si buscas una presencia rápida y directa para captar clientes en campañas, 'One Web' es ideal. Si necesitas mostrar varios servicios y dar una imagen corporativa sólida, elige 'Web Comercial'. Si buscas vender productos las 24 horas con pasarela de pagos, tu opción es 'Tienda Online'."
+  },
+  {
+    q: "¿El dominio y el hosting están incluidos?",
+    a: "No. El desarrollo se enfoca en el diseño y programación del sitio. Para la publicación podemos utilizar infraestructura de bajo costo o gratuita según lo permita el proyecto, y te asesoramos para adquirir tu propio dominio (.com o .pe) a tu nombre."
+  },
+  {
+    q: "¿Puedo conectar WhatsApp y formularios de contacto?",
+    a: "Sí, todos los planes incluyen botón directo a WhatsApp y formularios para que los clientes te escriban de inmediato a tu correo o teléfono."
+  },
+  {
+    q: "¿Puedo empezar con una One Web y ampliarla después?",
+    a: "Totalmente. Tu web se construye con arquitectura escalable: puedes iniciar hoy con una One Web y luego agregar nuevas secciones, blog, catálogo de productos, pasarela de pagos o integraciones con sistemas a medida."
+  },
+  {
+    q: "¿Cuánto tiempo demora la entrega de mi web?",
+    a: "Una 'One Web' suele estar lista en 3 a 5 días hábiles. Una 'Web Comercial' toma entre 7 a 12 días, y una 'Tienda Online' de 12 a 20 días, siempre coordinando previamente la entrega de tus textos, fotos y contenidos."
+  },
+  {
+    q: "¿Cómo es el proceso de trabajo y pago?",
+    a: "Trabajamos con alcance y precio cerrado. Iniciamos con un anticipo del 50%, diseñamos la propuesta para tu revisión y, tras tu aprobación final y publicación, se cancela el saldo restante."
+  }
 ];
 
 export function HostingerFAQReal() {
@@ -23,23 +35,23 @@ export function HostingerFAQReal() {
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);
 
   return (
-    <section id="faq" style={{ padding: "80px 0 100px", background: "#ffffff" }}>
+    <section id="faq" style={{ padding: "85px 0 105px", background: "#ffffff" }}>
       <div className="h-container">
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
-          style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}
+          style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 48px" }}
         >
           <span className="qw-kicker-capsule">
             PREGUNTAS FRECUENTES
           </span>
-          <h2 style={{ marginBottom: "12px" }}>
-            Preguntas frecuentes: hosting administrado para WordPress
+          <h2 style={{ marginBottom: "12px", fontSize: "clamp(2rem, 3.4vw, 2.7rem)", fontWeight: "700", color: "#111111", letterSpacing: "-0.02em" }}>
+            Resolvemos tus dudas antes de empezar
           </h2>
-          <p style={{ color: "#56596e", fontSize: "15px", margin: 0 }}>
-            Respondemos las preguntas frecuentes sobre nuestros planes de WordPress.
+          <p style={{ color: "#71717a", fontSize: "15.5px", margin: 0, lineHeight: "1.5" }}>
+            Todo claro y transparente desde el primer día.
           </p>
         </motion.div>
 
