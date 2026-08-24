@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Send, Check } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { supabase } from "@/config/supabase";
 
 export function QawayLeadContactForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [selectedBudget, setSelectedBudget] = useState("$500 – $1.500");
+
+  const budgetOptions = ["< $500", "$500 – $1.500", "$1.500 – $4.000", "+ $4.000"];
 
   const submit = async (e) => {
     e.preventDefault();
@@ -16,10 +19,10 @@ export function QawayLeadContactForm() {
     const form = new FormData(formElement);
     const lead = {
       name: String(form.get("name") || "").trim(),
-      phone: String(form.get("phone") || "").trim(),
       email: String(form.get("email") || "").trim().toLowerCase(),
-      profile: String(form.get("profile") || "").trim(),
-      interest: String(form.get("interest") || "").trim(),
+      company: String(form.get("company") || "").trim(),
+      phone: String(form.get("phone") || "").trim(),
+      budget: selectedBudget,
       message: String(form.get("message") || "").trim(),
     };
 
@@ -32,8 +35,8 @@ export function QawayLeadContactForm() {
           stage: "new",
           metadata: {
             email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
+            company: lead.company,
+            budget: lead.budget,
             message: lead.message || "Sin mensaje adicional",
           },
         },
@@ -47,13 +50,13 @@ export function QawayLeadContactForm() {
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({
             access_key: apiKey.trim(),
-            subject: `Nueva consulta Web: ${lead.interest || "Orientación"}`,
+            subject: `Nueva solicitud Web (${lead.budget}): ${lead.company || lead.name}`,
             from_name: "Qaway Lab Web",
             name: lead.name,
             phone: lead.phone,
             email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
+            company: lead.company,
+            budget: lead.budget,
             message: lead.message || "Sin mensaje adicional",
           }),
         });
@@ -66,7 +69,7 @@ export function QawayLeadContactForm() {
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify({
             access_key: backupKey.trim(),
-            subject: `[Copia] Nueva consulta Web: ${lead.interest || "Orientación"}`,
+            subject: `[Copia] Solicitud Web (${lead.budget}): ${lead.company || lead.name}`,
             from_name: "Qaway Lab Web",
             to_email: "qaway.myc@gmail.com",
           }),
@@ -76,7 +79,7 @@ export function QawayLeadContactForm() {
       formElement.reset();
 
       const contactMsg = encodeURIComponent(
-        `Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest} (Desarrollo Web). ${lead.message ? "Mensaje: " + lead.message : ""}`
+        `Hola Qaway, mi nombre es ${lead.name} de ${lead.company || "mi empresa"}. Mi presupuesto estimado es ${lead.budget}. Me gustaría cotizar mi proyecto web. ${lead.message ? "Detalles: " + lead.message : ""}`
       );
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
       window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -91,293 +94,192 @@ export function QawayLeadContactForm() {
   const resetForm = () => setSubmitted(false);
 
   return (
-    <section id="contacto" style={{ padding: "95px 0 105px", background: "#f8f9fc", borderTop: "1px solid #e4e4e7" }}>
-      <div className="h-container" style={{ maxWidth: "860px" }}>
-        
-        {/* Encabezado */}
-        <div style={{ textAlign: "center", marginBottom: "44px" }}>
-          <span
-            style={{
-              fontSize: "11.5px",
-              fontWeight: "800",
-              color: "#56596e",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              background: "#e6e8ee",
-              padding: "4px 12px",
-              borderRadius: "4px",
-              display: "inline-block",
-              marginBottom: "14px",
-            }}
-          >
-            CONTACTO
-          </span>
+    <section id="contacto" style={{ padding: "100px 0 110px", background: "#f8f9fc", borderTop: "1px solid #e4e4e7" }}>
+      <div className="h-container" style={{ maxWidth: "1240px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "64px", alignItems: "start" }}>
+          
+          {/* Columna Izquierda: Información y Garantías */}
+          <div>
+            <span
+              style={{
+                fontSize: "11.5px",
+                fontWeight: "800",
+                color: "#fe6612",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: "16px",
+              }}
+            >
+              CONTACTO
+            </span>
 
-          <h2
-            style={{
-              fontSize: "clamp(2rem, 3.5vw, 2.7rem)",
-              fontWeight: "700",
-              color: "#111111",
-              margin: 0,
-              lineHeight: "1.2",
-            }}
-          >
-            Hablemos de tu <span style={{ color: "#fe6612" }}>proyecto.</span>
-          </h2>
-        </div>
+            <h2
+              style={{
+                fontSize: "clamp(2.1rem, 3.4vw, 3rem)",
+                fontWeight: "700",
+                color: "#111111",
+                margin: "0 0 18px",
+                lineHeight: "1.18",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Cuéntanos tu proyecto y te enviamos una propuesta.
+            </h2>
 
-        {/* Formulario Estilo Estudio */}
-        <div
-          style={{
-            background: "#ffffff",
-            border: "1px solid #e4e4e7",
-            borderRadius: "20px",
-            padding: "clamp(24px, 5vw, 48px)",
-            boxShadow: "0 10px 35px rgba(0,0,0,0.04)",
-          }}
-        >
-          {submitted ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "40px 20px" }}>
-              <div
-                style={{
-                  width: "60px",
-                  height: "60px",
-                  borderRadius: "50%",
-                  background: "#fe6612",
-                  color: "#ffffff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "20px",
-                }}
-              >
-                <Check size={32} strokeWidth={2.5} />
+            <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.6", margin: "0 0 36px" }}>
+              Completa el formulario y recibirás alcance, plazos y precio cerrado. Sin llamadas de venta interminables.
+            </p>
+
+            <div style={{ width: "100%", height: "1px", background: "#e4e4e7", marginBottom: "36px" }} />
+
+            {/* 3 Viñetas */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
+                <div>
+                  <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Propuesta en 24 h</strong>
+                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Con alcance y precio detallado.</span>
+                </div>
               </div>
-              <h3 style={{ fontSize: "24px", fontWeight: "700", color: "#111111", margin: "0 0 10px" }}>
-                ¡Consulta enviada con éxito!
-              </h3>
-              <p style={{ color: "#71717a", fontSize: "15px", maxWidth: "460px", margin: "0 0 24px", lineHeight: "1.6" }}>
-                Te responderemos lo antes posible para ayudarte a elegir y cotizar el siguiente paso de tu web.
-              </p>
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  borderBottom: "2px solid #fe6612",
-                  color: "#111111",
-                  fontSize: "13px",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  padding: "0 0 4px",
-                }}
-              >
-                Enviar otro mensaje
-              </button>
+
+              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
+                <div>
+                  <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Prototipo antes de pagar el total</strong>
+                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Apruebas el diseño primero.</span>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
+                <div>
+                  <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Código propio, sin plantillas</strong>
+                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Tú eres dueño de tu web.</span>
+                </div>
+              </div>
             </div>
-          ) : (
-            <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-              {/* Nombre */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                <label htmlFor="qw-name" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                  ¿Cómo te llamas?
-                </label>
-                <input
-                  type="text"
-                  id="qw-name"
-                  name="name"
-                  required
-                  placeholder="Tu nombre completo"
+          </div>
+
+          {/* Columna Derecha: Tarjeta de Formulario */}
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e4e4e7",
+              borderRadius: "24px",
+              padding: "44px 38px",
+              boxShadow: "0 12px 35px rgba(0,0,0,0.04)",
+            }}
+          >
+            {submitted ? (
+              <div style={{ textAlign: "center", padding: "40px 10px" }}>
+                <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "#fe6612", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
+                  <Check size={30} strokeWidth={2.5} />
+                </div>
+                <h3 style={{ fontSize: "22px", fontWeight: "700", color: "#111111", margin: "0 0 8px" }}>¡Solicitud enviada!</h3>
+                <p style={{ color: "#71717a", fontSize: "14.5px", margin: "0 0 20px" }}>Nos pondremos en contacto contigo en menos de 24 horas.</p>
+                <button type="button" onClick={resetForm} style={{ background: "transparent", border: "none", borderBottom: "2px solid #fe6612", color: "#111111", fontWeight: "700", cursor: "pointer", fontSize: "13px" }}>
+                  Enviar otra consulta
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+                
+                {/* Nombre y Email */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>NOMBRE</label>
+                    <input type="text" name="name" required placeholder="Carlos Sandoval" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMAIL</label>
+                    <input type="email" name="email" required placeholder="hola@empresa.com" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                  </div>
+                </div>
+
+                {/* Empresa y WhatsApp */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMPRESA O MARCA</label>
+                    <input type="text" name="company" placeholder="Mi Marca SAC" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>WHATSAPP</label>
+                    <input type="tel" name="phone" required placeholder="+51 999 999 999" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                  </div>
+                </div>
+
+                {/* Presupuesto Estimado (Píldoras) */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>PRESUPUESTO ESTIMADO</label>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    {budgetOptions.map((b) => {
+                      const active = selectedBudget === b;
+                      return (
+                        <button
+                          key={b}
+                          type="button"
+                          onClick={() => setSelectedBudget(b)}
+                          style={{
+                            padding: "8px 14px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: active ? "700" : "500",
+                            border: active ? "1px solid #fe6612" : "1px solid #e4e4e7",
+                            background: active ? "rgba(254, 102, 18, 0.08)" : "#fcfcfd",
+                            color: active ? "#fe6612" : "#71717a",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {b}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Mensaje */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>CUÉNTANOS DEL PROYECTO</label>
+                  <textarea name="message" rows={3} placeholder="Objetivo, referencias, fecha ideal de lanzamiento..." style={{ width: "100%", padding: "12px 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none", resize: "vertical" }} />
+                </div>
+
+                {/* Botón */}
+                <button
+                  type="submit"
+                  disabled={submitting}
                   style={{
+                    display: "flex",
                     width: "100%",
-                    height: "48px",
-                    padding: "0 16px",
-                    borderRadius: "10px",
-                    border: "1px solid #d4d4d8",
-                    background: "#fcfcfd",
-                    fontSize: "14.5px",
-                    color: "#18181b",
-                    outline: "none",
+                    height: "52px",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    borderRadius: "12px",
+                    border: "none",
+                    background: "#fe6612",
+                    color: "#ffffff",
+                    fontSize: "15px",
+                    fontWeight: "700",
+                    cursor: submitting ? "wait" : "pointer",
+                    boxShadow: "0 8px 22px rgba(254, 102, 18, 0.28)",
                   }}
-                />
-              </div>
+                >
+                  <span>{submitting ? "Enviando solicitud..." : "Enviar solicitud"}</span>
+                  <ArrowRight size={18} />
+                </button>
 
-              {/* Teléfono y Correo */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "18px" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                  <label htmlFor="qw-phone" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                    Teléfono / WhatsApp
-                  </label>
-                  <input
-                    type="tel"
-                    id="qw-phone"
-                    name="phone"
-                    required
-                    placeholder="+51 999 999 999"
-                    style={{
-                      width: "100%",
-                      height: "48px",
-                      padding: "0 16px",
-                      borderRadius: "10px",
-                      border: "1px solid #d4d4d8",
-                      background: "#fcfcfd",
-                      fontSize: "14.5px",
-                      color: "#18181b",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                  <label htmlFor="qw-email" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                    Correo electrónico
-                  </label>
-                  <input
-                    type="email"
-                    id="qw-email"
-                    name="email"
-                    required
-                    placeholder="tucorreo@empresa.com"
-                    style={{
-                      width: "100%",
-                      height: "48px",
-                      padding: "0 16px",
-                      borderRadius: "10px",
-                      border: "1px solid #d4d4d8",
-                      background: "#fcfcfd",
-                      fontSize: "14.5px",
-                      color: "#18181b",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Perfil e Interés */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "18px" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                  <label htmlFor="qw-profile" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                    ¿A qué te dedicas?
-                  </label>
-                  <select
-                    id="qw-profile"
-                    name="profile"
-                    required
-                    style={{
-                      width: "100%",
-                      height: "48px",
-                      padding: "0 14px",
-                      borderRadius: "10px",
-                      border: "1px solid #d4d4d8",
-                      background: "#fcfcfd",
-                      fontSize: "14px",
-                      color: "#18181b",
-                      outline: "none",
-                    }}
-                  >
-                    <option value="">Selecciona tu perfil</option>
-                    <option value="Profesional">Profesional</option>
-                    <option value="Emprendedor o dueño de negocio">Emprendedor o dueño de negocio</option>
-                    <option value="Marca personal">Marca personal</option>
-                    <option value="Creador de contenido">Creador de contenido</option>
-                    <option value="Equipo comercial o de marketing">Equipo comercial o de marketing</option>
-                    <option value="Empresa o institución">Empresa o institución</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                  <label htmlFor="qw-interest" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                    ¿En qué servicio estás interesado/a?
-                  </label>
-                  <select
-                    id="qw-interest"
-                    name="interest"
-                    required
-                    style={{
-                      width: "100%",
-                      height: "48px",
-                      padding: "0 14px",
-                      borderRadius: "10px",
-                      border: "1px solid #d4d4d8",
-                      background: "#fcfcfd",
-                      fontSize: "14px",
-                      color: "#18181b",
-                      outline: "none",
-                    }}
-                  >
-                    <option value="">Selecciona un interés</option>
-                    <option value="Landing Pages de Captación">Landing Pages de Captación</option>
-                    <option value="Sitios Web Corporativos">Sitios Web Corporativos</option>
-                    <option value="Tiendas Online (E-commerce)">Tiendas Online (E-commerce)</option>
-                    <option value="Rediseño & Optimización Web">Rediseño & Optimización Web</option>
-                    <option value="Branding & Identidad">Branding & Identidad</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Mensaje */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
-                <label htmlFor="qw-message" style={{ fontSize: "13px", fontWeight: "700", color: "#3f3f46" }}>
-                  Cuéntanos un poco más
-                </label>
-                <textarea
-                  id="qw-message"
-                  name="message"
-                  rows={4}
-                  placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver con tu web?"
-                  style={{
-                    width: "100%",
-                    padding: "14px 16px",
-                    borderRadius: "10px",
-                    border: "1px solid #d4d4d8",
-                    background: "#fcfcfd",
-                    fontSize: "14.5px",
-                    color: "#18181b",
-                    outline: "none",
-                    resize: "vertical",
-                  }}
-                />
-              </div>
-
-              {/* Botón Submit */}
-              <button
-                type="submit"
-                disabled={submitting}
-                style={{
-                  display: "flex",
-                  width: "100%",
-                  height: "52px",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginTop: "8px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "#fe6612",
-                  color: "#ffffff",
-                  fontSize: "14.5px",
-                  fontWeight: "700",
-                  cursor: submitting ? "wait" : "pointer",
-                  boxShadow: "0 8px 20px rgba(254, 102, 18, 0.28)",
-                  transition: "background 0.2s ease, transform 0.15s ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#e5560b")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#fe6612")}
-              >
-                <span>{submitting ? "ENVIANDO CONSULTA..." : "QUIERO ORIENTACIÓN"}</span>
-                <Send size={18} />
-              </button>
-
-              {submitError && (
-                <p style={{ color: "#dc2626", fontSize: "13px", textAlign: "center", margin: "6px 0 0" }} role="alert">
-                  {submitError}
+                <p style={{ color: "#71717a", fontSize: "12px", textAlign: "center", margin: 0 }}>
+                  Respuesta en menos de 24 h. Sin compromiso.
                 </p>
-              )}
-            </form>
-          )}
-        </div>
 
+                {submitError && <p style={{ color: "#dc2626", fontSize: "12.5px", textAlign: "center", margin: 0 }}>{submitError}</p>}
+              </form>
+            )}
+          </div>
+
+        </div>
       </div>
     </section>
   );
