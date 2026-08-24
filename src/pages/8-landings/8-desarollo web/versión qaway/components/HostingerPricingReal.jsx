@@ -1,13 +1,40 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, Clock, Flame } from "lucide-react";
 
 export function HostingerPricingReal() {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 6,
+    hours: 14,
+    minutes: 32,
+    seconds: 45,
+  });
+
+  useEffect(() => {
+    // Cuenta regresiva calculada para fin de mes de septiembre
+    const targetDate = new Date(new Date().getFullYear(), 8, 30, 23, 59, 59).getTime();
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const difference = Math.max(0, targetDate - now);
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((difference / 1000 / 60) % 60);
+      const seconds = Math.floor((difference / 1000) % 60);
+      setTimeLeft({ days, hours, minutes, seconds });
+    };
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const plans = [
     {
       id: "web-comercial",
       name: "Web Comercial",
-      price: "490",
-      prefix: "Desde S/ ",
+      price: "290",
+      oldPrice: "S/ 490",
+      discount: "-40% OFF",
+      prefix: "S/ ",
       desc: "Una web completa para negocios que necesitan presentar sus servicios y generar consultas.",
       popular: false,
       btnText: "Quiero mi Web Comercial",
@@ -15,11 +42,10 @@ export function HostingerPricingReal() {
       features: [
         "Hasta 5 páginas principales",
         "Diseño personalizado",
-        "Responsive",
+        "Responsive para celulares",
         "WhatsApp y formularios",
-        "Google Maps",
-        "SEO básico",
-        "Analítica básica",
+        "Google Maps integrado",
+        "SEO y analítica básica",
         "Publicación online",
       ],
     },
@@ -28,16 +54,17 @@ export function HostingerPricingReal() {
       name: "One Web",
       price: "79.90",
       oldPrice: "S/ 149",
+      discount: "-46% OFF",
       prefix: "S/ ",
       desc: "Una web de una sola página para presentar un producto, servicio o proyecto.",
       popular: true,
-      badge: "Oferta especial",
+      badge: "Más elegido",
       btnText: "Quiero mi One Web",
       btnClass: "h-btn-plan-orange",
       features: [
-        "1 página",
+        "1 página de alto impacto",
         "Diseño adaptado",
-        "Responsive",
+        "Responsive para celulares",
         "WhatsApp integrado",
         "Formulario básico",
         "SEO básico",
@@ -47,8 +74,10 @@ export function HostingerPricingReal() {
     {
       id: "tienda-online",
       name: "Tienda Online",
-      price: "990",
-      prefix: "Desde S/ ",
+      price: "750",
+      oldPrice: "S/ 1.250",
+      discount: "-40% OFF",
+      prefix: "S/ ",
       desc: "Una tienda online para mostrar productos y gestionar ventas desde la web.",
       popular: false,
       btnText: "Quiero mi Tienda Online",
@@ -59,7 +88,7 @@ export function HostingerPricingReal() {
         "Integración de pagos",
         "Gestión de pedidos",
         "Diseño responsive",
-        "WhatsApp",
+        "WhatsApp integrado",
         "SEO básico",
         "Publicación online",
       ],
@@ -71,18 +100,50 @@ export function HostingerPricingReal() {
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal */}
-        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 52px" }}>
+        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 42px" }}>
           <span className="qw-kicker-capsule">
-            PRECIOS
+            TARIFARIO & PRECIOS
           </span>
 
           <h2 style={{ fontSize: "clamp(2rem, 3.4vw, 2.7rem)", fontWeight: "700", color: "#111111", margin: "0 0 14px", lineHeight: "1.15", letterSpacing: "-0.03em" }}>
-            Planes transparentes, sin sorpresas.
+            Planes transparentes con descuento de lanzamiento
           </h2>
           
-          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: 0 }}>
-            Precio cerrado antes de empezar. Incluye dominio guiado, hosting el primer año y capacitación.
+          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: "0 0 24px" }}>
+            Precio cerrado antes de empezar. Sin mensualidades ocultas ni llamadas de venta.
           </p>
+
+          {/* Temporizador de Oferta de Lanzamiento */}
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "12px",
+              background: "#ffffff",
+              border: "1px solid rgba(254, 102, 18, 0.25)",
+              padding: "9px 20px",
+              borderRadius: "9999px",
+              boxShadow: "0 4px 16px rgba(254, 102, 18, 0.08)",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <Flame size={16} color="#fe6612" />
+              <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#18181b" }}>
+                Oferta de Septiembre:
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px", fontFamily: "monospace", fontSize: "13px", fontWeight: "800", color: "#fe6612" }}>
+              <span>{String(timeLeft.days).padStart(2, "0")}d</span>
+              <span>:</span>
+              <span>{String(timeLeft.hours).padStart(2, "0")}h</span>
+              <span>:</span>
+              <span>{String(timeLeft.minutes).padStart(2, "0")}m</span>
+              <span>:</span>
+              <span>{String(timeLeft.seconds).padStart(2, "0")}s</span>
+            </div>
+          </div>
         </div>
 
         {/* Grid de 3 Tarjetas */}
@@ -110,16 +171,23 @@ export function HostingerPricingReal() {
                 }}
               >
                 <div>
-                  {/* Top Row: Nombre del Plan y Badge */}
+                  {/* Top Row: Nombre del Plan y Badges */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: "28px", marginBottom: "14px" }}>
                     <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#111111", margin: 0, letterSpacing: "-0.02em" }}>
                       {p.name}
                     </h3>
-                    {p.badge && (
-                      <span style={{ background: "#fe6612", color: "#ffffff", fontSize: "11px", fontWeight: "700", padding: "3px 11px", borderRadius: "9999px", letterSpacing: "0.02em" }}>
-                        {p.badge}
-                      </span>
-                    )}
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      {p.discount && (
+                        <span style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fee2e2", fontSize: "11px", fontWeight: "800", padding: "3px 8px", borderRadius: "9999px" }}>
+                          {p.discount}
+                        </span>
+                      )}
+                      {p.badge && (
+                        <span style={{ background: "#fe6612", color: "#ffffff", fontSize: "11px", fontWeight: "700", padding: "3px 10px", borderRadius: "9999px", letterSpacing: "0.02em" }}>
+                          {p.badge}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Precio */}

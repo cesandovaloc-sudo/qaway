@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const navLinks = [
-  { label: "Beneficios", path: "#beneficios" },
-  { label: "Rendimiento", path: "#rendimiento" },
-  { label: "Seguridad", path: "#seguridad" },
+  { label: "Proyectos", path: "#beneficios" },
+  { label: "Pilares", path: "#pilares" },
+  { label: "Canales", path: "#canales-de-venta" },
   { label: "Planes", path: "#planes" },
   { label: "FAQ", path: "#faq" },
+  { label: "Contacto", path: "#contacto" },
 ];
 
 export function HostingerHeader() {

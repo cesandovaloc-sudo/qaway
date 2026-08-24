@@ -54,11 +54,11 @@ export default function DesarrolloWebQawayPage() {
         {/* 6. PLANES Y PRECIOS */}
         <HostingerPricingReal />
 
-        {/* 7. FORMULARIO DE CONTACTO & ASESORÍA (COPIA EXACTA DE ESTUDIO) */}
-        <QawayLeadContactForm />
-
-        {/* 8. PREGUNTAS FRECUENTES */}
+        {/* 7. PREGUNTAS FRECUENTES (Resuelve dudas) */}
         <HostingerFAQReal />
+
+        {/* 8. FORMULARIO DE CONTACTO & ASESORÍA (Cierre final) */}
+        <QawayLeadContactForm />
       </main>
       <HostingerFooterFull />
     </div>

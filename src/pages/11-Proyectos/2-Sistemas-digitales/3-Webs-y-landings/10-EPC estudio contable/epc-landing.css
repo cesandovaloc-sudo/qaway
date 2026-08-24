@@ -1,0 +1,16 @@
+/* EPC Estudio Contable — estilos scopeados bajo .epc-landing
+   Patrón aurea-landing / josue-landing: nada de este archivo afecta al resto de la web. */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+
+.epc-landing{font-family:"DM Sans",sans-serif;color:#0c1c3d;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility}
+.epc-landing *{scroll-behavior:smooth}
+.epc-landing .font-display{font-family:"Playfair Display",serif}
+.epc-landing .container-ecp{width:min(1180px,calc(100% - 40px));margin-inline:auto}
+.epc-landing .section-pad{padding-block:110px}
+.epc-landing .eyebrow{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#1768ff}
+.epc-landing .glass{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px)}
+.epc-landing .shadow-soft{box-shadow:0 18px 55px rgba(6,21,58,.10)}
+.epc-landing .card{border:1px solid #e6ebf5;background:#fff;border-radius:22px}
+.epc-landing .blue-grid{background-image:linear-gradient(rgba(23,104,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(23,104,255,.08) 1px,transparent 1px);background-size:32px 32px}
+@media(max-width:768px){.epc-landing .container-ecp{width:min(100% - 28px,1180px)}.epc-landing .section-pad{padding-block:76px}}
+@media(prefers-reduced-motion:reduce){.epc-landing *,.epc-landing *::before,.epc-landing *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

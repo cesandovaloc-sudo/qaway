@@ -18,6 +18,13 @@
   --color-qaway-warm-muted: #e5e3dd;
   --color-qaway-warm-dark: #dcd9cf;
 
+  /* Tokens EPC Estudio Contable (solo usados dentro de .epc-landing) */
+  --color-ecp-navy: #06153a;
+  --color-ecp-blue: #1768ff;
+  --color-ecp-cobalt: #0d4fe8;
+  --color-ecp-ice: #f5f8ff;
+  --color-ecp-ink: #0c1c3d;
+
   /* Tipografias */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
@@ -90,29 +97,29 @@
   }
 
   /* Estandarizacion tipografica global para toda la web (Excluyendo Blog/Editor/Josue/Aurea/Plantora/Saniclick/Dental/MesaSelecta) */
-  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *) > h1:not(.blog-title):not(.no-qw),
-  h1:not(.blog-title):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *) > h1:not(.blog-title):not(.no-qw),
+  h1:not(.blog-title):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing):not(.epc-landing):not(.epc-landing *) {
     font-size: clamp(2.6rem, 4.2vw, 5.5rem);
     line-height: 0.91;
     letter-spacing: -0.055em;
   }
 
-  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *) > h2:not(.blog-subtitle):not(.no-qw),
-  h2:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *) > h2:not(.blog-subtitle):not(.no-qw),
+  h2:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing):not(.epc-landing):not(.epc-landing *) {
     font-size: clamp(2.3rem, 3.8vw, 4.1rem);
     line-height: 0.95;
     letter-spacing: -0.05em;
   }
 
-  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *) > h3:not(.blog-subtitle):not(.no-qw),
-  h3:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *) > h3:not(.blog-subtitle):not(.no-qw),
+  h3:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing):not(.epc-landing):not(.epc-landing *) {
     font-size: clamp(1.4rem, 2.7vw, 2.4rem);
     line-height: 1.02;
     letter-spacing: -0.035em;
   }
 
-  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *) > h4,
-  h4:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing) {
+  :not(.blog-content):not(.blog-editor):not(.josue-landing):not(.josue-landing *):not(.aurea-landing):not(.aurea-landing *):not(.plantora-landing):not(.plantora-landing *):not(.saniclick-landing):not(.saniclick-landing *):not(.dental-landing):not(.dental-landing *):not(.mesa-selecta-landing):not(.mesa-selecta-landing *):not(.epc-landing):not(.epc-landing *) > h4,
+  h4:not(.blog-subtitle):not(.no-qw):not(.josue-landing *):not(.josue-landing):not(.aurea-landing *):not(.aurea-landing):not(.plantora-landing *):not(.plantora-landing):not(.saniclick-landing *):not(.saniclick-landing):not(.dental-landing *):not(.dental-landing):not(.mesa-selecta-landing *):not(.mesa-selecta-landing):not(.epc-landing):not(.epc-landing *) {
     font-size: clamp(1.05rem, 2.2vw, 1.75rem);
     line-height: 1.06;
     letter-spacing: -0.025em;
