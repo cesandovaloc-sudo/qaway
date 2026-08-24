@@ -50,7 +50,6 @@ export function QawayDesignPillarsSection() {
   return (
     <section style={{ padding: "80px 16px 50px", background: "#f8f9fc", position: "relative" }}>
       <div className="h-container" style={{ maxWidth: "1200px" }}>
-
         {/* Encabezado Centrado de la Sección */}
         <div style={{ textAlign: "center", maxWidth: "780px", margin: "0 auto 52px" }}>
           <span
@@ -64,11 +63,12 @@ export function QawayDesignPillarsSection() {
               marginBottom: "12px",
             }}
           >
-            ESTÁNDARES DE IDENTIDAD & BRANDING
+            IDENTIDAD & BRANDING
           </span>
 
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: "600", color: "#111111", margin: "0 0 16px", lineHeight: "1.2" }}>
-            Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
+          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: "600", color: "#111111", margin: "0 0 16px", lineHeight: "1.25" }}>
+            Diseño web a medida con <br />
+            <span style={{ color: "#fe6612" }}>identidad de marca</span>
           </h2>
 
           <p style={{ color: "#71717a", fontSize: "16px", lineHeight: "1.6", margin: 0 }}>
@@ -76,163 +76,164 @@ export function QawayDesignPillarsSection() {
           </p>
         </div>
 
-        {/* Grid de Pilares sin caja flotante */}
+        {/* Grid de Pilares */}
         <div
           className="qaway-pillars-grid"
           style={{
             display: "grid",
-            gap: "40px",
+            gridTemplateColumns: "1.1fr 1fr",
+            gap: "48px",
             alignItems: "center",
           }}
         >
           {/* Columna Izquierda: Mensaje Central & Pilares */}
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div>
-                <span
+          <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            <div>
+              <span
+                style={{
+                  color: "#fe6612",
+                  fontSize: "11.5px",
+                  fontWeight: "800",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  display: "block",
+                  marginBottom: "8px",
+                }}
+              >
+                {current.tag}
+              </span>
+
+              <h3 style={{ color: "#111111", fontSize: "26px", fontWeight: "700", margin: "0 0 16px", lineHeight: "1.25" }}>
+                {current.title}
+              </h3>
+
+              {/* Tarjeta de Contenido / Descripción perfectamente alineada */}
+              <div
+                style={{
+                  width: "100%",
+                  background: "#ffffff",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
+                  padding: "26px",
+                  marginBottom: "20px",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.03)",
+                }}
+              >
+                <p
                   style={{
-                    color: "#fe6612",
-                    fontSize: "11.5px",
-                    fontWeight: "800",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    display: "block",
-                    marginBottom: "12px",
+                    color: "#3f3f46",
+                    fontSize: "15px",
+                    lineHeight: "1.65",
+                    margin: "0 0 16px",
                   }}
                 >
-                  {current.tag}
-                </span>
+                  "{current.desc}"
+                </p>
 
-                <h3 style={{ color: "#111111", fontSize: "24px", fontWeight: "700", margin: "0 0 16px" }}>
-                  {current.title}
-                </h3>
-
-                {/* Tarjeta de Contenido / Descripción */}
-                <div
-                  style={{
-                    background: "#ffffff",
-                    border: "1px solid #e4e4e7",
-                    borderRadius: "12px",
-                    padding: "24px",
-                    marginBottom: "28px",
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.03)",
-                  }}
-                >
-                  <p
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div
                     style={{
-                      color: "#3f3f46",
-                      fontSize: "15px",
-                      lineHeight: "1.65",
-                      margin: "0 0 16px",
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "8px",
+                      background: "rgba(254, 102, 18, 0.12)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    "{current.desc}"
-                  </p>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        width: "36px",
-                        height: "36px",
-                        borderRadius: "8px",
-                        background: "rgba(254, 102, 18, 0.12)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Sparkles size={18} color="#fe6612" />
-                    </div>
-                    <div>
-                      <strong style={{ fontSize: "13.5px", color: "#111111", display: "block" }}>
-                        Pilar Esencial de Diseño
-                      </strong>
-                      <span style={{ fontSize: "12px", color: "#71717a" }}>
-                        Garantía de Autoridad & Conversión Qaway Lab
-                      </span>
-                    </div>
+                    <Sparkles size={18} color="#fe6612" />
                   </div>
-                </div>
-              </div>
-
-              {/* Paginador & Controles de Navegación */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "8px" }}>
-                {/* Indicadores de Puntos */}
-                <div style={{ display: "flex", gap: "8px" }}>
-                  {pillarsData.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentIdx(i)}
-                      aria-label={`Ir al pilar ${i + 1}`}
-                      style={{
-                        width: currentIdx === i ? "24px" : "8px",
-                        height: "8px",
-                        borderRadius: "4px",
-                        background: currentIdx === i ? "#fe6612" : "#d4d4d8",
-                        border: "none",
-                        cursor: "pointer",
-                        transition: "all 0.25s ease",
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* Flechas de Navegación */}
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button
-                    onClick={handlePrev}
-                    aria-label="Pilar anterior"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      background: "#ffffff",
-                      border: "1px solid #e4e4e7",
-                      color: "#18181b",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#f4f4f5";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#ffffff";
-                    }}
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
-
-                  <button
-                    onClick={handleNext}
-                    aria-label="Pilar siguiente"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      background: "#fe6612",
-                      border: "none",
-                      color: "#ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "opacity 0.2s ease",
-                      boxShadow: "0 4px 12px rgba(254, 102, 18, 0.25)",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                  >
-                    <ChevronRight size={20} />
-                  </button>
+                  <div>
+                    <strong style={{ fontSize: "13.5px", color: "#111111", display: "block" }}>
+                      Pilar Esencial de Diseño
+                    </strong>
+                    <span style={{ fontSize: "12px", color: "#71717a" }}>
+                      Garantía de Autoridad & Conversión Qaway Lab
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Columna Derecha: Tarjeta de Showcase Visual con Animación */}
-            <AnimatePresence mode="wait">
+            {/* Paginador & Controles de Navegación Centrados debajo de la tarjeta */}
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px", paddingTop: "6px" }}>
+              {/* Flecha Anterior */}
+              <button
+                onClick={handlePrev}
+                aria-label="Pilar anterior"
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "50%",
+                  background: "#ffffff",
+                  border: "1px solid #e4e4e7",
+                  color: "#18181b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f4f4f5";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#ffffff";
+                }}
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {/* Indicadores de Puntos */}
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                {pillarsData.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentIdx(i)}
+                    aria-label={`Ir al pilar ${i + 1}`}
+                    style={{
+                      width: currentIdx === i ? "24px" : "8px",
+                      height: "8px",
+                      borderRadius: "4px",
+                      background: currentIdx === i ? "#fe6612" : "#d4d4d8",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.25s ease",
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Flecha Siguiente */}
+              <button
+                onClick={handleNext}
+                aria-label="Pilar siguiente"
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  borderRadius: "50%",
+                  background: "#fe6612",
+                  border: "none",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "opacity 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(254, 102, 18, 0.25)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Columna Derecha: Tarjeta de Showcase Visual con Animación */}
+          <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
                 initial={{ opacity: 0, x: 20 }}
