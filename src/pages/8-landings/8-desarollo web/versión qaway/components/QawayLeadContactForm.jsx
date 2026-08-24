@@ -7,23 +7,26 @@ export function QawayLeadContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [selectedBudget, setSelectedBudget] = useState("$500 – $1.500");
+  const [selectedTimeline, setSelectedTimeline] = useState("1 mes");
 
   const budgetOptions = ["< $500", "$500 – $1.500", "$1.500 – $4.000", "+ $4.000"];
+  const timelineOptions = ["< 2 semanas", "1 mes", "2 – 3 meses", "Flexible"];
 
   const submit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setSubmitError("");
 
-    const formElement = e.currentTarget;
-    const form = new FormData(formElement);
+    const fd = new FormData(e.currentTarget);
     const lead = {
-      name: String(form.get("name") || "").trim(),
-      email: String(form.get("email") || "").trim().toLowerCase(),
-      company: String(form.get("company") || "").trim(),
-      phone: String(form.get("phone") || "").trim(),
+      name: String(fd.get("name") || "").trim(),
+      email: String(fd.get("email") || "").trim().toLowerCase(),
+      company: String(fd.get("company") || "").trim(),
+      phone: String(fd.get("phone") || "").trim(),
       budget: selectedBudget,
-      message: String(form.get("message") || "").trim(),
+      timeline: selectedTimeline,
+      message: String(fd.get("message") || "").trim(),
+      source: "Desarrollo Web",
     };
 
     try {
@@ -31,55 +34,41 @@ export function QawayLeadContactForm() {
         {
           client_name: lead.name,
           contact_info: lead.phone,
-          source: "Desarrollo Web",
+          source: lead.source,
           stage: "new",
           metadata: {
             email: lead.email,
             company: lead.company,
             budget: lead.budget,
+            timeline: lead.timeline,
             message: lead.message || "Sin mensaje adicional",
           },
         },
       ]);
       if (error) throw error;
 
-      const apiKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || "";
-      if (apiKey.trim()) {
-        await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            access_key: apiKey.trim(),
-            subject: `Nueva solicitud Web (${lead.budget}): ${lead.company || lead.name}`,
-            from_name: "Qaway Lab Web",
-            name: lead.name,
-            phone: lead.phone,
-            email: lead.email,
-            company: lead.company,
-            budget: lead.budget,
-            message: lead.message || "Sin mensaje adicional",
-          }),
-        });
-      }
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || "",
+          subject: `Nuevo Lead Desarrollo Web: ${lead.name} (${lead.company || "Sin empresa"})`,
+          from_name: "Qaway Lab Web Leads",
+          name: lead.name,
+          email: lead.email,
+          empresa: lead.company || "No especificada",
+          whatsapp: lead.phone,
+          presupuesto: lead.budget,
+          plazo_estimado: lead.timeline,
+          mensaje: lead.message || "Sin mensaje adicional",
+        }),
+      });
 
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || "";
-      if (backupKey.trim()) {
-        await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            access_key: backupKey.trim(),
-            subject: `[Copia] Solicitud Web (${lead.budget}): ${lead.company || lead.name}`,
-            from_name: "Qaway Lab Web",
-            to_email: "qaway.myc@gmail.com",
-          }),
-        });
-      }
       setSubmitted(true);
-      formElement.reset();
+      e.currentTarget.reset();
 
       const contactMsg = encodeURIComponent(
-        `Hola Qaway, mi nombre es ${lead.name} de ${lead.company || "mi empresa"}. Mi presupuesto estimado es ${lead.budget}. Me gustaría cotizar mi proyecto web. ${lead.message ? "Detalles: " + lead.message : ""}`
+        `Hola Qaway, mi nombre es ${lead.name} de ${lead.company || "mi empresa"}. Mi presupuesto estimado es ${lead.budget} y fecha estimada ${lead.timeline}. Me gustaría cotizar mi proyecto web. ${lead.message ? "Detalles: " + lead.message : ""}`
       );
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
       window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -94,12 +83,12 @@ export function QawayLeadContactForm() {
   const resetForm = () => setSubmitted(false);
 
   return (
-    <section id="contacto" style={{ padding: "100px 0 110px", background: "#f8f9fc", borderTop: "1px solid #e4e4e7" }}>
-      <div className="h-container" style={{ maxWidth: "1240px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "64px", alignItems: "start" }}>
+    <section id="contacto" style={{ padding: "105px 0 115px", background: "#f8f9fc", borderTop: "1px solid #e4e4e7" }}>
+      <div className="h-container" style={{ maxWidth: "1260px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: "56px", alignItems: "center" }}>
           
           {/* Columna Izquierda: Información y Garantías */}
-          <div>
+          <div style={{ paddingRight: "10px" }}>
             <span className="qw-kicker-capsule">
               CONTACTO
             </span>
@@ -151,14 +140,14 @@ export function QawayLeadContactForm() {
             </div>
           </div>
 
-          {/* Columna Derecha: Tarjeta de Formulario */}
+          {/* Columna Derecha: Tarjeta de Formulario Optimizada */}
           <div
             style={{
               background: "#ffffff",
               border: "1px solid #e4e4e7",
               borderRadius: "24px",
-              padding: "44px 38px",
-              boxShadow: "0 12px 35px rgba(0,0,0,0.04)",
+              padding: "48px 42px",
+              boxShadow: "0 14px 40px rgba(0,0,0,0.05)",
             }}
           >
             {submitted ? (
@@ -176,26 +165,26 @@ export function QawayLeadContactForm() {
               <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
                 
                 {/* Nombre y Email */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>NOMBRE</label>
-                    <input type="text" name="name" required placeholder="Carlos Sandoval" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="text" name="name" required placeholder="Carlos Sandoval" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMAIL</label>
-                    <input type="email" name="email" required placeholder="hola@empresa.com" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="email" name="email" required placeholder="hola@empresa.com" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                 </div>
 
                 {/* Empresa y WhatsApp */}
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMPRESA O MARCA</label>
-                    <input type="text" name="company" placeholder="Mi Marca SAC" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="text" name="company" placeholder="Mi Marca SAC" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>WHATSAPP</label>
-                    <input type="tel" name="phone" required placeholder="+51 999 999 999" style={{ width: "100%", height: "46px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="tel" name="phone" required placeholder="+51 999 999 999" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                 </div>
 
@@ -229,10 +218,40 @@ export function QawayLeadContactForm() {
                   </div>
                 </div>
 
+                {/* Plazo de Lanzamiento */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>¿PARA CUÁNDO NECESITAS TU PROYECTO?</label>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    {timelineOptions.map((t) => {
+                      const active = selectedTimeline === t;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSelectedTimeline(t)}
+                          style={{
+                            padding: "8px 14px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: active ? "700" : "500",
+                            border: active ? "1px solid #fe6612" : "1px solid #e4e4e7",
+                            background: active ? "rgba(254, 102, 18, 0.08)" : "#fcfcfd",
+                            color: active ? "#fe6612" : "#71717a",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Mensaje */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>CUÉNTANOS DEL PROYECTO</label>
-                  <textarea name="message" rows={3} placeholder="Objetivo, referencias, fecha ideal de lanzamiento..." style={{ width: "100%", padding: "12px 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none", resize: "vertical" }} />
+                  <textarea name="message" rows={3} placeholder="Objetivo, referencias, funcionalidades clave..." style={{ width: "100%", padding: "12px 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none", resize: "vertical" }} />
                 </div>
 
                 {/* Botón */}
