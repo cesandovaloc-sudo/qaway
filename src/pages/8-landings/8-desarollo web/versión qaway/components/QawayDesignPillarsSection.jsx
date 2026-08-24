@@ -134,9 +134,34 @@ export function QawayDesignPillarsSection() {
             DISEÑO B: INTEGRACIÓN DIRECTA SPLIT 2 COLUMNAS (IGUAL A RENDIMIENTO)
             ───────────────────────────────────────────────────────────── */}
         <div style={{ paddingTop: "20px", borderTop: "2px dashed #e4e4e7" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#ffffff", border: "1px solid #e4e4e7", padding: "6px 16px", borderRadius: "999px", marginBottom: "36px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#ffffff", border: "1px solid #e4e4e7", padding: "6px 16px", borderRadius: "999px", marginBottom: "28px" }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#16a34a" }} />
             <strong style={{ fontSize: "12.5px", color: "#111111" }}>DISEÑO B: Integración Directa Split (Estilo Sección Rendimiento)</strong>
+          </div>
+
+          {/* Encabezado Principal de la Sección */}
+          <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 48px" }}>
+            <span
+              style={{
+                color: "#71717a",
+                fontSize: "12px",
+                fontWeight: "800",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: "12px",
+              }}
+            >
+              IDENTIDAD & BRANDING
+            </span>
+
+            <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 14px", lineHeight: "1.2" }}>
+              Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
+            </h2>
+
+            <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "660px", margin: "0 auto", lineHeight: "1.5" }}>
+              Cuidamos la tipografía, el impacto visual y la armonía cromática para que tu negocio transmita máxima autoridad y confianza.
+            </p>
           </div>
 
           <div
@@ -147,40 +172,36 @@ export function QawayDesignPillarsSection() {
               alignItems: "center",
             }}
           >
-            {/* Columna Izquierda: Directo sobre el lienzo (Igual que Rendimiento) */}
+            {/* Columna Izquierda: Detalle Dinámico del Pilar */}
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
               <span
                 style={{
+                  color: "#fe6612",
                   fontSize: "11.5px",
                   fontWeight: "800",
-                  color: "#56596e",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.1em",
                   textTransform: "uppercase",
-                  background: "#e6e8ee",
-                  padding: "4px 10px",
-                  borderRadius: "4px",
-                  display: "inline-block",
-                  marginBottom: "16px",
-                  width: "fit-content",
+                  display: "block",
+                  marginBottom: "10px",
                 }}
               >
-                IDENTIDAD & BRANDING
+                {current2.tag}
               </span>
 
-              <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.35rem)", fontWeight: "600", color: "#111111", margin: "0 0 16px", lineHeight: "1.18" }}>
-                Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
-              </h2>
+              <h3 style={{ color: "#111111", fontSize: "26px", fontWeight: "700", margin: "0 0 16px", lineHeight: "1.25" }}>
+                {current2.title}
+              </h3>
 
               <p style={{ color: "#52525b", fontSize: "15.5px", lineHeight: "1.65", margin: "0 0 24px", maxWidth: "520px" }}>
                 "{current2.desc}"
               </p>
 
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "32px", background: "#ffffff", border: "1px solid #e4e4e7", padding: "12px 16px", borderRadius: "10px", width: "fit-content", boxShadow: "0 2px 6px rgba(0,0,0,0.02)" }}>
                 <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(254, 102, 18, 0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <Sparkles size={16} color="#fe6612" />
                 </div>
-                <strong style={{ fontSize: "13px", color: "#111111" }}>
-                  {current2.tag}
+                <strong style={{ fontSize: "12.5px", color: "#111111" }}>
+                  Garantía de Autoridad & Conversión Qaway Lab
                 </strong>
               </div>
 
