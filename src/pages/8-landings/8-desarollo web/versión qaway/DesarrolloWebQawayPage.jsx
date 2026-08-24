@@ -9,6 +9,9 @@ import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.js
 import { HostingerFastPerformance } from "./components/HostingerFastPerformance.jsx";
 import { HostingerKodeeAi } from "./components/HostingerKodeeAi.jsx";
 import { HostingerSecurityGrid } from "./components/HostingerSecurityGrid.jsx";
+import { HostingerSecurityGridTaste } from "./components/HostingerSecurityGridTaste.jsx";
+import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.jsx";
+import { HostingerSalesAutomationTaste } from "./components/HostingerSalesAutomationTaste.jsx";
 import { HostingerMigrationDarkBanner } from "./components/HostingerMigrationDarkBanner.jsx";
 import { HostingerTestimonialsSlider } from "./components/HostingerTestimonialsSlider.jsx";
 import { HostingerEcommerceBanner } from "./components/HostingerEcommerceBanner.jsx";
@@ -16,7 +19,6 @@ import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
 import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
-import { QawayBrandsMarquee } from "./components/QawayBrandsMarquee.jsx";
 import "./styles/qaway-landing.css";
 
 export default function DesarrolloWebQawayPage() {
@@ -41,11 +43,17 @@ export default function DesarrolloWebQawayPage() {
         {/* 4. MARCAS & TESTIMONIOS (UNIFICADO) */}
         <HostingerTestimonialsSlider />
 
-        {/* 5. SOPORTE & GESTIÓN INTEGRAL */}
+        {/* 5A. SOPORTE & GESTIÓN (VERSIÓN ACTUAL) */}
         <HostingerSecurityGrid />
 
-        {/* 6. CANALES DE VENTA & AUTOMATIZACIÓN */}
+        {/* 5B. SOPORTE & GESTIÓN (PROPUESTA TASTE - NUEVA) */}
+        <HostingerSecurityGridTaste />
+
+        {/* 6A. CANALES DE VENTA (VERSIÓN ACTUAL) */}
         <HostingerEmailMarketing />
+
+        {/* 6B. CANALES DE VENTA (PROPUESTA TASTE - NUEVA) */}
+        <HostingerSalesAutomationTaste />
 
         {/* 7. PLANES Y PRECIOS */}
         <HostingerPricingReal />
