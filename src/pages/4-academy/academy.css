@@ -18,9 +18,7 @@
 .academy-hero {
   position: relative;
   min-height: 100dvh;
-  background:
-    radial-gradient(circle at 76% 14%, rgba(255, 75, 11, 0.05), transparent 24rem),
-    linear-gradient(135deg, #f8f7f4 0%, #efeeeb 100%);
+  background: #ffffff;
 }
 
 .academy-primary-button,

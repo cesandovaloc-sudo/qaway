@@ -31,14 +31,11 @@ export default function DesarrolloWebQawayPage() {
         {/* 1. HERO ACTUAL (Fondo Blanco Limpio) */}
         <HostingerHeroReal />
 
-        {/* 2. ALTERNATIVA 1: HERO FLOTANTE GRAFITO CARBÓN */}
+        {/* VARIANTES FLOTANTES GUARDADAS (Ocultas para no afectar peso ni render en producción)
         <HeroVariantGraphite />
-
-        {/* 3. ALTERNATIVA 2: HERO FLOTANTE WARM GLOW / NARANJA SUAVE */}
         <HeroVariantSoftWarm />
-
-        {/* 4. ALTERNATIVA 3: HERO FLOTANTE NARANJA SÓLIDO */}
         <HeroVariantSolidOrange />
+        */}
 
         <HostingerAiCards />
         <QawayDesignPillarsSection />

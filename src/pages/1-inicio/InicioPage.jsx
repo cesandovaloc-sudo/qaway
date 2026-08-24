@@ -253,11 +253,7 @@ function Hero() {
 
   return (
     <section
-      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f]"
-      style={{
-        background:
-          'radial-gradient(circle at 76% 14%, rgba(255, 75, 11, 0.05), transparent 24rem), linear-gradient(135deg, #f8f9f7 0%, #efeeeb 100%)',
-      }}
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
     >
       <Navbar variant="light" />
 
@@ -270,7 +266,7 @@ function Hero() {
       />
 
       <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
-        <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             animate={reduceMotion ? undefined : 'show'}
@@ -328,7 +324,7 @@ function Hero() {
 
         </motion.div>
 
-        <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-[#f8f9f7] text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
+        <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-white text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             whileInView={reduceMotion ? undefined : 'show'}
@@ -348,7 +344,7 @@ function Hero() {
               href="#sistemas"
               className="qw-hero-secondary-card-btn group"
             >
-              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-[#f8f9f7]" /></span>
+              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-white" /></span>
               <span className="flex items-center gap-2.5">
                 <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
                   <Workflow size={20} strokeWidth={1.65} />

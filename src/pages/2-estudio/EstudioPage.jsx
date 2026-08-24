@@ -185,11 +185,7 @@ function Hero() {
 
   return (
     <section
-      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f]"
-      style={{
-        background:
-          'radial-gradient(circle at 76% 14%, rgba(255, 75, 11, 0.05), transparent 24rem), linear-gradient(135deg, #f8f9f7 0%, #efeeeb 100%)',
-      }}
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
     >
       <Navbar variant="light" />
 
@@ -203,7 +199,7 @@ function Hero() {
 
       <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
         {/* Columna 1: Texto Principal */}
-        <div className="relative flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-[#f8f9f7] before:content-['']">
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, y: 32 }}
             animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
@@ -281,7 +277,7 @@ function Hero() {
         </motion.div>
 
         {/* Columna 3: Panel Derecho */}
-        <div className="relative hidden lg:flex flex-col justify-center bg-[#f8f9f7] px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-[#f8f9f7] after:content-['']">
+        <div className="relative hidden lg:flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']">
           <div className="qw-hero-secondary-enter relative z-10 flex flex-col items-center text-center">
             <p className="qw-hero-secondary-kicker">Estudio Visual</p>
             <p className="qw-hero-secondary-title text-balance">
