@@ -26,7 +26,7 @@ export function HostingerFastPerformance() {
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);
 
   return (
-    <section id="rendimiento" style={{ padding: "40px 0 90px", background: "#f8f9fc" }}>
+    <section id="rendimiento" style={{ padding: "80px 0", background: "#f8f9fc" }}>
       <div className="h-container">
         <div className="h-split-grid" style={{ gridTemplateColumns: "1fr 1.05fr", gap: "60px", alignItems: "center" }}>
           
