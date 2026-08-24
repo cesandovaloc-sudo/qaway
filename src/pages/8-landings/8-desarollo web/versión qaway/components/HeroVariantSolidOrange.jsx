@@ -12,13 +12,13 @@ const trustAvatars = [
 
 export function HeroVariantSolidOrange() {
   return (
-    <section style={{ padding: "40px 16px 50px", background: "#ffffff" }}>
-      <div className="h-container" style={{ maxWidth: "1320px" }}>
+    <section style={{ padding: "30px 0 50px", background: "#ffffff", width: "100%", overflow: "hidden" }}>
+      <div style={{ width: "95%", maxWidth: "1720px", margin: "0 auto" }}>
         
         {/* Label Identificador de Variante */}
         <div style={{ textAlign: "center", marginBottom: "16px" }}>
           <span style={{ background: "#fe6612", color: "#ffffff", padding: "6px 14px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            🔥 Alternativa 3: Hero Flotante Naranja Sólido (#fe6612)
+            🔥 Alternativa 3: Hero Flotante Naranja Sólido (#fe6612) - 95% Ancho
           </span>
         </div>
 
@@ -26,9 +26,9 @@ export function HeroVariantSolidOrange() {
         <div
           style={{
             background: "linear-gradient(135deg, #fe6612 0%, #e85509 100%)",
-            borderRadius: "16px",
+            borderRadius: "24px",
             border: "1px solid rgba(255, 255, 255, 0.25)",
-            padding: "54px 44px",
+            padding: "54px clamp(28px, 4vw, 64px)",
             boxShadow: "0 30px 60px -15px rgba(254, 102, 18, 0.45)",
             position: "relative",
             overflow: "hidden",

@@ -12,13 +12,13 @@ const trustAvatars = [
 
 export function HeroVariantSoftWarm() {
   return (
-    <section style={{ padding: "40px 16px 50px", background: "#ffffff" }}>
-      <div className="h-container" style={{ maxWidth: "1320px" }}>
+    <section style={{ padding: "30px 0 50px", background: "#ffffff", width: "100%", overflow: "hidden" }}>
+      <div style={{ width: "95%", maxWidth: "1720px", margin: "0 auto" }}>
         
         {/* Label Identificador de Variante */}
         <div style={{ textAlign: "center", marginBottom: "16px" }}>
           <span style={{ background: "#fff2eb", color: "#fe6612", border: "1px solid #fed7aa", padding: "6px 14px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            ✨ Alternativa 2: Hero Flotante Naranja Suave / Warm Glow (#fff8f5)
+            ✨ Alternativa 2: Hero Flotante Naranja Suave / Warm Glow (#fff8f5) - 95% Ancho
           </span>
         </div>
 
@@ -26,9 +26,9 @@ export function HeroVariantSoftWarm() {
         <div
           style={{
             background: "linear-gradient(145deg, #fffbf9 0%, #fff2ea 100%)",
-            borderRadius: "16px",
+            borderRadius: "24px",
             border: "1.5px solid #fed7aa",
-            padding: "54px 44px",
+            padding: "54px clamp(28px, 4vw, 64px)",
             boxShadow: "0 25px 50px -12px rgba(254, 102, 18, 0.12)",
             position: "relative",
             overflow: "hidden",
