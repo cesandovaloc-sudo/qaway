@@ -37,24 +37,18 @@ const pillarsData = [
 ];
 
 export function QawayDesignPillarsSection() {
-  const [currentIdx1, setCurrentIdx1] = useState(0);
-  const [currentIdx2, setCurrentIdx2] = useState(0);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const current = pillarsData[currentIdx];
 
-  const current1 = pillarsData[currentIdx1];
-  const current2 = pillarsData[currentIdx2];
-
-  const handleNext1 = () => setCurrentIdx1((prev) => (prev + 1) % pillarsData.length);
-  const handlePrev1 = () => setCurrentIdx1((prev) => (prev - 1 + pillarsData.length) % pillarsData.length);
-
-  const handleNext2 = () => setCurrentIdx2((prev) => (prev + 1) % pillarsData.length);
-  const handlePrev2 = () => setCurrentIdx2((prev) => (prev - 1 + pillarsData.length) % pillarsData.length);
+  const handleNext = () => setCurrentIdx((prev) => (prev + 1) % pillarsData.length);
+  const handlePrev = () => setCurrentIdx((prev) => (prev - 1 + pillarsData.length) % pillarsData.length);
 
   return (
-    <section style={{ padding: "80px 16px 80px", background: "#f8f9fc", position: "relative" }}>
+    <section style={{ padding: "90px 16px 90px", background: "#f8f9fc", position: "relative" }}>
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Centrado de la Sección */}
-        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 48px" }}>
+        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 52px" }}>
           <span
             style={{
               color: "#71717a",
@@ -78,38 +72,26 @@ export function QawayDesignPillarsSection() {
           </p>
         </div>
 
-        {/* ─────────────────────────────────────────────────────────────
-            OPCIÓN 1: DOS TARJETAS GEMELAS SIMÉTRICAS (ALINEADAS AL 100%)
-            ───────────────────────────────────────────────────────────── */}
-        <div style={{ marginBottom: "64px" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#ffffff", border: "1px solid #e4e4e7", padding: "6px 16px", borderRadius: "999px", marginBottom: "20px" }}>
-            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612" }} />
-            <strong style={{ fontSize: "12.5px", color: "#111111" }}>OPCIÓN 1: Dos Tarjetas Gemelas Simétricas</strong>
-          </div>
-
+        {/* Contenedor Maestro Panorámico con Mayor Aire Vertical */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #e4e4e7",
+            borderRadius: "12px",
+            padding: "48px 44px",
+            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.03)",
+          }}
+        >
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "28px",
-              alignItems: "stretch",
+              gridTemplateColumns: "1.1fr 1fr",
+              gap: "48px",
+              alignItems: "center",
             }}
           >
-            {/* Tarjeta Izquierda (Control del Pilar Integrado) */}
-            <div
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e4e4e7",
-                borderRadius: "12px",
-                padding: "36px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.03)",
-                height: "100%",
-                minHeight: "440px",
-              }}
-            >
+            {/* Columna Izquierda: Control del Pilar & Navegación */}
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
               <div>
                 <span
                   style={{
@@ -122,33 +104,27 @@ export function QawayDesignPillarsSection() {
                     marginBottom: "10px",
                   }}
                 >
-                  {current1.tag}
+                  {current.tag}
                 </span>
 
-                <h3 style={{ color: "#111111", fontSize: "24px", fontWeight: "700", margin: "0 0 16px", lineHeight: "1.25" }}>
-                  {current1.title}
+                <h3 style={{ color: "#111111", fontSize: "26px", fontWeight: "700", margin: "0 0 16px", lineHeight: "1.25" }}>
+                  {current.title}
                 </h3>
 
-                <p
-                  style={{
-                    color: "#52525b",
-                    fontSize: "15px",
-                    lineHeight: "1.65",
-                    margin: "0 0 24px",
-                  }}
-                >
-                  "{current1.desc}"
+                <p style={{ color: "#52525b", fontSize: "15.5px", lineHeight: "1.7", margin: "0 0 24px" }}>
+                  "{current.desc}"
                 </p>
 
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
-                    background: "#f9fafb",
-                    border: "1px solid #f4f4f5",
+                    gap: "12px",
+                    background: "#f8f9fc",
+                    border: "1px solid #e4e4e7",
                     borderRadius: "10px",
-                    padding: "12px 16px",
+                    padding: "14px 18px",
+                    marginBottom: "36px",
                   }}
                 >
                   <div
@@ -164,30 +140,48 @@ export function QawayDesignPillarsSection() {
                   >
                     <Sparkles size={16} color="#fe6612" />
                   </div>
-                  <div>
-                    <strong style={{ fontSize: "13px", color: "#111111", display: "block" }}>
-                      Pilar Esencial de Diseño
-                    </strong>
-                    <span style={{ fontSize: "11.5px", color: "#71717a" }}>
-                      Garantía de Autoridad & Conversión Qaway Lab
-                    </span>
-                  </div>
+                  <span style={{ fontSize: "13px", color: "#18181b", fontWeight: "600" }}>
+                    Garantía de Autoridad & Conversión Qaway Lab
+                  </span>
                 </div>
               </div>
 
-              {/* Pie de Tarjeta: Navegación Integrada */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "24px", borderTop: "1px solid #f4f4f5", marginTop: "24px" }}>
+              {/* Controles de Navegación Fluidos */}
+              <div style={{ display: "flex", alignItems: "center", gap: "18px", paddingTop: "8px" }}>
+                <button
+                  onClick={handlePrev}
+                  aria-label="Pilar anterior"
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "50%",
+                    background: "#ffffff",
+                    border: "1.5px solid #e4e4e7",
+                    color: "#18181b",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f4f4f5")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "#ffffff")}
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                   {pillarsData.map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => setCurrentIdx1(i)}
+                      onClick={() => setCurrentIdx(i)}
                       aria-label={`Ir al pilar ${i + 1}`}
                       style={{
-                        width: currentIdx1 === i ? "24px" : "8px",
+                        width: currentIdx === i ? "24px" : "8px",
                         height: "8px",
                         borderRadius: "4px",
-                        background: currentIdx1 === i ? "#fe6612" : "#e4e4e7",
+                        background: currentIdx === i ? "#fe6612" : "#d4d4d8",
                         border: "none",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
@@ -196,80 +190,53 @@ export function QawayDesignPillarsSection() {
                   ))}
                 </div>
 
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <button
-                    onClick={handlePrev1}
-                    aria-label="Pilar anterior"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      background: "#f9fafb",
-                      border: "1px solid #e4e4e7",
-                      color: "#18181b",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f4f4f5")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "#f9fafb")}
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  <button
-                    onClick={handleNext1}
-                    aria-label="Pilar siguiente"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "50%",
-                      background: "#fe6612",
-                      border: "none",
-                      color: "#ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      transition: "opacity 0.2s ease",
-                      boxShadow: "0 4px 12px rgba(254, 102, 18, 0.25)",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
+                <button
+                  onClick={handleNext}
+                  aria-label="Pilar siguiente"
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    borderRadius: "50%",
+                    background: "#fe6612",
+                    border: "none",
+                    color: "#ffffff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    transition: "opacity 0.2s ease",
+                    boxShadow: "0 4px 14px rgba(254, 102, 18, 0.3)",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                >
+                  <ChevronRight size={20} />
+                </button>
               </div>
             </div>
 
-            {/* Tarjeta Derecha (Showcase Visual) */}
+            {/* Columna Derecha: Preview del Proyecto con Imagen Alargada a 330px */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={current1.id}
-                initial={{ opacity: 0, x: 15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -15 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
+                key={current.id}
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3 }}
                 style={{
-                  background: "#ffffff",
+                  background: "#f9fafb",
                   borderRadius: "12px",
                   border: "1px solid #e4e4e7",
                   overflow: "hidden",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                  minHeight: "440px",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.02)",
                 }}
               >
-                <div style={{ position: "relative", height: "260px", overflow: "hidden" }}>
+                {/* Contenedor de Imagen Ampliado */}
+                <div style={{ height: "330px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
                   <img
-                    src={current1.image}
-                    alt={current1.highlight}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    src={current.image}
+                    alt={current.highlight}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
                   />
                   <div
                     style={{
@@ -295,22 +262,20 @@ export function QawayDesignPillarsSection() {
                   </div>
                 </div>
 
-                <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "12px", justifyContent: "space-between", flexGrow: 1 }}>
-                  <div>
-                    <h4 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", margin: "0 0 4px", fontFamily: "var(--qw-font-display)" }}>
-                      {current1.highlight}
-                    </h4>
-                    <span style={{ fontSize: "13px", color: "#71717a" }}>
-                      {current1.subHighlight}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", paddingTop: "12px", borderTop: "1px solid #f4f4f5" }}>
-                    {current1.badges.map((badge) => (
+                {/* Pie de la Tarjeta */}
+                <div style={{ padding: "24px" }}>
+                  <h4 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", margin: "0 0 4px", fontFamily: "var(--qw-font-display)" }}>
+                    {current.highlight}
+                  </h4>
+                  <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "16px" }}>
+                    {current.subHighlight}
+                  </span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {current.badges.map((badge) => (
                       <span
                         key={badge}
                         style={{
-                          background: "#f4f4f5",
+                          background: "#ffffff",
                           border: "1px solid #e4e4e7",
                           color: "#3f3f46",
                           padding: "4px 10px",
@@ -326,167 +291,6 @@ export function QawayDesignPillarsSection() {
                 </div>
               </motion.div>
             </AnimatePresence>
-          </div>
-        </div>
-
-        {/* ─────────────────────────────────────────────────────────────
-            OPCIÓN 2: UN SOLO CONTENEDOR MAESTRO BLANCO DE 2 COLUMNAS
-            ───────────────────────────────────────────────────────────── */}
-        <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#ffffff", border: "1px solid #e4e4e7", padding: "6px 16px", borderRadius: "999px", marginBottom: "20px" }}>
-            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612" }} />
-            <strong style={{ fontSize: "12.5px", color: "#111111" }}>OPCIÓN 2: Un Solo Contenedor Maestro Panorámico</strong>
-          </div>
-
-          <div
-            style={{
-              background: "#ffffff",
-              border: "1px solid #e4e4e7",
-              borderRadius: "12px",
-              padding: "36px",
-              boxShadow: "0 6px 24px rgba(0,0,0,0.03)",
-            }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1.1fr 1fr",
-                gap: "40px",
-                alignItems: "center",
-              }}
-            >
-              {/* Columna Izquierda */}
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-                <div>
-                  <span
-                    style={{
-                      color: "#fe6612",
-                      fontSize: "11.5px",
-                      fontWeight: "800",
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      display: "block",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    {current2.tag}
-                  </span>
-
-                  <h3 style={{ color: "#111111", fontSize: "24px", fontWeight: "700", margin: "0 0 14px", lineHeight: "1.25" }}>
-                    {current2.title}
-                  </h3>
-
-                  <p style={{ color: "#52525b", fontSize: "15px", lineHeight: "1.65", margin: "0 0 20px" }}>
-                    "{current2.desc}"
-                  </p>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "#f8f9fc", border: "1px solid #e4e4e7", borderRadius: "10px", padding: "12px 16px", marginBottom: "24px" }}>
-                    <Sparkles size={16} color="#fe6612" />
-                    <span style={{ fontSize: "12.5px", color: "#18181b", fontWeight: "600" }}>
-                      Garantía de Autoridad & Conversión Qaway Lab
-                    </span>
-                  </div>
-                </div>
-
-                {/* Controles de Navegación */}
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                  <button
-                    onClick={handlePrev2}
-                    aria-label="Pilar anterior"
-                    style={{
-                      width: "38px",
-                      height: "38px",
-                      borderRadius: "50%",
-                      background: "#ffffff",
-                      border: "1px solid #e4e4e7",
-                      color: "#18181b",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  <div style={{ display: "flex", gap: "6px" }}>
-                    {pillarsData.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentIdx2(i)}
-                        style={{
-                          width: currentIdx2 === i ? "20px" : "6px",
-                          height: "6px",
-                          borderRadius: "3px",
-                          background: currentIdx2 === i ? "#fe6612" : "#d4d4d8",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={handleNext2}
-                    aria-label="Pilar siguiente"
-                    style={{
-                      width: "38px",
-                      height: "38px",
-                      borderRadius: "50%",
-                      background: "#fe6612",
-                      border: "none",
-                      color: "#ffffff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Columna Derecha (Preview del Proyecto) */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={current2.id}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    background: "#f9fafb",
-                    borderRadius: "12px",
-                    border: "1px solid #e4e4e7",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div style={{ height: "240px", overflow: "hidden" }}>
-                    <img
-                      src={current2.image}
-                      alt={current2.highlight}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  </div>
-                  <div style={{ padding: "20px" }}>
-                    <h4 style={{ fontSize: "17px", fontWeight: "700", color: "#111111", margin: "0 0 4px" }}>
-                      {current2.highlight}
-                    </h4>
-                    <span style={{ fontSize: "12.5px", color: "#71717a", display: "block", marginBottom: "12px" }}>
-                      {current2.subHighlight}
-                    </span>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                      {current2.badges.map((badge) => (
-                        <span key={badge} style={{ background: "#ffffff", border: "1px solid #e4e4e7", color: "#3f3f46", padding: "3px 8px", borderRadius: "5px", fontSize: "10.5px", fontWeight: "600" }}>
-                          {badge}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
           </div>
         </div>
 
