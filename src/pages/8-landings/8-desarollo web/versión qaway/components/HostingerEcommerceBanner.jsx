@@ -5,7 +5,7 @@ export function HostingerEcommerceBanner() {
         className="h-container"
         style={{
           background: "linear-gradient(135deg, #181926 0%, #201547 100%)",
-          borderRadius: "24px",
+          borderRadius: "12px",
           padding: "60px 40px",
           textAlign: "center",
           color: "#ffffff",

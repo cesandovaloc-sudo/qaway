@@ -36,8 +36,8 @@ export function HostingerTestimonialsSlider() {
               key={r.name}
               style={{
                 background: "#ffffff",
-                border: "1px solid #e2e5e9",
-                borderRadius: "18px",
+                border: "1px solid #e4e4e7",
+                borderRadius: "12px",
                 padding: "32px 28px",
                 display: "flex",
                 flexDirection: "column",

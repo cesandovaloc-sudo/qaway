@@ -32,8 +32,8 @@ export function HostingerKodeeAi() {
 
           {/* Derecha: Visual del Chat Kodee */}
           <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-            <div style={{ background: "linear-gradient(135deg, #673de6 0%, #a78bfa 100%)", borderRadius: "24px", padding: "36px", width: "100%", maxWidth: "420px", boxShadow: "0 24px 50px rgba(103,61,230,0.2)" }}>
-              <div style={{ background: "#ffffff", borderRadius: "18px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
+            <div style={{ background: "linear-gradient(135deg, #673de6 0%, #a78bfa 100%)", borderRadius: "12px", padding: "36px", width: "100%", maxWidth: "420px", boxShadow: "0 24px 50px rgba(103,61,230,0.2)" }}>
+              <div style={{ background: "#ffffff", borderRadius: "12px", padding: "24px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
                   <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#00b090" }} />
                   <span style={{ fontSize: "12px", fontWeight: "700", color: "#56596e" }}>Agente de IA</span>
@@ -48,15 +48,15 @@ export function HostingerKodeeAi() {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <button style={{ background: "#f8f9fc", border: "1px solid #e2e5e9", padding: "10px 14px", borderRadius: "10px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                  <button style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", padding: "10px 14px", borderRadius: "12px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                     <span>↗</span>
                     <span>Quiero migrar a Hostinger</span>
                   </button>
-                  <button style={{ background: "#f8f9fc", border: "1px solid #e2e5e9", padding: "10px 14px", borderRadius: "10px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                  <button style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", padding: "10px 14px", borderRadius: "12px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                     <span>↗</span>
                     <span>Ayúdame a elegir el plan de hosting adecuado</span>
                   </button>
-                  <button style={{ background: "#f8f9fc", border: "1px solid #e2e5e9", padding: "10px 14px", borderRadius: "10px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                  <button style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", padding: "10px 14px", borderRadius: "12px", textAlign: "left", fontSize: "12px", fontWeight: "600", color: "#12131a", display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                     <span>↗</span>
                     <span>Quiero crear un sitio web</span>
                   </button>

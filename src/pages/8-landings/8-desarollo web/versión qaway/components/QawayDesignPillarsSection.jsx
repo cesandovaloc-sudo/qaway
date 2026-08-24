@@ -54,7 +54,7 @@ export function QawayDesignPillarsSection() {
         <div
           style={{
             background: "#1e2026",
-            borderRadius: "28px",
+            borderRadius: "12px",
             border: "1px solid rgba(255, 255, 255, 0.08)",
             padding: "54px 44px",
             boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.4)",
@@ -96,7 +96,7 @@ export function QawayDesignPillarsSection() {
                   style={{
                     background: "rgba(255, 255, 255, 0.04)",
                     border: "1px solid rgba(255, 255, 255, 0.08)",
-                    borderRadius: "16px",
+                    borderRadius: "12px",
                     padding: "24px",
                     marginBottom: "28px",
                   }}
@@ -219,7 +219,7 @@ export function QawayDesignPillarsSection() {
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 style={{
                   background: "#242731",
-                  borderRadius: "20px",
+                  borderRadius: "12px",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
                   overflow: "hidden",
                   boxShadow: "0 25px 50px rgba(0, 0, 0, 0.35)",

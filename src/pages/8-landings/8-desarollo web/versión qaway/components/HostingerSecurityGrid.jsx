@@ -15,7 +15,7 @@ export function HostingerSecurityGrid() {
 
         <div className="h-security-grid">
           {/* Card 1 */}
-          <div style={{ background: "#ffffff", border: "1px solid #e2e5e9", borderRadius: "16px", padding: "28px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "28px" }}>
             <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f4f0ff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
               <Shield size={22} color="#673de6" />
             </div>
@@ -28,7 +28,7 @@ export function HostingerSecurityGrid() {
           </div>
 
           {/* Card 2 */}
-          <div style={{ background: "#ffffff", border: "1px solid #e2e5e9", borderRadius: "16px", padding: "28px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "28px" }}>
             <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f4f0ff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
               <Lock size={22} color="#673de6" />
             </div>
@@ -41,7 +41,7 @@ export function HostingerSecurityGrid() {
           </div>
 
           {/* Card 3 */}
-          <div style={{ background: "#ffffff", border: "1px solid #e2e5e9", borderRadius: "16px", padding: "28px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "28px" }}>
             <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f4f0ff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
               <CloudLightning size={22} color="#673de6" />
             </div>
@@ -54,7 +54,7 @@ export function HostingerSecurityGrid() {
           </div>
 
           {/* Card 4 */}
-          <div style={{ background: "#ffffff", border: "1px solid #e2e5e9", borderRadius: "16px", padding: "28px" }}>
+          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "12px", padding: "28px" }}>
             <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "#f4f0ff", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
               <CheckCircle2 size={22} color="#673de6" />
             </div>
