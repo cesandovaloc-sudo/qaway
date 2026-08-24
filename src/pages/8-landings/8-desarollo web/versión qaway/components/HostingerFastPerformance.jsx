@@ -26,7 +26,7 @@ export function HostingerFastPerformance() {
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);
 
   return (
-    <section id="rendimiento" style={{ padding: "80px 0", background: "#f8f9fc" }}>
+    <section id="rendimiento" style={{ padding: "110px 0 120px", background: "#f8f9fc" }}>
       <div className="h-container">
         <div className="h-split-grid">
           {/* Izquierda */}

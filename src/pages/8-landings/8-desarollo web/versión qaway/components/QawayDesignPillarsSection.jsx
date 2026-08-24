@@ -55,7 +55,7 @@ export function QawayDesignPillarsSection() {
 
   return (
     <section
-      style={{ padding: "85px 16px 90px", background: "#f8f9fc", position: "relative" }}
+      style={{ padding: "110px 16px 120px", background: "#f8f9fc", position: "relative" }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
