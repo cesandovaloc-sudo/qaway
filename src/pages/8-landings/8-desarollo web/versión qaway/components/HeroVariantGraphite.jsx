@@ -28,7 +28,7 @@ export function HeroVariantGraphite() {
             background: "#1e2026",
             borderRadius: "28px",
             border: "1px solid rgba(255, 255, 255, 0.1)",
-            padding: "64px clamp(32px, 4vw, 76px)",
+            padding: "60px 0",
             boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.5)",
             position: "relative",
             overflow: "hidden",
@@ -36,10 +36,11 @@ export function HeroVariantGraphite() {
             boxSizing: "border-box",
           }}
         >
-          <div className="h-hero-grid-real">
-            
-            {/* Columna Izquierda */}
-            <div>
+          <div className="h-container">
+            <div className="h-hero-grid-real">
+              
+              {/* Columna Izquierda */}
+              <div>
               <div className="h-hero-overline-real" style={{ color: "#fe6612", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
                 CREACIÓN DE WEBS & SISTEMAS DIGITALES
               </div>
@@ -154,6 +155,7 @@ export function HeroVariantGraphite() {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 }

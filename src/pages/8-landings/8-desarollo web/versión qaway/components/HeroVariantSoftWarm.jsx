@@ -28,7 +28,7 @@ export function HeroVariantSoftWarm() {
             background: "linear-gradient(145deg, #fffbf9 0%, #fff2ea 100%)",
             borderRadius: "28px",
             border: "1.5px solid #fed7aa",
-            padding: "64px clamp(32px, 4vw, 76px)",
+            padding: "60px 0",
             boxShadow: "0 25px 50px -12px rgba(254, 102, 18, 0.12)",
             position: "relative",
             overflow: "hidden",
@@ -36,119 +36,121 @@ export function HeroVariantSoftWarm() {
             boxSizing: "border-box",
           }}
         >
-          <div className="h-hero-grid-real">
-            
-            {/* Columna Izquierda */}
-            <div>
-              <div className="h-hero-overline-real" style={{ color: "#fe6612", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
-                CREACIÓN DE WEBS & SISTEMAS DIGITALES
-              </div>
-
-              <h1 className="h-hero-title-real">
-                Gestiona tu sitio web WordPress de manera sencilla
-              </h1>
-
-              <ul className="h-hero-checks-real">
-                <li className="h-hero-check-item-real">
-                  <Check size={18} strokeWidth={3} />
-                  <span>Dominio gratis</span>
-                  <Info size={14} color="#84879c" style={{ cursor: "pointer" }} />
-                </li>
-                <li className="h-hero-check-item-real">
-                  <Check size={18} strokeWidth={3} />
-                  <span>Migración de sitios web gratuita e ilimitada</span>
-                </li>
-                <li className="h-hero-check-item-real">
-                  <Check size={18} strokeWidth={3} />
-                  <span>Sitios web WordPress mantenidos para ti</span>
-                </li>
-              </ul>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
-                <a
-                  href="#planes"
-                  className="h-btn-cta-purple h-btn-cta-orange"
-                  style={{ padding: "14px 38px", fontSize: "15px" }}
-                >
-                  Empezar ya
-                </a>
-                <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52525b", fontSize: "13px", fontWeight: "600" }}>
-                  <ShieldCheck size={16} color="#00b090" />
-                  <span>Garantía de reembolso de 30 días</span>
+          <div className="h-container">
+            <div className="h-hero-grid-real">
+              
+              {/* Columna Izquierda */}
+              <div>
+                <div className="h-hero-overline-real" style={{ color: "#fe6612", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
+                  CREACIÓN DE WEBS & SISTEMAS DIGITALES
                 </div>
-              </div>
 
-              {/* Social Proof */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  paddingTop: "20px",
-                  borderTop: "1px solid rgba(254, 102, 18, 0.15)",
-                  marginTop: "10px",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  {trustAvatars.map((av, index) => (
+                <h1 className="h-hero-title-real">
+                  Gestiona tu sitio web WordPress de manera sencilla
+                </h1>
+
+                <ul className="h-hero-checks-real">
+                  <li className="h-hero-check-item-real">
+                    <Check size={18} strokeWidth={3} />
+                    <span>Dominio gratis</span>
+                    <Info size={14} color="#84879c" style={{ cursor: "pointer" }} />
+                  </li>
+                  <li className="h-hero-check-item-real">
+                    <Check size={18} strokeWidth={3} />
+                    <span>Migración de sitios web gratuita e ilimitada</span>
+                  </li>
+                  <li className="h-hero-check-item-real">
+                    <Check size={18} strokeWidth={3} />
+                    <span>Sitios web WordPress mantenidos para ti</span>
+                  </li>
+                </ul>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
+                  <a
+                    href="#planes"
+                    className="h-btn-cta-purple h-btn-cta-orange"
+                    style={{ padding: "14px 38px", fontSize: "15px" }}
+                  >
+                    Empezar ya
+                  </a>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52525b", fontSize: "13px", fontWeight: "600" }}>
+                    <ShieldCheck size={16} color="#00b090" />
+                    <span>Garantía de reembolso de 30 días</span>
+                  </div>
+                </div>
+
+                {/* Social Proof */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                    paddingTop: "20px",
+                    borderTop: "1px solid rgba(254, 102, 18, 0.15)",
+                    marginTop: "10px",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    {trustAvatars.map((av, index) => (
+                      <div
+                        key={av.name}
+                        style={{
+                          width: "42px",
+                          height: "42px",
+                          borderRadius: "50%",
+                          marginLeft: index === 0 ? "0" : "-10px",
+                          border: "2.5px solid #ffffff",
+                          overflow: "hidden",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      >
+                        <img src={av.img} alt={av.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      </div>
+                    ))}
                     <div
-                      key={av.name}
                       style={{
                         width: "42px",
                         height: "42px",
                         borderRadius: "50%",
-                        marginLeft: index === 0 ? "0" : "-10px",
+                        marginLeft: "-10px",
                         border: "2.5px solid #ffffff",
-                        overflow: "hidden",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        background: "#fff2eb",
+                        color: "#fe6612",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <img src={av.img} alt={av.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      +50
                     </div>
-                  ))}
-                  <div
-                    style={{
-                      width: "42px",
-                      height: "42px",
-                      borderRadius: "50%",
-                      marginLeft: "-10px",
-                      border: "2.5px solid #ffffff",
-                      background: "#fff2eb",
-                      color: "#fe6612",
-                      fontSize: "12px",
-                      fontWeight: 800,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    +50
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
+                      ))}
+                      <span style={{ fontSize: "12px", fontWeight: "800", color: "#111111", marginLeft: "4px" }}>
+                        5.0 / 5.0
+                      </span>
+                    </div>
+                    <small style={{ color: "#71717a", fontSize: "11.5px", fontWeight: "500" }}>
+                      Más de 50 negocios confían en nosotros
+                    </small>
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
-                    ))}
-                    <span style={{ fontSize: "12px", fontWeight: "800", color: "#111111", marginLeft: "4px" }}>
-                      5.0 / 5.0
-                    </span>
-                  </div>
-                  <small style={{ color: "#71717a", fontSize: "11.5px", fontWeight: "500" }}>
-                    Más de 50 negocios confían en nosotros
-                  </small>
+              {/* Columna Derecha: Mockups */}
+              <div className="h-hero-showcase-container">
+                <div className="h-hero-layer-back">
+                  <img src={heroBackImg} alt="Agencia creativa diseño web" className="h-hero-layer-img" />
                 </div>
-              </div>
-            </div>
-
-            {/* Columna Derecha: Mockups */}
-            <div className="h-hero-showcase-container">
-              <div className="h-hero-layer-back">
-                <img src={heroBackImg} alt="Agencia creativa diseño web" className="h-hero-layer-img" />
-              </div>
-              <div className="h-hero-layer-front">
-                <img src={heroFrontImg} alt="Soluciones TI y desarrollo web" className="h-hero-layer-img" />
+                <div className="h-hero-layer-front">
+                  <img src={heroFrontImg} alt="Soluciones TI y desarrollo web" className="h-hero-layer-img" />
+                </div>
               </div>
             </div>
           </div>
