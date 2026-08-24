@@ -6,10 +6,10 @@ export function QawayLeadContactForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [selectedBudget, setSelectedBudget] = useState("$500 – $1.500");
+  const [selectedBudget, setSelectedBudget] = useState("S/ 500 – S/ 1.500");
   const [selectedTimeline, setSelectedTimeline] = useState("1 mes");
 
-  const budgetOptions = ["< $500", "$500 – $1.500", "$1.500 – $4.000", "+ $4.000"];
+  const budgetOptions = ["< S/ 500", "S/ 500 – S/ 1.500", "S/ 1.500 – S/ 4.000", "+ S/ 4.000"];
   const timelineOptions = ["< 2 semanas", "1 mes", "2 – 3 meses", "Flexible"];
 
   const submit = async (e) => {

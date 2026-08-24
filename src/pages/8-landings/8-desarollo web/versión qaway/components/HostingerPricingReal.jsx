@@ -5,8 +5,8 @@ export function HostingerPricingReal() {
     {
       id: "landing",
       name: "Landing",
-      price: "$490",
-      prefix: "",
+      price: "490",
+      prefix: "S/ ",
       desc: "Una página de alto impacto para campañas y lanzamientos.",
       popular: false,
       btnText: "Empezar con Landing",
@@ -22,8 +22,8 @@ export function HostingerPricingReal() {
     {
       id: "empresarial",
       name: "Empresarial",
-      price: "$1.290",
-      prefix: "",
+      price: "1.290",
+      prefix: "S/ ",
       desc: "El estándar para empresas que necesitan presencia sólida.",
       popular: true,
       badge: "Más elegido",
@@ -40,8 +40,8 @@ export function HostingerPricingReal() {
     {
       id: "ecommerce",
       name: "E-commerce",
-      price: "$2.490",
-      prefix: "Desde ",
+      price: "2.490",
+      prefix: "Desde S/ ",
       desc: "Tienda completa lista para vender y escalar.",
       popular: false,
       btnText: "Empezar con E-commerce",
