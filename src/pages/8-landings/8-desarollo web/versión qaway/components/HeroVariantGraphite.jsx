@@ -12,13 +12,13 @@ const trustAvatars = [
 
 export function HeroVariantGraphite() {
   return (
-    <section style={{ padding: "30px 0 50px", background: "#ffffff", width: "100%", overflow: "hidden" }}>
-      <div style={{ width: "95%", maxWidth: "1720px", margin: "0 auto" }}>
+    <section style={{ padding: "40px 0 60px", background: "#ffffff", width: "100%", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ width: "98%", maxWidth: "1860px", margin: "0 auto" }}>
         
         {/* Label Identificador de Variante */}
-        <div style={{ textAlign: "center", marginBottom: "16px" }}>
-          <span style={{ background: "#1e2026", color: "#ffffff", padding: "6px 14px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            ⭐ Alternativa 1: Hero Flotante Grafito Carbón (#1e2026) - 95% Ancho
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <span style={{ background: "#1e2026", color: "#ffffff", padding: "6px 16px", borderRadius: "999px", fontSize: "11px", fontWeight: "800", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            ⭐ Alternativa 1: Hero Flotante Grafito Carbón (#1e2026) - 98% Ancho
           </span>
         </div>
 
@@ -26,12 +26,14 @@ export function HeroVariantGraphite() {
         <div
           style={{
             background: "#1e2026",
-            borderRadius: "24px",
+            borderRadius: "28px",
             border: "1px solid rgba(255, 255, 255, 0.1)",
-            padding: "54px clamp(28px, 4vw, 64px)",
+            padding: "64px clamp(32px, 4vw, 76px)",
             boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.5)",
             position: "relative",
             overflow: "hidden",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <div className="h-hero-grid-real">
