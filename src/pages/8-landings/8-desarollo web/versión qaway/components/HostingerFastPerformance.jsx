@@ -3,20 +3,20 @@ import { Minus, Plus, Zap, Activity, ShieldCheck, Server } from "lucide-react";
 
 const performanceItems = [
   {
-    title: "Tiempos de carga ultrarrápidos (< 1.2s)",
-    content: "Optimizamos assets, scripts y compresión WebP para que tu web cargue en menos de un segundo, reduciendo drásticamente la tasa de rebote.",
+    title: "Carga ultrarrápida en menos de 1.2 segundos",
+    content: "Optimizamos imágenes en formato WebP, reducimos el peso de scripts y activamos caché inteligente para que tu web responda al instante en cualquier teléfono o computadora.",
   },
   {
-    title: "Sin tiempo de inactividad, 99.9% de disponibilidad",
-    content: "Infraestructura Cloud de alto rendimiento con servidores redundantes para que tu negocio nunca pierda una sola venta ni cliente potencial.",
+    title: "Disponibilidad 24/7 sin caídas de servidor",
+    content: "Infraestructura en la nube con monitoreo constante y servidores redundantes, garantizando que tu empresa esté siempre visible para nuevos clientes sin interrupciones.",
   },
   {
-    title: "Core Web Vitals 100% aprobados para SEO e IA",
-    content: "Tu sitio cumple con las métricas más exigentes de Google, logrando mejor posicionamiento orgánico y máxima visibilidad en motores de IA.",
+    title: "Métricas Core Web Vitals aprobadas para SEO",
+    content: "Desarrollo alineado a los estándares técnicos de Google, asegurando una mejor posición en los resultados de búsqueda orgánica y motores de IA.",
   },
   {
-    title: "Mayor retención y tasa de conversión",
-    content: "Una navegación ágil y sin esperas incrementa hasta en un 40% las consultas por WhatsApp y las compras directas en tu tienda online.",
+    title: "Mayor tasa de respuesta y conversión comercial",
+    content: "Al eliminar tiempos de espera, los visitantes navegan con fluidez y contactan directamente por WhatsApp o formularios sin abandonar el sitio.",
   },
 ];
 
@@ -95,7 +95,7 @@ export function HostingerFastPerformance() {
             </span>
 
             <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 20px", lineHeight: "1.2" }}>
-              Rendimiento ultrarrápido y tiempo de actividad en el que puedes confiar
+              Velocidad de carga instantánea y estabilidad web garantizada
             </h2>
 
             {/* Fila Horizontal de Indicadores Numéricos Minimalistas en Naranja */}
