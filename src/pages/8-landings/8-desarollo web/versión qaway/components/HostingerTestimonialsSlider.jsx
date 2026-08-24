@@ -26,28 +26,28 @@ const brandRow2 = [
 
 const reviews = [
   {
-    name: "Diego Mendoza",
-    role: "Director de Operaciones · GastroGroup",
-    comment: "El rediseño de nuestra web corporativa nos permitió duplicar los pedidos corporativos en el primer mes. La velocidad de carga en celulares es inmediata y transmite una autoridad total.",
+    name: "Mariana Ríos",
+    role: "Fundadora · Studio Glow",
+    comment: "La web cambió totalmente la percepción de nuestro estudio. Los clientes llegan directo a WhatsApp convencidos y listos para contratar.",
+    rating: 5,
+    tag: "Marca Personal & Web",
+    avatar: "/assets/pages/4-academy/testimonials/mariana.png",
+  },
+  {
+    name: "Diego Morales",
+    role: "Director Comercial · Innova Corp",
+    comment: "Entregaron en los 7 días prometidos. La velocidad de carga en celulares es instantánea y el diseño superó todas nuestras expectativas.",
     rating: 5,
     tag: "Web Corporativa",
     avatar: "/assets/pages/4-academy/testimonials/diego.png",
   },
   {
-    name: "Lucía Fernández",
-    role: "Fundadora · Estudio LF Arquitectura",
-    comment: "Cuidaron cada detalle del branding, los colores y las imágenes de nuestros proyectos. La entrega fue en tiempo récord y el soporte por WhatsApp nos resuelve cualquier duda al instante.",
+    name: "Lucía Vargas",
+    role: "CEO · BioHealth",
+    comment: "El nivel de detalle visual y la claridad del copy nos permitió cerrar alianzas corporativas con marcas que antes no nos consideraban.",
     rating: 5,
-    tag: "Identidad & Landing",
+    tag: "E-commerce & Autoridad",
     avatar: "/assets/pages/4-academy/testimonials/lucia.png",
-  },
-  {
-    name: "Mariana Ramos",
-    role: "Gerente Comercial · Mesa Selecta",
-    comment: "La integración directa con WhatsApp y la pasarela de pagos nos automatizó la captación de leads. Recibimos cotizaciones diarias directamente en nuestro correo y celular.",
-    rating: 5,
-    tag: "Automatización & Ventas",
-    avatar: "/assets/pages/4-academy/testimonials/mariana.png",
   },
 ];
 
