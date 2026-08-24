@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { MessageSquare, CreditCard, Mail, BarChart3 } from "lucide-react";
 
 export function HostingerSalesAutomationTaste() {
@@ -14,7 +15,13 @@ export function HostingerSalesAutomationTaste() {
       <div className="h-container" style={{ maxWidth: "1240px", position: "relative", zIndex: 2 }}>
         
         {/* Encabezado en Blanco sobre Fondo Naranja */}
-        <div style={{ textAlign: "center", maxWidth: "800px", margin: "0 auto 52px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+          style={{ textAlign: "center", maxWidth: "800px", margin: "0 auto 52px" }}
+        >
           <span className="qw-kicker-capsule-light">
             CANALES DE VENTA & AUTOMATIZACIÓN
           </span>
@@ -45,7 +52,7 @@ export function HostingerSalesAutomationTaste() {
           >
             Integramos tu sitio con las herramientas esenciales para que cada visitante se convierta en una consulta o una venta directa.
           </p>
-        </div>
+        </motion.div>
 
         {/* Grid de 4 Tarjetas Blancas */}
         <div

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { Check, ArrowRight, ShieldCheck, Zap, Lock } from "lucide-react";
 import { supabase } from "@/config/supabase";
 
 export function QawayLeadContactForm() {
@@ -88,7 +89,13 @@ export function QawayLeadContactForm() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: "56px", alignItems: "center" }}>
           
           {/* Columna Izquierda: Información y Garantías */}
-          <div style={{ paddingRight: "10px" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
+            style={{ paddingRight: "10px" }}
+          >
             <span className="qw-kicker-capsule">
               CONTACTO
             </span>
@@ -138,10 +145,14 @@ export function QawayLeadContactForm() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Columna Derecha: Tarjeta de Formulario Optimizada */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.65, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
             style={{
               background: "#ffffff",
               border: "1px solid #e4e4e7",
@@ -255,7 +266,7 @@ export function QawayLeadContactForm() {
                 {submitError && <p style={{ color: "#dc2626", fontSize: "12.5px", textAlign: "center", margin: 0 }}>{submitError}</p>}
               </form>
             )}
-          </div>
+          </motion.div>
 
         </div>
       </div>

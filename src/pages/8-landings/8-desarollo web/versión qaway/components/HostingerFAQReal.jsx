@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 
 const realFaqs = [
@@ -24,7 +25,13 @@ export function HostingerFAQReal() {
   return (
     <section id="faq" style={{ padding: "80px 0 100px", background: "#ffffff" }}>
       <div className="h-container">
-        <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+          style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}
+        >
           <span className="qw-kicker-capsule">
             PREGUNTAS FRECUENTES
           </span>
@@ -34,7 +41,7 @@ export function HostingerFAQReal() {
           <p style={{ color: "#56596e", fontSize: "15px", margin: 0 }}>
             Respondemos las preguntas frecuentes sobre nuestros planes de WordPress.
           </p>
-        </div>
+        </motion.div>
 
         <div style={{ maxWidth: "800px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "10px" }}>
           {realFaqs.map((f, idx) => {

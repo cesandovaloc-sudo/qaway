@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import mockup1 from "../../Diseño sin título (1).png";
 import mockup2 from "../../Diseño sin título.png";
 import mockup3 from "../../ChatGPT Image 21 ago 2026, 18_38_46.png";
@@ -9,19 +10,34 @@ export function HostingerAiCards() {
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}
       <section id="beneficios" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
         <div className="h-container" style={{ maxWidth: "1330px" }}>
-          <span className="qw-kicker-capsule">
-            PROYECTOS REALIZADOS
-          </span>
-          <h2 style={{ marginBottom: "14px" }}>
-            Elige el tipo de web que <span style={{ color: "#fe6612" }}>necesita tu marca</span>
-          </h2>
-          <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "620px", margin: "0 auto 40px", lineHeight: "1.5" }}>
-            Estructuras web diseñadas para captar clientes, transmitir autoridad y vender en automático.
-          </p>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <span className="qw-kicker-capsule">
+              PROYECTOS REALIZADOS
+            </span>
+            <h2 style={{ marginBottom: "14px" }}>
+              Elige el tipo de web que <span style={{ color: "#fe6612" }}>necesita tu marca</span>
+            </h2>
+            <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "620px", margin: "0 auto 40px", lineHeight: "1.5" }}>
+              Estructuras web diseñadas para captar clientes, transmitir autoridad y vender en automático.
+            </p>
+          </motion.div>
 
           <div className="h-three-cards-grid">
             {/* Tarjeta 1: Landing Pages */}
-            <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
+            <motion.div
+              className="h-ai-feature-card"
+              style={{ background: "#ffffff" }}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
@@ -38,10 +54,17 @@ export function HostingerAiCards() {
                   Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Tarjeta 2: Sitios Corporativos */}
-            <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
+            <motion.div
+              className="h-ai-feature-card"
+              style={{ background: "#ffffff" }}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
@@ -58,10 +81,17 @@ export function HostingerAiCards() {
                   Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Tarjeta 3: Tiendas Online */}
-            <div className="h-ai-feature-card" style={{ background: "#ffffff" }}>
+            <motion.div
+              className="h-ai-feature-card"
+              style={{ background: "#ffffff" }}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: 0.34, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                   <img
@@ -78,7 +108,7 @@ export function HostingerAiCards() {
                   Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Botón CTA */}
@@ -117,7 +147,11 @@ export function HostingerAiCards() {
             </h2>
 
             {/* Contenedor Grid 3x2 con Bordes Interiores y Fondo Blanco */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
               style={{
                 background: "#ffffff",
                 border: "1px solid rgba(254, 102, 18, 0.16)",
@@ -302,7 +336,7 @@ export function HostingerAiCards() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
 export function HostingerPricingReal() {
@@ -77,11 +78,15 @@ export function HostingerPricingReal() {
 
         {/* Grid de 3 Tarjetas */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: "28px", alignItems: "stretch" }}>
-          {plans.map((p) => {
+          {plans.map((p, idx) => {
             const isEmpresarial = p.popular;
             return (
-              <div
+              <motion.div
                 key={p.id}
+                initial={{ opacity: 0, y: 22 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.6, delay: idx * 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
                 style={{
                   background: "#ffffff",
                   borderRadius: "18px",
@@ -174,7 +179,7 @@ export function HostingerPricingReal() {
                 >
                   {p.btnText}
                 </a>
-              </div>
+              </motion.div>
             );
           })}
         </div>

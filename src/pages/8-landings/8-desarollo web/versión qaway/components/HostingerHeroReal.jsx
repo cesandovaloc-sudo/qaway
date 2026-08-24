@@ -27,7 +27,11 @@ export function HostingerHeroReal() {
         <div className="h-hero-grid-real">
           
           {/* Columna Izquierda */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
             <span className="qw-kicker-capsule">
               CREACIÓN DE WEBS & TIENDAS DIGITALES
             </span>
@@ -90,10 +94,7 @@ export function HostingerHeroReal() {
             </div>
 
             {/* Círculos Animados de Recomendados (Social Proof) */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -151,25 +152,26 @@ export function HostingerHeroReal() {
                     position: "relative",
                   }}
                 >
-                  +20
+                  +40
                 </motion.div>
               </div>
 
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "3px", marginBottom: "2px" }}>
+              {/* Textos y Estrellas */}
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
+                    <Star key={i} size={14} fill="#fe6612" color="#fe6612" />
                   ))}
-                  <span style={{ fontSize: "12px", fontWeight: "800", color: "#111111", marginLeft: "4px" }}>
-                    4.5 / 5.0
+                  <span style={{ fontSize: "13px", fontWeight: "800", color: "#191918", marginLeft: "4px" }}>
+                    5.0 / 5.0
                   </span>
                 </div>
-                <small style={{ color: "#71717a", fontSize: "11.5px", fontWeight: "500" }}>
-                  Más de 20 negocios confían en nosotros
-                </small>
+                <span style={{ fontSize: "12px", color: "#71717a", fontWeight: "500" }}>
+                  Empresas y marcas satisfechas
+                </span>
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
 
           {/* Columna Derecha: Composición en Capas con Intercambio Infinito y Suave */}
           <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "470px" }}>

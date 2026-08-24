@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Star, CheckCircle, Quote } from "lucide-react";
 
 const brandRow1 = [
@@ -72,9 +73,13 @@ export function HostingerTestimonialsSlider() {
       {/* 2. Grid de Testimonios Protagonistas */}
       <div className="h-container" style={{ maxWidth: "1200px", marginBottom: "64px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "28px" }}>
-          {reviews.map((r) => (
-            <div
+          {reviews.map((r, idx) => (
+            <motion.div
               key={r.name}
+              initial={{ opacity: 0, y: 22 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.6, delay: idx * 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
               style={{
                 background: "#ffffff",
                 border: "1px solid #e4e4e7",
@@ -124,7 +129,7 @@ export function HostingerTestimonialsSlider() {
                   <span style={{ color: "#71717a", fontSize: "12px", display: "block" }}>{r.role}</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
