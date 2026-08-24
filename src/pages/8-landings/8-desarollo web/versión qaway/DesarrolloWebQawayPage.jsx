@@ -28,24 +28,28 @@ export default function DesarrolloWebQawayPage() {
     <div className="qaway-landing-root">
       <HostingerHeader />
       <main>
-        {/* 1. HERO ACTUAL (Fondo Blanco Limpio) */}
+        {/* 1. HERO */}
         <HostingerHeroReal />
 
-        {/* VARIANTES FLOTANTES GUARDADAS (Ocultas para no afectar peso ni render en producción)
-        <HeroVariantGraphite />
-        <HeroVariantSoftWarm />
-        <HeroVariantSolidOrange />
-        */}
-
+        {/* 2. TIPOS DE WEB */}
         <HostingerAiCards />
+
+        {/* 3. PILARES DE DISEÑO */}
         <QawayDesignPillarsSection />
-        <HostingerFastPerformance />
-        <HostingerEmailMarketing />
-        <HostingerSecurityGrid />
-        <HostingerMigrationDarkBanner />
+
+        {/* 4. TESTIMONIOS */}
         <HostingerTestimonialsSlider />
-        <HostingerEcommerceBanner />
+
+        {/* 5. SOPORTE & GESTIÓN INTEGRAL */}
+        <HostingerSecurityGrid />
+
+        {/* 6. CANALES DE VENTA & AUTOMATIZACIÓN */}
+        <HostingerEmailMarketing />
+
+        {/* 7. PLANES Y PRECIOS */}
         <HostingerPricingReal />
+
+        {/* 8. PREGUNTAS FRECUENTES */}
         <HostingerFAQReal />
       </main>
       <HostingerFooterFull />
