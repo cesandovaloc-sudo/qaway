@@ -38,10 +38,7 @@ export default function DesarrolloWebQawayPage() {
         {/* 3. PILARES DE DISEÑO */}
         <QawayDesignPillarsSection />
 
-        {/* 4. MARQUESINA DE MARCAS & TECNOLOGÍAS */}
-        <QawayBrandsMarquee />
-
-        {/* 5. TESTIMONIOS */}
+        {/* 4. MARCAS & TESTIMONIOS (UNIFICADO) */}
         <HostingerTestimonialsSlider />
 
         {/* 5. SOPORTE & GESTIÓN INTEGRAL */}

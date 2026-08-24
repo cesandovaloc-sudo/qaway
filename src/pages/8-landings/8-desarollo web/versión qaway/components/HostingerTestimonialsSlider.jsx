@@ -3,6 +3,30 @@ import avatar1 from "@/assets/1-no-usados/Portfolio/1.webp";
 import avatar2 from "@/assets/1-no-usados/Portfolio/2.webp";
 import avatar3 from "@/assets/1-no-usados/Portfolio/3.webp";
 
+const brandRow1 = [
+  { name: "Mesa Selecta", style: { fontFamily: "'The Seasons', 'Georgia', 'Times New Roman', serif", fontWeight: 400 } },
+  { name: "Andes Norte", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.04em" } },
+  { name: "Lima Forma", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 500 } },
+  { name: "Croma Patio", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.03em" } },
+  { name: "Nativa Studio", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400, letterSpacing: "-0.02em" } },
+  { name: "Punto Claro", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
+  { name: "Marea Capital", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.05em" } },
+  { name: "Casa Bruma", style: { fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontWeight: 400, textTransform: "none", letterSpacing: "-0.01em" } },
+  { name: "Senda Legal", style: { fontFamily: "'Georgia', 'Times New Roman', serif", fontWeight: 600, letterSpacing: "-0.03em", fontStyle: "italic" } },
+];
+
+const brandRow2 = [
+  { name: "Rumbo Vivo", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.02em" } },
+  { name: "Altura Cafe", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
+  { name: "Brava Textil", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.05em" } },
+  { name: "Nexo Salud", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400, letterSpacing: "-0.01em" } },
+  { name: "Tierra Uno", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
+  { name: "Solar Finca", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.02em" } },
+  { name: "Nodo Urbano", style: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, letterSpacing: "-0.04em" } },
+  { name: "Ayni Foods", style: { fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontWeight: 400, textTransform: "none", letterSpacing: "0" } },
+  { name: "Vertice Lab", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.04em" } },
+];
+
 const reviews = [
   {
     name: "Carlos Mendoza",
@@ -31,39 +55,117 @@ const reviews = [
 ];
 
 export function HostingerTestimonialsSlider() {
+  const track1 = [...brandRow1, ...brandRow1, ...brandRow1];
+  const track2 = [...brandRow2, ...brandRow2, ...brandRow2];
+
   return (
-    <section style={{ padding: "90px 0 100px", background: "#f8f9fc", position: "relative" }}>
-      <div className="h-container" style={{ maxWidth: "1200px" }}>
-        
-        {/* Encabezado Centrado */}
-        <div style={{ textAlign: "center", maxWidth: "760px", margin: "0 auto 52px" }}>
-          <span
-            style={{
-              fontSize: "11.5px",
-              fontWeight: "800",
-              color: "#56596e",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              background: "#e6e8ee",
-              padding: "4px 10px",
-              borderRadius: "4px",
-              display: "inline-block",
-              marginBottom: "14px",
-            }}
-          >
-            HISTORIAS DE ÉXITO & TESTIMONIOS
-          </span>
+    <section id="testimonios" style={{ padding: "85px 0 95px", background: "#f8f9fc", position: "relative", overflow: "hidden" }}>
+      
+      {/* 1. Encabezado Único Compartido (Sin Párrafo) */}
+      <div className="h-container" style={{ maxWidth: "1200px", textAlign: "center", marginBottom: "36px" }}>
+        <span
+          style={{
+            fontSize: "11.5px",
+            fontWeight: "800",
+            color: "#56596e",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            background: "#e6e8ee",
+            padding: "4px 10px",
+            borderRadius: "4px",
+            display: "inline-block",
+            marginBottom: "14px",
+          }}
+        >
+          HISTORIAS DE ÉXITO & MARCAS QUE CONFÍAN
+        </span>
 
-          <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 14px", lineHeight: "1.2" }}>
-            Empresas y marcas que confían en <span style={{ color: "#fe6612" }}>Qaway Lab</span>
-          </h2>
+        <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: 0, lineHeight: "1.2" }}>
+          Empresas y marcas que confían en <span style={{ color: "#fe6612" }}>Qaway Lab</span>
+        </h2>
+      </div>
 
-          <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.55", margin: 0 }}>
-            Resultados reales de negocios que transformaron su presencia digital y multiplicaron sus clientes.
-          </p>
+      {/* 2. Pasarela de Logos Tipográficos con Degradados Laterales */}
+      <div style={{ position: "relative", margin: "0 0 54px", overflow: "hidden" }}>
+        {/* Degradados Laterales para Desvanecimiento */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "160px",
+            height: "100%",
+            background: "linear-gradient(90deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
+            zIndex: 3,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "160px",
+            height: "100%",
+            background: "linear-gradient(270deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
+            zIndex: 3,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div className="qaway-marquee-wrapper" style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+          {/* Fila 1: Izquierda */}
+          <div style={{ overflow: "hidden", display: "flex" }}>
+            <div className="qaway-marquee-row qaway-marquee-left">
+              {track1.map((brand, idx) => (
+                <span
+                  key={`r1-${brand.name}-${idx}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "24px",
+                    fontSize: "clamp(1.35rem, 2.4vw, 2.1rem)",
+                    color: "#18181b",
+                    opacity: 0.85,
+                    whiteSpace: "nowrap",
+                    ...brand.style,
+                  }}
+                >
+                  <span>{brand.name}</span>
+                  <span style={{ width: "1px", height: "24px", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Fila 2: Derecha */}
+          <div style={{ overflow: "hidden", display: "flex" }}>
+            <div className="qaway-marquee-row qaway-marquee-right">
+              {track2.map((brand, idx) => (
+                <span
+                  key={`r2-${brand.name}-${idx}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "24px",
+                    fontSize: "clamp(1.35rem, 2.4vw, 2.1rem)",
+                    color: "#18181b",
+                    opacity: 0.85,
+                    whiteSpace: "nowrap",
+                    ...brand.style,
+                  }}
+                >
+                  <span>{brand.name}</span>
+                  <span style={{ width: "1px", height: "24px", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Grid de 3 Tarjetas Modernas de Testimonios */}
+      {/* 3. Grid de Testimonios */}
+      <div className="h-container" style={{ maxWidth: "1200px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "28px" }}>
           {reviews.map((r) => (
             <div
@@ -79,7 +181,7 @@ export function HostingerTestimonialsSlider() {
                 transition: "transform 0.2s ease, box-shadow 0.2s ease",
               }}
             >
-              {/* Barra superior de la tarjeta: Estrellas + Tag */}
+              {/* Barra superior: Estrellas + Tag */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
                 <div style={{ display: "flex", gap: "3px" }}>
                   {[...Array(r.rating)].map((_, i) => (
@@ -96,7 +198,7 @@ export function HostingerTestimonialsSlider() {
                 "{r.comment}"
               </p>
 
-              {/* Bloque Autor con Avatar de Foto */}
+              {/* Bloque Autor con Avatar */}
               <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingTop: "18px", borderTop: "1px solid #f4f4f5" }}>
                 <img
                   src={r.avatar}
@@ -120,8 +222,8 @@ export function HostingerTestimonialsSlider() {
             </div>
           ))}
         </div>
-
       </div>
+
     </section>
   );
 }

@@ -685,6 +685,6 @@
   animation: qawayMarqueeRight 100s linear infinite;
 }
 
-.qaway-landing-root .qaway-marquee-row:hover {
+.qaway-landing-root .qaway-marquee-wrapper:hover .qaway-marquee-row {
   animation-play-state: paused !important;
 }
