@@ -40,8 +40,8 @@ export function HostingerHeader() {
         headerVisible ? "translate-y-0" : "-translate-y-full"
       } ${
         scrolled
-          ? "bg-[#f8f7f4]/95 border-[#20201f]/10 backdrop-blur-md shadow-sm"
-          : "bg-[#f8f9f7] border-[#20201f]/5"
+          ? "bg-white/95 border-[#20201f]/10 backdrop-blur-md shadow-sm"
+          : "bg-white border-[#20201f]/5"
       }`}
     >
       <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">

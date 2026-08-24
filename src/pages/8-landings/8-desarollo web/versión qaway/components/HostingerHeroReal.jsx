@@ -18,7 +18,7 @@ export function HostingerHeroReal() {
           
           {/* Columna Izquierda */}
           <div>
-            <div className="h-hero-overline-real" style={{ color: "#ff4b0b", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
+            <div className="h-hero-overline-real" style={{ color: "#71717a", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
               CREACIÓN DE WEBS & SISTEMAS DIGITALES
             </div>
 
