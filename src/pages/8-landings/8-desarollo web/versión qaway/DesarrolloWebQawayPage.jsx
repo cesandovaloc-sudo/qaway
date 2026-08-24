@@ -5,7 +5,6 @@ import { HeroVariantGraphite } from "./components/HeroVariantGraphite.jsx";
 import { HeroVariantSoftWarm } from "./components/HeroVariantSoftWarm.jsx";
 import { HeroVariantSolidOrange } from "./components/HeroVariantSolidOrange.jsx";
 import { HostingerAiCards } from "./components/HostingerAiCards.jsx";
-import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.jsx";
 import { HostingerFastPerformance } from "./components/HostingerFastPerformance.jsx";
 import { HostingerKodeeAi } from "./components/HostingerKodeeAi.jsx";
 import { HostingerSecurityGrid } from "./components/HostingerSecurityGrid.jsx";
