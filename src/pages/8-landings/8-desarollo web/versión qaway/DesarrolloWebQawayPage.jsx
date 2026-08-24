@@ -16,6 +16,7 @@ import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
 import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
+import { QawayBrandsMarquee } from "./components/QawayBrandsMarquee.jsx";
 import "./styles/qaway-landing.css";
 
 export default function DesarrolloWebQawayPage() {
@@ -37,7 +38,10 @@ export default function DesarrolloWebQawayPage() {
         {/* 3. PILARES DE DISEÑO */}
         <QawayDesignPillarsSection />
 
-        {/* 4. TESTIMONIOS */}
+        {/* 4. MARQUESINA DE MARCAS & TECNOLOGÍAS */}
+        <QawayBrandsMarquee />
+
+        {/* 5. TESTIMONIOS */}
         <HostingerTestimonialsSlider />
 
         {/* 5. SOPORTE & GESTIÓN INTEGRAL */}

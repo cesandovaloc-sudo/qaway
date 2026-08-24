@@ -651,3 +651,40 @@
     padding: 0 16px;
   }
 }
+
+/* Marquesina Dual Infinita */
+@keyframes qawayMarqueeLeft {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes qawayMarqueeRight {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.qaway-landing-root .qaway-marquee-row {
+  display: flex;
+  width: max-content;
+  gap: 20px;
+}
+
+.qaway-landing-root .qaway-marquee-left {
+  animation: qawayMarqueeLeft 35s linear infinite;
+}
+
+.qaway-landing-root .qaway-marquee-right {
+  animation: qawayMarqueeRight 35s linear infinite;
+}
+
+.qaway-landing-root .qaway-marquee-wrapper:hover .qaway-marquee-row {
+  animation-play-state: paused !important;
+}
