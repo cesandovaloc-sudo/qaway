@@ -68,17 +68,7 @@ export function QawayDesignPillarsSection() {
         
         {/* Encabezado Principal de la Sección */}
         <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 52px" }}>
-          <span
-            style={{
-              color: "#71717a",
-              fontSize: "12px",
-              fontWeight: "800",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              display: "block",
-              marginBottom: "12px",
-            }}
-          >
+          <span className="qw-kicker-capsule">
             IDENTIDAD VISUAL & EXPERIENCIA DIGITAL
           </span>
 

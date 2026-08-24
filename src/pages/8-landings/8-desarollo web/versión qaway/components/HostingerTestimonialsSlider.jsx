@@ -60,20 +60,7 @@ export function HostingerTestimonialsSlider() {
       
       {/* 1. Encabezado Único (Sin Párrafo) */}
       <div className="h-container" style={{ maxWidth: "1200px", textAlign: "center", marginBottom: "48px" }}>
-        <span
-          style={{
-            fontSize: "11.5px",
-            fontWeight: "800",
-            color: "#56596e",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            background: "#e6e8ee",
-            padding: "4px 10px",
-            borderRadius: "4px",
-            display: "inline-block",
-            marginBottom: "14px",
-          }}
-        >
+        <span className="qw-kicker-capsule">
           HISTORIAS DE ÉXITO & MARCAS QUE CONFÍAN
         </span>
 

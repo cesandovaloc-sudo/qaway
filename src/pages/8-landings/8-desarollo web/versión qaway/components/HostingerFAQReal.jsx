@@ -25,6 +25,9 @@ export function HostingerFAQReal() {
     <section id="faq" style={{ padding: "80px 0 100px", background: "#ffffff" }}>
       <div className="h-container">
         <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}>
+          <span className="qw-kicker-capsule">
+            PREGUNTAS FRECUENTES
+          </span>
           <h2 style={{ marginBottom: "12px" }}>
             Preguntas frecuentes: hosting administrado para WordPress
           </h2>

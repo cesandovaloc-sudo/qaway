@@ -15,17 +15,7 @@ export function HostingerSalesAutomationTaste() {
         
         {/* Encabezado en Blanco sobre Fondo Naranja */}
         <div style={{ textAlign: "center", maxWidth: "800px", margin: "0 auto 52px" }}>
-          <span
-            style={{
-              fontSize: "11.5px",
-              fontWeight: "800",
-              color: "rgba(255, 255, 255, 0.88)",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              display: "block",
-              marginBottom: "14px",
-            }}
-          >
+          <span className="qw-kicker-capsule-light">
             CANALES DE VENTA & AUTOMATIZACIÓN
           </span>
 

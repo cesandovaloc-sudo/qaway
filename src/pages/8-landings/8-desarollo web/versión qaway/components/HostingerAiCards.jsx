@@ -9,6 +9,9 @@ export function HostingerAiCards() {
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}
       <section id="beneficios" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
         <div className="h-container" style={{ maxWidth: "1330px" }}>
+          <span className="qw-kicker-capsule">
+            PROYECTOS REALIZADOS
+          </span>
           <h2 style={{ marginBottom: "14px" }}>
             Elige el tipo de web que <span style={{ color: "#fe6612" }}>necesita tu marca</span>
           </h2>
@@ -95,17 +98,7 @@ export function HostingerAiCards() {
       <section style={{ background: "#fff7f2", padding: "85px 0 95px", borderTop: "1px solid rgba(254, 102, 18, 0.12)", borderBottom: "1px solid rgba(254, 102, 18, 0.12)" }}>
         <div className="h-container">
           <div style={{ textAlign: "left" }}>
-            <span
-              style={{
-                fontSize: "11.5px",
-                fontWeight: "800",
-                color: "#fe6612",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                display: "block",
-                marginBottom: "12px",
-              }}
-            >
+            <span className="qw-kicker-capsule">
               SERVICIOS
             </span>
 

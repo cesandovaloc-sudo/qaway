@@ -28,9 +28,9 @@ export function HostingerHeroReal() {
           
           {/* Columna Izquierda */}
           <div>
-            <div className="h-hero-overline-real" style={{ color: "#71717a", textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "12px", fontWeight: "800" }}>
+            <span className="qw-kicker-capsule">
               CREACIÓN DE WEBS & TIENDAS DIGITALES
-            </div>
+            </span>
 
             <h1 className="h-hero-title-real">
               Diseñamos tu sitio web profesional listo para captar clientes

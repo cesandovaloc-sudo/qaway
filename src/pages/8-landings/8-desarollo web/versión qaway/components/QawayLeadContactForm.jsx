@@ -100,17 +100,7 @@ export function QawayLeadContactForm() {
           
           {/* Columna Izquierda: Información y Garantías */}
           <div>
-            <span
-              style={{
-                fontSize: "11.5px",
-                fontWeight: "800",
-                color: "#fe6612",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                display: "block",
-                marginBottom: "16px",
-              }}
-            >
+            <span className="qw-kicker-capsule">
               CONTACTO
             </span>
 
