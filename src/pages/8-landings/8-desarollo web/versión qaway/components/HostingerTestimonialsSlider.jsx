@@ -2,27 +2,27 @@ import { motion } from "framer-motion";
 import { Star, CheckCircle, Quote } from "lucide-react";
 
 const brandRow1 = [
-  { name: "Mesa Selecta", style: { fontFamily: "'The Seasons', 'Georgia', 'Times New Roman', serif", fontWeight: 400 } },
-  { name: "Andes Norte", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.04em" } },
-  { name: "Lima Forma", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 500 } },
-  { name: "Croma Patio", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.03em" } },
-  { name: "Nativa Studio", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400, letterSpacing: "-0.02em" } },
-  { name: "Punto Claro", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
-  { name: "Marea Capital", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.05em" } },
-  { name: "Casa Bruma", style: { fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontWeight: 400, textTransform: "none", letterSpacing: "-0.01em" } },
-  { name: "Senda Legal", style: { fontFamily: "'Georgia', 'Times New Roman', serif", fontWeight: 600, letterSpacing: "-0.03em", fontStyle: "italic" } },
+  { name: "MESA SELECTA" },
+  { name: "ANDES NORTE" },
+  { name: "LIMA FORMA" },
+  { name: "CROMA PATIO" },
+  { name: "NATIVA STUDIO" },
+  { name: "PUNTO CLARO" },
+  { name: "MAREA CAPITAL" },
+  { name: "CASA BRUMA" },
+  { name: "SENDA LEGAL" },
 ];
 
 const brandRow2 = [
-  { name: "Rumbo Vivo", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.02em" } },
-  { name: "Altura Cafe", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
-  { name: "Brava Textil", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.05em" } },
-  { name: "Nexo Salud", style: { fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400, letterSpacing: "-0.01em" } },
-  { name: "Tierra Uno", style: { fontFamily: "'Space Grotesk', 'Inter', system-ui, sans-serif", fontWeight: 500 } },
-  { name: "Solar Finca", style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 500, letterSpacing: "-0.02em" } },
-  { name: "Nodo Urbano", style: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, letterSpacing: "-0.04em" } },
-  { name: "Ayni Foods", style: { fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontWeight: 400, textTransform: "none", letterSpacing: "0" } },
-  { name: "Vertice Lab", style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: "-0.04em" } },
+  { name: "RUMBO VIVO" },
+  { name: "ALTURA CAFÉ" },
+  { name: "BRAVA TEXTIL" },
+  { name: "NEXO SALUD" },
+  { name: "TIERRA UNO" },
+  { name: "SOLAR FINCA" },
+  { name: "NODO URBANO" },
+  { name: "AYNI FOODS" },
+  { name: "VÉRTICE LAB" },
 ];
 
 const reviews = [
@@ -173,16 +173,15 @@ export function HostingerTestimonialsSlider() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "20px",
-                    fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
-                    color: "#18181b",
-                    opacity: 0.35,
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    letterSpacing: "0.08em",
+                    color: "#52525b",
                     whiteSpace: "nowrap",
-                    transition: "opacity 0.2s ease",
-                    ...brand.style,
                   }}
                 >
                   <span>{brand.name}</span>
-                  <span style={{ width: "1px", height: "16px", background: "#fe6612", display: "inline-block", opacity: 0.4 }} />
+                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
                 </span>
               ))}
             </div>
@@ -198,16 +197,15 @@ export function HostingerTestimonialsSlider() {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "20px",
-                    fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
-                    color: "#18181b",
-                    opacity: 0.35,
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    letterSpacing: "0.08em",
+                    color: "#52525b",
                     whiteSpace: "nowrap",
-                    transition: "opacity 0.2s ease",
-                    ...brand.style,
                   }}
                 >
                   <span>{brand.name}</span>
-                  <span style={{ width: "1px", height: "16px", background: "#fe6612", display: "inline-block", opacity: 0.4 }} />
+                  <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
                 </span>
               ))}
             </div>

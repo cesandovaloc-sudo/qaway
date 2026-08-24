@@ -64,7 +64,7 @@ export function HostingerHeroReal() {
                 Comenzar ahora
               </a>
               <a
-                href="#proyectos"
+                href="#beneficios"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -91,6 +91,20 @@ export function HostingerHeroReal() {
               >
                 <span>Ver proyectos</span>
               </a>
+
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  color: "#fe6612",
+                  background: "rgba(254, 102, 18, 0.08)",
+                  border: "1px solid rgba(254, 102, 18, 0.2)",
+                  padding: "6px 14px",
+                  borderRadius: "9999px",
+                }}
+              >
+                Desde S/ 79.90
+              </span>
             </div>
 
             {/* Círculos Animados de Recomendados (Social Proof) */}
