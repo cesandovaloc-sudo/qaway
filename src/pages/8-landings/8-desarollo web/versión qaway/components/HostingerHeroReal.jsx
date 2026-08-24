@@ -50,27 +50,32 @@ export function HostingerHeroReal() {
                 Cotizar mi proyecto
               </a>
               <a
-                href="https://wa.me/51921820468?text=Hola%20Qaway%20Lab%2C%20quiero%20cotizar%20un%20proyecto%20web"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#proyectos"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  color: "#15803d",
-                  background: "#f0fdf4",
-                  border: "1.5px solid #bbf7d0",
-                  padding: "12px 22px",
+                  color: "#191918",
+                  background: "#ffffff",
+                  border: "1.5px solid #191918",
+                  padding: "13px 26px",
                   borderRadius: "9999px",
-                  fontSize: "14px",
+                  fontSize: "14.5px",
                   fontWeight: "700",
                   textDecoration: "none",
                   transition: "all 0.2s ease",
-                  boxShadow: "0 2px 8px rgba(34, 197, 94, 0.08)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#191918";
+                  e.currentTarget.style.color = "#ffffff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#ffffff";
+                  e.currentTarget.style.color = "#191918";
                 }}
               >
-                <MessageCircle size={18} color="#16a34a" />
-                <span>Hablar por WhatsApp</span>
+                <span>Ver proyectos</span>
               </a>
             </div>
 
@@ -92,8 +97,8 @@ export function HostingerHeroReal() {
                 {trustAvatars.map((av, index) => (
                   <motion.div
                     key={av.name}
-                    whileHover={{ scale: 1.18, zIndex: 10, y: -2 }}
-                    transition={{ duration: 0.2 }}
+                    whileHover={{ y: -3, zIndex: 10 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     style={{
                       width: "42px",
                       height: "42px",
@@ -101,7 +106,7 @@ export function HostingerHeroReal() {
                       marginLeft: index === 0 ? "0" : "-10px",
                       border: "2.5px solid #ffffff",
                       overflow: "hidden",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                       cursor: "pointer",
                       position: "relative",
                     }}
@@ -116,22 +121,24 @@ export function HostingerHeroReal() {
                 ))}
                 
                 <motion.div
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ y: -3, zIndex: 10 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   style={{
                     width: "42px",
                     height: "42px",
                     borderRadius: "50%",
                     marginLeft: "-10px",
                     border: "2.5px solid #ffffff",
-                    background: "#fff2eb",
-                    color: "#ff4b0b",
+                    background: "#f4f4f5",
+                    color: "#191918",
                     fontSize: "12px",
                     fontWeight: 800,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     cursor: "pointer",
+                    position: "relative",
                   }}
                 >
                   +20
