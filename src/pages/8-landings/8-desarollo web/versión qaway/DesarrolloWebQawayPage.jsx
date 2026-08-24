@@ -15,6 +15,7 @@ import { HostingerMigrationDarkBanner } from "./components/HostingerMigrationDar
 import { HostingerTestimonialsSlider } from "./components/HostingerTestimonialsSlider.jsx";
 import { HostingerEcommerceBanner } from "./components/HostingerEcommerceBanner.jsx";
 import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
+import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
 import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
@@ -52,6 +53,9 @@ export default function DesarrolloWebQawayPage() {
 
         {/* 6. PLANES Y PRECIOS */}
         <HostingerPricingReal />
+
+        {/* 7. FORMULARIO DE CONTACTO & ASESORÍA (COPIA EXACTA DE ESTUDIO) */}
+        <QawayLeadContactForm />
 
         {/* 8. PREGUNTAS FRECUENTES */}
         <HostingerFAQReal />
