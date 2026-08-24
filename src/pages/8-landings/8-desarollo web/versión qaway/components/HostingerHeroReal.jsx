@@ -43,7 +43,11 @@ export function HostingerHeroReal() {
             </ul>
 
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
-              <a href="#planes" className="h-btn-cta-purple" style={{ padding: "14px 38px", fontSize: "15px" }}>
+              <a
+                href="#planes"
+                className="h-btn-cta-purple"
+                style={{ padding: "14px 38px", fontSize: "15px", background: "#fe6612", borderColor: "#fe6612", boxShadow: "0 8px 24px rgba(254, 102, 18, 0.35)" }}
+              >
                 Empezar ya
               </a>
               <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#52525b", fontSize: "13px", fontWeight: "600" }}>

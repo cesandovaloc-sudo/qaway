@@ -16,7 +16,7 @@ export function HostingerAiCards() {
         <div className="h-three-cards-grid">
           {/* Tarjeta 1: Creador de páginas */}
           <div className="h-ai-feature-card">
-            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "260px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup1}
@@ -36,7 +36,7 @@ export function HostingerAiCards() {
 
           {/* Tarjeta 2: Solucionador de problemas */}
           <div className="h-ai-feature-card">
-            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "260px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup2}
@@ -56,7 +56,7 @@ export function HostingerAiCards() {
 
           {/* Tarjeta 3: Optimizador de sitios web */}
           <div className="h-ai-feature-card">
-            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "260px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+            <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup3}
