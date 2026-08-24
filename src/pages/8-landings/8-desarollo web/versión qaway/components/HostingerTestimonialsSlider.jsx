@@ -1,7 +1,4 @@
 import { Star, CheckCircle, Quote } from "lucide-react";
-import avatar1 from "@/assets/1-no-usados/Portfolio/1.webp";
-import avatar2 from "@/assets/1-no-usados/Portfolio/2.webp";
-import avatar3 from "@/assets/1-no-usados/Portfolio/3.webp";
 
 const brandRow1 = [
   { name: "Mesa Selecta", style: { fontFamily: "'The Seasons', 'Georgia', 'Times New Roman', serif", fontWeight: 400 } },
@@ -29,12 +26,12 @@ const brandRow2 = [
 
 const reviews = [
   {
-    name: "Carlos Mendoza",
+    name: "Diego Mendoza",
     role: "Director de Operaciones · GastroGroup",
     comment: "El rediseño de nuestra web corporativa nos permitió duplicar los pedidos corporativos en el primer mes. La velocidad de carga en celulares es inmediata y transmite una autoridad total.",
     rating: 5,
     tag: "Web Corporativa",
-    avatar: avatar1,
+    avatar: "/assets/pages/4-academy/testimonials/diego.png",
   },
   {
     name: "Lucía Fernández",
@@ -42,15 +39,15 @@ const reviews = [
     comment: "Cuidaron cada detalle del branding, los colores y las imágenes de nuestros proyectos. La entrega fue en tiempo récord y el soporte por WhatsApp nos resuelve cualquier duda al instante.",
     rating: 5,
     tag: "Identidad & Landing",
-    avatar: avatar2,
+    avatar: "/assets/pages/4-academy/testimonials/lucia.png",
   },
   {
-    name: "Andrés Silva",
-    role: "Gerente Comercial · Silva & Asociados",
+    name: "Mariana Ramos",
+    role: "Gerente Comercial · Mesa Selecta",
     comment: "La integración directa con WhatsApp y la pasarela de pagos nos automatizó la captación de leads. Recibimos cotizaciones diarias directamente en nuestro correo y celular.",
     rating: 5,
     tag: "Automatización & Ventas",
-    avatar: avatar3,
+    avatar: "/assets/pages/4-academy/testimonials/mariana.png",
   },
 ];
 
