@@ -1,4 +1,7 @@
 import { Star, CheckCircle, Quote } from "lucide-react";
+import avatar1 from "@/assets/1-no-usados/Portfolio/1.webp";
+import avatar2 from "@/assets/1-no-usados/Portfolio/2.webp";
+import avatar3 from "@/assets/1-no-usados/Portfolio/3.webp";
 
 const reviews = [
   {
@@ -7,7 +10,7 @@ const reviews = [
     comment: "El rediseño de nuestra web corporativa nos permitió duplicar los pedidos corporativos en el primer mes. La velocidad de carga en celulares es inmediata y transmite una autoridad total.",
     rating: 5,
     tag: "Web Corporativa",
-    initials: "CM",
+    avatar: avatar1,
   },
   {
     name: "Lucía Fernández",
@@ -15,7 +18,7 @@ const reviews = [
     comment: "Cuidaron cada detalle del branding, los colores y las imágenes de nuestros proyectos. La entrega fue en tiempo récord y el soporte por WhatsApp nos resuelve cualquier duda al instante.",
     rating: 5,
     tag: "Identidad & Landing",
-    initials: "LF",
+    avatar: avatar2,
   },
   {
     name: "Andrés Silva",
@@ -23,7 +26,7 @@ const reviews = [
     comment: "La integración directa con WhatsApp y la pasarela de pagos nos automatizó la captación de leads. Recibimos cotizaciones diarias directamente en nuestro correo y celular.",
     rating: 5,
     tag: "Automatización & Ventas",
-    initials: "AS",
+    avatar: avatar3,
   },
 ];
 
@@ -93,25 +96,22 @@ export function HostingerTestimonialsSlider() {
                 "{r.comment}"
               </p>
 
-              {/* Bloque Autor con Avatar de Iniciales */}
+              {/* Bloque Autor con Avatar de Foto */}
               <div style={{ display: "flex", alignItems: "center", gap: "12px", paddingTop: "18px", borderTop: "1px solid #f4f4f5" }}>
-                <div
+                <img
+                  src={r.avatar}
+                  alt={r.name}
                   style={{
-                    width: "40px",
-                    height: "40px",
+                    width: "44px",
+                    height: "44px",
                     borderRadius: "50%",
-                    background: "linear-gradient(135deg, #fe6612 0%, #111111 100%)",
-                    color: "#ffffff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "13px",
-                    fontWeight: "800",
+                    objectFit: "cover",
+                    border: "2px solid #ffffff",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     flexShrink: 0,
                   }}
-                >
-                  {r.initials}
-                </div>
+                  loading="lazy"
+                />
                 <div>
                   <strong style={{ fontSize: "14px", color: "#111111", display: "block" }}>{r.name}</strong>
                   <span style={{ color: "#71717a", fontSize: "12px", display: "block" }}>{r.role}</span>

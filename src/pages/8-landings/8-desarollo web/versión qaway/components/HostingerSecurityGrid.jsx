@@ -1,12 +1,20 @@
-import { ShieldCheck, Cloud, MessageSquare, Activity } from "lucide-react";
+import { Zap, ShieldCheck, Cloud, MessageSquare, Activity } from "lucide-react";
 
 export function HostingerSecurityGrid() {
+  const items = [
+    { icon: Zap, title: "Carga Ultrarrápida (< 1.2s)", color: "#fe6612", bg: "rgba(254, 102, 18, 0.1)" },
+    { icon: ShieldCheck, title: "Actualizaciones & Seguridad", color: "#fe6612", bg: "rgba(254, 102, 18, 0.1)" },
+    { icon: Cloud, title: "Copias de Seguridad en la Nube", color: "#fe6612", bg: "rgba(254, 102, 18, 0.1)" },
+    { icon: MessageSquare, title: "Soporte Directo por WhatsApp", color: "#25d366", bg: "rgba(37, 211, 102, 0.12)" },
+    { icon: Activity, title: "Monitoreo de Disponibilidad 24/7", color: "#16a34a", bg: "rgba(22, 163, 74, 0.1)" },
+  ];
+
   return (
-    <section id="soporte" style={{ padding: "90px 0 100px", background: "#f8f9fc" }}>
+    <section id="soporte" style={{ padding: "80px 0 85px", background: "#f8f9fc" }}>
       <div className="h-container">
         
-        {/* Encabezado Centrado de la Sección */}
-        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 52px" }}>
+        {/* Encabezado Centrado y Directo */}
+        <div style={{ textAlign: "center", maxWidth: "740px", margin: "0 auto 40px" }}>
           <span
             style={{
               fontSize: "11.5px",
@@ -24,68 +32,70 @@ export function HostingerSecurityGrid() {
             SOPORTE & ACOMPAÑAMIENTO TÉCNICO
           </span>
 
-          <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 14px", lineHeight: "1.2" }}>
+          <h2 style={{ fontSize: "clamp(1.8rem, 2.8vw, 2.3rem)", fontWeight: "600", color: "#111111", margin: "0 0 12px", lineHeight: "1.25" }}>
             Nosotros nos encargamos de todo el soporte para que tú <span style={{ color: "#fe6612" }}>te enfoques en tu negocio</span>
           </h2>
 
-          <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.55", margin: 0 }}>
+          <p style={{ color: "#52525b", fontSize: "15.5px", lineHeight: "1.5", margin: 0 }}>
             Olvídate de problemas técnicos, caídas de servidor o configuraciones complejas. Cuentas con un equipo profesional cuidando tu sitio en todo momento.
           </p>
         </div>
 
-        {/* Grid 2x2 de Capacidades de Soporte */}
-        <div className="h-security-grid">
-          {/* Card 1: Actualizaciones & Seguridad */}
-          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "14px", padding: "32px", boxShadow: "0 4px 16px rgba(0,0,0,0.02)" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(254, 102, 18, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-              <ShieldCheck size={24} color="#fe6612" />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", marginBottom: "10px", fontFamily: "var(--qw-font-display)" }}>
-              Actualizaciones & Seguridad Continua
-            </h3>
-            <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: 0 }}>
-              Mantenemos los scripts, componentes y librerías siempre al día para prevenir fallos, vulnerabilidades e incompatibilidades.
-            </p>
-          </div>
-
-          {/* Card 2: Copias de Seguridad */}
-          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "14px", padding: "32px", boxShadow: "0 4px 16px rgba(0,0,0,0.02)" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(254, 102, 18, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-              <Cloud size={24} color="#fe6612" />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", marginBottom: "10px", fontFamily: "var(--qw-font-display)" }}>
-              Copias de Seguridad en la Nube
-            </h3>
-            <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: 0 }}>
-              Respaldos automáticos periódicos almacenados en la nube para proteger y restaurar toda tu información ante cualquier eventualidad.
-            </p>
-          </div>
-
-          {/* Card 3: Soporte WhatsApp */}
-          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "14px", padding: "32px", boxShadow: "0 4px 16px rgba(0,0,0,0.02)" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(37, 211, 102, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-              <MessageSquare size={24} color="#25d366" />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", marginBottom: "10px", fontFamily: "var(--qw-font-display)" }}>
-              Soporte Directo por WhatsApp
-            </h3>
-            <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: 0 }}>
-              Atención rápida, humana y personalizada para resolver dudas operativas o solicitar cambios puntuales sin intermediarios ni tickets lentos.
-            </p>
-          </div>
-
-          {/* Card 4: Monitoreo 24/7 */}
-          <div style={{ background: "#ffffff", border: "1px solid #e4e4e7", borderRadius: "14px", padding: "32px", boxShadow: "0 4px 16px rgba(0,0,0,0.02)" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "10px", background: "rgba(22, 163, 74, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "18px" }}>
-              <Activity size={24} color="#16a34a" />
-            </div>
-            <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#111111", marginBottom: "10px", fontFamily: "var(--qw-font-display)" }}>
-              Monitoreo de Disponibilidad 24/7
-            </h3>
-            <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: 0 }}>
-              Supervisión constante de velocidad y estabilidad para asegurar que tu web esté siempre activa y lista para recibir nuevos clientes.
-            </p>
-          </div>
+        {/* Fila / Grid Compacto de Solo Iconos y Títulos */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px",
+            maxWidth: "1160px",
+            margin: "0 auto",
+          }}
+        >
+          {items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={item.title}
+                style={{
+                  background: "#ffffff",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "12px",
+                  padding: "20px 18px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "14px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "10px",
+                    background: item.bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={20} color={item.color} strokeWidth={2.2} />
+                </div>
+                <h3
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "700",
+                    color: "#111111",
+                    margin: 0,
+                    lineHeight: "1.35",
+                  }}
+                >
+                  {item.title}
+                </h3>
+              </div>
+            );
+          })}
         </div>
 
       </div>

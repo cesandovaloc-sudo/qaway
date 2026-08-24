@@ -1,26 +1,22 @@
-﻿export function QawayBrandsMarquee() {
-  const row1 = [
-    { name: "Google Cloud", icon: "🌐", cat: "Infraestructura" },
-    { name: "Vercel", icon: "▲", cat: "Edge Hosting" },
-    { name: "Meta Business", icon: "♾️", cat: "Píxel & Ads" },
-    { name: "Stripe", icon: "💳", cat: "Pagos Online" },
-    { name: "WordPress", icon: "⚡", cat: "CMS Flexible" },
-    { name: "Cloudflare", icon: "🛡️", cat: "Seguridad & CDN" },
-    { name: "Shopify", icon: "🛍️", cat: "E-commerce" },
-    { name: "Next.js", icon: "⚛️", cat: "Frontend Moderno" },
-  ];
+import logo1 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (1).webp";
+import logo3 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (3).webp";
+import logo4 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (4).webp";
+import logo5 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (5).webp";
+import logo6 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (6).webp";
+import logo7 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (7).webp";
+import logo8 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (8).webp";
+import logo13 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (13).webp";
+import logo15 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (15).webp";
+import logo16 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (16).webp";
+import logo18 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (18).webp";
+import logo19 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (19).webp";
+import logo20 from "@/assets/1-no-usados/Portfolio/Qaway Web Logo WEP 1 (20).webp";
 
-  const row2 = [
-    { name: "LiteSpeed Web", icon: "🚀", cat: "Carga Ultrarrápida" },
-    { name: "Figma", icon: "🎨", cat: "Diseño UI/UX" },
-    { name: "Mercado Pago", icon: "🤝", cat: "Pasarela LATAM" },
-    { name: "Tailwind CSS", icon: "🌊", cat: "Estilos a Medida" },
-    { name: "Amazon AWS", icon: "☁️", cat: "Cloud Services" },
-    { name: "HubSpot", icon: "📊", cat: "CRM & Formularios" },
-    { name: "Yape & Plin", icon: "📱", cat: "Pagos Móviles" },
-    { name: "Google Analytics 4", icon: "📈", cat: "Métricas de Conversión" },
-  ];
+export function QawayBrandsMarquee() {
+  const row1 = [logo1, logo3, logo4, logo5, logo6, logo7];
+  const row2 = [logo8, logo13, logo15, logo16, logo18, logo19, logo20];
 
+  // Duplicar para loop continuo sin cortes
   const track1 = [...row1, ...row1, ...row1, ...row1];
   const track2 = [...row2, ...row2, ...row2, ...row2];
 
@@ -35,12 +31,13 @@
         borderBottom: "1px solid #f4f4f5",
       }}
     >
+      {/* Degradados Laterales para Desvanecimiento Suave */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: "120px",
+          width: "140px",
           height: "100%",
           background: "linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
           zIndex: 3,
@@ -52,7 +49,7 @@
           position: "absolute",
           top: 0,
           right: 0,
-          width: "120px",
+          width: "140px",
           height: "100%",
           background: "linear-gradient(270deg, #ffffff 0%, rgba(255,255,255,0) 100%)",
           zIndex: 3,
@@ -60,7 +57,7 @@
         }}
       />
 
-      <div style={{ textAlign: "center", marginBottom: "32px", padding: "0 16px" }}>
+      <div style={{ textAlign: "center", marginBottom: "36px", padding: "0 16px" }}>
         <span
           style={{
             fontSize: "11px",
@@ -72,7 +69,7 @@
             marginBottom: "8px",
           }}
         >
-          TECNOLOGÍAS & ESTÁNDARES GLOBALES
+          MARCAS & PROYECTOS QUE CONFÍAN EN NOSOTROS
         </span>
         <h3
           style={{
@@ -82,68 +79,103 @@
             margin: 0,
           }}
         >
-          Desarrollamos con el ecosistema tecnológico de los líderes digitales
+          Marcas que impulsan su presencia digital con Qaway Lab
         </h3>
       </div>
 
-      <div className="qaway-marquee-wrapper" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+      {/* Contenedor Marquee con pausa al Hover */}
+      <div className="qaway-marquee-wrapper" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        
+        {/* Fila 1: Circula hacia la Izquierda */}
         <div style={{ overflow: "hidden", display: "flex" }}>
           <div className="qaway-marquee-row qaway-marquee-left">
-            {track1.map((item, idx) => (
+            {track1.map((logoSrc, idx) => (
               <div
-                key={`${item.name}-${idx}`}
+                key={`r1-${idx}`}
                 style={{
-                  background: "#f8f9fc",
-                  border: "1px solid #e4e4e7",
-                  borderRadius: "10px",
-                  padding: "10px 20px",
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-                  transition: "all 0.2s ease",
-                  cursor: "default",
+                  justifyContent: "center",
+                  padding: "0 30px",
                   flexShrink: 0,
+                  opacity: 0.7,
+                  filter: "grayscale(100%)",
+                  transition: "all 0.3s ease",
+                  cursor: "default",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.filter = "grayscale(0%)";
+                  e.currentTarget.style.transform = "scale(1.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "0.7";
+                  e.currentTarget.style.filter = "grayscale(100%)";
+                  e.currentTarget.style.transform = "scale(1)";
                 }}
               >
-                <span style={{ fontSize: "18px" }}>{item.icon}</span>
-                <div>
-                  <strong style={{ fontSize: "13.5px", color: "#111111", display: "block" }}>{item.name}</strong>
-                  <span style={{ fontSize: "10.5px", color: "#71717a", fontWeight: "600" }}>{item.cat}</span>
-                </div>
+                <img
+                  src={logoSrc}
+                  alt="Cliente Qaway Lab"
+                  style={{
+                    height: "42px",
+                    width: "auto",
+                    maxWidth: "140px",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
         </div>
 
+        {/* Fila 2: Circula hacia la Derecha */}
         <div style={{ overflow: "hidden", display: "flex" }}>
           <div className="qaway-marquee-row qaway-marquee-right">
-            {track2.map((item, idx) => (
+            {track2.map((logoSrc, idx) => (
               <div
-                key={`${item.name}-${idx}`}
+                key={`r2-${idx}`}
                 style={{
-                  background: "#f8f9fc",
-                  border: "1px solid #e4e4e7",
-                  borderRadius: "10px",
-                  padding: "10px 20px",
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.02)",
-                  transition: "all 0.2s ease",
-                  cursor: "default",
+                  justifyContent: "center",
+                  padding: "0 30px",
                   flexShrink: 0,
+                  opacity: 0.7,
+                  filter: "grayscale(100%)",
+                  transition: "all 0.3s ease",
+                  cursor: "default",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.filter = "grayscale(0%)";
+                  e.currentTarget.style.transform = "scale(1.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "0.7";
+                  e.currentTarget.style.filter = "grayscale(100%)";
+                  e.currentTarget.style.transform = "scale(1)";
                 }}
               >
-                <span style={{ fontSize: "18px" }}>{item.icon}</span>
-                <div>
-                  <strong style={{ fontSize: "13.5px", color: "#111111", display: "block" }}>{item.name}</strong>
-                  <span style={{ fontSize: "10.5px", color: "#71717a", fontWeight: "600" }}>{item.cat}</span>
-                </div>
+                <img
+                  src={logoSrc}
+                  alt="Cliente Qaway Lab"
+                  style={{
+                    height: "42px",
+                    width: "auto",
+                    maxWidth: "140px",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                  loading="lazy"
+                />
               </div>
             ))}
           </div>
         </div>
+
       </div>
     </section>
   );
