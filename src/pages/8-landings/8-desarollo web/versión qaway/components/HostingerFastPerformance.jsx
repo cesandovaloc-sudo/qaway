@@ -63,7 +63,7 @@ export function HostingerFastPerformance() {
                     }}
                   >
                     <span style={{ fontSize: "16px", fontWeight: "700", color: "#111111" }}>{item.title}</span>
-                    {isOpen ? <Minus size={18} color="#fe6612" /> : <Plus size={18} color="#71717a" />}
+                    {isOpen ? <Minus size={18} color="#fe6612" strokeWidth={2.5} /> : <Plus size={18} color="#fe6612" strokeWidth={2.5} />}
                   </button>
                   {isOpen && (
                     <div className="h-accordion-body-custom" style={{ padding: "0 24px 20px", color: "#52525b", fontSize: "14.5px", lineHeight: "1.6" }}>
@@ -95,17 +95,17 @@ export function HostingerFastPerformance() {
             </span>
 
             <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 20px", lineHeight: "1.2" }}>
-              Rendimiento ultrarrápido y tiempo de actividad en el que <span style={{ color: "#fe6612" }}>puedes confiar</span>
+              Rendimiento ultrarrápido y tiempo de actividad en el que puedes confiar
             </h2>
 
-            {/* Fila Horizontal de Indicadores Numéricos Minimalistas */}
+            {/* Fila Horizontal de Indicadores Numéricos Minimalistas en Naranja */}
             <div style={{ display: "flex", gap: "32px", marginTop: "32px", paddingTop: "24px", borderTop: "1px solid #e4e4e7", flexWrap: "wrap" }}>
               <div>
                 <span
                   style={{
                     fontSize: "28px",
                     fontWeight: "700",
-                    color: "#111111",
+                    color: "#fe6612",
                     fontFamily: "var(--qw-font-display)",
                     letterSpacing: "-0.03em",
                     display: "block",
@@ -124,7 +124,7 @@ export function HostingerFastPerformance() {
                   style={{
                     fontSize: "28px",
                     fontWeight: "700",
-                    color: "#111111",
+                    color: "#fe6612",
                     fontFamily: "var(--qw-font-display)",
                     letterSpacing: "-0.03em",
                     display: "block",
@@ -143,7 +143,7 @@ export function HostingerFastPerformance() {
                   style={{
                     fontSize: "28px",
                     fontWeight: "700",
-                    color: "#111111",
+                    color: "#fe6612",
                     fontFamily: "var(--qw-font-display)",
                     letterSpacing: "-0.03em",
                     display: "block",
