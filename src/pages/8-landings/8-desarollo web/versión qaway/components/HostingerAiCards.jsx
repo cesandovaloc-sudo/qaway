@@ -131,7 +131,21 @@ export function HostingerAiCards() {
                 }}
               >
                 {/* Celda 1: Webs corporativas */}
-                <div style={{ padding: "38px 34px", borderRight: "1px solid rgba(254, 102, 18, 0.14)" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    borderRight: "1px solid rgba(254, 102, 18, 0.14)",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <Layers size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
@@ -144,7 +158,21 @@ export function HostingerAiCards() {
                 </div>
 
                 {/* Celda 2: Marca personal */}
-                <div style={{ padding: "38px 34px", borderRight: "1px solid rgba(254, 102, 18, 0.14)" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    borderRight: "1px solid rgba(254, 102, 18, 0.14)",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <Sparkles size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
@@ -157,7 +185,20 @@ export function HostingerAiCards() {
                 </div>
 
                 {/* Celda 3: E-commerce */}
-                <div style={{ padding: "38px 34px" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <TrendingUp size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
@@ -178,7 +219,21 @@ export function HostingerAiCards() {
                 }}
               >
                 {/* Celda 4: Performance */}
-                <div style={{ padding: "38px 34px", borderRight: "1px solid rgba(254, 102, 18, 0.14)" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    borderRight: "1px solid rgba(254, 102, 18, 0.14)",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <Gauge size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
@@ -191,7 +246,21 @@ export function HostingerAiCards() {
                 </div>
 
                 {/* Celda 5: SEO técnico */}
-                <div style={{ padding: "38px 34px", borderRight: "1px solid rgba(254, 102, 18, 0.14)" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    borderRight: "1px solid rgba(254, 102, 18, 0.14)",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <Search size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
@@ -204,7 +273,20 @@ export function HostingerAiCards() {
                 </div>
 
                 {/* Celda 6: Diseño responsive */}
-                <div style={{ padding: "38px 34px" }}>
+                <div
+                  style={{
+                    padding: "38px 34px",
+                    backgroundColor: "#ffffff",
+                    transition: "background-color 0.25s ease, transform 0.25s ease",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#fff4ec";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#ffffff";
+                  }}
+                >
                   <div style={{ marginBottom: "20px" }}>
                     <Smartphone size={28} color="#fe6612" strokeWidth={1.8} />
                   </div>
