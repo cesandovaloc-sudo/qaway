@@ -48,7 +48,7 @@ export function QawayDesignPillarsSection() {
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal de la Sección */}
-        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 56px" }}>
+        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 52px" }}>
           <span
             style={{
               color: "#71717a",
@@ -63,13 +63,9 @@ export function QawayDesignPillarsSection() {
             IDENTIDAD & BRANDING
           </span>
 
-          <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 14px", lineHeight: "1.2" }}>
+          <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: 0, lineHeight: "1.2" }}>
             Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
           </h2>
-
-          <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "660px", margin: "0 auto", lineHeight: "1.5" }}>
-            Cuidamos la tipografía, el impacto visual y la armonía cromática para que tu negocio transmita máxima autoridad y confianza.
-          </p>
         </div>
 
         {/* Estructura Split Directa 2 Columnas (Estilo Integrado) */}
@@ -112,41 +108,9 @@ export function QawayDesignPillarsSection() {
               {current.title}
             </h3>
 
-            <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.65", margin: "0 0 26px", maxWidth: "520px" }}>
+            <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.65", margin: "0 0 32px", maxWidth: "520px" }}>
               "{current.desc}"
             </p>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                marginBottom: "36px",
-                background: "#ffffff",
-                border: "1px solid #e4e4e7",
-                padding: "12px 18px",
-                borderRadius: "10px",
-                width: "fit-content",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
-              }}
-            >
-              <div
-                style={{
-                  width: "32px",
-                  height: "32px",
-                  borderRadius: "8px",
-                  background: "rgba(254, 102, 18, 0.12)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Sparkles size={16} color="#fe6612" />
-              </div>
-              <strong style={{ fontSize: "13px", color: "#111111" }}>
-                Garantía de Autoridad & Conversión Qaway Lab
-              </strong>
-            </div>
 
             {/* Controles de Navegación Fluidos */}
             <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
