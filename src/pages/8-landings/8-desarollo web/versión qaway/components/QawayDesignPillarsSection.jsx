@@ -8,33 +8,36 @@ import pilar3Img from "../ChatGPT Image 24 ago 2026, 13_31_41.png";
 const pillarsData = [
   {
     id: "branding",
-    tag: "PILAR 01 · IDENTIDAD VISUAL",
-    title: "Branding & Dirección de Arte",
-    desc: "Construimos una presencia cromática coherente, logotipos vectoriales de precisión y activos de marca que transmiten autoridad corporativa inmediata.",
+    tag: "PILAR 01 · IDENTIDAD CORPORATIVA",
+    title: "Branding & Dirección de Arte Exclusiva",
+    desc: "Construimos una presencia cromática coherente, logotipos vectoriales de precisión y activos gráficos que transmiten autoridad corporativa inmediata frente a tu competencia.",
     image: pilar1Img,
-    highlight: "Identidad & Colorimetría Exclusiva",
+    highlight: "Paleta Cromática & Manual de Marca Digital",
     subHighlight: "Armonización visual de alto contraste y balance cromático",
     badges: ["Color Tokens", "Logo Vectorial", "Design System", "Activos SVG"],
+    featureTag: "DIRECCIÓN DE ARTE & UI",
   },
   {
     id: "mockup",
-    tag: "PILAR 02 · IMPACTO MULTIDISPOSITIVO",
-    title: "Mockups de Marca Hiperrealistas",
-    desc: "Presentamos tu negocio en pantallas Retina y dispositivos móviles de última generación para generar credibilidad instantánea en tus clientes.",
+    tag: "PILAR 02 · ADAPTABILIDAD TOTAL",
+    title: "Arquitectura Web Responsive & Mobile-First",
+    desc: "Diseñamos y optimizamos cada pantalla para smartphones, tablets y pantallas Retina de alta definición, garantizando una navegación impecable que retiene visitantes.",
     image: pilar2Img,
-    highlight: "Composición Multidispositivo 3D",
-    subHighlight: "Adaptación exacta en Desktop, Tablet y Smartphone",
-    badges: ["Retina Display", "Mobile First", "Perspectiva 3D", "UI/UX Fluido"],
+    highlight: "Adaptación Exacta en Todos los Dispositivos",
+    subHighlight: "Navegación táctil fluida, menús intuitivos y legibilidad perfecta",
+    badges: ["Mobile First", "Pantallas Retina", "Responsive 100%", "UI/UX Fluido"],
+    featureTag: "ADAPTABILIDAD RESPONSIVE 3D",
   },
   {
     id: "tipografia",
     tag: "PILAR 03 · JERARQUÍA EDITORIAL",
-    title: "Tipografía de Precisión",
-    desc: "Combinamos Space Grotesk para titulares de gran fuerza visual con Inter para párrafos de lectura óptima, garantizando una jerarquía clara y sin fatiga.",
+    title: "Tipografía de Precisión & Lectura Óptima",
+    desc: "Combinamos fuentes de gran impacto visual con tipografías sans-serif calibradas al píxel para guiar el ojo del cliente hacia tus ofertas y facilitar la lectura.",
     image: pilar3Img,
-    highlight: "Space Grotesk + Inter Sans",
-    subHighlight: "Micro-tracking y pesos editoriales calibrados al píxel",
-    badges: ["Space Grotesk", "Inter UI", "Micro-Tracking", "Legibilidad 100%"],
+    highlight: "Space Grotesk + Inter Display System",
+    subHighlight: "Jerarquía visual, contraste accesible (WCAG) y micro-tracking calibrado",
+    badges: ["Space Grotesk", "Inter Sans", "Contraste Accesible", "Legibilidad 100%"],
+    featureTag: "SISTEMA TIPOGRÁFICO",
   },
 ];
 
@@ -76,11 +79,11 @@ export function QawayDesignPillarsSection() {
               marginBottom: "12px",
             }}
           >
-            IDENTIDAD & BRANDING
+            IDENTIDAD VISUAL & EXPERIENCIA DIGITAL
           </span>
 
           <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: 0, lineHeight: "1.2" }}>
-            Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
+            Diseño web profesional con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
           </h2>
         </div>
 
@@ -254,7 +257,7 @@ export function QawayDesignPillarsSection() {
                   }}
                 >
                   <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fe6612" }} />
-                  <span>PROYECTO DESTACADO</span>
+                  <span>{current.featureTag}</span>
                 </div>
               </div>
 
