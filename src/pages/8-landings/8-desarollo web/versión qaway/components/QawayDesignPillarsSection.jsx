@@ -48,16 +48,57 @@ export function QawayDesignPillarsSection() {
   };
 
   return (
-    <section style={{ padding: "40px 16px 70px" }}>
+    <section style={{ padding: "60px 16px 80px", background: "#ffffff", position: "relative" }}>
       <div className="h-container" style={{ maxWidth: "1320px" }}>
-        {/* Contenedor Principal Dark (Estilo Showcase de Marca) */}
+        
+        {/* Detalle Semicircular Naranja Minimalista */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+          <div
+            style={{
+              width: "44px",
+              height: "22px",
+              borderTopLeftRadius: "44px",
+              borderTopRightRadius: "44px",
+              background: "rgba(254, 102, 18, 0.12)",
+              border: "2px solid #fe6612",
+              borderBottom: "none",
+            }}
+          />
+        </div>
+
+        {/* Encabezado Centrado de la Sección */}
+        <div style={{ textAlign: "center", maxWidth: "780px", margin: "0 auto 48px" }}>
+          <span
+            style={{
+              color: "#fe6612",
+              fontSize: "12px",
+              fontWeight: "800",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              display: "block",
+              marginBottom: "12px",
+            }}
+          >
+            ESTÁNDARES DE IDENTIDAD & BRANDING
+          </span>
+
+          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: "600", color: "#111111", margin: "0 0 16px", lineHeight: "1.2" }}>
+            Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
+          </h2>
+
+          <p style={{ color: "#71717a", fontSize: "16px", lineHeight: "1.6", margin: 0 }}>
+            Cuidamos la tipografía, el impacto visual y la armonía cromática para que tu negocio transmita máxima autoridad y confianza.
+          </p>
+        </div>
+
+        {/* Contenedor Principal en Fondo Claro Suave */}
         <div
           style={{
-            background: "#1e2026",
+            background: "#f9fafb",
             borderRadius: "12px",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            padding: "54px 44px",
-            boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.4)",
+            border: "1px solid #e4e4e7",
+            padding: "50px 40px",
+            boxShadow: "0 10px 30px rgba(0, 0, 0, 0.03)",
             position: "relative",
             overflow: "hidden",
           }}
@@ -87,23 +128,24 @@ export function QawayDesignPillarsSection() {
                   {current.tag}
                 </span>
 
-                <h2 style={{ color: "#ffffff", margin: "0 0 16px" }}>
+                <h3 style={{ color: "#111111", fontSize: "24px", fontWeight: "700", margin: "0 0 16px" }}>
                   {current.title}
-                </h2>
+                </h3>
 
                 {/* Tarjeta de Contenido / Descripción */}
                 <div
                   style={{
-                    background: "rgba(255, 255, 255, 0.04)",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    background: "#ffffff",
+                    border: "1px solid #e4e4e7",
                     borderRadius: "12px",
                     padding: "24px",
                     marginBottom: "28px",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.03)",
                   }}
                 >
                   <p
                     style={{
-                      color: "#d4d4d8",
+                      color: "#3f3f46",
                       fontSize: "15px",
                       lineHeight: "1.65",
                       margin: "0 0 16px",
@@ -118,7 +160,7 @@ export function QawayDesignPillarsSection() {
                         width: "36px",
                         height: "36px",
                         borderRadius: "8px",
-                        background: "rgba(254, 102, 18, 0.15)",
+                        background: "rgba(254, 102, 18, 0.12)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -127,10 +169,10 @@ export function QawayDesignPillarsSection() {
                       <Sparkles size={18} color="#fe6612" />
                     </div>
                     <div>
-                      <strong style={{ fontSize: "13.5px", color: "#ffffff", display: "block" }}>
+                      <strong style={{ fontSize: "13.5px", color: "#111111", display: "block" }}>
                         Pilar Esencial de Diseño
                       </strong>
-                      <span style={{ fontSize: "12px", color: "#a1a1aa" }}>
+                      <span style={{ fontSize: "12px", color: "#71717a" }}>
                         Garantía de Autoridad & Conversión Qaway Lab
                       </span>
                     </div>
@@ -151,7 +193,7 @@ export function QawayDesignPillarsSection() {
                         width: currentIdx === i ? "24px" : "8px",
                         height: "8px",
                         borderRadius: "4px",
-                        background: currentIdx === i ? "#fe6612" : "rgba(255, 255, 255, 0.2)",
+                        background: currentIdx === i ? "#fe6612" : "#d4d4d8",
                         border: "none",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
@@ -169,17 +211,22 @@ export function QawayDesignPillarsSection() {
                       width: "40px",
                       height: "40px",
                       borderRadius: "50%",
-                      background: "rgba(255, 255, 255, 0.08)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      color: "#ffffff",
+                      background: "#ffffff",
+                      border: "1px solid #e4e4e7",
+                      color: "#18181b",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      transition: "background 0.2s ease",
+                      transition: "all 0.2s ease",
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.18)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#f4f4f5";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#ffffff";
+                    }}
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -199,8 +246,9 @@ export function QawayDesignPillarsSection() {
                       justifyContent: "center",
                       cursor: "pointer",
                       transition: "opacity 0.2s ease",
+                      boxShadow: "0 4px 12px rgba(254, 102, 18, 0.25)",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                   >
                     <ChevronRight size={20} />
@@ -218,11 +266,11 @@ export function QawayDesignPillarsSection() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 style={{
-                  background: "#242731",
+                  background: "#ffffff",
                   borderRadius: "12px",
-                  border: "1px solid rgba(255, 255, 255, 0.12)",
+                  border: "1px solid #e4e4e7",
                   overflow: "hidden",
-                  boxShadow: "0 25px 50px rgba(0, 0, 0, 0.35)",
+                  boxShadow: "0 15px 35px rgba(0, 0, 0, 0.05)",
                   display: "flex",
                   flexDirection: "column",
                   height: "100%",
@@ -242,17 +290,18 @@ export function QawayDesignPillarsSection() {
                       position: "absolute",
                       top: "16px",
                       left: "16px",
-                      background: "rgba(30, 32, 38, 0.88)",
+                      background: "rgba(255, 255, 255, 0.92)",
                       backdropFilter: "blur(8px)",
-                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
                       borderRadius: "999px",
                       padding: "6px 14px",
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      color: "#ffffff",
+                      color: "#18181b",
                       fontSize: "11px",
                       fontWeight: "700",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                     }}
                   >
                     <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fe6612" }} />
@@ -263,31 +312,31 @@ export function QawayDesignPillarsSection() {
                 {/* Pie de la Tarjeta */}
                 <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "14px" }}>
                   <div>
-                    <h3
+                    <h4
                       style={{
                         fontSize: "19px",
                         fontWeight: "700",
-                        color: "#ffffff",
+                        color: "#111111",
                         margin: "0 0 4px",
                         fontFamily: "var(--qw-font-display)",
                       }}
                     >
                       {current.highlight}
-                    </h3>
-                    <span style={{ fontSize: "13px", color: "#a1a1aa" }}>
+                    </h4>
+                    <span style={{ fontSize: "13px", color: "#71717a" }}>
                       {current.subHighlight}
                     </span>
                   </div>
 
                   {/* Badges Técnicos */}
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", paddingTop: "6px", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", paddingTop: "6px", borderTop: "1px solid #f4f4f5" }}>
                     {current.badges.map((badge) => (
                       <span
                         key={badge}
                         style={{
-                          background: "rgba(255, 255, 255, 0.06)",
-                          border: "1px solid rgba(255, 255, 255, 0.08)",
-                          color: "#e4e4e7",
+                          background: "#f4f4f5",
+                          border: "1px solid #e4e4e7",
+                          color: "#3f3f46",
                           padding: "4px 10px",
                           borderRadius: "6px",
                           fontSize: "11px",
