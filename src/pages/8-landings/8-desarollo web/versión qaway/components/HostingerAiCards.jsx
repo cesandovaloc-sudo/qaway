@@ -7,69 +7,69 @@ export function HostingerAiCards() {
     <section id="beneficios" className="h-ai-three-cards-section">
       <div className="h-container">
         <h2 style={{ marginBottom: "14px" }}>
-          Ahorra tiempo gestionando WordPress con IA
+          Elige el tipo de web que <span style={{ color: "#fe6612" }}>necesita tu marca</span>
         </h2>
         <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "620px", margin: "0 auto 40px", lineHeight: "1.5" }}>
-          Herramientas inteligentes integradas para optimizar la velocidad, corregir anomalías y potenciar la conversión.
+          Estructuras web diseñadas para captar clientes, transmitir autoridad y vender en automático.
         </p>
 
         <div className="h-three-cards-grid">
-          {/* Tarjeta 1: Creador de páginas */}
+          {/* Tarjeta 1: Landing Pages */}
           <div className="h-ai-feature-card">
             <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup1}
-                  alt="Mockup Web 1"
+                  alt="Landing Pages de Captación"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
                 />
               </div>
             </div>
             
             <div className="h-ai-feature-card-body">
-              <h3>Creador de páginas web con IA</h3>
+              <h3>Landing Pages de Captación</h3>
               <p>
-                Crea un sitio web en menos de 1 minuto con Elementor o el editor de bloques. Publica blogs, webs de negocios o tiendas WooCommerce al instante.
+                Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp.
               </p>
             </div>
           </div>
 
-          {/* Tarjeta 2: Solucionador de problemas */}
+          {/* Tarjeta 2: Sitios Corporativos */}
           <div className="h-ai-feature-card">
             <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup2}
-                  alt="Mockup Web 2"
+                  alt="Sitios Web Corporativos"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
                 />
               </div>
             </div>
 
             <div className="h-ai-feature-card-body">
-              <h3>Solucionador de problemas de sitios con IA</h3>
+              <h3>Sitios Web Corporativos</h3>
               <p>
-                Minimiza el tiempo de inactividad con la detección y corrección automática de errores: la IA resuelve el 70% de los problemas en minutos, sin que tú intervengas.
+                Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales.
               </p>
             </div>
           </div>
 
-          {/* Tarjeta 3: Optimizador de sitios web */}
+          {/* Tarjeta 3: Tiendas Online */}
           <div className="h-ai-feature-card">
             <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "#eef1f6", height: "300px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
               <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
                 <img
                   src={mockup3}
-                  alt="Mockup Web 3"
+                  alt="Tiendas Online E-commerce"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
                 />
               </div>
             </div>
 
             <div className="h-ai-feature-card-body">
-              <h3>Optimizador de sitios web con IA</h3>
+              <h3>Tiendas Online (E-commerce)</h3>
               <p>
-                Aumenta el rendimiento del sitio con Hostinger Reach: la IA aplica optimizaciones LiteSpeed y detecta consultas lentas automáticamente para hacer tu web ultrarrápida.
+                Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7.
               </p>
             </div>
           </div>
