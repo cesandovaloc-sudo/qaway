@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, MessageCircle, Star } from "lucide-react";
 import heroFrontImg from "../ChatGPT Image 24 ago 2026, 16_58_52.png";
-import heroBackImg from "../assets/hero-showcase-back.png";
+import heroBackImg from "../ChatGPT Image 24 ago 2026, 17_09_50.png";
 
 const trustAvatars = [
   { name: 'Ana Sofía', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80' },
