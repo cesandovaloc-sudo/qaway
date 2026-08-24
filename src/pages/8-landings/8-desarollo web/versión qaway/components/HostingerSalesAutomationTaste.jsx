@@ -74,22 +74,44 @@ export function HostingerSalesAutomationTaste() {
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 22px 48px rgba(0, 0, 0, 0.16)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "#fe6612";
+                iconBox.style.color = "#ffffff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.08)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "rgba(254, 102, 18, 0.1)";
+                iconBox.style.color = "#fe6612";
+              }
             }}
           >
             <div
+              className="channel-icon-box"
               style={{
                 width: "48px",
                 height: "48px",
                 borderRadius: "12px",
                 background: "rgba(254, 102, 18, 0.1)",
+                color: "#fe6612",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: "22px",
+                transition: "background-color 0.25s ease, color 0.25s ease",
               }}
             >
-              <MessageSquare size={24} color="#fe6612" strokeWidth={2} />
+              <MessageSquare size={24} strokeWidth={2} />
             </div>
 
             <h3 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
@@ -117,22 +139,44 @@ export function HostingerSalesAutomationTaste() {
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 22px 48px rgba(0, 0, 0, 0.16)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "#fe6612";
+                iconBox.style.color = "#ffffff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.08)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "rgba(254, 102, 18, 0.1)";
+                iconBox.style.color = "#fe6612";
+              }
             }}
           >
             <div
+              className="channel-icon-box"
               style={{
                 width: "48px",
                 height: "48px",
                 borderRadius: "12px",
                 background: "rgba(254, 102, 18, 0.1)",
+                color: "#fe6612",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: "22px",
+                transition: "background-color 0.25s ease, color 0.25s ease",
               }}
             >
-              <CreditCard size={24} color="#fe6612" strokeWidth={2} />
+              <CreditCard size={24} strokeWidth={2} />
             </div>
 
             <h3 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
@@ -163,22 +207,44 @@ export function HostingerSalesAutomationTaste() {
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 22px 48px rgba(0, 0, 0, 0.16)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "#fe6612";
+                iconBox.style.color = "#ffffff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.08)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "rgba(254, 102, 18, 0.1)";
+                iconBox.style.color = "#fe6612";
+              }
             }}
           >
             <div
+              className="channel-icon-box"
               style={{
                 width: "48px",
                 height: "48px",
                 borderRadius: "12px",
                 background: "rgba(254, 102, 18, 0.1)",
+                color: "#fe6612",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: "22px",
+                transition: "background-color 0.25s ease, color 0.25s ease",
               }}
             >
-              <Mail size={24} color="#fe6612" strokeWidth={2} />
+              <Mail size={24} strokeWidth={2} />
             </div>
 
             <h3 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
@@ -206,22 +272,44 @@ export function HostingerSalesAutomationTaste() {
               display: "flex",
               flexDirection: "column",
               boxShadow: "0 12px 32px rgba(0, 0, 0, 0.08)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease",
+              cursor: "default",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-8px)";
+              e.currentTarget.style.boxShadow = "0 22px 48px rgba(0, 0, 0, 0.16)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "#fe6612";
+                iconBox.style.color = "#ffffff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.08)";
+              const iconBox = e.currentTarget.querySelector(".channel-icon-box");
+              if (iconBox) {
+                iconBox.style.backgroundColor = "rgba(254, 102, 18, 0.1)";
+                iconBox.style.color = "#fe6612";
+              }
             }}
           >
             <div
+              className="channel-icon-box"
               style={{
                 width: "48px",
                 height: "48px",
                 borderRadius: "12px",
                 background: "rgba(254, 102, 18, 0.1)",
+                color: "#fe6612",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 marginBottom: "22px",
+                transition: "background-color 0.25s ease, color 0.25s ease",
               }}
             >
-              <BarChart3 size={24} color="#fe6612" strokeWidth={2} />
+              <BarChart3 size={24} strokeWidth={2} />
             </div>
 
             <h3 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
