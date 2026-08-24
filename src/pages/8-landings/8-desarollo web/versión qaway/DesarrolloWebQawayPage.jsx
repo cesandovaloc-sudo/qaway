@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { HostingerHeader } from "./components/HostingerHeader.jsx";
 import { HostingerHeroReal } from "./components/HostingerHeroReal.jsx";
+import { HeroVariantGraphite } from "./components/HeroVariantGraphite.jsx";
+import { HeroVariantSoftWarm } from "./components/HeroVariantSoftWarm.jsx";
+import { HeroVariantSolidOrange } from "./components/HeroVariantSolidOrange.jsx";
 import { HostingerAiCards } from "./components/HostingerAiCards.jsx";
 import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.jsx";
 import { HostingerFastPerformance } from "./components/HostingerFastPerformance.jsx";
@@ -25,7 +28,18 @@ export default function DesarrolloWebQawayPage() {
     <div className="qaway-landing-root">
       <HostingerHeader />
       <main>
+        {/* 1. HERO ACTUAL (Fondo Blanco Limpio) */}
         <HostingerHeroReal />
+
+        {/* 2. ALTERNATIVA 1: HERO FLOTANTE GRAFITO CARBÓN */}
+        <HeroVariantGraphite />
+
+        {/* 3. ALTERNATIVA 2: HERO FLOTANTE WARM GLOW / NARANJA SUAVE */}
+        <HeroVariantSoftWarm />
+
+        {/* 4. ALTERNATIVA 3: HERO FLOTANTE NARANJA SÓLIDO */}
+        <HeroVariantSolidOrange />
+
         <HostingerAiCards />
         <QawayDesignPillarsSection />
         <HostingerEmailMarketing />
