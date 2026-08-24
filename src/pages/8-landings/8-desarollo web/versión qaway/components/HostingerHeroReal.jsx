@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, MessageCircle, Star } from "lucide-react";
 import heroFrontImg from "../ChatGPT Image 24 ago 2026, 16_58_52.png";
@@ -11,6 +12,15 @@ const trustAvatars = [
 ];
 
 export function HostingerHeroReal() {
+  const [frontIndex, setFrontIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFrontIndex((prev) => (prev === 0 ? 1 : 0));
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section id="inicio" className="h-hero-section-real">
       <div className="h-container">
@@ -161,15 +171,63 @@ export function HostingerHeroReal() {
             </motion.div>
           </div>
 
-          {/* Columna Derecha: Composición en Capas Invertida (Bordes rectos, sin marco y con más parte inferior) */}
-          <div className="h-hero-showcase-container">
+          {/* Columna Derecha: Composición en Capas con Intercambio Infinito y Suave */}
+          <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "470px" }}>
             
-            {/* CAPA 1: IMAGEN DE ATRÁS (Agencia Creativa - Asomando 50% recta y con sombra suave) */}
+            {/* IMAGEN 1: Soluciones TI */}
             <motion.div
-              initial={{ opacity: 0, y: 30, x: 40 }}
-              animate={{ opacity: 1, y: 0, x: 36 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="h-hero-layer-back"
+              animate={{
+                x: frontIndex === 0 ? -18 : 36,
+                y: frontIndex === 0 ? 0 : -15,
+                scale: frontIndex === 0 ? 1 : 0.94,
+                zIndex: frontIndex === 0 ? 10 : 2,
+                opacity: 1,
+              }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: frontIndex === 0 ? "relative" : "absolute",
+                top: 0,
+                right: frontIndex === 0 ? "auto" : "10px",
+                width: "90%",
+                maxWidth: "490px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                background: "#ffffff",
+                boxShadow: frontIndex === 0 
+                  ? "0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
+                  : "0 20px 45px -10px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              <img
+                src={heroFrontImg}
+                alt="Soluciones TI y desarrollo web"
+                className="h-hero-layer-img"
+              />
+            </motion.div>
+
+            {/* IMAGEN 2: Agencia Creativa */}
+            <motion.div
+              animate={{
+                x: frontIndex === 1 ? -18 : 36,
+                y: frontIndex === 1 ? 0 : -15,
+                scale: frontIndex === 1 ? 1 : 0.94,
+                zIndex: frontIndex === 1 ? 10 : 2,
+                opacity: 1,
+              }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: frontIndex === 1 ? "relative" : "absolute",
+                top: 0,
+                right: frontIndex === 1 ? "auto" : "10px",
+                width: "90%",
+                maxWidth: "490px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                background: "#ffffff",
+                boxShadow: frontIndex === 1 
+                  ? "0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
+                  : "0 20px 45px -10px rgba(0, 0, 0, 0.2)",
+              }}
             >
               <img
                 src={heroBackImg}
@@ -178,19 +236,6 @@ export function HostingerHeroReal() {
               />
             </motion.div>
 
-            {/* CAPA 2: IMAGEN DEL FRENTE (Soluciones TI - Al frente 100% nítida y recta) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30, x: -20 }}
-              animate={{ opacity: 1, y: 0, x: -18 }}
-              transition={{ duration: 0.8, delay: 0.35, ease: "easeOut" }}
-              className="h-hero-layer-front"
-            >
-              <img
-                src={heroFrontImg}
-                alt="Soluciones TI y desarrollo web"
-                className="h-hero-layer-img"
-              />
-            </motion.div>
           </div>
         </div>
       </div>
