@@ -26,7 +26,7 @@ export function HostingerFastPerformance() {
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);
 
   return (
-    <section id="rendimiento" style={{ padding: "110px 0 120px", background: "#f8f9fc" }}>
+    <section id="rendimiento" style={{ padding: "40px 0 90px", background: "#f8f9fc" }}>
       <div className="h-container">
         <div className="h-split-grid" style={{ gridTemplateColumns: "1fr 1.05fr", gap: "60px", alignItems: "center" }}>
           
@@ -40,7 +40,7 @@ export function HostingerFastPerformance() {
                   className="h-accordion-item-custom"
                   style={{
                     background: "#ffffff",
-                    border: isOpen ? "1px solid #e4e4e7" : "1px solid #e4e4e7",
+                    border: "1px solid #e4e4e7",
                     borderRadius: "12px",
                     overflow: "hidden",
                     boxShadow: isOpen ? "0 4px 16px rgba(0,0,0,0.03)" : "none",
@@ -75,7 +75,7 @@ export function HostingerFastPerformance() {
             })}
           </div>
 
-          {/* Lado Derecho: Titular + Dashboard Minimalista Moderno */}
+          {/* Lado Derecho: Titular + Cifra Minimalista */}
           <div>
             <span
               style={{
@@ -94,69 +94,27 @@ export function HostingerFastPerformance() {
               INFRAESTRUCTURA & VELOCIDAD WEB
             </span>
 
-            <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 24px", lineHeight: "1.2" }}>
+            <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 20px", lineHeight: "1.2" }}>
               Rendimiento ultrarrápido y tiempo de actividad en el que <span style={{ color: "#fe6612" }}>puedes confiar</span>
             </h2>
 
-            {/* Dashboard Minimalista de Telemetría */}
-            <div
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e4e4e7",
-                borderRadius: "14px",
-                padding: "24px",
-                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.03)",
-              }}
-            >
-              {/* Barra Superior del Dashboard */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", paddingBottom: "14px", borderBottom: "1px solid #f4f4f5" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <Zap size={16} color="#fe6612" />
-                  <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#111111" }}>Google PageSpeed Insights</span>
-                </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(22, 163, 74, 0.1)", color: "#16a34a", padding: "4px 10px", borderRadius: "999px", fontSize: "11.5px", fontWeight: "700" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#16a34a" }} />
-                  <span>Score: 99 / 100</span>
-                </div>
-              </div>
-
-              {/* 3 Métricas Clave en Grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "18px" }}>
-                <div style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", borderRadius: "10px", padding: "12px 14px" }}>
-                  <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "600", display: "block", marginBottom: "4px" }}>LCP (Carga)</span>
-                  <strong style={{ fontSize: "19px", color: "#111111", display: "block" }}>0.8s</strong>
-                  <span style={{ fontSize: "10px", color: "#16a34a", fontWeight: "700" }}>● Óptimo</span>
-                </div>
-
-                <div style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", borderRadius: "10px", padding: "12px 14px" }}>
-                  <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "600", display: "block", marginBottom: "4px" }}>TTFB (Servidor)</span>
-                  <strong style={{ fontSize: "19px", color: "#111111", display: "block" }}>38ms</strong>
-                  <span style={{ fontSize: "10px", color: "#16a34a", fontWeight: "700" }}>● Ultrarrápido</span>
-                </div>
-
-                <div style={{ background: "#f8f9fc", border: "1px solid #e4e4e7", borderRadius: "10px", padding: "12px 14px" }}>
-                  <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "600", display: "block", marginBottom: "4px" }}>Uptime SLA</span>
-                  <strong style={{ fontSize: "19px", color: "#111111", display: "block" }}>99.9%</strong>
-                  <span style={{ fontSize: "10px", color: "#16a34a", fontWeight: "700" }}>● Activo 24/7</span>
-                </div>
-              </div>
-
-              {/* Barra de Progreso de Core Web Vitals */}
-              <div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11.5px", fontWeight: "600", color: "#52525b", marginBottom: "6px" }}>
-                  <span>Core Web Vitals Pass</span>
-                  <span style={{ color: "#16a34a" }}>100% Aprobado</span>
-                </div>
-                <div style={{ width: "100%", height: "7px", background: "#e4e4e7", borderRadius: "4px", overflow: "hidden" }}>
-                  <div style={{ width: "100%", height: "100%", background: "linear-gradient(90deg, #fe6612 0%, #16a34a 100%)", borderRadius: "4px" }} />
-                </div>
-              </div>
-
-              {/* Status Footer */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid #f4f4f5", fontSize: "11.5px", color: "#71717a" }}>
-                <Server size={14} color="#fe6612" />
-                <span>Edge CDN Qaway Lab · Nodos Cloud de alta disponibilidad</span>
-              </div>
+            {/* Número Minimalista Limpio */}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginTop: "24px" }}>
+              <span
+                style={{
+                  fontSize: "clamp(2.5rem, 4vw, 3.4rem)",
+                  fontWeight: "700",
+                  color: "#111111",
+                  fontFamily: "var(--qw-font-display)",
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                }}
+              >
+                &lt; 1.2s
+              </span>
+              <span style={{ fontSize: "14.5px", color: "#71717a", fontWeight: "500", maxWidth: "240px", lineHeight: "1.4" }}>
+                Tiempo de carga promedio optimizado para retención y ventas.
+              </span>
             </div>
           </div>
 
