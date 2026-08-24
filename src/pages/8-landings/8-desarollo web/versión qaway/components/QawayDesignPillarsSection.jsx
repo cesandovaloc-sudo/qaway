@@ -86,8 +86,8 @@ export function QawayDesignPillarsSection() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1.05fr 1fr",
-            gap: "56px",
+            gridTemplateColumns: "1fr 1.1fr",
+            gap: "64px",
             alignItems: "center",
           }}
         >
@@ -98,6 +98,7 @@ export function QawayDesignPillarsSection() {
               flexDirection: "column",
               justifyContent: "space-between",
               minHeight: "360px",
+              paddingRight: "12px",
             }}
           >
             {/* Bloque de Textos con Altura Mínima Calibrada */}
@@ -120,7 +121,7 @@ export function QawayDesignPillarsSection() {
               <h3
                 style={{
                   fontFamily: "var(--qw-font-display)",
-                  fontSize: "clamp(1.85rem, 2.8vw, 2.35rem)",
+                  fontSize: "clamp(1.75rem, 2.5vw, 2.2rem)",
                   fontWeight: "600",
                   letterSpacing: "-0.03em",
                   lineHeight: "1.18",
@@ -129,12 +130,13 @@ export function QawayDesignPillarsSection() {
                   minHeight: "64px",
                   display: "flex",
                   alignItems: "center",
+                  maxWidth: "440px",
                 }}
               >
                 {current.title}
               </h3>
 
-              <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.65", margin: 0, maxWidth: "520px" }}>
+              <p style={{ color: "#52525b", fontSize: "15.5px", lineHeight: "1.65", margin: 0, maxWidth: "440px" }}>
                 {current.desc}
               </p>
             </div>
@@ -208,7 +210,7 @@ export function QawayDesignPillarsSection() {
             </div>
           </div>
 
-          {/* Columna Derecha: Tarjeta Blanca Limpia Directa sobre el Lienzo */}
+          {/* Columna Derecha: Tarjeta Blanca con Altura Ampliada un 5% (345px) */}
           <AnimatePresence mode="wait">
             <motion.div
               key={current.id}
@@ -224,7 +226,7 @@ export function QawayDesignPillarsSection() {
                 boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
               }}
             >
-              <div style={{ height: "320px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
+              <div style={{ height: "345px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
                 <img
                   src={current.image}
                   alt={current.highlight}
