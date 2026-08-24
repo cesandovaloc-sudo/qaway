@@ -188,63 +188,32 @@ export function QawayLeadContactForm() {
                   </div>
                 </div>
 
-                {/* Presupuesto Estimado (Píldoras) */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>PRESUPUESTO ESTIMADO</label>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {budgetOptions.map((b) => {
-                      const active = selectedBudget === b;
-                      return (
-                        <button
-                          key={b}
-                          type="button"
-                          onClick={() => setSelectedBudget(b)}
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            fontWeight: active ? "700" : "500",
-                            border: active ? "1px solid #fe6612" : "1px solid #e4e4e7",
-                            background: active ? "rgba(254, 102, 18, 0.08)" : "#fcfcfd",
-                            color: active ? "#fe6612" : "#71717a",
-                            cursor: "pointer",
-                            transition: "all 0.15s ease",
-                          }}
-                        >
-                          {b}
-                        </button>
-                      );
-                    })}
+                {/* Fila Única: Presupuesto y Plazo en Opciones Desplegables */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>PRESUPUESTO ESTIMADO</label>
+                    <select
+                      value={selectedBudget}
+                      onChange={(e) => setSelectedBudget(e.target.value)}
+                      style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none", cursor: "pointer" }}
+                    >
+                      {budgetOptions.map((b) => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
                   </div>
-                </div>
 
-                {/* Plazo de Lanzamiento */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>¿PARA CUÁNDO NECESITAS TU PROYECTO?</label>
-                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                    {timelineOptions.map((t) => {
-                      const active = selectedTimeline === t;
-                      return (
-                        <button
-                          key={t}
-                          type="button"
-                          onClick={() => setSelectedTimeline(t)}
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            fontWeight: active ? "700" : "500",
-                            border: active ? "1px solid #fe6612" : "1px solid #e4e4e7",
-                            background: active ? "rgba(254, 102, 18, 0.08)" : "#fcfcfd",
-                            color: active ? "#fe6612" : "#71717a",
-                            cursor: "pointer",
-                            transition: "all 0.15s ease",
-                          }}
-                        >
-                          {t}
-                        </button>
-                      );
-                    })}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>¿PARA CUÁNDO LO NECESITAS?</label>
+                    <select
+                      value={selectedTimeline}
+                      onChange={(e) => setSelectedTimeline(e.target.value)}
+                      style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none", cursor: "pointer" }}
+                    >
+                      {timelineOptions.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
