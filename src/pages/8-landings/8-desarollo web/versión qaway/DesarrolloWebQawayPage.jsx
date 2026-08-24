@@ -41,7 +41,6 @@ export default function DesarrolloWebQawayPage() {
         <QawayDesignPillarsSection />
         <HostingerFastPerformance />
         <HostingerEmailMarketing />
-        <HostingerKodeeAi />
         <HostingerSecurityGrid />
         <HostingerMigrationDarkBanner />
         <HostingerTestimonialsSlider />
