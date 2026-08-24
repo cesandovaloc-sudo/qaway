@@ -30,14 +30,14 @@ const pillarsData = [
   },
   {
     id: "mockup",
-    tag: "PILAR 03 · PROTOTIPADO DE DISEÑO",
-    title: "Maquetas Web & Vistas Previas Reales",
-    desc: "Creamos maquetas y prototipos de alta fidelidad para que visualices la estructura, diseño y experiencia exacta de tu página web antes de su publicación.",
+    tag: "PILAR 03 · RECURSOS VISUALES",
+    title: "Mockups & Fotografía de Producto",
+    desc: "Producimos e integramos composiciones visuales, fotografías profesionales y mockups realistas de tus servicios dentro de la web para transmitir máxima confianza y deseo de compra.",
     image: pilar2Img,
-    highlight: "Previsualización de tu Sitio Web",
-    subHighlight: "Validación visual completa en pantallas de escritorio y teléfonos",
-    badges: ["Prototipos 3D", "Alta Definición", "Validación Previa", "Entrega Exacta"],
-    featureTag: "📱 PROTOTIPADO & MAQUETAS",
+    highlight: "Imágenes y Maquetas de Alto Impacto",
+    subHighlight: "Recursos visuales alineados a tu rubro",
+    badges: ["Mockups Integrados", "Fotografía HD", "Composición Visual", "Alta Credibilidad"],
+    featureTag: "🖼️ ASSETS VISUALES PREMIUM",
   },
 ];
 

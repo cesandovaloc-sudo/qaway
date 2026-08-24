@@ -3,20 +3,20 @@ import { Minus, Plus, Zap, Activity, ShieldCheck, Server } from "lucide-react";
 
 const performanceItems = [
   {
-    title: "Carga ultrarrápida en menos de 1.2 segundos",
-    content: "Optimizamos imágenes en formato WebP, reducimos el peso de scripts y activamos caché inteligente para que tu web responda al instante en cualquier teléfono o computadora.",
+    title: "Imágenes ultra optimizadas en formato WebP (< 1.2s)",
+    content: "Comprimimos y procesamos cada fotografía y mockup sin pérdida de calidad para que tu web cargue en menos de un segundo.",
   },
   {
-    title: "Disponibilidad 24/7 sin caídas de servidor",
-    content: "Infraestructura en la nube con monitoreo constante y servidores redundantes, garantizando que tu empresa esté siempre visible para nuevos clientes sin interrupciones.",
+    title: "Infraestructura Cloud de máxima estabilidad",
+    content: "Servidores de alta velocidad con 99.9% de tiempo activo para que tu web jamás se caiga ante picos de tráfico.",
   },
   {
-    title: "Métricas Core Web Vitals aprobadas para SEO",
-    content: "Desarrollo alineado a los estándares técnicos de Google, asegurando una mejor posición en los resultados de búsqueda orgánica y motores de IA.",
+    title: "Core Web Vitals impecables para posicionar en Google",
+    content: "Tu web no solo se ve increíble, sino que cumple los requisitos técnicos más exigentes de los buscadores.",
   },
   {
-    title: "Mayor tasa de respuesta y conversión comercial",
-    content: "Al eliminar tiempos de espera, los visitantes navegan con fluidez y contactan directamente por WhatsApp o formularios sin abandonar el sitio.",
+    title: "Experiencia fluida que multiplica tus ventas",
+    content: "La combinación de diseño premium y carga instantánea retiene a tus clientes y acelera el contacto por WhatsApp.",
   },
 ];
 
@@ -91,11 +91,11 @@ export function HostingerFastPerformance() {
                 marginBottom: "16px",
               }}
             >
-              INFRAESTRUCTURA & VELOCIDAD WEB
+              OPTIMIZACIÓN & VELOCIDAD WEB
             </span>
 
             <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 20px", lineHeight: "1.2" }}>
-              Velocidad de carga instantánea y estabilidad web garantizada
+              Diseño visual de alto nivel con velocidad de carga instantánea
             </h2>
 
             {/* Fila Horizontal de Indicadores Numéricos Minimalistas en Naranja */}
