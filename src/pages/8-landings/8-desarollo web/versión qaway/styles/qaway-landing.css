@@ -121,6 +121,19 @@
   box-shadow: 0 6px 20px rgba(30, 32, 38, 0.28);
 }
 
+.qaway-landing-root .h-btn-cta-orange {
+  background: #fe6612 !important;
+  color: #ffffff !important;
+  border: 1px solid #fe6612 !important;
+  box-shadow: 0 8px 24px rgba(254, 102, 18, 0.35) !important;
+}
+
+.qaway-landing-root .h-btn-cta-orange:hover {
+  background: #e5590c !important;
+  border-color: #e5590c !important;
+  box-shadow: 0 10px 28px rgba(254, 102, 18, 0.45) !important;
+}
+
 .qaway-landing-root .h-btn-outline-black {
   background: #ffffff !important;
   color: #24262e !important;
