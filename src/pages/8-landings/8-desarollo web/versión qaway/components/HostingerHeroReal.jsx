@@ -47,7 +47,7 @@ export function HostingerHeroReal() {
                 className="h-btn-cta-purple h-btn-cta-orange"
                 style={{ padding: "14px 38px", fontSize: "15px" }}
               >
-                Cotizar mi proyecto
+                Comenzar ahora
               </a>
               <a
                 href="#proyectos"

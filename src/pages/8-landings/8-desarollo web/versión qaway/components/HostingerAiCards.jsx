@@ -76,8 +76,8 @@ export function HostingerAiCards() {
         </div>
 
         <div>
-          <a href="#planes" className="h-btn-cta-purple" style={{ padding: "14px 42px", fontSize: "15px" }}>
-            Empezar ya
+          <a href="#planes" className="h-btn-cta-purple h-btn-cta-orange" style={{ padding: "14px 42px", fontSize: "15px" }}>
+            Comenzar ahora
           </a>
         </div>
       </div>

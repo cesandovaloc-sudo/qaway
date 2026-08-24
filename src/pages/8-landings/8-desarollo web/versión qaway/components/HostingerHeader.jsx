@@ -74,7 +74,7 @@ export function HostingerHeader() {
             href="#planes"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#fe6612] px-6 py-2.5 text-[0.84rem] font-semibold text-white shadow-[0_8px_20px_rgba(254,102,18,0.3)] transition-all hover:bg-[#e5590c] active:translate-y-px"
           >
-            <span>Empezar ya</span>
+            <span>Comenzar ahora</span>
             <ArrowRight size={14} />
           </a>
         </div>

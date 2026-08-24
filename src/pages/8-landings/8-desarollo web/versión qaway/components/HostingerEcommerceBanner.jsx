@@ -17,8 +17,8 @@ export function HostingerEcommerceBanner() {
         <p style={{ color: "#a0a3bd", fontSize: "15px", marginBottom: "28px" }}>
           Hosting administrado para WooCommerce: rendimiento prémium a un precio increíble.
         </p>
-        <a href="#precios" className="h-btn-cta-purple" style={{ padding: "14px 42px" }}>
-          Empezar ya
+        <a href="#planes" className="h-btn-cta-purple h-btn-cta-orange" style={{ padding: "14px 42px" }}>
+          Comenzar ahora
         </a>
       </div>
     </section>
