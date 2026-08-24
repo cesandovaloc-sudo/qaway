@@ -397,19 +397,19 @@
 
 .qaway-landing-root .h-ai-feature-card-media > div {
   width: 100%;
-  max-width: 360px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
 .qaway-landing-root .h-ai-feature-card-body {
-  padding: 24px;
+  padding: 26px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .qaway-landing-root .h-ai-feature-card-body h3 {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 700;
   color: #111111;
   margin: 0 0 10px;
@@ -418,7 +418,7 @@
 }
 
 .qaway-landing-root .h-ai-feature-card-body p {
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--qw-text-secondary);
   line-height: 1.55;
   margin: 0;
