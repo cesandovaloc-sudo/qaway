@@ -59,10 +59,10 @@ export function HostingerTestimonialsSlider() {
   const track2 = [...brandRow2, ...brandRow2, ...brandRow2];
 
   return (
-    <section id="testimonios" style={{ padding: "85px 0 95px", background: "#f8f9fc", position: "relative", overflow: "hidden" }}>
+    <section id="testimonios" style={{ padding: "90px 0 95px", background: "#f8f9fc", position: "relative", overflow: "hidden" }}>
       
-      {/* 1. Encabezado Único Compartido (Sin Párrafo) */}
-      <div className="h-container" style={{ maxWidth: "1200px", textAlign: "center", marginBottom: "36px" }}>
+      {/* 1. Encabezado Único (Sin Párrafo) */}
+      <div className="h-container" style={{ maxWidth: "1200px", textAlign: "center", marginBottom: "48px" }}>
         <span
           style={{
             fontSize: "11.5px",
@@ -85,87 +85,8 @@ export function HostingerTestimonialsSlider() {
         </h2>
       </div>
 
-      {/* 2. Pasarela de Logos Tipográficos con Degradados Laterales */}
-      <div style={{ position: "relative", margin: "0 0 54px", overflow: "hidden" }}>
-        {/* Degradados Laterales para Desvanecimiento */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "160px",
-            height: "100%",
-            background: "linear-gradient(90deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
-            zIndex: 3,
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: "160px",
-            height: "100%",
-            background: "linear-gradient(270deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
-            zIndex: 3,
-            pointerEvents: "none",
-          }}
-        />
-
-        <div className="qaway-marquee-wrapper" style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-          {/* Fila 1: Izquierda */}
-          <div style={{ overflow: "hidden", display: "flex" }}>
-            <div className="qaway-marquee-row qaway-marquee-left">
-              {track1.map((brand, idx) => (
-                <span
-                  key={`r1-${brand.name}-${idx}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "24px",
-                    fontSize: "clamp(1.35rem, 2.4vw, 2.1rem)",
-                    color: "#18181b",
-                    opacity: 0.85,
-                    whiteSpace: "nowrap",
-                    ...brand.style,
-                  }}
-                >
-                  <span>{brand.name}</span>
-                  <span style={{ width: "1px", height: "24px", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Fila 2: Derecha */}
-          <div style={{ overflow: "hidden", display: "flex" }}>
-            <div className="qaway-marquee-row qaway-marquee-right">
-              {track2.map((brand, idx) => (
-                <span
-                  key={`r2-${brand.name}-${idx}`}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "24px",
-                    fontSize: "clamp(1.35rem, 2.4vw, 2.1rem)",
-                    color: "#18181b",
-                    opacity: 0.85,
-                    whiteSpace: "nowrap",
-                    ...brand.style,
-                  }}
-                >
-                  <span>{brand.name}</span>
-                  <span style={{ width: "1px", height: "24px", background: "#fe6612", display: "inline-block", opacity: 0.6 }} />
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Grid de Testimonios */}
-      <div className="h-container" style={{ maxWidth: "1200px" }}>
+      {/* 2. Grid de Testimonios Protagonistas */}
+      <div className="h-container" style={{ maxWidth: "1200px", marginBottom: "64px" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "28px" }}>
           {reviews.map((r) => (
             <div
@@ -221,6 +142,87 @@ export function HostingerTestimonialsSlider() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* 3. Pasarela de Logos Tipográficos Sutiles de Apoyo (Baja Opacidad) */}
+      <div style={{ position: "relative", overflow: "hidden", borderTop: "1px solid rgba(228, 228, 231, 0.6)", paddingTop: "32px" }}>
+        {/* Degradados Laterales para Desvanecimiento */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "160px",
+            height: "100%",
+            background: "linear-gradient(90deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
+            zIndex: 3,
+            pointerEvents: "none",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: "160px",
+            height: "100%",
+            background: "linear-gradient(270deg, #f8f9fc 0%, rgba(248, 249, 252, 0) 100%)",
+            zIndex: 3,
+            pointerEvents: "none",
+          }}
+        />
+
+        <div className="qaway-marquee-wrapper" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {/* Fila 1: Izquierda */}
+          <div style={{ overflow: "hidden", display: "flex" }}>
+            <div className="qaway-marquee-row qaway-marquee-left">
+              {track1.map((brand, idx) => (
+                <span
+                  key={`r1-${brand.name}-${idx}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "20px",
+                    fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
+                    color: "#18181b",
+                    opacity: 0.35,
+                    whiteSpace: "nowrap",
+                    transition: "opacity 0.2s ease",
+                    ...brand.style,
+                  }}
+                >
+                  <span>{brand.name}</span>
+                  <span style={{ width: "1px", height: "16px", background: "#fe6612", display: "inline-block", opacity: 0.4 }} />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Fila 2: Derecha */}
+          <div style={{ overflow: "hidden", display: "flex" }}>
+            <div className="qaway-marquee-row qaway-marquee-right">
+              {track2.map((brand, idx) => (
+                <span
+                  key={`r2-${brand.name}-${idx}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "20px",
+                    fontSize: "clamp(1.05rem, 1.6vw, 1.35rem)",
+                    color: "#18181b",
+                    opacity: 0.35,
+                    whiteSpace: "nowrap",
+                    transition: "opacity 0.2s ease",
+                    ...brand.style,
+                  }}
+                >
+                  <span>{brand.name}</span>
+                  <span style={{ width: "1px", height: "16px", background: "#fe6612", display: "inline-block", opacity: 0.4 }} />
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
