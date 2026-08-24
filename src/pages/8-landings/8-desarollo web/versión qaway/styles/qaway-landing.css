@@ -409,7 +409,7 @@
 }
 
 .qaway-landing-root .h-ai-feature-card-body h3 {
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   color: #111111;
   margin: 0 0 10px;
@@ -418,7 +418,7 @@
 }
 
 .qaway-landing-root .h-ai-feature-card-body p {
-  font-size: 15.5px;
+  font-size: 14px;
   color: var(--qw-text-secondary);
   line-height: 1.55;
   margin: 0;
