@@ -554,7 +554,7 @@
   width: 88%;
   max-width: 480px;
   z-index: 2;
-  border-radius: 0px;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2), 0 10px 20px -5px rgba(0,0,0,0.1);
   background: #ffffff;
@@ -565,7 +565,7 @@
   width: 90%;
   max-width: 490px;
   z-index: 10;
-  border-radius: 0px;
+  border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15);
   background: #ffffff;
@@ -573,6 +573,7 @@
 
 .qaway-landing-root .h-hero-layer-img {
   width: 100%;
+  border-radius: 10px;
   height: 450px;
   object-fit: cover;
   object-position: top center;
