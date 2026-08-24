@@ -49,22 +49,41 @@ export function QawayDesignPillarsSection() {
 
   return (
     <section style={{ padding: "60px 16px 80px", background: "#ffffff", position: "relative" }}>
-      <div className="h-container" style={{ maxWidth: "1320px" }}>
-        
-        {/* Detalle Semicircular Naranja Minimalista */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-          <div
-            style={{
-              width: "44px",
-              height: "22px",
-              borderTopLeftRadius: "44px",
-              borderTopRightRadius: "44px",
-              background: "rgba(254, 102, 18, 0.12)",
-              border: "2px solid #fe6612",
-              borderBottom: "none",
-            }}
-          />
-        </div>
+      {/* Semicírculo Panorámico Gigante que Conecta las Secciones */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-60px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "min(1050px, 92vw)",
+          height: "360px",
+          borderTopLeftRadius: "1050px",
+          borderTopRightRadius: "1050px",
+          background: "radial-gradient(ellipse at 50% 0%, rgba(254, 102, 18, 0.08) 0%, rgba(254, 102, 18, 0.02) 60%, transparent 85%)",
+          border: "1.5px solid rgba(254, 102, 18, 0.22)",
+          borderBottom: "none",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        {/* Glow sutil en el ápice de la curva */}
+        <div
+          style={{
+            position: "absolute",
+            top: "-1px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "160px",
+            height: "2.5px",
+            background: "#fe6612",
+            borderRadius: "999px",
+            boxShadow: "0 0 24px 6px rgba(254, 102, 18, 0.35)",
+          }}
+        />
+      </div>
+
+      <div className="h-container" style={{ maxWidth: "1320px", position: "relative", zIndex: 1 }}>
 
         {/* Encabezado Centrado de la Sección */}
         <div style={{ textAlign: "center", maxWidth: "780px", margin: "0 auto 48px" }}>
