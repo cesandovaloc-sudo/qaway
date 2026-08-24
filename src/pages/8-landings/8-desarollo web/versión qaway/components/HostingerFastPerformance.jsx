@@ -98,23 +98,64 @@ export function HostingerFastPerformance() {
               Rendimiento ultrarrápido y tiempo de actividad en el que <span style={{ color: "#fe6612" }}>puedes confiar</span>
             </h2>
 
-            {/* Número Minimalista Limpio */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginTop: "24px" }}>
-              <span
-                style={{
-                  fontSize: "clamp(2.5rem, 4vw, 3.4rem)",
-                  fontWeight: "700",
-                  color: "#111111",
-                  fontFamily: "var(--qw-font-display)",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                }}
-              >
-                &lt; 1.2s
-              </span>
-              <span style={{ fontSize: "14.5px", color: "#71717a", fontWeight: "500", maxWidth: "240px", lineHeight: "1.4" }}>
-                Tiempo de carga promedio optimizado para retención y ventas.
-              </span>
+            {/* Fila Horizontal de Indicadores Numéricos Minimalistas */}
+            <div style={{ display: "flex", gap: "32px", marginTop: "32px", paddingTop: "24px", borderTop: "1px solid #e4e4e7", flexWrap: "wrap" }}>
+              <div>
+                <span
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    color: "#111111",
+                    fontFamily: "var(--qw-font-display)",
+                    letterSpacing: "-0.03em",
+                    display: "block",
+                    lineHeight: 1,
+                  }}
+                >
+                  &lt; 1.2s
+                </span>
+                <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginTop: "8px" }}>
+                  Velocidad de Carga
+                </span>
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    color: "#111111",
+                    fontFamily: "var(--qw-font-display)",
+                    letterSpacing: "-0.03em",
+                    display: "block",
+                    lineHeight: 1,
+                  }}
+                >
+                  99.9%
+                </span>
+                <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginTop: "8px" }}>
+                  Disponibilidad Uptime
+                </span>
+              </div>
+
+              <div>
+                <span
+                  style={{
+                    fontSize: "28px",
+                    fontWeight: "700",
+                    color: "#111111",
+                    fontFamily: "var(--qw-font-display)",
+                    letterSpacing: "-0.03em",
+                    display: "block",
+                    lineHeight: 1,
+                  }}
+                >
+                  100%
+                </span>
+                <span style={{ fontSize: "11px", color: "#71717a", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginTop: "8px" }}>
+                  Core Web Vitals
+                </span>
+              </div>
             </div>
           </div>
 
