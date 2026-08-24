@@ -42,19 +42,15 @@ export default function DesarrolloWebQawayPage() {
         {/* 4. MARCAS & TESTIMONIOS (UNIFICADO) */}
         <HostingerTestimonialsSlider />
 
-        {/* 5A. SOPORTE & GESTIÓN (VERSIÓN ACTUAL) */}
+        {/* SECCIÓN DE SOPORTE & GARANTÍA (Pausada para después)
         <HostingerSecurityGrid />
-
-        {/* 5B. SOPORTE & GESTIÓN (PROPUESTA TASTE - NUEVA) */}
         <HostingerSecurityGridTaste />
+        */}
 
-        {/* 6A. CANALES DE VENTA (VERSIÓN ACTUAL) */}
-        <HostingerEmailMarketing />
-
-        {/* 6B. CANALES DE VENTA (PROPUESTA TASTE - NUEVA) */}
+        {/* 5. CANALES DE VENTA & AUTOMATIZACIÓN (BENTO GRID TASTE) */}
         <HostingerSalesAutomationTaste />
 
-        {/* 7. PLANES Y PRECIOS */}
+        {/* 6. PLANES Y PRECIOS */}
         <HostingerPricingReal />
 
         {/* 8. PREGUNTAS FRECUENTES */}
