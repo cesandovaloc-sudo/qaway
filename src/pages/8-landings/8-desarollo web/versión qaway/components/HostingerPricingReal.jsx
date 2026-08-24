@@ -1,138 +1,184 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 
 export function HostingerPricingReal() {
+  const plans = [
+    {
+      id: "landing",
+      name: "Landing",
+      price: "$490",
+      prefix: "",
+      desc: "Una página de alto impacto para campañas y lanzamientos.",
+      popular: false,
+      btnText: "Empezar con Landing",
+      btnClass: "h-btn-plan-dark",
+      features: [
+        "1 página con hasta 7 secciones",
+        "Diseño a medida + copy guiado",
+        "Formulario y WhatsApp",
+        "SEO básico y velocidad optimizada",
+        "Entrega en 7 días",
+      ],
+    },
+    {
+      id: "empresarial",
+      name: "Empresarial",
+      price: "$1.290",
+      prefix: "",
+      desc: "El estándar para empresas que necesitan presencia sólida.",
+      popular: true,
+      badge: "Más elegido",
+      btnText: "Empezar con Empresarial",
+      btnClass: "h-btn-plan-orange",
+      features: [
+        "Hasta 7 páginas internas",
+        "Blog y panel autoadministrable",
+        "SEO técnico completo",
+        "Integración analítica y píxeles",
+        "Soporte 60 días",
+      ],
+    },
+    {
+      id: "ecommerce",
+      name: "E-commerce",
+      price: "$2.490",
+      prefix: "Desde ",
+      desc: "Tienda completa lista para vender y escalar.",
+      popular: false,
+      btnText: "Empezar con E-commerce",
+      btnClass: "h-btn-plan-dark",
+      features: [
+        "Catálogo y pasarela de pagos",
+        "Carrito, cupones y envíos",
+        "Automatización de correos",
+        "Capacitación del equipo",
+        "Soporte 90 días",
+      ],
+    },
+  ];
+
   return (
-    <section id="planes" className="h-real-pricing-section">
-      <div className="h-container">
-        <div style={{ textAlign: "center", maxWidth: "700px", margin: "0 auto 40px" }}>
+    <section id="planes" style={{ padding: "95px 0 100px", background: "#fbfbfc" }}>
+      <div className="h-container" style={{ maxWidth: "1200px" }}>
+        
+        {/* Encabezado Principal */}
+        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 52px" }}>
           <span className="qw-kicker-capsule">
-            PLANES & PRECIOS
+            PRECIOS
           </span>
 
-          <h2 style={{ marginBottom: "14px" }}>
-            Explora los planes de hosting administrado para WordPress
+          <h2 style={{ fontSize: "clamp(2rem, 3.4vw, 2.7rem)", fontWeight: "700", color: "#111111", margin: "0 0 14px", lineHeight: "1.15", letterSpacing: "-0.03em" }}>
+            Planes transparentes, sin sorpresas.
           </h2>
-          <p style={{ color: "#56596e", fontSize: "15px", margin: 0 }}>
-            Nuestros servicios de hosting ofrecen rendimiento superior, herramientas con IA y soporte las 24 horas del día, con precios que se adaptan a tu crecimiento.
+          
+          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: 0 }}>
+            Precio cerrado antes de empezar. Incluye dominio guiado, hosting el primer año y capacitación.
           </p>
         </div>
 
-        <div className="h-real-pricing-grid">
-          {/* Plan 1: Premium */}
-          <div className="h-real-plan-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-              <h3 style={{ fontSize: "20px", fontWeight: "800", color: "#12131a", margin: 0 }}>Premium</h3>
-              <span style={{ background: "#e6f7f3", color: "#00876e", fontSize: "11px", fontWeight: "800", padding: "2px 8px", borderRadius: "4px" }}>-78%</span>
-            </div>
-            <p style={{ fontSize: "12.5px", color: "#727586", minHeight: "36px", margin: "0 0 16px" }}>
-              Gestiona sitios web sin problemas. Ideal para creadores y pequeñas marcas.
-            </p>
+        {/* Grid de 3 Tarjetas */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: "28px", alignItems: "stretch" }}>
+          {plans.map((p) => {
+            const isEmpresarial = p.popular;
+            return (
+              <div
+                key={p.id}
+                style={{
+                  background: "#ffffff",
+                  borderRadius: "18px",
+                  border: isEmpresarial ? "2px solid #fe6612" : "1px solid #e4e4e7",
+                  boxShadow: isEmpresarial ? "0 18px 40px rgba(254, 102, 18, 0.12)" : "0 4px 20px rgba(0,0,0,0.03)",
+                  padding: "36px 30px 32px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  position: "relative",
+                  transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                }}
+              >
+                <div>
+                  {/* Top Row: Nombre del Plan y Badge */}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", minHeight: "28px", marginBottom: "14px" }}>
+                    <h3 style={{ fontSize: "20px", fontWeight: "700", color: "#111111", margin: 0, letterSpacing: "-0.02em" }}>
+                      {p.name}
+                    </h3>
+                    {p.badge && (
+                      <span style={{ background: "#fe6612", color: "#ffffff", fontSize: "11px", fontWeight: "700", padding: "3px 11px", borderRadius: "9999px", letterSpacing: "0.02em" }}>
+                        {p.badge}
+                      </span>
+                    )}
+                  </div>
 
-            <div style={{ marginBottom: "20px" }}>
-              <span style={{ textDecoration: "line-through", color: "#84879c", fontSize: "12.5px" }}>11,99 US$</span>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "2px" }}>
-                <strong className="h-plan-price-num" style={{ fontSize: "32px", fontWeight: "800", color: "#12131a" }}>2,59 US$</strong>
-                <span style={{ color: "#727586", fontSize: "13px" }}>/mes</span>
+                  {/* Precio */}
+                  <div style={{ marginBottom: "12px", display: "flex", alignItems: "baseline" }}>
+                    {p.prefix && (
+                      <span style={{ fontSize: "21px", fontWeight: "700", color: "#111111", marginRight: "4px" }}>
+                        {p.prefix}
+                      </span>
+                    )}
+                    <span style={{ fontSize: "38px", fontWeight: "800", color: "#111111", letterSpacing: "-0.04em" }}>
+                      {p.price}
+                    </span>
+                  </div>
+
+                  {/* Descripción */}
+                  <p style={{ fontSize: "13.5px", color: "#71717a", lineHeight: "1.5", margin: "0 0 26px", minHeight: "40px" }}>
+                    {p.desc}
+                  </p>
+
+                  <div style={{ width: "100%", height: "1px", background: "#f4f4f5", marginBottom: "26px" }} />
+
+                  {/* Lista de Características */}
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 34px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                    {p.features.map((f, fIdx) => (
+                      <li key={fIdx} style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "13.5px", color: "#3f3f46", lineHeight: "1.4" }}>
+                        <Check size={16} strokeWidth={2.6} style={{ color: "#fe6612", flexShrink: 0, marginTop: "2px" }} />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Botón CTA */}
+                <a
+                  href="#contacto"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "13px 20px",
+                    borderRadius: "10px",
+                    textAlign: "center",
+                    fontWeight: "700",
+                    fontSize: "14px",
+                    textDecoration: "none",
+                    transition: "all 0.2s ease",
+                    background: isEmpresarial ? "#fe6612" : "#18181b",
+                    color: "#ffffff",
+                    boxShadow: isEmpresarial ? "0 6px 18px rgba(254, 102, 18, 0.35)" : "none",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isEmpresarial) {
+                      e.currentTarget.style.background = "#e55708";
+                    } else {
+                      e.currentTarget.style.background = "#27272a";
+                    }
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isEmpresarial) {
+                      e.currentTarget.style.background = "#fe6612";
+                    } else {
+                      e.currentTarget.style.background = "#18181b";
+                    }
+                    e.currentTarget.style.transform = "none";
+                  }}
+                >
+                  {p.btnText}
+                </a>
               </div>
-              <small style={{ color: "#84879c", fontSize: "11px", display: "block", marginTop: "2px" }}>
-                Obtén 48 meses por 124,32 US$ (valorado en 575,52 US$). Se renueva por 9,99 US$/mes.
-              </small>
-            </div>
-
-            <a href="#inicio" className="h-btn-outline-black" style={{ textAlign: "center", padding: "11px", fontSize: "14px", marginBottom: "24px" }}>
-              Elegir plan
-            </a>
-
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px", color: "#12131a" }}>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Sitios web 3</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Dominio gratis durante 1 año</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>20 GB de almacenamiento SSD</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Backups semanales gratis</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>CDN incluido</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Herramientas de IA</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Soporte prioritario las 24 horas</span></li>
-            </ul>
-          </div>
-
-          {/* Plan 2: Unlimited (Dark Card - Más Vendido) */}
-          <div className="h-real-plan-card unlimited-popular">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-              <h3 style={{ fontSize: "20px", fontWeight: "800", color: "#ffffff", margin: 0 }}>Unlimited</h3>
-              <span style={{ background: "#ff4b0b", color: "#ffffff", fontSize: "11px", fontWeight: "800", padding: "2px 8px", borderRadius: "4px" }}>Oferta especial -80%</span>
-            </div>
-            <p style={{ fontSize: "12.5px", color: "#c9ccd5", minHeight: "36px", margin: "0 0 16px" }}>
-              Sitios web y buzones ilimitados, además de herramientas de IA y asistencia prioritaria para una máxima flexibilidad.
-            </p>
-
-            <div style={{ marginBottom: "20px" }}>
-              <span style={{ textDecoration: "line-through", color: "#a0a3bd", fontSize: "12.5px" }}>18,99 US$</span>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "2px" }}>
-                <strong className="h-plan-price-num" style={{ fontSize: "32px", fontWeight: "800", color: "#ffffff" }}>3,79 US$</strong>
-                <span style={{ color: "#c9ccd5", fontSize: "13px" }}>/mes</span>
-              </div>
-              <small style={{ color: "#a0a3bd", fontSize: "11px", display: "block", marginTop: "2px" }}>
-                Obtén 48 meses por 181,92 US$ (valorado en 911,52 US$). Se renueva por 16,99 US$/mes.
-              </small>
-            </div>
-
-            <a href="#inicio" style={{ background: "#ffffff", color: "#111111", border: "1.5px solid #ffffff", textAlign: "center", padding: "11px", fontSize: "14px", fontWeight: "700", borderRadius: "8px", textDecoration: "none", display: "block", marginBottom: "24px", transition: "all 0.2s ease" }}>
-              Elegir plan
-            </a>
-
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text"><strong>Ilimitado sitios web</strong></span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">Dominio gratis durante 1 año</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text"><strong>50 GB de almacenamiento NVMe</strong></span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">Backups diarios + restauración de datos fácil</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">CDN incluido</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">Ecommerce integrado</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">Herramientas de IA</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span className="h-feature-check-text">Soporte prioritario las 24 horas</span></li>
-            </ul>
-
-            <div style={{ marginTop: "20px", background: "rgba(0,0,0,0.3)", padding: "12px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.1)" }}>
-              <strong style={{ fontSize: "12px", color: "#ffffff", display: "block", marginBottom: "2px" }}>¿Por qué elegir este plan?</strong>
-              <small style={{ color: "#a0a3bd", fontSize: "11px" }}>Una solución integral para proyectos a largo plazo con todo incluido.</small>
-            </div>
-          </div>
-
-          {/* Plan 3: Cloud Startup */}
-          <div className="h-real-plan-card">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-              <h3 style={{ fontSize: "20px", fontWeight: "800", color: "#12131a", margin: 0 }}>Cloud Startup</h3>
-              <span style={{ background: "#e6f7f3", color: "#00876e", fontSize: "11px", fontWeight: "800", padding: "2px 8px", borderRadius: "4px" }}>-69%</span>
-            </div>
-            <p style={{ fontSize: "12.5px", color: "#727586", minHeight: "36px", margin: "0 0 16px" }}>
-              Rendimiento superior para agencias o proyectos con alto tráfico.
-            </p>
-
-            <div style={{ marginBottom: "20px" }}>
-              <span style={{ textDecoration: "line-through", color: "#84879c", fontSize: "12.5px" }}>25,99 US$</span>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "2px" }}>
-                <strong className="h-plan-price-num" style={{ fontSize: "32px", fontWeight: "800", color: "#12131a" }}>7,99 US$</strong>
-                <span style={{ color: "#727586", fontSize: "13px" }}>/mes</span>
-              </div>
-              <small style={{ color: "#84879c", fontSize: "11px", display: "block", marginTop: "2px" }}>
-                Obtén 48 meses por 383,52 US$ (valorado en 1.247,52 US$). Se renueva por 23,99 US$/mes.
-              </small>
-            </div>
-
-            <a href="#inicio" className="h-btn-outline-black" style={{ textAlign: "center", padding: "11px", fontSize: "14px", marginBottom: "24px" }}>
-              Elegir plan
-            </a>
-
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Sitios web ilimitado</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Dominio gratis durante 1 año</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span><strong>100 GB de almacenamiento NVMe</strong></span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Backups diarios y bajo demanda</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>CDN incluido</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Ecommerce integrado</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Herramientas de IA</span></li>
-              <li style={{ display: "flex", gap: "8px" }}><Check size={15} color="#00b090" /><span>Soporte prioritario las 24 horas</span></li>
-            </ul>
-          </div>
+            );
+          })}
         </div>
+
       </div>
     </section>
   );
