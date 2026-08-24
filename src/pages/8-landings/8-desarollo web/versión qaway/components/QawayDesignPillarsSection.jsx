@@ -48,12 +48,12 @@ export function QawayDesignPillarsSection() {
   };
 
   return (
-    <section style={{ padding: "40px 24px 70px" }}>
-      <div className="h-container">
+    <section style={{ padding: "40px 16px 70px" }}>
+      <div className="h-container" style={{ maxWidth: "1320px" }}>
         {/* Contenedor Principal Dark (Estilo Showcase de Marca) */}
         <div
           style={{
-            background: "#111111",
+            background: "#1e2026",
             borderRadius: "28px",
             border: "1px solid rgba(255, 255, 255, 0.08)",
             padding: "54px 44px",
@@ -75,7 +75,7 @@ export function QawayDesignPillarsSection() {
               <div>
                 <span
                   style={{
-                    color: "#ff4b0b",
+                    color: "#fe6612",
                     fontSize: "11.5px",
                     fontWeight: "800",
                     letterSpacing: "0.1em",
@@ -118,13 +118,13 @@ export function QawayDesignPillarsSection() {
                         width: "36px",
                         height: "36px",
                         borderRadius: "8px",
-                        background: "rgba(255, 75, 11, 0.15)",
+                        background: "rgba(254, 102, 18, 0.15)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Sparkles size={18} color="#ff4b0b" />
+                      <Sparkles size={18} color="#fe6612" />
                     </div>
                     <div>
                       <strong style={{ fontSize: "13.5px", color: "#ffffff", display: "block" }}>
@@ -151,7 +151,7 @@ export function QawayDesignPillarsSection() {
                         width: currentIdx === i ? "24px" : "8px",
                         height: "8px",
                         borderRadius: "4px",
-                        background: currentIdx === i ? "#ff4b0b" : "rgba(255, 255, 255, 0.2)",
+                        background: currentIdx === i ? "#fe6612" : "rgba(255, 255, 255, 0.2)",
                         border: "none",
                         cursor: "pointer",
                         transition: "all 0.25s ease",
@@ -191,7 +191,7 @@ export function QawayDesignPillarsSection() {
                       width: "40px",
                       height: "40px",
                       borderRadius: "50%",
-                      background: "#ff4b0b",
+                      background: "#fe6612",
                       border: "none",
                       color: "#ffffff",
                       display: "flex",
@@ -218,7 +218,7 @@ export function QawayDesignPillarsSection() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
                 style={{
-                  background: "#18181b",
+                  background: "#242731",
                   borderRadius: "20px",
                   border: "1px solid rgba(255, 255, 255, 0.12)",
                   overflow: "hidden",
@@ -242,7 +242,7 @@ export function QawayDesignPillarsSection() {
                       position: "absolute",
                       top: "16px",
                       left: "16px",
-                      background: "rgba(17, 17, 17, 0.85)",
+                      background: "rgba(30, 32, 38, 0.88)",
                       backdropFilter: "blur(8px)",
                       border: "1px solid rgba(255, 255, 255, 0.15)",
                       borderRadius: "999px",
@@ -255,7 +255,7 @@ export function QawayDesignPillarsSection() {
                       fontWeight: "700",
                     }}
                   >
-                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ff4b0b" }} />
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fe6612" }} />
                     <span>PROYECTO DESTACADO</span>
                   </div>
                 </div>
