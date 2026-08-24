@@ -54,13 +54,13 @@ export function QawayDesignPillarsSection() {
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Centrado de la Sección */}
-        <div style={{ textAlign: "center", maxWidth: "780px", margin: "0 auto 52px" }}>
+        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 48px" }}>
           <span
             style={{
-              color: "#fe6612",
+              color: "#71717a",
               fontSize: "12px",
               fontWeight: "800",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
               display: "block",
               marginBottom: "12px",
@@ -69,12 +69,11 @@ export function QawayDesignPillarsSection() {
             IDENTIDAD & BRANDING
           </span>
 
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: "600", color: "#111111", margin: "0 0 16px", lineHeight: "1.25" }}>
-            Diseño web a medida con <br />
-            <span style={{ color: "#fe6612" }}>identidad de marca</span>
+          <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: "0 0 14px", lineHeight: "1.2" }}>
+            Diseño web a medida con <span style={{ color: "#fe6612" }}>identidad de marca propia</span>
           </h2>
 
-          <p style={{ color: "#71717a", fontSize: "16px", lineHeight: "1.6", margin: 0 }}>
+          <p style={{ color: "#71717a", fontSize: "16px", maxWidth: "660px", margin: "0 auto", lineHeight: "1.5" }}>
             Cuidamos la tipografía, el impacto visual y la armonía cromática para que tu negocio transmita máxima autoridad y confianza.
           </p>
         </div>
