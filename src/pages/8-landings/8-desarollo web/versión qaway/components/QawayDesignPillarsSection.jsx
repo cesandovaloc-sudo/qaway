@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import pilar1Img from "../ChatGPT Image 24 ago 2026, 12_16_16.png";
@@ -38,13 +38,27 @@ const pillarsData = [
 
 export function QawayDesignPillarsSection() {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const current = pillarsData[currentIdx];
 
   const handleNext = () => setCurrentIdx((prev) => (prev + 1) % pillarsData.length);
   const handlePrev = () => setCurrentIdx((prev) => (prev - 1 + pillarsData.length) % pillarsData.length);
 
+  // Transición automática suave cada 4.5 segundos (se pausa al pasar el mouse)
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % pillarsData.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+
   return (
-    <section style={{ padding: "85px 16px 90px", background: "#f8f9fc", position: "relative" }}>
+    <section
+      style={{ padding: "85px 16px 90px", background: "#f8f9fc", position: "relative" }}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal de la Sección */}
@@ -77,43 +91,56 @@ export function QawayDesignPillarsSection() {
             alignItems: "center",
           }}
         >
-          {/* Columna Izquierda: Detalle Dinámico del Pilar con Formato H2 */}
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <span
-              style={{
-                color: "#71717a",
-                fontSize: "11.5px",
-                fontWeight: "800",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                display: "block",
-                marginBottom: "12px",
-              }}
-            >
-              {current.tag}
-            </span>
+          {/* Columna Izquierda: Detalle con Altura Mínima Fija para Evitar Saltos */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              minHeight: "360px",
+            }}
+          >
+            {/* Bloque de Textos con Altura Mínima Calibrada */}
+            <div style={{ minHeight: "220px" }}>
+              <span
+                style={{
+                  color: "#71717a",
+                  fontSize: "11.5px",
+                  fontWeight: "800",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  display: "block",
+                  marginBottom: "12px",
+                }}
+              >
+                {current.tag}
+              </span>
 
-            {/* Título de Pilar con el mismo tamaño y formato H2 de sección */}
-            <h3
-              style={{
-                fontFamily: "var(--qw-font-display)",
-                fontSize: "clamp(1.9rem, 3vw, 2.4rem)",
-                fontWeight: "600",
-                letterSpacing: "-0.03em",
-                lineHeight: "1.18",
-                color: "#111111",
-                margin: "0 0 16px",
-              }}
-            >
-              {current.title}
-            </h3>
+              {/* Título de Pilar con el mismo tamaño y formato H2 de sección */}
+              <h3
+                style={{
+                  fontFamily: "var(--qw-font-display)",
+                  fontSize: "clamp(1.85rem, 2.8vw, 2.35rem)",
+                  fontWeight: "600",
+                  letterSpacing: "-0.03em",
+                  lineHeight: "1.18",
+                  color: "#111111",
+                  margin: "0 0 14px",
+                  minHeight: "64px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {current.title}
+              </h3>
 
-            <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.65", margin: "0 0 32px", maxWidth: "520px" }}>
-              "{current.desc}"
-            </p>
+              <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.65", margin: 0, maxWidth: "520px" }}>
+                {current.desc}
+              </p>
+            </div>
 
-            {/* Controles de Navegación Fluidos */}
-            <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
+            {/* Controles de Navegación Fijos en la Base (Sin Saltos) */}
+            <div style={{ display: "flex", alignItems: "center", gap: "18px", paddingTop: "20px" }}>
               <button
                 onClick={handlePrev}
                 aria-label="Pilar anterior"
