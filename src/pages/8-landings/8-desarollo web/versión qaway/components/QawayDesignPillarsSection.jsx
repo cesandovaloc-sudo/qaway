@@ -122,7 +122,7 @@ export function QawayDesignPillarsSection() {
                 {current.tag}
               </span>
 
-              {/* Título de Pilar con el mismo tamaño y formato H2 de sección */}
+              {/* Título de Pilar con altura reservada fija y alineación superior */}
               <h3
                 style={{
                   fontFamily: "var(--qw-font-display)",
@@ -132,9 +132,10 @@ export function QawayDesignPillarsSection() {
                   lineHeight: "1.18",
                   color: "#111111",
                   margin: "0 0 14px",
+                  height: "64px",
                   minHeight: "64px",
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                   maxWidth: "440px",
                 }}
               >
@@ -300,7 +301,7 @@ export function QawayDesignPillarsSection() {
 
                 <div style={{ padding: "20px 24px 22px", height: "190px", minHeight: "190px", maxHeight: "190px", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", boxSizing: "border-box" }}>
                   <div>
-                    <h4 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 6px", fontFamily: "var(--qw-font-display)" }}>
+                    <h4 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 6px", height: "48px", minHeight: "48px", display: "flex", alignItems: "flex-start", lineHeight: "1.25", fontFamily: "var(--qw-font-display)" }}>
                       {current.highlight}
                     </h4>
                     <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "12px" }}>
