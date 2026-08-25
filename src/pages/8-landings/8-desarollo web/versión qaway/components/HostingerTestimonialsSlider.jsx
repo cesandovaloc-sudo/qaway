@@ -90,15 +90,12 @@ export function HostingerTestimonialsSlider() {
               }}
             >
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px" }}>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: "18px" }}>
                   <div style={{ display: "flex", gap: "4px" }}>
                     {[...Array(r.rating)].map((_, i) => (
                       <Star key={i} size={15} fill="#fe6612" color="#fe6612" />
                     ))}
                   </div>
-                  <span style={{ fontSize: "11.5px", fontWeight: "700", color: "#fe6612", background: "rgba(254, 102, 18, 0.08)", padding: "4px 10px", borderRadius: "9999px", letterSpacing: "0.02em" }}>
-                    {r.tag}
-                  </span>
                 </div>
                 <p style={{ color: "#27272a", fontSize: "14.5px", lineHeight: "1.65", margin: "0 0 24px", fontStyle: "normal" }}>
                   "{r.comment}"
