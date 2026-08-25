@@ -107,8 +107,9 @@ export function HostingerPricingReal() {
                 key={p.id}
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -6, boxShadow: isEmpresarial ? "0 22px 50px rgba(254, 102, 18, 0.2)" : "0 18px 45px rgba(0,0,0,0.08)" }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.6, delay: idx * 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
                 style={{
                   background: "#ffffff",
                   borderRadius: "18px",
@@ -119,7 +120,7 @@ export function HostingerPricingReal() {
                   flexDirection: "column",
                   justifyContent: "space-between",
                   position: "relative",
-                  transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                  cursor: "default",
                 }}
               >
                 <div>

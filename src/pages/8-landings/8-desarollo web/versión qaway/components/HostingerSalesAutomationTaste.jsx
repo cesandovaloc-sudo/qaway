@@ -63,7 +63,11 @@ export function HostingerSalesAutomationTaste() {
           }}
         >
           {/* Tarjeta 1: WhatsApp Business */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.55, delay: 0.08, ease: [0.21, 0.47, 0.32, 0.98] }}
             style={{
               background: "#ffffff",
               borderRadius: "20px",
@@ -125,10 +129,14 @@ export function HostingerSalesAutomationTaste() {
                 Conexión Activa
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Tarjeta 2: Pasarelas de Pago */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.55, delay: 0.18, ease: [0.21, 0.47, 0.32, 0.98] }}
             style={{
               background: "#ffffff",
               borderRadius: "20px",
@@ -181,22 +189,23 @@ export function HostingerSalesAutomationTaste() {
             </h3>
 
             <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: "0 0 20px", flexGrow: 1 }}>
-              Cobros seguros con tarjetas de crédito/débito, transferencias bancarias, Yape y Plin sin fricción.
+              Cobros online automáticos con Yape, Plin, tarjetas de crédito, débito y transferencias.
             </p>
 
-            {/* Píldoras minimalistas de pago */}
+            {/* Píldora minimalista */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
-              <span style={{ background: "#f4f4f5", color: "#18181b", fontSize: "11px", fontWeight: "700", padding: "4px 8px", borderRadius: "6px" }}>
-                Yape / Plin
-              </span>
-              <span style={{ background: "#f4f4f5", color: "#18181b", fontSize: "11px", fontWeight: "700", padding: "4px 8px", borderRadius: "6px" }}>
-                Tarjetas & Stripe
+              <span style={{ background: "#f4f4f5", color: "#3f3f46", fontSize: "11px", fontWeight: "700", padding: "4px 9px", borderRadius: "6px" }}>
+                Yape · Tarjetas · Culqi
               </span>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Tarjeta 3: Formularios & CRM */}
-          <div
+          {/* Tarjeta 3: E-mails & Notificaciones */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.55, delay: 0.28, ease: [0.21, 0.47, 0.32, 0.98] }}
             style={{
               background: "#ffffff",
               borderRadius: "20px",
@@ -245,23 +254,27 @@ export function HostingerSalesAutomationTaste() {
             </div>
 
             <h3 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 10px", letterSpacing: "-0.02em" }}>
-              Formularios & CRM
+              E-mails & Notificaciones
             </h3>
 
             <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.6", margin: "0 0 20px", flexGrow: 1 }}>
-              Notificaciones instantáneas de cada cotización enviadas directamente a tu correo corporativo.
+              Confirmaciones de pedido automáticas y alertas en tiempo real al correo de tu empresa.
             </p>
 
             {/* Píldora minimalista */}
             <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", paddingTop: "14px", borderTop: "1px solid #f4f4f5" }}>
               <span style={{ background: "#f4f4f5", color: "#0284c7", fontSize: "11px", fontWeight: "700", padding: "4px 9px", borderRadius: "6px" }}>
-                Notificación en 0.4s
+                Auto-Respuesta 24/7
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Tarjeta 4: Analítica & Píxel */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.55, delay: 0.38, ease: [0.21, 0.47, 0.32, 0.98] }}
             style={{
               background: "#ffffff",
               borderRadius: "20px",
@@ -323,7 +336,7 @@ export function HostingerSalesAutomationTaste() {
                 Eventos Lead / Compra
               </span>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Botón Automatizar mi proyecto (Oculto hasta activar portafolio) */}

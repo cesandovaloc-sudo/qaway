@@ -59,29 +59,43 @@ export function HostingerFAQReal() {
           {realFaqs.map((f, idx) => {
             const isOpen = openIdx === idx;
             return (
-              <div key={idx} style={{ borderBottom: "1px solid #e2e5e9", paddingBottom: "14px" }}>
+              <div
+                key={idx}
+                style={{
+                  borderBottom: "1px solid #e2e5e9",
+                  paddingBottom: "14px",
+                  transition: "border-color 0.2s ease",
+                }}
+              >
                 <button
                   onClick={() => toggle(idx)}
                   style={{
                     width: "100%",
                     background: "transparent",
                     border: "none",
-                    padding: "12px 0",
+                    padding: "14px 0",
                     textAlign: "left",
-                    fontSize: "15px",
+                    fontSize: "15.5px",
                     fontWeight: "600",
-                    color: "#12131a",
+                    color: isOpen ? "#fe6612" : "#12131a",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     cursor: "pointer",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isOpen) e.currentTarget.style.color = "#fe6612";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isOpen) e.currentTarget.style.color = "#12131a";
                   }}
                 >
                   <span>{f.q}</span>
-                  {isOpen ? <Minus size={16} color="#673de6" /> : <Plus size={16} color="#84879c" />}
+                  {isOpen ? <Minus size={18} color="#fe6612" /> : <Plus size={18} color="#84879c" />}
                 </button>
                 {isOpen && (
-                  <div style={{ padding: "6px 0 12px", color: "#56596e", fontSize: "14px", lineHeight: "1.6" }}>
+                  <div style={{ padding: "6px 0 14px", color: "#56596e", fontSize: "14.5px", lineHeight: "1.65", animation: "fadeIn 0.2s ease" }}>
                     {f.a}
                   </div>
                 )}
