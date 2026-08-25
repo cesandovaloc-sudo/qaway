@@ -32,6 +32,7 @@ const reviews = [
     comment: "La web cambió totalmente la percepción de nuestro estudio. Los clientes llegan directo a WhatsApp convencidos y listos para contratar.",
     rating: 5,
     tag: "Marca Personal & Web",
+    avatar: "/assets/pages/4-academy/testimonials/mariana.png",
   },
   {
     name: "Diego Morales",
@@ -39,6 +40,7 @@ const reviews = [
     comment: "Entregaron en los 7 días prometidos. La velocidad de carga en celulares es instantánea y el diseño superó todas nuestras expectativas.",
     rating: 5,
     tag: "Web Corporativa",
+    avatar: "/assets/pages/4-academy/testimonials/diego.png",
   },
   {
     name: "Lucía Vargas",
@@ -46,6 +48,7 @@ const reviews = [
     comment: "El nivel de detalle visual y la claridad del copy nos permitió cerrar alianzas corporativas con marcas que antes no nos consideraban.",
     rating: 5,
     tag: "E-commerce & Autoridad",
+    avatar: "/assets/pages/4-academy/testimonials/lucia.png",
   },
 ];
 
@@ -102,9 +105,26 @@ export function HostingerTestimonialsSlider() {
                 </p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", borderTop: "1px solid #f4f4f5", paddingTop: "18px" }}>
-                <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e4e4e7", color: "#111", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "15px" }}>
-                  {r.name.charAt(0)}
-                </div>
+                {r.avatar ? (
+                  <img
+                    src={r.avatar}
+                    alt={r.name}
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #ffffff",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                      flexShrink: 0,
+                    }}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "#e4e4e7", color: "#111", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", fontSize: "15px", flexShrink: 0 }}>
+                    {r.name.charAt(0)}
+                  </div>
+                )}
                 <div>
                   <h3 style={{ fontSize: "14.5px", fontWeight: "700", color: "#111111", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                     {r.name}
