@@ -239,30 +239,36 @@ export function QawayDesignPillarsSection() {
             </div>
           </div>
 
-          {/* Columna Derecha: Tarjeta Blanca con Altura Ampliada un 5% (345px) */}
-          <div style={{ width: "100%", minHeight: "510px", position: "relative" }}>
+          {/* Columna Derecha: Tarjeta Blanca con Altura Estricta y Fija (530px) */}
+          <div style={{ width: "100%", height: "530px", minHeight: "530px", maxHeight: "530px", position: "relative", overflow: "hidden" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: 16 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
+                exit={{ opacity: 0, x: -16 }}
                 whileHover={{ y: -4, boxShadow: "0 20px 48px rgba(0, 0, 0, 0.09)", transition: { duration: 0.2, ease: "easeOut" } }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.28 }}
                 style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "530px",
+                  maxHeight: "530px",
                   background: "#ffffff",
                   borderRadius: "12px",
                   border: "1px solid #e4e4e7",
                   overflow: "hidden",
                   boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
                   cursor: "default",
-                  minHeight: "510px",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
+                  boxSizing: "border-box",
                 }}
               >
-                <div style={{ height: "345px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
+                <div style={{ height: "340px", minHeight: "340px", maxHeight: "340px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
                   <img
                     src={current.image}
                     alt={current.highlight}
@@ -292,12 +298,12 @@ export function QawayDesignPillarsSection() {
                   </div>
                 </div>
 
-                <div style={{ padding: "24px 26px 26px", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "165px" }}>
+                <div style={{ padding: "20px 24px 22px", height: "190px", minHeight: "190px", maxHeight: "190px", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", boxSizing: "border-box" }}>
                   <div>
                     <h4 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 6px", fontFamily: "var(--qw-font-display)" }}>
                       {current.highlight}
                     </h4>
-                    <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "14px" }}>
+                    <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "12px" }}>
                       {current.subHighlight}
                     </span>
                   </div>
