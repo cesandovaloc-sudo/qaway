@@ -10,6 +10,7 @@ const navLinks = [
 
 export function HostingerHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const [deepScrolled, setDeepScrolled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -17,6 +18,7 @@ export function HostingerHeader() {
     const handleScroll = () => {
       const currentY = window.scrollY;
       setScrolled(currentY > 20);
+      setDeepScrolled(currentY > 400);
 
       // Ocultar al hacer scroll hacia abajo, mostrar al hacer scroll hacia arriba
       if (currentY > lastScrollY.current && currentY > 50) {
@@ -38,33 +40,36 @@ export function HostingerHeader() {
         headerVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      {/* Barra Superior de Oferta de Lanzamiento */}
-      <div
-        style={{
-          background: "#18181b",
-          borderBottom: "1px solid rgba(254, 102, 18, 0.35)",
-          padding: "6px 16px",
-          textAlign: "center",
-          fontSize: "12px",
-          color: "#ffffff",
-        }}
-      >
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#d4d4d8" }}>
-            <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#fe6612", display: "inline-block", boxShadow: "0 0 8px #fe6612" }} />
-            <span>🔥 <strong>Oferta de Lanzamiento:</strong> One Web <strong>S/ 79.90</strong> · Web Comercial <strong>S/ 290</strong> · Tienda <strong>S/ 490</strong></span>
+      {/* Barra Superior de Oferta de Lanzamiento (Visible solo tras scroll para no saturar) */}
+      {deepScrolled && (
+        <div
+          style={{
+            background: "#18181b",
+            borderBottom: "1px solid rgba(254, 102, 18, 0.35)",
+            padding: "6px 16px",
+            textAlign: "center",
+            fontSize: "12px",
+            color: "#ffffff",
+            animation: "fadeIn 0.25s ease",
+          }}
+        >
+          <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#d4d4d8" }}>
+              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#fe6612", display: "inline-block", boxShadow: "0 0 8px #fe6612" }} />
+              <span>🔥 <strong>Oferta de Lanzamiento:</strong> One Web a solo <strong>S/ 79.90</strong></span>
+            </div>
+            <a
+              href="#precios"
+              style={{ color: "#fe6612", fontWeight: "700", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
+            >
+              <span>Ver oferta</span>
+              <ArrowRight size={12} />
+            </a>
           </div>
-          <a
-            href="#precios"
-            style={{ color: "#fe6612", fontWeight: "700", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
-            onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-            onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
-          >
-            <span>Ver tarifario</span>
-            <ArrowRight size={12} />
-          </a>
         </div>
-      </div>
+      )}
 
       {/* Main Navbar */}
       <div
