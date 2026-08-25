@@ -1,33 +1,8 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Clock, Flame } from "lucide-react";
+import { Check, Flame } from "lucide-react";
+import { DigitalCountdown } from "./DigitalCountdown";
 
 export function HostingerPricingReal() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 4,
-    hours: 12,
-    minutes: 35,
-    seconds: 18,
-  });
-
-  useEffect(() => {
-    // Cuenta regresiva dinámica con efecto de urgencia
-    const now = new Date();
-    const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 4, 23, 59, 59).getTime();
-    const updateCountdown = () => {
-      const current = new Date().getTime();
-      const difference = Math.max(0, targetDate - current);
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-      const seconds = Math.floor((difference / 1000) % 60);
-      setTimeLeft({ days, hours, minutes, seconds });
-    };
-    updateCountdown();
-    const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   const plans = [
     {
       id: "web-comercial",
@@ -110,48 +85,17 @@ export function HostingerPricingReal() {
             Planes transparentes con descuento de lanzamiento
           </h2>
           
-          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: "0 0 24px" }}>
+          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: "0 0 28px" }}>
             Precio cerrado antes de empezar. Sin mensualidades ocultas ni llamadas de venta.
           </p>
 
-          {/* Temporizador de Oferta de Lanzamiento */}
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "14px",
-              background: "#18181b",
-              border: "1px solid rgba(254, 102, 18, 0.4)",
-              padding: "8px 20px",
-              borderRadius: "9999px",
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-              <Flame size={16} color="#fe6612" fill="#fe6612" />
-              <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#ffffff", letterSpacing: "0.02em" }}>
-                Oferta de Septiembre:
-              </span>
+          {/* Temporizador de Oferta de Lanzamiento Estilo Bloques */}
+          <div style={{ margin: "0 auto 10px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#e0281b", fontSize: "13px", fontWeight: "800", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              <Flame size={16} fill="#e0281b" />
+              <span>La oferta de lanzamiento expira en:</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
-                {String(timeLeft.days).padStart(2, "0")}d
-              </span>
-              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
-              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
-                {String(timeLeft.hours).padStart(2, "0")}h
-              </span>
-              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
-              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
-                {String(timeLeft.minutes).padStart(2, "0")}m
-              </span>
-              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
-              <span style={{ background: "#27272a", color: "#fe6612", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
-                {String(timeLeft.seconds).padStart(2, "0")}s
-              </span>
-            </div>
+            <DigitalCountdown targetDays={4} />
           </div>
         </div>
 

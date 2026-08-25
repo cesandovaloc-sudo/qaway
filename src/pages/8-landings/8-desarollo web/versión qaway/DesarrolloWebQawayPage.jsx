@@ -15,10 +15,11 @@ import { HostingerMigrationDarkBanner } from "./components/HostingerMigrationDar
 import { HostingerTestimonialsSlider } from "./components/HostingerTestimonialsSlider.jsx";
 import { HostingerEcommerceBanner } from "./components/HostingerEcommerceBanner.jsx";
 import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
-import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
 import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
+import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
+import { ExitIntentModal } from "./components/ExitIntentModal.jsx";
 import "./styles/qaway-landing.css";
 
 export default function DesarrolloWebQawayPage() {
@@ -61,6 +62,9 @@ export default function DesarrolloWebQawayPage() {
         <QawayLeadContactForm />
       </main>
       <HostingerFooterFull />
+      
+      {/* Pop-up de Intento de Salida (Exit-Intent) */}
+      <ExitIntentModal />
     </div>
   );
 }
