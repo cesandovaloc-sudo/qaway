@@ -44,13 +44,13 @@ export function HostingerHeader() {
     >
       <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
         
-        {/* Brand Logo Oficial */}
-        <Link
-          to="/"
-          className="text-xl font-semibold tracking-[-0.055em] text-[#20201f] transition-opacity hover:opacity-90"
+        {/* Brand Logo Oficial que lleva al inicio de la landing */}
+        <a
+          href="#inicio"
+          className="text-xl font-semibold tracking-[-0.055em] text-[#20201f] transition-opacity hover:opacity-90 cursor-pointer"
         >
           Qaway <span className="text-[#fe6612]">Lab</span>
-        </Link>
+        </a>
 
         {/* Enlaces de Navegación de Landing con Efecto Oficial */}
         <nav className="hidden items-center gap-7 md:flex lg:gap-10">
