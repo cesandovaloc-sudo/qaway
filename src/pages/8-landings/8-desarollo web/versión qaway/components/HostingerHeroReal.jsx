@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, MessageCircle, Star } from "lucide-react";
+import { Check, MessageCircle, Star, StarHalf } from "lucide-react";
 import heroFrontImg from "../ChatGPT Image 24 ago 2026, 16_58_52.png";
 import heroBackImg from "../ChatGPT Image 24 ago 2026, 17_09_50.png";
 
 const trustAvatars = [
-  { name: 'Ana Sofía', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80' },
-  { name: 'Carlos Ruiz', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80' },
-  { name: 'Elena Ramos', img: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=80' },
-  { name: 'Mateo Silva', img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80' },
+  { name: 'Mariana Ríos', img: '/assets/pages/4-academy/testimonials/mariana.png' },
+  { name: 'Diego Morales', img: '/assets/pages/4-academy/testimonials/diego.png' },
+  { name: 'Lucía Vargas', img: '/assets/pages/4-academy/testimonials/lucia.png' },
+  { name: 'Renzo Soto', img: '/assets/pages/4-academy/testimonials/renzo.png' },
 ];
 
 export function HostingerHeroReal() {
@@ -159,11 +159,12 @@ export function HostingerHeroReal() {
               {/* Textos y Estrellas */}
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                  {[...Array(5)].map((_, i) => (
+                  {[...Array(4)].map((_, i) => (
                     <Star key={i} size={14} fill="#fe6612" color="#fe6612" />
                   ))}
+                  <StarHalf size={14} fill="#fe6612" color="#fe6612" />
                   <span style={{ fontSize: "13px", fontWeight: "800", color: "#191918", marginLeft: "4px" }}>
-                    5.0 / 5.0
+                    4.5 / 5.0
                   </span>
                 </div>
                 <span style={{ fontSize: "12px", color: "#71717a", fontWeight: "500" }}>
