@@ -35,7 +35,7 @@ export function HostingerAiCards() {
               style={{ background: "#ffffff", cursor: "pointer" }}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)" }}
+              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.5, delay: 0.08, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
@@ -63,9 +63,9 @@ export function HostingerAiCards() {
               style={{ background: "#ffffff", cursor: "pointer" }}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)" }}
+              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
               viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.5, delay: 0.18, ease: [0.21, 0.47, 0.32, 0.98] }}
+              transition={{ duration: 0.5, delay: 0.24, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>
@@ -91,9 +91,9 @@ export function HostingerAiCards() {
               style={{ background: "#ffffff", cursor: "pointer" }}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)" }}
+              whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
               viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.5, delay: 0.28, ease: [0.21, 0.47, 0.32, 0.98] }}
+              transition={{ duration: 0.5, delay: 0.40, ease: [0.21, 0.47, 0.32, 0.98] }}
             >
               <div className="h-ai-feature-card-media" style={{ padding: "20px 20px 0 20px", background: "linear-gradient(180deg, #edf0f5 0%, #f8f9fc 100%)", height: "346px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
                 <div style={{ width: "100%", height: "100%", background: "#ffffff", borderRadius: "8px 8px 0 0", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.08)", border: "1px solid rgba(0,0,0,0.06)", borderBottom: "none" }}>

@@ -67,7 +67,13 @@ export function QawayDesignPillarsSection() {
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal de la Sección */}
-        <div style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 52px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
+          style={{ textAlign: "center", maxWidth: "850px", margin: "0 auto 52px" }}
+        >
           <span className="qw-kicker-capsule">
             IDENTIDAD VISUAL & EXPERIENCIA DIGITAL
           </span>
@@ -75,10 +81,14 @@ export function QawayDesignPillarsSection() {
           <h2 style={{ fontSize: "clamp(1.9rem, 3vw, 2.4rem)", fontWeight: "600", color: "#111111", margin: 0, lineHeight: "1.2" }}>
             Diseño web profesional <span style={{ color: "#fe6612" }}>adaptado a tu marca</span>
           </h2>
-        </div>
+        </motion.div>
 
         {/* Estructura Split Directa 2 Columnas (Estilo Integrado) */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.65, delay: 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1.1fr",
@@ -236,6 +246,7 @@ export function QawayDesignPillarsSection() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
+              whileHover={{ y: -4, boxShadow: "0 20px 48px rgba(0, 0, 0, 0.09)", transition: { duration: 0.2, ease: "easeOut" } }}
               transition={{ duration: 0.3 }}
               style={{
                 background: "#ffffff",
@@ -243,6 +254,7 @@ export function QawayDesignPillarsSection() {
                 border: "1px solid #e4e4e7",
                 overflow: "hidden",
                 boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
+                cursor: "default",
               }}
             >
               <div style={{ height: "345px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
@@ -303,7 +315,7 @@ export function QawayDesignPillarsSection() {
               </div>
             </motion.div>
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
