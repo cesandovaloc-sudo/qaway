@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
-function RouletteDigit({ digit, delay = 0 }) {
+function RouletteDigit({ digit, delay = 0, isParentInView = false }) {
   const target = parseInt(digit, 10) || 0;
-  // Reel de ruleta con ciclo 0-9 seguido del dígito objetivo
-  const reel = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, target];
-  const targetIndex = 20; // Se detiene en el último número exacto (target)
+  // Reel de 15 números para giro dinámico
+  const reel = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, target];
+  const targetOffset = -(reel.length - 1) * 46;
 
   return (
     <div
@@ -21,11 +21,10 @@ function RouletteDigit({ digit, delay = 0 }) {
     >
       <motion.div
         initial={{ y: 0 }}
-        whileInView={{ y: -targetIndex * 46 }}
-        viewport={{ once: true, amount: 0.2 }}
+        animate={isParentInView ? { y: targetOffset } : { y: 0 }}
         transition={{
-          duration: 1.3 + delay * 0.12,
-          ease: [0.16, 1, 0.3, 1],
+          duration: 1.4 + delay * 0.15,
+          ease: [0.12, 0.8, 0.25, 1],
         }}
         style={{
           display: "flex",
@@ -60,6 +59,9 @@ function RouletteDigit({ digit, delay = 0 }) {
 }
 
 export function DigitalCountdown({ targetDays = 4 }) {
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.25 });
+
   const [timeLeft, setTimeLeft] = useState({
     days: 4,
     hours: 12,
@@ -97,15 +99,18 @@ export function DigitalCountdown({ targetDays = 4 }) {
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+    <div
+      ref={containerRef}
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}
+    >
       {units.map((u, uIdx) => {
         const [d1, d2] = u.value.split("");
         return (
           <div key={u.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "7px" }}>
             {/* Par de Cajas Dígito con Efecto Ruleta */}
             <div style={{ display: "flex", gap: "3px" }}>
-              <RouletteDigit digit={d1} delay={uIdx * 2} />
-              <RouletteDigit digit={d2} delay={uIdx * 2 + 1} />
+              <RouletteDigit digit={d1} delay={uIdx * 0.8} isParentInView={isInView} />
+              <RouletteDigit digit={d2} delay={uIdx * 0.8 + 0.3} isParentInView={isInView} />
             </div>
             <span style={{ fontSize: "12px", fontWeight: "600", color: "#4b5563" }}>
               {u.label}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, ArrowRight, ShieldCheck, Zap, Lock } from "lucide-react";
+import { Check, ArrowRight, ShieldCheck, Zap, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/config/supabase";
 
 export function QawayLeadContactForm() {
@@ -235,9 +235,12 @@ export function QawayLeadContactForm() {
                 </div>
 
                 {/* Botón */}
-                <button
+                <motion.button
                   type="submit"
                   disabled={submitting}
+                  whileHover={submitting ? {} : { y: -2, backgroundColor: "#ff7527", boxShadow: "0 12px 28px rgba(254, 102, 18, 0.38)" }}
+                  whileTap={submitting ? {} : { scale: 0.98 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
                   style={{
                     display: "flex",
                     width: "100%",
@@ -255,9 +258,18 @@ export function QawayLeadContactForm() {
                     boxShadow: "0 8px 22px rgba(254, 102, 18, 0.28)",
                   }}
                 >
-                  <span>{submitting ? "Enviando solicitud..." : "Enviar solicitud"}</span>
-                  <ArrowRight size={18} />
-                </button>
+                  {submitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Enviando solicitud...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Enviar solicitud</span>
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </motion.button>
 
                 <p style={{ color: "#71717a", fontSize: "12px", textAlign: "center", margin: 0 }}>
                   Respuesta en menos de 24 h. Sin compromiso.
