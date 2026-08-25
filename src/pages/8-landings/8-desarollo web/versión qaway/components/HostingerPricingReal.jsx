@@ -4,18 +4,19 @@ import { Check, Clock, Flame } from "lucide-react";
 
 export function HostingerPricingReal() {
   const [timeLeft, setTimeLeft] = useState({
-    days: 6,
-    hours: 14,
-    minutes: 32,
-    seconds: 45,
+    days: 4,
+    hours: 12,
+    minutes: 35,
+    seconds: 18,
   });
 
   useEffect(() => {
-    // Cuenta regresiva calculada para fin de mes de septiembre
-    const targetDate = new Date(new Date().getFullYear(), 8, 30, 23, 59, 59).getTime();
+    // Cuenta regresiva dinámica con efecto de urgencia
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 4, 23, 59, 59).getTime();
     const updateCountdown = () => {
-      const now = new Date().getTime();
-      const difference = Math.max(0, targetDate - now);
+      const current = new Date().getTime();
+      const difference = Math.max(0, targetDate - current);
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((difference / 1000 / 60) % 60);
@@ -74,9 +75,9 @@ export function HostingerPricingReal() {
     {
       id: "tienda-online",
       name: "Tienda Online",
-      price: "750",
-      oldPrice: "S/ 1.250",
-      discount: "-40% OFF",
+      price: "490",
+      oldPrice: "S/ 890",
+      discount: "-45% OFF",
       prefix: "S/ ",
       desc: "Una tienda online para mostrar productos y gestionar ventas desde la web.",
       popular: false,
@@ -100,7 +101,7 @@ export function HostingerPricingReal() {
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal */}
-        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 42px" }}>
+        <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 44px" }}>
           <span className="qw-kicker-capsule">
             TARIFARIO & PRECIOS
           </span>
@@ -118,30 +119,38 @@ export function HostingerPricingReal() {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "12px",
-              background: "#ffffff",
-              border: "1px solid rgba(254, 102, 18, 0.25)",
-              padding: "9px 20px",
+              gap: "14px",
+              background: "#18181b",
+              border: "1px solid rgba(254, 102, 18, 0.4)",
+              padding: "8px 20px",
               borderRadius: "9999px",
-              boxShadow: "0 4px 16px rgba(254, 102, 18, 0.08)",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
               flexWrap: "wrap",
               justifyContent: "center",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Flame size={16} color="#fe6612" />
-              <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#18181b" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+              <Flame size={16} color="#fe6612" fill="#fe6612" />
+              <span style={{ fontSize: "12.5px", fontWeight: "700", color: "#ffffff", letterSpacing: "0.02em" }}>
                 Oferta de Septiembre:
               </span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "5px", fontFamily: "monospace", fontSize: "13px", fontWeight: "800", color: "#fe6612" }}>
-              <span>{String(timeLeft.days).padStart(2, "0")}d</span>
-              <span>:</span>
-              <span>{String(timeLeft.hours).padStart(2, "0")}h</span>
-              <span>:</span>
-              <span>{String(timeLeft.minutes).padStart(2, "0")}m</span>
-              <span>:</span>
-              <span>{String(timeLeft.seconds).padStart(2, "0")}s</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
+                {String(timeLeft.days).padStart(2, "0")}d
+              </span>
+              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
+              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
+                {String(timeLeft.hours).padStart(2, "0")}h
+              </span>
+              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
+              <span style={{ background: "#27272a", color: "#ffffff", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
+                {String(timeLeft.minutes).padStart(2, "0")}m
+              </span>
+              <span style={{ color: "#fe6612", fontWeight: "800", fontSize: "12px" }}>:</span>
+              <span style={{ background: "#27272a", color: "#fe6612", padding: "3px 7px", borderRadius: "6px", fontSize: "12px", fontWeight: "800", fontFamily: "monospace" }}>
+                {String(timeLeft.seconds).padStart(2, "0")}s
+              </span>
             </div>
           </div>
         </div>
