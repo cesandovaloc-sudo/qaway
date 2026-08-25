@@ -7,11 +7,21 @@ export function QawayLeadContactForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [selectedBudget, setSelectedBudget] = useState("S/ 100 – S/ 400");
-  const [selectedTimeline, setSelectedTimeline] = useState("1 mes");
+  const [selectedBudget, setSelectedBudget] = useState("S/ 250 – S/ 400 (Web Comercial)");
+  const [selectedTimeline, setSelectedTimeline] = useState("1 a 2 semanas");
 
-  const budgetOptions = ["< S/ 100", "S/ 100 – S/ 400", "S/ 400 – S/ 1.000", "+ S/ 1.000"];
-  const timelineOptions = ["< 2 semanas", "1 mes", "2 – 3 meses", "Flexible"];
+  const budgetOptions = [
+    "S/ 80 – S/ 150 (One Web)",
+    "S/ 250 – S/ 400 (Web Comercial)",
+    "S/ 450 – S/ 700 (Tienda Online)",
+    "+ S/ 800 (A Medida / Corporativo)",
+  ];
+  const timelineOptions = [
+    "⚡ Urgente / Inmediato (< 48 h)",
+    "1 a 2 semanas",
+    "1 mes",
+    "Flexible / En planificación",
+  ];
 
   const submit = async (e) => {
     e.preventDefault();
@@ -31,51 +41,74 @@ export function QawayLeadContactForm() {
     };
 
     try {
-      const { error } = await supabase.from("leads").insert([
-        {
-          client_name: lead.name,
-          contact_info: lead.phone,
-          source: lead.source,
-          stage: "new",
-          metadata: {
-            email: lead.email,
-            company: lead.company,
-            budget: lead.budget,
-            timeline: lead.timeline,
-            message: lead.message || "Sin mensaje adicional",
+      // 1. Enviar a Supabase (de fondo sin bloquear si hay restricción de RLS)
+      try {
+        await supabase.from("leads").insert([
+          {
+            client_name: lead.name,
+            contact_info: lead.phone,
+            source: lead.source,
+            stage: "new",
+            metadata: {
+              email: lead.email,
+              company: lead.company,
+              budget: lead.budget,
+              timeline: lead.timeline,
+              message: lead.message || "Sin mensaje adicional",
+            },
           },
-        },
-      ]);
-      if (error) throw error;
+        ]);
+      } catch (spErr) {
+        console.warn("Supabase insert warning:", spErr);
+      }
+
+      // 2. Enviar por correo con Web3Forms (Proyectos + Respaldo)
+      const primaryKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || "b1022349-bf06-41b2-b110-5beb1cd2a1a0";
+      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || "d1e5eb0e-95c3-4cba-8029-b9e5ef8f8d49";
+
+      const mailBody = {
+        access_key: primaryKey,
+        subject: `Nuevo Lead Desarrollo Web: ${lead.name} (${lead.company || "Sin empresa"})`,
+        from_name: "Qaway Lab Web Leads",
+        name: lead.name,
+        email: lead.email,
+        empresa: lead.company || "No especificada",
+        whatsapp: lead.phone,
+        presupuesto: lead.budget,
+        plazo_estimado: lead.timeline,
+        mensaje: lead.message || "Sin mensaje adicional",
+      };
 
       await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || "",
-          subject: `Nuevo Lead Desarrollo Web: ${lead.name} (${lead.company || "Sin empresa"})`,
-          from_name: "Qaway Lab Web Leads",
-          name: lead.name,
-          email: lead.email,
-          empresa: lead.company || "No especificada",
-          whatsapp: lead.phone,
-          presupuesto: lead.budget,
-          plazo_estimado: lead.timeline,
-          mensaje: lead.message || "Sin mensaje adicional",
-        }),
+        body: JSON.stringify(mailBody),
       });
+
+      if (backupKey && backupKey !== primaryKey) {
+        fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            ...mailBody,
+            access_key: backupKey,
+            subject: `[Copia] Nuevo Lead Web: ${lead.name}`,
+          }),
+        }).catch(() => {});
+      }
 
       setSubmitted(true);
       e.currentTarget.reset();
 
+      // 3. Abrir WhatsApp directamente con mensaje estructurado
       const contactMsg = encodeURIComponent(
-        `Hola Qaway, mi nombre es ${lead.name} de ${lead.company || "mi empresa"}. Mi presupuesto estimado es ${lead.budget} y fecha estimada ${lead.timeline}. Me gustaría cotizar mi proyecto web. ${lead.message ? "Detalles: " + lead.message : ""}`
+        `Hola Qaway Lab, quiero cotizar mi proyecto web:\n\n• Nombre: ${lead.name}\n• Empresa: ${lead.company || "No especificada"}\n• WhatsApp: ${lead.phone}\n• Email: ${lead.email}\n• Presupuesto: ${lead.budget}\n• Plazo: ${lead.timeline}\n• Mensaje: ${lead.message || "Solicito cotización"}`
       );
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
       window.open(waUrl, "_blank", "noopener,noreferrer");
     } catch (err) {
-      console.error(err);
-      setSubmitError("Hubo un error al enviar tu solicitud. Inténtalo de nuevo.");
+      console.error("Error al enviar formulario:", err);
+      setSubmitError("Hubo un problema de conexión. Puedes escribirnos directamente por WhatsApp.");
     } finally {
       setSubmitting(false);
     }
