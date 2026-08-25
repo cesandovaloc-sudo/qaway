@@ -58,24 +58,46 @@ function RouletteDigit({ digit, delay = 0, isParentInView = false }) {
   );
 }
 
-export function DigitalCountdown({ targetDays = 4 }) {
+export function DigitalCountdown({ targetDays = 6 }) {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.25 });
 
   const [timeLeft, setTimeLeft] = useState({
-    days: 4,
-    hours: 12,
-    minutes: 35,
-    seconds: 18,
+    days: 5,
+    hours: 18,
+    minutes: 42,
+    seconds: 30,
   });
 
   useEffect(() => {
-    // Cuenta regresiva dinámica con efecto de urgencia rotativo
-    const now = new Date();
-    const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + targetDays, 23, 59, 59).getTime();
+    const STORAGE_KEY = "qw_launch_offer_deadline_v2";
+    const CYCLE_MS = targetDays * 24 * 60 * 60 * 1000;
+
+    // Obtener o crear fecha límite persistente de 6 días
+    const getOrSetTargetDate = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        const now = Date.now();
+        if (stored) {
+          const deadline = parseInt(stored, 10);
+          // Si quedan más de 8 horas, mantener el conteo real
+          if (deadline - now > 8 * 60 * 60 * 1000) {
+            return deadline;
+          }
+        }
+        // Si no existe o le queda poco tiempo, renovar nuevo ciclo de 6 días
+        const newDeadline = Date.now() + CYCLE_MS;
+        localStorage.setItem(STORAGE_KEY, String(newDeadline));
+        return newDeadline;
+      } catch {
+        return Date.now() + CYCLE_MS;
+      }
+    };
+
+    const targetDate = getOrSetTargetDate();
 
     const updateCountdown = () => {
-      const current = new Date().getTime();
+      const current = Date.now();
       const difference = Math.max(0, targetDate - current);
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
       const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
