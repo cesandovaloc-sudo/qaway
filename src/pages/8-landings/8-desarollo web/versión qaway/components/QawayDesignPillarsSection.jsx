@@ -203,6 +203,30 @@ export function QawayDesignPillarsSection() {
                 <ChevronRight size={20} />
               </button>
             </div>
+
+            {/* Botón Explorar proyectos (Oculto hasta activar portafolio) */}
+            <div style={{ display: "none", marginTop: "24px" }}>
+              <a
+                href="/proyectos"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  color: "#18181b",
+                  background: "#ffffff",
+                  border: "1.5px solid #18181b",
+                  padding: "12px 24px",
+                  borderRadius: "9999px",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span>Explorar proyectos</span>
+                <span>→</span>
+              </a>
+            </div>
           </div>
 
           {/* Columna Derecha: Tarjeta Blanca con Altura Ampliada un 5% (345px) */}

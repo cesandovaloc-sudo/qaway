@@ -326,6 +326,32 @@ export function HostingerSalesAutomationTaste() {
           </div>
         </div>
 
+        {/* Botón Automatizar mi proyecto (Oculto hasta activar portafolio) */}
+        <div style={{ display: "none", marginTop: "48px", textAlign: "center" }}>
+          <a
+            href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab%2C%20deseo%20automatizar%20mi%20proyecto%20web%20con%20WhatsApp%20y%20pasarelas%20de%20pago."
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              background: "#ffffff",
+              color: "#18181b",
+              padding: "14px 36px",
+              borderRadius: "9999px",
+              fontSize: "15px",
+              fontWeight: "700",
+              textDecoration: "none",
+              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+          >
+            <span>Automatizar mi proyecto</span>
+            <span>→</span>
+          </a>
+        </div>
+
       </div>
     </section>
   );
