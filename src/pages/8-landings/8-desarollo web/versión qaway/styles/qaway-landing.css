@@ -159,13 +159,15 @@
   background: #fe6612 !important;
   color: #ffffff !important;
   border: 1px solid #fe6612 !important;
-  box-shadow: 0 8px 24px rgba(254, 102, 18, 0.35) !important;
+  box-shadow: 0 4px 16px rgba(254, 102, 18, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .qaway-landing-root .h-btn-cta-orange:hover {
-  background: #e5590c !important;
-  border-color: #e5590c !important;
-  box-shadow: 0 10px 28px rgba(254, 102, 18, 0.45) !important;
+  background: #ff7527 !important;
+  border-color: #ff7527 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(254, 102, 18, 0.32) !important;
 }
 
 .qaway-landing-root .h-btn-outline-black {

@@ -197,7 +197,7 @@ export function HostingerPricingReal() {
                   }}
                   onMouseEnter={(e) => {
                     if (isEmpresarial) {
-                      e.currentTarget.style.background = "#e55708";
+                      e.currentTarget.style.background = "#ff7527";
                     } else {
                       e.currentTarget.style.background = "#27272a";
                     }

@@ -107,7 +107,7 @@ export function HostingerHeader() {
           <div className="flex items-center gap-4">
             <a
               href="#contacto"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#fe6612] px-6 py-2.5 text-[0.84rem] font-semibold text-white shadow-[0_8px_20px_rgba(254,102,18,0.3)] transition-all hover:bg-[#e5590c] active:translate-y-px"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#fe6612] px-6 py-2.5 text-[0.84rem] font-semibold text-white shadow-[0_6px_18px_rgba(254,102,18,0.25)] transition-all hover:bg-[#ff7527] hover:shadow-[0_10px_25px_rgba(254,102,18,0.35)] active:translate-y-px"
             >
               <span>Cotizar proyecto</span>
               <ArrowRight size={14} />

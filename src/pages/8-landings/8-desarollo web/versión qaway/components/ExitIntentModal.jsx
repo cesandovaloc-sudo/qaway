@@ -166,7 +166,7 @@ export function ExitIntentModal() {
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#e55708";
+                e.currentTarget.style.background = "#ff7527";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {

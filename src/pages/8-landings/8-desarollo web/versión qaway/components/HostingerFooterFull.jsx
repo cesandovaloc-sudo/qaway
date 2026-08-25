@@ -91,7 +91,7 @@ export function HostingerFooterFull() {
                 transition: "background 0.2s ease, transform 0.2s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#e55708";
+                e.currentTarget.style.backgroundColor = "#ff7527";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
