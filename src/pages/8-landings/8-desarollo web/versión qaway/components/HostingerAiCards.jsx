@@ -114,7 +114,7 @@ export function HostingerAiCards() {
           {/* Botón CTA */}
           <div style={{ marginTop: "46px", textAlign: "center" }}>
             <a
-              href="#planes"
+              href="#precios"
               className="h-btn-cta-purple h-btn-cta-orange"
               style={{ padding: "14px 42px", fontSize: "15px" }}
             >

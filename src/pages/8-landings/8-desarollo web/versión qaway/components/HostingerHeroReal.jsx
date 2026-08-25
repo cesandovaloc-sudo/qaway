@@ -57,14 +57,14 @@ export function HostingerHeroReal() {
 
             <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
               <a
-                href="#planes"
+                href="#precios"
                 className="h-btn-cta-purple h-btn-cta-orange"
                 style={{ padding: "14px 38px", fontSize: "15px" }}
               >
                 Comenzar ahora
               </a>
               <a
-                href="#beneficios"
+                href="/proyectos"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
