@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import mockup1 from "../../Diseño sin título (1).png";
+import mockup1 from "../ChatGPT Image 24 ago 2026, 19_57_02.png";
 import mockup2 from "../../Diseño sin título.png";
 import mockup3 from "../ChatGPT Image 24 ago 2026, 18_27_46.png";
 import { Layers, Sparkles, TrendingUp, Gauge, Search, Smartphone } from "lucide-react";
