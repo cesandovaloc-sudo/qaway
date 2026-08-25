@@ -5,7 +5,7 @@ import { Plus, Minus } from "lucide-react";
 const realFaqs = [
   {
     q: "¿Qué tipo de web necesita mi negocio?",
-    a: "Depende de tu objetivo comercial: si buscas una presencia rápida y directa para captar clientes en campañas, 'One Web' es ideal. Si necesitas mostrar varios servicios y dar una imagen corporativa sólida, elige 'Web Comercial'. Si buscas vender productos las 24 horas con pasarela de pagos, tu opción es 'Tienda Online'."
+    a: "Depende de tu objetivo comercial: si buscas una presencia rápida, todo en uno y directa para captar clientes en campañas, 'One Web' o una 'Landing Page' es ideal. Si necesitas mostrar varios servicios y dar una imagen corporativa sólida, elige 'Web Comercial'. Si buscas vender productos las 24 horas con pasarela de pagos, tu opción es 'Tienda Online'."
   },
   {
     q: "¿El dominio y el hosting están incluidos?",
@@ -13,19 +13,19 @@ const realFaqs = [
   },
   {
     q: "¿Puedo conectar WhatsApp y formularios de contacto?",
-    a: "Sí, todos los planes incluyen botón directo a WhatsApp y formularios para que los clientes te escriban de inmediato a tu correo o teléfono."
+    a: "Sí. Todos los planes cuentan con conexión directa a WhatsApp para captar clientes al instante. Además, si tu proyecto requiere recibir solicitudes por correo, integramos formularios de contacto adaptados a tu flujo de trabajo."
   },
   {
     q: "¿Puedo empezar con una One Web y ampliarla después?",
-    a: "Totalmente. Tu web se construye con arquitectura escalable: puedes iniciar hoy con una One Web y luego agregar nuevas secciones, blog, catálogo de productos, pasarela de pagos o integraciones con sistemas a medida."
+    a: "Totalmente. Tu web se construye con arquitectura escalable: puedes iniciar hoy con una versión base y luego incorporar nuevas páginas, catálogo, funcionalidades avanzadas, CRM, automatizaciones o integraciones según las necesidades de tu negocio."
   },
   {
     q: "¿Cuánto tiempo demora la entrega de mi web?",
-    a: "Una 'One Web' suele estar lista en 3 a 5 días hábiles. Una 'Web Comercial' toma entre 7 a 12 días, y una 'Tienda Online' de 12 a 20 días, siempre coordinando previamente la entrega de tus textos, fotos y contenidos."
+    a: "Una 'One Web' suele estar lista en 3 a 5 días hábiles. Una 'Web Comercial' toma entre 7 a 12 días, y una 'Tienda Online' de 12 a 20 días. El tiempo exacto depende de la complejidad del proyecto y de la entrega de la información básica de tu negocio mediante una ficha guiada que coordinamos juntos."
   },
   {
     q: "¿Cómo es el proceso de trabajo y pago?",
-    a: "Trabajamos con alcance y precio cerrado. Iniciamos con un anticipo del 50%, diseñamos la propuesta para tu revisión y, tras tu aprobación final y publicación, se cancela el saldo restante."
+    a: "Definimos los requerimientos y el presupuesto final desde el primer día, sin costos ocultos ni cobros sorpresa. Iniciamos con un anticipo del 50%, desarrollamos la propuesta para tu revisión y, tras tu aprobación final y publicación, se cancela el saldo restante."
   }
 ];
 

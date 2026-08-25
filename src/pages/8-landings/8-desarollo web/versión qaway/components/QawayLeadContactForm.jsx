@@ -147,18 +147,18 @@ export function QawayLeadContactForm() {
             </h2>
 
             <p style={{ color: "#52525b", fontSize: "16px", lineHeight: "1.6", margin: "0 0 36px" }}>
-              Completa el formulario y recibirás alcance, plazos y precio cerrado. Sin llamadas de venta interminables.
+              Completa el formulario y recibirás alcance, plazos y una propuesta personalizada para tu proyecto.
             </p>
 
             <div style={{ width: "100%", height: "1px", background: "#e4e4e7", marginBottom: "36px" }} />
 
-            {/* 3 Viñetas */}
+            {/* Viñetas de Garantía */}
             <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
               <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
                 <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
                 <div>
                   <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Propuesta en 24 h</strong>
-                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Con alcance y precio detallado.</span>
+                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Con alcance y precio detallado sin compromiso.</span>
                 </div>
               </div>
 
@@ -166,15 +166,7 @@ export function QawayLeadContactForm() {
                 <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
                 <div>
                   <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Prototipo antes de pagar el total</strong>
-                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Apruebas el diseño primero.</span>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
-                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#fe6612", marginTop: "6px", flexShrink: 0 }} />
-                <div>
-                  <strong style={{ fontSize: "15.5px", color: "#111111", display: "block" }}>Código propio, sin plantillas</strong>
-                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Tú eres dueño de tu web.</span>
+                  <span style={{ color: "#71717a", fontSize: "13.5px" }}>Apruebas el diseño primero antes de la publicación final.</span>
                 </div>
               </div>
             </div>
