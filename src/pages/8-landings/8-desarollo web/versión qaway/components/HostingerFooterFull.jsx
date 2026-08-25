@@ -44,11 +44,11 @@ export function HostingerFooterFull() {
             </h4>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px", fontSize: "13.5px" }}>
               <li><a href="#inicio" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Inicio</a></li>
-              <li><a href="#beneficios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Proyectos Realizados</a></li>
-              <li><a href="#pilares" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Pilares de Diseño</a></li>
-              <li><a href="#canales-de-venta" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Canales de Venta</a></li>
-              <li><a href="#planes" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Tarifario & Precios</a></li>
+              <li><a href="#proyectos" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Proyectos Realizados</a></li>
+              <li><a href="#servicios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Servicios & Alcance</a></li>
+              <li><a href="#precios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Tarifario & Precios</a></li>
               <li><a href="#faq" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Preguntas Frecuentes</a></li>
+              <li><a href="#contacto" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Cotizar Proyecto</a></li>
             </ul>
           </div>
 
@@ -58,9 +58,9 @@ export function HostingerFooterFull() {
               Planes
             </h4>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "12px", fontSize: "13.5px" }}>
-              <li><a href="#planes" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>One Web (S/ 79.90)</a></li>
-              <li><a href="#planes" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Web Comercial (Desde S/ 490)</a></li>
-              <li><a href="#planes" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Tienda Online (Desde S/ 990)</a></li>
+              <li><a href="#precios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>One Web (S/ 79.90)</a></li>
+              <li><a href="#precios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Web Comercial (S/ 290)</a></li>
+              <li><a href="#precios" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Tienda Online (S/ 750)</a></li>
               <li><a href="#contacto" style={{ color: "#a1a1aa", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#a1a1aa")}>Desarrollo a Medida</a></li>
             </ul>
           </div>

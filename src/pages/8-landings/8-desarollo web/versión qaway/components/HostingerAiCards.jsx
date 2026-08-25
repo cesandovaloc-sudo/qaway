@@ -8,7 +8,7 @@ export function HostingerAiCards() {
   return (
     <>
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}
-      <section id="beneficios" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
+      <section id="proyectos" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
         <div className="h-container" style={{ maxWidth: "1330px" }}>
           
           <motion.div
@@ -125,7 +125,7 @@ export function HostingerAiCards() {
       </section>
 
       {/* BLOQUE 2: SERVICIOS & CAPACIDADES (Fondo Naranja Suave / Bajito #fff7f2) */}
-      <section style={{ background: "#fff7f2", padding: "85px 0 95px", borderTop: "1px solid rgba(254, 102, 18, 0.12)", borderBottom: "1px solid rgba(254, 102, 18, 0.12)" }}>
+      <section id="servicios" style={{ background: "#fff7f2", padding: "85px 0 95px", borderTop: "1px solid rgba(254, 102, 18, 0.12)", borderBottom: "1px solid rgba(254, 102, 18, 0.12)" }}>
         <div className="h-container">
           <div style={{ textAlign: "left" }}>
             <span className="qw-kicker-capsule">

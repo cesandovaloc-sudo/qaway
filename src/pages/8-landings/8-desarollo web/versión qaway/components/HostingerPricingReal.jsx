@@ -96,7 +96,7 @@ export function HostingerPricingReal() {
   ];
 
   return (
-    <section id="planes" style={{ padding: "95px 0 100px", background: "#fbfbfc" }}>
+    <section id="precios" style={{ padding: "95px 0 100px", background: "#fbfbfc" }}>
       <div className="h-container" style={{ maxWidth: "1200px" }}>
         
         {/* Encabezado Principal */}

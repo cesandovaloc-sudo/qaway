@@ -3,12 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const navLinks = [
-  { label: "Proyectos", path: "#beneficios" },
-  { label: "Pilares", path: "#pilares" },
-  { label: "Canales", path: "#canales-de-venta" },
-  { label: "Planes", path: "#planes" },
-  { label: "FAQ", path: "#faq" },
-  { label: "Contacto", path: "#contacto" },
+  { label: "Proyectos", path: "#proyectos" },
+  { label: "Servicios", path: "#servicios" },
+  { label: "Precios", path: "#precios" },
 ];
 
 export function HostingerHeader() {
@@ -52,7 +49,7 @@ export function HostingerHeader() {
           to="/"
           className="text-xl font-semibold tracking-[-0.055em] text-[#20201f] transition-opacity hover:opacity-90"
         >
-          Qaway <span className="text-[#ff4b0b]">Lab</span>
+          Qaway <span className="text-[#fe6612]">Lab</span>
         </Link>
 
         {/* Enlaces de Navegación de Landing con Efecto Oficial */}
@@ -61,7 +58,7 @@ export function HostingerHeader() {
             <div key={link.label} className="group relative flex h-full items-center">
               <a
                 href={link.path}
-                className="relative py-2 text-[10.5px] font-bold uppercase tracking-widest text-[#292927]/80 transition-colors hover:text-[#292927] after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.25rem)] after:-bottom-[26px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 hover:after:scale-x-100 hover:after:bg-[#ff4b0b]"
+                className="relative py-2 text-[11px] font-bold uppercase tracking-widest text-[#292927]/80 transition-colors hover:text-[#fe6612] after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.25rem)] after:-bottom-[26px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 hover:after:scale-x-100 hover:after:bg-[#fe6612]"
               >
                 {link.label}
               </a>
@@ -72,10 +69,10 @@ export function HostingerHeader() {
         {/* Botón CTA Oficial */}
         <div className="flex items-center gap-4">
           <a
-            href="#planes"
+            href="#contacto"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#fe6612] px-6 py-2.5 text-[0.84rem] font-semibold text-white shadow-[0_8px_20px_rgba(254,102,18,0.3)] transition-all hover:bg-[#e5590c] active:translate-y-px"
           >
-            <span>Comenzar ahora</span>
+            <span>Cotizar proyecto</span>
             <ArrowRight size={14} />
           </a>
         </div>
