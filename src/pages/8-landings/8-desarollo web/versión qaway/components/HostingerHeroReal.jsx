@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, MessageCircle, Star, StarHalf } from "lucide-react";
-import heroFrontImg from "../ChatGPT Image 24 ago 2026, 16_58_52.png";
-import heroBackImg from "../ChatGPT Image 24 ago 2026, 17_09_50.png";
+import heroFrontImg from "../assets/Hero-1.webp";
+import heroBackImg from "../assets/Hero-2.webp";
 
 const trustAvatars = [
   { name: 'Mariana Ríos', img: '/assets/pages/4-academy/testimonials/mariana.png' },

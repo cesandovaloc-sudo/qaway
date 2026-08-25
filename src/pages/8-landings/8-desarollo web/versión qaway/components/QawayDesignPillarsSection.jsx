@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import pilar1Img from "../ChatGPT Image 24 ago 2026, 12_16_16.png";
-import pilar2Img from "../ChatGPT Image 24 ago 2026, 13_32_04.png";
-import pilar3Img from "../ChatGPT Image 24 ago 2026, 13_31_41.png";
+import pilar1Img from "../assets/Pilar-1.webp";
+import pilar2Img from "../assets/Pilar-3.webp";
+import pilar3Img from "../assets/Pilar-2.webp";
 
 const pillarsData = [
   {

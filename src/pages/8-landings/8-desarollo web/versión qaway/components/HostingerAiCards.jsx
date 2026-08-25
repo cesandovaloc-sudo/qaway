@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import mockup1 from "../ChatGPT Image 24 ago 2026, 19_57_02.png";
-import mockup2 from "../epc_screenshot_3_4.png";
-import mockup3 from "../ChatGPT Image 24 ago 2026, 18_27_46.png";
+import mockup1 from "../assets/Landing-Pages.webp";
+import mockup2 from "../assets/Sitios-Web.webp";
+import mockup3 from "../assets/Tiendas-Online.webp";
 import { Layers, Sparkles, TrendingUp, Gauge, Search, Smartphone } from "lucide-react";
 
 export function HostingerAiCards() {
