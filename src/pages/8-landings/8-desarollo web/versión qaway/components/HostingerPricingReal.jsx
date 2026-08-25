@@ -15,6 +15,7 @@ export function HostingerPricingReal() {
       popular: false,
       btnText: "Quiero mi Web Comercial",
       btnClass: "h-btn-plan-dark",
+      waLink: "https://wa.me/51930756781?text=Hola%20Qaway%20Lab%2C%20quiero%20cotizar%20el%20plan%20Web%20Comercial%20por%20S%2F%20290.",
       features: [
         "Hasta 5 páginas principales",
         "Diseño personalizado",
@@ -37,6 +38,7 @@ export function HostingerPricingReal() {
       badge: "Más elegido",
       btnText: "Quiero mi One Web",
       btnClass: "h-btn-plan-orange",
+      waLink: "https://wa.me/51930756781?text=Hola%20Qaway%20Lab%2C%20quiero%20aprovechar%20la%20oferta%20de%20lanzamiento%20de%20la%20One%20Web%20por%20S%2F%2079.90.",
       features: [
         "1 página de alto impacto",
         "Diseño adaptado",
@@ -58,6 +60,7 @@ export function HostingerPricingReal() {
       popular: false,
       btnText: "Quiero mi Tienda Online",
       btnClass: "h-btn-plan-dark",
+      waLink: "https://wa.me/51930756781?text=Hola%20Qaway%20Lab%2C%20quiero%20solicitar%20el%20plan%20Tienda%20Online%20por%20S%2F%20490.",
       features: [
         "Catálogo de productos",
         "Carrito de compras",
@@ -176,7 +179,9 @@ export function HostingerPricingReal() {
 
                 {/* Botón CTA */}
                 <a
-                  href="#contacto"
+                  href={p.waLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     display: "block",
                     width: "100%",

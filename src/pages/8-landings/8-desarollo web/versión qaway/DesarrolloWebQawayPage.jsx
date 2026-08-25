@@ -20,6 +20,7 @@ import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
 import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
 import { ExitIntentModal } from "./components/ExitIntentModal.jsx";
+import { FloatingWhatsAppButton } from "./components/FloatingWhatsAppButton.jsx";
 import "./styles/qaway-landing.css";
 
 export default function DesarrolloWebQawayPage() {
@@ -65,6 +66,9 @@ export default function DesarrolloWebQawayPage() {
       
       {/* Pop-up de Intento de Salida (Exit-Intent) */}
       <ExitIntentModal />
+
+      {/* Botón Flotante Permanente de WhatsApp */}
+      <FloatingWhatsAppButton />
     </div>
   );
 }
