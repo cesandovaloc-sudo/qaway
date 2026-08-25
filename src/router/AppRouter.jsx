@@ -154,6 +154,10 @@ export default function AppRouter() {
           element={renderRoute('proyectos', <MesaSelectaPage />)}
         />
         <Route
+          path="/proyectos/epc/*"
+          element={<EpcPage />}
+        />
+        <Route
           path="/pruebas/inicio-descartado"
           element={renderRoute('pruebas', <DiscardedInicioPage />)}
         />
@@ -198,7 +202,6 @@ export default function AppRouter() {
           <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
-          <Route path="proyectos/epc/*" element={<EpcPage />} />
           <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
           <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
