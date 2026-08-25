@@ -38,27 +38,27 @@ export function DigitalCountdown({ targetDays = 4 }) {
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
       {units.map((u) => {
         const [d1, d2] = u.value.split("");
         return (
-          <div key={u.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+          <div key={u.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "7px" }}>
             {/* Par de Cajas Dígito */}
-            <div style={{ display: "flex", gap: "4px" }}>
+            <div style={{ display: "flex", gap: "3px" }}>
               <div
                 style={{
                   width: "36px",
-                  height: "44px",
-                  background: "linear-gradient(180deg, #ff453a 0%, #e0281b 100%)",
-                  borderRadius: "8px",
+                  height: "46px",
+                  background: "#e11938",
+                  borderRadius: "6px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "24px",
+                  fontSize: "25px",
                   fontWeight: "800",
                   color: "#ffffff",
                   fontFamily: "system-ui, -apple-system, sans-serif",
-                  boxShadow: "0 4px 10px rgba(224, 40, 27, 0.35)",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.12)",
                 }}
               >
                 {d1}
@@ -66,23 +66,23 @@ export function DigitalCountdown({ targetDays = 4 }) {
               <div
                 style={{
                   width: "36px",
-                  height: "44px",
-                  background: "linear-gradient(180deg, #ff453a 0%, #e0281b 100%)",
-                  borderRadius: "8px",
+                  height: "46px",
+                  background: "#e11938",
+                  borderRadius: "6px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "24px",
+                  fontSize: "25px",
                   fontWeight: "800",
                   color: "#ffffff",
                   fontFamily: "system-ui, -apple-system, sans-serif",
-                  boxShadow: "0 4px 10px rgba(224, 40, 27, 0.35)",
+                  boxShadow: "0 2px 6px rgba(0, 0, 0, 0.12)",
                 }}
               >
                 {d2}
               </div>
             </div>
-            <span style={{ fontSize: "11px", fontWeight: "700", color: "#71717a", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            <span style={{ fontSize: "12px", fontWeight: "600", color: "#4b5563" }}>
               {u.label}
             </span>
           </div>

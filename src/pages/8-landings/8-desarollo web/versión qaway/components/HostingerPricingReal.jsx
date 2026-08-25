@@ -81,13 +81,9 @@ export function HostingerPricingReal() {
             TARIFARIO & PRECIOS
           </span>
 
-          <h2 style={{ fontSize: "clamp(2rem, 3.4vw, 2.7rem)", fontWeight: "700", color: "#111111", margin: "0 0 14px", lineHeight: "1.15", letterSpacing: "-0.03em" }}>
+          <h2 style={{ fontSize: "clamp(2rem, 3.4vw, 2.7rem)", fontWeight: "700", color: "#111111", margin: "0 0 20px", lineHeight: "1.15", letterSpacing: "-0.03em" }}>
             Planes transparentes con descuento de lanzamiento
           </h2>
-          
-          <p style={{ color: "#71717a", fontSize: "15.5px", lineHeight: "1.55", margin: "0 0 28px" }}>
-            Precio cerrado antes de empezar. Sin mensualidades ocultas ni llamadas de venta.
-          </p>
 
           {/* Temporizador de Oferta de Lanzamiento Estilo Bloques */}
           <div style={{ margin: "0 auto 10px" }}>
