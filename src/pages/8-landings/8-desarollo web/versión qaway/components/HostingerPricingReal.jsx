@@ -94,7 +94,7 @@ export function HostingerPricingReal() {
               <Flame size={16} fill="#e0281b" />
               <span>La oferta de lanzamiento expira en:</span>
             </div>
-            <DigitalCountdown targetDays={4} />
+            <DigitalCountdown targetDays={6} />
           </div>
         </div>
 

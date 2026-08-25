@@ -141,7 +141,7 @@ export function ExitIntentModal() {
 
             {/* Temporizador Digital en Bloques */}
             <div style={{ marginBottom: "30px" }}>
-              <DigitalCountdown targetDays={4} />
+              <DigitalCountdown targetDays={6} />
             </div>
 
             {/* Botón CTA */}

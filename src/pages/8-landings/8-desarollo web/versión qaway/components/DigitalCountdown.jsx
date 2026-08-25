@@ -70,7 +70,7 @@ export function DigitalCountdown({ targetDays = 6 }) {
   });
 
   useEffect(() => {
-    const STORAGE_KEY = "qw_launch_offer_deadline_v2";
+    const STORAGE_KEY = "qw_launch_offer_deadline_v6days";
     const CYCLE_MS = targetDays * 24 * 60 * 60 * 1000;
 
     // Obtener o crear fecha límite persistente de 6 días
