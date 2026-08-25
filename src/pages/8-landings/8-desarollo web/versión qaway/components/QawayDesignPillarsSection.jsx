@@ -240,81 +240,89 @@ export function QawayDesignPillarsSection() {
           </div>
 
           {/* Columna Derecha: Tarjeta Blanca con Altura Ampliada un 5% (345px) */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              whileHover={{ y: -4, boxShadow: "0 20px 48px rgba(0, 0, 0, 0.09)", transition: { duration: 0.2, ease: "easeOut" } }}
-              transition={{ duration: 0.3 }}
-              style={{
-                background: "#ffffff",
-                borderRadius: "12px",
-                border: "1px solid #e4e4e7",
-                overflow: "hidden",
-                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
-                cursor: "default",
-              }}
-            >
-              <div style={{ height: "345px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
-                <img
-                  src={current.image}
-                  alt={current.highlight}
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    left: "16px",
-                    background: "rgba(255, 255, 255, 0.94)",
-                    backdropFilter: "blur(8px)",
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
-                    borderRadius: "999px",
-                    padding: "6px 14px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    color: "#18181b",
-                    fontSize: "11px",
-                    fontWeight: "700",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fe6612" }} />
-                  <span>{current.featureTag}</span>
+          <div style={{ width: "100%", minHeight: "510px", position: "relative" }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                whileHover={{ y: -4, boxShadow: "0 20px 48px rgba(0, 0, 0, 0.09)", transition: { duration: 0.2, ease: "easeOut" } }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  background: "#ffffff",
+                  borderRadius: "12px",
+                  border: "1px solid #e4e4e7",
+                  overflow: "hidden",
+                  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04)",
+                  cursor: "default",
+                  minHeight: "510px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ height: "345px", overflow: "hidden", position: "relative", background: "#f1f3f7" }}>
+                  <img
+                    src={current.image}
+                    alt={current.highlight}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "16px",
+                      left: "16px",
+                      background: "rgba(255, 255, 255, 0.94)",
+                      backdropFilter: "blur(8px)",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      borderRadius: "999px",
+                      padding: "6px 14px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      color: "#18181b",
+                      fontSize: "11px",
+                      fontWeight: "700",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    }}
+                  >
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#fe6612" }} />
+                    <span>{current.featureTag}</span>
+                  </div>
                 </div>
-              </div>
 
-              <div style={{ padding: "26px" }}>
-                <h4 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 6px", fontFamily: "var(--qw-font-display)" }}>
-                  {current.highlight}
-                </h4>
-                <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "16px" }}>
-                  {current.subHighlight}
-                </span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {current.badges.map((badge) => (
-                    <span
-                      key={badge}
-                      style={{
-                        background: "#f4f4f5",
-                        border: "1px solid #e4e4e7",
-                        color: "#3f3f46",
-                        padding: "4px 10px",
-                        borderRadius: "6px",
-                        fontSize: "11px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {badge}
+                <div style={{ padding: "24px 26px 26px", flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: "165px" }}>
+                  <div>
+                    <h4 style={{ fontSize: "19px", fontWeight: "700", color: "#111111", margin: "0 0 6px", fontFamily: "var(--qw-font-display)" }}>
+                      {current.highlight}
+                    </h4>
+                    <span style={{ fontSize: "13px", color: "#71717a", display: "block", marginBottom: "14px" }}>
+                      {current.subHighlight}
                     </span>
-                  ))}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {current.badges.map((badge) => (
+                      <span
+                        key={badge}
+                        style={{
+                          background: "#f4f4f5",
+                          border: "1px solid #e4e4e7",
+                          color: "#3f3f46",
+                          padding: "4px 10px",
+                          borderRadius: "6px",
+                          fontSize: "11px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </motion.div>
       </div>
     </section>
