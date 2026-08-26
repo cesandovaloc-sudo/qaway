@@ -37,9 +37,7 @@ import ContableLandingPage from '@/pages/8-landings/3-contable/ContableLandingPa
 import RestauracionFotograficaPage from '@/pages/8-landings/4-restauracion-fotografica/RestauracionFotograficaPage'
 import FotografiaLinkedinPage from '@/pages/8-landings/5-fotografia-linkedin/FotografiaLinkedinPage'
 import RestauracionFotografica2Page from '@/pages/8-landings/6-restauracion-fotografica2/RestauracionFotografica2Page'
-import DesarrolloWebLandingPage from '@/pages/8-landings/7-desarrollo web/DesarrolloWebLandingPage'
 import DesarrolloWebSuperpowerPage from '@/pages/8-landings/8-desarollo web/DesarrolloWebSuperpowerPage'
-import HostingerLandingPage from '@/pages/8-landings/8-desarollo web/versión hostinger/HostingerLandingPage.jsx'
 import DesarrolloWebQawayPage from '@/pages/8-landings/8-desarollo web/versión qaway/DesarrolloWebQawayPage.jsx'
 import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
@@ -111,7 +109,7 @@ export default function AppRouter() {
         />
         <Route
           path="/landings/desarrollo-web"
-          element={renderPublicPathRoute('landings', '/landings/desarrollo-web', <DesarrolloWebLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/desarrollo-web', <DesarrolloWebQawayPage />)}
         />
         <Route
           path="/landings/desarrollo-web-superpower"
@@ -119,11 +117,11 @@ export default function AppRouter() {
         />
         <Route
           path="/landings/hostinger"
-          element={renderPublicPathRoute('landings', '/landings/hostinger', <HostingerLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/hostinger', <DesarrolloWebQawayPage />)}
         />
         <Route
           path="/landings/desarrollo-web-hostinger"
-          element={renderPublicPathRoute('landings', '/landings/desarrollo-web-hostinger', <HostingerLandingPage />)}
+          element={renderPublicPathRoute('landings', '/landings/desarrollo-web-hostinger', <DesarrolloWebQawayPage />)}
         />
         <Route
           path="/landings/desarrollo-web-qaway"
