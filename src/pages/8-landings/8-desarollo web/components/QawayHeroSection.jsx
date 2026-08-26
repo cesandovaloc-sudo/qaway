@@ -165,11 +165,15 @@ export function QawayHeroSection() {
             </div>
           </motion.div>
 
-          {/* Columna Derecha: Composición en Capas Estáticas (Una detrás de otra) */}
+          {/* Columna Derecha: Composición en Capas con Transiciones y Hover 3D */}
           <div className="h-hero-showcase-container" style={{ position: "relative" }}>
             
             {/* IMAGEN 2 (Fondo / Gelato) */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, x: 28, y: 10 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
+              whileHover={{ y: -6, x: 6, transition: { duration: 0.25, ease: "easeOut" } }}
               style={{
                 position: "absolute",
                 top: "0px",
@@ -181,6 +185,7 @@ export function QawayHeroSection() {
                 background: "#ffffff",
                 boxShadow: "0 15px 35px -8px rgba(0, 0, 0, 0.16)",
                 zIndex: 1,
+                cursor: "pointer",
               }}
             >
               <img
@@ -188,10 +193,14 @@ export function QawayHeroSection() {
                 alt="Agencia creativa diseño web"
                 className="h-hero-layer-img"
               />
-            </div>
+            </motion.div>
 
             {/* IMAGEN 1 (Frente / NÖRA) */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
+              whileHover={{ y: -8, scale: 1.015, boxShadow: "0 35px 75px -15px rgba(0, 0, 0, 0.36)", transition: { duration: 0.25, ease: "easeOut" } }}
               style={{
                 position: "relative",
                 top: "40px",
@@ -203,6 +212,7 @@ export function QawayHeroSection() {
                 background: "#ffffff",
                 boxShadow: "0 30px 65px -15px rgba(0, 0, 0, 0.3)",
                 zIndex: 2,
+                cursor: "pointer",
               }}
             >
               <img
@@ -210,7 +220,7 @@ export function QawayHeroSection() {
                 alt="Soluciones TI y desarrollo web"
                 className="h-hero-layer-img"
               />
-            </div>
+            </motion.div>
 
           </div>
         </div>
