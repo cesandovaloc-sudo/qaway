@@ -1,62 +1,63 @@
 /* ==========================================================================
-   ESTILOS OFICIALES: QAWAY STUDIO (SUITE PLANE.SO & DUB.CO)
+   ESTILOS OFICIALES: QAWAY STUDIO (ESTILO APPLE / MODERN SAAS MINIMALIST)
+   Inspirado en macOS Sequoia, Linear & Apple Design Guidelines
    Tipografía: Arial Narrow / Roboto Condensed (Display) + Inter (Sans)
-   Gradientes: Variaciones de Naranja Qaway (#ff4b0b, #fe6612, #ff7a45) + Grises (#111111, #18181b, #27272a, #f4f4f5)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --qw-font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
-  --qw-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --qw-font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --qw-font-mono: "JetBrains Mono", monospace;
   
-  /* Variaciones de Naranja Qaway */
+  /* Acento Quirúrgico Qaway */
   --qw-primary: #ff4b0b;
   --qw-primary-hover: #fd5605;
-  --qw-primary-light: #ff7a45;
-  --qw-primary-soft: #fff2eb;
-  --qw-grad-orange: linear-gradient(135deg, #ff7a45 0%, #ff4b0b 50%, #e03e00 100%);
-  --qw-grad-orange-subtle: linear-gradient(135deg, rgba(255, 75, 11, 0.12) 0%, rgba(254, 102, 18, 0.04) 100%);
+  --qw-primary-light: rgba(255, 75, 11, 0.08);
+  --qw-primary-glow: 0 4px 16px rgba(255, 75, 11, 0.22);
   
-  /* Variaciones de Grises */
-  --qw-dark: #111111;
-  --qw-dark-card: #18181b;
-  --qw-grad-dark: linear-gradient(135deg, #1e2026 0%, #111111 100%);
-  --qw-grad-card: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  --qw-border: #e4e4e7;
-  --qw-border-subtle: #f4f4f5;
-  --qw-bg-subtle: #fbfbfc;
+  /* Superficies Apple Glassmorphism */
+  --qw-bg-app: #fbfbfd;
+  --qw-bg-surface: #ffffff;
+  --qw-bg-glass: rgba(255, 255, 255, 0.82);
+  --qw-border-hairline: rgba(0, 0, 0, 0.05);
+  --qw-border-subtle: rgba(0, 0, 0, 0.08);
+  
+  /* Escala Tipográfica y Contraste */
+  --qw-text-main: #111113;
+  --qw-text-muted: #6e6e73;
+  --qw-text-tertiary: #a1a1a6;
 }
 
-/* Espaciado del Navbar Global */
+/* Base App Root con Espaciado Suave del Navbar */
 .qw-plane-app-root {
   min-height: 100vh;
-  padding-top: 84px; /* Colchón superior para no chocar con el Navbar fijo */
-  background: radial-gradient(circle at 10% 10%, rgba(255, 75, 11, 0.04) 0%, transparent 50%),
-              radial-gradient(circle at 90% 80%, rgba(25, 25, 24, 0.03) 0%, transparent 60%),
-              #f8f9fa;
-  color: #111111;
+  padding-top: 80px;
+  background-color: var(--qw-bg-app);
+  color: var(--qw-text-main);
   font-family: var(--qw-font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 .qw-plane-layout-grid {
   display: grid;
-  grid-template-columns: 270px 1fr;
-  min-height: calc(100vh - 84px);
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 80px);
 }
 
 /* ==========================================================================
-   1. SIDEBAR LATERAL CON DEGRADADOS
+   1. SIDEBAR LATERAL (APPLE TRANSLUCENT MINIMALIST)
    ========================================================================== */
 .qw-plane-sidebar {
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  border-right: 1px solid var(--qw-border);
+  background: var(--qw-bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--qw-border-hairline);
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 20px;
 }
 
 .qw-plane-ws-header {
@@ -64,7 +65,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 4px 14px;
-  border-bottom: 1px solid #f4f4f5;
+  border-bottom: 1px solid var(--qw-border-hairline);
 }
 
 .qw-plane-ws-brand {
@@ -74,18 +75,18 @@
 }
 
 .qw-plane-ws-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: var(--qw-grad-dark);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #1d1d1f 0%, #111113 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--qw-font-display);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .qw-plane-ws-info strong {
@@ -93,25 +94,25 @@
   font-size: 13.5px;
   font-weight: 700;
   font-family: var(--qw-font-display);
-  color: #111111;
+  color: var(--qw-text-main);
   letter-spacing: -0.01em;
 }
 
 .qw-plane-ws-info small {
   font-size: 11px;
-  color: #71717a;
+  color: var(--qw-text-muted);
   font-weight: 500;
 }
 
 .qw-plane-ws-back {
-  color: #a1a1aa;
+  color: var(--qw-text-tertiary);
   padding: 6px;
   border-radius: 6px;
   transition: all 0.15s ease;
 }
 
 .qw-plane-ws-back:hover {
-  background: #f4f4f5;
+  background: rgba(0, 0, 0, 0.04);
   color: var(--qw-primary);
 }
 
@@ -126,54 +127,54 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--qw-grad-orange);
+  background: var(--qw-primary);
   color: #ffffff;
   border: none;
-  padding: 9px 14px;
+  padding: 8px 14px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   font-family: var(--qw-font-display);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(255, 75, 11, 0.25);
-  transition: all 0.15s ease;
+  box-shadow: var(--qw-primary-glow);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .qw-plane-btn-new-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(255, 75, 11, 0.35);
+  background: var(--qw-primary-hover);
+  transform: scale(1.01);
 }
 
 .qw-plane-btn-new-proj {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
-  border: 1px solid var(--qw-border);
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  border: 1px solid var(--qw-border-hairline);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #111111;
+  color: var(--qw-text-main);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-new-proj:hover {
-  border-color: var(--qw-primary);
-  color: var(--qw-primary);
+  background: #f4f4f5;
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .qw-plane-nav-group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .qw-plane-nav-title {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
-  color: #a1a1aa;
+  color: var(--qw-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0 8px 6px;
@@ -184,33 +185,34 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   background: transparent;
   border: none;
   font-size: 13px;
-  font-weight: 600;
-  color: #52525b;
+  font-weight: 500;
+  color: var(--qw-text-muted);
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease;
 }
 
 .qw-plane-nav-item:hover {
-  background: #f4f4f5;
-  color: #111111;
+  background: rgba(0, 0, 0, 0.035);
+  color: var(--qw-text-main);
 }
 
 .qw-plane-nav-item.is-active {
-  background: var(--qw-grad-dark);
+  background: #111113;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .qw-plane-projects-group {
-  margin-top: 10px;
-  border-top: 1px solid #f4f4f5;
-  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 1px solid var(--qw-border-hairline);
+  padding-top: 14px;
 }
 
 .qw-plane-group-header {
@@ -222,7 +224,7 @@
 }
 
 .qw-plane-toggle-arrow {
-  color: #a1a1aa;
+  color: var(--qw-text-tertiary);
   transition: transform 0.2s ease;
 }
 
@@ -233,33 +235,33 @@
 .qw-plane-projects-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 10px;
+  gap: 3px;
+  margin-top: 8px;
 }
 
 .qw-plane-project-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-plane-project-item:hover {
-  background: #f4f4f5;
+  background: rgba(0, 0, 0, 0.035);
 }
 
 .qw-plane-project-item.is-selected {
-  background: var(--qw-grad-orange-subtle);
+  background: var(--qw-primary-light);
   border-left: 3px solid var(--qw-primary);
 }
 
 .qw-plane-proj-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -276,27 +278,26 @@
   font-size: 13px;
   font-weight: 700;
   font-family: var(--qw-font-display);
-  color: #111111;
+  color: var(--qw-text-main);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 
 .qw-plane-proj-text small {
-  font-size: 11px;
-  color: #71717a;
+  font-size: 10.5px;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-proj-status-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 6px rgba(255, 75, 11, 0.4);
 }
 
 /* ==========================================================================
-   2. TOPBAR & WORKSPACE CON DEGRADADOS DE GRISES Y NARANJA
+   2. TOPBAR & WORKSPACE (MINIMAL AIRY SAAS)
    ========================================================================== */
 .qw-plane-workspace {
   background: #ffffff;
@@ -308,44 +309,42 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 32px;
-  border-bottom: 1px solid var(--qw-border);
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  padding: 18px 36px;
+  border-bottom: 1px solid var(--qw-border-hairline);
+  background: #ffffff;
 }
 
 .qw-plane-topbar-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .qw-plane-proj-key-badge {
-  background: var(--qw-grad-dark);
+  background: #111113;
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 6px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   font-family: var(--qw-font-display);
-  letter-spacing: 0.05em;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  letter-spacing: 0.04em;
 }
 
 .qw-plane-topbar-title {
   font-family: var(--qw-font-display) !important;
-  font-size: 24px !important;
+  font-size: 26px !important;
   font-weight: 700 !important;
-  color: #111111 !important;
+  color: var(--qw-text-main) !important;
   letter-spacing: -0.035em !important;
   margin: 0;
 }
 
 .qw-plane-topbar-plan {
-  font-size: 13px;
-  color: #52525b;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
-  border: 1px solid var(--qw-border);
-  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--qw-text-muted);
+  background: #f4f4f6;
+  padding: 4px 10px;
   border-radius: 6px;
   font-weight: 500;
 }
@@ -353,58 +352,55 @@
 .qw-plane-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .qw-plane-btn-share {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  border: 1px solid var(--qw-border);
-  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid var(--qw-border-subtle);
+  padding: 7px 14px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
-  color: #111111;
+  color: var(--qw-text-main);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-share:hover {
-  background: #f4f4f5;
-  border-color: #111111;
+  background: #f4f4f6;
 }
 
 .qw-plane-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--qw-grad-orange);
+  background: var(--qw-primary);
   color: #ffffff;
   border: none;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   font-family: var(--qw-font-display);
-  letter-spacing: -0.01em;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 75, 11, 0.25);
+  box-shadow: var(--qw-primary-glow);
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(255, 75, 11, 0.35);
+  background: var(--qw-primary-hover);
 }
 
 .qw-plane-tabs-bar {
   display: flex;
-  gap: 8px;
-  padding: 0 32px;
-  border-bottom: 1px solid var(--qw-border);
-  background: linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
+  gap: 6px;
+  padding: 0 36px;
+  border-bottom: 1px solid var(--qw-border-hairline);
+  background: #fafafa;
   overflow-x: auto;
 }
 
@@ -415,10 +411,10 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 13px 16px;
-  font-size: 13.5px;
+  padding: 12px 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: #71717a;
+  color: var(--qw-text-muted);
   cursor: pointer;
   white-space: nowrap;
   font-family: var(--qw-font-display);
@@ -427,7 +423,7 @@
 }
 
 .qw-plane-tab-btn:hover {
-  color: #111111;
+  color: var(--qw-text-main);
 }
 
 .qw-plane-tab-btn.is-active {
@@ -437,7 +433,7 @@
 }
 
 .qw-plane-content-body {
-  padding: 32px;
+  padding: 34px 36px;
   flex: 1;
 }
 
@@ -448,7 +444,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .qw-plane-toolbar-left {
@@ -458,17 +454,17 @@
 }
 
 .qw-plane-items-count {
-  font-size: 13.5px;
-  color: #52525b;
+  font-size: 13px;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-bulk-actions {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--qw-grad-dark);
+  background: #111113;
   color: #ffffff;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-size: 11.5px;
   font-weight: 600;
@@ -478,7 +474,7 @@
   background: #00b090;
   color: #ffffff;
   border: none;
-  padding: 3px 9px;
+  padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 700;
@@ -493,46 +489,46 @@
   align-items: center;
   gap: 6px;
   background: #ffffff;
-  border: 1px solid var(--qw-border);
-  padding: 7px 14px;
+  border: 1px solid var(--qw-border-subtle);
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .qw-plane-group-block {
-  margin-bottom: 26px;
+  margin-bottom: 24px;
 }
 
 .qw-plane-group-title-row {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .qw-plane-group-title {
   font-family: var(--qw-font-display) !important;
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-weight: 700 !important;
-  color: #111111 !important;
+  color: var(--qw-text-main) !important;
   margin: 0;
   letter-spacing: -0.02em !important;
 }
 
 .qw-plane-group-count {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
-  color: #71717a;
-  background: #f4f4f5;
-  padding: 2px 7px;
+  color: var(--qw-text-muted);
+  background: #f4f4f6;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 
 .qw-plane-items-table {
-  border: 1px solid var(--qw-border);
+  border: 1px solid var(--qw-border-hairline);
   border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .qw-plane-item-row {
@@ -540,10 +536,10 @@
   grid-template-columns: 24px 28px 80px 1fr 90px 130px 90px;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-bottom: 1px solid #f4f4f5;
-  font-size: 14px;
-  transition: background-color 0.1s ease;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.035);
+  font-size: 13.5px;
+  transition: background-color 0.12s ease;
 }
 
 .qw-plane-item-row:last-child {
@@ -551,7 +547,7 @@
 }
 
 .qw-plane-item-row:hover {
-  background-color: #fafafa;
+  background-color: #fafafc;
 }
 
 .qw-plane-item-row.is-done {
@@ -573,14 +569,14 @@
 
 .qw-plane-item-key {
   font-family: var(--qw-font-mono);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
-  color: #71717a;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-item-title {
   font-weight: 500;
-  color: #111111;
+  color: var(--qw-text-main);
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -588,7 +584,7 @@
 
 .qw-plane-item-row.is-done .qw-plane-item-title {
   text-decoration: line-through;
-  color: #a1a1aa;
+  color: var(--qw-text-tertiary);
 }
 
 .qw-plane-priority-badge {
@@ -598,29 +594,29 @@
   padding: 2px 7px;
   border-radius: 4px;
   font-family: var(--qw-font-display);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
 
 .priority-urgent { background: #fee2e2; color: #dc2626; }
 .priority-high { background: #ffedd5; color: #ea580c; }
 .priority-medium { background: #fef9c3; color: #ca8a04; }
-.priority-low { background: #f4f4f5; color: #71717a; }
+.priority-low { background: #f4f4f5; color: var(--qw-text-muted); }
 
 .qw-plane-col-assignee {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
-  color: #52525b;
+  font-size: 12px;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-avatar-mini {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #e4e4e7 0%, #d4d4d8 100%);
-  color: #111111;
-  font-size: 9.5px;
+  background: #f0f0f2;
+  color: var(--qw-text-main);
+  font-size: 9px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -631,8 +627,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11.5px;
-  color: #71717a;
+  font-size: 11px;
+  color: var(--qw-text-muted);
   font-family: var(--qw-font-mono);
 }
 
@@ -642,14 +638,13 @@
 .qw-plane-kanban-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  gap: 16px;
   align-items: flex-start;
 }
 
 .qw-plane-kanban-col {
-  background: linear-gradient(180deg, #f4f4f5 0%, #efede8 100%);
-  border: 1px solid var(--qw-border);
-  border-radius: 14px;
+  background: #f4f4f6;
+  border-radius: 12px;
   padding: 14px;
 }
 
@@ -657,17 +652,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   font-family: var(--qw-font-display);
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 700;
 }
 
 .qw-plane-col-badge {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
   background: #ffffff;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 4px;
 }
 
@@ -675,29 +670,29 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  color: #71717a;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-kanban-cards-wrap {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .qw-plane-kanban-card {
   background: #ffffff;
-  border: 1px solid var(--qw-border);
+  border: 1px solid var(--qw-border-hairline);
   border-radius: 10px;
-  padding: 14px;
+  padding: 13px;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: all 0.15s ease;
 }
 
 .qw-plane-kanban-card:hover {
   transform: translateY(-2px);
   border-color: var(--qw-primary);
-  box-shadow: 0 6px 16px rgba(255, 75, 11, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
 }
 
 .qw-plane-kcard-top {
@@ -708,10 +703,10 @@
 }
 
 .qw-plane-kcard-title {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #111111;
-  margin: 0 0 12px;
+  color: var(--qw-text-main);
+  margin: 0 0 10px;
   line-height: 1.35;
 }
 
@@ -719,15 +714,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #f4f4f5;
-  padding-top: 10px;
+  border-top: 1px solid #f4f4f6;
+  padding-top: 8px;
 }
 
 /* ==========================================================================
    5. CONTRATO SOW & DESCARGA
    ========================================================================== */
 .qw-plane-contract-wrapper {
-  max-width: 860px;
+  max-width: 840px;
   margin: 0 auto;
 }
 
@@ -735,14 +730,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .qw-plane-contract-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--qw-primary);
@@ -754,30 +749,28 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--qw-grad-dark);
+  background: #111113;
   color: #ffffff;
-  padding: 10px 22px;
+  padding: 9px 18px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   font-family: var(--qw-font-display);
   cursor: pointer;
   border: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-print:hover {
-  background: var(--qw-grad-orange);
-  transform: translateY(-1px);
+  background: var(--qw-primary);
 }
 
 .qw-plane-contract-sheet {
   background: #ffffff;
-  border: 1px solid var(--qw-border);
+  border: 1px solid var(--qw-border-hairline);
   border-radius: 14px;
-  padding: 48px 52px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.04);
+  padding: 44px 48px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .qw-plane-contract-header {
@@ -788,64 +781,64 @@
 
 .qw-plane-contract-logo {
   font-family: var(--qw-font-display);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 800;
-  color: #111111;
+  color: var(--qw-text-main);
   letter-spacing: -0.04em;
 }
 
 .qw-plane-contract-sub {
   font-size: 13px;
-  color: #71717a;
+  color: var(--qw-text-muted);
   margin: 2px 0 0;
 }
 
 .qw-plane-contract-code-box {
   text-align: right;
-  font-size: 11.5px;
-  color: #71717a;
+  font-size: 11px;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-contract-code-box strong {
   display: block;
   font-family: var(--qw-font-mono);
-  font-size: 14px;
-  color: #111111;
+  font-size: 13px;
+  color: var(--qw-text-main);
 }
 
 .qw-plane-contract-line {
   height: 2px;
-  background: var(--qw-grad-dark);
-  margin: 22px 0 26px;
+  background: #111113;
+  margin: 20px 0 24px;
 }
 
 .qw-plane-contract-parties {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  background: #fafafa;
-  border: 1px solid var(--qw-border);
+  gap: 20px;
+  background: #fbfbfc;
+  border: 1px solid var(--qw-border-hairline);
   border-radius: 10px;
-  padding: 18px 22px;
-  margin-bottom: 30px;
+  padding: 16px 20px;
+  margin-bottom: 26px;
 }
 
 .qw-plane-party-box strong {
   display: block;
-  font-size: 14.5px;
-  color: #111111;
+  font-size: 14px;
+  color: var(--qw-text-main);
   font-family: var(--qw-font-display);
   margin: 4px 0 2px;
 }
 
 .qw-plane-party-box span {
   display: block;
-  font-size: 12.5px;
-  color: #52525b;
+  font-size: 12px;
+  color: var(--qw-text-muted);
 }
 
 .qw-plane-party-role {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   color: var(--qw-primary);
   letter-spacing: 0.08em;
@@ -855,24 +848,24 @@
 .qw-plane-clauses-body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-bottom: 36px;
+  gap: 18px;
+  margin-bottom: 34px;
 }
 
 .qw-plane-clause-item h4 {
   font-family: var(--qw-font-display);
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 700;
-  color: #111111;
+  color: var(--qw-text-main);
   letter-spacing: -0.02em;
   margin: 0 0 6px;
 }
 
 .qw-plane-clause-item p,
 .qw-plane-clause-item ul {
-  font-size: 13.5px;
+  font-size: 13px;
   color: #3f3f46;
-  line-height: 1.6;
+  line-height: 1.55;
   margin: 0;
 }
 
@@ -885,8 +878,8 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 36px;
-  margin-top: 44px;
-  padding-top: 24px;
+  margin-top: 40px;
+  padding-top: 20px;
 }
 
 .qw-plane-signature-box {
@@ -894,9 +887,9 @@
 }
 
 .qw-plane-sig-line {
-  border-top: 1px solid #111111;
-  padding-top: 10px;
-  margin-bottom: 8px;
+  border-top: 1px solid #111113;
+  padding-top: 8px;
+  margin-bottom: 6px;
 }
 
 .qw-plane-sig-badge {
@@ -905,20 +898,181 @@
   color: #00b090;
   text-transform: uppercase;
   background: rgba(0, 176, 144, 0.1);
-  padding: 3px 9px;
+  padding: 2px 8px;
   border-radius: 4px;
 }
 
 .qw-plane-signature-box strong {
   display: block;
-  font-size: 13.5px;
-  color: #111111;
+  font-size: 13px;
+  color: var(--qw-text-main);
   font-family: var(--qw-font-display);
 }
 
 .qw-plane-signature-box small {
+  font-size: 11px;
+  color: var(--qw-text-muted);
+}
+
+/* ==========================================================================
+   MODALES (APPLE CLEAN MODAL)
+   ========================================================================== */
+.qw-gestor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.qw-gestor-modal-container {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px 28px;
+  border: 1px solid var(--qw-border-hairline);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+
+.qw-gestor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.qw-gestor-modal-close-btn {
+  background: #f4f4f6;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--qw-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-modal-close-btn:hover {
+  background: #e4e4e7;
+  color: #111113;
+}
+
+.qw-gestor-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.qw-gestor-form-label {
+  display: block;
   font-size: 11.5px;
-  color: #71717a;
+  font-weight: 700;
+  color: var(--qw-text-main);
+  font-family: var(--qw-font-display);
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.qw-gestor-form-input,
+.qw-gestor-form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--qw-border-subtle);
+  background: #ffffff;
+  font-size: 13.5px;
+  font-family: var(--qw-font-sans);
+  color: var(--qw-text-main);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.qw-gestor-form-input:focus,
+.qw-gestor-form-textarea:focus {
+  border-color: var(--qw-primary);
+}
+
+.qw-gestor-service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.qw-gestor-service-option {
+  border: 1.5px solid var(--qw-border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--qw-border-subtle);
+  color: var(--qw-text-main);
+  padding: 9px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--qw-font-display);
+  cursor: pointer;
+}
+
+.qw-gestor-btn-cancel:hover {
+  background: #f4f4f6;
+}
+
+.qw-gestor-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--qw-primary);
+  color: #ffffff;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--qw-font-display);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--qw-primary-glow);
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-submit:hover {
+  background: var(--qw-primary-hover);
+}
+
+/* ==========================================================================
+   ESTILOS DE IMPRESIÓN (PRINT)
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-contract, .printable-contract * {
+    visibility: visible;
+  }
+  .printable-contract {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
 }
 
 /* ==========================================================================
@@ -930,7 +1084,7 @@
   }
   .qw-plane-sidebar {
     border-right: none;
-    border-bottom: 1px solid var(--qw-border);
+    border-bottom: 1px solid var(--qw-border-hairline);
   }
   .qw-plane-kanban-grid {
     grid-template-columns: 1fr;
