@@ -4,9 +4,6 @@ import {
   FolderKanban,
   Layers,
   Plus,
-  Search,
-  CheckCircle2,
-  Clock,
   Sparkles,
   ChevronDown,
   Globe,
@@ -15,10 +12,7 @@ import {
   TrendingUp,
   FileText,
   Eye,
-  Shield,
   ArrowLeft,
-  ChevronRight,
-  Settings,
 } from "lucide-react";
 
 export function PlaneSidebar({
@@ -42,28 +36,25 @@ export function PlaneSidebar({
   return (
     <aside className="qw-plane-sidebar">
       
-      {/* 1. Header del Workspace */}
+      {/* 1. Header Minimalista */}
       <div className="qw-plane-ws-header">
         <div className="qw-plane-ws-brand">
-          <div className="qw-plane-ws-avatar">QW</div>
-          <div className="qw-plane-ws-info">
-            <strong>Qaway Lab Studio</strong>
-            <small>Enterprise Delivery</small>
-          </div>
+          <span className="qw-plane-ws-brand-title">Qaway Lab</span>
+          <span className="qw-plane-ws-tag">Studio</span>
         </div>
         <Link to="/hub" className="qw-plane-ws-back" title="Volver a Qaway Hub">
-          <ArrowLeft size={15} />
+          <ArrowLeft size={14} />
         </Link>
       </div>
 
-      {/* 2. Botones de Acción Rápida (Estilo Plane) */}
+      {/* 2. Botón de Acción Principal */}
       <div className="qw-plane-quick-actions">
         <button
           type="button"
           onClick={onOpenNewItemModal}
           className="qw-plane-btn-new-item"
         >
-          <Plus size={15} />
+          <Plus size={14} />
           <span>Nuevo Work Item</span>
         </button>
 
@@ -71,23 +62,23 @@ export function PlaneSidebar({
           type="button"
           onClick={onOpenNewProjectModal}
           className="qw-plane-btn-new-proj"
-          title="Crear Nuevo Proyecto"
+          title="Crear Proyecto"
         >
-          <Plus size={15} />
+          <Plus size={14} />
         </button>
       </div>
 
-      {/* 3. Navegación Principal & Vistas */}
+      {/* 3. Vistas Principales (Navegación Vectorial SVG Pura) */}
       <div className="qw-plane-nav-group">
-        <span className="qw-plane-nav-title">VISTAS PRINCIPALES</span>
+        <span className="qw-plane-nav-title">VISTAS</span>
         
         <button
           type="button"
           onClick={() => onSelectTab("work-items")}
           className={`qw-plane-nav-item ${activeTab === "work-items" ? "is-active" : ""}`}
         >
-          <Layers size={16} />
-          <span>Work Items (Tareas)</span>
+          <Layers size={15} />
+          <span>Work Items</span>
         </button>
 
         <button
@@ -95,7 +86,7 @@ export function PlaneSidebar({
           onClick={() => onSelectTab("kanban")}
           className={`qw-plane-nav-item ${activeTab === "kanban" ? "is-active" : ""}`}
         >
-          <FolderKanban size={16} />
+          <FolderKanban size={15} />
           <span>Tablero Kanban</span>
         </button>
 
@@ -104,8 +95,8 @@ export function PlaneSidebar({
           onClick={() => onSelectTab("milestones")}
           className={`qw-plane-nav-item ${activeTab === "milestones" ? "is-active" : ""}`}
         >
-          <Sparkles size={16} />
-          <span>Hitos & Ciclos (1-6)</span>
+          <Sparkles size={15} />
+          <span>Hitos & Fases (1-6)</span>
         </button>
 
         <button
@@ -113,8 +104,8 @@ export function PlaneSidebar({
           onClick={() => onSelectTab("contract")}
           className={`qw-plane-nav-item ${activeTab === "contract" ? "is-active" : ""}`}
         >
-          <FileText size={16} />
-          <span>Contrato SOW Oficial</span>
+          <FileText size={15} />
+          <span>Contrato SOW</span>
         </button>
 
         <button
@@ -122,20 +113,20 @@ export function PlaneSidebar({
           onClick={() => onSelectTab("client-portal")}
           className={`qw-plane-nav-item ${activeTab === "client-portal" ? "is-active" : ""}`}
         >
-          <Eye size={16} />
-          <span>Vista Portal Cliente</span>
+          <Eye size={15} />
+          <span>Portal Cliente</span>
         </button>
       </div>
 
-      {/* 4. Lista de Proyectos Activos (Plane Tree) */}
+      {/* 4. Proyectos Activos (Selector Limpio con Iconos Vectoriales) */}
       <div className="qw-plane-projects-group">
         <div
           className="qw-plane-group-header"
           onClick={() => setIsProjectsOpen(!isProjectsOpen)}
         >
-          <span className="qw-plane-nav-title">PROYECTOS ACTIVOS ({projects.length})</span>
+          <span className="qw-plane-nav-title">PROYECTOS ({projects.length})</span>
           <ChevronDown
-            size={14}
+            size={13}
             className={`qw-plane-toggle-arrow ${isProjectsOpen ? "is-open" : ""}`}
           />
         </div>
@@ -152,10 +143,7 @@ export function PlaneSidebar({
                   onClick={() => onSelectProject(proj.id)}
                   className={`qw-plane-project-item ${isSelected ? "is-selected" : ""}`}
                 >
-                  <div
-                    className="qw-plane-proj-icon"
-                    style={{ backgroundColor: `${proj.serviceColor}15`, color: proj.serviceColor }}
-                  >
+                  <div className="qw-plane-proj-icon">
                     <Icon size={13} />
                   </div>
 
@@ -164,12 +152,11 @@ export function PlaneSidebar({
                     <small>{proj.key} • {proj.progress}%</small>
                   </div>
 
-                  <div
-                    className="qw-plane-proj-status-dot"
-                    style={{
-                      backgroundColor: proj.status === "completed" ? "#00b090" : "#ff4b0b"
-                    }}
-                  />
+                  {proj.status === "completed" ? (
+                    <div className="qw-plane-proj-status-dot dot-completed" />
+                  ) : (
+                    <div className="qw-plane-proj-status-dot dot-active" />
+                  )}
                 </div>
               );
             })}

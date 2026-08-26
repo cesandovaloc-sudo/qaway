@@ -100,11 +100,12 @@ export const INITIAL_PROJECTS = [
 ];
 
 export const INITIAL_WORK_ITEMS = [
+  // Gelato Gourmet
   {
     id: "item-101",
     key: "QW-101",
     projectId: "proj-web-01",
-    title: "Discovery & Briefing: Levantamiento de catálogo de sabores y precios",
+    title: "Discovery: Ficha técnica de requerimientos comerciales y catálogo de productos",
     state: "done",
     stateLabel: "Completado",
     priority: "urgent",
@@ -119,7 +120,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-102",
     key: "QW-102",
     projectId: "proj-web-01",
-    title: "Firma de Contrato SOW & Confirmación de Anticipo 50%",
+    title: "Contrato SOW & Validación de Anticipo 50%",
     state: "done",
     stateLabel: "Completado",
     priority: "high",
@@ -134,13 +135,13 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-103",
     key: "QW-103",
     projectId: "proj-web-01",
-    title: "Diseño UI: Wireframes y Mockup interactivo en alta fidelidad",
+    title: "Diseño UI: Wireframes y Mockup interactivo con Sign-Off",
     state: "done",
     stateLabel: "Completado",
     priority: "high",
     priorityLabel: "Alta",
     assignee: "Valeria T.",
-    role: "UI/UX Designer",
+    role: "UI/UX",
     dueDate: "22 Ago",
     serviceId: "desarrollo-web",
     milestone: 3
@@ -149,7 +150,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-104",
     key: "QW-104",
     projectId: "proj-web-01",
-    title: "Frontend React: Maquetación Hero + Catálogo con animaciones GPU a 60 FPS",
+    title: "Frontend React: Maquetación Hero + Catálogo interactivo a 60 FPS",
     state: "in-progress",
     stateLabel: "En Progreso",
     priority: "urgent",
@@ -179,7 +180,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-106",
     key: "QW-106",
     projectId: "proj-web-01",
-    title: "Go-Live: Apuntamiento de DNS en gelatogourmet.pe y activación de SSL",
+    title: "Go-Live: Apuntamiento de DNS y activación de certificado SSL",
     state: "todo",
     stateLabel: "Por Hacer",
     priority: "medium",
@@ -194,13 +195,13 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-107",
     key: "QW-107",
     projectId: "proj-web-01",
-    title: "Auditoría Oficial Google Lighthouse: Certificación de velocidad 98+ y Schema JSON-LD",
+    title: "Auditoría Oficial Google Lighthouse: Certificación de velocidad 98/100",
     state: "todo",
     stateLabel: "Por Hacer",
     priority: "high",
     priorityLabel: "Alta",
     assignee: "Antigravity",
-    role: "QA / Performance",
+    role: "QA Engineer",
     dueDate: "30 Ago",
     serviceId: "desarrollo-web",
     milestone: 6
@@ -241,10 +242,10 @@ export const INITIAL_WORK_ITEMS = [
     key: "QW-203",
     projectId: "proj-brd-02",
     title: "Exportación de Brand Kit Master: Vectores AI, SVG, PNG y tipografías",
-    state: "backlog",
-    stateLabel: "Backlog",
-    priority: "low",
-    priorityLabel: "Baja",
+    state: "todo",
+    stateLabel: "Por Hacer",
+    priority: "medium",
+    priorityLabel: "Media",
     assignee: "Valeria T.",
     role: "Brand Designer",
     dueDate: "05 Sep",
@@ -281,10 +282,71 @@ export const INITIAL_WORK_ITEMS = [
     dueDate: "15 Ago",
     serviceId: "sistemas-crm",
     milestone: 4
+  },
+  // Lumina Estética Dental
+  {
+    id: "item-401",
+    key: "QW-401",
+    projectId: "proj-mkt-04",
+    title: "Estructura de la oferta y copywriting para campaña de captación",
+    state: "done",
+    stateLabel: "Completado",
+    priority: "high",
+    priorityLabel: "Alta",
+    assignee: "Leo S.",
+    role: "Copywriter",
+    dueDate: "12 Ago",
+    serviceId: "marketing-leads",
+    milestone: 1
+  },
+  {
+    id: "item-402",
+    key: "QW-402",
+    projectId: "proj-mkt-04",
+    title: "Diseño de 4 formatos estáticos y 2 videos para Meta Ads",
+    state: "done",
+    stateLabel: "Completado",
+    priority: "high",
+    priorityLabel: "Alta",
+    assignee: "Valeria T.",
+    role: "Creative Designer",
+    dueDate: "16 Ago",
+    serviceId: "marketing-leads",
+    milestone: 3
+  },
+  {
+    id: "item-403",
+    key: "QW-403",
+    projectId: "proj-mkt-04",
+    title: "Configuración de Meta Pixel, API de Conversiones y tags UTM",
+    state: "in-progress",
+    stateLabel: "En Progreso",
+    priority: "urgent",
+    priorityLabel: "Urgente",
+    assignee: "Antigravity",
+    role: "Tracking / Tech",
+    dueDate: "28 Ago",
+    serviceId: "marketing-leads",
+    milestone: 4
+  },
+  {
+    id: "item-404",
+    key: "QW-404",
+    projectId: "proj-mkt-04",
+    title: "Optimización de conjunto de anuncios y reporte ejecutivo de ROAS",
+    state: "todo",
+    stateLabel: "Por Hacer",
+    priority: "medium",
+    priorityLabel: "Media",
+    assignee: "Leo S.",
+    role: "Media Buyer",
+    dueDate: "30 Ago",
+    serviceId: "marketing-leads",
+    milestone: 6
   }
 ];
 
-// Persistencia en LocalStorage
+// Persistencia en LocalStorage limpia
 export function getPlaneProjects() {
   try {
     const local = localStorage.getItem("qaway_plane_projects");
