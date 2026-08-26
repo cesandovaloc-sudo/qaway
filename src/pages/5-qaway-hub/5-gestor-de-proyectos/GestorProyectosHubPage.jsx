@@ -15,7 +15,8 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
-import { SERVICES_CONFIG, SAMPLE_PROJECTS } from "./data/services-milestones-data";
+import { SERVICES_CONFIG, getStoredProjects } from "./data/services-milestones-data";
+import { CreateProjectModal } from "./components/CreateProjectModal";
 import "./styles/gestor-proyectos.css";
 
 const serviceIcons = {
@@ -27,11 +28,17 @@ const serviceIcons = {
 
 export default function GestorProyectosHubPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projects, setProjects] = useState(() => getStoredProjects());
+
+  const handleProjectCreated = (newProject) => {
+    setProjects(getStoredProjects());
+  };
 
   const filteredProjects =
     selectedCategory === "all"
-      ? SAMPLE_PROJECTS
-      : SAMPLE_PROJECTS.filter((p) => p.serviceId === selectedCategory);
+      ? projects
+      : projects.filter((p) => p.serviceId === selectedCategory);
 
   return (
     <div className="qw-gestor-root">
@@ -42,6 +49,13 @@ export default function GestorProyectosHubPage() {
           content="Consola central de gestión de proyectos y ciclo de vida ágil para Desarrollo Web, Branding, CRM y Marketing."
         />
       </Helmet>
+
+      {/* Modal de Creación de Proyecto */}
+      <CreateProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onProjectCreated={handleProjectCreated}
+      />
 
       {/* Header del Dashboard */}
       <header className="qw-gestor-header">
@@ -67,11 +81,21 @@ export default function GestorProyectosHubPage() {
               </p>
             </div>
 
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="qw-gestor-btn-submit"
+                style={{ padding: "10px 20px" }}
+              >
+                <Plus size={16} />
+                <span>Nuevo Proyecto</span>
+              </button>
+
               <div className="qw-gestor-sow-card" style={{ background: "#ffffff" }}>
                 <FolderKanban size={18} color="#fe6612" />
                 <div>
-                  <strong>{SAMPLE_PROJECTS.length} Proyectos Activos</strong>
+                  <strong>{projects.length} Proyectos Registrados</strong>
                   <span>4 Servicios Configurados</span>
                 </div>
               </div>
@@ -90,7 +114,7 @@ export default function GestorProyectosHubPage() {
             onClick={() => setSelectedCategory("all")}
             className={`qw-gestor-dash-tab ${selectedCategory === "all" ? "is-active" : ""}`}
           >
-            <span>Todos los Servicios ({SAMPLE_PROJECTS.length})</span>
+            <span>Todos los Servicios ({projects.length})</span>
           </button>
 
           {Object.values(SERVICES_CONFIG).map((srv) => {

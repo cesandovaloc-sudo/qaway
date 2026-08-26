@@ -816,6 +816,162 @@
 }
 
 /* ==========================================================================
+   MODAL DE CREACIÓN DE PROYECTO (WIZARD GUIADO ESTILO LINEAR)
+   ========================================================================== */
+.qw-gestor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.qw-gestor-modal-container {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  maxWidth: 620px;
+  maxHeight: 90vh;
+  overflow-y: auto;
+  padding: 32px 28px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e4e4e7;
+}
+
+.qw-gestor-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.qw-gestor-modal-close-btn {
+  background: #f4f4f5;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #71717a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-modal-close-btn:hover {
+  background: #e4e4e7;
+  color: #111111;
+}
+
+.qw-gestor-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.qw-gestor-form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: #71717a;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+.qw-gestor-form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid #e4e4e7;
+  background: #fcfcfd;
+  font-size: 14px;
+  color: #18181b;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.qw-gestor-form-input:focus {
+  border-color: #fe6612;
+  background: #ffffff;
+}
+
+.qw-gestor-form-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e4e4e7;
+  background: #fcfcfd;
+  font-size: 13.5px;
+  color: #18181b;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.qw-gestor-form-textarea:focus {
+  border-color: #fe6612;
+  background: #ffffff;
+}
+
+.qw-gestor-service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.qw-gestor-service-option {
+  border: 1.5px solid #e4e4e7;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-cancel {
+  background: transparent;
+  border: 1px solid #e4e4e7;
+  color: #71717a;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qw-gestor-btn-cancel:hover {
+  background: #f4f4f5;
+  color: #111111;
+}
+
+.qw-gestor-btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fe6612;
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(254, 102, 18, 0.25);
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-submit:hover {
+  background: #ff7527;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {

@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { GestorHeader } from "./components/GestorHeader";
 import { MilestoneInteractiveStepper } from "./components/MilestoneInteractiveStepper";
 import { MilestoneDetailPanel } from "./components/MilestoneDetailPanel";
-import { SERVICES_CONFIG, SAMPLE_PROJECTS } from "./data/services-milestones-data";
+import { SERVICES_CONFIG, getStoredProjects } from "./data/services-milestones-data";
 import "./styles/gestor-proyectos.css";
 
 export default function ProjectTimelineViewerPage({ isPortalMode = false }) {
@@ -14,8 +14,9 @@ export default function ProjectTimelineViewerPage({ isPortalMode = false }) {
 
   // Buscar el proyecto por slug o fallback
   const project = useMemo(() => {
-    const found = SAMPLE_PROJECTS.find((p) => p.slug === currentSlug);
-    return found || SAMPLE_PROJECTS[0];
+    const allProjects = getStoredProjects();
+    const found = allProjects.find((p) => p.slug === currentSlug);
+    return found || allProjects[0];
   }, [currentSlug]);
 
   const service = SERVICES_CONFIG[project.serviceId] || SERVICES_CONFIG["desarrollo-web"];

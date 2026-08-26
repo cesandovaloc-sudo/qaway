@@ -457,3 +457,38 @@ export const SAMPLE_PROJECTS = [
     notes: "Campana de captacion para blanqueamiento dental en Lima con cierre directo por WhatsApp."
   }
 ];
+
+export function getStoredProjects() {
+  try {
+    const local = localStorage.getItem("qaway_gestor_projects");
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn("Error leyendo localStorage de proyectos:", e);
+  }
+  return SAMPLE_PROJECTS;
+}
+
+export function saveStoredProject(project) {
+  try {
+    const current = getStoredProjects();
+    const existingIndex = current.findIndex((p) => p.slug === project.slug || p.id === project.id);
+    let updated;
+    if (existingIndex >= 0) {
+      updated = [...current];
+      updated[existingIndex] = { ...updated[existingIndex], ...project };
+    } else {
+      updated = [project, ...current];
+    }
+    localStorage.setItem("qaway_gestor_projects", JSON.stringify(updated));
+    return updated;
+  } catch (e) {
+    console.warn("Error guardando proyecto en localStorage:", e);
+    return SAMPLE_PROJECTS;
+  }
+}
+
