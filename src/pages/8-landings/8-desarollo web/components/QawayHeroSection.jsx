@@ -12,6 +12,15 @@ const trustAvatars = [
 ];
 
 export function QawayHeroSection() {
+  const [frontIndex, setFrontIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFrontIndex((prev) => (prev === 0 ? 1 : 0));
+    }, 4500);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section id="inicio" className="h-hero-section-real">
       <div className="h-container">
@@ -165,59 +174,73 @@ export function QawayHeroSection() {
             </div>
           </motion.div>
 
-          {/* Columna Derecha: Composición en Capas con Transiciones y Hover 3D */}
-          <div className="h-hero-showcase-container" style={{ position: "relative" }}>
+          {/* Columna Derecha: Composición en Capas con Intercambio Infinito y Suave */}
+          <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "470px" }}>
             
-            {/* IMAGEN 2 (Fondo / Gelato) */}
+            {/* IMAGEN 1: Soluciones TI / NÖRA */}
             <motion.div
-              initial={{ opacity: 0, x: 28, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: 0 }}
-              transition={{ duration: 0.75, delay: 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
-              whileHover={{ y: -6, x: 6, transition: { duration: 0.25, ease: "easeOut" } }}
-              style={{
-                position: "absolute",
-                top: "0px",
-                right: "0px",
-                width: "88%",
-                maxWidth: "470px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                background: "#ffffff",
-                boxShadow: "0 15px 35px -8px rgba(0, 0, 0, 0.16)",
-                zIndex: 1,
-                cursor: "pointer",
+              animate={{
+                x: frontIndex === 0 ? -12 : 28,
+                y: frontIndex === 0 ? 30 : 0,
+                scale: frontIndex === 0 ? 1 : 0.94,
+                zIndex: frontIndex === 0 ? 10 : 2,
+                opacity: 1,
               }}
-            >
-              <img
-                src={heroBackImg}
-                alt="Agencia creativa diseño web"
-                className="h-hero-layer-img"
-              />
-            </motion.div>
-
-            {/* IMAGEN 1 (Frente / NÖRA) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
-              whileHover={{ y: -8, scale: 1.015, boxShadow: "0 35px 75px -15px rgba(0, 0, 0, 0.36)", transition: { duration: 0.25, ease: "easeOut" } }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                position: "relative",
-                top: "40px",
-                left: "-10px",
+                position: frontIndex === 0 ? "relative" : "absolute",
+                top: 0,
+                right: frontIndex === 0 ? "auto" : "0px",
+                left: frontIndex === 0 ? "-10px" : "auto",
                 width: "92%",
                 maxWidth: "490px",
                 borderRadius: "12px",
                 overflow: "hidden",
                 background: "#ffffff",
-                boxShadow: "0 30px 65px -15px rgba(0, 0, 0, 0.3)",
-                zIndex: 2,
+                boxShadow: frontIndex === 0 
+                  ? "0 30px 65px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
+                  : "0 15px 35px -8px rgba(0, 0, 0, 0.16)",
                 cursor: "pointer",
               }}
+              onClick={() => setFrontIndex(0)}
             >
               <img
                 src={heroFrontImg}
                 alt="Soluciones TI y desarrollo web"
+                className="h-hero-layer-img"
+              />
+            </motion.div>
+
+            {/* IMAGEN 2: Agencia Creativa / Gelato */}
+            <motion.div
+              animate={{
+                x: frontIndex === 1 ? -12 : 28,
+                y: frontIndex === 1 ? 30 : 0,
+                scale: frontIndex === 1 ? 1 : 0.94,
+                zIndex: frontIndex === 1 ? 10 : 2,
+                opacity: 1,
+              }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: frontIndex === 1 ? "relative" : "absolute",
+                top: 0,
+                right: frontIndex === 1 ? "auto" : "0px",
+                left: frontIndex === 1 ? "-10px" : "auto",
+                width: "92%",
+                maxWidth: "490px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                background: "#ffffff",
+                boxShadow: frontIndex === 1 
+                  ? "0 30px 65px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
+                  : "0 15px 35px -8px rgba(0, 0, 0, 0.16)",
+                cursor: "pointer",
+              }}
+              onClick={() => setFrontIndex(1)}
+            >
+              <img
+                src={heroBackImg}
+                alt="Agencia creativa diseño web"
                 className="h-hero-layer-img"
               />
             </motion.div>
