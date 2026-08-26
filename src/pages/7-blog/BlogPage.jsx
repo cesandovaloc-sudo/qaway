@@ -15,6 +15,13 @@ import {
   ArrowLeft,
   Search,
   Sparkles,
+  Zap,
+  Bot,
+  Compass,
+  Layers,
+  Star,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react'
 
 const categories = [
@@ -302,32 +309,21 @@ export default function BlogPage() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
+    <div className="flex min-h-screen flex-col justify-between bg-white selection:bg-[#ff4b0b] selection:text-white">
       <div>
-        <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#ffffff] pb-10 pt-24 text-[#191918] sm:pb-12 sm:pt-32">
-          <div className="absolute inset-0 z-0 overflow-hidden bg-[#ffffff] pointer-events-none select-none">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
-            <div
-              className="absolute bottom-0 right-0 top-0 w-[42%] bg-[#1a1918] shadow-2xl transition-all duration-300 md:w-[34%] lg:w-[28%]"
-              style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)' }}
-            >
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px] opacity-[0.14]" />
-              <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
-              <div className="absolute inset-0 bg-linear-to-l from-black/30 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 top-0 w-px bg-white/10" />
-            </div>
-          </div>
-
-          <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
-            <div>
-              <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+        {/* ========================================================================= */}
+        {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE (BLANCO EN EL NAVBAR -> CÁLIDO)     */}
+        {/* ========================================================================= */}
+        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#fff9f6] to-[#fff1eb] pb-14 pt-24 sm:pb-20 sm:pt-32">
+          <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+            <div className="max-w-3xl">
+              
+              <div className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
                 <span>/ Blog</span>
               </div>
 
               <motion.h1
-                className="qw-hero-title font-bold uppercase text-[#191918]"
+                className="text-4xl font-bold tracking-tight text-[#191918] sm:text-5xl lg:text-6xl"
                 style={displayFont}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -337,28 +333,68 @@ export default function BlogPage() {
               </motion.h1>
 
               <motion.p
-                className="mt-4 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
+                className="mt-4 max-w-2xl text-base leading-relaxed text-black/70 sm:text-lg"
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                Explora ideas por <strong className="font-bold text-[#ff4b0b]">pilares reales del negocio</strong>, no por etiquetas editoriales sueltas.
+                Explora ideas por <strong className="font-semibold text-[#191918]">pilares reales del negocio</strong>, no por etiquetas editoriales sueltas.
               </motion.p>
-            </div>
 
-            <div className="mt-7 flex flex-nowrap items-center gap-3 max-w-[78rem] relative">
+              {/* Buscador Integrado (Borde de foco Naranja) */}
+              <motion.div
+                className="mt-8 max-w-xl"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="flex items-center gap-3 rounded-lg border border-black/10 bg-white px-4 py-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[#ff4b0b] focus-within:shadow-[0_8px_30px_rgba(255,75,11,0.15)]">
+                  <Search className="h-5 w-5 text-black/40" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar temas, artículos o herramientas..."
+                    className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-black/40"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="text-xs font-bold text-black/40 hover:text-[#ff4b0b]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ========================================================================= */}
+        {/* BARRA DE PÍLDORAS / CATEGORÍAS (FONDO BLANCO + BOTÓN ACTIVO SUAVE)        */}
+        {/* ========================================================================= */}
+        <div className="border-b border-black/10 bg-white py-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+          <div className="mx-auto flex max-w-[94rem] items-center justify-between gap-4 px-6 sm:px-10 lg:px-14">
+            
+            {/* Lista de píldoras horizontal */}
+            <div className="flex flex-1 items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+              {/* Botón Todos */}
               <button
                 type="button"
                 onClick={() => selectCategory(null)}
-                className={`group flex w-[110px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
-                  activeCategory === null ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
+                className={`shrink-0 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all ${
+                  activeCategory === null
+                    ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
+                    : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
                 }`}
               >
-                <span className={`text-[11px] font-bold uppercase tracking-widest ${activeCategory === null ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>
-                  Todos
-                </span>
+                Todos
               </button>
 
+              {/* Categorías */}
               {categoriesWithCounts.map((cat) => {
                 const isActive = activeCategory === cat.key
                 return (
@@ -366,34 +402,34 @@ export default function BlogPage() {
                     key={cat.key}
                     type="button"
                     onClick={() => selectCategory(cat.key)}
-                    className={`group flex w-[130px] shrink-0 items-center justify-center rounded-md border border-black/10 px-4 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
-                      isActive ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
+                    className={`shrink-0 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
+                        : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
                     }`}
                   >
-                    <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>
-                      {cat.title}
-                    </span>
+                    {cat.title}
                   </button>
                 )
               })}
-
-              <label className={`group flex items-center gap-3 rounded-md border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.04)] transition-all duration-300 focus-within:border-[#ff4b0b]/50 focus-within:shadow-[0_18px_44px_rgba(0,0,0,0.08)] ${shouldExpandSearch ? 'w-[300px] flex-none' : 'w-[132px] flex-none'}`}>
-                <Search className="h-4 w-4 text-[#191918]/40 transition-colors group-focus-within:text-[#ff4b0b]" />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onFocus={() => setIsSearchExpanded(true)}
-                  onBlur={() => setIsSearchExpanded(false)}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder={shouldExpandSearch ? 'Buscar tema' : 'Buscar'}
-                  className={`w-full bg-transparent text-sm text-[#191918] outline-none transition-opacity duration-200 placeholder:text-[#191918]/45 ${shouldExpandSearch ? 'opacity-100' : 'opacity-0'}`}
-                />
-              </label>
             </div>
-          </div>
-        </section>
 
-        <section className="bg-[#f8f9fc] pb-12 pt-8 lg:pb-24 lg:pt-10">
+            {/* Selector lateral "Ver Todos" */}
+            <div className="hidden sm:block">
+              <button
+                type="button"
+                onClick={() => { selectCategory(null); setSearchQuery('') }}
+                className="flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3.5 py-2 text-xs font-medium text-[#191918] transition-colors hover:border-[#ff4b0b]/50 hover:text-[#ff4b0b]"
+              >
+                <span>Ver Todos</span>
+                <ChevronDown className="h-3.5 w-3.5 text-black/50" />
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <section className="bg-white pb-12 pt-8 lg:pb-24 lg:pt-10">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {activeCategory || isSearchActive ? (
               <>
@@ -422,11 +458,22 @@ export default function BlogPage() {
               </>
             ) : (
               <>
-                <div className="mb-8 border-b border-black/10 pb-4">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-                    Pilares destacados
+                <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-black/10 pb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
+                      Pilares destacados
+                    </h2>
+                    <p className="mt-1 text-xs text-black/60 sm:text-sm">
+                      Temas y guías seleccionadas por el equipo de Qaway Lab.
+                    </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => selectCategory(null)}
+                    className="self-start sm:self-auto rounded-lg border border-black/15 bg-white px-4 py-2 text-xs font-semibold text-[#191918] transition-colors hover:border-black/40 hover:bg-[#f4f6fa]"
+                  >
+                    Ver todos
+                  </button>
                 </div>
 
                 {highlightedArticles.length > 0 && (
@@ -440,7 +487,7 @@ export default function BlogPage() {
                     <div className="mb-8 border-b border-black/10 pb-4">
                       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
                         <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-                        MÃ¡s publicaciones
+                        Más publicaciones
                       </div>
                     </div>
 

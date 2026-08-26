@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
+import InicioPageV2 from '@/pages/1-inicio/InicioPageV2.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
 import {
   EstudioPage,
@@ -127,6 +128,10 @@ export default function AppRouter() {
         <Route
           path="/landings/desarrollo-web-qaway"
           element={renderPublicPathRoute('landings', '/landings/desarrollo-web-qaway', <DesarrolloWebQawayPage />)}
+        />
+        <Route
+          path="/inicio-v2"
+          element={<InicioPageV2 />}
         />
         <Route
           path="/proyectos/panaderia-josue"

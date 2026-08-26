@@ -30,6 +30,7 @@ const publicPathAllowList = new Set([
   '/landings/hostinger',
   '/landings/desarrollo-web-hostinger',
   '/landings/desarrollo-web-qaway',
+  '/inicio-v2',
   '/academy',
 ])
 

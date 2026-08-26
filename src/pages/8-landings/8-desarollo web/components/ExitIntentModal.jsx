@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sparkles, ArrowRight, Flame } from "lucide-react";
+import { X, Sparkles, ArrowRight } from "lucide-react";
 import { DigitalCountdown } from "./DigitalCountdown";
 
 export function ExitIntentModal() {
@@ -55,26 +55,27 @@ export function ExitIntentModal() {
             alignItems: "center",
             justifyContent: "center",
             padding: "20px",
-            backgroundColor: "rgba(0, 0, 0, 0.65)",
-            backdropFilter: "blur(8px)",
+            backgroundColor: "rgba(0, 0, 0, 0.45)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
           }}
           onClick={close}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             style={{
               position: "relative",
               width: "100%",
-              maxWidth: "520px",
+              maxWidth: "490px",
               background: "#ffffff",
-              borderRadius: "24px",
-              padding: "42px 32px 36px",
-              boxShadow: "0 25px 60px rgba(0, 0, 0, 0.3)",
+              borderRadius: "20px",
+              padding: "36px 28px 30px",
+              boxShadow: "0 20px 48px rgba(0, 0, 0, 0.12)",
               textAlign: "center",
-              border: "1px solid rgba(254, 102, 18, 0.2)",
+              border: "1px solid rgba(0, 0, 0, 0.08)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -85,13 +86,13 @@ export function ExitIntentModal() {
               aria-label="Cerrar modal"
               style={{
                 position: "absolute",
-                top: "18px",
-                right: "18px",
-                background: "#f4f4f5",
+                top: "16px",
+                right: "16px",
+                background: "#f4f4f6",
                 border: "none",
                 borderRadius: "50%",
-                width: "36px",
-                height: "36px",
+                width: "30px",
+                height: "30px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -104,40 +105,42 @@ export function ExitIntentModal() {
                 e.currentTarget.style.color = "#18181b";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#f4f4f5";
+                e.currentTarget.style.background = "#f4f4f6";
                 e.currentTarget.style.color = "#71717a";
               }}
             >
-              <X size={18} />
+              <X size={15} />
             </button>
 
-            {/* Badge de Alerta */}
+            {/* Badge Minimalista */}
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
-                background: "rgba(254, 102, 18, 0.1)",
-                border: "1px solid rgba(254, 102, 18, 0.25)",
-                color: "#fe6612",
-                fontSize: "12px",
-                fontWeight: "800",
-                padding: "5px 14px",
+                background: "#f4f4f6",
+                border: "1px solid rgba(0, 0, 0, 0.06)",
+                color: "#18181b",
+                fontSize: "11px",
+                fontWeight: "700",
+                letterSpacing: "0.04em",
+                padding: "4px 12px",
                 borderRadius: "9999px",
-                marginBottom: "18px",
+                marginBottom: "16px",
+                textTransform: "uppercase",
               }}
             >
-              <Flame size={15} />
-              <span>¡ESPERA! NO DEJES PASAR ESTA OPORTUNIDAD</span>
+              <Sparkles size={12} color="#ff4b0b" />
+              <span>OFERTA DE LANZAMIENTO</span>
             </div>
 
             {/* Título */}
             <h3
               style={{
-                fontSize: "clamp(1.5rem, 2.5vw, 1.85rem)",
-                fontWeight: "800",
+                fontSize: "clamp(1.4rem, 2.2vw, 1.7rem)",
+                fontWeight: "700",
                 color: "#111111",
-                margin: "0 0 10px",
+                margin: "0 0 8px",
                 letterSpacing: "-0.03em",
                 lineHeight: "1.2",
               }}
@@ -145,12 +148,12 @@ export function ExitIntentModal() {
               Asegura tu web profesional a precio de lanzamiento
             </h3>
 
-            <p style={{ color: "#52525b", fontSize: "14.5px", lineHeight: "1.55", margin: "0 0 26px" }}>
+            <p style={{ color: "#52525b", fontSize: "13.5px", lineHeight: "1.5", margin: "0 0 22px" }}>
               Obtén tu <strong>One Web por solo S/ 79.90</strong> antes de que expire la cuenta regresiva. Cupos limitados por mes.
             </p>
 
-            {/* Temporizador Digital en Bloques */}
-            <div style={{ marginBottom: "30px" }}>
+            {/* Temporizador Digital Minimalista */}
+            <div style={{ marginBottom: "24px" }}>
               <DigitalCountdown targetDays={6} />
             </div>
 
@@ -161,47 +164,31 @@ export function ExitIntentModal() {
               style={{
                 display: "flex",
                 width: "100%",
-                height: "52px",
+                height: "48px",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                borderRadius: "14px",
+                borderRadius: "10px",
                 border: "none",
-                background: "#fe6612",
+                background: "#ff4b0b",
                 color: "#ffffff",
-                fontSize: "15px",
-                fontWeight: "700",
+                fontSize: "14px",
+                fontWeight: "600",
                 cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(254, 102, 18, 0.35)",
-                transition: "all 0.2s ease",
+                boxShadow: "0 4px 14px rgba(255, 75, 11, 0.25)",
+                transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#ff7527";
+                e.currentTarget.style.background = "#fd5605";
                 e.currentTarget.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#fe6612";
+                e.currentTarget.style.background = "#ff4b0b";
                 e.currentTarget.style.transform = "none";
               }}
             >
               <span>Reclamar mi oferta de lanzamiento</span>
-              <ArrowRight size={17} />
-            </button>
-
-            <button
-              type="button"
-              onClick={close}
-              style={{
-                marginTop: "14px",
-                background: "transparent",
-                border: "none",
-                color: "#a1a1aa",
-                fontSize: "12.5px",
-                cursor: "pointer",
-                textDecoration: "underline",
-              }}
-            >
-              No gracias, prefiero pagar el precio regular
+              <ArrowRight size={15} />
             </button>
           </motion.div>
         </div>

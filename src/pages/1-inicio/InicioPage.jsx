@@ -757,7 +757,7 @@ function SistemasDigitalesSection() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f5f6f3] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#ffffff] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div className="flex flex-col justify-center">
@@ -1120,7 +1120,7 @@ function CoursesLandings() {
   const cursosHref = academyHref ? `${academyHref}/cursos` : '/academy'
 
   return (
-    <section className="bg-[#f5f6f3] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">
+    <section className="bg-[#ffffff] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">
       <div className="mx-auto flex w-full max-w-[94rem] flex-col">
         <Reveal className="mb-3 lg:mb-4 text-center">
           <p className="qw-section-kicker">Formación y soluciones</p>
