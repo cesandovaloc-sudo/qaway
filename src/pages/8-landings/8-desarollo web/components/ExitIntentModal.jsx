@@ -19,8 +19,18 @@ export function ExitIntentModal() {
       }
     };
 
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener("mouseleave", handleMouseLeave);
-    return () => document.removeEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const close = () => setIsOpen(false);

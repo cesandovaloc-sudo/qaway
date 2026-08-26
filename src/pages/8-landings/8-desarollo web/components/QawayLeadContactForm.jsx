@@ -204,11 +204,11 @@ export function QawayLeadContactForm() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>NOMBRE</label>
-                    <input type="text" name="name" required placeholder="Carlos Sandoval" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="text" name="name" required autoComplete="name" placeholder="Carlos Sandoval" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMAIL</label>
-                    <input type="email" name="email" required placeholder="hola@empresa.com" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="email" name="email" required autoComplete="email" placeholder="hola@empresa.com" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                 </div>
 
@@ -216,11 +216,11 @@ export function QawayLeadContactForm() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "16px" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>EMPRESA O MARCA</label>
-                    <input type="text" name="company" placeholder="Mi Marca SAC" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="text" name="company" autoComplete="organization" placeholder="Mi Marca SAC" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                     <label style={{ fontSize: "11px", fontWeight: "800", color: "#71717a", letterSpacing: "0.08em" }}>WHATSAPP</label>
-                    <input type="tel" name="phone" required placeholder="+51 999 999 999" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
+                    <input type="tel" name="phone" required autoComplete="tel" inputMode="tel" placeholder="+51 999 999 999" style={{ width: "100%", height: "48px", padding: "0 14px", borderRadius: "10px", border: "1px solid #e4e4e7", background: "#fcfcfd", fontSize: "14px", color: "#18181b", outline: "none" }} />
                   </div>
                 </div>
 

@@ -47,13 +47,14 @@ export function HostingerHeader() {
         {/* Brand Logo Oficial que lleva al inicio de la landing */}
         <a
           href="#inicio"
+          aria-label="Ir al inicio de Qaway Lab"
           className="text-xl font-semibold tracking-[-0.055em] text-[#20201f] transition-opacity hover:opacity-90 cursor-pointer"
         >
           Qaway <span className="text-[#fe6612]">Lab</span>
         </a>
 
         {/* Enlaces de Navegación de Landing con Efecto Oficial */}
-        <nav className="hidden items-center gap-7 md:flex lg:gap-10">
+        <nav aria-label="Navegación principal" className="hidden items-center gap-7 md:flex lg:gap-10">
           {navLinks.map((link) => (
             <div key={link.label} className="group relative flex h-full items-center">
               <a

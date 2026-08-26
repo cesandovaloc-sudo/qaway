@@ -189,6 +189,7 @@ export function HostingerPricingReal() {
                   href={p.waLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Elegir plan ${p.name}`}
                   style={{
                     display: "block",
                     width: "100%",
