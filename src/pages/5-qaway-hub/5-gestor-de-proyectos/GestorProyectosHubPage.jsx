@@ -145,215 +145,211 @@ export default function GestorProyectosHubPage() {
         onProjectCreated={handleProjectCreated}
       />
 
-      {/* CONTENEDOR PRINCIPAL CON RESPONSIVE DESIGN Y BORDES CONTENIDOS */}
-      <div className="qw-plane-main-container">
+      {/* SHELL DE APLICACIÓN NATIVA FULL-BLEED (IGUAL AL CRM) */}
+      <div className="qw-plane-layout-grid">
         
-        <div className="qw-plane-layout-grid">
+        {/* 1. SIDEBAR LATERAL (PINNED FULL-HEIGHT) */}
+        <PlaneSidebar
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onSelectProject={(id) => {
+            setSelectedProjectId(id);
+            const proj = projects.find(p => p.id === id);
+            if (proj) setActiveMilestoneStep(proj.activeMilestone || 1);
+          }}
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+          onOpenNewProjectModal={() => setIsNewProjModalOpen(true)}
+        />
+
+        {/* 2. ÁREA DE TRABAJO PRINCIPAL (FULL-WIDTH) */}
+        <main className="qw-plane-workspace">
           
-          {/* 1. SIDEBAR LATERAL */}
-          <PlaneSidebar
-            projects={projects}
-            selectedProjectId={selectedProjectId}
-            onSelectProject={(id) => {
-              setSelectedProjectId(id);
-              const proj = projects.find(p => p.id === id);
-              if (proj) setActiveMilestoneStep(proj.activeMilestone || 1);
-            }}
-            activeTab={activeTab}
-            onSelectTab={setActiveTab}
-            onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
-            onOpenNewProjectModal={() => setIsNewProjModalOpen(true)}
-          />
+          {/* Topbar del Proyecto */}
+          <header className="qw-plane-topbar">
+            <div className="qw-plane-topbar-left">
+              <span className="qw-plane-proj-key-badge">{currentProject.key}</span>
+              <h2 className="qw-plane-topbar-title">{currentProject.name}</h2>
+              <span className="qw-plane-topbar-plan">{currentProject.plan}</span>
+            </div>
 
-          {/* 2. ÁREA DE TRABAJO PRINCIPAL */}
-          <main className="qw-plane-workspace">
+            <div className="qw-plane-topbar-actions">
+              <button
+                type="button"
+                onClick={handleCopyClientLink}
+                className="qw-plane-btn-share"
+                title="Copiar enlace para el cliente"
+              >
+                {copiedLink ? (
+                  <>
+                    <Check size={13} color="#00b090" />
+                    <span style={{ color: "#00b090" }}>Link Copiado</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 size={13} />
+                    <span>Compartir Portal</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsNewItemModalOpen(true)}
+                className="qw-plane-btn-primary"
+              >
+                <Plus size={13} />
+                <span>Crear Tarea</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Barra de Pestañas de Vista */}
+          <div className="qw-plane-tabs-bar">
+            <button
+              type="button"
+              onClick={() => setActiveTab("work-items")}
+              className={`qw-plane-tab-btn ${activeTab === "work-items" ? "is-active" : ""}`}
+            >
+              <Layers size={14} />
+              <span>Work Items ({currentWorkItems.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("kanban")}
+              className={`qw-plane-tab-btn ${activeTab === "kanban" ? "is-active" : ""}`}
+            >
+              <FolderKanban size={14} />
+              <span>Tablero Kanban</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("milestones")}
+              className={`qw-plane-tab-btn ${activeTab === "milestones" ? "is-active" : ""}`}
+            >
+              <Sparkles size={14} />
+              <span>Hitos & Fases (1-6)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("contract")}
+              className={`qw-plane-tab-btn ${activeTab === "contract" ? "is-active" : ""}`}
+            >
+              <FileText size={14} />
+              <span>Contrato SOW</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("client-portal")}
+              className={`qw-plane-tab-btn ${activeTab === "client-portal" ? "is-active" : ""}`}
+            >
+              <Eye size={14} />
+              <span>Portal del Cliente</span>
+            </button>
+          </div>
+
+          {/* CONTENIDO DE LA VISTA */}
+          <div className="qw-plane-content-body">
             
-            {/* Topbar del Proyecto */}
-            <header className="qw-plane-topbar">
-              <div className="qw-plane-topbar-left">
-                <span className="qw-plane-proj-key-badge">{currentProject.key}</span>
-                <h2 className="qw-plane-topbar-title">{currentProject.name}</h2>
-                <span className="qw-plane-topbar-plan">{currentProject.plan}</span>
-              </div>
+            {/* VISTA 1: WORK ITEMS */}
+            {activeTab === "work-items" && (
+              <PlaneWorkItemsList
+                workItems={currentWorkItems}
+                project={currentProject}
+                onToggleItemState={handleToggleItemState}
+                onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+              />
+            )}
 
-              <div className="qw-plane-topbar-actions">
-                <button
-                  type="button"
-                  onClick={handleCopyClientLink}
-                  className="qw-plane-btn-share"
-                  title="Copiar enlace para el cliente"
-                >
-                  {copiedLink ? (
-                    <>
-                      <Check size={13} color="#00b090" />
-                      <span style={{ color: "#00b090" }}>Link Copiado</span>
-                    </>
-                  ) : (
-                    <>
-                      <Share2 size={13} />
-                      <span>Compartir Portal</span>
-                    </>
-                  )}
-                </button>
+            {/* VISTA 2: TABLERO KANBAN */}
+            {activeTab === "kanban" && (
+              <PlaneKanbanBoard
+                workItems={currentWorkItems}
+                project={currentProject}
+                onToggleItemState={handleToggleItemState}
+                onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+              />
+            )}
 
-                <button
-                  type="button"
-                  onClick={() => setIsNewItemModalOpen(true)}
-                  className="qw-plane-btn-primary"
-                >
-                  <Plus size={13} />
-                  <span>Crear Tarea</span>
-                </button>
-              </div>
-            </header>
-
-            {/* Barra de Pestañas de Vista */}
-            <div className="qw-plane-tabs-bar">
-              <button
-                type="button"
-                onClick={() => setActiveTab("work-items")}
-                className={`qw-plane-tab-btn ${activeTab === "work-items" ? "is-active" : ""}`}
-              >
-                <Layers size={14} />
-                <span>Work Items ({currentWorkItems.length})</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("kanban")}
-                className={`qw-plane-tab-btn ${activeTab === "kanban" ? "is-active" : ""}`}
-              >
-                <FolderKanban size={14} />
-                <span>Tablero Kanban</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("milestones")}
-                className={`qw-plane-tab-btn ${activeTab === "milestones" ? "is-active" : ""}`}
-              >
-                <Sparkles size={14} />
-                <span>Hitos & Fases (1-6)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("contract")}
-                className={`qw-plane-tab-btn ${activeTab === "contract" ? "is-active" : ""}`}
-              >
-                <FileText size={14} />
-                <span>Contrato SOW</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("client-portal")}
-                className={`qw-plane-tab-btn ${activeTab === "client-portal" ? "is-active" : ""}`}
-              >
-                <Eye size={14} />
-                <span>Portal del Cliente</span>
-              </button>
-            </div>
-
-            {/* CONTENIDO DE LA VISTA SELECCIONADA */}
-            <div className="qw-plane-content-body">
-              
-              {/* VISTA 1: WORK ITEMS */}
-              {activeTab === "work-items" && (
-                <PlaneWorkItemsList
-                  workItems={currentWorkItems}
-                  project={currentProject}
-                  onToggleItemState={handleToggleItemState}
-                  onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+            {/* VISTA 3: HITOS & FASES */}
+            {activeTab === "milestones" && (
+              <div>
+                <MilestoneInteractiveStepper
+                  milestones={milestones}
+                  activeStep={activeMilestoneStep}
+                  onSelectStep={setActiveMilestoneStep}
+                  serviceColor={currentProject.serviceColor}
                 />
-              )}
 
-              {/* VISTA 2: TABLERO KANBAN */}
-              {activeTab === "kanban" && (
-                <PlaneKanbanBoard
-                  workItems={currentWorkItems}
+                <MilestoneDetailPanel
                   project={currentProject}
-                  onToggleItemState={handleToggleItemState}
-                  onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+                  activeMilestone={activeMilestoneObj}
+                  onNextMilestone={() => {
+                    if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
+                  }}
+                  onPrevMilestone={() => {
+                    if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
+                  }}
+                  totalMilestones={milestones.length}
                 />
-              )}
+              </div>
+            )}
 
-              {/* VISTA 3: HITOS & FASES */}
-              {activeTab === "milestones" && (
-                <div>
-                  <MilestoneInteractiveStepper
-                    milestones={milestones}
-                    activeStep={activeMilestoneStep}
-                    onSelectStep={setActiveMilestoneStep}
-                    serviceColor={currentProject.serviceColor}
-                  />
+            {/* VISTA 4: CONTRATO SOW */}
+            {activeTab === "contract" && (
+              <ContractDownloadView project={currentProject} />
+            )}
 
-                  <MilestoneDetailPanel
-                    project={currentProject}
-                    activeMilestone={activeMilestoneObj}
-                    onNextMilestone={() => {
-                      if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
-                    }}
-                    onPrevMilestone={() => {
-                      if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
-                    }}
-                    totalMilestones={milestones.length}
-                  />
-                </div>
-              )}
-
-              {/* VISTA 4: CONTRATO SOW */}
-              {activeTab === "contract" && (
-                <ContractDownloadView project={currentProject} />
-              )}
-
-              {/* VISTA 5: PORTAL DEL CLIENTE */}
-              {activeTab === "client-portal" && (
-                <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fbfbfc", padding: "14px 18px", borderRadius: "10px", border: "1px solid rgba(0,0,0,0.06)", marginBottom: "20px" }}>
-                    <div>
-                      <strong style={{ fontSize: "13px", color: "#111111", display: "block" }}>Enlace Público del Portal de Cliente:</strong>
-                      <span style={{ fontSize: "12px", color: "#71717a", fontFamily: "monospace" }}>
-                        {window.location.origin}/portal/{currentProject.slug}
-                      </span>
-                    </div>
-                    <a
-                      href={`/portal/${currentProject.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="qw-plane-btn-share"
-                    >
-                      <span>Abrir Portal</span>
-                      <ExternalLink size={13} />
-                    </a>
+            {/* VISTA 5: PORTAL DEL CLIENTE */}
+            {activeTab === "client-portal" && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fafafc", padding: "14px 18px", borderRadius: "8px", border: "1px solid rgba(0,0,0,0.06)", marginBottom: "20px" }}>
+                  <div>
+                    <strong style={{ fontSize: "13px", color: "#111111", display: "block" }}>Enlace Público del Portal de Cliente:</strong>
+                    <span style={{ fontSize: "12px", color: "#71717a", fontFamily: "monospace" }}>
+                      {window.location.origin}/portal/{currentProject.slug}
+                    </span>
                   </div>
-
-                  <MilestoneInteractiveStepper
-                    milestones={milestones}
-                    activeStep={activeMilestoneStep}
-                    onSelectStep={setActiveMilestoneStep}
-                    serviceColor={currentProject.serviceColor}
-                  />
-
-                  <MilestoneDetailPanel
-                    project={currentProject}
-                    activeMilestone={activeMilestoneObj}
-                    onNextMilestone={() => {
-                      if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
-                    }}
-                    onPrevMilestone={() => {
-                      if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
-                    }}
-                    totalMilestones={milestones.length}
-                  />
+                  <a
+                    href={`/portal/${currentProject.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="qw-plane-btn-share"
+                  >
+                    <span>Abrir Portal</span>
+                    <ExternalLink size={13} />
+                  </a>
                 </div>
-              )}
 
-            </div>
+                <MilestoneInteractiveStepper
+                  milestones={milestones}
+                  activeStep={activeMilestoneStep}
+                  onSelectStep={setActiveMilestoneStep}
+                  serviceColor={currentProject.serviceColor}
+                />
 
-          </main>
+                <MilestoneDetailPanel
+                  project={currentProject}
+                  activeMilestone={activeMilestoneObj}
+                  onNextMilestone={() => {
+                    if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
+                  }}
+                  onPrevMilestone={() => {
+                    if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
+                  }}
+                  totalMilestones={milestones.length}
+                />
+              </div>
+            )}
 
-        </div>
+          </div>
+
+        </main>
 
       </div>
 
