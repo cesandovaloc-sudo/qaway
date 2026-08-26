@@ -83,27 +83,21 @@ export function QawayDesignPillarsSection() {
           </h2>
         </motion.div>
 
-        {/* Estructura Split Directa 2 Columnas (Estilo Integrado) */}
+        {/* Estructura Split Responsiva 2 Columnas / 1 Columna en móvil */}
         <motion.div
+          className="qw-pillars-split-grid"
           initial={{ opacity: 0, y: 22 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.15 }}
           transition={{ duration: 0.65, delay: 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1.1fr",
-            gap: "64px",
-            alignItems: "center",
-          }}
         >
-          {/* Columna Izquierda: Detalle con Altura Mínima Fija para Evitar Saltos */}
+          {/* Columna Izquierda: Detalle */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              minHeight: "360px",
-              paddingRight: "12px",
+              minHeight: "320px",
             }}
           >
             {/* Bloque de Textos con Altura Mínima Calibrada */}
@@ -241,7 +235,7 @@ export function QawayDesignPillarsSection() {
           </div>
 
           {/* Columna Derecha: Tarjeta Blanca con Altura Estricta y Fija (530px) */}
-          <div style={{ width: "100%", height: "530px", minHeight: "530px", maxHeight: "530px", position: "relative", overflow: "hidden" }}>
+          <div style={{ width: "100%", maxWidth: "560px", margin: "0 auto", height: "530px", minHeight: "530px", maxHeight: "530px", position: "relative", overflow: "hidden" }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={current.id}

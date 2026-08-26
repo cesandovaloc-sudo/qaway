@@ -12,15 +12,6 @@ const trustAvatars = [
 ];
 
 export function HostingerHeroReal() {
-  const [frontIndex, setFrontIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setFrontIndex((prev) => (prev === 0 ? 1 : 0));
-    }, 4500);
-    return () => clearInterval(timer);
-  }, []);
-
   return (
     <section id="inicio" className="h-hero-section-real">
       <div className="h-container">
@@ -174,62 +165,22 @@ export function HostingerHeroReal() {
             </div>
           </motion.div>
 
-          {/* Columna Derecha: Composición en Capas con Intercambio Infinito y Suave */}
-          <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "470px" }}>
+          {/* Columna Derecha: Composición en Capas Estáticas (Una detrás de otra) */}
+          <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "440px" }}>
             
-            {/* IMAGEN 1: Soluciones TI */}
-            <motion.div
-              animate={{
-                x: frontIndex === 0 ? -18 : 36,
-                y: frontIndex === 0 ? 0 : -15,
-                scale: frontIndex === 0 ? 1 : 0.94,
-                zIndex: frontIndex === 0 ? 10 : 2,
-                opacity: 1,
-              }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            {/* IMAGEN 2 (Fondo / Gelato) */}
+            <div
               style={{
-                position: frontIndex === 0 ? "relative" : "absolute",
-                top: 0,
-                right: frontIndex === 0 ? "auto" : "10px",
-                width: "90%",
-                maxWidth: "490px",
+                position: "absolute",
+                top: "0px",
+                right: "0px",
+                width: "88%",
+                maxWidth: "470px",
                 borderRadius: "12px",
                 overflow: "hidden",
                 background: "#ffffff",
-                boxShadow: frontIndex === 0 
-                  ? "0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
-                  : "0 20px 45px -10px rgba(0, 0, 0, 0.2)",
-              }}
-            >
-              <img
-                src={heroFrontImg}
-                alt="Soluciones TI y desarrollo web"
-                className="h-hero-layer-img"
-              />
-            </motion.div>
-
-            {/* IMAGEN 2: Agencia Creativa */}
-            <motion.div
-              animate={{
-                x: frontIndex === 1 ? -18 : 36,
-                y: frontIndex === 1 ? 0 : -15,
-                scale: frontIndex === 1 ? 1 : 0.94,
-                zIndex: frontIndex === 1 ? 10 : 2,
-                opacity: 1,
-              }}
-              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                position: frontIndex === 1 ? "relative" : "absolute",
-                top: 0,
-                right: frontIndex === 1 ? "auto" : "10px",
-                width: "90%",
-                maxWidth: "490px",
-                borderRadius: "12px",
-                overflow: "hidden",
-                background: "#ffffff",
-                boxShadow: frontIndex === 1 
-                  ? "0 35px 70px -15px rgba(0, 0, 0, 0.32), 0 15px 30px -8px rgba(0, 0, 0, 0.15)" 
-                  : "0 20px 45px -10px rgba(0, 0, 0, 0.2)",
+                boxShadow: "0 15px 35px -8px rgba(0, 0, 0, 0.16)",
+                zIndex: 1,
               }}
             >
               <img
@@ -237,7 +188,29 @@ export function HostingerHeroReal() {
                 alt="Agencia creativa diseño web"
                 className="h-hero-layer-img"
               />
-            </motion.div>
+            </div>
+
+            {/* IMAGEN 1 (Frente / NÖRA) */}
+            <div
+              style={{
+                position: "relative",
+                top: "40px",
+                left: "-10px",
+                width: "92%",
+                maxWidth: "490px",
+                borderRadius: "12px",
+                overflow: "hidden",
+                background: "#ffffff",
+                boxShadow: "0 30px 65px -15px rgba(0, 0, 0, 0.3)",
+                zIndex: 2,
+              }}
+            >
+              <img
+                src={heroFrontImg}
+                alt="Soluciones TI y desarrollo web"
+                className="h-hero-layer-img"
+              />
+            </div>
 
           </div>
         </div>

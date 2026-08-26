@@ -43,8 +43,8 @@ export function HostingerFAQReal() {
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);
 
   return (
-    <section id="faq" style={{ padding: "85px 0 105px", background: "#ffffff" }}>
-      <div className="h-container">
+    <section id="faq" style={{ padding: "80px 16px 95px", background: "#ffffff" }}>
+      <div className="h-container" style={{ maxWidth: "840px", margin: "0 auto", padding: "0 6px" }}>
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}

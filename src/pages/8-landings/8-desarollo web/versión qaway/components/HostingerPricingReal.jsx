@@ -110,6 +110,7 @@ export function HostingerPricingReal() {
             return (
               <motion.div
                 key={p.id}
+                className={isEmpresarial ? "qw-pricing-plan-popular" : ""}
                 initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -6, boxShadow: isEmpresarial ? "0 22px 50px rgba(254, 102, 18, 0.2)" : "0 18px 45px rgba(0,0,0,0.08)", transition: { duration: 0.2, ease: "easeOut" } }}

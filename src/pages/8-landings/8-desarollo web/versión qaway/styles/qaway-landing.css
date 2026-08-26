@@ -639,11 +639,14 @@
 }
 
 @media (max-width: 900px) {
+  .qaway-landing-root .h-hero-section-real {
+    padding: 105px 0 40px;
+  }
   .qaway-landing-root .h-hero-showcase-container {
-    min-height: 400px;
+    min-height: 380px;
   }
   .qaway-landing-root .h-hero-layer-img {
-    height: 360px;
+    height: 320px;
   }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -651,40 +654,39 @@
   }
   .qaway-landing-root .h-split-grid,
   .qaway-landing-root .h-real-pricing-grid,
-  .qaway-landing-root .h-security-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
+  .qaway-landing-root .h-security-grid,
+  .qaway-landing-root .qw-pillars-split-grid {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+  }
+  .qaway-landing-root .qw-pricing-plan-popular {
+    order: -1 !important;
   }
 }
 
 @media (max-width: 640px) {
+  .qaway-landing-root .h-hero-section-real {
+    padding: 92px 0 35px;
+  }
   .qaway-landing-root .h-hero-showcase-container {
-    min-height: 270px;
+    min-height: 250px;
     margin-top: 10px;
   }
-  .qaway-landing-root .h-hero-layer-back {
-    right: 0px;
-    width: 88%;
-    top: -8px;
-  }
-  .qaway-landing-root .h-hero-layer-front {
-    width: 92%;
-  }
   .qaway-landing-root .h-hero-layer-img {
-    height: 250px;
+    height: 220px;
   }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   .qaway-landing-root .h-hero-title-real {
-    font-size: 2.2rem;
+    font-size: 2.1rem;
   }
   .qaway-landing-root .h-ai-three-cards-section {
-    padding: 50px 0;
+    padding: 45px 0 55px;
   }
   .qaway-landing-root .h-container {
-    padding: 0 16px;
+    padding: 0 20px;
   }
 }
 
