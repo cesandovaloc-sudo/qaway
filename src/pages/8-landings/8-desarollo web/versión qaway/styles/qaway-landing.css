@@ -697,7 +697,7 @@
   }
   .qaway-landing-root .qw-pillars-text-box {
     min-height: auto !important;
-    margin-bottom: 0 !important;
+    margin-bottom: 36px !important;
   }
   .qaway-landing-root .qw-pillars-text-box h3 {
     height: auto !important;
@@ -745,8 +745,12 @@
   .qaway-landing-root #contacto {
     padding: 68px 0 76px !important;
   }
-  .qaway-landing-root .h-container {
-    padding: 0 20px;
+  .qaway-landing-root .qw-pillars-text-box {
+    margin-bottom: 32px !important;
+  }
+  .qaway-landing-root .h-container,
+  .qaway-landing-root #faq .h-container {
+    padding: 0 22px !important;
   }
 }
 
