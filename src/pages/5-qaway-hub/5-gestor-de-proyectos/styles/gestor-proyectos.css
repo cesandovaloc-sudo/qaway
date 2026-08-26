@@ -1,18 +1,29 @@
 /* ==========================================================================
    ESTILOS OFICIALES: GESTOR DE PROYECTOS QAWAY LAB
-   Exactamente la misma tipografía y tokens que la landing de Desarrollo Web:
-   --h-font-display: "Space Grotesk", "Inter", sans-serif;
-   --h-font-sans: "Inter", system-ui, -apple-system, sans-serif;
-   --h-font-mono: "JetBrains Mono", monospace;
+   Tipografía idéntica al 100% de la Landing de Desarrollo Web de Qaway:
+   --qw-font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
+   --qw-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+   --qw-font-mono: "JetBrains Mono", monospace;
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --qw-gestor-font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
+  --qw-gestor-font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --qw-gestor-font-mono: "JetBrains Mono", monospace;
+  --qw-gestor-primary: #ff4b0b;
+  --qw-gestor-dark: #111111;
+  --qw-gestor-text-primary: #1e2026;
+  --qw-gestor-text-secondary: #52525b;
+  --qw-gestor-text-muted: #71717a;
+}
 
 .qw-gestor-root {
   min-height: 100vh;
   background-color: #fafafa;
-  color: #111111;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: var(--qw-gestor-text-primary);
+  font-family: var(--qw-gestor-font-sans);
   -webkit-font-smoothing: antialiased;
   padding-bottom: 90px;
 }
@@ -20,9 +31,14 @@
 .qw-gestor-root h1,
 .qw-gestor-root h2,
 .qw-gestor-root h3,
-.qw-gestor-root h4 {
-  font-family: "Space Grotesk", "Inter", sans-serif;
-  letter-spacing: -0.03em;
+.qw-gestor-root h4,
+.qw-gestor-project-title,
+.qw-gestor-card-title,
+.qw-gestor-detail-title,
+.qw-gestor-step-title {
+  font-family: var(--qw-gestor-font-display) !important;
+  letter-spacing: -0.035em !important;
+  font-weight: 700;
 }
 
 .qw-gestor-container {
@@ -60,16 +76,16 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
   transition: color 0.15s ease;
 }
 
 .qw-gestor-back-link:hover {
-  color: #ff4b0b;
+  color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-brand-badge {
@@ -81,14 +97,15 @@
   padding: 5px 12px;
   border-radius: 6px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.05em;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  text-transform: uppercase;
 }
 
 .qw-gestor-brand-badge small {
-  color: #ff4b0b;
-  font-weight: 700;
+  color: var(--qw-gestor-primary);
+  font-weight: 800;
 }
 
 .qw-gestor-sep {
@@ -97,12 +114,13 @@
 }
 
 .qw-gestor-service-tag {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
   color: #111111;
-  border-left: 3px solid #ff4b0b;
+  border-left: 3px solid var(--qw-gestor-primary);
   padding-left: 8px;
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-share-btn {
@@ -115,7 +133,7 @@
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
   color: #111111;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -134,31 +152,32 @@
 }
 
 .qw-gestor-client-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #ff4b0b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--qw-gestor-primary);
   text-transform: uppercase;
   margin-bottom: 6px;
   display: block;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
 }
 
 .qw-gestor-project-title {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: clamp(2rem, 3.5vw, 2.5rem);
-  font-weight: 700;
-  color: #111111;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  font-family: var(--qw-gestor-font-display) !important;
+  font-size: clamp(2.4rem, 4vw, 3.2rem) !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  letter-spacing: -0.035em !important;
+  line-height: 1.05 !important;
   margin: 0 0 6px;
 }
 
 .qw-gestor-project-plan {
-  font-size: 14.5px;
-  color: #52525b;
+  font-size: 15px;
+  color: var(--qw-gestor-text-secondary);
   margin: 0;
   font-weight: 400;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-progress-card {
@@ -177,17 +196,18 @@
 }
 
 .qw-gestor-progress-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #111111;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-progress-pct {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: #111111;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--qw-gestor-font-display);
 }
 
 .qw-gestor-progress-bar-bg {
@@ -209,9 +229,9 @@
   display: flex;
   gap: 8px;
   font-size: 11.5px;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
   font-weight: 500;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--qw-gestor-font-mono);
 }
 
 /* ==========================================================================
@@ -268,8 +288,9 @@
   position: relative;
   z-index: 2;
   margin-bottom: 12px;
-  font-family: "Space Grotesk", sans-serif;
-  font-weight: 700;
+  font-family: var(--qw-gestor-font-display);
+  font-weight: 800;
+  font-size: 15px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -280,30 +301,31 @@
 }
 
 .qw-gestor-step-num {
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   color: #a1a1aa;
   letter-spacing: 0.05em;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  text-transform: uppercase;
 }
 
 .qw-gestor-step-title {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 13.5px;
-  font-weight: 700;
+  font-family: var(--qw-gestor-font-display) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
   color: #111111;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
+  line-height: 1.2;
+  letter-spacing: -0.03em !important;
 }
 
 .qw-gestor-step-node.is-active .qw-gestor-step-title {
-  color: #ff4b0b;
+  color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-step-date {
-  font-size: 11px;
-  color: #71717a;
-  font-family: "Inter", sans-serif;
+  font-size: 11.5px;
+  color: var(--qw-gestor-text-muted);
+  font-family: var(--qw-gestor-font-sans);
 }
 
 /* ==========================================================================
@@ -327,21 +349,22 @@
 
 .qw-gestor-phase-pill {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   color: #52525b;
   background: #f4f4f5;
   padding: 4px 10px;
   border-radius: 6px;
-  letter-spacing: 0.04em;
-  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: 0.05em;
+  font-family: var(--qw-gestor-font-display);
+  text-transform: uppercase;
 }
 
 .qw-gestor-status-pill {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 999px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-status-pill.status-completed {
@@ -351,41 +374,41 @@
 
 .qw-gestor-status-pill.status-in-progress {
   background: rgba(255, 75, 11, 0.12);
-  color: #ff4b0b;
+  color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-status-pill.status-pending {
   background: #f4f4f5;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
 }
 
 .qw-gestor-detail-title {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
-  color: #111111;
+  font-family: var(--qw-gestor-font-display) !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
   margin: 0 0 6px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em !important;
 }
 
 .qw-gestor-detail-sub {
   font-size: 15px;
-  color: #52525b;
+  color: var(--qw-gestor-text-secondary);
   margin: 0;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-detail-date-box {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #111111;
   background: #f4f4f5;
   padding: 6px 12px;
   border-radius: 6px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-display);
 }
 
 .qw-gestor-divider {
@@ -396,12 +419,12 @@
 }
 
 .qw-gestor-section-heading {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 12px;
-  font-weight: 700;
-  color: #71717a;
+  font-family: var(--qw-gestor-font-display) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--qw-gestor-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em !important;
   margin: 0 0 16px;
 }
 
@@ -418,14 +441,14 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  font-size: 14.5px;
+  font-size: 15px;
   color: #111111;
   line-height: 1.45;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-check-icon {
-  color: #ff4b0b;
+  color: var(--qw-gestor-primary);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -442,13 +465,14 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ff4b0b;
+  background: var(--qw-gestor-primary);
   color: #ffffff;
-  padding: 12px 22px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
   text-decoration: none;
   border: none;
   cursor: pointer;
@@ -466,11 +490,11 @@
   gap: 8px;
   background: #00b090;
   color: #ffffff;
-  padding: 12px 22px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
   border: none;
   cursor: pointer;
 }
@@ -487,15 +511,16 @@
 
 .qw-gestor-sow-card strong {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   color: #111111;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-sow-card span {
   font-size: 12px;
-  color: #52525b;
-  font-family: "Inter", sans-serif;
+  color: var(--qw-gestor-text-secondary);
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-nav-footer {
@@ -515,9 +540,9 @@
   border: 1px solid #e4e4e7;
   padding: 8px 16px;
   border-radius: 6px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
   color: #111111;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -556,10 +581,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
   color: #111111;
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-badge-passed {
@@ -572,7 +598,7 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-gauges-grid {
@@ -604,17 +630,18 @@
 
 .qw-gestor-gauge-value {
   position: absolute;
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   color: #00876e;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
 }
 
 .qw-gestor-gauge-label {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 12px;
+  font-family: var(--qw-gestor-font-display);
+  font-size: 14px;
   font-weight: 700;
   color: #111111;
+  letter-spacing: -0.02em;
   text-align: center;
 }
 
@@ -636,15 +663,15 @@
 
 .qw-gestor-cwv-name {
   font-size: 11px;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
   font-weight: 600;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-cwv-val {
-  font-size: 16px;
-  font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--qw-gestor-font-display);
 }
 
 .qw-gestor-cwv-sub {
@@ -673,10 +700,11 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
   color: #111111;
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-palette-grid {
@@ -696,7 +724,7 @@
 
 .qw-gestor-palette-item:hover {
   transform: translateY(-2px);
-  border-color: #ff4b0b;
+  border-color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-palette-color {
@@ -712,16 +740,17 @@
 }
 
 .qw-gestor-palette-info strong {
-  font-size: 12px;
+  font-size: 13px;
   color: #111111;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-hex-code {
   font-size: 11px;
   font-weight: 600;
   color: #52525b;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--qw-gestor-font-mono);
 }
 
 .qw-gestor-palette-info small {
@@ -749,21 +778,22 @@
 }
 
 .qw-gestor-download-btn:hover {
-  border-color: #ff4b0b;
+  border-color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-download-btn strong {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   color: #111111;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
 }
 
 .qw-gestor-download-btn span {
   display: block;
   font-size: 11.5px;
-  color: #71717a;
-  font-family: "Inter", sans-serif;
+  color: var(--qw-gestor-text-muted);
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-down-icon {
@@ -790,9 +820,10 @@
   border: 1px solid #e4e4e7;
   padding: 10px 18px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
   color: #52525b;
   cursor: pointer;
   white-space: nowrap;
@@ -825,7 +856,7 @@
 
 .qw-gestor-card:hover {
   transform: translateY(-3px);
-  border-color: #ff4b0b;
+  border-color: var(--qw-gestor-primary);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.06);
 }
 
@@ -837,20 +868,20 @@
 }
 
 .qw-gestor-card-title {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #111111;
-  letter-spacing: -0.03em;
+  font-family: var(--qw-gestor-font-display) !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  letter-spacing: -0.035em !important;
   margin: 0 0 4px;
 }
 
 .qw-gestor-card-plan {
   font-size: 13px;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
   margin: 0;
   font-weight: 400;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
 }
 
 .qw-gestor-card-body {
@@ -865,18 +896,19 @@
   border-top: 1px solid #f4f4f5;
   padding-top: 16px;
   font-size: 12px;
-  color: #71717a;
+  color: var(--qw-gestor-text-muted);
 }
 
 .qw-gestor-card-footer strong {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 14px;
+  font-family: var(--qw-gestor-font-display);
+  font-size: 16px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: #111111;
 }
 
 /* ==========================================================================
-   MODAL DE CREACIÓN (EDITORIAL TECH)
+   MODAL DE CREACIÓN
    ========================================================================== */
 .qw-gestor-modal-overlay {
   position: fixed;
@@ -936,12 +968,11 @@
 
 .qw-gestor-form-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #111111;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: -0.01em;
+  font-family: var(--qw-gestor-font-display);
   margin-bottom: 6px;
 }
 
@@ -953,14 +984,14 @@
   border: 1px solid #e4e4e7;
   background: #ffffff;
   font-size: 14px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
   color: #111111;
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .qw-gestor-form-input:focus {
-  border-color: #ff4b0b;
+  border-color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-form-textarea {
@@ -970,7 +1001,7 @@
   border: 1px solid #e4e4e7;
   background: #ffffff;
   font-size: 14px;
-  font-family: "Inter", sans-serif;
+  font-family: var(--qw-gestor-font-sans);
   color: #111111;
   outline: none;
   resize: vertical;
@@ -978,7 +1009,7 @@
 }
 
 .qw-gestor-form-textarea:focus {
-  border-color: #ff4b0b;
+  border-color: var(--qw-gestor-primary);
 }
 
 .qw-gestor-service-grid {
@@ -1001,9 +1032,9 @@
   color: #111111;
   padding: 10px 18px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
   cursor: pointer;
 }
 
@@ -1015,13 +1046,14 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #ff4b0b;
+  background: var(--qw-gestor-primary);
   color: #ffffff;
   padding: 12px 24px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: var(--qw-gestor-font-display);
+  letter-spacing: -0.02em;
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
