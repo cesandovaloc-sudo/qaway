@@ -141,8 +141,8 @@ export function QawayDesignPillarsSection() {
               </p>
             </div>
 
-            {/* Controles de Navegación Fijos en la Base (Sin Saltos) */}
-            <div style={{ display: "flex", alignItems: "center", gap: "18px", paddingTop: "20px" }}>
+            {/* Controles de Navegación para Desktop (Fijos en la Base) */}
+            <div className="qw-pillars-controls-desktop">
               <button
                 onClick={handlePrev}
                 aria-label="Pilar anterior"
@@ -323,6 +323,68 @@ export function QawayDesignPillarsSection() {
                 </div>
               </motion.div>
             </AnimatePresence>
+          </div>
+
+          {/* Controles de Navegación Centrados para Móvil (Debajo del Mockup) */}
+          <div className="qw-pillars-controls-mobile">
+            <button
+              onClick={handlePrev}
+              aria-label="Pilar anterior"
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "50%",
+                background: "#ffffff",
+                border: "1.5px solid #e4e4e7",
+                color: "#18181b",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+              }}
+            >
+              <ChevronLeft size={20} />
+            </button>
+
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {pillarsData.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIdx(i)}
+                  aria-label={`Ir al pilar ${i + 1}`}
+                  style={{
+                    width: currentIdx === i ? "24px" : "8px",
+                    height: "8px",
+                    borderRadius: "4px",
+                    background: currentIdx === i ? "#fe6612" : "#d4d4d8",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.25s ease",
+                  }}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={handleNext}
+              aria-label="Pilar siguiente"
+              style={{
+                width: "42px",
+                height: "42px",
+                borderRadius: "50%",
+                background: "#fe6612",
+                border: "none",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 4px 14px rgba(254, 102, 18, 0.3)",
+              }}
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </motion.div>
       </div>

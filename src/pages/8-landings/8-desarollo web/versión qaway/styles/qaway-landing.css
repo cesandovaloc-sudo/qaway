@@ -662,6 +662,16 @@
   .qaway-landing-root .qw-pricing-plan-popular {
     order: -1 !important;
   }
+  .qaway-landing-root .qw-pillars-controls-desktop {
+    display: none !important;
+  }
+  .qaway-landing-root .qw-pillars-controls-mobile {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 24px;
+  }
 }
 
 @media (max-width: 640px) {
