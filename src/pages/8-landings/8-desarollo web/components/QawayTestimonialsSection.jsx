@@ -52,7 +52,7 @@ const reviews = [
   },
 ];
 
-export function HostingerTestimonialsSlider() {
+export function QawayTestimonialsSection() {
   const track1 = [...brandRow1, ...brandRow1, ...brandRow1];
   const track2 = [...brandRow2, ...brandRow2, ...brandRow2];
 

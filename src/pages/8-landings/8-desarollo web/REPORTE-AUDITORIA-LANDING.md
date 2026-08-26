@@ -42,19 +42,19 @@ Todos los recursos gráficos de la landing fueron convertidos y comprimidos en *
 
 ## 3. Matriz de Auditoría por Sección
 
-### 1. Header Fijo (`HostingerHeader.jsx`)
+### 1. Header Fijo (`QawayHeader.jsx`)
 * **Estado:** ✅ APROBADO
 * **Navegación:** Enlaces de salto suave (`#inicio`, `#proyectos`, `#servicios`, `#precios`, `#faq`, `#contacto`).
 * **Botón CTA:** Enlace directo de conversión a `#contacto`.
 * **Responsive:** Menú hamburguesa accesible con botones táctiles amplios.
 
-### 2. Hero Section (`HostingerHeroReal.jsx`)
+### 2. Hero Section (`QawayHeroSection.jsx`)
 * **Estado:** ✅ APROBADO
 * **H1 Semántico:** *"Diseño y Desarrollo de Páginas Web y Tiendas Online que Venden"*.
 * **Capas de imágenes:** 100% estáticas (Gelato atrás, NÖRA adelante) con `loading="eager"` y sombra de profundidad.
 * **Móvil:** Padding superior calibrado a `96px` para evitar huecos contra el header fijo.
 
-### 3. Tipos de Sitios Web (`HostingerAiCards.jsx`)
+### 3. Tipos de Sitios Web (`QawayWebTypesSection.jsx`)
 * **Estado:** ✅ APROBADO
 * **Grid:** 3 columnas en desktop / 1 columna fluida en móvil.
 * **Copy comercial:** Segmentación clara de Landing Page, Web Comercial y Tienda Online.
@@ -66,12 +66,12 @@ Todos los recursos gráficos de la landing fueron convertidos y comprimidos en *
 * **Separación de texto:** Margen inferior de `36px` en móvil para dar aire visual holgado.
 * **Temporizador:** Transición automática calibrada a `3.2s` con pausa al posar el cursor (`onMouseEnter`).
 
-### 5. Marcas & Testimonios (`HostingerTestimonialsSlider.jsx`)
+### 5. Marcas & Testimonios (`QawayTestimonialsSection.jsx`)
 * **Estado:** ✅ APROBADO
 * **Marquesina:** Movimiento continuo suave a `38s` acelerado por GPU (`will-change: transform; transform: translate3d(0,0,0)`).
 * **Testimonios:** 3 tarjetas testimoniales con estrellas, avatares y verificación.
 
-### 6. Tarifario Oficial (`HostingerPricingReal.jsx`)
+### 6. Tarifario Oficial (`QawayPricingSection.jsx`)
 * **Estado:** ✅ APROBADO
 * **Planes validados:**
   * **One Web (S/ 79.90):** Destacado al centro en PC; **ordenado primero (`order: -1`) en Móvil**.
@@ -79,7 +79,7 @@ Todos los recursos gráficos de la landing fueron convertidos y comprimidos en *
   * **Tienda Online (S/ 490.00):** Catálogo interactivo con carrito, panel autoadministrable de productos/stock y pedidos a WhatsApp.
 * **Transparencia:** Removidas promesas falsas de "SEO básico"; agregadas auditorías de velocidad y optimización de recursos.
 
-### 7. Preguntas Frecuentes (`HostingerFAQReal.jsx`)
+### 7. Preguntas Frecuentes (`QawayFAQSection.jsx`)
 * **Estado:** ✅ APROBADO
 * **Desktop:** Centrado cómodo a 800px.
 * **Móvil:** Colchón lateral protegido de `22px-24px` para evitar que los textos toquen el marco de la pantalla.
@@ -90,7 +90,7 @@ Todos los recursos gráficos de la landing fueron convertidos y comprimidos en *
 * **Campos:** Nombre, WhatsApp/Teléfono, Tipo de Proyecto, Presupuesto estimado, Fecha límite y Detalle.
 * **Integración Dual:** Envío a Web3Forms por correo + Redirección directa a WhatsApp con mensaje estructurado pre-llenado.
 
-### 9. Footer Optimizado (`HostingerFooterFull.jsx`)
+### 9. Footer Optimizado (`QawayFooter.jsx`)
 * **Estado:** ✅ APROBADO
 * **Desktop:** 4 columnas completas (Marca, Navegación, Planes, Contacto).
 * **Móvil:** Columna de planes oculta (`qw-footer-col-plans`) para un scroll limpio y estratégico.

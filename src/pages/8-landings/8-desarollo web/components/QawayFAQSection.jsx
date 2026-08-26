@@ -37,7 +37,7 @@ const realFaqs = [
   }
 ];
 
-export function HostingerFAQReal() {
+export function QawayFAQSection() {
   const [openIdx, setOpenIdx] = useState(null);
 
   const toggle = (i) => setOpenIdx(openIdx === i ? null : i);

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Globe } from "lucide-react";
 import { socialLinks, WHATSAPP_PHONE_LINK } from "@/data/navigation";
 
-export function HostingerFooterFull() {
+export function QawayFooter() {
   return (
     <footer style={{ backgroundColor: "#111111", color: "#ffffff", borderTop: "1px solid rgba(255, 255, 255, 0.1)", padding: "60px 20px 32px", width: "100%", fontFamily: "var(--h-font-sans)" }}>
       <div style={{ maxWidth: "1200px", margin: "0 auto" }}>

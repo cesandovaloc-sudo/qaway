@@ -4,7 +4,7 @@ import mockup2 from "../assets/Sitios-Web.webp";
 import mockup3 from "../assets/Tiendas-Online.webp";
 import { Layers, Sparkles, TrendingUp, Gauge, Search, Smartphone } from "lucide-react";
 
-export function HostingerAiCards() {
+export function QawayWebTypesSection() {
   return (
     <>
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}

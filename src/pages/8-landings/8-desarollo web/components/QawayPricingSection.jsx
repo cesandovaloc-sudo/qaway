@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Check, Flame } from "lucide-react";
 import { DigitalCountdown } from "./DigitalCountdown";
 
-export function HostingerPricingReal() {
+export function QawayPricingSection() {
   const plans = [
     {
       id: "web-comercial",

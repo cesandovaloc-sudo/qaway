@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { MessageSquare, CreditCard, Mail, BarChart3 } from "lucide-react";
 
-export function HostingerSalesAutomationTaste() {
+export function QawaySalesAutomationSection() {
   return (
     <section
       id="canales-de-venta"

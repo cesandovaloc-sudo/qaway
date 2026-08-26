@@ -11,7 +11,7 @@ const trustAvatars = [
   { name: 'Renzo Soto', img: '/assets/pages/4-academy/testimonials/renzo.png' },
 ];
 
-export function HostingerHeroReal() {
+export function QawayHeroSection() {
   return (
     <section id="inicio" className="h-hero-section-real">
       <div className="h-container">

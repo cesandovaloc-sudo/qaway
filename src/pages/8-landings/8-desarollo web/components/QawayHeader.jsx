@@ -8,7 +8,7 @@ const navLinks = [
   { label: "Precios", path: "#precios" },
 ];
 
-export function HostingerHeader() {
+export function QawayHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);

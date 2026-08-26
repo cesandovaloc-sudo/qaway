@@ -1,25 +1,15 @@
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { HostingerHeader } from "./components/HostingerHeader.jsx";
-import { HostingerHeroReal } from "./components/HostingerHeroReal.jsx";
-import { HeroVariantGraphite } from "./components/HeroVariantGraphite.jsx";
-import { HeroVariantSoftWarm } from "./components/HeroVariantSoftWarm.jsx";
-import { HeroVariantSolidOrange } from "./components/HeroVariantSolidOrange.jsx";
-import { HostingerAiCards } from "./components/HostingerAiCards.jsx";
-import { HostingerFastPerformance } from "./components/HostingerFastPerformance.jsx";
-import { HostingerKodeeAi } from "./components/HostingerKodeeAi.jsx";
-import { HostingerSecurityGrid } from "./components/HostingerSecurityGrid.jsx";
-import { HostingerSecurityGridTaste } from "./components/HostingerSecurityGridTaste.jsx";
-import { HostingerEmailMarketing } from "./components/HostingerEmailMarketing.jsx";
-import { HostingerSalesAutomationTaste } from "./components/HostingerSalesAutomationTaste.jsx";
-import { HostingerMigrationDarkBanner } from "./components/HostingerMigrationDarkBanner.jsx";
-import { HostingerTestimonialsSlider } from "./components/HostingerTestimonialsSlider.jsx";
-import { HostingerEcommerceBanner } from "./components/HostingerEcommerceBanner.jsx";
-import { HostingerPricingReal } from "./components/HostingerPricingReal.jsx";
-import { HostingerFAQReal } from "./components/HostingerFAQReal.jsx";
-import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
-import { HostingerFooterFull } from "./components/HostingerFooterFull.jsx";
+import { QawayHeader } from "./components/QawayHeader.jsx";
+import { QawayHeroSection } from "./components/QawayHeroSection.jsx";
+import { QawayWebTypesSection } from "./components/QawayWebTypesSection.jsx";
 import { QawayDesignPillarsSection } from "./components/QawayDesignPillarsSection.jsx";
+import { QawayTestimonialsSection } from "./components/QawayTestimonialsSection.jsx";
+import { QawaySalesAutomationSection } from "./components/QawaySalesAutomationSection.jsx";
+import { QawayPricingSection } from "./components/QawayPricingSection.jsx";
+import { QawayFAQSection } from "./components/QawayFAQSection.jsx";
+import { QawayLeadContactForm } from "./components/QawayLeadContactForm.jsx";
+import { QawayFooter } from "./components/QawayFooter.jsx";
 import { ExitIntentModal } from "./components/ExitIntentModal.jsx";
 import { FloatingWhatsAppButton } from "./components/FloatingWhatsAppButton.jsx";
 import "./styles/qaway-landing.css";
@@ -163,38 +153,33 @@ export default function DesarrolloWebQawayPage() {
         </script>
       </Helmet>
 
-      <HostingerHeader />
+      <QawayHeader />
       <main>
         {/* 1. HERO */}
-        <HostingerHeroReal />
+        <QawayHeroSection />
 
         {/* 2. TIPOS DE WEB */}
-        <HostingerAiCards />
+        <QawayWebTypesSection />
 
         {/* 3. PILARES DE DISEÑO */}
         <QawayDesignPillarsSection />
 
         {/* 4. MARCAS & TESTIMONIOS (UNIFICADO) */}
-        <HostingerTestimonialsSlider />
-
-        {/* SECCIÓN DE SOPORTE & GARANTÍA (Pausada para después)
-        <HostingerSecurityGrid />
-        <HostingerSecurityGridTaste />
-        */}
+        <QawayTestimonialsSection />
 
         {/* 5. CANALES DE VENTA & AUTOMATIZACIÓN (BENTO GRID TASTE) */}
-        <HostingerSalesAutomationTaste />
+        <QawaySalesAutomationSection />
 
         {/* 6. PLANES Y PRECIOS */}
-        <HostingerPricingReal />
+        <QawayPricingSection />
 
         {/* 7. PREGUNTAS FRECUENTES (Resuelve dudas) */}
-        <HostingerFAQReal />
+        <QawayFAQSection />
 
         {/* 8. FORMULARIO DE CONTACTO & ASESORÍA (Cierre final) */}
         <QawayLeadContactForm />
       </main>
-      <HostingerFooterFull />
+      <QawayFooter />
       
       {/* Pop-up de Intento de Salida (Exit-Intent) */}
       <ExitIntentModal />
