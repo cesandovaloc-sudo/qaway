@@ -1,221 +1,363 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
+  Layers,
   FolderKanban,
-  Globe,
-  Palette,
-  Cpu,
-  TrendingUp,
-  ArrowRight,
+  FileText,
+  Eye,
   Plus,
-  Clock,
+  Search,
   CheckCircle2,
+  ExternalLink,
   Sparkles,
+  Share2,
+  Check,
   ShieldCheck,
+  Zap,
 } from "lucide-react";
-import { SERVICES_CONFIG, SAMPLE_PROJECTS, getStoredProjects } from "./data/services-milestones-data";
+
+import {
+  getPlaneProjects,
+  savePlaneProjects,
+  getPlaneWorkItems,
+  savePlaneWorkItems,
+} from "./data/plane-gestor-data";
+import { SERVICES_CONFIG } from "./data/services-milestones-data";
+
+import { PlaneSidebar } from "./components/PlaneSidebar";
+import { PlaneWorkItemsList } from "./components/PlaneWorkItemsList";
+import { PlaneKanbanBoard } from "./components/PlaneKanbanBoard";
+import { ContractDownloadView } from "./components/ContractDownloadView";
+import { CreateWorkItemModal } from "./components/CreateWorkItemModal";
 import { CreateProjectModal } from "./components/CreateProjectModal";
+import { MilestoneInteractiveStepper } from "./components/MilestoneInteractiveStepper";
+import { MilestoneDetailPanel } from "./components/MilestoneDetailPanel";
+
 import "./styles/gestor-proyectos.css";
 
-const serviceIcons = {
-  "desarrollo-web": Globe,
-  "branding": Palette,
-  "sistemas-crm": Cpu,
-  "marketing-leads": TrendingUp,
-};
-
 export default function GestorProyectosHubPage() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [projects, setProjects] = useState(() => getStoredProjects());
+  const [projects, setProjects] = useState(() => getPlaneProjects());
+  const [workItems, setWorkItems] = useState(() => getPlaneWorkItems());
+  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || "proj-web-01");
+  const [activeTab, setActiveTab] = useState("work-items"); // 'work-items' | 'kanban' | 'milestones' | 'contract' | 'client-portal'
+  
+  const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
+  const [isNewProjModalOpen, setIsNewProjModalOpen] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
-  const handleProjectCreated = (newProject) => {
-    setProjects(getStoredProjects());
+  // Proyecto actualmente seleccionado
+  const currentProject = useMemo(() => {
+    return projects.find((p) => p.id === selectedProjectId) || projects[0];
+  }, [projects, selectedProjectId]);
+
+  // Work items pertenecientes al proyecto seleccionado
+  const currentWorkItems = useMemo(() => {
+    return workItems.filter((i) => i.projectId === currentProject.id);
+  }, [workItems, currentProject]);
+
+  // Configuración del servicio (Desarrollo Web, Branding, etc.)
+  const serviceConfig = SERVICES_CONFIG[currentProject.serviceId] || SERVICES_CONFIG["desarrollo-web"];
+  const milestones = serviceConfig.milestones;
+
+  const [activeMilestoneStep, setActiveMilestoneStep] = useState(currentProject.activeMilestone || 1);
+
+  const activeMilestoneObj = useMemo(() => {
+    return milestones.find((m) => m.id === activeMilestoneStep) || milestones[0];
+  }, [milestones, activeMilestoneStep]);
+
+  // Alternar estado de una tarea
+  const handleToggleItemState = (itemId, newState) => {
+    const updated = workItems.map((item) => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          state: newState,
+          stateLabel: newState === "done" ? "Completado" : newState === "in-progress" ? "En Progreso" : "Por Hacer"
+        };
+      }
+      return item;
+    });
+    setWorkItems(updated);
+    savePlaneWorkItems(updated);
   };
 
-  const filteredProjects =
-    selectedCategory === "all"
-      ? projects
-      : projects.filter((p) => p.serviceId === selectedCategory);
+  // Añadir nuevo Work Item
+  const handleAddWorkItem = (newItem) => {
+    const updated = [newItem, ...workItems];
+    setWorkItems(updated);
+    savePlaneWorkItems(updated);
+  };
+
+  // Añadir nuevo Proyecto
+  const handleProjectCreated = (newProj) => {
+    const planeProj = {
+      id: `proj-${Date.now()}`,
+      key: `QW-${newProj.slug.substring(0, 3).toUpperCase()}`,
+      name: newProj.clientName,
+      slug: newProj.slug,
+      serviceId: newProj.serviceId,
+      serviceName: newProj.serviceId === "desarrollo-web" ? "Desarrollo Web & E-commerce" : "Servicio Digital",
+      serviceColor: "#ff4b0b",
+      client: newProj.clientName,
+      plan: newProj.plan,
+      budget: newProj.budget,
+      paidAmount: newProj.paidAmount,
+      status: "in-progress",
+      statusText: "En Discovery",
+      progress: 15,
+      activeMilestone: 1,
+      targetDate: newProj.targetDate,
+      domain: newProj.officialDomain,
+      previewUrl: newProj.previewUrl
+    };
+
+    const updatedProjects = [planeProj, ...projects];
+    setProjects(updatedProjects);
+    savePlaneProjects(updatedProjects);
+    setSelectedProjectId(planeProj.id);
+  };
+
+  const handleCopyClientLink = () => {
+    const url = `${window.location.origin}/portal/${currentProject.slug}`;
+    navigator.clipboard.writeText(url);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   return (
-    <div className="qw-gestor-root">
+    <div className="qw-plane-app-root">
       <Helmet>
-        <title>Gestor de Proyectos & Metodología Ágil | Qaway Hub</title>
+        <title>{`Qaway Studio | ${currentProject.name} - Gestor de Proyectos`}</title>
         <meta
           name="description"
-          content="Consola central de gestión de proyectos y ciclo de vida ágil para Desarrollo Web, Branding, CRM y Marketing."
+          content="Plataforma de gestión de proyectos y seguimiento ágil de entregas de Qaway Lab."
         />
       </Helmet>
 
-      {/* Modal de Creación de Proyecto */}
+      {/* Modales */}
+      <CreateWorkItemModal
+        isOpen={isNewItemModalOpen}
+        onClose={() => setIsNewItemModalOpen(false)}
+        project={currentProject}
+        onAddItem={handleAddWorkItem}
+      />
+
       <CreateProjectModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isNewProjModalOpen}
+        onClose={() => setIsNewProjModalOpen(false)}
         onProjectCreated={handleProjectCreated}
       />
 
-      {/* Header del Dashboard */}
-      <header className="qw-gestor-header">
-        <div className="qw-gestor-header-inner">
-          <div className="qw-gestor-header-top">
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <Link to="/hub" className="qw-gestor-back-link">
-                <span>← Volver a Qaway Hub</span>
-              </Link>
-            </div>
-            <div className="qw-gestor-brand-badge">
-              <span>QAWAY HUB</span>
-              <small>GESTOR DE PROYECTOS</small>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "16px" }}>
-            <div>
-              <span className="qw-gestor-client-label">ENGINEERING & PRODUCT MANAGEMENT</span>
-              <h1 className="qw-gestor-project-title">Gestor de Proyectos</h1>
-              <p className="qw-gestor-project-plan">
-                Trazabilidad ágil de 6 hitos por servicio: desde el Briefing hasta la Certificación de Entrega.
-              </p>
-            </div>
-
-            <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="qw-gestor-btn-submit"
-                style={{ padding: "10px 20px" }}
-              >
-                <Plus size={16} />
-                <span>Nuevo Proyecto</span>
-              </button>
-
-              <div className="qw-gestor-sow-card" style={{ background: "#ffffff" }}>
-                <FolderKanban size={18} color="#fe6612" />
-                <div>
-                  <strong>{projects.length} Proyectos Registrados</strong>
-                  <span>4 Servicios Configurados</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Contenido Principal */}
-      <main className="qw-gestor-container">
+      {/* LAYOUT PRINCIPAL DE 2 COLUMNAS (SIDEBAR + WORKSPACE) */}
+      <div className="qw-plane-layout-grid">
         
-        {/* Pestañas de Filtro por Servicio */}
-        <div className="qw-gestor-dash-tabs">
-          <button
-            type="button"
-            onClick={() => setSelectedCategory("all")}
-            className={`qw-gestor-dash-tab ${selectedCategory === "all" ? "is-active" : ""}`}
-          >
-            <span>Todos los Servicios ({projects.length})</span>
-          </button>
+        {/* 1. SIDEBAR LATERAL IZQUIERDO */}
+        <PlaneSidebar
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onSelectProject={(id) => {
+            setSelectedProjectId(id);
+            const proj = projects.find(p => p.id === id);
+            if (proj) setActiveMilestoneStep(proj.activeMilestone || 1);
+          }}
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+          onOpenNewProjectModal={() => setIsNewProjModalOpen(true)}
+        />
 
-          {Object.values(SERVICES_CONFIG).map((srv) => {
-            const Icon = serviceIcons[srv.id] || Globe;
-            const count = (projects || []).filter((p) => p.serviceId === srv.id).length;
-            const isActive = selectedCategory === srv.id;
+        {/* 2. ÁREA DE TRABAJO PRINCIPAL (PLANE WORKSPACE) */}
+        <main className="qw-plane-workspace">
+          
+          {/* Topbar del Proyecto */}
+          <header className="qw-plane-topbar">
+            <div className="qw-plane-topbar-left">
+              <span className="qw-plane-proj-key-badge">{currentProject.key}</span>
+              <h2 className="qw-plane-topbar-title">{currentProject.name}</h2>
+              <span className="qw-plane-topbar-plan">{currentProject.plan}</span>
+            </div>
 
-            return (
+            <div className="qw-plane-topbar-actions">
               <button
-                key={srv.id}
                 type="button"
-                onClick={() => setSelectedCategory(srv.id)}
-                className={`qw-gestor-dash-tab ${isActive ? "is-active" : ""}`}
+                onClick={handleCopyClientLink}
+                className="qw-plane-btn-share"
+                title="Copiar enlace para el cliente"
               >
-                <Icon size={15} color={isActive ? "#ffffff" : srv.color} />
-                <span>{srv.name} ({count})</span>
+                {copiedLink ? (
+                  <>
+                    <Check size={14} color="#00b090" />
+                    <span style={{ color: "#00b090" }}>¡Link Copiado!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 size={14} />
+                    <span>Compartir Portal Cliente</span>
+                  </>
+                )}
               </button>
-            );
-          })}
-        </div>
 
-        {/* Grid de Tarjetas de Proyecto */}
-        <div className="qw-gestor-projects-grid">
-          {filteredProjects.map((proj, idx) => {
-            const srv = SERVICES_CONFIG[proj.serviceId];
-            const Icon = serviceIcons[proj.serviceId] || Globe;
-
-            return (
-              <motion.div
-                key={proj.id}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
+              <button
+                type="button"
+                onClick={() => setIsNewItemModalOpen(true)}
+                className="qw-plane-btn-primary"
               >
-                <Link
-                  to={`/hub/gestor-proyectos/${proj.serviceId}/${proj.slug}`}
-                  className="qw-gestor-card"
-                >
-                  <div className="qw-gestor-card-header">
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <div
-                        style={{
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "8px",
-                          background: `${srv.color}15`,
-                          color: srv.color,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Icon size={16} />
-                      </div>
-                      <div>
-                        <span style={{ fontSize: "11px", fontWeight: "700", color: "#71717a", textTransform: "uppercase" }}>
-                          {srv.shortName}
-                        </span>
-                      </div>
-                    </div>
+                <Plus size={14} />
+                <span>Crear Tarea</span>
+              </button>
+            </div>
+          </header>
 
-                    <span className={`qw-gestor-status-pill status-${proj.status}`}>
-                      {proj.statusText}
+          {/* Barra de Pestañas de Vista (Estilo Plane Tabs) */}
+          <div className="qw-plane-tabs-bar">
+            <button
+              type="button"
+              onClick={() => setActiveTab("work-items")}
+              className={`qw-plane-tab-btn ${activeTab === "work-items" ? "is-active" : ""}`}
+            >
+              <Layers size={14} />
+              <span>Work Items ({currentWorkItems.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("kanban")}
+              className={`qw-plane-tab-btn ${activeTab === "kanban" ? "is-active" : ""}`}
+            >
+              <FolderKanban size={14} />
+              <span>Tablero Kanban</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("milestones")}
+              className={`qw-plane-tab-btn ${activeTab === "milestones" ? "is-active" : ""}`}
+            >
+              <Sparkles size={14} />
+              <span>Hitos & Certificación (1-6)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("contract")}
+              className={`qw-plane-tab-btn ${activeTab === "contract" ? "is-active" : ""}`}
+            >
+              <FileText size={14} />
+              <span>Contrato SOW Oficial</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("client-portal")}
+              className={`qw-plane-tab-btn ${activeTab === "client-portal" ? "is-active" : ""}`}
+            >
+              <Eye size={14} />
+              <span>Portal del Cliente</span>
+            </button>
+          </div>
+
+          {/* CONTENIDO SEGÚN LA PESTAÑA SELECCIONADA */}
+          <div className="qw-plane-content-body">
+            
+            {/* VISTA 1: LISTA DE WORK ITEMS */}
+            {activeTab === "work-items" && (
+              <PlaneWorkItemsList
+                workItems={currentWorkItems}
+                project={currentProject}
+                onToggleItemState={handleToggleItemState}
+                onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+              />
+            )}
+
+            {/* VISTA 2: TABLERO KANBAN */}
+            {activeTab === "kanban" && (
+              <PlaneKanbanBoard
+                workItems={currentWorkItems}
+                project={currentProject}
+                onToggleItemState={handleToggleItemState}
+                onOpenNewItemModal={() => setIsNewItemModalOpen(true)}
+              />
+            )}
+
+            {/* VISTA 3: HITOS ÁGILES & CERTIFICACIÓN */}
+            {activeTab === "milestones" && (
+              <div>
+                <MilestoneInteractiveStepper
+                  milestones={milestones}
+                  activeStep={activeMilestoneStep}
+                  onSelectStep={setActiveMilestoneStep}
+                  serviceColor={currentProject.serviceColor}
+                />
+
+                <MilestoneDetailPanel
+                  project={currentProject}
+                  activeMilestone={activeMilestoneObj}
+                  onNextMilestone={() => {
+                    if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
+                  }}
+                  onPrevMilestone={() => {
+                    if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
+                  }}
+                  totalMilestones={milestones.length}
+                />
+              </div>
+            )}
+
+            {/* VISTA 4: CONTRATO SOW & DESCARGA */}
+            {activeTab === "contract" && (
+              <ContractDownloadView project={currentProject} />
+            )}
+
+            {/* VISTA 5: PORTAL DEL CLIENTE (VISTA DE RECORRIDO) */}
+            {activeTab === "client-portal" && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#ffffff", padding: "16px 20px", borderRadius: "12px", border: "1px solid #e4e4e7", marginBottom: "24px" }}>
+                  <div>
+                    <strong style={{ fontSize: "14px", color: "#111111", display: "block" }}>Enlace Público del Portal de Cliente:</strong>
+                    <span style={{ fontSize: "13px", color: "#71717a", fontFamily: "monospace" }}>
+                      {window.location.origin}/portal/{currentProject.slug}
                     </span>
                   </div>
+                  <a
+                    href={`/portal/${currentProject.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="qw-gestor-btn-primary"
+                  >
+                    <span>Abrir en Nueva Pestaña</span>
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
 
-                  <h3 className="qw-gestor-card-title">{proj.clientName}</h3>
-                  <p className="qw-gestor-card-plan">{proj.plan}</p>
+                <MilestoneInteractiveStepper
+                  milestones={milestones}
+                  activeStep={activeMilestoneStep}
+                  onSelectStep={setActiveMilestoneStep}
+                  serviceColor={currentProject.serviceColor}
+                />
 
-                  <div className="qw-gestor-card-body">
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                      <span style={{ color: "#71717a" }}>Hito 0{proj.activeMilestone} de 06</span>
-                      <strong style={{ color: "#111111" }}>{proj.progress}%</strong>
-                    </div>
+                <MilestoneDetailPanel
+                  project={currentProject}
+                  activeMilestone={activeMilestoneObj}
+                  onNextMilestone={() => {
+                    if (activeMilestoneStep < milestones.length) setActiveMilestoneStep(prev => prev + 1);
+                  }}
+                  onPrevMilestone={() => {
+                    if (activeMilestoneStep > 1) setActiveMilestoneStep(prev => prev - 1);
+                  }}
+                  totalMilestones={milestones.length}
+                />
+              </div>
+            )}
 
-                    <div className="qw-gestor-progress-bar-bg" style={{ height: "6px" }}>
-                      <div
-                        className="qw-gestor-progress-bar-fill"
-                        style={{ width: `${proj.progress}%`, backgroundColor: srv.color }}
-                      />
-                    </div>
+          </div>
 
-                    <p style={{ fontSize: "12.5px", color: "#71717a", margin: "10px 0 0", lineHeight: "1.4" }}>
-                      {proj.notes}
-                    </p>
-                  </div>
+        </main>
 
-                  <div className="qw-gestor-card-footer">
-                    <span style={{ fontWeight: "700", color: "#18181b" }}>{proj.budget}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", color: "#fe6612", fontWeight: "700" }}>
-                      <span>Ver Recorrido</span>
-                      <ArrowRight size={13} />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
+      </div>
 
-      </main>
     </div>
   );
 }
