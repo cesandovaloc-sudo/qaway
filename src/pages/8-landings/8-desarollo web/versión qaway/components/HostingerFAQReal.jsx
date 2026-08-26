@@ -5,7 +5,11 @@ import { Plus, Minus } from "lucide-react";
 const realFaqs = [
   {
     q: "¿Qué tipo de web necesita mi negocio?",
-    a: "Depende de tu objetivo comercial: si buscas una presencia rápida, todo en uno y directa para captar clientes en campañas, 'One Web' o una 'Landing Page' es ideal. Si necesitas mostrar varios servicios y dar una imagen corporativa sólida, elige 'Web Comercial'. Si buscas vender productos las 24 horas con pasarela de pagos, tu opción es 'Tienda Online'."
+    a: (
+      <>
+        Depende de tu objetivo comercial: si buscas una presencia rápida, todo en uno y directa para captar clientes en campañas, <strong style={{ color: "#111111", fontWeight: "600" }}>“One Web”</strong> o una <strong style={{ color: "#111111", fontWeight: "600" }}>“Landing Page”</strong> es ideal. Si necesitas mostrar varios servicios y dar una imagen corporativa sólida, elige <strong style={{ color: "#111111", fontWeight: "600" }}>“Web Comercial”</strong>. Si buscas vender productos las 24 horas con pasarela de pagos, tu opción es <strong style={{ color: "#111111", fontWeight: "600" }}>“Tienda Online”</strong>.
+      </>
+    )
   },
   {
     q: "¿El dominio y el hosting están incluidos?",
