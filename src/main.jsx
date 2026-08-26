@@ -24,9 +24,19 @@ class RootErrorBoundary extends React.Component {
       return (
         <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
           <h1 style={{ color: '#dc2626', marginBottom: '1rem' }}>Algo salió mal</h1>
-          <p style={{ color: '#52525b', marginBottom: '1.5rem' }}>No se pudo cargar la aplicación.</p>
+          <p style={{ color: '#52525b', marginBottom: '1rem' }}>No se pudo cargar la aplicación.</p>
+          {this.state.error && (
+            <pre style={{ textAlign: 'left', background: '#f4f4f5', padding: '1rem', borderRadius: '8px', color: '#b91c1c', fontSize: '13px', overflowX: 'auto', maxWidth: '800px', margin: '0 auto 1.5rem' }}>
+              {this.state.error.toString()}
+              {'\n'}
+              {this.state.error.stack}
+            </pre>
+          )}
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.removeItem('qaway_gestor_projects');
+              window.location.reload();
+            }}
             style={{
               padding: '0.75rem 1.5rem',
               background: '#ff4b0b',

@@ -7,7 +7,11 @@ import { BrandKitDeliveryCard } from "./BrandKitDeliveryCard";
 export function MilestoneDetailPanel({ project, activeMilestone, onNextMilestone, onPrevMilestone, totalMilestones }) {
   const [signedOff, setSignedOff] = useState(false);
 
-  const milestone = activeMilestone || project.milestones[0];
+  if (!activeMilestone || !project) {
+    return null;
+  }
+
+  const milestone = activeMilestone;
   const isWebAudit = project.serviceId === "desarrollo-web" && milestone.id === 6;
   const isBrandDelivery = project.serviceId === "branding" && milestone.id === 6;
   const isSignOffStep = milestone.id === 3;
