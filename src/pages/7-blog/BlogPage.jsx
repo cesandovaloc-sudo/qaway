@@ -302,10 +302,10 @@ export default function BlogPage() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col justify-between bg-[#f2f1ef] selection:bg-[#ff4b0b] selection:text-white">
+    <div className="flex min-h-screen flex-col justify-between bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
       <div>
-        <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#f5f5f4] pb-10 pt-24 text-[#191918] sm:pb-12 sm:pt-32">
-          <div className="absolute inset-0 z-0 overflow-hidden bg-[#f5f5f4] pointer-events-none select-none">
+        <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#ffffff] pb-10 pt-24 text-[#191918] sm:pb-12 sm:pt-32">
+          <div className="absolute inset-0 z-0 overflow-hidden bg-[#ffffff] pointer-events-none select-none">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
             <div
@@ -393,7 +393,7 @@ export default function BlogPage() {
           </div>
         </section>
 
-        <section className="bg-[#f2f1ef] pb-12 pt-8 lg:pb-24 lg:pt-10">
+        <section className="bg-[#f8f9fc] pb-12 pt-8 lg:pb-24 lg:pt-10">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {activeCategory || isSearchActive ? (
               <>

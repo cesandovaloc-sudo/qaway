@@ -296,7 +296,7 @@ export default function RecursosPage() {
           transition={{ duration: 0.45, delay: idx * 0.07 }}
           className="flex h-full flex-col"
         >
-          <div className="relative w-full overflow-hidden bg-[#f2f1ef] pt-[65%]">
+          <div className="relative w-full overflow-hidden bg-[#f8f9fc] pt-[65%]">
             <img 
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
               src={res.image} 
@@ -335,7 +335,7 @@ export default function RecursosPage() {
       >
         <CardWrapper {...wrapperProps} className="group mb-3 flex items-center justify-between gap-6 rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
           <div className="flex flex-1 items-center gap-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f2f1ef] text-black/60 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-black/60 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
               <Icon size={20} />
             </div>
             <div>
@@ -361,10 +361,10 @@ export default function RecursosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f1ef] selection:bg-[#ff4b0b] selection:text-white">
+    <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
       
-      <section className="relative overflow-hidden bg-[#f5f5f4] pt-24 pb-10 text-[#191918] sm:pt-32 sm:pb-12 border-b border-black/10">
-        <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden bg-[#f5f5f4]">
+      <section className="relative overflow-hidden bg-[#ffffff] pt-24 pb-10 text-[#191918] sm:pt-32 sm:pb-12 border-b border-black/10">
+        <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden bg-[#ffffff]">
           <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
           <div 

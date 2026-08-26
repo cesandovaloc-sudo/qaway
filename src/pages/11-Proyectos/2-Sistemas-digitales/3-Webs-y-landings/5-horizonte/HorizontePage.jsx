@@ -90,7 +90,7 @@ export default function HorizontePage() {
       </header>
 
       {/* — HERO EDITORIAL — */}
-      <section className="bg-[#f8f9f7] text-[#111210] py-20 md:py-32 px-6">
+      <section className="bg-[#f8f9fc] text-[#111210] py-20 md:py-32 px-6">
         <div className="max-w-[1000px] mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -249,7 +249,7 @@ export default function HorizontePage() {
       </section>
 
       {/* — FULL-BLEED: APLICACIÓN DE MARCA — */}
-      <section className="bg-[#f8f9f7]">
+      <section className="bg-[#ffffff]">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <motion.div
             initial={{ opacity: 0 }}
@@ -354,7 +354,7 @@ export default function HorizontePage() {
       </section>
 
       {/* — EXPERIENCIA INTERACTIVA (Tarjetas de propiedades) — */}
-      <section className="bg-[#f8f9f7] py-20 md:py-28 px-6">
+      <section className="bg-[#f8f9fc] py-20 md:py-28 px-6">
         <div className="max-w-[1200px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[

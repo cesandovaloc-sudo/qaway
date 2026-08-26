@@ -334,7 +334,7 @@ function BrandingSpotlight() {
   }
 
   return (
-    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f3f1ee', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
+    <section id="branding" className="vl-section vl-branding" style={{ backgroundColor: '#f8f9fc', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(40px, 4vh, 80px) 0' }}>
       <div className="vl-shell vl-branding__grid">
         <motion.div
           className="vl-branding__copy order-1 lg:order-2"
@@ -508,7 +508,7 @@ function TransformacionVisualCarousel() {
           </div>
 
           {/* En móvil: imagen interactiva inmediatamente debajo del título */}
-          <div className="mt-6 block lg:hidden w-full h-[320px] relative overflow-hidden border border-black/12 rounded-[6px] bg-[#f3f1ee]">
+          <div className="mt-6 block lg:hidden w-full h-[320px] relative overflow-hidden border border-black/12 rounded-[6px] bg-[#f8f9fc]">
             <AnimatePresence>
               <motion.div
                 key={activeSlide}
@@ -550,7 +550,7 @@ function TransformacionVisualCarousel() {
                   transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
                   className={`flex items-center gap-2.5 lg:gap-4 p-2 lg:p-4 border rounded-[6px] cursor-pointer transition-all duration-300 text-left w-full ${
                     activeSlide === index
-                      ? 'border-[#ff4b0b] bg-[#fcfbf7] text-[#ff4b0b]'
+                      ? 'border-[#ff4b0b] bg-[#fff4ec] text-[#ff4b0b]'
                       : 'border-black/10 bg-transparent text-[#8b8c88] hover:bg-black/5'
                   }`}
                 >
@@ -576,7 +576,7 @@ function TransformacionVisualCarousel() {
               overflow: 'hidden',
               border: '1px solid rgba(0,0,0,0.12)',
               borderRadius: '6px',
-              backgroundColor: '#f3f1ee'
+              backgroundColor: '#f8f9fc'
             }}
           >
             <AnimatePresence>
@@ -617,7 +617,7 @@ function ContentSystem() {
   const formats = ['Feed', 'Carrusel', 'Reels', 'Stories', 'Web']
 
   return (
-    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#f3f1ee', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(60px, 6vh, 100px) 0' }}>
+    <section id="contenido" className="vl-section vl-social" style={{ backgroundColor: '#ffffff', color: '#191918', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: 'clamp(60px, 6vh, 100px) 0' }}>
       <div className="vl-shell vl-content-system">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-content-system__copy">
           <div>

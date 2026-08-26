@@ -442,7 +442,7 @@ function EcosystemPhoto() {
 
 function EcosystemIntro() {
   return (
-    <section id="ecosistema" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
+    <section id="ecosistema" className="flex min-h-[100dvh] items-center bg-[#ffffff] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
       <div className="mx-auto max-w-[94rem]">
         <Reveal className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div className="text-center lg:text-left">
@@ -480,7 +480,7 @@ function EstudioSection() {
   const activeService = estudioServices[active]
 
   return (
-    <section id="estudio" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f8f9f7] px-6 py-12 text-[#20201f] sm:px-10 lg:px-14">
+    <section id="estudio" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f8f9fc] px-6 py-12 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
           <div className="flex flex-col">
@@ -821,7 +821,7 @@ function AcademyFeature() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section id="academy" className="flex flex-col justify-center bg-[#f8f9f7] text-[#20201f] py-12 lg:min-h-[100dvh] lg:py-0">
+    <section id="academy" className="flex flex-col justify-center bg-[#ffffff] text-[#20201f] py-12 lg:min-h-[100dvh] lg:py-0">
       <div className="mx-auto w-full max-w-[96rem]">
       <div className="grid items-center w-full lg:grid-cols-[55%_45%]">
         <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
@@ -895,7 +895,7 @@ function AcademyFeature() {
 
 function AcademyContactSection({ submitted, submitting, submitError, onSubmit, onReset }) {
   return (
-    <section id="formulario" className="flex min-h-[100dvh] items-center bg-[#f8f9f7] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+    <section id="formulario" className="flex min-h-[100dvh] items-center bg-[#f8f9fc] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
         <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14 items-center">
           <Reveal>

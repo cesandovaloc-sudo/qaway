@@ -1,8 +1,8 @@
 .academy-page {
   --academy-ink: #20201f;
   --academy-muted: #6d6b68;
-  --academy-paper: #f4f3f0;
-  --academy-white: #fbfaf8;
+  --academy-paper: #f8f9fc;
+  --academy-white: #ffffff;
   --academy-accent: #ff4b0b;
   min-height: 100dvh;
   overflow: hidden;
@@ -737,14 +737,14 @@
   flex-direction: column;
   padding: clamp(1.7rem, 2.8vw, 2.8rem);
   border: 1px solid rgba(32, 32, 31, 0.1);
-  background: #f0efec;
+  background: #f8f9fc;
   box-shadow: 0 18px 46px rgba(69, 58, 50, 0.05);
   transition: border-color 250ms ease, box-shadow 250ms ease;
 }
 
 .academy-program-grid>div:nth-child(2) .academy-program-card {
   margin-top: 3.5rem;
-  background: #e9e7e2;
+  background: #ffffff;
 }
 
 .academy-program-grid>div:nth-child(3) .academy-program-card {
@@ -833,7 +833,7 @@
 }
 
 .academy-method {
-  background: #efeeeb;
+  background: #f8f9fc;
 }
 
 .academy-method-layout {
@@ -950,11 +950,11 @@
 }
 
 .academy-testimonials {
-  background: #f0eee9;
+  background: #f8f9fc;
 }
 
 .tst-ver-a {
-  background: #f8f7f4;
+  background: #ffffff;
   color: var(--academy-ink);
 }
 

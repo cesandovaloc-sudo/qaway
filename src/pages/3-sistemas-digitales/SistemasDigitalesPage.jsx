@@ -357,7 +357,7 @@ function HeroInicioBlockPractice() {
     </section>
 
     {/* Banda de botones — fuera del hero, fila completa */}
-    <div className="w-full border-b-[3px] border-black/5 bg-[#f8f9f7] grid grid-cols-2 lg:grid-cols-4">
+    <div className="w-full border-b-[3px] border-black/5 bg-[#ffffff] grid grid-cols-2 lg:grid-cols-4">
       <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
         <Settings className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Automatización</span>
@@ -742,7 +742,7 @@ export default function SistemasDigitalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f1ee] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
+    <div className="min-h-screen bg-[#ffffff] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
       <SEO
         title="Sistemas Digitales y Automatización con IA | Qaway LAB"
         description="Implementamos sistemas, CRMs y agentes con IA para optimizar la operación de tu negocio."
@@ -955,7 +955,7 @@ export default function SistemasDigitalesPage() {
         </div>
       </section>
 
-      <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
+      <section className="border-b border-black/6 bg-[#f8f9fc] py-20 lg:py-28">
         <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[0.95fr_1.05fr] lg:px-14">
           <motion.div
             initial={reduceMotion ? false : "hidden"}
@@ -1062,7 +1062,7 @@ export default function SistemasDigitalesPage() {
       </section>
 
 
-      <section className="border-b border-black/6 bg-[#f3f1ee] py-20 lg:py-28">
+      <section className="border-b border-black/6 bg-[#ffffff] py-20 lg:py-28">
         <div className="mx-auto grid max-w-[94rem] gap-12 px-6 sm:px-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-14">
           <motion.div
             initial={reduceMotion ? false : "hidden"}
@@ -1375,7 +1375,7 @@ export default function SistemasDigitalesPage() {
       </section>
 
 
-      <section id="diagnostico" className="-scroll-mt-24 bg-[#f3f1ee] py-20 lg:py-28">
+      <section id="diagnostico" className="-scroll-mt-24 bg-[#f8f9fc] py-20 lg:py-28">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           <div className="overflow-hidden border border-black/8 bg-white shadow-[0_24px_74px_rgba(0,0,0,0.06)]">
             <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">

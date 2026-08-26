@@ -13,10 +13,10 @@
   --color-qaway-muted: #71717a;
   --color-qaway-muted-light: #a1a1aa;
   --color-qaway-surface: #f5f5f5;
-  --color-qaway-surface-muted: #f2f1ef;
-  --color-qaway-warm: #efede8;
-  --color-qaway-warm-muted: #e5e3dd;
-  --color-qaway-warm-dark: #dcd9cf;
+  --color-qaway-surface-muted: #f8f9fc;
+  --color-qaway-warm: #fafafa;
+  --color-qaway-warm-muted: #f4f4f5;
+  --color-qaway-warm-dark: #e4e4e7;
 
   /* Tokens EPC Estudio Contable (solo usados dentro de .epc-landing) */
   --color-ecp-navy: #06153a;

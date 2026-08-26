@@ -179,7 +179,7 @@ export default function HubPage() {
         <Link to={route.path} className="group flex h-full flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
           <div>
             <div className="mb-5 flex items-start justify-between gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f2f1ef] text-[#191918]/55 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-[#191918]/55 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
                 <Icon size={20} />
               </div>
               <span className={`rounded-md px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${route.tone}`}>
@@ -201,9 +201,9 @@ export default function HubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f1ef] selection:bg-[#ff4b0b] selection:text-white">
-      <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#f5f5f4] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
-        <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden bg-[#f5f5f4]">
+    <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
+      <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#ffffff] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
+        <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden bg-[#ffffff]">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
           <div
