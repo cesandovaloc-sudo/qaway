@@ -166,7 +166,7 @@ export function HostingerHeroReal() {
           </motion.div>
 
           {/* Columna Derecha: Composición en Capas Estáticas (Una detrás de otra) */}
-          <div className="h-hero-showcase-container" style={{ position: "relative", minHeight: "440px" }}>
+          <div className="h-hero-showcase-container" style={{ position: "relative" }}>
             
             {/* IMAGEN 2 (Fondo / Gelato) */}
             <div

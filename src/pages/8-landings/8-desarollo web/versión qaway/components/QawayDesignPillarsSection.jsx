@@ -92,16 +92,10 @@ export function QawayDesignPillarsSection() {
           transition={{ duration: 0.65, delay: 0.12, ease: [0.21, 0.47, 0.32, 0.98] }}
         >
           {/* Columna Izquierda: Detalle */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              minHeight: "320px",
-            }}
-          >
-            {/* Bloque de Textos con Altura Mínima Calibrada */}
-            <div style={{ minHeight: "220px" }}>
+          {/* Columna Izquierda: Detalle */}
+          <div className="qw-pillars-text-col">
+            {/* Bloque de Textos */}
+            <div className="qw-pillars-text-box">
               <span
                 style={{
                   color: "#71717a",
@@ -116,7 +110,7 @@ export function QawayDesignPillarsSection() {
                 {current.tag}
               </span>
 
-              {/* Título de Pilar con altura reservada fija y alineación superior */}
+              {/* Título de Pilar */}
               <h3
                 style={{
                   fontFamily: "var(--qw-font-display)",
@@ -126,8 +120,6 @@ export function QawayDesignPillarsSection() {
                   lineHeight: "1.18",
                   color: "#111111",
                   margin: "0 0 14px",
-                  height: "64px",
-                  minHeight: "64px",
                   display: "flex",
                   alignItems: "flex-start",
                   maxWidth: "440px",

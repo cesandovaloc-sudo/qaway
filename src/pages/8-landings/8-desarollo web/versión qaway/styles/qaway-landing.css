@@ -630,6 +630,23 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Pilares de Diseño */
+.qaway-landing-root .qw-pillars-text-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 340px;
+}
+
+.qaway-landing-root .qw-pillars-text-box {
+  min-height: 220px;
+}
+
+.qaway-landing-root .qw-pillars-text-box h3 {
+  height: 64px;
+  min-height: 64px;
+}
+
 /* Responsive Breakpoints Profesionales */
 @media (max-width: 1100px) {
   .qaway-landing-root .h-hero-grid-real {
@@ -640,13 +657,16 @@
 
 @media (max-width: 900px) {
   .qaway-landing-root .h-hero-section-real {
-    padding: 105px 0 40px;
+    padding: 105px 0 25px;
   }
   .qaway-landing-root .h-hero-showcase-container {
-    min-height: 380px;
+    min-height: auto;
   }
   .qaway-landing-root .h-hero-layer-img {
-    height: 320px;
+    height: 260px;
+  }
+  .qaway-landing-root .h-ai-three-cards-section {
+    padding: 30px 0 45px !important;
   }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -657,7 +677,19 @@
   .qaway-landing-root .h-security-grid,
   .qaway-landing-root .qw-pillars-split-grid {
     grid-template-columns: 1fr !important;
-    gap: 36px !important;
+    gap: 24px !important;
+  }
+  .qaway-landing-root .qw-pillars-text-col {
+    min-height: auto !important;
+  }
+  .qaway-landing-root .qw-pillars-text-box {
+    min-height: auto !important;
+    margin-bottom: 0 !important;
+  }
+  .qaway-landing-root .qw-pillars-text-box h3 {
+    height: auto !important;
+    min-height: auto !important;
+    margin-bottom: 10px !important;
   }
   .qaway-landing-root .qw-pricing-plan-popular {
     order: -1 !important;
@@ -670,7 +702,7 @@
     justify-content: center;
     align-items: center;
     gap: 18px;
-    margin-top: 24px;
+    margin-top: 20px;
   }
 }
 

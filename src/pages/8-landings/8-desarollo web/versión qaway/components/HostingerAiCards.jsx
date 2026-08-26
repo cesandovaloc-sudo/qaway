@@ -8,7 +8,7 @@ export function HostingerAiCards() {
   return (
     <>
       {/* BLOQUE 1: Elige el tipo de web (Fondo Blanco) */}
-      <section id="proyectos" className="h-ai-three-cards-section" style={{ background: "#ffffff", padding: "90px 0 85px" }}>
+      <section id="proyectos" className="h-ai-three-cards-section" style={{ background: "#ffffff" }}>
         <div className="h-container" style={{ maxWidth: "1330px" }}>
           
           <motion.div
