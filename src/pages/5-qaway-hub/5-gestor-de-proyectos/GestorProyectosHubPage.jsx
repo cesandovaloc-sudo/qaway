@@ -15,7 +15,7 @@ import {
   Sparkles,
   ShieldCheck,
 } from "lucide-react";
-import { SERVICES_CONFIG, getStoredProjects } from "./data/services-milestones-data";
+import { SERVICES_CONFIG, SAMPLE_PROJECTS, getStoredProjects } from "./data/services-milestones-data";
 import { CreateProjectModal } from "./components/CreateProjectModal";
 import "./styles/gestor-proyectos.css";
 
@@ -119,7 +119,7 @@ export default function GestorProyectosHubPage() {
 
           {Object.values(SERVICES_CONFIG).map((srv) => {
             const Icon = serviceIcons[srv.id] || Globe;
-            const count = SAMPLE_PROJECTS.filter((p) => p.serviceId === srv.id).length;
+            const count = (projects || []).filter((p) => p.serviceId === srv.id).length;
             const isActive = selectedCategory === srv.id;
 
             return (
