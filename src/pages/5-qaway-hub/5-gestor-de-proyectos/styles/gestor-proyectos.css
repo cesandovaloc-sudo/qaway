@@ -445,7 +445,7 @@
 }
 
 /* ==========================================================================
-   3. WORK ITEMS LIST VIEW (TIPOGRAFÍA INTER ULTRA-PULIDA)
+   3. WORK ITEMS LIST VIEW
    ========================================================================== */
 .qw-plane-table-toolbar {
   display: flex;
@@ -647,7 +647,7 @@
 }
 
 /* ==========================================================================
-   4. KANBAN BOARD VIEW (TIPOGRAFÍA PULIDA)
+   4. KANBAN BOARD VIEW
    ========================================================================== */
 .qw-plane-kanban-grid {
   display: grid;
@@ -741,7 +741,439 @@
 }
 
 /* ==========================================================================
-   5. CONTRATO SOW & DESCARGA
+   5. STEPPER INTERACTIVO DE 6 HITOS & PANEL DE DETALLE
+   ========================================================================== */
+.qw-gestor-stepper-container {
+  background: #ffffff;
+  border: 1px solid var(--qw-border-hairline);
+  border-radius: 12px;
+  padding: 24px 20px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+}
+
+.qw-gestor-stepper-track {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  min-width: 680px;
+}
+
+.qw-gestor-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  flex: 1;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.qw-gestor-step-line {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background-color: #e4e4e7;
+  z-index: 1;
+  transition: background-color 0.2s ease;
+}
+
+.qw-gestor-step-bubble {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #e4e4e7;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 10px;
+  font-family: var(--qw-font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--qw-text-muted);
+  transition: all 0.2s ease;
+}
+
+.qw-gestor-step-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qw-gestor-step-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #a1a1aa;
+  letter-spacing: 0.04em;
+  font-family: var(--qw-font-sans);
+  text-transform: uppercase;
+}
+
+.qw-gestor-step-title {
+  font-family: var(--qw-font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--qw-text-main);
+  line-height: 1.25;
+}
+
+.qw-gestor-step-node.is-active .qw-gestor-step-title {
+  color: var(--qw-primary);
+}
+
+.qw-gestor-step-date {
+  font-size: 11px;
+  color: var(--qw-text-muted);
+  font-family: var(--qw-font-sans);
+}
+
+/* Panel de Detalle del Hito Activo */
+.qw-gestor-detail-panel {
+  background: #ffffff;
+  border: 1px solid var(--qw-border-hairline);
+  border-radius: 12px;
+  padding: 32px 28px;
+}
+
+.qw-gestor-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.qw-gestor-phase-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #52525b;
+  background: #f4f4f6;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  font-family: var(--qw-font-sans);
+  text-transform: uppercase;
+}
+
+.qw-gestor-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-status-pill.status-completed {
+  background: rgba(0, 176, 144, 0.12);
+  color: #00876e;
+}
+
+.qw-gestor-status-pill.status-in-progress {
+  background: rgba(255, 75, 11, 0.12);
+  color: var(--qw-primary);
+}
+
+.qw-gestor-status-pill.status-pending {
+  background: #f4f4f6;
+  color: var(--qw-text-muted);
+}
+
+.qw-gestor-detail-title {
+  font-family: var(--qw-font-display) !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  color: var(--qw-text-main) !important;
+  margin: 6px 0 4px;
+  letter-spacing: -0.03em !important;
+}
+
+.qw-gestor-detail-sub {
+  font-size: 14px;
+  color: var(--qw-text-muted);
+  margin: 0;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-detail-date-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--qw-text-main);
+  background: #f4f4f6;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-divider {
+  width: 100%;
+  height: 1px;
+  background: #f4f4f6;
+  margin: 22px 0;
+}
+
+.qw-gestor-section-heading {
+  font-family: var(--qw-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--qw-text-main);
+  margin: 0 0 14px;
+}
+
+.qw-gestor-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qw-gestor-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: #27272a;
+  line-height: 1.45;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-check-icon {
+  color: #00b090;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.qw-gestor-actions-box {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.qw-gestor-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--qw-dark-btn);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--qw-font-sans);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-primary:hover {
+  background: var(--qw-dark-btn-hover);
+}
+
+.qw-gestor-btn-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #00b090;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--qw-font-sans);
+  border: none;
+  cursor: pointer;
+}
+
+.qw-gestor-sow-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fafafc;
+  border: 1px solid var(--qw-border-hairline);
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+.qw-gestor-sow-card strong {
+  display: block;
+  font-size: 13px;
+  color: var(--qw-text-main);
+  font-family: var(--qw-font-sans);
+  font-weight: 600;
+}
+
+.qw-gestor-sow-card span {
+  font-size: 11px;
+  color: var(--qw-text-muted);
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-nav-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f4f4f6;
+  padding-top: 20px;
+  margin-top: 28px;
+}
+
+.qw-gestor-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid var(--qw-border-subtle);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--qw-font-sans);
+  color: var(--qw-text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-nav-btn:hover:not(:disabled) {
+  background: #f4f4f6;
+}
+
+.qw-gestor-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Auditoría Lighthouse Card */
+.qw-gestor-audit-card {
+  background: #fafafc;
+  border: 1px solid var(--qw-border-hairline);
+  border-radius: 10px;
+  padding: 22px;
+}
+
+.qw-gestor-audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qw-gestor-badge-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--qw-font-sans);
+  color: var(--qw-text-main);
+}
+
+.qw-gestor-badge-passed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 176, 144, 0.15);
+  color: #00876e;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-gauges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.qw-gestor-gauge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--qw-border-hairline);
+  border-radius: 8px;
+  padding: 12px 8px;
+}
+
+.qw-gestor-gauge-svg-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.qw-gestor-gauge-value {
+  position: absolute;
+  font-size: 22px;
+  font-weight: 700;
+  color: #00876e;
+  font-family: var(--qw-font-display);
+}
+
+.qw-gestor-gauge-label {
+  font-family: var(--qw-font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--qw-text-main);
+  text-align: center;
+}
+
+.qw-gestor-cwv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.qw-gestor-cwv-box {
+  background: #ffffff;
+  border: 1px solid var(--qw-border-hairline);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qw-gestor-cwv-name {
+  font-size: 10.5px;
+  color: var(--qw-text-muted);
+  font-weight: 600;
+  font-family: var(--qw-font-sans);
+}
+
+.qw-gestor-cwv-val {
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--qw-font-mono);
+}
+
+.qw-gestor-cwv-sub {
+  font-size: 9.5px;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   6. CONTRATO SOW & DESCARGA
    ========================================================================== */
 .qw-plane-contract-wrapper {
   max-width: 840px;
@@ -939,7 +1371,7 @@
 }
 
 /* ==========================================================================
-   MODALES (APPLE CLEAN MODAL)
+   MODALES
    ========================================================================== */
 .qw-gestor-modal-overlay {
   position: fixed;
@@ -1125,5 +1557,8 @@
   .qw-plane-col-assignee,
   .qw-plane-col-date {
     display: none;
+  }
+  .qw-gestor-stepper-track {
+    min-width: 580px;
   }
 }
