@@ -128,7 +128,7 @@ export function HostingerAiCards() {
       </section>
 
       {/* BLOQUE 2: SERVICIOS & CAPACIDADES (Fondo Naranja Suave / Bajito #fff7f2) */}
-      <section id="servicios" style={{ background: "#fff7f2", padding: "85px 0 95px", borderTop: "1px solid rgba(254, 102, 18, 0.12)", borderBottom: "1px solid rgba(254, 102, 18, 0.12)" }}>
+      <section id="servicios" className="qw-services-section" style={{ background: "#fff7f2", borderTop: "1px solid rgba(254, 102, 18, 0.12)", borderBottom: "1px solid rgba(254, 102, 18, 0.12)" }}>
         <div className="h-container">
           <div style={{ textAlign: "left" }}>
             <span className="qw-kicker-capsule">

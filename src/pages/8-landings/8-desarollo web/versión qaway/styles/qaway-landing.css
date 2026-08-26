@@ -631,6 +631,14 @@
 }
 
 /* Pilares de Diseño */
+.qaway-landing-root .qw-pillars-section {
+  padding: 90px 0 95px;
+}
+
+.qaway-landing-root .qw-services-section {
+  padding: 85px 0 95px;
+}
+
 .qaway-landing-root .qw-pillars-text-col {
   display: flex;
   flex-direction: column;
@@ -657,7 +665,7 @@
 
 @media (max-width: 900px) {
   .qaway-landing-root .h-hero-section-real {
-    padding: 105px 0 48px;
+    padding: 105px 0 72px;
   }
   .qaway-landing-root .h-hero-showcase-container {
     min-height: auto;
@@ -665,8 +673,13 @@
   .qaway-landing-root .h-hero-layer-img {
     height: 280px;
   }
-  .qaway-landing-root .h-ai-three-cards-section {
-    padding: 48px 0 64px !important;
+  .qaway-landing-root .h-ai-three-cards-section,
+  .qaway-landing-root .qw-services-section,
+  .qaway-landing-root .qw-pillars-section,
+  .qaway-landing-root .h-real-pricing-section,
+  .qaway-landing-root #faq,
+  .qaway-landing-root #contacto {
+    padding: 72px 0 80px !important;
   }
   .qaway-landing-root .h-three-cards-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -677,7 +690,7 @@
   .qaway-landing-root .h-security-grid,
   .qaway-landing-root .qw-pillars-split-grid {
     grid-template-columns: 1fr !important;
-    gap: 36px !important;
+    gap: 40px !important;
   }
   .qaway-landing-root .qw-pillars-text-col {
     min-height: auto !important;
@@ -702,13 +715,13 @@
     justify-content: center;
     align-items: center;
     gap: 18px;
-    margin-top: 24px;
+    margin-top: 28px;
   }
 }
 
 @media (max-width: 640px) {
   .qaway-landing-root .h-hero-section-real {
-    padding: 96px 0 48px;
+    padding: 96px 0 72px;
   }
   .qaway-landing-root .h-hero-showcase-container {
     min-height: auto;
@@ -724,8 +737,13 @@
   .qaway-landing-root .h-hero-title-real {
     font-size: 2.1rem;
   }
-  .qaway-landing-root .h-ai-three-cards-section {
-    padding: 48px 0 60px !important;
+  .qaway-landing-root .h-ai-three-cards-section,
+  .qaway-landing-root .qw-services-section,
+  .qaway-landing-root .qw-pillars-section,
+  .qaway-landing-root .h-real-pricing-section,
+  .qaway-landing-root #faq,
+  .qaway-landing-root #contacto {
+    padding: 68px 0 76px !important;
   }
   .qaway-landing-root .h-container {
     padding: 0 20px;

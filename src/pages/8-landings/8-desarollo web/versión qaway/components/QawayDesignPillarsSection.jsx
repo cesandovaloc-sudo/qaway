@@ -60,7 +60,8 @@ export function QawayDesignPillarsSection() {
 
   return (
     <section
-      style={{ padding: "90px 16px 80px", background: "#f8f9fc", position: "relative" }}
+      className="qw-pillars-section"
+      style={{ background: "#f8f9fc", position: "relative" }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
