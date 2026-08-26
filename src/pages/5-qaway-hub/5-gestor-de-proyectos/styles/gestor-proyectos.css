@@ -1,6 +1,7 @@
 /* ==========================================================================
-   ESTILOS OFICIALES: QAWAY STUDIO (ESTILO PLANE.SO & DUB.CO)
-   Tipografía de Marca: Arial Narrow / Roboto Condensed (Display) + Inter (Sans)
+   ESTILOS OFICIALES: QAWAY STUDIO (SUITE PLANE.SO & DUB.CO)
+   Tipografía: Arial Narrow / Roboto Condensed (Display) + Inter (Sans)
+   Gradientes: Variaciones de Naranja Qaway (#ff4b0b, #fe6612, #ff7a45) + Grises (#111111, #18181b, #27272a, #f4f4f5)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;600;700;800;900&display=swap');
@@ -9,16 +10,32 @@
   --qw-font-display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
   --qw-font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --qw-font-mono: "JetBrains Mono", monospace;
+  
+  /* Variaciones de Naranja Qaway */
   --qw-primary: #ff4b0b;
+  --qw-primary-hover: #fd5605;
+  --qw-primary-light: #ff7a45;
+  --qw-primary-soft: #fff2eb;
+  --qw-grad-orange: linear-gradient(135deg, #ff7a45 0%, #ff4b0b 50%, #e03e00 100%);
+  --qw-grad-orange-subtle: linear-gradient(135deg, rgba(255, 75, 11, 0.12) 0%, rgba(254, 102, 18, 0.04) 100%);
+  
+  /* Variaciones de Grises */
   --qw-dark: #111111;
+  --qw-dark-card: #18181b;
+  --qw-grad-dark: linear-gradient(135deg, #1e2026 0%, #111111 100%);
+  --qw-grad-card: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   --qw-border: #e4e4e7;
-  --qw-bg-subtle: #fafafa;
+  --qw-border-subtle: #f4f4f5;
+  --qw-bg-subtle: #fbfbfc;
 }
 
-/* Base App Root */
+/* Espaciado del Navbar Global */
 .qw-plane-app-root {
   min-height: 100vh;
-  background-color: #fafafa;
+  padding-top: 84px; /* Colchón superior para no chocar con el Navbar fijo */
+  background: radial-gradient(circle at 10% 10%, rgba(255, 75, 11, 0.04) 0%, transparent 50%),
+              radial-gradient(circle at 90% 80%, rgba(25, 25, 24, 0.03) 0%, transparent 60%),
+              #f8f9fa;
   color: #111111;
   font-family: var(--qw-font-sans);
   -webkit-font-smoothing: antialiased;
@@ -26,27 +43,27 @@
 
 .qw-plane-layout-grid {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  min-height: 100vh;
+  grid-template-columns: 270px 1fr;
+  min-height: calc(100vh - 84px);
 }
 
 /* ==========================================================================
-   1. SIDEBAR LATERAL (ESTILO PLANE.SO)
+   1. SIDEBAR LATERAL CON DEGRADADOS
    ========================================================================== */
 .qw-plane-sidebar {
-  background-color: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   border-right: 1px solid var(--qw-border);
-  padding: 20px 14px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .qw-plane-ws-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px 12px;
+  padding: 0 4px 14px;
   border-bottom: 1px solid #f4f4f5;
 }
 
@@ -57,47 +74,50 @@
 }
 
 .qw-plane-ws-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: #111111;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--qw-grad-dark);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   font-family: var(--qw-font-display);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .qw-plane-ws-info strong {
   display: block;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   font-family: var(--qw-font-display);
   color: #111111;
+  letter-spacing: -0.01em;
 }
 
 .qw-plane-ws-info small {
-  font-size: 10.5px;
+  font-size: 11px;
   color: #71717a;
   font-weight: 500;
 }
 
 .qw-plane-ws-back {
   color: #a1a1aa;
-  padding: 4px;
-  border-radius: 4px;
-  transition: color 0.15s ease;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
 .qw-plane-ws-back:hover {
+  background: #f4f4f5;
   color: var(--qw-primary);
 }
 
 .qw-plane-quick-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .qw-plane-btn-new-item {
@@ -106,27 +126,29 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--qw-primary);
+  background: var(--qw-grad-orange);
   color: #ffffff;
   border: none;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   font-family: var(--qw-font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 75, 11, 0.25);
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-new-item:hover {
-  background: #111111;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255, 75, 11, 0.35);
 }
 
 .qw-plane-btn-new-proj {
-  width: 34px;
-  height: 34px;
-  background: #f4f4f5;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
   border: 1px solid var(--qw-border);
   border-radius: 8px;
   display: flex;
@@ -138,13 +160,14 @@
 }
 
 .qw-plane-btn-new-proj:hover {
-  background: #e4e4e7;
+  border-color: var(--qw-primary);
+  color: var(--qw-primary);
 }
 
 .qw-plane-nav-group {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .qw-plane-nav-title {
@@ -161,7 +184,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border-radius: 8px;
   background: transparent;
   border: none;
@@ -179,14 +202,15 @@
 }
 
 .qw-plane-nav-item.is-active {
-  background: #111111;
+  background: var(--qw-grad-dark);
   color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .qw-plane-projects-group {
   margin-top: 10px;
   border-top: 1px solid #f4f4f5;
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .qw-plane-group-header {
@@ -194,6 +218,7 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  padding: 0 4px;
 }
 
 .qw-plane-toggle-arrow {
@@ -208,15 +233,15 @@
 .qw-plane-projects-list {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin-top: 8px;
+  gap: 4px;
+  margin-top: 10px;
 }
 
 .qw-plane-project-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -227,14 +252,14 @@
 }
 
 .qw-plane-project-item.is-selected {
-  background: #fff4ee;
+  background: var(--qw-grad-orange-subtle);
   border-left: 3px solid var(--qw-primary);
 }
 
 .qw-plane-proj-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -258,19 +283,20 @@
 }
 
 .qw-plane-proj-text small {
-  font-size: 10.5px;
+  font-size: 11px;
   color: #71717a;
 }
 
 .qw-plane-proj-status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(255, 75, 11, 0.4);
 }
 
 /* ==========================================================================
-   2. ÁREA DE TRABAJO (WORKSPACE CENTRAL)
+   2. TOPBAR & WORKSPACE CON DEGRADADOS DE GRISES Y NARANJA
    ========================================================================== */
 .qw-plane-workspace {
   background: #ffffff;
@@ -282,59 +308,63 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 28px;
+  padding: 18px 32px;
   border-bottom: 1px solid var(--qw-border);
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
 }
 
 .qw-plane-topbar-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .qw-plane-proj-key-badge {
-  background: #111111;
+  background: var(--qw-grad-dark);
   color: #ffffff;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   font-family: var(--qw-font-display);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .qw-plane-topbar-title {
-  font-family: var(--qw-font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: #111111;
-  letter-spacing: -0.03em;
+  font-family: var(--qw-font-display) !important;
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
+  letter-spacing: -0.035em !important;
   margin: 0;
 }
 
 .qw-plane-topbar-plan {
   font-size: 13px;
-  color: #71717a;
-  background: #f4f4f5;
-  padding: 3px 10px;
+  color: #52525b;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f5 100%);
+  border: 1px solid var(--qw-border);
+  padding: 4px 12px;
   border-radius: 6px;
+  font-weight: 500;
 }
 
 .qw-plane-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .qw-plane-btn-share {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
   border: 1px solid var(--qw-border);
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #111111;
   cursor: pointer;
@@ -343,35 +373,38 @@
 
 .qw-plane-btn-share:hover {
   background: #f4f4f5;
+  border-color: #111111;
 }
 
 .qw-plane-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--qw-primary);
+  background: var(--qw-grad-orange);
   color: #ffffff;
   border: none;
-  padding: 7px 16px;
+  padding: 8px 18px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   font-family: var(--qw-font-display);
   letter-spacing: -0.01em;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 75, 11, 0.25);
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-primary:hover {
-  background: #111111;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(255, 75, 11, 0.35);
 }
 
 .qw-plane-tabs-bar {
   display: flex;
-  gap: 6px;
-  padding: 0 28px;
+  gap: 8px;
+  padding: 0 32px;
   border-bottom: 1px solid var(--qw-border);
-  background: #fafafa;
+  background: linear-gradient(180deg, #fafafa 0%, #f4f4f5 100%);
   overflow-x: auto;
 }
 
@@ -382,12 +415,14 @@
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 12px 14px;
-  font-size: 13px;
+  padding: 13px 16px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #71717a;
   cursor: pointer;
   white-space: nowrap;
+  font-family: var(--qw-font-display);
+  letter-spacing: -0.01em;
   transition: all 0.15s ease;
 }
 
@@ -398,22 +433,22 @@
 .qw-plane-tab-btn.is-active {
   color: var(--qw-primary);
   border-bottom-color: var(--qw-primary);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .qw-plane-content-body {
-  padding: 28px;
+  padding: 32px;
   flex: 1;
 }
 
 /* ==========================================================================
-   3. WORK ITEMS LIST VIEW (ESTILO PLANE / DUB)
+   3. WORK ITEMS LIST VIEW
    ========================================================================== */
 .qw-plane-table-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .qw-plane-toolbar-left {
@@ -423,7 +458,7 @@
 }
 
 .qw-plane-items-count {
-  font-size: 13px;
+  font-size: 13.5px;
   color: #52525b;
 }
 
@@ -431,9 +466,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #111111;
+  background: var(--qw-grad-dark);
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-size: 11.5px;
   font-weight: 600;
@@ -443,7 +478,7 @@
   background: #00b090;
   color: #ffffff;
   border: none;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 700;
@@ -459,44 +494,45 @@
   gap: 6px;
   background: #ffffff;
   border: 1px solid var(--qw-border);
-  padding: 6px 12px;
+  padding: 7px 14px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .qw-plane-group-block {
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .qw-plane-group-title-row {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .qw-plane-group-title {
-  font-family: var(--qw-font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: #111111;
+  font-family: var(--qw-font-display) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #111111 !important;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.02em !important;
 }
 
 .qw-plane-group-count {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   color: #71717a;
   background: #f4f4f5;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
 .qw-plane-items-table {
   border: 1px solid var(--qw-border);
-  border-radius: 10px;
+  border-radius: 12px;
   background: #ffffff;
   overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
 .qw-plane-item-row {
@@ -504,9 +540,9 @@
   grid-template-columns: 24px 28px 80px 1fr 90px 130px 90px;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f4f4f5;
-  font-size: 13.5px;
+  font-size: 14px;
   transition: background-color 0.1s ease;
 }
 
@@ -574,17 +610,17 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #52525b;
 }
 
 .qw-plane-avatar-mini {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #e4e4e7;
+  background: linear-gradient(135deg, #e4e4e7 0%, #d4d4d8 100%);
   color: #111111;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -595,7 +631,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #71717a;
   font-family: var(--qw-font-mono);
 }
@@ -606,30 +642,32 @@
 .qw-plane-kanban-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 18px;
   align-items: flex-start;
 }
 
 .qw-plane-kanban-col {
-  background: #f4f4f5;
-  border-radius: 12px;
-  padding: 12px;
+  background: linear-gradient(180deg, #f4f4f5 0%, #efede8 100%);
+  border: 1px solid var(--qw-border);
+  border-radius: 14px;
+  padding: 14px;
 }
 
 .qw-plane-kanban-col-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   font-family: var(--qw-font-display);
-  font-size: 14px;
+  font-size: 14.5px;
+  font-weight: 700;
 }
 
 .qw-plane-col-badge {
   font-size: 11px;
   font-weight: 800;
   background: #ffffff;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
@@ -643,37 +681,37 @@
 .qw-plane-kanban-cards-wrap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .qw-plane-kanban-card {
   background: #ffffff;
   border: 1px solid var(--qw-border);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 14px;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
   transition: all 0.15s ease;
 }
 
 .qw-plane-kanban-card:hover {
   transform: translateY(-2px);
   border-color: var(--qw-primary);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 6px 16px rgba(255, 75, 11, 0.08);
 }
 
 .qw-plane-kcard-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .qw-plane-kcard-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #111111;
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   line-height: 1.35;
 }
 
@@ -682,7 +720,7 @@
   justify-content: space-between;
   align-items: center;
   border-top: 1px solid #f4f4f5;
-  padding-top: 8px;
+  padding-top: 10px;
 }
 
 /* ==========================================================================
@@ -697,14 +735,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .qw-plane-contract-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   text-transform: uppercase;
   color: var(--qw-primary);
@@ -716,28 +754,30 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #111111;
+  background: var(--qw-grad-dark);
   color: #ffffff;
-  padding: 10px 20px;
+  padding: 10px 22px;
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   font-family: var(--qw-font-display);
   cursor: pointer;
   border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: all 0.15s ease;
 }
 
 .qw-plane-btn-print:hover {
-  background: var(--qw-primary);
+  background: var(--qw-grad-orange);
+  transform: translateY(-1px);
 }
 
 .qw-plane-contract-sheet {
   background: #ffffff;
   border: 1px solid var(--qw-border);
-  border-radius: 12px;
-  padding: 44px 48px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  border-radius: 14px;
+  padding: 48px 52px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.04);
 }
 
 .qw-plane-contract-header {
@@ -748,7 +788,7 @@
 
 .qw-plane-contract-logo {
   font-family: var(--qw-font-display);
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   color: #111111;
   letter-spacing: -0.04em;
@@ -762,21 +802,21 @@
 
 .qw-plane-contract-code-box {
   text-align: right;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #71717a;
 }
 
 .qw-plane-contract-code-box strong {
   display: block;
   font-family: var(--qw-font-mono);
-  font-size: 13px;
+  font-size: 14px;
   color: #111111;
 }
 
 .qw-plane-contract-line {
   height: 2px;
-  background: #111111;
-  margin: 20px 0 24px;
+  background: var(--qw-grad-dark);
+  margin: 22px 0 26px;
 }
 
 .qw-plane-contract-parties {
@@ -785,14 +825,14 @@
   gap: 24px;
   background: #fafafa;
   border: 1px solid var(--qw-border);
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 28px;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 30px;
 }
 
 .qw-plane-party-box strong {
   display: block;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #111111;
   font-family: var(--qw-font-display);
   margin: 4px 0 2px;
@@ -800,12 +840,12 @@
 
 .qw-plane-party-box span {
   display: block;
-  font-size: 12px;
+  font-size: 12.5px;
   color: #52525b;
 }
 
 .qw-plane-party-role {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 800;
   color: var(--qw-primary);
   letter-spacing: 0.08em;
@@ -815,13 +855,13 @@
 .qw-plane-clauses-body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-bottom: 34px;
+  gap: 20px;
+  margin-bottom: 36px;
 }
 
 .qw-plane-clause-item h4 {
   font-family: var(--qw-font-display);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 700;
   color: #111111;
   letter-spacing: -0.02em;
@@ -830,23 +870,23 @@
 
 .qw-plane-clause-item p,
 .qw-plane-clause-item ul {
-  font-size: 13px;
+  font-size: 13.5px;
   color: #3f3f46;
-  line-height: 1.55;
+  line-height: 1.6;
   margin: 0;
 }
 
 .qw-plane-clause-item ul {
-  padding-left: 18px;
+  padding-left: 20px;
   margin-top: 6px;
 }
 
 .qw-plane-signatures-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  margin-top: 40px;
-  padding-top: 20px;
+  gap: 36px;
+  margin-top: 44px;
+  padding-top: 24px;
 }
 
 .qw-plane-signature-box {
@@ -855,8 +895,8 @@
 
 .qw-plane-sig-line {
   border-top: 1px solid #111111;
-  padding-top: 8px;
-  margin-bottom: 6px;
+  padding-top: 10px;
+  margin-bottom: 8px;
 }
 
 .qw-plane-sig-badge {
@@ -865,41 +905,20 @@
   color: #00b090;
   text-transform: uppercase;
   background: rgba(0, 176, 144, 0.1);
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 4px;
 }
 
 .qw-plane-signature-box strong {
   display: block;
-  font-size: 13px;
+  font-size: 13.5px;
   color: #111111;
   font-family: var(--qw-font-display);
 }
 
 .qw-plane-signature-box small {
-  font-size: 11px;
+  font-size: 11.5px;
   color: #71717a;
-}
-
-/* ==========================================================================
-   ESTILOS DE IMPRESIÓN (PRINT)
-   ========================================================================== */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .printable-contract, .printable-contract * {
-    visibility: visible;
-  }
-  .printable-contract {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    border: none;
-    box-shadow: none;
-    padding: 0;
-  }
 }
 
 /* ==========================================================================
