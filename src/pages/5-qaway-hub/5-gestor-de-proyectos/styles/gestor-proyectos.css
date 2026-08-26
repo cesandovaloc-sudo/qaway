@@ -1,0 +1,840 @@
+/* ==========================================================================
+   ESTILOS NATIVOS: GESTOR DE PROYECTOS MULTI-SERVICIO DE QAWAY LAB
+   Namespace: .qw-gestor-root, .qw-gestor-...
+   ========================================================================== */
+
+.qw-gestor-root {
+  min-height: 100vh;
+  background-color: #fafafa;
+  color: #18181b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: 80px;
+}
+
+.qw-gestor-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ==========================================================================
+   HEADER Y PROGRESS
+   ========================================================================== */
+.qw-gestor-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e4e4e7;
+  padding: 28px 0 24px;
+  margin-bottom: 36px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.qw-gestor-header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.qw-gestor-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.qw-gestor-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #71717a;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.qw-gestor-back-link:hover {
+  color: #fe6612;
+}
+
+.qw-gestor-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #111111;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.qw-gestor-brand-badge small {
+  color: #fe6612;
+}
+
+.qw-gestor-sep {
+  color: #d4d4d8;
+  font-size: 13px;
+}
+
+.qw-gestor-service-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: #18181b;
+  border-left: 3px solid #fe6612;
+  padding-left: 8px;
+}
+
+.qw-gestor-share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #18181b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-share-btn:hover {
+  background: #f4f4f5;
+  border-color: #d4d4d8;
+}
+
+.qw-gestor-header-main {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.qw-gestor-client-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fe6612;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.qw-gestor-project-title {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-weight: 800;
+  color: #111111;
+  letter-spacing: -0.03em;
+  margin: 0 0 4px;
+}
+
+.qw-gestor-project-plan {
+  font-size: 14.5px;
+  color: #71717a;
+  margin: 0;
+  font-weight: 500;
+}
+
+.qw-gestor-progress-card {
+  background: #fbfbfc;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+
+.qw-gestor-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.qw-gestor-progress-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f3f46;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.qw-gestor-progress-pct {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.qw-gestor-progress-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e4e4e7;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.qw-gestor-progress-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qw-gestor-dates-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #71717a;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   STEPPER / TIMELINE INTERACTIVO (6 HITOS)
+   ========================================================================== */
+.qw-gestor-stepper-container {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 18px;
+  padding: 24px 20px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  overflow-x: auto;
+}
+
+.qw-gestor-stepper-track {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  min-width: 680px;
+}
+
+.qw-gestor-step-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  flex: 1;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.qw-gestor-step-line {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background-color: #e4e4e7;
+  z-index: 1;
+  transition: background-color 0.3s ease;
+}
+
+.qw-gestor-step-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #e4e4e7;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.qw-gestor-step-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qw-gestor-step-num {
+  font-size: 10px;
+  font-weight: 800;
+  color: #a1a1aa;
+  letter-spacing: 0.08em;
+}
+
+.qw-gestor-step-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #27272a;
+  line-height: 1.3;
+}
+
+.qw-gestor-step-node.is-active .qw-gestor-step-title {
+  color: #fe6612;
+}
+
+.qw-gestor-step-date {
+  font-size: 11px;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   PANEL DE DETALLE DEL HITO
+   ========================================================================== */
+.qw-gestor-detail-panel {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 20px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.qw-gestor-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.qw-gestor-phase-pill {
+  font-size: 11px;
+  font-weight: 800;
+  color: #71717a;
+  background: #f4f4f5;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+}
+
+.qw-gestor-status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.qw-gestor-status-pill.status-completed {
+  background: #00b09018;
+  color: #00876e;
+}
+
+.qw-gestor-status-pill.status-in-progress {
+  background: #fe661218;
+  color: #e04e00;
+}
+
+.qw-gestor-status-pill.status-pending {
+  background: #f4f4f5;
+  color: #71717a;
+}
+
+.qw-gestor-detail-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111111;
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.qw-gestor-detail-sub {
+  font-size: 14.5px;
+  color: #71717a;
+  margin: 0;
+}
+
+.qw-gestor-detail-date-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #52525b;
+  background: #f4f4f5;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.qw-gestor-divider {
+  width: 100%;
+  height: 1px;
+  background: #f4f4f5;
+  margin: 24px 0;
+}
+
+.qw-gestor-section-heading {
+  font-size: 12px;
+  font-weight: 800;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 14px;
+}
+
+.qw-gestor-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qw-gestor-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #27272a;
+  line-height: 1.45;
+}
+
+.qw-gestor-check-icon {
+  color: #00b090;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.qw-gestor-actions-box {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.qw-gestor-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fe6612;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(254, 102, 18, 0.25);
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-btn-primary:hover {
+  background: #ff7527;
+  transform: translateY(-1px);
+}
+
+.qw-gestor-btn-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #00b090;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.qw-gestor-sow-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #00b09010;
+  border: 1px solid #00b09030;
+  padding: 10px 16px;
+  border-radius: 10px;
+}
+
+.qw-gestor-sow-card strong {
+  display: block;
+  font-size: 13px;
+  color: #00876e;
+}
+
+.qw-gestor-sow-card span {
+  font-size: 12px;
+  color: #3f3f46;
+}
+
+.qw-gestor-nav-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f4f4f5;
+  padding-top: 24px;
+  margin-top: 32px;
+}
+
+.qw-gestor-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #27272a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-nav-btn:hover:not(:disabled) {
+  background: #f4f4f5;
+  border-color: #d4d4d8;
+}
+
+.qw-gestor-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================================================
+   AUDITORÍA LIGHTHOUSE SCORECARD
+   ========================================================================== */
+.qw-gestor-audit-card {
+  background: #fbfbfc;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.qw-gestor-audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.qw-gestor-badge-google {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.qw-gestor-badge-passed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #00b09015;
+  color: #00876e;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.qw-gestor-gauges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.qw-gestor-gauge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 12px;
+  padding: 14px 10px;
+}
+
+.qw-gestor-gauge-svg-wrap {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.qw-gestor-gauge-value {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 800;
+  color: #00876e;
+}
+
+.qw-gestor-gauge-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #3f3f46;
+  text-align: center;
+}
+
+.qw-gestor-cwv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.qw-gestor-cwv-box {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qw-gestor-cwv-name {
+  font-size: 11px;
+  color: #71717a;
+  font-weight: 600;
+}
+
+.qw-gestor-cwv-val {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.qw-gestor-cwv-sub {
+  font-size: 10.5px;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   BRANDING CARD
+   ========================================================================== */
+.qw-gestor-brand-card {
+  background: #fbfbfc;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.qw-gestor-brand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.qw-gestor-badge-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #111111;
+}
+
+.qw-gestor-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.qw-gestor-palette-item {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-palette-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.qw-gestor-palette-color {
+  height: 52px;
+  width: 100%;
+}
+
+.qw-gestor-palette-info {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.qw-gestor-palette-info strong {
+  font-size: 12px;
+  color: #18181b;
+}
+
+.qw-gestor-hex-code {
+  font-size: 11px;
+  font-weight: 700;
+  color: #52525b;
+  font-family: monospace;
+}
+
+.qw-gestor-palette-info small {
+  font-size: 10px;
+  color: #a1a1aa;
+}
+
+.qw-gestor-downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.qw-gestor-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-download-btn:hover {
+  border-color: #fe6612;
+  box-shadow: 0 4px 12px rgba(254, 102, 18, 0.08);
+}
+
+.qw-gestor-download-btn strong {
+  display: block;
+  font-size: 12.5px;
+  color: #18181b;
+}
+
+.qw-gestor-download-btn span {
+  display: block;
+  font-size: 11px;
+  color: #71717a;
+}
+
+.qw-gestor-down-icon {
+  margin-left: auto;
+  color: #a1a1aa;
+}
+
+/* ==========================================================================
+   DASHBOARD CENTRAL (HUB VIEW)
+   ========================================================================== */
+.qw-gestor-dash-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 28px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.qw-gestor-dash-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #52525b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.qw-gestor-dash-tab.is-active {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.qw-gestor-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.qw-gestor-card {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 16px;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.qw-gestor-card:hover {
+  transform: translateY(-3px);
+  border-color: #fe6612;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+}
+
+.qw-gestor-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.qw-gestor-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111111;
+  margin: 0 0 2px;
+}
+
+.qw-gestor-card-plan {
+  font-size: 13px;
+  color: #71717a;
+  margin: 0;
+}
+
+.qw-gestor-card-body {
+  margin: 16px 0;
+  flex-grow: 1;
+}
+
+.qw-gestor-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f4f4f5;
+  padding-top: 14px;
+  font-size: 12px;
+  color: #71717a;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+  .qw-gestor-header-main {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .qw-gestor-detail-panel {
+    padding: 24px 18px;
+  }
+  .qw-gestor-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .qw-gestor-share-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

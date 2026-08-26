@@ -15,10 +15,20 @@ import {
   Layers,
   PenSquare,
   Star,
+  FolderKanban,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 
 const routes = [
+  {
+    icon: FolderKanban,
+    title: 'Gestor de Proyectos & Entregas',
+    description: 'Trazabilidad y portal de cliente: ciclo de 6 hitos para Desarrollo Web, Branding, CRM y Marketing.',
+    path: '/hub/gestor-proyectos',
+    badge: 'Pro',
+    category: 'Product Management',
+    tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+  },
   {
     icon: PenSquare,
     title: 'Editor Interno de Blog',
