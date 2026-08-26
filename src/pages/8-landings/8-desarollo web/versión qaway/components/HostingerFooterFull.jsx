@@ -52,8 +52,8 @@ export function HostingerFooterFull() {
             </ul>
           </div>
 
-          {/* Columna 3: Planes Estratégicos */}
-          <div>
+          {/* Columna 3: Planes Estratégicos (Solo Desktop) */}
+          <div className="qw-footer-col-plans">
             <h4 style={{ fontSize: "12.5px", fontWeight: "700", color: "#ffffff", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 16px" }}>
               Planes
             </h4>
