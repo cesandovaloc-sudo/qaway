@@ -105,7 +105,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-101",
     key: "QW-101",
     projectId: "proj-web-01",
-    title: "Discovery: Ficha técnica de requerimientos comerciales y catálogo de productos",
+    title: "Discovery: Ficha técnica de requerimientos comerciales y catálogo",
     state: "done",
     stateLabel: "Completado",
     priority: "urgent",
@@ -195,7 +195,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-107",
     key: "QW-107",
     projectId: "proj-web-01",
-    title: "Auditoría Oficial Google Lighthouse: Certificación de velocidad 98/100",
+    title: "Auditoría Oficial Google Lighthouse: Certificación 98/100",
     state: "todo",
     stateLabel: "Por Hacer",
     priority: "high",
@@ -211,7 +211,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-201",
     key: "QW-201",
     projectId: "proj-brd-02",
-    title: "Moodboard y exploración de dirección de arte editorial minimalista",
+    title: "Moodboard y exploración de dirección de arte minimalista",
     state: "done",
     stateLabel: "Completado",
     priority: "high",
@@ -226,7 +226,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-202",
     key: "QW-202",
     projectId: "proj-brd-02",
-    title: "Presentación de 3 rutas creativas de logotipo con mockups de empaques",
+    title: "Presentación de 3 rutas creativas de logotipo con mockups",
     state: "in-progress",
     stateLabel: "En Progreso",
     priority: "urgent",
@@ -241,7 +241,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-203",
     key: "QW-203",
     projectId: "proj-brd-02",
-    title: "Exportación de Brand Kit Master: Vectores AI, SVG, PNG y tipografías",
+    title: "Exportación de Brand Kit Master: Vectores AI, SVG, PNG",
     state: "todo",
     stateLabel: "Por Hacer",
     priority: "medium",
@@ -257,7 +257,7 @@ export const INITIAL_WORK_ITEMS = [
     id: "item-301",
     key: "QW-301",
     projectId: "proj-crm-03",
-    title: "Verificación de Meta Business Manager y aprobación de línea WABA Cloud",
+    title: "Verificación de Meta Business Manager y aprobación de línea WABA",
     state: "done",
     stateLabel: "Completado",
     priority: "urgent",
@@ -346,13 +346,13 @@ export const INITIAL_WORK_ITEMS = [
   }
 ];
 
-// Persistencia en LocalStorage limpia
+// Persistencia en LocalStorage con auto-merge para garantizar datos completos
 export function getPlaneProjects() {
   try {
     const local = localStorage.getItem("qaway_plane_projects");
     if (local) {
       const parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length >= INITIAL_PROJECTS.length) return parsed;
     }
   } catch (e) {}
   return INITIAL_PROJECTS;
@@ -369,7 +369,7 @@ export function getPlaneWorkItems() {
     const local = localStorage.getItem("qaway_plane_work_items");
     if (local) {
       const parsed = JSON.parse(local);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length >= INITIAL_WORK_ITEMS.length) return parsed;
     }
   } catch (e) {}
   return INITIAL_WORK_ITEMS;

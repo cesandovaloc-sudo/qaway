@@ -1,7 +1,7 @@
 /* ==========================================================================
    ESTILOS OFICIALES: QAWAY STUDIO (ESTILO NATIVO FULL-BLEED COMO CRM)
-   Inspirado en la integración estructural nativa de Qaway Hub
-   Tipografía: Arial Narrow / Roboto Condensed (Display) + Inter (Sans)
+   Tipografía de Sistema: Inter / -apple-system (UI limpia con peso 500/600)
+   Tipografía de Titulares: Arial Narrow / Roboto Condensed (Solo en H1/H2)
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;600;700;800;900&display=swap');
@@ -123,7 +123,7 @@
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--qw-font-sans);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -159,13 +159,13 @@
 }
 
 .qw-plane-nav-title {
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--qw-text-tertiary);
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c8c94;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   padding: 0 8px 6px;
-  font-family: var(--qw-font-display);
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-nav-item {
@@ -181,6 +181,7 @@
   color: var(--qw-text-muted);
   cursor: pointer;
   text-align: left;
+  font-family: var(--qw-font-sans);
   transition: all 0.15s ease;
 }
 
@@ -267,8 +268,8 @@
 .qw-plane-proj-text strong {
   display: block;
   font-size: 13px;
-  font-weight: 700;
-  font-family: var(--qw-font-display);
+  font-weight: 600;
+  font-family: var(--qw-font-sans);
   color: var(--qw-text-main);
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -276,8 +277,9 @@
 }
 
 .qw-plane-proj-text small {
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--qw-text-muted);
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-proj-status-dot {
@@ -329,9 +331,9 @@
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
-  font-weight: 800;
-  font-family: var(--qw-font-display);
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  font-family: var(--qw-font-mono);
+  letter-spacing: 0.02em;
 }
 
 .qw-plane-topbar-title {
@@ -350,6 +352,7 @@
   padding: 3px 8px;
   border-radius: 4px;
   font-weight: 500;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-topbar-actions {
@@ -370,6 +373,7 @@
   font-weight: 500;
   color: var(--qw-text-main);
   cursor: pointer;
+  font-family: var(--qw-font-sans);
   transition: all 0.15s ease;
 }
 
@@ -441,7 +445,7 @@
 }
 
 /* ==========================================================================
-   3. WORK ITEMS LIST VIEW
+   3. WORK ITEMS LIST VIEW (TIPOGRAFÍA INTER ULTRA-PULIDA)
    ========================================================================== */
 .qw-plane-table-toolbar {
   display: flex;
@@ -459,6 +463,7 @@
 .qw-plane-items-count {
   font-size: 13px;
   color: var(--qw-text-muted);
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-bulk-actions {
@@ -471,6 +476,7 @@
   border-radius: 4px;
   font-size: 11.5px;
   font-weight: 600;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-btn-bulk {
@@ -480,7 +486,7 @@
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -497,6 +503,7 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
+  font-family: var(--qw-font-sans);
   cursor: pointer;
 }
 
@@ -509,21 +516,22 @@
 }
 
 .qw-plane-group-title {
-  font-family: var(--qw-font-display) !important;
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  color: var(--qw-text-main) !important;
+  font-family: var(--qw-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #27272a !important;
   margin: 0;
-  letter-spacing: -0.02em !important;
+  letter-spacing: 0 !important;
 }
 
 .qw-plane-group-count {
-  font-size: 10.5px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--qw-text-muted);
   background: #f4f4f6;
-  padding: 2px 6px;
+  padding: 1px 6px;
   border-radius: 4px;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-items-table {
@@ -540,7 +548,8 @@
   gap: 12px;
   padding: 10px 14px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.035);
-  font-size: 13.5px;
+  font-size: 13px;
+  font-family: var(--qw-font-sans);
   transition: background-color 0.12s ease;
 }
 
@@ -572,7 +581,7 @@
 .qw-plane-item-key {
   font-family: var(--qw-font-mono);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--qw-text-muted);
 }
 
@@ -582,6 +591,7 @@
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-item-row.is-done .qw-plane-item-title {
@@ -591,12 +601,12 @@
 
 .qw-plane-priority-badge {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   padding: 2px 7px;
   border-radius: 4px;
-  font-family: var(--qw-font-display);
-  letter-spacing: 0.03em;
+  font-family: var(--qw-font-sans);
+  letter-spacing: 0.02em;
 }
 
 .priority-urgent { background: #fee2e2; color: #dc2626; }
@@ -610,6 +620,7 @@
   gap: 6px;
   font-size: 12px;
   color: var(--qw-text-muted);
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-avatar-mini {
@@ -619,7 +630,8 @@
   background: #f0f0f2;
   color: var(--qw-text-main);
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 700;
+  font-family: var(--qw-font-sans);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -635,7 +647,7 @@
 }
 
 /* ==========================================================================
-   4. KANBAN BOARD VIEW
+   4. KANBAN BOARD VIEW (TIPOGRAFÍA PULIDA)
    ========================================================================== */
 .qw-plane-kanban-grid {
   display: grid;
@@ -655,17 +667,24 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-  font-family: var(--qw-font-display);
-  font-size: 13.5px;
-  font-weight: 700;
+  font-family: var(--qw-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #27272a !important;
+}
+
+.qw-plane-kanban-col-header strong {
+  font-family: var(--qw-font-sans) !important;
+  font-weight: 600 !important;
 }
 
 .qw-plane-col-badge {
-  font-size: 10.5px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 600;
   background: #ffffff;
-  padding: 2px 6px;
+  padding: 1px 6px;
   border-radius: 4px;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-col-add-btn {
@@ -705,11 +724,12 @@
 }
 
 .qw-plane-kcard-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--qw-text-main);
+  font-family: var(--qw-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--qw-text-main) !important;
   margin: 0 0 10px;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .qw-plane-kcard-footer {
@@ -740,11 +760,11 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   color: var(--qw-primary);
-  letter-spacing: 0.06em;
-  font-family: var(--qw-font-display);
+  letter-spacing: 0.04em;
+  font-family: var(--qw-font-sans);
 }
 
 .qw-plane-btn-print {
@@ -756,7 +776,7 @@
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--qw-font-sans);
   cursor: pointer;
   border: none;
@@ -829,7 +849,8 @@
   display: block;
   font-size: 14px;
   color: var(--qw-text-main);
-  font-family: var(--qw-font-display);
+  font-family: var(--qw-font-sans);
+  font-weight: 600;
   margin: 4px 0 2px;
 }
 
@@ -841,9 +862,9 @@
 
 .qw-plane-party-role {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--qw-primary);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -855,11 +876,11 @@
 }
 
 .qw-plane-clause-item h4 {
-  font-family: var(--qw-font-display);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--qw-text-main);
-  letter-spacing: -0.02em;
+  font-family: var(--qw-font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: var(--qw-text-main) !important;
+  letter-spacing: 0 !important;
   margin: 0 0 6px;
 }
 
@@ -896,7 +917,7 @@
 
 .qw-plane-sig-badge {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   color: #00b090;
   text-transform: uppercase;
   background: rgba(0, 176, 144, 0.1);
@@ -908,7 +929,8 @@
   display: block;
   font-size: 13px;
   color: var(--qw-text-main);
-  font-family: var(--qw-font-display);
+  font-family: var(--qw-font-sans);
+  font-weight: 600;
 }
 
 .qw-plane-signature-box small {
@@ -979,10 +1001,10 @@
 .qw-gestor-form-label {
   display: block;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--qw-text-main);
-  font-family: var(--qw-font-display);
-  letter-spacing: -0.01em;
+  font-family: var(--qw-font-sans);
+  letter-spacing: 0;
   margin-bottom: 5px;
 }
 
@@ -993,7 +1015,7 @@
   border-radius: 6px;
   border: 1px solid var(--qw-border-subtle);
   background: #ffffff;
-  font-size: 13.5px;
+  font-size: 13px;
   font-family: var(--qw-font-sans);
   color: var(--qw-text-main);
   outline: none;
@@ -1026,7 +1048,7 @@
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--qw-font-sans);
   cursor: pointer;
 }
