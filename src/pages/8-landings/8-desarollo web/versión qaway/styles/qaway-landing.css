@@ -655,6 +655,28 @@
   min-height: 64px;
 }
 
+.qaway-landing-root .qw-pillars-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.qaway-landing-root .qw-pillars-controls-desktop {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-top: 20px;
+}
+
+.qaway-landing-root .qw-pillars-controls-mobile {
+  display: none;
+}
+
+.qaway-landing-root .qw-footer-col-plans {
+  display: block;
+}
+
 /* Responsive Breakpoints Profesionales */
 @media (max-width: 1100px) {
   .qaway-landing-root .h-hero-grid-real {
