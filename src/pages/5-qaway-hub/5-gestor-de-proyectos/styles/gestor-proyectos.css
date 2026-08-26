@@ -1,14 +1,17 @@
 /* ==========================================================================
-   ESTILOS NATIVOS: GESTOR DE PROYECTOS MULTI-SERVICIO DE QAWAY LAB
-   Namespace: .qw-gestor-root, .qw-gestor-...
+   ESTILOS OFICIALES DE MARCA: QAWAY LAB GESTOR DE PROYECTOS
+   DNA: Space Grotesk + Oswald + JetBrains Mono + Inter
+   Colores: #ff4b0b (Acento Qaway), #191918 (Ink), #f2f1ef (Warm Surface)
    ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Oswald:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 .qw-gestor-root {
   min-height: 100vh;
-  background-color: #fafafa;
-  color: #18181b;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  padding-bottom: 80px;
+  background-color: #faf9f6;
+  color: #191918;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding-bottom: 90px;
 }
 
 .qw-gestor-container {
@@ -18,14 +21,13 @@
 }
 
 /* ==========================================================================
-   HEADER Y PROGRESS
+   HEADER PRINCIPAL
    ========================================================================== */
 .qw-gestor-header {
   background: #ffffff;
-  border-bottom: 1px solid #e4e4e7;
-  padding: 28px 0 24px;
+  border-bottom: 1px solid rgba(25, 25, 24, 0.08);
+  padding: 32px 0 28px;
   margin-bottom: 36px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .qw-gestor-header-inner {
@@ -38,7 +40,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   flex-wrap: wrap;
   gap: 12px;
 }
@@ -48,43 +50,51 @@
   align-items: center;
   gap: 6px;
   color: #71717a;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   text-decoration: none;
+  font-family: 'Space Grotesk', sans-serif;
   transition: color 0.15s ease;
 }
 
 .qw-gestor-back-link:hover {
-  color: #fe6612;
+  color: #ff4b0b;
 }
 
 .qw-gestor-brand-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #111111;
+  background: #191918;
   color: #ffffff;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-brand-badge small {
-  color: #fe6612;
+  color: #ff4b0b;
+  font-weight: 800;
 }
 
 .qw-gestor-sep {
-  color: #d4d4d8;
+  color: rgba(25, 25, 24, 0.2);
   font-size: 13px;
 }
 
 .qw-gestor-service-tag {
-  font-size: 12px;
-  font-weight: 700;
-  color: #18181b;
-  border-left: 3px solid #fe6612;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #191918;
+  border-left: 3px solid #ff4b0b;
   padding-left: 8px;
 }
 
@@ -93,19 +103,22 @@
   align-items: center;
   gap: 6px;
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  padding: 6px 14px;
+  border: 1px solid rgba(25, 25, 24, 0.15);
+  padding: 8px 16px;
   border-radius: 8px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #18181b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #191918;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-gestor-share-btn:hover {
-  background: #f4f4f5;
-  border-color: #d4d4d8;
+  background: #f2f1ef;
+  border-color: #191918;
 }
 
 .qw-gestor-header-main {
@@ -118,63 +131,68 @@
 .qw-gestor-client-label {
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #fe6612;
+  letter-spacing: 0.16em;
+  color: #ff4b0b;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   display: block;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-project-title {
-  font-size: clamp(1.7rem, 3vw, 2.3rem);
-  font-weight: 800;
-  color: #111111;
+  font-family: 'Space Grotesk', 'Oswald', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  color: #191918;
   letter-spacing: -0.03em;
-  margin: 0 0 4px;
+  line-height: 1.08;
+  margin: 0 0 6px;
 }
 
 .qw-gestor-project-plan {
   font-size: 14.5px;
-  color: #71717a;
+  color: #52525b;
   margin: 0;
   font-weight: 500;
 }
 
 .qw-gestor-progress-card {
-  background: #fbfbfc;
-  border: 1px solid #e4e4e7;
-  border-radius: 14px;
-  padding: 16px 20px;
+  background: #f2f1ef;
+  border: 1px solid rgba(25, 25, 24, 0.08);
+  border-radius: 12px;
+  padding: 18px 22px;
 }
 
 .qw-gestor-progress-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .qw-gestor-progress-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: #3f3f46;
+  font-size: 11px;
+  font-weight: 800;
+  color: #191918;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.1em;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-progress-pct {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
-  color: #111111;
+  color: #191918;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-progress-bar-bg {
   width: 100%;
-  height: 8px;
-  background: #e4e4e7;
+  height: 6px;
+  background: rgba(25, 25, 24, 0.1);
   border-radius: 999px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .qw-gestor-progress-bar-fill {
@@ -188,7 +206,8 @@
   gap: 8px;
   font-size: 11.5px;
   color: #71717a;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* ==========================================================================
@@ -196,11 +215,10 @@
    ========================================================================== */
 .qw-gestor-stepper-container {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 18px;
-  padding: 24px 20px;
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 16px;
+  padding: 28px 22px;
   margin-bottom: 28px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
   overflow-x: auto;
 }
 
@@ -208,7 +226,7 @@
   display: flex;
   justify-content: space-between;
   position: relative;
-  min-width: 680px;
+  min-width: 720px;
 }
 
 .qw-gestor-step-node {
@@ -219,7 +237,7 @@
   position: relative;
   flex: 1;
   cursor: pointer;
-  padding: 0 6px;
+  padding: 0 8px;
 }
 
 .qw-gestor-step-line {
@@ -227,8 +245,8 @@
   top: 18px;
   left: 50%;
   width: 100%;
-  height: 3px;
-  background-color: #e4e4e7;
+  height: 2px;
+  background-color: rgba(25, 25, 24, 0.1);
   z-index: 1;
   transition: background-color 0.3s ease;
 }
@@ -236,8 +254,8 @@
 .qw-gestor-step-bubble {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
-  border: 2px solid #e4e4e7;
+  border-radius: 10px;
+  border: 1.5px solid rgba(25, 25, 24, 0.15);
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -245,36 +263,41 @@
   position: relative;
   z-index: 2;
   margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .qw-gestor-step-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .qw-gestor-step-num {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   color: #a1a1aa;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-step-title {
-  font-size: 12.5px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
   font-weight: 700;
-  color: #27272a;
-  line-height: 1.3;
+  color: #191918;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .qw-gestor-step-node.is-active .qw-gestor-step-title {
-  color: #fe6612;
+  color: #ff4b0b;
 }
 
 .qw-gestor-step-date {
   font-size: 11px;
-  color: #a1a1aa;
+  color: #71717a;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* ==========================================================================
@@ -282,10 +305,9 @@
    ========================================================================== */
 .qw-gestor-detail-panel {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 20px;
-  padding: 36px 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 16px;
+  padding: 38px 34px;
 }
 
 .qw-gestor-detail-header {
@@ -297,48 +319,53 @@
 }
 
 .qw-gestor-phase-pill {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  color: #71717a;
-  background: #f4f4f5;
+  color: #191918;
+  background: #f2f1ef;
   padding: 3px 8px;
   border-radius: 4px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-status-pill {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 800;
   padding: 3px 10px;
-  border-radius: 999px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-status-pill.status-completed {
-  background: #00b09018;
+  background: rgba(0, 176, 144, 0.12);
   color: #00876e;
 }
 
 .qw-gestor-status-pill.status-in-progress {
-  background: #fe661218;
-  color: #e04e00;
+  background: rgba(255, 75, 11, 0.12);
+  color: #ff4b0b;
 }
 
 .qw-gestor-status-pill.status-pending {
-  background: #f4f4f5;
+  background: #f2f1ef;
   color: #71717a;
 }
 
 .qw-gestor-detail-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #111111;
-  margin: 0 0 4px;
+  font-family: 'Space Grotesk', 'Oswald', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #191918;
+  margin: 0 0 6px;
   letter-spacing: -0.02em;
 }
 
 .qw-gestor-detail-sub {
-  font-size: 14.5px;
-  color: #71717a;
+  font-size: 15px;
+  color: #52525b;
   margin: 0;
 }
 
@@ -346,28 +373,30 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #52525b;
-  background: #f4f4f5;
+  font-size: 12px;
+  font-weight: 700;
+  color: #191918;
+  background: #f2f1ef;
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-divider {
   width: 100%;
   height: 1px;
-  background: #f4f4f5;
-  margin: 24px 0;
+  background: rgba(25, 25, 24, 0.08);
+  margin: 26px 0;
 }
 
 .qw-gestor-section-heading {
-  font-size: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11.5px;
   font-weight: 800;
   color: #71717a;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin: 0 0 14px;
+  letter-spacing: 0.1em;
+  margin: 0 0 16px;
 }
 
 .qw-gestor-checklist {
@@ -376,20 +405,20 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .qw-gestor-check-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   font-size: 14.5px;
-  color: #27272a;
+  color: #191918;
   line-height: 1.45;
 }
 
 .qw-gestor-check-icon {
-  color: #00b090;
+  color: #ff4b0b;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -399,28 +428,30 @@
   gap: 14px;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 24px;
+  margin-top: 26px;
 }
 
 .qw-gestor-btn-primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fe6612;
+  background: #ff4b0b;
   color: #ffffff;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(254, 102, 18, 0.25);
   transition: all 0.15s ease;
 }
 
 .qw-gestor-btn-primary:hover {
-  background: #ff7527;
+  background: #191918;
   transform: translateY(-1px);
 }
 
@@ -430,10 +461,13 @@
   gap: 8px;
   background: #00b090;
   color: #ffffff;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
   border: none;
   cursor: pointer;
 }
@@ -442,30 +476,31 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #00b09010;
-  border: 1px solid #00b09030;
+  background: #f2f1ef;
+  border: 1px solid rgba(25, 25, 24, 0.1);
   padding: 10px 16px;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .qw-gestor-sow-card strong {
   display: block;
   font-size: 13px;
-  color: #00876e;
+  color: #191918;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-sow-card span {
   font-size: 12px;
-  color: #3f3f46;
+  color: #52525b;
 }
 
 .qw-gestor-nav-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #f4f4f5;
+  border-top: 1px solid rgba(25, 25, 24, 0.08);
   padding-top: 24px;
-  margin-top: 32px;
+  margin-top: 34px;
 }
 
 .qw-gestor-nav-btn {
@@ -473,23 +508,26 @@
   align-items: center;
   gap: 6px;
   background: #ffffff;
-  border: 1px solid #e4e4e7;
+  border: 1px solid rgba(25, 25, 24, 0.15);
   padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #27272a;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #191918;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-gestor-nav-btn:hover:not(:disabled) {
-  background: #f4f4f5;
-  border-color: #d4d4d8;
+  background: #f2f1ef;
+  border-color: #191918;
 }
 
 .qw-gestor-nav-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -497,17 +535,17 @@
    AUDITORÍA LIGHTHOUSE SCORECARD
    ========================================================================== */
 .qw-gestor-audit-card {
-  background: #fbfbfc;
-  border: 1px solid #e4e4e7;
-  border-radius: 16px;
-  padding: 24px;
+  background: #f2f1ef;
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 14px;
+  padding: 26px;
 }
 
 .qw-gestor-audit-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -516,21 +554,26 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  color: #111111;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #191918;
 }
 
 .qw-gestor-badge-passed {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #00b09015;
+  background: rgba(0, 176, 144, 0.15);
   color: #00876e;
   padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-gauges-grid {
@@ -545,9 +588,9 @@
   flex-direction: column;
   align-items: center;
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  padding: 14px 10px;
+  border: 1px solid rgba(25, 25, 24, 0.08);
+  border-radius: 10px;
+  padding: 16px 12px;
 }
 
 .qw-gestor-gauge-svg-wrap {
@@ -562,15 +605,19 @@
 
 .qw-gestor-gauge-value {
   position: absolute;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #00876e;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-gauge-label {
-  font-size: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11.5px;
   font-weight: 700;
-  color: #3f3f46;
+  color: #191918;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   text-align: center;
 }
 
@@ -582,27 +629,30 @@
 
 .qw-gestor-cwv-box {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
-  padding: 12px;
+  border: 1px solid rgba(25, 25, 24, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .qw-gestor-cwv-name {
-  font-size: 11px;
+  font-size: 10.5px;
   color: #71717a;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-cwv-val {
   font-size: 16px;
   font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-cwv-sub {
-  font-size: 10.5px;
+  font-size: 10px;
   color: #a1a1aa;
 }
 
@@ -610,26 +660,29 @@
    BRANDING CARD
    ========================================================================== */
 .qw-gestor-brand-card {
-  background: #fbfbfc;
-  border: 1px solid #e4e4e7;
-  border-radius: 16px;
-  padding: 24px;
+  background: #f2f1ef;
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 14px;
+  padding: 26px;
 }
 
 .qw-gestor-brand-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .qw-gestor-badge-brand {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
-  color: #111111;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #191918;
 }
 
 .qw-gestor-palette-grid {
@@ -640,8 +693,8 @@
 
 .qw-gestor-palette-item {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
+  border: 1px solid rgba(25, 25, 24, 0.08);
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -649,7 +702,7 @@
 
 .qw-gestor-palette-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-color: #ff4b0b;
 }
 
 .qw-gestor-palette-color {
@@ -658,22 +711,23 @@
 }
 
 .qw-gestor-palette-info {
-  padding: 8px 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .qw-gestor-palette-info strong {
   font-size: 12px;
-  color: #18181b;
+  color: #191918;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .qw-gestor-hex-code {
   font-size: 11px;
   font-weight: 700;
   color: #52525b;
-  font-family: monospace;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .qw-gestor-palette-info small {
@@ -692,23 +746,24 @@
   align-items: center;
   gap: 12px;
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
-  padding: 12px 14px;
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 8px;
+  padding: 14px;
   text-align: left;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-gestor-download-btn:hover {
-  border-color: #fe6612;
-  box-shadow: 0 4px 12px rgba(254, 102, 18, 0.08);
+  border-color: #ff4b0b;
 }
 
 .qw-gestor-download-btn strong {
   display: block;
-  font-size: 12.5px;
-  color: #18181b;
+  font-size: 12px;
+  color: #191918;
+  font-family: 'Space Grotesk', sans-serif;
+  text-transform: uppercase;
 }
 
 .qw-gestor-download-btn span {
@@ -727,8 +782,8 @@
    ========================================================================== */
 .qw-gestor-dash-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 28px;
+  gap: 8px;
+  margin-bottom: 30px;
   overflow-x: auto;
   padding-bottom: 4px;
 }
@@ -738,11 +793,14 @@
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  border: 1px solid #e4e4e7;
+  border: 1px solid rgba(25, 25, 24, 0.12);
   padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 700;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-family: 'Space Grotesk', sans-serif;
   color: #52525b;
   cursor: pointer;
   white-space: nowrap;
@@ -750,58 +808,60 @@
 }
 
 .qw-gestor-dash-tab.is-active {
-  background: #111111;
+  background: #191918;
   color: #ffffff;
-  border-color: #111111;
+  border-color: #191918;
 }
 
 .qw-gestor-projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 22px;
 }
 
 .qw-gestor-card {
   background: #ffffff;
-  border: 1px solid #e4e4e7;
-  border-radius: 16px;
-  padding: 24px;
+  border: 1px solid rgba(25, 25, 24, 0.1);
+  border-radius: 14px;
+  padding: 26px;
   text-decoration: none;
   color: inherit;
   display: flex;
   flex-direction: column;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
 }
 
 .qw-gestor-card:hover {
   transform: translateY(-3px);
-  border-color: #fe6612;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+  border-color: #ff4b0b;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.06);
 }
 
 .qw-gestor-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .qw-gestor-card-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #111111;
-  margin: 0 0 2px;
+  font-family: 'Space Grotesk', 'Oswald', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #191918;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
 }
 
 .qw-gestor-card-plan {
   font-size: 13px;
   color: #71717a;
   margin: 0;
+  font-weight: 500;
 }
 
 .qw-gestor-card-body {
-  margin: 16px 0;
+  margin: 18px 0;
   flex-grow: 1;
 }
 
@@ -809,20 +869,26 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #f4f4f5;
-  padding-top: 14px;
+  border-top: 1px solid rgba(25, 25, 24, 0.08);
+  padding-top: 16px;
   font-size: 12px;
   color: #71717a;
 }
 
+.qw-gestor-card-footer strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  color: #191918;
+}
+
 /* ==========================================================================
-   MODAL DE CREACIÓN DE PROYECTO (WIZARD GUIADO ESTILO LINEAR)
+   MODAL DE CREACIÓN (EDITORIAL TECH)
    ========================================================================== */
 .qw-gestor-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
+  background-color: rgba(25, 25, 24, 0.7);
+  backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -832,83 +898,84 @@
 
 .qw-gestor-modal-container {
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   width: 100%;
-  maxWidth: 620px;
-  maxHeight: 90vh;
+  max-width: 620px;
+  max-height: 90vh;
   overflow-y: auto;
-  padding: 32px 28px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-  border: 1px solid #e4e4e7;
+  padding: 34px 30px;
+  border: 1px solid rgba(25, 25, 24, 0.15);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.3);
 }
 
 .qw-gestor-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
 }
 
 .qw-gestor-modal-close-btn {
-  background: #f4f4f5;
+  background: #f2f1ef;
   border: none;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #71717a;
+  color: #191918;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-gestor-modal-close-btn:hover {
-  background: #e4e4e7;
-  color: #111111;
+  background: #191918;
+  color: #ffffff;
 }
 
 .qw-gestor-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
 .qw-gestor-form-label {
   display: block;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
-  color: #71717a;
-  letter-spacing: 0.08em;
+  color: #191918;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', sans-serif;
   margin-bottom: 6px;
 }
 
 .qw-gestor-form-input {
   width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid #e4e4e7;
-  background: #fcfcfd;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(25, 25, 24, 0.15);
+  background: #ffffff;
   font-size: 14px;
-  color: #18181b;
+  color: #191918;
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .qw-gestor-form-input:focus {
-  border-color: #fe6612;
-  background: #ffffff;
+  border-color: #ff4b0b;
 }
 
 .qw-gestor-form-textarea {
   width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid #e4e4e7;
-  background: #fcfcfd;
-  font-size: 13.5px;
-  color: #18181b;
+  padding: 14px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(25, 25, 24, 0.15);
+  background: #ffffff;
+  font-size: 14px;
+  color: #191918;
   outline: none;
   resize: vertical;
   font-family: inherit;
@@ -916,8 +983,7 @@
 }
 
 .qw-gestor-form-textarea:focus {
-  border-color: #fe6612;
-  background: #ffffff;
+  border-color: #ff4b0b;
 }
 
 .qw-gestor-service-grid {
@@ -927,47 +993,51 @@
 }
 
 .qw-gestor-service-option {
-  border: 1.5px solid #e4e4e7;
-  border-radius: 10px;
-  padding: 10px;
+  border: 1.5px solid rgba(25, 25, 24, 0.12);
+  border-radius: 8px;
+  padding: 12px 10px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .qw-gestor-btn-cancel {
   background: transparent;
-  border: 1px solid #e4e4e7;
-  color: #71717a;
+  border: 1px solid rgba(25, 25, 24, 0.15);
+  color: #191918;
   padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
   cursor: pointer;
 }
 
 .qw-gestor-btn-cancel:hover {
-  background: #f4f4f5;
-  color: #111111;
+  background: #f2f1ef;
 }
 
 .qw-gestor-btn-submit {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fe6612;
+  background: #ff4b0b;
   color: #ffffff;
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-size: 13.5px;
-  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'Space Grotesk', sans-serif;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(254, 102, 18, 0.25);
   transition: all 0.15s ease;
 }
 
 .qw-gestor-btn-submit:hover {
-  background: #ff7527;
+  background: #191918;
   transform: translateY(-1px);
 }
 
