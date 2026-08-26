@@ -802,14 +802,16 @@
   display: flex;
   width: max-content;
   gap: 24px;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .qaway-landing-root .qaway-marquee-left {
-  animation: qawayMarqueeLeft 100s linear infinite;
+  animation: qawayMarqueeLeft 38s linear infinite;
 }
 
 .qaway-landing-root .qaway-marquee-right {
-  animation: qawayMarqueeRight 100s linear infinite;
+  animation: qawayMarqueeRight 38s linear infinite;
 }
 
 .qaway-landing-root .qaway-marquee-wrapper:hover .qaway-marquee-row {

@@ -49,12 +49,12 @@ export function QawayDesignPillarsSection() {
   const handleNext = () => setCurrentIdx((prev) => (prev + 1) % pillarsData.length);
   const handlePrev = () => setCurrentIdx((prev) => (prev - 1 + pillarsData.length) % pillarsData.length);
 
-  // Transición automática suave cada 4.5 segundos (se pausa al pasar el mouse)
+  // Transición automática suave cada 3.2 segundos (se pausa al pasar el mouse)
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % pillarsData.length);
-    }, 4500);
+    }, 3200);
     return () => clearInterval(interval);
   }, [isPaused]);
 
