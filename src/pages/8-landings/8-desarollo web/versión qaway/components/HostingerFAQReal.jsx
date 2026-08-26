@@ -13,7 +13,11 @@ const realFaqs = [
   },
   {
     q: "¿El dominio y el hosting están incluidos?",
-    a: "No. El desarrollo se enfoca en el diseño y programación del sitio. Para la publicación podemos utilizar infraestructura de bajo costo o gratuita según lo permita el proyecto, y te asesoramos para adquirir tu propio dominio (.com o .pe) a tu nombre."
+    a: (
+      <>
+        Si estás iniciando, para la publicación de tu sitio podemos utilizar <strong style={{ color: "#111111", fontWeight: "600" }}>infraestructura gratuita o de muy bajo costo</strong> según lo permita el proyecto. Luego, a medida que tu negocio escale, te asesoramos para adquirir tu propio <strong style={{ color: "#111111", fontWeight: "600" }}>dominio (.com o .pe)</strong> directamente a tu nombre.
+      </>
+    )
   },
   {
     q: "¿Puedo conectar WhatsApp y formularios de contacto?",
