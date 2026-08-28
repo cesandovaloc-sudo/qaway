@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import {
@@ -10,10 +9,13 @@ import {
   BookOpen,
   Bot,
   Boxes,
+  BrainCircuit,
   Brush,
   Check,
-  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   CircleUserRound,
+  Clock3,
   Compass,
   Cpu,
   GraduationCap,
@@ -21,15 +23,15 @@ import {
   Layers3,
   MessageCircle,
   PenTool,
+  Play,
+  Quote,
   ScanSearch,
   Send,
   Settings,
   Sparkles,
+  Star,
+  Users,
   Workflow,
-  Zap,
-  ShieldCheck,
-  Globe,
-  ChevronRight
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { carouselLandings } from '@/data/academyCourses'
@@ -40,44 +42,89 @@ import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
 
 const base = '/assets/pages/1-inicio/'
-const VLAB = '/assets/pages/1-inicio'
-
 const displayFont = {
   fontFamily: "'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue Condensed', Impact, sans-serif",
   fontStretch: 'condensed',
   fontWeight: 700,
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  show: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.72, delay, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
+const growX = {
+  hidden: { scaleX: 0, opacity: 0 },
+  show: (delay = 0) => ({
+    scaleX: 1,
+    opacity: 1,
+    transition: { duration: 0.52, delay, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
 const primaryAreas = [
   {
-    number: '01',
     title: 'Estudio creativo',
-    tag: 'Branding & Visual',
-    description: 'Branding, sistemas visuales, contenido y dirección de arte para marcas y negocios.',
+    description: 'Branding, contenido y presencia digital para marcas, profesionales y negocios.',
     link: '/estudio',
-    ctaLabel: 'Explorar Estudio',
+    ctaLabel: 'Ver estudio creativo',
     icon: PenTool,
-    accent: '#ff4b0b',
   },
   {
-    number: '02',
     title: 'Sistemas digitales',
-    tag: 'Automatización & IA',
-    description: 'Automatiza tareas repetitivas, implementa CRM y conecta herramientas operativas con IA.',
+    description: 'Organiza procesos, automatiza tareas y conecta herramientas para trabajar mejor.',
     link: '/sistemas-digitales',
-    ctaLabel: 'Ver Sistemas Digitales',
+    ctaLabel: 'Ver sistemas digitales',
     icon: Workflow,
-    accent: '#ff4b0b',
   },
   {
-    number: '03',
-    title: 'Qaway Academy',
-    tag: 'Formación Práctica',
-    description: 'Aprende a usar Inteligencia Artificial, automatizaciones y software moderno en tus proyectos.',
+    title: 'Academy',
+    description: 'Aprende a usar IA, sistemas y herramientas digitales de forma práctica.',
     link: '/academy',
-    ctaLabel: 'Ir a Academy',
+    ctaLabel: 'Ver Academy',
     icon: GraduationCap,
-    accent: '#ff4b0b',
+  },
+]
+
+const ecosystemAreas = [
+  {
+    title: 'Qaway Hub',
+    description: 'Ruta interna de herramientas y módulos para organizar mejor tu trabajo.',
+    link: '/hub',
+    icon: Boxes,
+  },
+  {
+    title: 'Recursos',
+    description: 'Plantillas, guías y materiales listos para aplicar en tu trabajo.',
+    link: '/recursos',
+    icon: BookOpen,
+  },
+  {
+    title: 'Blog',
+    description: 'Guías y artículos para entender mejor IA, sistemas, marketing y productividad.',
+    link: '/blog',
+    icon: Compass,
+  },
+]
+
+const heroCapabilities = [
+  {
+    icon: PenTool,
+    title: 'Estudio creativo',
+    description: 'Branding y Contenido',
+    link: '#estudio',
+    placement: 'left-[4.5%] bottom-[25%] w-[14rem]',
+  },
+  {
+    icon: Workflow,
+    title: 'Sistemas',
+    description: 'Automatización e IA',
+    link: '#sistemas',
+    placement: 'right-[3%] bottom-[21%] w-[13rem]',
   },
 ]
 
@@ -102,99 +149,15 @@ const brandNames = [
   { name: 'Vertice Lab', style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 600, letterSpacing: '-0.04em' } },
 ]
 
-const estudioServices = [
-  {
-    title: 'Branding Digital',
-    tag: 'Identidad & Manual',
-    icon: Brush,
-    description: 'Logotipos vectoriales, tipografías corporativas, paletas cromáticas y manual de identidad para destacar en el mercado.',
-    image: `${VLAB}/inicio-branding-hospitality-moodboard2.webp`
-  },
-  {
-    title: 'Contenido Visual',
-    tag: 'Dirección de Arte',
-    icon: ImageIcon,
-    description: 'Fotografía comercial, piezas de comunicación y producción gráfica coherente con la personalidad de tu marca.',
-    image: `${VLAB}/inicio-servicio-contenido.webp`
-  },
-  {
-    title: 'Presencia Profesional',
-    tag: 'Autoridad Digital',
-    icon: CircleUserRound,
-    description: 'Estructuración visual para consultores, profesionales y equipos ejecutivos que requieren proyectar alta confianza.',
-    image: `${VLAB}/estudio_portada_identidad_ejecutiva2.webp`
-  },
-  {
-    title: 'Estrategia Digital',
-    tag: 'Posicionamiento',
-    icon: ScanSearch,
-    description: 'Auditoría de canales, arquitectura de marca y planes de comunicación para conectar con tu audiencia ideal.',
-    image: `${VLAB}/inicio-servicio-estrategia.webp`
-  },
-]
-
-const sistemasSubsections = [
-  {
-    icon: Settings,
-    title: 'Automatización administrativa',
-    description: 'Automatiza facturas, gastos, archivos y correos en un solo flujo continuo.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Dashboards operativos',
-    description: 'Visualiza métricas, conversiones y reportes clave en un solo panel centralizado.',
-  },
-  {
-    icon: CircleUserRound,
-    title: 'CRM y seguimiento comercial',
-    description: 'Organiza prospectos y asegura que ningún contacto de venta quede desatendido.',
-  },
-  {
-    icon: Bot,
-    title: 'Agentes para atención y soporte',
-    description: 'Automatiza respuestas en WhatsApp y clasifica consultas con lógica operativa.',
-  },
-  {
-    icon: PenTool,
-    title: 'Sistemas de contenido con IA',
-    description: 'Crea, organiza y distribuye contenido comercial de alto impacto con apoyo de IA.',
-  },
-  {
-    icon: BookOpen,
-    title: 'Procesos internos documentados',
-    description: 'Estandariza procedimientos y manuales operativos para escalar tu negocio con orden.',
-  },
-]
-
-const visualDeck = [
-  {
-    title: 'Identificar lo repetitivo',
-    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero1.webp',
-    className: 'left-[8%] top-0 w-[62%] z-10',
-    rotation: -3,
-  },
-  {
-    title: 'Automatización interna',
-    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero2.webp',
-    className: 'left-[46%] top-[22%] w-[60%] z-20',
-    rotation: 2,
-  },
-  {
-    title: 'El proceso ya corre solo',
-    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero3.webp',
-    className: 'left-[14%] bottom-0 w-[62%] z-30',
-    rotation: -1,
-  },
-]
-
 function Reveal({ children, className = '', delay = 0 }) {
   const reduceMotion = useReducedMotion()
+
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0.16 }}
+      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
       {children}
@@ -202,12 +165,863 @@ function Reveal({ children, className = '', delay = 0 }) {
   )
 }
 
+const scaleUpImage = {
+  hidden: { opacity: 0, scale: 0.95, y: 28 },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+function ArrowLink({ to, children, light = false, newTab = false }) {
+  const classes = `group inline-flex items-center gap-4 border-b pb-2 text-sm font-medium transition-colors ${light
+    ? 'border-[#ff4b0b] text-white/78 hover:text-white'
+    : 'border-[#ff4b0b] text-[#20201f]/72 hover:text-[#20201f]'
+    }`
+
+  if (newTab) {
+    return (
+      <a href={to} target="_blank" rel="noopener noreferrer" className={classes}>
+        {children}
+        <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
+      </a>
+    )
+  }
+
+  return (
+    <Link to={to} className={classes}>
+      {children}
+      <ArrowRight size={15} className="transition-transform group-hover:translate-x-1.5" />
+    </Link>
+  )
+}
+
+/* 
+================================================================================
+GUÍA DE ALINEACIÓN Y MAQUETACIÓN DE SECCIONES HERO (QAWAY LAB):
+================================================================================
+Para asegurar la consistencia visual y estabilidad responsiva en todas las 
+páginas del ecosistema (Inicio, Estudio, Sistemas Digitales, Academy), 
+se deben seguir estrictamente las siguientes reglas en la sección Hero:
+
+1. SANGRADO / ALINEACIÓN HORIZONTAL:
+   - El contenedor principal de la cuadrícula o rejilla (grid) debe tener un 
+     ancho máximo de 96rem (max-w-[96rem] o max-width: 96rem) y estar centrado 
+     horizontalmente (mx-auto o margin: 0 auto).
+   - El sangrado izquierdo de la columna de texto debe ser de 2.5rem (px-10 o 
+     padding-left: 2.5rem) en escritorio para alinearse exactamente con el 
+     logotipo del Navbar. Evitar el uso de paddings fluidos en vw (ej. 3.5vw).
+
+2. TAMAÑO E INTERLINEADO DEL TÍTULO (H1):
+   - El título principal debe usar un tamaño controlado de font-size:
+     clamp(3.2rem, 5.5vw, 6.5rem)
+   - El interlineado (line-height) debe ser ajustado a 0.82 (leading-[0.82]).
+   - El ancho máximo del título debe estar limitado (ej. max-w-[58rem] o 
+     max-width: 58rem) para evitar invadir las imágenes adyacentes.
+
+3. COMPORTAMIENTO FLEXIBLE DE LÍNEAS:
+   - Evitar el uso de 'white-space: nowrap' en las líneas o spans del título,
+     permitiendo saltos de línea naturales (responsive) para que el texto no 
+     se desborde sobre el rostro de las imágenes.
+
+4. ESTRUCTURA DE 3 COLUMNAS INTEGRADAS Y AJUSTE FLEXIBLE DE PROPORCIONES:
+   - El Hero de cada página se estructura en un contenedor grid de 3 columnas integradas
+     con base de referencia `lg:grid-cols-[.95fr_1.05fr_.7fr] max-w-[96rem] mx-auto`.
+   - Las tarjetas flotantes NUNCA deben posicionarse con 'right: calc(X% + Ypx)' sueltas 
+     respecto a la pantalla global. DEBEN ir ancladas dentro de la columna central.
+   - REGLA FLEXIBLE DE PROPORCIÓN: El ratio de las columnas no es una regla rígida e imperativa;
+     dependerá de la longitud del título H1 y del encuadre de la imagen de cada página. 
+     Si un título genera saltos de línea aislados o torre de filas (ej. "la" o "y" solas),
+     se debe aplicar un micro-desplazamiento del 1% al 3% a la derecha (ej. `lg:grid-cols-[1.03fr_0.97fr_0.70fr]`)
+     para dar aire al texto manteniendo intacta la escala tipográfica referente de Inicio.
+
+5. COMPORTAMIENTO RESPONSIVO EN MÓVILES Y TABLETS (< 1024px):
+   - El contenedor de la imagen principal debe llevar una restricción de altura en móviles 
+     (ej. `max-h-[50vh]` o `min-h-[40vh]`) con `overflow-hidden` o la imagen en `object-cover` 
+     para que la foto se recorte estratégicamente y no crezca desproporcionadamente. 
+     En pantallas grandes recupera su tamaño (ej. `lg:max-h-none`).
+   - El panel de contenido secundario (la tercera columna, si existe) debe ocultarse en 
+     móviles usando las clases de Tailwind `hidden lg:flex` o `hidden lg:grid` para evitar 
+     que se apile al final y rompa la fluidez del Hero.
+================================================================================
+*/
+
+function Hero() {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <section
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
+    >
+      <Navbar variant="light" />
+
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 180 180%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.74%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.44%22/%3E%3C/svg%3E")',
+        }}
+      />
+
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
+          <motion.div
+            initial={reduceMotion ? false : 'hidden'}
+            animate={reduceMotion ? undefined : 'show'}
+            variants={fadeUp}
+            custom={0}
+            className="relative z-10"
+          >
+            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
+              Marcas, Automatización y formación con IA
+            </p>
+            <h1
+              className="max-w-[58rem] qw-hero-title text-[#20201f]"
+              style={{ ...displayFont, fontWeight: 760 }}
+            >
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con&nbsp;IA.</span></span>
+            </h1>
+            <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
+              Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-5">
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
+              >
+                Cuéntanos tu proyecto
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </a>
+              <a
+                href="#primary-areas"
+                className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
+              >
+                Elige por dónde empezar
+              </a>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+          transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={`${base}hero-qaway-vision-lab.webp`}
+              alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
+              className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-white/12" />
+          </div>
+
+
+        </motion.div>
+
+        <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-white text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']">
+          <motion.div
+            initial={reduceMotion ? false : 'hidden'}
+            whileInView={reduceMotion ? undefined : 'show'}
+            viewport={{ once: true, amount: 0.35 }}
+            variants={fadeUp}
+            custom={0.22}
+            className="flex flex-col justify-center items-center text-center px-7 py-10 sm:px-10 lg:px-9"
+          >
+            <p className="qw-hero-secondary-kicker">Qaway Lab</p>
+            <p className="qw-hero-secondary-title text-balance">
+              Todo lo que necesitas para crear,
+              <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
+            </p>
+            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b] hidden" />
+
+            <a
+              href="#sistemas"
+              className="qw-hero-secondary-card-btn group"
+            >
+              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-white" /></span>
+              <span className="flex items-center gap-2.5">
+                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                  <Workflow size={20} strokeWidth={1.65} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                    Sistemas
+                  </span>
+                  <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                    Automatización e IA
+                  </span>
+                </span>
+              </span>
+            </a>
+          </motion.div>
+        </aside>
+      </div>
+    </section>
+  )
+}
+
+function BrandMarquee() {
+  const track = [...brandNames, ...brandNames]
+
+  return (
+    <section className="relative overflow-hidden border-y border-[#ff4b0b]/20 bg-[#151514] py-8 text-white sm:py-10">
+      <style>
+        {`
+          @keyframes qawayBrandMarquee {
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(-50%, 0, 0); }
+          }
+
+          .qaway-brand-track {
+            animation: qawayBrandMarquee 120s linear infinite;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .qaway-brand-track {
+              animation: none;
+              transform: none;
+            }
+          }
+        `}
+      </style>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-[#151514] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-[#151514] to-transparent" />
+      <div className="mx-auto mb-5 flex max-w-[94rem] items-center justify-between gap-6 px-6 sm:px-10 lg:px-14">
+        <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Marcas que toman forma</p>
+        <div className="hidden h-px flex-1 bg-white/10 sm:block" />
+      </div>
+      <div className="flex w-max qaway-brand-track">
+        {track.map((brand, index) => (
+          <span
+            key={`${brand.name}-${index}`}
+            className="mx-7 inline-flex items-center gap-5 whitespace-nowrap text-[clamp(0.95rem,2.2vw,2.35rem)] leading-none text-white/30"
+            style={brand.style}
+          >
+            {brand.name}
+            <span className="h-8 w-px bg-[#ff4b0b]" />
+          </span>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function EcosystemPhoto() {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : "hidden"}
+      whileInView={reduceMotion ? undefined : "show"}
+      viewport={{ once: true, amount: 0.2 }}
+      variants={scaleUpImage}
+      className="group relative min-h-[31rem] overflow-visible border-[#20201f]/10 lg:min-h-[38rem]"
+    >
+      <div
+        className="absolute inset-0 overflow-hidden transition-shadow duration-500 group-hover:shadow-[0_38px_92px_rgba(32,32,31,0.18)]"
+        style={{ boxShadow: '0 24px 64px rgba(32, 32, 31, 0.10)' }}
+      >
+        <img
+          src={`${base}equipo-colaborando2.webp`}
+          alt="Equipo multidisciplinario colaborando en un proyecto"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-linear-to-t from-black/8 via-transparent to-white/8" />
+        <div className="absolute inset-y-10 left-0 w-2 bg-[#ff4b0b]" />
+      </div>
+    </motion.div>
+  )
+}
+
+function EcosystemIntro() {
+  return (
+    <section id="ecosistema" className="flex min-h-[100dvh] items-center bg-[#ffffff] px-6 py-18 text-[#20201f] sm:px-10 lg:px-14 lg:py-24">
+      <div className="mx-auto max-w-[94rem]">
+        <Reveal className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div className="text-center lg:text-left">
+            <p className="qw-section-kicker">Todo conectado</p>
+            <h2
+              className="qw-section-title mx-auto lg:mx-0 max-w-[42rem]"
+              style={{ ...displayFont, fontWeight: 760 }}
+            >
+              Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
+            </h2>
+            <p className="qw-section-copy mx-auto lg:mx-0">
+              No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.
+            </p>
+          </div>
+
+          <EcosystemPhoto />
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+const VLAB = '/assets/pages/1-inicio'
+
+const estudioServices = [
+  { title: 'Branding Digital', icon: Brush, image: `${VLAB}/inicio-branding-hospitality-moodboard2.webp` },
+  { title: 'Contenido Visual', icon: ImageIcon, image: `${VLAB}/inicio-servicio-contenido.webp` },
+  { title: 'Presencia Profesional', icon: CircleUserRound, image: `${VLAB}/estudio_portada_identidad_ejecutiva2.webp` },
+  { title: 'Estrategia Digital', icon: ScanSearch, image: `${VLAB}/inicio-servicio-estrategia.webp` },
+]
+
+function EstudioSection() {
+  const reduceMotion = useReducedMotion()
+  const [active, setActive] = useState(0)
+  const activeService = estudioServices[active]
+
+  return (
+    <section id="estudio" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#f8f9fc] px-6 py-12 text-[#20201f] sm:px-10 lg:px-14">
+      <div className="mx-auto w-full max-w-[96rem]">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+          <div className="flex flex-col">
+            <Reveal>
+              <div>
+                <p className="qw-section-kicker">
+                  Estudio creativo
+                </p>
+                <h2
+                  className="qw-section-title"
+                  style={{ ...displayFont, fontWeight: 760 }}
+                >
+                  Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
+                </h2>
+                <p className="qw-section-copy">
+                  Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
+                </p>
+              </div>
+            </Reveal>
+
+            {/* En móvil: la imagen se ubica inmediatamente debajo del título */}
+            <div className="mt-6 block lg:hidden">
+              <Reveal delay={0.15} className="relative mx-auto aspect-[4/3] w-full overflow-hidden">
+                <AnimatePresence initial={false}>
+                  <motion.img
+                    key={activeService.title}
+                    src={activeService.image}
+                    alt={activeService.title}
+                    initial={reduceMotion ? false : { opacity: 0, scale: 1.015 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                    transition={{ duration: 0.26, ease: 'easeInOut' }}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                </AnimatePresence>
+              </Reveal>
+            </div>
+
+            <div className="mt-8 grid min-h-0 grid-cols-2 content-stretch gap-2 sm:gap-3">
+              {estudioServices.map(({ title, icon: Icon }, index) => (
+                <motion.div
+                  key={title}
+                  initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.45, delay: 0.06 * index, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActive(index)}
+                    className={`group flex h-full w-full items-center gap-2.5 border px-3.5 py-2.5 text-left transition-all duration-300 sm:px-4 sm:py-2.5 ${active === index
+                      ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
+                      : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
+                      }`}
+                  >
+                    <span className={`grid h-8 w-8 shrink-0 place-items-center transition-colors duration-300 ${active === index
+                      ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
+                      : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
+                      }`}>
+                      <Icon size={17} strokeWidth={1.5} />
+                    </span>
+                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
+                      }`}>
+                      {title}
+                    </span>
+                  </button>
+                </motion.div>
+              ))}
+            </div>
+
+            <Reveal delay={0.15}>
+              <div className="mt-8 flex justify-start">
+                <ArrowLink to="/estudio">Ver estudio creativo</ArrowLink>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* En desktop: la imagen se muestra en la columna derecha */}
+          <Reveal delay={0.3} className="hidden lg:block relative mx-auto aspect-[4/3] w-full overflow-hidden lg:aspect-[3/2] lg:w-[90%]">
+            <AnimatePresence initial={false}>
+              <motion.img
+                key={activeService.title}
+                src={activeService.image}
+                alt={activeService.title}
+                initial={reduceMotion ? false : { opacity: 0, scale: 1.015 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={reduceMotion ? undefined : { opacity: 0, scale: 0.99 }}
+                transition={{ duration: 0.26, ease: 'easeInOut' }}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-linear-to-t from-white/5 to-transparent" />
+            <span className="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-[0.12em] text-white/60 drop-shadow-lg">
+              {activeService.title}
+            </span>
+          </Reveal>
+
+          {/* Precarga de imágenes: transición instantánea sin destello blanco */}
+          <div style={{ display: 'none' }} aria-hidden="true">
+            {estudioServices.map(service => (
+              <img key={service.title} src={service.image} alt="" loading="eager" decoding="async" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PrimaryAreas() {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <section id="primary-areas" className="bg-[#191918] px-6 py-18 text-white sm:px-10 lg:px-14 lg:py-24">
+      <div className="mx-auto max-w-[94rem]">
+        <Reveal className="mb-12 lg:mb-16">
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza aquí</p>
+          <h2
+            className="qw-section-title qw-section-title--impact"
+            style={{ ...displayFont, fontWeight: 680 }}
+          >
+            <span className="text-[#8b8c88]">Elige el área que hoy</span><br />
+            <span className="text-white">necesitas fortalecer.</span>
+          </h2>
+        </Reveal>
+
+        <div className="grid border-t border-white/18 lg:grid-cols-3">
+          {primaryAreas.map(({ title, description, link, ctaLabel, icon: Icon }, index) => {
+            const dir = index === 0 ? { x: -50 } : index === 1 ? { y: 50 } : { x: 50 }
+            return (
+              <motion.div
+                key={title}
+                initial={reduceMotion ? false : { opacity: 0, ...dir }}
+                whileInView={{ opacity: 1, x: 0, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.7, delay: index * 0.18, ease: [0.22, 1, 0.36, 1] }}
+                className={`group relative flex flex-col overflow-hidden border-b border-white/18 py-6 transition-all duration-500 lg:border-b-0 lg:px-12 hover:-translate-y-1 hover:shadow-[0_0_40px_rgba(255,75,11,0.1),inset_0_0_0_1px_rgba(255,75,11,0.25)] ${index ? 'lg:border-l' : ''
+                  } ${index === 0 ? 'lg:pl-12' : ''}`}
+              >
+                <span className="pointer-events-none absolute -top-6 left-4 select-none text-[10rem] font-bold leading-none text-white/[0.04]">
+                  0{index + 1}
+                </span>
+                <div className="relative mb-10 flex justify-end">
+                  <span className="grid h-12 w-12 place-items-center rounded-[6px] border border-white/15 text-[#ff4b0b] transition-all duration-500 group-hover:border-[#ff4b0b] group-hover:bg-[#ff4b0b] group-hover:text-white group-hover:shadow-[0_0_24px_rgba(255,75,11,0.25)]">
+                    <Icon size={21} strokeWidth={1.45} />
+                  </span>
+                </div>
+                <div className="relative flex flex-1 flex-col justify-end pt-[3.25rem]">
+                  <h3 className="text-[clamp(1.8rem,2.8vw,3.6rem)] uppercase leading-[0.85] tracking-[-0.035em]" style={{ ...displayFont, fontWeight: 760 }}>
+                    {title}
+                  </h3>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/50">{description}</p>
+                  <div className="mt-2">
+                    <ArrowLink to={link} light>
+                      {ctaLabel}
+                    </ArrowLink>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const visualDeck = [
+  {
+    title: 'Identificar lo repetitivo',
+    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero1.webp',
+    className: 'left-[12%] top-0 w-[58%] z-10',
+    rotation: -4,
+    yPath: [0, -5, 0],
+    duration: 4.5,
+  },
+  {
+    title: 'Automatización interna',
+    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero2.webp',
+    className: 'left-[50%] top-[25%] w-[60%] z-20',
+    rotation: 2,
+    yPath: [2, -3, 2],
+    duration: 5.8,
+  },
+  {
+    title: 'El proceso ya corre solo',
+    src: '/assets/pages/3-sistemas-digitales/1-automatizacion/automatizacion_hero3.webp',
+    className: 'left-[15%] bottom-0 w-[60%] z-30',
+    rotation: 0,
+    yPath: [-2, 2, -2],
+    duration: 5.2,
+  },
+]
+
+function OpsImageStage({ reduceMotion }) {
+  return (
+    <div className="relative hidden lg:block">
+      <div className="relative h-[620px]">
+        {visualDeck.map((image, idx) => (
+          <motion.figure
+            key={image.title}
+            initial={reduceMotion ? false : { opacity: 0, y: 35, rotate: image.rotation }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, rotate: image.rotation }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={
+              reduceMotion ? undefined : {
+                duration: 0.85,
+                delay: 0.2 + idx * 0.45,
+                ease: [0.22, 1, 0.36, 1]
+              }
+            }
+            className={`absolute transform-gpu will-change-transform ${image.className} ${idx === 2 ? 'academy-ops-solution' : ''
+              }`}
+          >
+            <div className="relative overflow-hidden">
+              <img
+                src={image.src}
+                alt={image.title}
+                className="h-[260px] w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-black/5 to-transparent" />
+            </div>
+          </motion.figure>
+        ))}
+
+        <motion.div
+          animate={reduceMotion ? undefined : { x: ['-20%', '120%'] }}
+          transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-[#ff4b0b] to-transparent opacity-50"
+        />
+      </div>
+    </div>
+  )
+}
+
+const sistemasSubsections = [
+  {
+    icon: Settings,
+    title: 'Automatización administrativa',
+    description: 'Automatiza facturas, gastos, archivos y correos en un solo flujo.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Dashboards operativos',
+    description: 'Visualiza indicadores y reportes clave en un solo panel.',
+  },
+  {
+    icon: CircleUserRound,
+    title: 'CRM y seguimiento comercial',
+    description: 'Organiza clientes y seguimiento comercial en un solo lugar.',
+  },
+  {
+    icon: Bot,
+    title: 'Agentes para atención y soporte',
+    description: 'Automatiza respuestas y clasifica consultas con lógica operativa.',
+  },
+  {
+    icon: PenTool,
+    title: 'Sistemas de contenido con IA',
+    description: 'Crea, organiza y distribuye contenido con apoyo de IA.',
+  },
+  {
+    icon: BookOpen,
+    title: 'Procesos internos documentados',
+    description: 'Documenta y estandariza procesos para operar con más orden.',
+  },
+]
+
+function SistemasDigitalesSection() {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <section id="sistemas" className="relative flex flex-col justify-center min-h-[100dvh] bg-[#ffffff] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+      <div className="mx-auto w-full max-w-[96rem]">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
+          <div className="flex flex-col justify-center">
+            <Reveal>
+              <p className="qw-section-kicker">
+                Sistemas digitales con IA
+              </p>
+              <h2
+                className="qw-section-title"
+                style={{ ...displayFont, fontWeight: 760 }}
+              >
+                Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
+                <br />
+                <span className="text-[#ff4b0b]">la carga manual.</span>
+              </h2>
+              <p className="qw-section-copy">
+                Organiza tus herramientas, automatiza tareas repetitivas y conecta tus procesos con apoyo de IA.
+              </p>
+            </Reveal>
+
+            <div className="mt-6 grid gap-x-6 gap-y-11 pb-10 sm:grid-cols-2">
+              {sistemasSubsections.map(({ icon: Icon, title, description }, index) => (
+                <motion.div
+                  key={title}
+                  initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: 0.04 * index, ease: [0.22, 1, 0.36, 1] }}
+                  className="group flex cursor-pointer items-start gap-3 border-t border-black/8 pt-3"
+                >
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center border border-[#ff4b0b]/15 bg-[#ff4b0b] text-white transition-colors duration-300 group-hover:bg-[#ff4b0b]/80">
+                    <Icon size={13} strokeWidth={1.5} />
+                  </span>
+                  <div className="relative">
+                    <h3 className="no-qw text-sm font-bold uppercase tracking-[-0.01em] leading-tight text-[#414140] sm:text-[#20201f]">
+                      {title}
+                    </h3>
+                    <div className="transition-all duration-300 sm:pointer-events-none sm:absolute sm:left-0 sm:top-full sm:z-10 sm:w-[min(20rem,100%)] sm:translate-y-1 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
+                      <p className="pt-2 text-[11px] leading-relaxed text-[#414140] sm:text-[#20201f]">
+                        {description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <Reveal className="mt-10 flex items-center gap-4 pt-4">
+              <ArrowLink to="/sistemas-digitales">Ver sistemas digitales</ArrowLink>
+            </Reveal>
+          </div>
+
+          <OpsImageStage reduceMotion={reduceMotion} />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function AcademyFeature() {
+  const reduceMotion = useReducedMotion()
+
+  return (
+    <section id="academy" className="flex flex-col justify-center bg-[#ffffff] text-[#20201f] py-12 lg:min-h-[100dvh] lg:py-0">
+      <div className="mx-auto w-full max-w-[96rem]">
+      <div className="grid items-center w-full lg:grid-cols-[55%_45%]">
+        <div className="order-1 flex flex-col justify-center px-6 py-4 sm:px-10 lg:order-2 lg:px-14 lg:py-16">
+        <motion.p
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0}
+          className="qw-section-kicker"
+        >
+          Academy
+        </motion.p>
+        <motion.h2
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.1}
+          className="qw-section-title"
+          style={{ ...displayFont, fontWeight: 760 }}
+        >
+          <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
+        </motion.h2>
+        <motion.p
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.2}
+          className="qw-section-copy"
+        >
+          Accede a cursos, talleres y recursos para aplicar Inteligencia Artificial, sistemas, herramientas de productividad, diseño y comunicación digital de forma práctica.
+        </motion.p>
+        <motion.div
+          initial={reduceMotion ? false : 'hidden'}
+          whileInView={reduceMotion ? undefined : 'show'}
+          viewport={{ once: true, amount: 0.2 }}
+          variants={fadeUp}
+          custom={0.3}
+          className="mt-6 flex flex-wrap gap-7"
+        >
+          <ArrowLink to="/academy">Ver Academy</ArrowLink>
+          <ArrowLink to={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} newTab>
+            Ver todos los cursos
+          </ArrowLink>
+        </motion.div>
+      </div>
+
+      <motion.div
+        initial={reduceMotion ? false : "hidden"}
+        whileInView={reduceMotion ? undefined : "show"}
+        whileHover={reduceMotion ? undefined : { y: -3 }}
+        viewport={{ once: true, amount: 0.2 }}
+        variants={scaleUpImage}
+        className="order-2 relative mt-4 aspect-[4/3] w-full max-w-[92%] mx-auto overflow-hidden cursor-pointer lg:order-1 lg:mt-0 lg:self-center lg:w-[88%] xl:w-[84%]"
+      >
+        <img
+          src={`${base}aprendizaje-aplicado2.webp`}
+          alt="Profesional aprendiendo y prototipando en un espacio de trabajo"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-black/18" />
+      </motion.div>
+      </div>
+      </div>
+    </section>
+  )
+}
+
+function AcademyContactSection({ submitted, submitting, submitError, onSubmit, onReset }) {
+  return (
+    <section id="formulario" className="flex min-h-[100dvh] items-center bg-[#f8f9fc] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
+      <div className="mx-auto w-full max-w-[96rem]">
+        <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-14 items-center">
+          <Reveal>
+            <p className="qw-section-kicker">Contacto</p>
+            <h2 className="qw-section-title" style={{ ...displayFont, fontWeight: 760 }}>
+              Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
+            </h2>
+            <p className="qw-section-copy">
+              Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
+            </p>
+            <div className="qw-form-points mt-6">
+              <span><Check size={16} /> Te respondemos en menos de 24 horas</span>
+              <span><Check size={16} /> Recibe orientación sin compromiso</span>
+              <span><Check size={16} /> Explora opciones para tu equipo o negocio</span>
+            </div>
+          </Reveal>
+
+          <Reveal>
+            <form
+              onSubmit={onSubmit}
+              className="qw-form"
+            >
+              {submitted ? (
+                <div className="qw-form-success">
+                  <div><Check size={28} /></div>
+                  <h3>¡Consulta enviada!</h3>
+                  <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
+                  <button type="button" onClick={onReset}>Enviar otro mensaje</button>
+                </div>
+              ) : (
+                <>
+                  <div className="qw-field">
+                    <label htmlFor="qw-name">¿Cómo te llamas?</label>
+                    <input
+                      type="text"
+                      id="qw-name"
+                      name="name"
+                      required
+                      placeholder="Tu nombre completo"
+                    />
+                  </div>
+                  <div className="qw-field-row">
+                    <div className="qw-field">
+                      <label htmlFor="qw-phone">Teléfono</label>
+                      <input
+                        type="tel"
+                        id="qw-phone"
+                        name="phone"
+                        required
+                        placeholder="+51 999 999 999"
+                      />
+                    </div>
+                    <div className="qw-field">
+                      <label htmlFor="qw-email">Correo</label>
+                      <input
+                        type="email"
+                        id="qw-email"
+                        name="email"
+                        required
+                        placeholder="tucorreo@empresa.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="qw-field-row">
+                    <div className="qw-field">
+                      <label htmlFor="qw-profile">¿A qué te dedicas?</label>
+                      <select id="qw-profile" name="profile" required>
+                        <option value="">Selecciona tu perfil</option>
+                        <option value="Profesional / Consultor">Profesional / Consultor</option>
+                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
+                        <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
+                        <option value="Equipo de empresa">Equipo de empresa</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
+                    <div className="qw-field">
+                      <label htmlFor="qw-interest">¿Qué Servicio o Curso te interesa?</label>
+                      <select id="qw-interest" name="interest" required>
+                        <option value="">Selecciona un interés</option>
+                        <option value="Identidad visual / Branding">Identidad visual / Branding</option>
+                        <option value="Creación de sitios web y landings">Creación de sitios web y landings</option>
+                        <option value="Automatización de procesos">Automatización de procesos</option>
+                        <option value="CRM y seguimiento comercial">CRM y seguimiento comercial</option>
+                        <option value="Formación / Cursos (Academy)">Formación / Cursos (Academy)</option>
+                        <option value="Orientación general / Otro">Orientación general / Otro</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="qw-field">
+                    <label htmlFor="qw-message">Cuéntanos un poco más</label>
+                    <textarea
+                      id="qw-message"
+                      name="message"
+                      rows="4"
+                      placeholder="¿Qué quieres lograr o qué dificultad estás intentando resolver?"
+                    />
+                  </div>
+                  <button type="submit" className="qw-submit-button" disabled={submitting}>
+                    {submitting ? 'ENVIANDO CONSULTA...' : 'QUIERO ORIENTACIÓN'}
+                    <Send size={17} />
+                  </button>
+                  {submitError && <p className="qw-form-error" role="alert">{submitError}</p>}
+                  <small>Usaremos esta información únicamente para responder tu consulta.</small>
+                </>
+              )}
+            </form>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+
 function useCarouselTick(intervalMs = 7000) {
+  // Tick ÚNICO y compartido: ambas tarjetas derivan su índice de este mismo
+  // contador, por lo que sus imágenes rotan al mismo tiempo.
   const [tick, setTick] = useState(0)
+
   useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), intervalMs)
+    const id = setInterval(() => setTick(t => t + 1), intervalMs)
     return () => clearInterval(id)
   }, [intervalMs])
+
   return tick
 }
 
@@ -218,7 +1032,7 @@ function AcademyCoursesInner({ tick }) {
 
   if (status === 'loading') {
     return (
-      <div className="relative mt-2" aria-busy="true">
+      <div className="relative mt-2" aria-busy="true" aria-label="Cargando cursos">
         <div style={{ minHeight: '14rem' }} className="academy-course-card is-compact animate-pulse bg-[#20201f]/5" />
       </div>
     )
@@ -236,7 +1050,7 @@ function AcademyCoursesInner({ tick }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'linear' }}
+            transition={{ duration: 0.30, ease: "linear" }}
             style={{ gridTemplateRows: '14rem 1fr', display: 'grid' }}
             className="academy-course-card is-compact"
           >
@@ -266,12 +1080,8 @@ function AcademyCoursesInner({ tick }) {
               {course.badgeText && <span>{course.badgeText}</span>}
             </div>
             <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-              <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>
-                {course.category || 'Curso'}
-              </p>
-              <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>
-                {course.title}
-              </h3>
+              <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{course.category || 'Curso'}</p>
+              <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{course.title}</h3>
             </div>
           </motion.a>
         </AnimatePresence>
@@ -279,8 +1089,10 @@ function AcademyCoursesInner({ tick }) {
     )
   }
 
+  // Respuesta válida sin destacados, caché caducada o error sin caché:
+  // tarjeta NEUTRAL (sin precios, duraciones ni badges inventados).
   return (
-    <div className="relative mt-2">
+    <div className="relative mt-2" role="status">
       <div style={{ gridTemplateRows: '14rem 1fr', minHeight: '14rem' }} className="academy-course-card is-compact">
         <div style={{ minHeight: '14rem' }} className="academy-course-image">
           <span className="grid h-full w-full place-items-center bg-[#20201f]/5 text-[#20201f]/30">
@@ -288,36 +1100,123 @@ function AcademyCoursesInner({ tick }) {
           </span>
         </div>
         <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-          <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>
-            Formación
-          </p>
-          <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>
-            {neutral.title}
-          </h3>
-          <p className="text-[0.95rem] leading-relaxed text-[#20201f]/72" style={{ marginBottom: '0.6rem' }}>
-            {neutral.text}
-          </p>
+          <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>Formación</p>
+          <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{neutral.title}</h3>
+          <p className="text-[0.95rem] leading-relaxed text-[#20201f]/72" style={{ marginBottom: '0.6rem' }}>{neutral.text}</p>
         </div>
       </div>
+      {status === 'error' && error && (
+        <p className="mt-2 text-[0.75rem] text-[#20201f]/50">{error}</p>
+      )}
     </div>
   )
 }
 
-export default function InicioPageV2() {
-  const [activeEstudio, setActiveEstudio] = useState(0)
-  const activeService = estudioServices[activeEstudio]
+function CoursesLandings() {
   const tick = useCarouselTick(7000)
   const landingIdx = tick % carouselLandings.length
   const landing = carouselLandings[landingIdx]
   const academyHref = (import.meta.env.VITE_ACADEMY_URL || '').replace(/\/+$/, '')
   const cursosHref = academyHref ? `${academyHref}/cursos` : '/academy'
 
-  // Form State
+  return (
+    <section className="bg-[#ffffff] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">
+      <div className="mx-auto flex w-full max-w-[94rem] flex-col">
+        <Reveal className="mb-3 lg:mb-4 text-center">
+          <p className="qw-section-kicker">Formación y soluciones</p>
+          <h2
+            className="qw-section-title mx-auto"
+            style={{ ...displayFont, fontWeight: 760 }}
+          >
+            Aprende y <span className="text-[#ff4b0b]">aplica.</span>
+          </h2>
+        </Reveal>
+
+        <div className="grid flex-1 gap-5 sm:gap-6 md:gap-8 px-0 sm:px-8 md:px-12 lg:gap-10 lg:px-[8%] sm:grid-cols-2">
+          <Reveal delay={0}>
+            <Link
+              to={landing.link}
+              style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
+              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
+            >
+              <div className="mb-5 flex items-center gap-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <Compass size={19} strokeWidth={1.45} />
+                </span>
+                <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                  Soluciones digitales
+                </h3>
+              </div>
+              <div>
+                <div className="relative mt-2">
+                  <AnimatePresence mode="wait">
+                    <motion.article
+                      key={landing.title}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.30, ease: "linear" }}
+                      style={{ gridTemplateRows: '14rem 1fr' }}
+                      className="academy-course-card is-compact"
+                    >
+                      <div style={{ minHeight: '14rem' }} className="academy-course-image">
+                        <img src={landing.image} alt="" loading="lazy" decoding="async" />
+                        {landing.featured && <span>{landing.featured}</span>}
+                      </div>
+                      <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
+                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{landing.category}</p>
+                        <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{landing.title}</h3>
+                      </div>
+                    </motion.article>
+                  </AnimatePresence>
+                </div>
+                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
+                  Explorar
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
+                </span>
+              </div>
+            </Link>
+          </Reveal>
+
+          <Reveal delay={0.06}>
+            <div
+              style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}
+              className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
+            >
+              <div className="mb-5 flex items-center gap-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                  <GraduationCap size={19} strokeWidth={1.45} />
+                </span>
+                <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
+                  Cursos aplicados
+                </h3>
+              </div>
+              <div>
+                <AcademyCoursesInner tick={tick} />
+                <a
+                  href={cursosHref}
+                  target={academyHref ? '_blank' : undefined}
+                  rel={academyHref ? 'noopener noreferrer' : undefined}
+                  className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]"
+                >
+                  Ver formación
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default function InicioPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  async function handleContactSubmit(event) {
+  async function submitInterest(event) {
     event.preventDefault()
     setSubmitting(true)
     setSubmitError('')
@@ -334,654 +1233,90 @@ export default function InicioPageV2() {
     }
 
     try {
-      const { error } = await supabase.from('leads').insert([
-        {
-          client_name: lead.name,
-          contact_info: lead.phone,
-          source: 'Inicio V2',
-          stage: 'new',
-          metadata: {
+      const { error } = await supabase.from('leads').insert([{
+        client_name: lead.name,
+        contact_info: lead.phone,
+        source: 'Academy',
+        stage: 'new',
+        metadata: {
+          email: lead.email,
+          profile: lead.profile,
+          interest: lead.interest,
+          message: lead.message || 'Sin mensaje adicional',
+        },
+      }])
+      if (error) throw error
+
+      const academyKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || ''
+      if (academyKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            access_key: academyKey.trim(),
+            subject: `Nueva consulta Web: ${lead.interest || 'Orientación'}`,
+            from_name: 'Qaway Lab Academy',
+            name: lead.name,
+            phone: lead.phone,
             email: lead.email,
             profile: lead.profile,
             interest: lead.interest,
             message: lead.message || 'Sin mensaje adicional',
-          },
-        },
-      ])
-      if (error) throw error
+          }),
+        })
+      }
+
+      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
+      if (backupKey.trim()) {
+        await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            access_key: backupKey.trim(),
+            subject: `[Copia] Nueva consulta Web: ${lead.interest || 'Orientación'}`,
+            from_name: 'Qaway Lab Web',
+            to_email: 'qaway.myc@gmail.com',
+          }),
+        })
+      }
 
       setSubmitted(true)
       formElement.reset()
-
-      const contactMsg = encodeURIComponent(
-        `Hola Qaway Lab, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${
-          lead.message ? 'Mensaje: ' + lead.message : ''
-        }`
-      )
-      window.open(`https://wa.me/51930756781?text=${contactMsg}`, '_blank', 'noopener,noreferrer')
-    } catch (err) {
-      console.error('Error al registrar lead:', err)
-      setSubmitError('No pudimos enviar tu consulta. Por favor contáctanos directo a WhatsApp.')
+      
+      const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
+      const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
+      window.open(waUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Error al enviar consulta de Academy:', error)
+      setSubmitError(error.message || 'No pudimos enviar tu consulta. Inténtalo nuevamente.')
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#111210] font-sans antialiased">
-      <Helmet>
-        <title>Qaway Lab | Estudio Creativo, Sistemas con IA y Formación</title>
-        <meta
-          name="description"
-          content="Construimos marcas memorables, automatizamos procesos operativos con IA y formamos a equipos con tecnología práctica en Perú."
-        />
-      </Helmet>
-
-      {/* 1. NAVBAR OFICIAL */}
-      <Navbar variant="light" />
-
-      {/* 2. HERO SAAS MODERNO & FLUIDO */}
-      <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-gradient-to-b from-white via-[#f8f9fc] to-[#f8f9fc] border-b border-zinc-200/80">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
-            
-            {/* Columna Izquierda: Headline & Value Proposition */}
-            <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#ff4b0b]/10 border border-[#ff4b0b]/20 text-[#ff4b0b] text-xs font-bold uppercase tracking-wider mb-5">
-                <Sparkles size={14} />
-                <span>Estudio Digital & Sistemas con IA</span>
-              </div>
-
-              <h1
-                className="text-[clamp(2.6rem,4.8vw,4.4rem)] font-bold text-[#111210] tracking-[-0.035em] leading-[1.03] mb-5"
-                style={{ ...displayFont, fontWeight: 760 }}
-              >
-                Construimos marcas, sistemas y{' '}
-                <span className="text-[#ff4b0b]">formamos con IA.</span>
-              </h1>
-
-              <p className="text-[#52525b] text-lg leading-relaxed mb-7 max-w-[540px]">
-                El ecosistema integral para negocios, profesionales y equipos en crecimiento: diseño visual sólido, automatización de procesos y formación práctica en un solo lugar.
-              </p>
-
-              {/* Bullets de Valor Editoriales y Finos */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center gap-3 text-[14.5px] text-[#27272a]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] shrink-0" />
-                  <span className="font-semibold">Branding, presencia digital y piezas de alta conversión</span>
-                </div>
-                <div className="flex items-center gap-3 text-[14.5px] text-[#27272a]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] shrink-0" />
-                  <span className="font-semibold">Flujos automáticos conectados a WhatsApp, CRM y bases de datos</span>
-                </div>
-                <div className="flex items-center gap-3 text-[14.5px] text-[#27272a]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] shrink-0" />
-                  <span className="font-semibold">Capacitación aplicada para dominar herramientas de Inteligencia Artificial</span>
-                </div>
-              </div>
-
-              {/* Botones SaaS Modernos */}
-              <div className="flex flex-wrap items-center gap-4">
-                <a
-                  href="#contacto-v2"
-                  className="group inline-flex items-center justify-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-[#ff4b0b] to-[#ff632b] text-white font-bold text-[13px] uppercase tracking-wider rounded-full shadow-[0_10px_26px_rgba(255,75,11,0.28)] hover:shadow-[0_14px_32px_rgba(255,75,11,0.4)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
-                >
-                  <span>Iniciar proyecto</span>
-                  <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-                </a>
-
-                <a
-                  href="#areas-principales"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/90 backdrop-blur-sm border border-zinc-200 text-[#18181b] font-bold text-[13px] uppercase tracking-wider rounded-full hover:bg-white hover:border-zinc-300 shadow-sm hover:shadow transition-all duration-200"
-                >
-                  <span>Explorar divisiones</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Columna Derecha: Presentación Editorial y Limpia de la Imagen Principal */}
-            <div className="relative">
-              <div className="relative rounded-2xl overflow-hidden border border-zinc-200/90 shadow-[0_24px_60px_rgba(0,0,0,0.09)] bg-white">
-                <div className="aspect-[4/3.8] sm:aspect-[4/3.5] relative overflow-hidden bg-zinc-900">
-                  <img
-                    src={`${base}hero-qaway-vision-lab.webp`}
-                    alt="Qaway Lab Vision"
-                    className="w-full h-full object-cover grayscale object-[50%_18%]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
-                  
-                  {/* Micro Tag Glassmorphism Flotante en la esquina inferior */}
-                  <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md border border-white/15 px-4 py-2.5 rounded-xl text-white flex items-center justify-between">
-                    <div>
-                      <span className="block text-[10px] font-bold uppercase tracking-widest text-[#ff4b0b]">Laboratorio Digital</span>
-                      <span className="text-xs font-semibold text-white/95">Estrategia, Tecnología y Operaciones</span>
-                    </div>
-                    <span className="w-2 h-2 rounded-full bg-[#00b090] animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 3. MARQUESINA DE MARCAS AUTÉNTICAS DE QAWAY */}
-      <section className="relative overflow-hidden border-b border-zinc-800 bg-[#151514] py-6 text-white">
-        <style>{`
-          @keyframes qawayBrandMarqueeFast {
-            from { transform: translate3d(0, 0, 0); }
-            to { transform: translate3d(-50%, 0, 0); }
-          }
-          .qaway-track-fast {
-            animation: qawayBrandMarqueeFast 90s linear infinite;
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .qaway-track-fast { animation: none; transform: none; }
-          }
-        `}</style>
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#151514] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#151514] to-transparent" />
-        
-        <div className="max-w-[1280px] mx-auto px-6 mb-3 flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Marcas y proyectos desarrollados en el laboratorio</p>
-          <div className="hidden sm:block h-px flex-1 bg-white/10 ml-6" />
-        </div>
-
-        <div className="flex w-max qaway-track-fast">
-          {[...brandNames, ...brandNames].map((brand, idx) => (
-            <span
-              key={`${brand.name}-${idx}`}
-              className="mx-6 inline-flex items-center gap-4 whitespace-nowrap text-[clamp(1rem,2vw,1.8rem)] text-white/40 hover:text-white transition-colors"
-              style={brand.style}
-            >
-              {brand.name}
-              <span className="h-4 w-px bg-[#ff4b0b]/60" />
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. SECCIÓN ÁREAS PRINCIPALES (ESTUDIO / SISTEMAS / ACADEMY) */}
-      <section id="areas-principales" className="py-20 md:py-28 bg-[#191918] text-white">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="max-w-2xl mb-14">
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#ff4b0b] mb-3">Empieza aquí</p>
-            <h2 className="text-[clamp(2.2rem,3.8vw,3.4rem)] font-bold tracking-tight leading-[1.05]" style={{ ...displayFont, fontWeight: 760 }}>
-              <span className="text-[#8b8c88]">Elige el área que hoy</span><br />
-              <span>necesitas fortalecer.</span>
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {primaryAreas.map((area) => {
-              const Icon = area.icon
-              return (
-                <div
-                  key={area.number}
-                  className="group relative rounded-2xl bg-zinc-900/90 border border-white/10 p-8 flex flex-col justify-between hover:border-[#ff4b0b]/50 hover:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-8">
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#ff4b0b] bg-[#ff4b0b]/10 px-3 py-1 rounded-full border border-[#ff4b0b]/20">
-                        {area.tag}
-                      </span>
-                      <span className="text-3xl font-black text-white/10 group-hover:text-white/25 transition-colors">
-                        {area.number}
-                      </span>
-                    </div>
-
-                    <div className="w-12 h-12 rounded-xl bg-black border border-white/15 flex items-center justify-center text-[#ff4b0b] group-hover:bg-[#ff4b0b] group-hover:text-white transition-colors mb-6">
-                      <Icon size={22} strokeWidth={1.75} />
-                    </div>
-
-                    <h3 className="text-2xl font-bold uppercase tracking-tight mb-3 text-white" style={{ ...displayFont, fontWeight: 760 }}>
-                      {area.title}
-                    </h3>
-
-                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                      {area.description}
-                    </p>
-                  </div>
-
-                  <Link
-                    to={area.link}
-                    className="inline-flex items-center gap-2 text-sm font-bold text-white group-hover:text-[#ff4b0b] transition-colors border-t border-white/10 pt-5"
-                  >
-                    <span>{area.ctaLabel}</span>
-                    <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform" />
-                  </Link>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. ESTUDIO CREATIVO (TABULADO ESTILO HOSTINGER CON ASSETS REALES) */}
-      <section id="estudio" className="py-20 md:py-28 bg-[#f8f9fc] border-b border-zinc-200">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="max-w-3xl mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200/80 text-zinc-800 text-xs font-bold uppercase tracking-wider mb-3">
-              <Brush size={13} color="#ff4b0b" />
-              <span>01 · Estudio Creativo</span>
-            </div>
-            <h2 className="text-[clamp(2.2rem,3.6vw,3.2rem)] font-bold text-[#111210] tracking-tight leading-[1.08] mb-3" style={{ ...displayFont, fontWeight: 760 }}>
-              Haz que tu marca se vea <span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
-            </h2>
-            <p className="text-zinc-600 text-base leading-relaxed">
-              Define tu identidad, unifica tu contenido y construye una presencia digital de alto nivel con dirección de arte estratégica.
-            </p>
-          </div>
-
-          {/* Grid de 2 Columnas: Selector de Pestañas + Showcase Visual */}
-          <div className="grid lg:grid-cols-[0.9fr_1.1fr] gap-8 items-center bg-white rounded-2xl border border-zinc-200 p-6 sm:p-8 shadow-[0_10px_30px_rgba(0,0,0,0.03)]">
-            
-            {/* Lista de Servicios Interactiva */}
-            <div className="space-y-3">
-              {estudioServices.map((srv, idx) => {
-                const Icon = srv.icon
-                const isActive = activeEstudio === idx
-                return (
-                  <button
-                    key={srv.title}
-                    type="button"
-                    onClick={() => setActiveEstudio(idx)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-start gap-4 ${
-                      isActive
-                        ? 'border-[#ff4b0b] bg-[#fff7f2] shadow-sm'
-                        : 'border-zinc-200 bg-white hover:border-zinc-300 hover:bg-zinc-50'
-                    }`}
-                  >
-                    <span
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                        isActive ? 'bg-[#ff4b0b] text-white' : 'bg-zinc-100 text-zinc-700'
-                      }`}
-                    >
-                      <Icon size={20} strokeWidth={1.75} />
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`text-base font-bold uppercase tracking-tight ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-900'}`}>
-                          {srv.title}
-                        </h4>
-                        <span className="text-[10px] font-bold uppercase bg-zinc-200/60 text-zinc-700 px-2 py-0.5 rounded">
-                          {srv.tag}
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-600 leading-relaxed">
-                        {srv.description}
-                      </p>
-                    </div>
-                  </button>
-                )
-              })}
-
-              <div className="pt-2">
-                <Link
-                  to="/estudio"
-                  className="inline-flex items-center gap-2 text-sm font-bold text-[#ff4b0b] hover:text-[#e03e04]"
-                >
-                  <span>Ver portafolio de Estudio</span>
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Showcase Visual Dinámico */}
-            <div className="relative rounded-xl overflow-hidden border border-zinc-200 bg-zinc-100 aspect-[4/3] lg:aspect-[16/11]">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={activeService.title}
-                  src={activeService.image}
-                  alt={activeService.title}
-                  initial={{ opacity: 0, scale: 1.02 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full h-full object-cover"
-                />
-              </AnimatePresence>
-              <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">
-                {activeService.title}
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 6. SISTEMAS DIGITALES CON IA (MATRIZ DE 6 CAPACIDADES + VISUAL DECK) */}
-      <section id="sistemas" className="py-20 md:py-28 bg-white border-b border-zinc-200">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="max-w-3xl mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 text-xs font-bold uppercase tracking-wider mb-3">
-              <Workflow size={13} color="#ff4b0b" />
-              <span>02 · Sistemas Digitales</span>
-            </div>
-            <h2 className="text-[clamp(2.2rem,3.6vw,3.2rem)] font-bold text-[#111210] tracking-tight leading-[1.08] mb-3" style={{ ...displayFont, fontWeight: 760 }}>
-              Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce la carga manual.</span>
-            </h2>
-            <p className="text-zinc-600 text-base leading-relaxed">
-              Organiza tus herramientas, automatiza tareas operativas y conecta tus canales con apoyo de Inteligencia Artificial.
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
-            
-            {/* Grid 3x2 de Capacidades Operativas */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              {sistemasSubsections.map((sub, i) => {
-                const Icon = sub.icon
-                return (
-                  <div
-                    key={i}
-                    className="p-5 rounded-xl border border-zinc-200 bg-[#f8f9fc] hover:bg-white hover:border-[#ff4b0b]/40 hover:shadow-sm transition-all"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#ff4b0b] text-white flex items-center justify-center mb-3">
-                      <Icon size={16} strokeWidth={1.75} />
-                    </div>
-                    <h4 className="text-sm font-bold uppercase tracking-tight text-zinc-900 mb-1.5">
-                      {sub.title}
-                    </h4>
-                    <p className="text-xs text-zinc-600 leading-relaxed">
-                      {sub.description}
-                    </p>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Visual Deck de Automatizaciones */}
-            <div className="relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-950 p-6 min-h-[380px] flex flex-col justify-between text-white">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#ff4b0b]">Control de Flujos</span>
-                <span className="text-[11px] bg-emerald-500/20 text-emerald-400 font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                  Operando 24/7
-                </span>
-              </div>
-
-              <div className="relative h-[240px] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800">
-                {visualDeck.map((img, idx) => (
-                  <div
-                    key={idx}
-                    className={`absolute ${img.className} rounded-lg overflow-hidden border border-white/15 shadow-xl`}
-                    style={{ transform: `rotate(${img.rotation}deg)` }}
-                  >
-                    <img src={img.src} alt={img.title} className="w-full h-[120px] object-cover" />
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
-                <span className="text-xs text-zinc-400">WhatsApp API · CRM · Google Workspace</span>
-                <Link to="/sistemas-digitales" className="text-xs font-bold text-[#ff4b0b] hover:underline flex items-center gap-1">
-                  <span>Ver sistemas</span>
-                  <ArrowRight size={13} />
-                </Link>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 7. ACADEMY & CURSOS EN VIVO (CATÁLOGO DINÁMICO SUPABASE) */}
-      <section id="academy" className="py-20 md:py-28 bg-[#f8f9fc] border-b border-zinc-200">
-        <div className="max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="max-w-3xl mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-200 text-zinc-800 text-xs font-bold uppercase tracking-wider mb-3">
-              <GraduationCap size={13} color="#ff4b0b" />
-              <span>03 · Qaway Academy</span>
-            </div>
-            <h2 className="text-[clamp(2.2rem,3.6vw,3.2rem)] font-bold text-[#111210] tracking-tight leading-[1.08] mb-3" style={{ ...displayFont, fontWeight: 760 }}>
-              Aprende a usar <span className="text-[#ff4b0b]">IA y herramientas digitales.</span>
-            </h2>
-            <p className="text-zinc-600 text-base leading-relaxed">
-              Formación práctica y recursos listos para aplicar en tus proyectos, negocios y flujos de trabajo profesionales.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Tarjeta 1: Soluciones Digitales / Landings */}
-            <div className="bg-white rounded-2xl border border-zinc-200 p-6 flex flex-col justify-between shadow-sm">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-lg bg-[#ff4b0b] text-white grid place-items-center">
-                    <Compass size={18} />
-                  </span>
-                  <h3 className="text-xl font-bold uppercase tracking-tight text-zinc-900" style={{ ...displayFont, fontWeight: 760 }}>
-                    Soluciones digitales
-                  </h3>
-                </div>
-
-                <div className="relative mt-3">
-                  <AnimatePresence mode="wait">
-                    <motion.article
-                      key={landing.title}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      style={{ gridTemplateRows: '14rem 1fr' }}
-                      className="academy-course-card is-compact"
-                    >
-                      <div style={{ minHeight: '14rem' }} className="academy-course-image">
-                        <img src={landing.image} alt={landing.title} loading="lazy" decoding="async" />
-                        {landing.featured && <span>{landing.featured}</span>}
-                      </div>
-                      <div style={{ padding: '1.3rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '0.8rem' }}>
-                          {landing.category}
-                        </p>
-                        <h4 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.1rem,1.4vw,1.4rem)', marginTop: '0.5rem', marginBottom: '0.4rem' }}>
-                          {landing.title}
-                        </h4>
-                      </div>
-                    </motion.article>
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              <Link
-                to={landing.link}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#ff4b0b] hover:text-[#e03e04] border-t border-zinc-100 pt-4"
-              >
-                <span>Explorar solución</span>
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-
-            {/* Tarjeta 2: Cursos Aplicados (Catálogo Supabase) */}
-            <div className="bg-white rounded-2xl border border-zinc-200 p-6 flex flex-col justify-between shadow-sm">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="w-9 h-9 rounded-lg bg-[#ff4b0b] text-white grid place-items-center">
-                    <GraduationCap size={18} />
-                  </span>
-                  <h3 className="text-xl font-bold uppercase tracking-tight text-zinc-900" style={{ ...displayFont, fontWeight: 760 }}>
-                    Cursos aplicados
-                  </h3>
-                </div>
-
-                <AcademyCoursesInner tick={tick} />
-              </div>
-
-              <a
-                href={cursosHref}
-                target={academyHref ? '_blank' : undefined}
-                rel={academyHref ? 'noopener noreferrer' : undefined}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-[#ff4b0b] hover:text-[#e03e04] border-t border-zinc-100 pt-4"
-              >
-                <span>Ver todos los cursos</span>
-                <ArrowRight size={16} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. FORMULARIO DE CONTACTO OFICIAL DE INICIO */}
-      <section id="contacto-v2" className="py-20 md:py-28 bg-white">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
-          <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16 items-center">
-            
-            {/* Columna Izquierda: Garantías */}
-            <div>
-              <span className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] text-xs font-bold uppercase tracking-wider mb-4">
-                Contacto Directo
-              </span>
-              <h2 className="text-[clamp(2.2rem,3.6vw,3.2rem)] font-bold text-[#111210] tracking-tight leading-[1.08] mb-4" style={{ ...displayFont, fontWeight: 760 }}>
-                Cuéntanos <span className="text-[#ff4b0b]">qué necesitas.</span>
-              </h2>
-              <p className="text-zinc-600 text-base leading-relaxed mb-8">
-                Escríbenos para orientarte sobre el servicio, sistema automatizado o formación que mejor encaja con tus objetivos.
-              </p>
-
-              <div className="space-y-4 text-sm font-medium text-zinc-800">
-                <div className="flex items-center gap-3">
-                  <Check size={18} className="text-[#ff4b0b] shrink-0" />
-                  <span>Te respondemos en menos de 24 horas hábiles</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Check size={18} className="text-[#ff4b0b] shrink-0" />
-                  <span>Recibe orientación sin compromiso de contratación</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Check size={18} className="text-[#ff4b0b] shrink-0" />
-                  <span>Soluciones personalizadas para profesionales y empresas</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Columna Derecha: Tarjeta Formulario */}
-            <div className="bg-[#f8f9fc] rounded-2xl border border-zinc-200 p-8 shadow-[0_10px_35px_rgba(0,0,0,0.04)]">
-              {submitted ? (
-                <div className="text-center py-8">
-                  <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center mx-auto mb-4">
-                    <Check size={28} />
-                  </div>
-                  <h3 className="text-2xl font-bold text-zinc-900 mb-2">¡Consulta enviada con éxito!</h3>
-                  <p className="text-zinc-600 text-sm mb-6">
-                    Te responderemos a la brevedad para coordinar la mejor solución.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSubmitted(false)}
-                    className="px-6 py-2.5 bg-zinc-900 text-white rounded-lg text-xs font-bold uppercase tracking-wider"
-                  >
-                    Enviar otro mensaje
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                      ¿Cómo te llamas? *
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      required
-                      placeholder="Tu nombre completo"
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b]"
-                    />
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        WhatsApp / Teléfono *
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        required
-                        placeholder="+51 930 756 781"
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Correo Electrónico
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        placeholder="tu@empresa.com"
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        ¿A qué te dedicas?
-                      </label>
-                      <select
-                        name="profile"
-                        required
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b]"
-                      >
-                        <option value="Profesional / Consultor">Profesional / Consultor</option>
-                        <option value="Emprendedor / Dueño de negocio">Emprendedor / Dueño de negocio</option>
-                        <option value="Creador de contenido / Freelancer">Creador de contenido / Freelancer</option>
-                        <option value="Equipo de empresa">Equipo de empresa</option>
-                        <option value="Otro">Otro</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                        Interés principal
-                      </label>
-                      <select
-                        name="interest"
-                        required
-                        className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b]"
-                      >
-                        <option value="Identidad visual / Branding">Identidad visual / Branding</option>
-                        <option value="Creación de sitios web y landings">Creación de sitios web y landings</option>
-                        <option value="Automatización de procesos con IA">Automatización de procesos con IA</option>
-                        <option value="CRM y seguimiento comercial">CRM y seguimiento comercial</option>
-                        <option value="Formación / Cursos (Academy)">Formación / Cursos (Academy)</option>
-                        <option value="Orientación general / Proyecto a medida">Orientación general / Proyecto a medida</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                      Cuéntanos un poco más
-                    </label>
-                    <textarea
-                      name="message"
-                      rows={3}
-                      placeholder="¿Qué objetivo o dificultad buscas resolver?"
-                      className="w-full px-3.5 py-2.5 rounded-lg border border-zinc-300 bg-white text-sm focus:outline-none focus:border-[#ff4b0b] resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3.5 bg-[#ff4b0b] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-[0_12px_24px_rgba(255,75,11,0.22)] hover:bg-[#e03e04] transition-all flex items-center justify-center gap-2"
-                  >
-                    <span>{submitting ? 'ENVIANDO...' : 'QUIERO ORIENTACIÓN'}</span>
-                    <Send size={15} />
-                  </button>
-
-                  {submitError && <p className="text-xs text-red-600 mt-2">{submitError}</p>}
-                </form>
-              )}
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 9. FOOTER OFICIAL */}
+    <>
+      <main className="min-h-screen overflow-hidden bg-[#191918]">
+        <Hero />
+        <BrandMarquee />
+        <EcosystemIntro />
+        <PrimaryAreas />
+        <EstudioSection />
+        <SistemasDigitalesSection />
+        <AcademyFeature />
+        <CoursesLandings />
+      </main>
+      <AcademyContactSection
+        submitted={submitted}
+        submitting={submitting}
+        submitError={submitError}
+        onSubmit={submitInterest}
+        onReset={() => setSubmitted(false)}
+      />
       <Footer />
-    </div>
+    </>
   )
 }

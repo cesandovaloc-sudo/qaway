@@ -1,7 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, ArrowLeft, ArrowRight, BookOpen, Send, Mail, Sparkles } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Send,
+  Mail,
+  Sparkles,
+  Play,
+  Pause,
+  Square,
+  Volume2,
+  VolumeX,
+  Headphones,
+  RotateCcw,
+} from 'lucide-react'
 import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
@@ -10,6 +26,10 @@ export default function ArticleDetailPage() {
   const { id } = useParams()
   const [scrollProgress, setScrollProgress] = useState(0)
   const articleRef = useRef(null)
+
+  // Estado del artículo (dinámico de Supabase o local)
+  const [article, setArticle] = useState(() => visibleArticles.find((art) => art.id === id) || null)
+  const [loadingArticle, setLoadingArticle] = useState(false)
 
   // Estados para comentarios de Supabase
   const [comments, setComments] = useState([])
@@ -29,8 +49,146 @@ export default function ArticleDetailPage() {
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false)
   const [newsletterError, setNewsletterError] = useState(null)
 
-  // Buscar el artículo por su ID
-  const article = visibleArticles.find(art => art.id === id)
+  // =========================================================================
+  // REPRODUCTOR DE AUDIO DE LECTURA (WEB SPEECH API / SÍNTESIS DE VOZ)
+  // =========================================================================
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [isPausedAudio, setIsPausedAudio] = useState(false)
+  const [audioSpeed, setAudioSpeed] = useState(1.0)
+  const [audioProgress, setAudioProgress] = useState(0)
+  const utteranceRef = useRef(null)
+  const textCharsCountRef = useRef(0)
+
+  // Cargar artículo si no está en memoria local
+  useEffect(() => {
+    async function loadArticle() {
+      const local = visibleArticles.find((art) => art.id === id)
+      if (local) {
+        setArticle(local)
+        return
+      }
+
+      setLoadingArticle(true)
+      try {
+        const { data, error } = await supabase
+          .from('blog_articles')
+          .select('*')
+          .or(`slug.eq.${id},id.eq.${id}`)
+          .single()
+
+        if (!error && data) {
+          setArticle({
+            id: data.slug || data.id,
+            category: data.category,
+            categoryLabel: data.category_label || data.category,
+            formatLabel: data.format_label || 'Guía',
+            title: data.title,
+            excerpt: data.excerpt || '',
+            content: data.content || '',
+            date: data.date || new Date(data.published_at || data.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
+            readTime: data.read_time || '5 min',
+            publishedAt: data.published_at || data.created_at,
+            public: data.public !== false,
+            featured: data.featured ? { order: data.featured_order || 1, label: data.featured_label || 'Destacado' } : null,
+            image: data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            audioUrl: data.audio_url || null,
+          })
+        }
+      } catch (err) {
+        console.warn('[Article] Error cargando artículo de Supabase:', err)
+      } finally {
+        setLoadingArticle(false)
+      }
+    }
+
+    loadArticle()
+  }, [id])
+
+  // Detener audio al desmontar o cambiar de artículo
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [id])
+
+  const startSpeech = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !article) return
+
+    window.speechSynthesis.cancel()
+
+    // Limpiar texto de HTML para una lectura fluida
+    const cleanContent = (article.content || '').replace(/<[^>]+>/g, ' ')
+    const fullTextToRead = `${article.title}. ${article.excerpt ? article.excerpt + '.' : ''} ${cleanContent}`
+    textCharsCountRef.current = fullTextToRead.length
+
+    const utterance = new SpeechSynthesisUtterance(fullTextToRead)
+    utterance.lang = 'es-ES'
+    utterance.rate = audioSpeed
+    utterance.pitch = 1.0
+
+    // Buscar una voz en español si está disponible
+    const voices = window.speechSynthesis.getVoices()
+    const spanishVoice = voices.find((v) => v.lang.startsWith('es') || v.lang.includes('es-'))
+    if (spanishVoice) {
+      utterance.voice = spanishVoice
+    }
+
+    utterance.onboundary = (event) => {
+      if (textCharsCountRef.current > 0) {
+        const progress = Math.min(100, Math.round((event.charIndex / textCharsCountRef.current) * 100))
+        setAudioProgress(progress)
+      }
+    }
+
+    utterance.onend = () => {
+      setIsPlayingAudio(false)
+      setIsPausedAudio(false)
+      setAudioProgress(100)
+    }
+
+    utterance.onerror = () => {
+      setIsPlayingAudio(false)
+      setIsPausedAudio(false)
+    }
+
+    utteranceRef.current = utterance
+    window.speechSynthesis.speak(utterance)
+    setIsPlayingAudio(true)
+    setIsPausedAudio(false)
+  }
+
+  const togglePlayAudio = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
+
+    if (!isPlayingAudio) {
+      startSpeech()
+    } else if (isPausedAudio) {
+      window.speechSynthesis.resume()
+      setIsPausedAudio(false)
+    } else {
+      window.speechSynthesis.pause()
+      setIsPausedAudio(true)
+    }
+  }
+
+  const stopAudio = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+      setIsPlayingAudio(false)
+      setIsPausedAudio(false)
+      setAudioProgress(0)
+    }
+  }
+
+  const changeAudioSpeed = (speed) => {
+    setAudioSpeed(speed)
+    if (isPlayingAudio && !isPausedAudio) {
+      // Reiniciar con la nueva velocidad
+      startSpeech()
+    }
+  }
 
   // Comentarios iniciales de respaldo en caso de que no haya conexión a Supabase o esté vacío
   const fallbackComments = [
@@ -302,6 +460,91 @@ export default function ArticleDetailPage() {
             </span>
           </motion.div>
         </div>
+
+        {/* REPRODUCTOR DE AUDIO DE LECTURA */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="mb-8 rounded-xl border border-black/10 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] sm:p-5"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Controles de Reproducción y Estado */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={togglePlayAudio}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-md shadow-[#ff4b0b]/25 transition-all hover:scale-105 active:scale-95"
+                title={isPlayingAudio && !isPausedAudio ? 'Pausar audio' : 'Escuchar artículo'}
+              >
+                {isPlayingAudio && !isPausedAudio ? (
+                  <Pause className="h-5 w-5 fill-current" />
+                ) : (
+                  <Play className="h-5 w-5 fill-current translate-x-0.5" />
+                )}
+              </button>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <Headphones className="h-4 w-4 text-[#ff4b0b]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#191918]">
+                    {isPlayingAudio
+                      ? isPausedAudio
+                        ? 'Lectura en pausa'
+                        : 'Reproduciendo lectura...'
+                      : 'Escuchar este artículo'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-black/50">
+                  {isPlayingAudio
+                    ? `Progreso: ${audioProgress}%`
+                    : `Voz de lectura • Tiempo est.: ${article.readTime}`}
+                </p>
+              </div>
+            </div>
+
+            {/* Controles de Velocidad y Detener */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center rounded-lg border border-black/10 bg-[#f8f9fc] p-0.5">
+                {[1.0, 1.25, 1.5].map((speed) => (
+                  <button
+                    key={speed}
+                    type="button"
+                    onClick={() => changeAudioSpeed(speed)}
+                    className={`rounded-md px-2.5 py-1 text-[11px] font-bold transition-all ${
+                      audioSpeed === speed
+                        ? 'bg-white text-[#ff4b0b] shadow-xs'
+                        : 'text-black/60 hover:text-black'
+                    }`}
+                  >
+                    {speed}x
+                  </button>
+                ))}
+              </div>
+
+              {isPlayingAudio && (
+                <button
+                  type="button"
+                  onClick={stopAudio}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-black/60 transition-colors hover:border-red-500/40 hover:text-red-500"
+                  title="Detener lectura"
+                >
+                  <Square className="h-3.5 w-3.5 fill-current" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Barra de progreso de lectura interactiva */}
+          {isPlayingAudio && (
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
+              <div
+                className="h-full bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] transition-all duration-300"
+                style={{ width: `${audioProgress}%` }}
+              />
+            </div>
+          )}
+        </motion.div>
 
         {/* Imagen de Portada */}
         <motion.div

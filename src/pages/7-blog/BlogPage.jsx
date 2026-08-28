@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { isPublicSiteMode } from '@/config/siteVisibility'
+import { supabase } from '@/config/supabase'
 import qawayCalendarImage from '../6-recursos/assets/qaway-calendar.png'
 import {
   Newspaper,
@@ -22,6 +23,8 @@ import {
   Star,
   ChevronDown,
   ChevronRight,
+  Headphones,
+  Volume2,
 } from 'lucide-react'
 
 const categories = [
@@ -196,8 +199,8 @@ export const visibleArticles = isPublicSiteMode
   : articles
 
 const displayFont = {
-  fontFamily: "'Oswald', sans-serif",
-  fontStretch: 'condensed',
+  fontFamily: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif',
+  letterSpacing: '-0.03em',
 }
 
 export default function BlogPage() {
@@ -205,23 +208,65 @@ export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [articlesList, setArticlesList] = useState(visibleArticles)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     setActiveCategory(category || null)
   }, [category])
 
+  // Cargar artículos dinámicamente desde Supabase
+  useEffect(() => {
+    async function fetchSupabaseArticles() {
+      try {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from('blog_articles')
+          .select('*')
+          .eq('public', true)
+          .order('published_at', { ascending: false })
+
+        if (!error && data && data.length > 0) {
+          const mappedArticles = data.map((item) => ({
+            id: item.slug || item.id,
+            category: item.category,
+            categoryLabel: item.category_label || item.category,
+            formatLabel: item.format_label || 'Guía',
+            title: item.title,
+            excerpt: item.excerpt || '',
+            content: item.content || '',
+            date: item.date || new Date(item.published_at || item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
+            readTime: item.read_time || '5 min',
+            publishedAt: item.published_at || item.created_at,
+            public: item.public !== false,
+            featured: item.featured ? { order: item.featured_order || 1, label: item.featured_label || 'Destacado' } : null,
+            image: item.image || item.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            audioUrl: item.audio_url || null,
+          }))
+          setArticlesList(mappedArticles)
+        }
+      } catch (err) {
+        console.warn('[Blog] Fallback a artículos locales:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSupabaseArticles()
+  }, [])
+
   const normalizedSearch = searchQuery.trim().toLowerCase()
   const isSearchActive = normalizedSearch.length > 0
   const shouldExpandSearch = isSearchExpanded || isSearchActive
 
-  const filteredArticles = visibleArticles.filter((article) => {
+  const filteredArticles = articlesList.filter((article) => {
     const matchesCategory = activeCategory ? article.category === activeCategory : true
     const searchableText = [
       article.title,
       article.excerpt,
       article.categoryLabel,
       article.formatLabel,
-      article.content.replace(/<[^>]+>/g, ' '),
+      (article.content || '').replace(/<[^>]+>/g, ' '),
     ]
       .join(' ')
       .toLowerCase()
@@ -230,13 +275,18 @@ export default function BlogPage() {
     return matchesCategory && matchesSearch
   })
 
+  // Conteo de artículos por categoría
   const categoriesWithCounts = categories.map((cat) => {
-    const count = visibleArticles.filter((article) => article.category === cat.key).length
+    const count = articlesList.filter((article) => article.category === cat.key).length
     return {
       ...cat,
+      countNum: count,
       count: `${count} publicación${count !== 1 ? 'es' : ''}`,
     }
   })
+
+  // REGLA: SOLO mostrar categorías que tienen artículos publicados (count > 0)
+  const activeCategoriesWithArticles = categoriesWithCounts.filter((cat) => cat.countNum > 0)
 
   const activeCategoryObj = categoriesWithCounts.find((cat) => cat.key === activeCategory)
 
@@ -247,11 +297,11 @@ export default function BlogPage() {
     }
   }
 
-  const highlightedArticles = visibleArticles
+  const highlightedArticles = articlesList
     .filter((article) => article.featured)
     .sort((a, b) => a.featured.order - b.featured.order)
 
-  const secondaryArticles = visibleArticles
+  const secondaryArticles = articlesList
     .filter((article) => article.homeSection === 'more' || !article.featured)
     .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
 
@@ -262,7 +312,7 @@ export default function BlogPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.5, delay: idx * 0.08 }}
-        className="group flex h-full flex-col justify-between overflow-hidden rounded-[12px] border border-black/10 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.01)] transition-all duration-500 hover:border-[#ff4b0b]/40 hover:shadow-[0_24px_60px_rgba(0,0,0,0.08)]"
+        className="group flex h-full flex-col justify-between overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-400 hover:border-black/25 hover:shadow-[0_20px_50px_rgba(0,0,0,0.07)]"
       >
         <div>
           <div className="relative h-48 overflow-hidden bg-zinc-950">
@@ -273,35 +323,38 @@ export default function BlogPage() {
               loading="lazy"
             />
             <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/10 bg-[#191918] px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white backdrop-blur-md">
+              <span className="rounded-full border border-white/20 bg-[#191918]/85 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-md shadow-xs">
                 {article.categoryLabel}
               </span>
-              <span className="rounded-full border border-[#ff4b0b]/20 bg-[#ff4b0b]/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white">
+              <span className="rounded-full border border-white/20 bg-gradient-to-r from-[#ea580c] to-[#c2410c] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
                 {article.formatLabel}
               </span>
             </div>
           </div>
           <div className="p-6">
-            <div className="mb-3 flex items-center gap-4 font-mono text-[10px] text-zinc-400">
+            <div className="mb-3 flex items-center gap-4 font-mono text-xs text-zinc-500">
               <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 text-[#ff4b0b]" /> {article.date}
+                <Calendar className="h-3.5 w-3.5 text-[#ea580c]" /> {article.date}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-[#ff4b0b]" /> {article.readTime}
+                <Clock className="h-3.5 w-3.5 text-[#ea580c]" /> {article.readTime}
               </span>
             </div>
-            <h3 className="mb-2 text-base font-bold leading-tight text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+            <h3
+              className="mb-2.5 text-xl font-bold leading-snug text-[#191918] transition-colors duration-300 group-hover:text-zinc-600 sm:text-2xl"
+              style={displayFont}
+            >
               {article.title}
             </h3>
-            <p className="line-clamp-3 text-xs font-normal leading-relaxed text-black/60">
+            <p className="line-clamp-3 text-sm font-normal leading-relaxed text-black/70">
               {article.excerpt}
             </p>
           </div>
         </div>
         <div className="px-6 pb-6">
-          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 text-xs font-bold text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 text-sm font-bold text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
             <span>Leer artículo completo</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 transition-all duration-300 ease-out group-hover:translate-x-2 group-hover:text-[#ff4b0b]" />
           </div>
         </div>
       </motion.article>
@@ -314,7 +367,7 @@ export default function BlogPage() {
         {/* ========================================================================= */}
         {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE (BLANCO EN EL NAVBAR -> CÁLIDO)     */}
         {/* ========================================================================= */}
-        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#fff9f6] to-[#fff1eb] pb-14 pt-24 sm:pb-20 sm:pt-32">
+        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#fff9f6] to-[#fff1eb] pb-8 pt-20 sm:pb-10 sm:pt-28">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             <div className="max-w-3xl">
               
@@ -338,12 +391,12 @@ export default function BlogPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
               >
-                Explora ideas por <strong className="font-semibold text-[#191918]">pilares reales del negocio</strong>, no por etiquetas editoriales sueltas.
+                Encuentra artículos, tutoriales y guías sobre IA, automatización, marketing, diseño y sistemas digitales.
               </motion.p>
 
               {/* Buscador Integrado (Borde de foco Naranja) */}
               <motion.div
-                className="mt-8 max-w-xl"
+                className="mt-6 max-w-xl"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
@@ -376,7 +429,7 @@ export default function BlogPage() {
         {/* ========================================================================= */}
         {/* BARRA DE PÍLDORAS / CATEGORÍAS (FONDO BLANCO + BOTÓN ACTIVO SUAVE)        */}
         {/* ========================================================================= */}
-        <div className="border-b border-black/10 bg-white py-4 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="border-b border-black/10 bg-white py-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
           <div className="mx-auto flex max-w-[94rem] items-center justify-between gap-4 px-6 sm:px-10 lg:px-14">
             
             {/* Lista de píldoras horizontal */}
@@ -385,7 +438,7 @@ export default function BlogPage() {
               <button
                 type="button"
                 onClick={() => selectCategory(null)}
-                className={`shrink-0 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all ${
+                className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
                   activeCategory === null
                     ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
                     : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
@@ -394,15 +447,15 @@ export default function BlogPage() {
                 Todos
               </button>
 
-              {/* Categorías */}
-              {categoriesWithCounts.map((cat) => {
+              {/* Categorías (SOLO LAS QUE TIENEN ARTÍCULOS) */}
+              {activeCategoriesWithArticles.map((cat) => {
                 const isActive = activeCategory === cat.key
                 return (
                   <button
                     key={cat.key}
                     type="button"
                     onClick={() => selectCategory(cat.key)}
-                    className={`shrink-0 rounded-lg px-4 py-2.5 text-xs font-semibold transition-all ${
+                    className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
                         : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
@@ -429,7 +482,7 @@ export default function BlogPage() {
           </div>
         </div>
 
-        <section className="bg-white pb-12 pt-8 lg:pb-24 lg:pt-10">
+        <section className="bg-white pb-12 pt-10 lg:pb-24 lg:pt-12">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {activeCategory || isSearchActive ? (
               <>
