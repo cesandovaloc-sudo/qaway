@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Paleta Qaway (migrada desde tailwind.config.js v3) */
-  --color-qaway-accent: #ff4b0b;
-  --color-qaway-accent-dark: #fd5605;
-  --color-qaway-accent-light: #ff7a45;
-  --color-qaway-accent-bright: #ff9b73;
+  /* Paleta Qaway Oficial */
+  --color-qaway-accent: #fe6612;
+  --color-qaway-accent-dark: #e05508;
+  --color-qaway-accent-light: #ff7a2d;
+  --color-qaway-accent-bright: #ff9456;
   --color-qaway-dark: #111111;
   --color-qaway-dark-2: #18181b;
   --color-qaway-dark-3: #1f1f23;

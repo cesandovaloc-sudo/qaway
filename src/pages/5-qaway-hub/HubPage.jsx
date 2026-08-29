@@ -94,12 +94,12 @@ const routes = [
   },
   {
     icon: BarChart3,
-    title: 'Dashboards',
-    description: 'Paneles de control para medir, analizar y optimizar tu presencia y operacion digital.',
-    path: '/hub/dashboards',
-    badge: null,
+    title: 'Centro de Analítica & Gráficos',
+    description: 'Suite de métricas estilo PowerBI y Google Analytics con galería Recharts completa y presets por industria.',
+    path: '/hub/analytics',
+    badge: 'Pro',
     category: 'Herramientas',
-    tone: 'bg-[#191918]/5 text-[#191918]/70',
+    tone: 'bg-[#0080FF]/10 text-[#0080FF]',
   },
   {
     icon: Zap,

@@ -131,24 +131,61 @@ function useHeroCarousel() {
 }
 
 function ProjectCard({ project, index }) {
+  const videoRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {})
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+    }
+  }
+
   return (
     <motion.article
-      className={`projects-card ${project.tall ? 'projects-card--tall' : ''}`}
-      initial={{ opacity: 0, y: 24 }}
+      className="projects-card group cursor-pointer"
+      initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.65, delay: Math.min(index * 0.05, 0.25), ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.2), ease: [0.22, 1, 0.36, 1] }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="projects-card__image">
-        <img src={project.image} alt={`Proyecto ${project.title}`} loading="lazy" />
+        {project.video ? (
+          <video
+            ref={videoRef}
+            src={project.video}
+            poster={project.image}
+            muted
+            loop
+            playsInline
+            className="h-full w-full object-cover object-top"
+          />
+        ) : (
+          <img
+            src={project.image}
+            alt={`Proyecto ${project.title}`}
+            loading="lazy"
+            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+          />
+        )}
+        <div className="absolute top-3.5 right-3.5 rounded-full bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+          {project.kind || 'Proyecto'}
+        </div>
       </div>
       <div className="projects-card__body">
-        <h3>{project.title}</h3>
+        <h3 className="group-hover:text-[#fe6612] transition-colors">{project.title}</h3>
         <p>{project.subtitle}</p>
         <div className="projects-card__tags">
-          {project.tags.map((tag) => <span key={tag}>{tag}</span>)}
+          {project.tags.map((tag) => (
+            <span key={tag}>{tag}</span>
+          ))}
         </div>
-        <small><i />{project.kind}</small>
       </div>
     </motion.article>
   )
@@ -384,7 +421,7 @@ export default function ProyectosPage() {
               <div className="projects-featured__media">
                 <img src={`${estudioAssets}estudio-proyecto-cafe.webp`} alt="Aplicaciones de marca Brenda y Ely Cafe" />
                 <div className="projects-palette" aria-hidden="true">
-                  {['#101010', '#32170c', '#ff4b0b', '#788348', '#e8dece', '#f5f0e7'].map((color) => <span key={color} style={{ background: color }} />)}
+                  {['#101010', '#32170c', '#fe6612', '#788348', '#e8dece', '#f5f0e7'].map((color) => <span key={color} style={{ background: color }} />)}
                 </div>
               </div>
               <div className="projects-featured__copy">
@@ -407,6 +444,107 @@ export default function ProyectosPage() {
               <div key={project.title} className={activeFilter === 'Todos' && projectIndex === 0 ? 'hidden md:contents' : 'contents'}>
                 <ProjectCard project={project} index={projectIndex} />
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* DESCANSO VISUAL: MARCAS Y CLIENTES EN MONOCROMO ESTÁTICO (MINIMALISTA) */}
+      {/* ========================================================================= */}
+      <section className="border-y border-black/5 bg-[#fafaf9] py-14 sm:py-16">
+        <div className="projects-shell">
+          <div className="mb-6 text-center">
+            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#71717a]">
+              Marcas y ecosistemas que confían en Qaway Lab
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-6 items-center justify-items-center opacity-70">
+            {['VALLET INMOBILIARIA', 'ECP CONTABILIDAD', 'GELATO LAB', 'BRENDA & ELY', 'HORIZONTE DIGITAL', 'SANICLICK'].map((name) => (
+              <span
+                key={name}
+                className="font-mono text-xs font-bold uppercase tracking-wider text-[#191918]/60 transition-colors hover:text-[#fe6612]"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* VITRINA POR SECTORES Y EXPERIENCIA MOBILE */}
+      {/* ========================================================================= */}
+      <section className="bg-white py-16 sm:py-24">
+        <div className="projects-shell">
+          <div className="mb-12 max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#fe6612]">
+              <span>/ Adaptación y sectores</span>
+            </div>
+            <h2 className="text-3xl font-bold tracking-[-0.03em] text-[#111210] sm:text-4xl mb-3">
+              Soluciones diseñadas para cada tipo de industria
+            </h2>
+            <p className="text-base text-[#71717a] leading-relaxed">
+              Experiencias pensadas primero en la conversión móvil y en los objetivos comerciales específicos de cada rubro.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                title: 'Inmobiliario & Construcción',
+                desc: 'Captación de compradores con recorridos y cotizadores integrados a WhatsApp.',
+                image: estudioAssets + 'estudio-proyecto-arquitectura.webp',
+                tag: 'Captación Rápida'
+              },
+              {
+                title: 'Servicios B2B & Consultoría',
+                desc: 'Estructuras corporativas con agendamiento y autoridad visual inmediata.',
+                image: sistemasAssets + 'content-ops-command-center.webp',
+                tag: 'Alta Conversión'
+              },
+              {
+                title: 'Gastronomía & Experiencias',
+                desc: 'Menús digitales, reservas directas y contenido visual inmersivo.',
+                image: estudioAssets + 'estudio-proyecto-cafe.webp',
+                tag: 'Mobile First'
+              },
+              {
+                title: 'Retail & E-commerce',
+                desc: 'Catálogos autogestionables con checkout fluido y pasarelas 24/7.',
+                image: estudioAssets + 'estudio-servicio-contenido.webp',
+                tag: 'Ventas 24/7'
+              }
+            ].map((sector, i) => (
+              <motion.div
+                key={sector.title}
+                className="group flex flex-col overflow-hidden rounded-[14px] border border-black/8 bg-[#fafaf9] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black/15"
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+              >
+                <div className="relative h-48 overflow-hidden bg-zinc-200">
+                  <img
+                    src={sector.image}
+                    alt={sector.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+                    {sector.tag}
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col justify-between p-5">
+                  <div>
+                    <h3 className="mb-1.5 text-base font-bold text-[#111210] group-hover:text-[#fe6612] transition-colors">
+                      {sector.title}
+                    </h3>
+                    <p className="text-xs text-[#71717a] leading-relaxed">
+                      {sector.desc}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
