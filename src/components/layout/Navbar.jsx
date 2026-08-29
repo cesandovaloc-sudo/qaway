@@ -33,9 +33,9 @@ const variantStyles = {
     headerScrolled: 'bg-white/95 border-[#20201f]/10 backdrop-blur-md',
     headerInitial: 'bg-white border-transparent',
     link: 'text-[#292927]/80 hover:text-[#292927]',
-    linkActive: 'text-[#ff4b0b]',
+    linkActive: 'text-[#fe6612]',
     logo: 'text-[#20201f]',
-    cta: 'bg-[#ff4b0b] text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] hover:bg-[#df3900]',
+    cta: 'bg-[#fe6612] text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] hover:bg-[#e05508] rounded-[10px]',
     menuBtn: 'text-[#292927]',
     mobileBg: 'bg-white border-[#20201f]/10',
     mobileLink: 'text-[#292927]',
@@ -44,31 +44,31 @@ const variantStyles = {
     headerScrolled: 'bg-[#111]/95 border-white/10 backdrop-blur-md',
     headerInitial: 'bg-[#111] border-transparent',
     link: 'text-gray-300 hover:text-white',
-    linkActive: 'text-[#ff4b0b]',
+    linkActive: 'text-[#fe6612]',
     logo: 'text-white',
-    cta: 'bg-white text-black shadow-[0_14px_36px_rgba(0,0,0,0.2)] hover:bg-[#ff4b0b] hover:text-white',
+    cta: 'bg-white text-black shadow-[0_14px_36px_rgba(0,0,0,0.2)] hover:bg-[#fe6612] hover:text-white rounded-[10px]',
     menuBtn: 'text-white',
     mobileBg: 'bg-[#111] border-white/10',
     mobileLink: 'text-white/72',
   },
   transparent: {
-    headerScrolled: 'bg-[#111]/95 border-white/10 backdrop-blur-md',
+    headerScrolled: 'bg-white/95 border-[#20201f]/10 backdrop-blur-md',
     headerInitial: 'bg-transparent border-transparent',
-    link: 'text-white/80 hover:text-white',
-    linkActive: 'text-white',
-    logo: 'text-white',
-    cta: 'bg-white text-black shadow-[0_14px_36px_rgba(0,0,0,0.2)] hover:bg-[#ff4b0b] hover:text-white',
-    menuBtn: 'text-white',
-    mobileBg: 'bg-[#111] border-white/10',
-    mobileLink: 'text-white/72',
+    link: 'text-[#292927]/80 hover:text-[#292927]',
+    linkActive: 'text-[#fe6612]',
+    logo: 'text-[#20201f]',
+    cta: 'bg-[#fe6612] text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] hover:bg-[#e05508] rounded-[10px]',
+    menuBtn: 'text-[#292927]',
+    mobileBg: 'bg-white border-[#20201f]/10',
+    mobileLink: 'text-[#292927]',
   },
   brand: {
     headerScrolled: 'bg-white/95 border-[#20201f]/10 backdrop-blur-md',
     headerInitial: 'bg-white border-[#20201f]/10',
     link: 'text-[#292927]/80 hover:text-[#292927]',
-    linkActive: 'text-[#ff4b0b]',
+    linkActive: 'text-[#fe6612]',
     logo: 'text-[#20201f]',
-    cta: 'bg-[#ff4b0b] text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] hover:bg-[#df3900]',
+    cta: 'bg-[#fe6612] text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] hover:bg-[#e05508] rounded-[10px]',
     menuBtn: 'text-[#292927]',
     mobileBg: 'bg-white border-[#20201f]/10',
     mobileLink: 'text-[#292927]',
@@ -102,17 +102,24 @@ export default function Navbar({ variant: explicitVariant }) {
   const lastScrollY = useRef(0)
 
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      const currentY = window.scrollY
-      setScrolled(currentY > 20)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY
+          setScrolled(currentY > 20)
 
-      if (currentY > lastScrollY.current && currentY > 50) {
-        setHeaderVisible(false) // Ocultar al bajar
-      } else {
-        setHeaderVisible(true)  // Mostrar al subir
+          if (currentY > lastScrollY.current && currentY > 50) {
+            setHeaderVisible(false) // Ocultar al bajar
+          } else {
+            setHeaderVisible(true)  // Mostrar al subir
+          }
+
+          lastScrollY.current = currentY
+          ticking = false
+        })
+        ticking = true
       }
-
-      lastScrollY.current = currentY
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
@@ -139,17 +146,27 @@ export default function Navbar({ variant: explicitVariant }) {
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
+  const isTransparentInitial = variant === 'transparent' && !scrolled
+
+  const logoClass = isTransparentInitial ? 'text-white' : styles.logo
+  const logoAccentClass = isTransparentInitial ? 'text-white' : 'text-[#fe6612]'
+  const linkClass = isTransparentInitial ? 'text-white/85 hover:text-white' : styles.link
+  const linkActiveClass = isTransparentInitial ? 'text-white font-bold' : styles.linkActive
+  const activeLineBg = isTransparentInitial ? 'after:bg-white' : 'after:bg-[#fe6612]'
+  const ctaClass = isTransparentInitial ? 'bg-white text-[#fe6612] shadow-[0_12px_28px_rgba(0,0,0,0.14)] hover:bg-zinc-100' : styles.cta
+  const menuBtnClass = isTransparentInitial ? 'text-white' : styles.menuBtn
+
   return (
     <>
       <header
         ref={menuContainerRef}
-        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform,background-color,border-color] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
           } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
           }`}
       >
         <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
-          <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] ${styles.logo}`}>
-            Qaway <span className="text-[#ff4b0b]">Lab</span>
+          <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] transition-colors duration-200 ${logoClass}`}>
+            Qaway <span className={`transition-colors duration-200 ${logoAccentClass}`}>Lab</span>
           </Link>
 
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
@@ -157,22 +174,22 @@ export default function Navbar({ variant: explicitVariant }) {
               <div key={link.key} className="group relative flex h-full items-center">
                 <Link
                   to={link.path}
-                  className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
-                      ? `${styles.linkActive} after:scale-x-100 after:bg-[#ff4b0b]`
-                      : `${styles.link} hover:after:scale-x-100 hover:after:bg-[#ff4b0b]`
+                  className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-200 after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
+                      ? `${linkActiveClass} after:scale-x-100 ${activeLineBg}`
+                      : `${linkClass} hover:after:scale-x-100 ${activeLineBg}`
                     }`}
                 >
                   {link.label}
                 </Link>
                 {link.items && link.items.length > 0 && (
                   <div className="absolute left-1/2 top-[calc(100%+12px)] -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className={`flex flex-col min-w-[200px] rounded-[6px] p-3 shadow-xl ${styles.mobileBg}`}>
+                    <div className={`flex flex-col min-w-[200px] rounded-[10px] p-3 shadow-xl ${styles.mobileBg}`}>
                       {link.items.map(subItem => (
                         subItem.external ? (
                           <a
                             key={subItem.label}
                             href={subItem.path}
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[4px] transition-colors ${styles.link}`}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${styles.link}`}
                           >
                             {subItem.label}
                           </a>
@@ -180,7 +197,7 @@ export default function Navbar({ variant: explicitVariant }) {
                           <Link
                             key={subItem.label}
                             to={subItem.path}
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[4px] transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
+                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
                           >
                             {subItem.label}
                           </Link>
@@ -198,9 +215,9 @@ export default function Navbar({ variant: explicitVariant }) {
               href={WHATSAPP_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className={`hidden min-h-12 rounded-[6px] px-5 py-3 text-[0.84rem] font-semibold transition-colors active:translate-y-px sm:inline-flex ${styles.cta}`}
+              className={`hidden min-h-12 rounded-[10px] px-5 py-3 text-[0.84rem] font-semibold transition-all duration-200 active:translate-y-px sm:inline-flex ${ctaClass}`}
             >
-              Cuentanos tu proyecto
+              Cuéntanos tu proyecto
             </a>
 
             <button
@@ -208,7 +225,7 @@ export default function Navbar({ variant: explicitVariant }) {
               aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((current) => !current)}
-              className={`lg:hidden ${styles.menuBtn}`}
+              className={`lg:hidden transition-colors duration-200 ${menuBtnClass}`}
             >
               <Menu size={22} />
             </button>

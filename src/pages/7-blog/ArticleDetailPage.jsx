@@ -70,27 +70,39 @@ export default function ArticleDetailPage() {
 
       setLoadingArticle(true)
       try {
-        const { data, error } = await supabase
-          .from('blog_articles')
+        let { data, error } = await supabase
+          .from('posts')
           .select('*')
           .or(`slug.eq.${id},id.eq.${id}`)
           .single()
+
+        if (error || !data) {
+          const res = await supabase
+            .from('blog_articles')
+            .select('*')
+            .or(`slug.eq.${id},id.eq.${id}`)
+            .single()
+          if (!res.error && res.data) {
+            data = res.data
+            error = null
+          }
+        }
 
         if (!error && data) {
           setArticle({
             id: data.slug || data.id,
             category: data.category,
-            categoryLabel: data.category_label || data.category,
+            categoryLabel: data.category || data.category_label || 'General',
             formatLabel: data.format_label || 'Guía',
             title: data.title,
             excerpt: data.excerpt || '',
-            content: data.content || '',
-            date: data.date || new Date(data.published_at || data.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
-            readTime: data.read_time || '5 min',
+            content: data.content_html || data.content || data.body || '',
+            date: data.published_at ? new Date(data.published_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : data.date || 'Reciente',
+            readTime: data.reading_time ? `${data.reading_time} min` : data.read_time || '4 min',
             publishedAt: data.published_at || data.created_at,
-            public: data.public !== false,
+            public: data.status === 'publicado' || data.public !== false,
             featured: data.featured ? { order: data.featured_order || 1, label: data.featured_label || 'Destacado' } : null,
-            image: data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            image: data.cover_url || data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
             audioUrl: data.audio_url || null,
           })
         }

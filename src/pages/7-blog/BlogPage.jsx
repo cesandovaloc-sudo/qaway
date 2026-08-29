@@ -215,32 +215,46 @@ export default function BlogPage() {
     setActiveCategory(category || null)
   }, [category])
 
-  // Cargar artículos dinámicamente desde Supabase
+  // Cargar artículos dinámicamente desde Supabase (sincronizado con Blog Studio)
   useEffect(() => {
     async function fetchSupabaseArticles() {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('blog_articles')
+        // Intentar consultar la tabla posts (del editor)
+        let { data, error } = await supabase
+          .from('posts')
           .select('*')
-          .eq('public', true)
+          .eq('status', 'publicado')
           .order('published_at', { ascending: false })
+
+        // Si no encuentra la tabla posts o viene vacía, consultar blog_articles
+        if (error || !data || data.length === 0) {
+          const res = await supabase
+            .from('blog_articles')
+            .select('*')
+            .eq('public', true)
+            .order('published_at', { ascending: false })
+          if (!res.error && res.data && res.data.length > 0) {
+            data = res.data
+            error = null
+          }
+        }
 
         if (!error && data && data.length > 0) {
           const mappedArticles = data.map((item) => ({
             id: item.slug || item.id,
-            category: item.category,
-            categoryLabel: item.category_label || item.category,
+            category: item.category ? item.category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-') : 'marketing',
+            categoryLabel: item.category || item.category_label || 'General',
             formatLabel: item.format_label || 'Guía',
             title: item.title,
             excerpt: item.excerpt || '',
-            content: item.content || '',
-            date: item.date || new Date(item.published_at || item.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
-            readTime: item.read_time || '5 min',
+            content: item.content_html || item.content || item.body || '',
+            date: item.published_at ? new Date(item.published_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : item.date || 'Reciente',
+            readTime: item.reading_time ? `${item.reading_time} min` : item.read_time || '4 min',
             publishedAt: item.published_at || item.created_at,
-            public: item.public !== false,
+            public: item.status === 'publicado' || item.public !== false,
             featured: item.featured ? { order: item.featured_order || 1, label: item.featured_label || 'Destacado' } : null,
-            image: item.image || item.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            image: item.cover_url || item.image || item.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
             audioUrl: item.audio_url || null,
           }))
           setArticlesList(mappedArticles)

@@ -1,0 +1,116 @@
+/* =========================================================================
+   ESTILOS Y TOKENS PARA QAWAY HUB BLOG STUDIO / BLOG EDITOR
+   ========================================================================= */
+
+.blog-editor-root {
+  --be-primary: #1e2026;
+  --be-muted: #71717a;
+  --be-line: #e4e4e7;
+  --be-accent: #ff4b0b;
+  --be-success: #16a34a;
+  --be-surface-muted: #f4f4f5;
+  --be-bg-light: #fafafc;
+
+  color: #1e2026 !important;
+  background-color: #ffffff !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  line-height: 1.5;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.blog-editor-root * {
+  box-sizing: border-box;
+}
+
+/* Clases de texto explícitas para evitar herencia de blanco */
+.blog-editor-root .text-primary,
+.blog-editor-root h1,
+.blog-editor-root h2,
+.blog-editor-root h3,
+.blog-editor-root h4 {
+  color: #1e2026 !important;
+}
+
+.blog-editor-root .text-muted {
+  color: #71717a !important;
+}
+
+.blog-editor-root .text-line {
+  color: #e4e4e7 !important;
+}
+
+.blog-editor-root .text-accent {
+  color: #ff4b0b !important;
+}
+
+.blog-editor-root .text-success {
+  color: #16a34a !important;
+}
+
+/* Bordes y Líneas */
+.blog-editor-root .border-line {
+  border-color: #e4e4e7 !important;
+}
+
+/* Fondos */
+.blog-editor-root .bg-surface-muted {
+  background-color: #f4f4f5 !important;
+}
+
+.blog-editor-root .bg-line {
+  background-color: #e4e4e7 !important;
+}
+
+.blog-editor-root .bg-primary {
+  background-color: #1e2026 !important;
+}
+
+.blog-editor-root .bg-accent {
+  background-color: #ff4b0b !important;
+}
+
+/* Sidebar y elementos de navegación */
+.blog-editor-root aside {
+  background-color: #fafafc !important;
+  color: #1e2026 !important;
+}
+
+.blog-editor-root aside span,
+.blog-editor-root aside p,
+.blog-editor-root aside button {
+  color: inherit;
+}
+
+/* Botones en hover y activos */
+.blog-editor-root button {
+  transition: all 0.2s ease;
+}
+
+.blog-editor-root input,
+.blog-editor-root textarea,
+.blog-editor-root select {
+  color: #1e2026 !important;
+  background-color: #ffffff !important;
+}
+
+.blog-editor-root input::placeholder,
+.blog-editor-root textarea::placeholder {
+  color: #a1a1aa !important;
+}
+
+/* Editor Tiptap y bloques */
+.blog-editor-root .ProseMirror {
+  color: #1e2026 !important;
+}
+
+.blog-editor-root .ProseMirror h1,
+.blog-editor-root .ProseMirror h2,
+.blog-editor-root .ProseMirror h3,
+.blog-editor-root .ProseMirror h4 {
+  color: #111111 !important;
+}
+
+.blog-editor-root .ProseMirror p {
+  color: #27272a !important;
+}

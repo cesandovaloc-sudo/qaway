@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, Search, ChevronDown } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
+import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
+import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
+import mockupTiendasOnline from '../8-landings/8-desarollo web/assets/Tiendas-Online.webp'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -120,7 +123,7 @@ function useHeroCarousel() {
     if (reduceMotion) return undefined
     const id = setInterval(() => {
       setIndex((current) => (current + 1) % heroSlides.length)
-    }, 4200)
+    }, 5200)
     return () => clearInterval(id)
   }, [reduceMotion])
 
@@ -152,12 +155,11 @@ function ProjectCard({ project, index }) {
 }
 
 export default function ProyectosPage() {
-  useSetNavbarVariant('brand')
-  const { index, setIndex, slide } = useHeroCarousel()
+  useSetNavbarVariant('transparent')
   const [activeFilter, setActiveFilter] = useState('Todos')
+  const [searchQuery, setSearchQuery] = useState('')
   const [dbProjects, setDbProjects] = useState(projects)
   const [dynamicFilters, setDynamicFilters] = useState(() => extractVigenteCategories(projects))
-  const filtersRef = useRef(null)
 
   useEffect(() => {
     async function loadProjectsFromSupabase() {
@@ -175,101 +177,201 @@ export default function ProyectosPage() {
     loadProjectsFromSupabase()
   }, [])
 
-  const visibleProjects = dbProjects.filter((project) => activeFilter === 'Todos' || (project.categories && project.categories.includes(activeFilter)))
-
-  const scrollFilters = (direction) => {
-    if (filtersRef.current) {
-      const amount = direction === 'left' ? -160 : 160
-      filtersRef.current.scrollBy({ left: amount, behavior: 'smooth' })
-    }
-  }
+  const visibleProjects = dbProjects.filter((project) => {
+    const matchesFilter = activeFilter === 'Todos' || (project.categories && project.categories.includes(activeFilter))
+    const q = searchQuery.toLowerCase().trim()
+    const matchesSearch = !q || (
+      (project.title && project.title.toLowerCase().includes(q)) ||
+      (project.subtitle && project.subtitle.toLowerCase().includes(q)) ||
+      (project.tags && project.tags.some(t => t.toLowerCase().includes(q))) ||
+      (project.categories && project.categories.some(c => c.toLowerCase().includes(q)))
+    )
+    return matchesFilter && matchesSearch
+  })
 
   return (
     <main className="projects-page">
-      <section className="projects-hero">
-        <div className="projects-shell projects-hero__grid">
+      <section className="projects-hero border-b border-black/10">
+        <div className="projects-shell">
           <motion.div
-            className="projects-hero__copy"
-            initial={{ opacity: 0, y: 20 }}
+            className="projects-hero__center"
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="projects-kicker">Proyectos / Branding y automatización</p>
-            <h1 className="qw-hero-title">Proyectos que tomaron forma</h1>
-            <p className="projects-hero__lead">Una seleccion de trabajos donde combinamos direccion visual y sistemas aplicados a marcas reales.</p>
-            <a className="projects-button" href="#proyectos-listado">Explorar proyectos <ArrowRight size={16} /></a>
-          </motion.div>
-
-          <div className="projects-hero__visual" aria-live="polite">
-            <AnimatePresence mode="wait">
-              <motion.figure
-                key={slide.title}
-                initial={{ opacity: 0, scale: 1.02 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.985 }}
-                transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <img src={slide.image} alt={slide.title} />
-                <figcaption>
-                  <span>{slide.eyebrow}</span>
-                  <strong>{slide.title}</strong>
-                </figcaption>
-              </motion.figure>
-            </AnimatePresence>
-            <div className="projects-hero__dots" role="tablist" aria-label="Proyectos destacados">
-              {heroSlides.map((item, slideIndex) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  className={slideIndex === index ? 'is-active' : ''}
-                  onClick={() => setIndex(slideIndex)}
-                  aria-label={`Ver ${item.title}`}
-                  aria-pressed={slideIndex === index}
-                />
-              ))}
+            {/* Kicker en Cápsula Blanca translúcida */}
+            <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs shadow-xs">
+              <span>/ Proyectos</span>
             </div>
-          </div>
+            
+            {/* Título Principal Centrado con misma escala que Desarrollo Web */}
+            <h1
+              className="text-[clamp(2.4rem,4vw,3.4rem)] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4 text-balance"
+              style={{ fontWeight: 800 }}
+            >
+              Proyectos<span className="text-white/70">.</span>
+            </h1>
+
+            {/* Bajada Centrada */}
+            <p className="text-white/90 text-base sm:text-lg max-w-2xl leading-relaxed mb-7 text-balance font-normal">
+              Una selección de trabajos donde combinamos dirección de arte, desarrollo web y sistemas de automatización con IA aplicados a marcas reales.
+            </p>
+
+            {/* Buscador Integrado Centrado */}
+            <div className="w-full max-w-xl">
+              <div className="flex items-center gap-3 rounded-[10px] border border-white/40 bg-white px-4 py-3.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] transition-all focus-within:ring-2 focus-within:ring-white">
+                <Search className="h-5 w-5 text-black/40" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar proyectos por marca, rubro o tipo..."
+                  className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-black/40 font-medium"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs font-bold text-black/40 hover:text-[#fe6612]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      <section id="proyectos-listado" className="projects-listing">
-        <div className="projects-shell">
-          <div className="projects-filters" aria-label="Categorias de proyectos">
-            <div className="projects-filters-container">
-              <button
-                type="button"
-                className="projects-filters-scroll-btn projects-filters-scroll-btn--left"
-                onClick={() => scrollFilters('left')}
-                aria-label="Desplazar filtros a la izquierda"
-              >
-                <ChevronLeft size={18} strokeWidth={2.25} />
-              </button>
-              <div ref={filtersRef} className="projects-filters__items">
-                {dynamicFilters.map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    className={activeFilter === filter ? 'is-active' : ''}
-                    onClick={() => setActiveFilter(filter)}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="projects-filters-scroll-btn projects-filters-scroll-btn--right"
-                onClick={() => scrollFilters('right')}
-                aria-label="Desplazar filtros a la derecha"
-              >
-                <ChevronRight size={18} strokeWidth={2.25} />
-              </button>
-            </div>
-            <div className="projects-legend">
-              <span><i className="is-project" />Proyecto</span>
-              <span><i />Caso aplicado por rubro</span>
-            </div>
+      {/* ========================================================================= */}
+      {/* BARRA DE PÍLDORAS / CATEGORÍAS (IDÉNTICA A BLOG CON SUPABASE Y COLOR OFICIAL) */}
+      {/* ========================================================================= */}
+      <div id="proyectos-listado" className="border-b border-black/10 bg-white py-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="projects-shell flex items-center justify-between gap-4">
+          
+          {/* Lista de píldoras horizontal */}
+          <div className="flex flex-1 items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            {dynamicFilters.map((filter) => {
+              const isActive = activeFilter === filter
+              return (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setActiveFilter(filter)}
+                  className={`shrink-0 rounded-[10px] px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
+                    isActive
+                      ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
+                      : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
+                  }`}
+                >
+                  {filter}
+                </button>
+              )
+            })}
           </div>
+
+          {/* Selector lateral "Ver Todos" */}
+          <div className="hidden sm:block">
+            <button
+              type="button"
+              onClick={() => { setActiveFilter('Todos'); setSearchQuery('') }}
+              className="flex items-center gap-2 rounded-[10px] border border-black/10 bg-white px-3.5 py-2 text-xs font-medium text-[#191918] transition-colors hover:border-[#fe6612]/50 hover:text-[#fe6612]"
+            >
+              <span>Ver Todos</span>
+              <ChevronDown className="h-3.5 w-3.5 text-black/50" />
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <section className="projects-listing">
+        <div className="projects-shell">
+
+          {/* Fila Principal de Proyectos Web Destacados */}
+          {(!searchQuery && (activeFilter === 'Todos' || activeFilter === 'Páginas web')) && (
+            <div className="pt-6 pb-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Tarjeta 1: Landing Pages */}
+                <Link
+                  to="/landings/desarrollo-web"
+                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
+                >
+                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                      <img
+                        src={mockupLandingPages}
+                        alt="Landing Pages de Captación"
+                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
+                        Landing Pages de Captación
+                      </h3>
+                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
+                        Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Tarjeta 2: Sitios Web Corporativos */}
+                <Link
+                  to="/landings/desarrollo-web"
+                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
+                >
+                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                      <img
+                        src={mockupSitiosWeb}
+                        alt="Sitios Web Corporativos"
+                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
+                        Sitios Web Corporativos
+                      </h3>
+                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
+                        Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Tarjeta 3: Tiendas Online */}
+                <Link
+                  to="/landings/desarrollo-web"
+                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
+                >
+                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                      <img
+                        src={mockupTiendasOnline}
+                        alt="Tiendas Online (E-commerce)"
+                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
+                        Tiendas Online (E-commerce)
+                      </h3>
+                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
+                        Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7.
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          )}
 
           {activeFilter === 'Todos' && (
             <motion.article

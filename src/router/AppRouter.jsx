@@ -171,8 +171,8 @@ export default function AppRouter() {
           element={renderRoute('pruebas', <DiscardedInicioPage />)}
         />
         <Route
-          path="/pruebas/template-demo"
-          element={renderRoute('pruebas', <TemplateDemo />)}
+          path="/hub/blog-editor"
+          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
         />
         <Route index element={<InicioPage />} />
 
@@ -188,10 +188,6 @@ export default function AppRouter() {
           <Route
             path="hub/waba-crm"
             element={renderRoute('hub', <ProtectedRoute><WabaCrmConsolePage /></ProtectedRoute>)}
-          />
-          <Route
-            path="hub/blog-editor"
-            element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/gestor-proyectos"
