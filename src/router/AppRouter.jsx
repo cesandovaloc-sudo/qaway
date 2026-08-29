@@ -3,6 +3,7 @@ import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV2 from '@/pages/1-inicio/InicioPageV2.jsx'
+import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
 import {
   EstudioPage,
@@ -132,6 +133,10 @@ export default function AppRouter() {
         <Route
           path="/inicio-v2"
           element={<InicioPageV2 />}
+        />
+        <Route
+          path="/inicio-v3"
+          element={<InicioPageV3 />}
         />
         <Route
           path="/proyectos/panaderia-josue"
