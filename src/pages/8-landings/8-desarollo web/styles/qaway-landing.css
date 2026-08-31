@@ -651,8 +651,8 @@
 }
 
 .qaway-landing-root .qw-pillars-text-box h3 {
-  height: 64px;
-  min-height: 64px;
+  min-height: 88px;
+  margin-bottom: 22px;
 }
 
 .qaway-landing-root .qw-pillars-split-grid {
