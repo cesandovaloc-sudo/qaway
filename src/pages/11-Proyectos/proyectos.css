@@ -460,11 +460,9 @@
 .projects-cta {
   position: relative;
   overflow: hidden;
-  padding: 78px 0;
-  background:
-    radial-gradient(circle at 64% 100%, rgba(254, 102, 18, 0.20), transparent 45%),
-    #20201f;
-  color: #fff;
+  padding: 85px 0 90px;
+  background: radial-gradient(ellipse 110% 90% at 50% 15%, #ff833b 0%, #fe6612 48%, #e85505 80%, #d24600 100%);
+  color: #ffffff;
 }
 
 .projects-cta::after {
@@ -473,7 +471,7 @@
   right: -20px;
   bottom: -58px;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.12);
   font-family: "Arial Narrow", Impact, sans-serif;
   font-size: clamp(8rem, 18vw, 20rem);
   font-weight: 900;
@@ -491,32 +489,53 @@
 
 .projects-cta p {
   margin: 0 0 20px;
-  color: var(--projects-acid);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .projects-cta h2 {
   margin: 0;
   font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
-  font-size: clamp(3.4rem, 5vw, 6.6rem);
-  line-height: 0.9;
+  font-size: clamp(3.2rem, 4.8vw, 6.2rem);
+  line-height: 0.92;
   letter-spacing: -0.06em;
+  color: #ffffff;
 }
 
 .projects-cta span {
   display: block;
   max-width: 620px;
   margin-top: 24px;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(255, 255, 255, 0.92);
   line-height: 1.68;
 }
 
 .projects-cta a {
   margin-top: 0;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  color: #191918;
+  padding: 16px 36px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+  transition: all 0.22s ease;
+  cursor: pointer;
+}
+
+.projects-cta a:hover {
+  background: #191918;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
 }
 
 @media (max-width: 1180px) {

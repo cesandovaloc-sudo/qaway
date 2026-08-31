@@ -82,6 +82,8 @@ export default function Navbar({ variant: explicitVariant }) {
   // Resolución síncrona inmediata en el primer render frame (evita destello blanco en /proyectos)
   const isProyectos = location.pathname === '/proyectos' || location.pathname === '/proyectos/'
   const variant = explicitVariant || (isProyectos ? 'transparent' : contextVariant)
+  const isMarketingHub = location.pathname.startsWith('/hub/marketing')
+  const isLogoOnly = variant === 'logo-only' || isMarketingHub
 
   // Visor / reader pages hide the global Navbar for immersive experience
   if (variant === 'hidden') return null
@@ -172,99 +174,28 @@ export default function Navbar({ variant: explicitVariant }) {
             Qaway <span className={`transition-colors duration-200 ${logoAccentClass}`}>Lab</span>
           </Link>
 
-          <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
-            {navLinks.map((link) => (
-              <div key={link.key} className="group relative flex h-full items-center">
-                <Link
-                  to={link.path}
-                  className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-200 after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
-                      ? `${linkActiveClass} after:scale-x-100 ${activeLineBg}`
-                      : `${linkClass} hover:after:scale-x-100 ${activeLineBg}`
-                    }`}
-                >
-                  {link.label}
-                </Link>
-                {link.items && link.items.length > 0 && (
-                  <div className="absolute left-1/2 top-[calc(100%+12px)] -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className={`flex flex-col min-w-[200px] rounded-[10px] p-3 shadow-xl ${styles.mobileBg}`}>
-                      {link.items.map(subItem => (
-                        subItem.external ? (
-                          <a
-                            key={subItem.label}
-                            href={subItem.path}
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${styles.link}`}
-                          >
-                            {subItem.label}
-                          </a>
-                        ) : (
-                          <Link
-                            key={subItem.label}
-                            to={subItem.path}
-                            className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
-                          >
-                            {subItem.label}
-                          </Link>
-                        )
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`hidden min-h-12 rounded-[10px] px-5 py-3 text-[0.84rem] font-semibold transition-all duration-200 active:translate-y-px sm:inline-flex ${ctaClass}`}
-            >
-              Cuéntanos tu proyecto
-            </a>
-
-            <button
-              type="button"
-              aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((current) => !current)}
-              className={`lg:hidden transition-colors duration-200 ${menuBtnClass}`}
-            >
-              <Menu size={22} />
-            </button>
-          </div>
-        </div>
-
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 lg:hidden`}
-            >
-              <div className="flex flex-col">
-                {navLinks.map((link) => (
-                  <div key={link.key} className="border-b border-[#20201f]/10 last:border-b-0">
-                    <Link
-                      to={link.path}
-                      onClick={() => {
-                        if (!link.items || link.items.length === 0) setMenuOpen(false)
-                      }}
-                      className={`block py-3 text-xs font-bold uppercase tracking-[0.14em] ${styles.mobileLink}`}
-                    >
-                      {link.label}
-                    </Link>
-                    {link.items && link.items.length > 0 && (
-                      <div className="flex flex-col pl-4 pb-2">
+          {!isLogoOnly && (
+            <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
+              {navLinks.map((link) => (
+                <div key={link.key} className="group relative flex h-full items-center">
+                  <Link
+                    to={link.path}
+                    className={`relative py-2 text-[10px] font-bold uppercase tracking-widest transition-colors duration-200 after:absolute after:left-1/2 after:-translate-x-1/2 after:w-[calc(100%-0.5rem)] after:-bottom-[28px] after:h-[1.5px] after:origin-center after:scale-x-0 after:transition-transform after:duration-200 ${isActive(link.path)
+                        ? `${linkActiveClass} after:scale-x-100 ${activeLineBg}`
+                        : `${linkClass} hover:after:scale-x-100 ${activeLineBg}`
+                      }`}
+                  >
+                    {link.label}
+                  </Link>
+                  {link.items && link.items.length > 0 && (
+                    <div className="absolute left-1/2 top-[calc(100%+12px)] -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                      <div className={`flex flex-col min-w-[200px] rounded-[10px] p-3 shadow-xl ${styles.mobileBg}`}>
                         {link.items.map(subItem => (
                           subItem.external ? (
                             <a
                               key={subItem.label}
                               href={subItem.path}
-                              onClick={() => setMenuOpen(false)}
-                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
+                              className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${styles.link}`}
                             >
                               {subItem.label}
                             </a>
@@ -272,29 +203,106 @@ export default function Navbar({ variant: explicitVariant }) {
                             <Link
                               key={subItem.label}
                               to={subItem.path}
-                              onClick={() => setMenuOpen(false)}
-                              className={`block py-2 text-[10px] font-bold uppercase tracking-wider ${isActive(subItem.path) ? styles.linkActive : `opacity-60 hover:opacity-100 ${styles.mobileLink}`}`}
+                              className={`block px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-[6px] transition-colors ${isActive(subItem.path) ? styles.linkActive : styles.link}`}
                             >
                               {subItem.label}
                             </Link>
                           )
                         ))}
                       </div>
-                    )}
-                  </div>
-                ))}
-                <a
-                  href={WHATSAPP_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex justify-center rounded-[6px] bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
-                >
-                  Cuentanos tu proyecto
-                </a>
-              </div>
-            </motion.nav>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
           )}
-        </AnimatePresence>
+
+          {!isLogoOnly && (
+            <div className="flex items-center gap-4">
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`hidden min-h-12 rounded-[10px] px-5 py-3 text-[0.84rem] font-semibold transition-all duration-200 active:translate-y-px sm:inline-flex ${ctaClass}`}
+              >
+                Cuéntanos tu proyecto
+              </a>
+
+              <button
+                type="button"
+                aria-label={menuOpen ? 'Cerrar navegacion' : 'Abrir navegacion'}
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((current) => !current)}
+                className={`lg:hidden transition-colors duration-200 ${menuBtnClass}`}
+              >
+                <Menu size={22} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!isLogoOnly && (
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.nav
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className={`relative z-30 border-b ${styles.mobileBg} px-6 py-5 lg:hidden`}
+              >
+                <div className="flex flex-col">
+                  {navLinks.map((link) => (
+                    <div key={link.key} className="border-b border-[#20201f]/10 last:border-b-0">
+                      <Link
+                        to={link.path}
+                        onClick={() => {
+                          if (!link.items || link.items.length === 0) setMenuOpen(false)
+                        }}
+                        className={`block py-3 text-xs font-bold uppercase tracking-[0.14em] ${styles.mobileLink}`}
+                      >
+                        {link.label}
+                      </Link>
+                      {link.items && link.items.length > 0 && (
+                        <div className="flex flex-col pl-4 pb-2">
+                          {link.items.map(subItem => (
+                            subItem.external ? (
+                              <a
+                                key={subItem.label}
+                                href={subItem.path}
+                                onClick={() => setMenuOpen(false)}
+                                className={`block py-2 text-[10px] font-bold uppercase tracking-wider opacity-60 hover:opacity-100 ${styles.mobileLink}`}
+                              >
+                                {subItem.label}
+                              </a>
+                            ) : (
+                              <Link
+                                key={subItem.label}
+                                to={subItem.path}
+                                onClick={() => setMenuOpen(false)}
+                                className={`block py-2 text-[10px] font-bold uppercase tracking-wider ${isActive(subItem.path) ? styles.linkActive : `opacity-60 hover:opacity-100 ${styles.mobileLink}`}`}
+                              >
+                                {subItem.label}
+                              </Link>
+                            )
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <a
+                    href={WHATSAPP_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex justify-center rounded-[6px] bg-[#ff4b0b] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white"
+                  >
+                    Cuentanos tu proyecto
+                  </a>
+                </div>
+              </motion.nav>
+            )}
+          </AnimatePresence>
+        )}
       </header>
 
       {/* Backdrop blur independiente de pantalla completa vía Portal */}
