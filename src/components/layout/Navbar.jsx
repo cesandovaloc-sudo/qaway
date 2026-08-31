@@ -77,13 +77,16 @@ const variantStyles = {
 
 export default function Navbar({ variant: explicitVariant }) {
   const contextVariant = useContext(NavbarVariantContext)
-  const variant = explicitVariant || contextVariant
+  const location = useLocation()
+  
+  // Resolución síncrona inmediata en el primer render frame (evita destello blanco en /proyectos)
+  const isProyectos = location.pathname === '/proyectos' || location.pathname === '/proyectos/'
+  const variant = explicitVariant || (isProyectos ? 'transparent' : contextVariant)
 
   // Visor / reader pages hide the global Navbar for immersive experience
   if (variant === 'hidden') return null
 
   const styles = variantStyles[variant] || variantStyles.light
-  const location = useLocation()
   
   const visibleLinks = getNavbarLinks()
   const navLinks = visibleLinks.map(vLink => {
