@@ -65,6 +65,8 @@ export function QawayHeroSection() {
               </a>
               <a
                 href="/proyectos"
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
