@@ -30,6 +30,7 @@ import {
   Calendar,
   Layers,
   ArrowRight,
+  ArrowUp,
   Phone,
   Printer,
   X,
@@ -38,7 +39,13 @@ import {
   Activity,
   BarChart2,
   ChevronRight,
-  Filter
+  Filter,
+  Share2,
+  Linkedin,
+  Instagram,
+  Facebook,
+  Twitter,
+  MoreHorizontal
 } from 'lucide-react'
 
 // LocalStorage persistence key
@@ -64,6 +71,14 @@ const HUBSPOT_FORMATS_BY_STAGE = {
 const PRESET_CHANNELS_B2B = ['LinkedIn', 'Google Search (SEO)', 'Email Corporativo', 'Webinars & Demos', 'WhatsApp Business']
 const PRESET_CHANNELS_B2C = ['Instagram', 'TikTok', 'WhatsApp', 'YouTube', 'Google / Reseñas', 'Facebook']
 
+const AVATAR_PRESETS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
+]
+
 const TAG_PRESETS = [
   { name: 'Product', color: 'bg-blue-100 text-blue-800 border-blue-200' },
   { name: 'Design', color: 'bg-amber-100 text-amber-800 border-amber-200' },
@@ -78,19 +93,27 @@ const INITIAL_PERSONAS = [
     name: 'Carlos Mendoza',
     title: 'Director de Operaciones / CEO',
     type: 'B2B',
-    avatarImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    avatarImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     roleType: 'Decisor',
-    age: '46 años',
-    salary: '+$90,000 USD / año',
-    location: 'Lima, Perú / Santiago',
-    experience: '8 años como director',
-    family: 'Casado, 2 hijos',
-    jtbd: 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y no depender de tareas manuales.',
+    age: 'Entre 40 y 49 años',
+    education: 'Maestría / MBA',
+    industry: 'Tecnología & Servicios B2B',
+    companySize: 'Entre 10 y 50 empleados',
+    socialNetworks: ['linkedin', 'x', 'facebook'],
+    commChannels: ['Correo electrónico', 'Teléfono / WhatsApp', 'Reuniones Virtuales'],
+    reportingTo: 'Directorio / Junta Directiva',
+    tools: ['Software de CRM', 'Sistemas ERP / Gestión', 'Correo electrónico corporativo'],
+    kpis: ['Aumento de facturación', 'Reducción de costos operativos', 'Tasa de conversión comercial'],
     pains: [
       'Pérdida de leads por falta de seguimiento ágil',
       'Desorden en la base de datos de clientes',
       'Falta de visibilidad sobre el ROI de marketing'
     ],
+    howWeHelp: 'Implementación de arquitectura comercial digital, dashboard en tiempo real y soporte dedicado.',
+    infoSources: ['Investigación en línea, LinkedIn y recomendaciones de pares'],
+    salary: '+$90,000 USD / año',
+    location: 'Lima, Perú / Santiago',
+    jtbd: 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y no depender de tareas manuales.',
     gains: [
       'Control total de métricas en un solo dashboard',
       'Aumento del 35% en conversión de leads a ventas',
@@ -130,57 +153,61 @@ const INITIAL_PERSONAS = [
   },
   {
     id: 'p-2',
-    name: 'Valeria Ramos',
-    title: 'Compradora Digital & Emprendedora',
-    type: 'B2C',
-    avatarImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    roleType: 'Compradora Directa',
-    age: '29 años',
-    salary: '+$28,000 USD / año',
-    location: 'Bogotá / Ciudad de México',
-    experience: 'Emprendedora digital',
-    family: 'Soltera',
-    jtbd: 'Encontrar soluciones de bienestar y estilo de vida confiables con compra inmediata y entrega garantizada.',
+    name: 'Roxana Jimenez',
+    title: 'Fundadora & Directora Médica',
+    type: 'B2B',
+    avatarImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    roleType: 'Decisora Principal',
+    age: 'Entre 35 y 44 años',
+    education: 'Título profesional y Especialidad',
+    industry: 'Cuidado de la salud / Clínica Dental',
+    companySize: 'Entre 1 y 10 empleados',
+    socialNetworks: ['instagram', 'facebook', 'linkedin'],
+    commChannels: ['WhatsApp Business', 'Teléfono', 'Redes sociales'],
+    reportingTo: 'Propietaria independiente',
+    tools: ['Software Dental / Agenda', 'WhatsApp Web', 'Sistemas de gestión'],
+    kpis: ['Crecimiento de pacientes nuevos', 'Retención de tratamientos', 'Satisfacción del paciente'],
     pains: [
-      'Páginas de compra lentas o confusas',
-      'Poca claridad en los beneficios reales',
-      'Desconfianza en marcas sin prueba social'
+      'Posicionar su marca de clínica dental frente a la competencia',
+      'Competencia desleal en precios en el sector',
+      'Falta de tiempo y recursos especializados para marketing'
     ],
+    howWeHelp: 'Estrategia de posicionamiento de reputación médica, captación automatizada de citas y seguimiento por WhatsApp.',
+    infoSources: ['Investigación en línea, redes sociales y recomendaciones de colegas'],
+    salary: '+$45,000 USD / año',
+    location: 'Bogotá / Lima',
+    jtbd: 'Atraer pacientes calificados para tratamientos de alto valor sin depender de descuentos constantes.',
     gains: [
-      'Experiencia de compra fluida en 2 clics',
-      'Garantía de satisfacción y reviews verificadas',
-      'Atención rápida y personalizada por WhatsApp'
+      'Agenda de citas llena con pacientes recurrentes',
+      'Marca reconocida como referente de calidad en su ciudad',
+      'Automatización de recordatorios de citas'
     ],
     dimensions: {
-      external: 'Pierde tiempo navegando en sitios lentos con pasarelas de pago dudosas que fallan al momento de pagar.',
-      internal: 'Siente ansiedad e inseguridad de que el producto no llegue como se muestra en fotos o que no haya atención.',
-      philosophical: 'Cree que comprar en línea debe ser una experiencia placentera, transparente y sin complicaciones.'
+      external: 'Los pacientes cotizan por WhatsApp pero no asisten a la primera evaluación.',
+      internal: 'Siente estrés de tener que atender consultas en su tiempo libre.',
+      philosophical: 'Cree que la salud requiere profesionalismo y no tácticas agresivas de venta.'
     },
     guidePlan: {
-      search: 'Descubre marcas a través de videos cortos en TikTok e Instagram Reels.',
-      howWeHelp: 'Plataforma de compra ultra-rápida, testimonios en video reales y confirmación directa por WhatsApp.',
-      actionSteps: [
-        'Descubrimiento visual en redes sociales.',
-        'Checkout transparente en 2 pasos con múltiples opciones de pago.',
-        'Seguimiento automático del pedido por WhatsApp.'
-      ]
+      search: 'Busca agencias o plataformas confiables con casos de éxito médicos.',
+      howWeHelp: 'Configuración de embudo médico con confirmación de citas y presencia web de confianza.',
+      actionSteps: ['Diseño de landing de especialidad', 'Campaña de reputación', 'Atención guiada por WhatsApp']
     },
     habits: {
-      channels: ['Instagram', 'TikTok', 'WhatsApp'],
-      schedule: 'Tardes 1:00 PM a 3:00 PM y Noches 7:00 PM a 10:00 PM en redes móviles',
-      quote: '“Si una tienda online no me da confianza en los primeros 5 segundos o no tiene reseñas reales, me voy a otra.”'
+      channels: ['Instagram', 'WhatsApp', 'Facebook'],
+      schedule: 'Tardes entre consultas (1:00 PM - 3:00 PM)',
+      quote: '“Quiero que los pacientes valoren la calidad del tratamiento y no solo pregunten por el precio.”'
     },
     keyMessages: {
-      marketing: 'Descubre la forma más fácil y segura de comprar lo que necesitas con entrega rápida y garantía total.',
-      sales: 'Más de 1,200 clientes satisfechos con calificación 4.9/5. Envío gratis y garantía de satisfacción de 30 días.',
+      marketing: 'Posiciona tu clínica con una imagen sólida y atrae pacientes que buscan excelencia médica.',
+      sales: 'Multiplica la confirmación de tus citas y profesionaliza tu atención en menos de 14 días.',
       formats: [
-        'Instagram & TikTok: Videos cortos con testimonios y unboxing de producto.',
-        'Anuncios en Stories: Ofertas flash y llamado directo a WhatsApp.',
-        'Demostración social: Fotos reales de clientes con el hashtag de marca.'
+        'Instagram & Reels: Videos educativos y testimonios de pacientes.',
+        'Google Ads & Reseñas: Posicionamiento en búsquedas locales.',
+        'WhatsApp Automation: Confirmaciones y recordatorios automáticos.'
       ]
     },
-    channels: ['Instagram', 'TikTok', 'WhatsApp'],
-    trigger: 'Vio un video testimonial en redes sociales que resolvió su duda principal.'
+    channels: ['Instagram', 'WhatsApp', 'Google Search'],
+    trigger: 'Vio que su competencia directa empezó a llenar agenda con pauta digital.'
   }
 ]
 
@@ -273,7 +300,7 @@ const INITIAL_CONTENT = [
     date: '2026/08/29',
     personaId: 'p-2',
     status: 'Publicado',
-    modelType: 'B2C'
+    modelType: 'B2B'
   }
 ]
 
@@ -298,6 +325,25 @@ export default function MarketingStudioPage() {
     const saved = localStorage.getItem(`${STORAGE_KEY}_personas`)
     return saved ? JSON.parse(saved) : INITIAL_PERSONAS
   })
+  const [activePersonaId, setActivePersonaId] = useState(() => {
+    return personas[0]?.id || 'p-1'
+  })
+
+  // Persona Center Canvas Mode: 'modular-view' | 'wizard' | 'generating'
+  const [personaCanvasMode, setPersonaCanvasMode] = useState('modular-view')
+
+  // HubSpot Conversational Wizard States
+  const [wizardStep, setWizardStep] = useState(1)
+  const [wizardAnswers, setWizardAnswers] = useState({
+    name: '',
+    role: '',
+    industry: '',
+    challenge: '',
+    howWeHelp: '',
+    channels: ''
+  })
+  const [currentWizardInput, setCurrentWizardInput] = useState('')
+
   const [contents, setContents] = useState(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_contents`)
     return saved ? JSON.parse(saved) : INITIAL_CONTENT
@@ -334,23 +380,10 @@ export default function MarketingStudioPage() {
   const [simLtvMultiplier, setSimLtvMultiplier] = useState(2.8)
 
   // Modals state
-  const [showPersonaModal, setShowPersonaModal] = useState(false)
-  const [editingPersona, setEditingPersona] = useState(null)
+  const [showContentModal, setShowContentModal] = useState(false)
   const [viewingExecutivePersona, setViewingExecutivePersona] = useState(null)
   const [executiveSlideTab, setExecutiveSlideTab] = useState('messages')
 
-  const [newPersona, setNewPersona] = useState({
-    name: '',
-    title: '',
-    type: 'B2B',
-    jtbd: '',
-    pains: '',
-    gains: '',
-    channels: [],
-    trigger: ''
-  })
-
-  const [showContentModal, setShowContentModal] = useState(false)
   const [newContent, setNewContent] = useState({
     title: '',
     stage: 'TOFU',
@@ -389,6 +422,11 @@ export default function MarketingStudioPage() {
     localStorage.setItem(`${STORAGE_KEY}_poem`, JSON.stringify(poemChannels))
   }, [poemChannels])
 
+  // Active persona object
+  const currentPersona = useMemo(() => {
+    return personas.find(p => p.id === activePersonaId) || personas[0] || INITIAL_PERSONAS[0]
+  }, [personas, activePersonaId])
+
   // Calculations
   const calculatedMomVisitorsGoal = useMemo(() => {
     return Math.round(momVisitorsCurrent * Math.pow(1 + momVisitorsRate / 100, momMonths))
@@ -418,88 +456,141 @@ export default function MarketingStudioPage() {
   const calculatedLtvCacRatio = useMemo(() => (calculatedCac > 0 ? (calculatedLtv / calculatedCac).toFixed(1) : '∞'), [calculatedLtv, calculatedCac])
   const calculatedRoas = useMemo(() => (simAdSpend > 0 ? (calculatedRevenue / simAdSpend).toFixed(1) : '0'), [calculatedRevenue, simAdSpend])
 
-  // Handlers for Personas
-  const handleSavePersona = (e) => {
-    e.preventDefault()
-    if (!newPersona.name || !newPersona.jtbd) return
-
-    const resolvedChannels = Array.isArray(newPersona.channels)
-      ? newPersona.channels
-      : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()).filter(Boolean) : [])
-
-    if (editingPersona) {
-      setPersonas(prev => prev.map(p => (p.id === editingPersona.id ? {
-        ...editingPersona,
-        ...newPersona,
-        type: businessModel,
-        pains: typeof newPersona.pains === 'string' ? newPersona.pains.split('\n').filter(Boolean) : newPersona.pains,
-        gains: typeof newPersona.gains === 'string' ? newPersona.gains.split('\n').filter(Boolean) : newPersona.gains,
-        channels: resolvedChannels
-      } : p)))
-    } else {
-      const created = {
-        id: `p-${Date.now()}`,
-        name: newPersona.name,
-        title: newPersona.title,
-        type: businessModel,
-        avatarImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        roleType: businessModel === 'B2B' ? 'Decisor' : 'Comprador Directo',
-        age: '38 años',
-        salary: '+$45,000 USD / año',
-        location: 'Latinoamérica',
-        experience: 'Profesional activo',
-        family: 'Familia',
-        jtbd: newPersona.jtbd,
-        pains: typeof newPersona.pains === 'string' ? newPersona.pains.split('\n').filter(Boolean) : newPersona.pains,
-        gains: typeof newPersona.gains === 'string' ? newPersona.gains.split('\n').filter(Boolean) : newPersona.gains,
-        channels: resolvedChannels.length > 0 ? resolvedChannels : (businessModel === 'B2B' ? ['LinkedIn', 'Google Search'] : ['Instagram', 'TikTok']),
-        dimensions: {
-          external: 'Dificultad para encontrar soluciones confiables y medir el impacto real.',
-          internal: 'Frustración por la falta de resultados visibles y pérdida de tiempo.',
-          philosophical: 'Cree que las herramientas digitales deben simplificar la vida del negocio.'
-        },
-        guidePlan: {
-          search: 'Busca comparativas claras y asesoría confiable.',
-          howWeHelp: 'Implementación guiada, soporte dedicado y métricas claras.',
-          actionSteps: ['Auditoría inicial', 'Configuración de herramientas', 'Capacitación y soporte']
-        },
-        habits: {
-          channels: resolvedChannels,
-          schedule: 'Horario comercial regular',
-          quote: `“Buscamos soluciones que nos den tranquilidad y resultados.”`
-        },
-        keyMessages: {
-          marketing: `Optimiza tu operación con tecnología de alta gama. Solicita tu asesoría estratégica.`,
-          sales: `Resultados comprobados con implementación ágil y garantía total de satisfacción.`,
-          formats: ['LinkedIn / Redes Sociales', 'Ebook / Guía', 'Demostración en vivo']
-        },
-        trigger: newPersona.trigger || 'Detectó una fuga de oportunidades y decidió actuar.'
-      }
-      setPersonas(prev => [...prev, created])
+  // HubSpot Wizard Step Progression
+  const wizardQuestions = [
+    {
+      step: 1,
+      key: 'name',
+      label: 'Describe tu cliente ideal',
+      question: '¿Cuál es el nombre o arquetipo de tu cliente ideal?',
+      placeholder: 'Ej. Roxana Jimenez / Directora Comercial',
+      minLength: 3
+    },
+    {
+      step: 2,
+      key: 'challenge',
+      label: '¿Cuál es su mayor desafío?',
+      question: '¿Cuál es el principal desafío o problema que enfrenta?',
+      placeholder: 'Ej. Posicionar su marca de clínica dental frente a competidores agresivos...',
+      minLength: 6
+    },
+    {
+      step: 3,
+      key: 'howWeHelp',
+      label: '¿Cómo puedes contribuir a su éxito?',
+      question: '¿Cómo tu producto o servicio resuelve su necesidad?',
+      placeholder: 'Ej. Proporcionamos una estrategia integral de captación digital y automatización de citas...',
+      minLength: 8
+    },
+    {
+      step: 4,
+      key: 'channels',
+      label: 'Canales y medios preferidos',
+      question: '¿A través de qué canales prefiere comunicarse y buscar información?',
+      placeholder: 'Ej. WhatsApp Business, Instagram, LinkedIn y recomendaciones...',
+      minLength: 4
     }
-    setShowPersonaModal(false)
-    setEditingPersona(null)
-    setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
+  ]
+
+  const handleWizardSubmit = (e) => {
+    e.preventDefault()
+    const activeQ = wizardQuestions[wizardStep - 1]
+    if (!currentWizardInput.trim() || currentWizardInput.trim().length < activeQ.minLength) return
+
+    const updatedAnswers = {
+      ...wizardAnswers,
+      [activeQ.key]: currentWizardInput.trim()
+    }
+    setWizardAnswers(updatedAnswers)
+    setCurrentWizardInput('')
+
+    if (wizardStep < wizardQuestions.length) {
+      setWizardStep(wizardStep + 1)
+    } else {
+      // Completed all steps: trigger generation animation
+      setPersonaCanvasMode('generating')
+      setTimeout(() => {
+        const newId = `p-${Date.now()}`
+        const createdPersona = {
+          id: newId,
+          name: updatedAnswers.name || 'Nuevo Buyer Persona',
+          title: updatedAnswers.name.includes('/') ? updatedAnswers.name.split('/')[1].trim() : 'Líder de Área / Decisor',
+          type: businessModel,
+          avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
+          roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Comprador Directo',
+          age: 'Entre 35 y 44 años',
+          education: 'Título profesional',
+          industry: businessModel === 'B2B' ? 'Servicios Profesionales / Salud' : 'Consumo & Estilo de Vida',
+          companySize: 'Entre 1 y 15 empleados',
+          socialNetworks: ['linkedin', 'instagram', 'facebook', 'x'],
+          commChannels: ['WhatsApp Business', 'Correo electrónico', 'Teléfono'],
+          reportingTo: 'Dirección General / Propietario',
+          tools: ['Software de CRM', 'WhatsApp Web', 'Sistemas de gestión'],
+          kpis: ['Crecimiento de clientes', 'Retención de pacientes', 'Satisfacción y recomendación'],
+          pains: [
+            updatedAnswers.challenge || 'Posicionamiento frente a competidores',
+            'Falta de recursos y tiempo para marketing constante',
+            'Pérdida de prospectos por seguimiento manual'
+          ],
+          howWeHelp: updatedAnswers.howWeHelp || 'Infraestructura digital completa con automatización comercial y acompañamiento continuo.',
+          infoSources: [updatedAnswers.channels || 'Investigación en línea, redes sociales y recomendaciones'],
+          salary: '+$48,000 USD / año',
+          location: 'Latinoamérica',
+          jtbd: updatedAnswers.challenge ? `Superar el reto de ${updatedAnswers.challenge.toLowerCase()} de forma estructurada.` : 'Escalar su negocio con orden.',
+          gains: [
+            'Aumento comprobado en conversión y prospectos calificados',
+            'Ahorro de horas operativas cada semana',
+            'Posicionamiento como referente en su nicho'
+          ],
+          dimensions: {
+            external: updatedAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
+            internal: 'Siente frustración cuando el esfuerzo no se traduce en crecimiento medible.',
+            philosophical: 'Cree que todo negocio merece contar con herramientas modernas para crecer.'
+          },
+          guidePlan: {
+            search: 'Busca soluciones probadas con soporte guiado.',
+            howWeHelp: updatedAnswers.howWeHelp || 'Implementación estratégica paso a paso.',
+            actionSteps: ['Diagnóstico inicial de cuellos de botella', 'Despliegue ágil en 14 días', 'Soporte y optimización']
+          },
+          habits: {
+            channels: ['WhatsApp', 'LinkedIn', 'Google Search'],
+            schedule: 'Horario comercial y tardes',
+            quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados.”`
+          },
+          keyMessages: {
+            marketing: `Descubre cómo superar ${updatedAnswers.challenge || 'tus desafíos'} con herramientas diseñadas a tu medida.`,
+            sales: `Acompañamiento especializado con resultados medibles en los primeros 90 días.`,
+            formats: ['Publicaciones en redes sociales', 'Videos demostrativos', 'Casos de éxito reales']
+          },
+          channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
+          trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia.'
+        }
+
+        setPersonas(prev => [...prev, createdPersona])
+        setActivePersonaId(newId)
+        setPersonaCanvasMode('modular-view')
+        setWizardStep(1)
+        setWizardAnswers({ name: '', role: '', industry: '', challenge: '', howWeHelp: '', channels: '' })
+      }, 1200)
+    }
+  }
+
+  const handleCycleAvatar = (personaId) => {
+    setPersonas(prev => prev.map(p => {
+      if (p.id === personaId) {
+        const currentIndex = AVATAR_PRESETS.indexOf(p.avatarImg)
+        const nextIndex = (currentIndex + 1) % AVATAR_PRESETS.length
+        return { ...p, avatarImg: AVATAR_PRESETS[nextIndex] }
+      }
+      return p
+    }))
   }
 
   const handleDeletePersona = (id) => {
-    setPersonas(prev => prev.filter(p => p.id !== id))
-    if (viewingExecutivePersona?.id === id) setViewingExecutivePersona(null)
-  }
-
-  const handleOpenEditPersona = (persona) => {
-    setEditingPersona(persona)
-    setNewPersona({
-      name: persona.name,
-      title: persona.title,
-      type: persona.type,
-      jtbd: persona.jtbd,
-      pains: Array.isArray(persona.pains) ? persona.pains.join('\n') : persona.pains,
-      gains: Array.isArray(persona.gains) ? persona.gains.join('\n') : persona.gains,
-      channels: Array.isArray(persona.channels) ? persona.channels : [],
-      trigger: persona.trigger || ''
-    })
-    setShowPersonaModal(true)
+    if (personas.length <= 1) return
+    const remaining = personas.filter(p => p.id !== id)
+    setPersonas(remaining)
+    setActivePersonaId(remaining[0].id)
   }
 
   // Handlers for Content Mapping
@@ -540,14 +631,18 @@ export default function MarketingStudioPage() {
       case 'personas':
         return {
           title: '1. Buyer Personas & Slides Ejecutivos',
-          subtitle: 'Perfiles ICP, Dimensiones Psicológicas y Fichas de Presentación',
+          subtitle: 'Perfiles ICP, Dimensiones Psicológicas y Resumen Modular HubSpot',
           icon: Users,
           iconColor: 'bg-purple-500',
-          actionText: '+ Nueva Persona',
+          actionText: personaCanvasMode === 'wizard' ? 'Volver a Fichas' : '+ Generar mi buyer persona',
           onAction: () => {
-            setEditingPersona(null)
-            setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
-            setShowPersonaModal(true)
+            if (personaCanvasMode === 'wizard') {
+              setPersonaCanvasMode('modular-view')
+            } else {
+              setPersonaCanvasMode('wizard')
+              setWizardStep(1)
+              setCurrentWizardInput('')
+            }
           }
         }
       case 'kanban':
@@ -602,7 +697,7 @@ export default function MarketingStudioPage() {
           onAction: () => {}
         }
     }
-  }, [currentView, businessModel])
+  }, [currentView, businessModel, personaCanvasMode])
 
   return (
     <div className="min-h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row">
@@ -623,10 +718,10 @@ export default function MarketingStudioPage() {
               <div className="flex items-center gap-1.5">
                 <h1 className="text-base font-bold text-slate-900 tracking-tight">Marketing OS</h1>
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  v1 Pro
+                  HubSpot v1
                 </span>
               </div>
-              <p className="text-xs text-slate-500">Modern Workspace Panel</p>
+              <p className="text-xs text-slate-500">Panel & Fichas Modulares</p>
             </div>
           </div>
 
@@ -668,7 +763,10 @@ export default function MarketingStudioPage() {
             {/* Block 1: Personas */}
             <button
               type="button"
-              onClick={() => setCurrentView('personas')}
+              onClick={() => {
+                setCurrentView('personas')
+                setPersonaCanvasMode('modular-view')
+              }}
               className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
                 currentView === 'personas'
                   ? 'bg-slate-900 text-white shadow-sm'
@@ -682,7 +780,7 @@ export default function MarketingStudioPage() {
                 <div>
                   <div className="font-bold text-xs sm:text-sm">1. Buyer Personas</div>
                   <div className={`text-[11px] ${currentView === 'personas' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    ICP & Fichas Slides
+                    Resumen Modular
                   </div>
                 </div>
               </div>
@@ -804,7 +902,7 @@ export default function MarketingStudioPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               SaaS Engine Activo
             </span>
-            <span className="font-mono text-slate-400">v4.2</span>
+            <span className="font-mono text-slate-400">v4.3</span>
           </div>
         </div>
 
@@ -845,7 +943,7 @@ export default function MarketingStudioPage() {
 
               <button
                 onClick={activeViewMeta.onAction}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
               >
                 <Plus className="w-4 h-4" />
                 <span>{activeViewMeta.actionText}</span>
@@ -859,7 +957,9 @@ export default function MarketingStudioPage() {
         <div className="p-4 sm:p-8 space-y-6">
           <AnimatePresence mode="wait">
 
-            {/* 1. BUYER PERSONAS & SLIDES (FIRST TAB) */}
+            {/* =========================================================================
+                1. BUYER PERSONAS: HUBSPOT RESUMEN MODULAR & CONVERSATIONAL WIZARD
+               ========================================================================= */}
             {currentView === 'personas' && (
               <motion.div
                 key="panel-personas"
@@ -868,87 +968,451 @@ export default function MarketingStudioPage() {
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {personas.map((persona) => (
-                    <div key={persona.id} className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3.5">
-                          <img
-                            src={persona.avatarImg}
-                            alt={persona.name}
-                            className="w-14 h-14 rounded-xl object-cover ring-2 ring-slate-100 shadow-xs"
-                          />
-                          <div>
-                            <h4 className="text-base font-bold text-slate-900">{persona.name}</h4>
-                            <p className="text-xs sm:text-sm text-slate-500">{persona.title}</p>
+                
+                {/* -------------------------------------------------------------------
+                    SUB-VIEW A: CONVERSATIONAL CREATION WIZARD (HUBSPOT INTERACTIVE)
+                   ------------------------------------------------------------------- */}
+                {personaCanvasMode === 'wizard' && (
+                  <div className="max-w-2xl mx-auto p-6 sm:p-10 rounded-3xl bg-white border border-slate-200 shadow-lg space-y-8">
+                    
+                    {/* Header with Step Indicator */}
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                      <div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          Asistente Conversacional HubSpot
+                        </span>
+                        <h3 className="text-xl font-black text-slate-900">
+                          Paso {wizardStep} de {wizardQuestions.length}
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setPersonaCanvasMode('modular-view')}
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Previously Answered Questions as Clean Pills on Top Right */}
+                    <div className="space-y-2">
+                      {wizardQuestions.slice(0, wizardStep - 1).map((q) => (
+                        <div key={q.step} className="flex flex-col items-end text-right">
+                          <span className="text-xs text-slate-400 font-semibold">{q.label}</span>
+                          <div className="mt-0.5 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-xs sm:text-sm font-bold border border-slate-200">
+                            <span>{wizardAnswers[q.key]}</span>
+                            <button
+                              onClick={() => {
+                                setWizardStep(q.step)
+                                setCurrentWizardInput(wizardAnswers[q.key])
+                              }}
+                              className="text-slate-400 hover:text-slate-700"
+                              title="Editar respuesta"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-purple-100 text-purple-800">
-                            {persona.roleType}
-                          </span>
-                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                            persona.type === 'B2B' ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            {persona.type}
-                          </span>
+                      ))}
+                    </div>
+
+                    {/* Current Active Question */}
+                    <div className="space-y-4 pt-2">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
+                        {wizardQuestions[wizardStep - 1].question}
+                      </h4>
+
+                      <form onSubmit={handleWizardSubmit} className="space-y-4">
+                        <div className="relative">
+                          <textarea
+                            rows="3"
+                            autoFocus
+                            placeholder={wizardQuestions[wizardStep - 1].placeholder}
+                            value={currentWizardInput}
+                            onChange={(e) => setCurrentWizardInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault()
+                                handleWizardSubmit(e)
+                              }
+                            }}
+                            className="w-full p-4 pr-14 rounded-2xl bg-slate-50 border-2 border-slate-200 focus:border-slate-900 focus:bg-white text-slate-900 text-sm font-semibold focus:outline-none transition-all"
+                          />
+                          <button
+                            type="submit"
+                            disabled={!currentWizardInput.trim() || currentWizardInput.trim().length < wizardQuestions[wizardStep - 1].minLength}
+                            className="absolute right-3 bottom-4 w-10 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center disabled:opacity-30 disabled:hover:bg-slate-900 shadow-md transition-all"
+                          >
+                            <ArrowUp className="w-5 h-5 font-black" />
+                          </button>
+                        </div>
+
+                        {currentWizardInput.trim().length > 0 && currentWizardInput.trim().length < wizardQuestions[wizardStep - 1].minLength && (
+                          <div className="px-3 py-1.5 rounded-lg bg-red-100 text-red-800 text-xs font-bold inline-block">
+                            Por favor, introduce al menos {wizardQuestions[wizardStep - 1].minLength} caracteres
+                          </div>
+                        )}
+                      </form>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                      <span>Presiona Enter para continuar</span>
+                      <button
+                        onClick={() => setPersonaCanvasMode('modular-view')}
+                        className="text-slate-600 hover:text-slate-900 font-semibold"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* -------------------------------------------------------------------
+                    SUB-VIEW B: GENERATING LOADER ANIMATION
+                   ------------------------------------------------------------------- */}
+                {personaCanvasMode === 'generating' && (
+                  <div className="max-w-md mx-auto p-12 rounded-3xl bg-white border border-slate-200 shadow-lg text-center space-y-6 my-12">
+                    <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+                      <Sparkles className="w-8 h-8 animate-spin" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="w-48 h-2 bg-emerald-500 rounded-full mx-auto animate-pulse" />
+                      <h3 className="text-lg font-bold text-slate-900">
+                        Tu buyer persona se está generando...
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        Sintetizando perfil, desafíos y ficha modular
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* -------------------------------------------------------------------
+                    SUB-VIEW C: HUBSPOT MODULAR RESUMEN GRID (SCREENSHOTS 4 & 5)
+                   ------------------------------------------------------------------- */}
+                {personaCanvasMode === 'modular-view' && (
+                  <div className="space-y-6">
+                    
+                    {/* Top Hubspot Header: Persona Switcher Tabs & Actions */}
+                    <div className="p-6 rounded-3xl bg-[#0d2a2c] text-white shadow-md space-y-6">
+                      
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+                            Resumen de tu buyer persona
+                          </h3>
+                          <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                            Visualización modular certificada para equipos de marketing y ventas
+                          </p>
+                        </div>
+
+                        {/* Top Action Buttons */}
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <button
+                            onClick={() => {
+                              setViewingExecutivePersona(currentPersona)
+                              setExecutiveSlideTab('messages')
+                            }}
+                            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs sm:text-sm border border-white/20 transition-all flex items-center gap-1.5"
+                          >
+                            <FileText className="w-4 h-4 text-emerald-400" />
+                            <span>Ver Slide</span>
+                          </button>
+
+                          <button
+                            onClick={() => window.print()}
+                            className="px-4 py-2.5 rounded-xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>Descargar / Exportar</span>
+                          </button>
+
+                          {personas.length > 1 && (
+                            <button
+                              onClick={() => handleDeletePersona(currentPersona.id)}
+                              className="p-2.5 rounded-xl bg-white/10 hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-white/20 transition-all"
+                              title="Eliminar este persona"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
 
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-xs sm:text-sm text-slate-700 italic leading-relaxed">
-                        "{persona.jtbd}"
-                      </div>
+                      {/* Horizontal Persona Tabs */}
+                      <div className="flex items-center gap-2 overflow-x-auto border-b border-white/15 pb-2">
+                        {personas.map((p) => {
+                          const isActive = p.id === activePersonaId
+                          return (
+                            <button
+                              key={p.id}
+                              onClick={() => setActivePersonaId(p.id)}
+                              className={`px-4 py-2 text-xs sm:text-sm font-bold transition-all relative whitespace-nowrap ${
+                                isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                              }`}
+                            >
+                              <span>{p.name}</span>
+                              {isActive && (
+                                <motion.div
+                                  layoutId="hubspot-active-tab"
+                                  className="absolute bottom-[-9px] left-0 right-0 h-[3px] bg-white rounded-full"
+                                />
+                              )}
+                            </button>
+                          )
+                        })}
 
-                      <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
-                        <div className="p-3.5 rounded-xl bg-red-50/70 border border-red-100">
-                          <div className="font-bold text-red-800 mb-1.5">Dolores Principales</div>
-                          <ul className="space-y-1 text-slate-700">
-                            {persona.pains.slice(0, 2).map((p, i) => (
-                              <li key={i} className="truncate">• {p}</li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
-                          <div className="font-bold text-emerald-800 mb-1.5">Ganancias Deseadas</div>
-                          <ul className="space-y-1 text-slate-700">
-                            {persona.gains.slice(0, 2).map((g, i) => (
-                              <li key={i} className="truncate">• {g}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <button
                           onClick={() => {
-                            setViewingExecutivePersona(persona)
-                            setExecutiveSlideTab('messages')
+                            setPersonaCanvasMode('wizard')
+                            setWizardStep(1)
+                            setCurrentWizardInput('')
                           }}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:bg-white/5 transition-all flex items-center gap-1 ml-2"
                         >
-                          <FileText className="w-4 h-4 text-emerald-400" />
-                          <span>Ver Ficha Diapositiva (Slide)</span>
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>+ Generar nuevo</span>
                         </button>
-
-                        <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
-                          <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800">
-                            Editar
-                          </button>
-                          <button onClick={() => handleDeletePersona(persona.id)} className="text-red-500 hover:text-red-700">
-                            Eliminar
-                          </button>
-                        </div>
                       </div>
 
                     </div>
-                  ))}
-                </div>
+
+                    {/* 3-COLUMN MODULAR CARD GRID (LIKE HUBSPOT) */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                      
+                      {/* COLUMN 1: PERFIL GENERAL */}
+                      <div className="md:col-span-4 space-y-4">
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+                          Perfil general
+                        </div>
+
+                        {/* Card: Avatar */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm text-center space-y-3">
+                          <img
+                            src={currentPersona.avatarImg}
+                            alt={currentPersona.name}
+                            className="w-24 h-24 rounded-2xl object-cover mx-auto ring-4 ring-slate-100 shadow-sm"
+                          />
+                          <div>
+                            <button
+                              onClick={() => handleCycleAvatar(currentPersona.id)}
+                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-2"
+                            >
+                              Cambiar avatar
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Card: Edad */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Rango de edad</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="text-xs sm:text-sm font-bold text-slate-800">
+                            • {currentPersona.age || 'Entre 35 y 44 años'}
+                          </div>
+                        </div>
+
+                        {/* Card: Nivel de educación */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Nivel de educación más alto</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="text-xs sm:text-sm font-bold text-slate-800">
+                            • {currentPersona.education || 'Título profesional'}
+                          </div>
+                        </div>
+
+                        {/* Card: Redes Sociales */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Redes sociales</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="flex items-center gap-2 pt-1">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                              <Facebook className="w-4 h-4" />
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                              <Instagram className="w-4 h-4" />
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                              <Twitter className="w-4 h-4" />
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                              <Linkedin className="w-4 h-4" />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card: Industria */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Industria</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="text-xs sm:text-sm font-bold text-slate-800">
+                            • {currentPersona.industry || 'Cuidado de la salud'}
+                          </div>
+                        </div>
+
+                        {/* Card: Tamaño organización */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Tamaño de la organización</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="text-xs sm:text-sm font-bold text-slate-800">
+                            • {currentPersona.companySize || 'Entre 1 y 10 empleados'}
+                          </div>
+                        </div>
+
+                      </div>
+
+                      {/* COLUMN 2: DETALLES PROFESIONALES */}
+                      <div className="md:col-span-4 space-y-4">
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+                          Detalles profesionales
+                        </div>
+
+                        {/* Card: Canal favorito de comunicación */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Canal favorito de comunicación</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
+                            {currentPersona.commChannels?.map((ch, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span>{ch}</span>
+                              </li>
+                            )) || <li>• WhatsApp Business</li>}
+                          </ul>
+                        </div>
+
+                        {/* Card: Su superior es */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Su superior es</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <div className="text-xs sm:text-sm font-bold text-slate-800">
+                            • {currentPersona.reportingTo || 'Dirección General'}
+                          </div>
+                        </div>
+
+                        {/* Card: Herramientas que necesita para trabajar */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Herramientas que necesita para trabajar</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
+                            {currentPersona.tools?.map((tool, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span>{tool}</span>
+                              </li>
+                            )) || <li>• Software de CRM</li>}
+                          </ul>
+                        </div>
+
+                      </div>
+
+                      {/* COLUMN 3: OBJETIVOS, DOLORES & CÓMO AYUDAMOS */}
+                      <div className="md:col-span-4 space-y-4">
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+                          Objetivos y Desafíos
+                        </div>
+
+                        {/* Card: Su trabajo se mide en función de */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Su trabajo se mide en función de</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
+                            {currentPersona.kpis?.map((kpi, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span>{kpi}</span>
+                              </li>
+                            )) || <li>• Crecimiento de clientes</li>}
+                          </ul>
+                        </div>
+
+                        {/* Card: Dificultades principales (Dolores) */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Dificultades principales (Dolores)</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
+                            {currentPersona.pains?.map((pain, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                                <span>{pain}</span>
+                              </li>
+                            )) || <li>• Dificultad de posicionamiento</li>}
+                          </ul>
+                        </div>
+
+                        {/* Card: Obtiene información a través de */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                            <span>Obtiene información a través de</span>
+                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                          </div>
+                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
+                            {currentPersona.infoSources?.map((source, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
+                                <span>{source}</span>
+                              </li>
+                            )) || <li>• Investigación en línea</li>}
+                          </ul>
+                        </div>
+
+                        {/* Card: Cómo contribuimos a su éxito */}
+                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2">
+                          <div className="text-xs text-emerald-800 font-bold uppercase">
+                            Cómo contribuimos a su éxito
+                          </div>
+                          <p className="text-xs sm:text-sm text-emerald-950 font-semibold leading-relaxed">
+                            {currentPersona.howWeHelp || currentPersona.jtbd}
+                          </p>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                    {/* Bottom Add Section Button (Like HubSpot Screenshot 5) */}
+                    <div className="pt-4 flex justify-center">
+                      <button
+                        onClick={() => {
+                          setViewingExecutivePersona(currentPersona)
+                          setExecutiveSlideTab('dimensions')
+                        }}
+                        className="w-full max-w-md py-3.5 rounded-2xl bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Ver Análisis de Dimensiones Psicológicas (StoryBrand)</span>
+                      </button>
+                    </div>
+
+                  </div>
+                )}
+
               </motion.div>
             )}
 
-            {/* 2. KANBAN CONTENT MAPPING */}
+            {/* =========================================================================
+                2. KANBAN CONTENT MAPPING
+               ========================================================================= */}
             {currentView === 'kanban' && (
               <motion.div
                 key="panel-kanban"
@@ -1032,7 +1496,9 @@ export default function MarketingStudioPage() {
               </motion.div>
             )}
 
-            {/* 3. GRID TABLE VIEW */}
+            {/* =========================================================================
+                3. GRID TABLE VIEW
+               ========================================================================= */}
             {currentView === 'grid' && (
               <motion.div
                 key="panel-grid"
@@ -1093,7 +1559,9 @@ export default function MarketingStudioPage() {
               </motion.div>
             )}
 
-            {/* 4. DASHBOARD & UNIT ECONOMICS */}
+            {/* =========================================================================
+                4. DASHBOARD & UNIT ECONOMICS
+               ========================================================================= */}
             {currentView === 'dashboard' && (
               <motion.div
                 key="panel-dashboard"
@@ -1276,7 +1744,9 @@ export default function MarketingStudioPage() {
               </motion.div>
             )}
 
-            {/* 5. AUTOMATED SMART ENGINE */}
+            {/* =========================================================================
+                5. AUTOMATED SMART ENGINE
+               ========================================================================= */}
             {currentView === 'smart' && (
               <motion.div
                 key="panel-smart"
@@ -1417,157 +1887,7 @@ export default function MarketingStudioPage() {
       </main>
 
       {/* =========================================================================
-          MODAL 1: PERSONA CREATION / EDITING
-         ========================================================================= */}
-      {showPersonaModal && (
-        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50 overflow-y-auto">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white border border-slate-200 rounded-[28px] p-6 sm:p-8 max-w-xl w-full space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
-          >
-            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Users className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">
-                    {editingPersona ? 'Editar Buyer Persona' : 'Crear Nuevo Buyer Persona'}
-                  </h3>
-                  <p className="text-xs text-slate-500">Framework JTBD, StoryBrand & HubSpot Standards</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowPersonaModal(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSavePersona} className="space-y-4 text-xs sm:text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label className="block text-slate-800 font-bold mb-1">Nombre Completo</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Carlos Mendoza"
-                    value={newPersona.name}
-                    onChange={(e) => setNewPersona(p => ({ ...p, name: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-800 font-bold mb-1">
-                    {businessModel === 'B2B' ? 'Cargo / Rol' : 'Arquetipo'}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={businessModel === 'B2B' ? 'Ej. Director de Operaciones / CEO' : 'Ej. Compradora Frecuente'}
-                    value={newPersona.title}
-                    onChange={(e) => setNewPersona(p => ({ ...p, title: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-800 font-bold mb-1">Job To Be Done (Progreso que busca)</label>
-                <textarea
-                  rows="2"
-                  required
-                  placeholder="Describe exactamente qué problema busca resolver y el resultado deseado..."
-                  value={newPersona.jtbd}
-                  onChange={(e) => setNewPersona(p => ({ ...p, jtbd: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div className="p-3.5 rounded-2xl bg-red-50/50 border border-red-100/80 space-y-1">
-                  <label className="block text-red-900 font-bold mb-1">Dolores Principales (1 por línea)</label>
-                  <textarea
-                    rows="3"
-                    placeholder="Pérdida de leads&#10;Falta de visibilidad ROI"
-                    value={newPersona.pains}
-                    onChange={(e) => setNewPersona(p => ({ ...p, pains: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
-                  />
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/80 space-y-1">
-                  <label className="block text-emerald-900 font-bold mb-1">Ganancias Deseadas (1 por línea)</label>
-                  <textarea
-                    rows="3"
-                    placeholder="Aumento del 35%&#10;Ahorro de 15 horas"
-                    value={newPersona.gains}
-                    onChange={(e) => setNewPersona(p => ({ ...p, gains: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-emerald-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-800 font-bold mb-1.5">
-                  Canales de Información ({businessModel})
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {(businessModel === 'B2B' ? PRESET_CHANNELS_B2B : PRESET_CHANNELS_B2C).map(ch => {
-                    const currentChannels = Array.isArray(newPersona.channels)
-                      ? newPersona.channels
-                      : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()) : [])
-                    const isSelected = currentChannels.includes(ch)
-                    return (
-                      <button
-                        key={ch}
-                        type="button"
-                        onClick={() => {
-                          let updated
-                          if (isSelected) {
-                            updated = currentChannels.filter(c => c !== ch)
-                          } else {
-                            updated = [...currentChannels, ch]
-                          }
-                          setNewPersona(p => ({ ...p, channels: updated }))
-                        }}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          isSelected
-                            ? 'bg-slate-900 text-white shadow-xs'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {isSelected ? `✓ ${ch}` : `+ ${ch}`}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setShowPersonaModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs sm:text-sm shadow-sm transition-all"
-                >
-                  Guardar Persona
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* =========================================================================
-          MODAL 2: CONTENT PIECE FORM
+          MODAL: CONTENT PIECE FORM
          ========================================================================= */}
       {showContentModal && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50">
@@ -1705,7 +2025,7 @@ export default function MarketingStudioPage() {
       )}
 
       {/* =========================================================================
-          MODAL 3: EXECUTIVE SLIDE PRESENTATION
+          MODAL: EXECUTIVE SLIDE PRESENTATION
          ========================================================================= */}
       {viewingExecutivePersona && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
