@@ -164,6 +164,29 @@
   gap: 24px;
 }
 
+.josue-panaderia-root .headerLogo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 170px;
+  height: 52px;
+}
+
+.josue-panaderia-root .headerLogo img {
+  display: block;
+  width: 170px;
+  height: 52px;
+  aspect-ratio: 170 / 52;
+}
+
+.josue-panaderia-root section[id] {
+  scroll-margin-top: 84px;
+}
+
+.josue-panaderia-root #inicio {
+  scroll-margin-top: 0;
+}
+
 .josue-panaderia-root .nav {
   display: flex;
   align-items: center;

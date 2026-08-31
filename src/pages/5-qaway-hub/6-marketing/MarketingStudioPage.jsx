@@ -38,8 +38,8 @@ import {
   Sliders,
   ShieldCheck,
   Activity,
-  BarChart2,
   ChevronRight,
+  ChevronDown,
   Filter,
   Share2,
   Linkedin,
@@ -384,6 +384,13 @@ export default function MarketingStudioPage() {
   const [showContentModal, setShowContentModal] = useState(false)
   const [viewingExecutivePersona, setViewingExecutivePersona] = useState(null)
   const [executiveSlideTab, setExecutiveSlideTab] = useState('messages')
+  const [slideDropdownOpen, setSlideDropdownOpen] = useState(false)
+
+  const SLIDE_TABS = [
+    { id: 'messages', label: 'Mensajes Clave & Formatos' },
+    { id: 'dimensions', label: 'Dimensiones Psicológicas del Problema' },
+    { id: 'guide', label: 'Plan de Acción & Hábitos de Consumo' }
+  ]
 
   const [newContent, setNewContent] = useState({
     title: '',
@@ -2046,24 +2053,44 @@ export default function MarketingStudioPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/60 overflow-x-auto">
-                {[
-                  { id: 'messages', label: '1. Mensajes Clave (Slide)' },
-                  { id: 'dimensions', label: '2. 3 Dimensiones del Dolor' },
-                  { id: 'guide', label: '3. Plan de Acción & Hábitos' }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setExecutiveSlideTab(tab.id)}
-                    className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
-                      executiveSlideTab === tab.id
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-500 hover:text-slate-800'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSlideDropdownOpen(prev => !prev)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs sm:text-sm border border-slate-200 shadow-2xs transition-all"
+                >
+                  <span>{SLIDE_TABS.find(t => t.id === executiveSlideTab)?.label || 'Seleccionar Vista'}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-500" />
+                </button>
+
+                {slideDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setSlideDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-1.5 w-72 rounded-2xl bg-white border border-slate-200 shadow-xl p-1.5 z-50 space-y-1">
+                      {SLIDE_TABS.map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => {
+                            setExecutiveSlideTab(tab.id)
+                            setSlideDropdownOpen(false)
+                          }}
+                          className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-between ${
+                            executiveSlideTab === tab.id
+                              ? 'bg-slate-900 text-white shadow-xs'
+                              : 'text-slate-700 hover:bg-slate-100'
+                          }`}
+                        >
+                          <span>{tab.label}</span>
+                          {executiveSlideTab === tab.id && <Check className="w-4 h-4 text-emerald-400" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2 self-end sm:self-auto">

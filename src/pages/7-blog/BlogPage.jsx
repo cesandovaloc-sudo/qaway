@@ -207,9 +207,28 @@ export default function BlogPage() {
   const { category } = useParams()
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
-  const [articlesList, setArticlesList] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Caché instantáneo (SWR) para mostrar artículos en 0ms al abrir la página
+  const [articlesList, setArticlesList] = useState(() => {
+    try {
+      const cached = localStorage.getItem('qaway_blog_articles_cache')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      }
+    } catch (e) {}
+    return []
+  })
+
+  const [loading, setLoading] = useState(() => {
+    try {
+      const cached = localStorage.getItem('qaway_blog_articles_cache')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) return false
+      }
+    } catch (e) {}
+    return true
+  })
 
   useEffect(() => {
     setActiveCategory(category || null)
@@ -219,7 +238,6 @@ export default function BlogPage() {
   useEffect(() => {
     async function fetchSupabaseArticles() {
       try {
-        setLoading(true)
         // Intentar consultar la tabla posts (del editor)
         let { data, error } = await supabase
           .from('posts')
@@ -258,13 +276,17 @@ export default function BlogPage() {
             audioUrl: item.audio_url || null,
           }))
           setArticlesList(mappedArticles)
+          // Guardar en caché para la próxima visita inmediata (0ms)
+          try {
+            localStorage.setItem('qaway_blog_articles_cache', JSON.stringify(mappedArticles))
+          } catch (e) {}
         } else {
           // Fallback a artículos locales solo si no hay ninguno en Supabase
           setArticlesList(visibleArticles)
         }
       } catch (err) {
         console.warn('[Blog] Fallback a artículos locales:', err)
-        setArticlesList(visibleArticles)
+        setArticlesList((prev) => (prev.length > 0 ? prev : visibleArticles))
       } finally {
         setLoading(false)
       }
@@ -275,7 +297,6 @@ export default function BlogPage() {
 
   const normalizedSearch = searchQuery.trim().toLowerCase()
   const isSearchActive = normalizedSearch.length > 0
-  const shouldExpandSearch = isSearchExpanded || isSearchActive
 
   const filteredArticles = articlesList.filter((article) => {
     const matchesCategory = activeCategory ? article.category === activeCategory : true
@@ -401,11 +422,15 @@ export default function BlogPage() {
         {/* ========================================================================= */}
         {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE (BLANCO EN EL NAVBAR -> CÁLIDO)     */}
         {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE CON CONTROLES INTEGRADOS            */}
+        {/* ========================================================================= */}
         <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#fff9f6] to-[#fff1eb] pb-8 pt-20 sm:pb-10 sm:pt-28">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+            
+            {/* Cabecera del Hero */}
             <div className="max-w-3xl">
-              
-              <div className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+              <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
                 <span>/ Blog</span>
               </div>
 
@@ -427,22 +452,60 @@ export default function BlogPage() {
               >
                 Encuentra artículos, tutoriales y guías sobre IA, automatización, marketing, diseño y sistemas digitales.
               </motion.p>
+            </div>
 
-              {/* Buscador Integrado (Borde de foco Naranja) */}
-              <motion.div
-                className="mt-6 max-w-xl"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-              >
-                <div className="flex items-center gap-3 rounded-lg border border-black/10 bg-white px-4 py-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] transition-all focus-within:border-[#ff4b0b] focus-within:shadow-[0_8px_30px_rgba(255,75,11,0.15)]">
-                  <Search className="h-5 w-5 text-black/40" />
+            {/* Fila Integrada de Control (Filtros a la izquierda + Buscador a la derecha) */}
+            <motion.div
+              className="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {/* 1. Lista de píldoras horizontal (Izquierda) */}
+              <div className="flex flex-wrap items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                {/* Botón Todos */}
+                <button
+                  type="button"
+                  onClick={() => selectCategory(null)}
+                  className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all shadow-xs ${
+                    activeCategory === null
+                      ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/25'
+                      : 'border border-black/10 bg-white/85 backdrop-blur-xs text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
+                  }`}
+                >
+                  Todos
+                </button>
+
+                {/* Categorías (SOLO LAS QUE TIENEN ARTÍCULOS) */}
+                {activeCategoriesWithArticles.map((cat) => {
+                  const isActive = activeCategory === cat.key
+                  return (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => selectCategory(cat.key)}
+                      className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all shadow-xs ${
+                        isActive
+                          ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/25'
+                          : 'border border-black/10 bg-white/85 backdrop-blur-xs text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
+                      }`}
+                    >
+                      {cat.title}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* 2. Buscador Compacto en la misma fila (Derecha) */}
+              <div className="w-full sm:w-80 md:w-96 shrink-0">
+                <div className="flex items-center gap-3 rounded-lg border border-black/10 bg-white/90 px-3.5 py-2.5 shadow-xs backdrop-blur-xs transition-all focus-within:border-[#ff4b0b] focus-within:bg-white focus-within:shadow-[0_6px_24px_rgba(255,75,11,0.14)]">
+                  <Search className="h-4 w-4 text-black/40 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Buscar temas, artículos o herramientas..."
-                    className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-black/40"
+                    placeholder="Buscar temas o herramientas..."
+                    className="w-full bg-transparent text-xs sm:text-sm text-[#191918] outline-none placeholder:text-black/40"
                   />
                   {searchQuery && (
                     <button
@@ -454,57 +517,13 @@ export default function BlogPage() {
                     </button>
                   )}
                 </div>
-              </motion.div>
+              </div>
+            </motion.div>
 
-            </div>
           </div>
         </section>
 
-        {/* ========================================================================= */}
-        {/* BARRA DE PÍLDORAS / CATEGORÍAS (FONDO BLANCO + BOTÓN ACTIVO SUAVE)        */}
-        {/* ========================================================================= */}
-        <div className="border-b border-black/10 bg-white py-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-          <div className="mx-auto flex max-w-[94rem] items-center justify-between gap-4 px-6 sm:px-10 lg:px-14">
-            
-            {/* Lista de píldoras horizontal */}
-            <div className="flex flex-1 items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-              {/* Botón Todos */}
-              <button
-                type="button"
-                onClick={() => selectCategory(null)}
-                className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
-                  activeCategory === null
-                    ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
-                    : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
-                }`}
-              >
-                Todos
-              </button>
-
-              {/* Categorías (SOLO LAS QUE TIENEN ARTÍCULOS) */}
-              {activeCategoriesWithArticles.map((cat) => {
-                const isActive = activeCategory === cat.key
-                return (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => selectCategory(cat.key)}
-                    className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/20'
-                        : 'border border-black/10 bg-white text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
-                    }`}
-                  >
-                    {cat.title}
-                  </button>
-                )
-              })}
-            </div>
-
-          </div>
-        </div>
-
-        <section className="bg-white pb-12 pt-10 lg:pb-24 lg:pt-12">
+        <section className="bg-white pb-16 pt-10 lg:pb-24 lg:pt-14">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {loading ? (
               /* Skeleton Loader suave mientras conecta con Supabase */
@@ -550,10 +569,10 @@ export default function BlogPage() {
               </>
             ) : (
               <>
-                {/* 1. SECCIÓN DESTACADOS (Solo se muestra si hay artículos) */}
+                {/* 1. SECCIÓN DESTACADOS (Sin raya divisoria sobrante) */}
                 {highlightedArticles.length > 0 && (
                   <div>
-                    <div className="mb-8 border-b border-black/10 pb-4">
+                    <div className="mb-8">
                       <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
                         Destacados
                       </h2>

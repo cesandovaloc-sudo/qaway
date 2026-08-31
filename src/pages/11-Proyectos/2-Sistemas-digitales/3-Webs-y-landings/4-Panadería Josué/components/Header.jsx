@@ -15,7 +15,15 @@ export function Header() {
   return (
     <header className="siteHeader">
       <div className="container headerInner">
-        <a href="#inicio" aria-label="Ir al inicio">
+        <a
+          href="#inicio"
+          aria-label="Ir al inicio"
+          className="headerLogo"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        >
           <img src="/assets/logo/logo-primary.svg" alt="Josué Panadería" width={170} height={52} />
         </a>
         <button className="menuButton" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(v => !v)}>
@@ -23,7 +31,19 @@ export function Header() {
         </button>
         <nav id="main-navigation" className={open ? "nav navOpen" : "nav"} aria-label="Navegación principal">
           {links.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => setOpen(false)}>{label}</a>
+            <a
+              key={href}
+              href={href}
+              onClick={(e) => {
+                setOpen(false);
+                if (href === "#inicio") {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
+            >
+              {label}
+            </a>
           ))}
         </nav>
         <a className="button buttonPrimary headerCta" href={whatsappUrl("Hola, quisiera hacer una consulta.")} target="_blank" rel="noreferrer">
