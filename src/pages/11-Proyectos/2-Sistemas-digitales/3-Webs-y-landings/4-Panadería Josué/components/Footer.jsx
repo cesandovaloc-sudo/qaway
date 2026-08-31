@@ -19,9 +19,9 @@ export function Footer() {
         <div>
           <strong>Productos</strong>
           <a href="#productos">Panes del día</a>
-          <a href="#productos">Panes tradicionales</a>
-          <a href="#productos">Bocaditos</a>
-          <a href="#productos">Pedidos especiales</a>
+          <a href="#mas-pedidos">Los más pedidos</a>
+          <a href="#proceso">Elaboración artesanal</a>
+          <a href="#pedidos">Pedidos especiales</a>
         </div>
         <div>
           <strong>Contacto</strong>
@@ -36,8 +36,18 @@ export function Footer() {
         </div>
       </Reveal>
       <div className="container footerBottom">
-        <span>© 2026 Josué Panadería.</span>
-        <span>Hecho en Lima, Perú.</span>
+        <span>© 2026 Josué Panadería. Todos los derechos reservados.</span>
+        <span>
+          Diseño y desarrollo web por{" "}
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontWeight: "700", color: "var(--primary)" }}
+          >
+            Qaway Lab
+          </a>
+        </span>
       </div>
     </footer>
   );

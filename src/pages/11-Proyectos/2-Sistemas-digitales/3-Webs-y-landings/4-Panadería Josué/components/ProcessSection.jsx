@@ -3,7 +3,7 @@ import { processItems } from "../data/content.js";
 
 export function ProcessSection() {
   return (
-    <section className="section processSection">
+    <section id="proceso" className="section processSection">
       <div className="container">
         <Reveal className="processTop">
           <div>

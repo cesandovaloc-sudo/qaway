@@ -32,7 +32,7 @@ export function BestSellers() {
   }, []);
 
   return (
-    <section className="section sectionSoft">
+    <section id="mas-pedidos" className="section sectionSoft">
       <div className="container">
         <Reveal className="sectionHeading">
           <div>

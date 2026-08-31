@@ -386,30 +386,30 @@ export default function BlogPage() {
               </span>
             </div>
           </div>
-          <div className="p-6">
-            <div className="mb-3 flex items-center gap-4 font-mono text-xs text-zinc-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3.5 w-3.5 text-[#ea580c]" /> {article.date}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5 text-[#ea580c]" /> {article.readTime}
-              </span>
+          <div className="flex flex-1 flex-col justify-between p-6">
+            <div>
+              <div className="mb-3 flex items-center gap-4 font-mono text-xs text-zinc-500">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3.5 w-3.5 text-[#ea580c]" /> {article.date}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-[#ea580c]" /> {article.readTime}
+                </span>
+              </div>
+              <h3
+                className="mb-2.5 text-[20px] font-bold leading-snug text-[#191918] transition-colors duration-300 group-hover:text-zinc-600 sm:text-[22px]"
+                style={displayFont}
+              >
+                {article.title}
+              </h3>
+              <p className="line-clamp-3 text-sm font-normal leading-relaxed text-black/70">
+                {article.excerpt}
+              </p>
             </div>
-            <h3
-              className="mb-2.5 text-xl font-bold leading-snug text-[#191918] transition-colors duration-300 group-hover:text-zinc-600 sm:text-2xl"
-              style={displayFont}
-            >
-              {article.title}
-            </h3>
-            <p className="line-clamp-3 text-sm font-normal leading-relaxed text-black/70">
-              {article.excerpt}
-            </p>
-          </div>
-        </div>
-        <div className="px-6 pb-6">
-          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 text-sm font-bold text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
-            <span>Leer artículo completo</span>
-            <ArrowRight className="h-4 w-4 transition-all duration-300 ease-out group-hover:translate-x-2 group-hover:text-[#ff4b0b]" />
+            <div className="mt-5 flex items-center justify-between text-sm font-bold text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+              <span>Leer artículo completo</span>
+              <ArrowRight className="h-4 w-4 transition-all duration-300 ease-out group-hover:translate-x-2 group-hover:text-[#ff4b0b]" />
+            </div>
           </div>
         </div>
       </motion.article>

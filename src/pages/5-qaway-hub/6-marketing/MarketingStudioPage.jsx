@@ -708,12 +708,12 @@ export default function MarketingStudioPage() {
   }, [currentView, businessModel, personaCanvasMode])
 
   return (
-    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row">
+    <div className="h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row overflow-hidden">
       
       {/* =========================================================================
           LEFT SIDEBAR: 5 BIG NAVIGATION BLOCKS & MODEL SWITCHER
          ========================================================================= */}
-      <aside className="w-full lg:w-80 bg-white border-r border-slate-200/90 p-5 flex flex-col justify-between shrink-0 shadow-xs lg:min-h-screen">
+      <aside className="w-full lg:w-80 h-auto lg:h-screen lg:overflow-y-auto bg-white border-r border-slate-200/90 p-5 flex flex-col justify-between shrink-0 shadow-xs">
         
         <div className="space-y-6">
           
@@ -915,7 +915,7 @@ export default function MarketingStudioPage() {
       {/* =========================================================================
           MAIN WORKSPACE CANVAS & FLOATING CLOUD BAR
          ========================================================================= */}
-      <main className="flex-1 flex flex-col min-w-0 pb-20">
+      <main className="flex-1 h-auto lg:h-screen lg:overflow-y-auto flex flex-col min-w-0 pb-20">
         
         {/* FLOATING TOP CLOUD BAR */}
         <div className="sticky top-3 z-30 px-4 sm:px-8 pt-2">
