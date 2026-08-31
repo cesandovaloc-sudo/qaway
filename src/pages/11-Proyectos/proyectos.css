@@ -403,27 +403,27 @@
 .projects-area-card {
   min-height: 260px;
   padding: 36px;
-  border: 1px solid #e4e4e7;
+  border: 1px solid #fe6612;
   border-radius: 14px;
-  background: #ffffff;
-  color: #111111;
+  background: #fe6612;
+  color: #ffffff;
   text-decoration: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px rgba(254, 102, 18, 0.22);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: background 220ms ease, border-color 220ms ease, color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+  transition: background 220ms ease, border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
 }
 
 .projects-area-card:hover {
-  background: #ffffff;
-  border-color: rgba(254, 102, 18, 0.4);
+  background: #e85505;
+  border-color: #e85505;
   transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 20px 45px rgba(254, 102, 18, 0.35);
 }
 
 .projects-area-card > span {
-  color: #fe6612;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
@@ -437,17 +437,12 @@
   font-size: clamp(2.6rem, 3.8vw, 4.6rem);
   line-height: 0.92;
   letter-spacing: -0.06em;
-  color: #111111;
-  transition: color 220ms ease;
-}
-
-.projects-area-card:hover h2 {
-  color: #fe6612;
+  color: #ffffff;
 }
 
 .projects-area-card p {
   max-width: 520px;
-  color: #71717a;
+  color: rgba(255, 255, 255, 0.92);
   line-height: 1.6;
   margin: 12px 0 0;
 }
@@ -457,7 +452,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 28px;
-  color: #fe6612;
+  color: #ffffff;
   font-weight: 800;
   font-size: 14px;
 }

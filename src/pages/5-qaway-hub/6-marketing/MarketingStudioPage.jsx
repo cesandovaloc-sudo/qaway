@@ -37,11 +37,12 @@ import {
   ShieldCheck,
   Activity,
   BarChart2,
-  Tag
+  ChevronRight,
+  Filter
 } from 'lucide-react'
 
 // LocalStorage persistence key
-const STORAGE_KEY = 'qaway_marketing_workspace_v5'
+const STORAGE_KEY = 'qaway_marketing_workspace_v6'
 
 // HubSpot Page 6: Exact Format Mapping
 const HUBSPOT_FORMATS_BY_STAGE = {
@@ -315,7 +316,7 @@ export default function MarketingStudioPage() {
 
   // MoM Growth Calculator States (HubSpot Sheet 2)
   const [momVisitorsCurrent, setMomVisitorsCurrent] = useState(1000)
-  const [momVisitorsRate, setMomVisitorsRate] = useState(5.0) // 5% MoM
+  const [momVisitorsRate, setMomVisitorsRate] = useState(5.0)
   const [momMonths, setMomMonths] = useState(6)
 
   const [momConvRateCurrent, setMomConvRateCurrent] = useState(5.0)
@@ -336,7 +337,7 @@ export default function MarketingStudioPage() {
   const [showPersonaModal, setShowPersonaModal] = useState(false)
   const [editingPersona, setEditingPersona] = useState(null)
   const [viewingExecutivePersona, setViewingExecutivePersona] = useState(null)
-  const [executiveSlideTab, setExecutiveSlideTab] = useState('messages') // 'messages' | 'dimensions' | 'guide'
+  const [executiveSlideTab, setExecutiveSlideTab] = useState('messages')
 
   const [newPersona, setNewPersona] = useState({
     name: '',
@@ -388,7 +389,7 @@ export default function MarketingStudioPage() {
     localStorage.setItem(`${STORAGE_KEY}_poem`, JSON.stringify(poemChannels))
   }, [poemChannels])
 
-  // HubSpot MoM Compounding Calculations
+  // Calculations
   const calculatedMomVisitorsGoal = useMemo(() => {
     return Math.round(momVisitorsCurrent * Math.pow(1 + momVisitorsRate / 100, momMonths))
   }, [momVisitorsCurrent, momVisitorsRate, momMonths])
@@ -409,7 +410,6 @@ export default function MarketingStudioPage() {
     return Math.round(100 * (calculatedMomCloseRateGoal / 100))
   }, [calculatedMomCloseRateGoal])
 
-  // Simulator Calculations
   const calculatedLeads = useMemo(() => Math.round(simTraffic * (simTofuToMofu / 100)), [simTraffic, simTofuToMofu])
   const calculatedCustomers = useMemo(() => Math.round(calculatedLeads * (simMofuToBofu / 100)), [calculatedLeads, simMofuToBofu])
   const calculatedRevenue = useMemo(() => calculatedCustomers * simAov, [calculatedCustomers, simAov])
@@ -534,324 +534,429 @@ export default function MarketingStudioPage() {
     setContents(prev => prev.filter(c => c.id !== id))
   }
 
+  // View Metadata for Cloud Header Bar
+  const activeViewMeta = useMemo(() => {
+    switch (currentView) {
+      case 'personas':
+        return {
+          title: '1. Buyer Personas & Slides Ejecutivos',
+          subtitle: 'Perfiles ICP, Dimensiones Psicológicas y Fichas de Presentación',
+          icon: Users,
+          iconColor: 'bg-purple-500',
+          actionText: '+ Nueva Persona',
+          onAction: () => {
+            setEditingPersona(null)
+            setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
+            setShowPersonaModal(true)
+          }
+        }
+      case 'kanban':
+        return {
+          title: '2. Content Mapping (Página 6)',
+          subtitle: 'Tablero Kanban por Nivel de Conciencia: TOFU, MOFU y BOFU',
+          icon: Kanban,
+          iconColor: 'bg-emerald-500',
+          actionText: '+ Nueva Pieza',
+          onAction: () => setShowContentModal(true)
+        }
+      case 'grid':
+        return {
+          title: '3. Base Relacional POEM',
+          subtitle: 'Planilla estructurada de activos digitales y formatos certificados',
+          icon: TableIcon,
+          iconColor: 'bg-blue-500',
+          actionText: '+ Agregar Fila',
+          onAction: () => setShowContentModal(true)
+        }
+      case 'dashboard':
+        return {
+          title: '4. Dashboard & Unit Economics',
+          subtitle: 'Widgets analíticos, Mix POEM y Simulador Financiero CAC / LTV',
+          icon: PieChart,
+          iconColor: 'bg-amber-500',
+          actionText: 'Resetear Valores',
+          onAction: () => {
+            setSimTraffic(8500)
+            setSimTofuToMofu(4.5)
+            setSimMofuToBofu(12.0)
+            setSimAov(480)
+            setSimAdSpend(1500)
+          }
+        }
+      case 'smart':
+        return {
+          title: '5. Automated SMART Engine',
+          subtitle: 'Fórmula de Crecimiento Compuesto MoM y Mitigación de Obstáculos',
+          icon: Bot,
+          iconColor: 'bg-cyan-500',
+          actionText: 'Exportar Meta',
+          onAction: () => window.print()
+        }
+      default:
+        return {
+          title: 'Marketing Studio OS',
+          subtitle: 'Modern Workspace',
+          icon: Sparkles,
+          iconColor: 'bg-slate-900',
+          actionText: '+ Nuevo',
+          onAction: () => {}
+        }
+    }
+  }, [currentView, businessModel])
+
   return (
-    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm pb-24">
+    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row">
       
-      {/* 1. MODERN WORKSPACE TOPBAR */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* =========================================================================
+          LEFT SIDEBAR: 5 BIG NAVIGATION BLOCKS & MODEL SWITCHER
+         ========================================================================= */}
+      <aside className="w-full lg:w-80 bg-white border-r border-slate-200/90 p-5 flex flex-col justify-between shrink-0 shadow-xs lg:min-h-screen">
+        
+        <div className="space-y-6">
           
-          {/* Brand & Suite Name */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+          {/* Brand Header */}
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
               <Sparkles className="w-5 h-5 text-emerald-400" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Marketing Studio OS</h1>
-                <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Modern Workspace
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-base font-bold text-slate-900 tracking-tight">Marketing OS</h1>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  v1 Pro
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Multi-View System • Metas SMART, Content Mapping (Pág. 6) y Unit Economics
-              </p>
+              <p className="text-xs text-slate-500">Modern Workspace Panel</p>
             </div>
           </div>
 
-          {/* Quick Controls: Model Switcher & New Asset */}
-          <div className="flex items-center gap-3 flex-wrap">
-            
-            {/* Global Business Model Switch */}
-            <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
-              <button
-                type="button"
-                onClick={() => setBusinessModel('B2B')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
-                  businessModel === 'B2B'
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <Building2 className="w-4 h-4 text-indigo-600" />
-                <span>Modelo B2B</span>
-              </button>
+          {/* Business Model Switcher */}
+          <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 grid grid-cols-2 gap-1">
+            <button
+              type="button"
+              onClick={() => setBusinessModel('B2B')}
+              className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                businessModel === 'B2B'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Modelo B2B</span>
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setBusinessModel('B2C')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
-                  businessModel === 'B2C'
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <ShoppingBag className="w-4 h-4 text-emerald-600" />
-                <span>Modelo B2C</span>
-              </button>
+            <button
+              type="button"
+              onClick={() => setBusinessModel('B2C')}
+              className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                businessModel === 'B2C'
+                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Modelo B2C</span>
+            </button>
+          </div>
+
+          {/* 5 Big Navigation Blocks */}
+          <div className="space-y-2">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3">
+              Ecosistema de Trabajo
             </div>
 
-            {/* Primary Action Button */}
+            {/* Block 1: Personas */}
             <button
-              onClick={() => {
-                if (currentView === 'personas') {
-                  setEditingPersona(null)
-                  setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
-                  setShowPersonaModal(true)
-                } else {
-                  setShowContentModal(true)
-                }
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
+              type="button"
+              onClick={() => setCurrentView('personas')}
+              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                currentView === 'personas'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+              }`}
             >
-              <Plus className="w-4 h-4" />
-              <span>{currentView === 'personas' ? 'Nueva Persona' : 'Nueva Pieza'}</span>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs sm:text-sm">1. Buyer Personas</div>
+                  <div className={`text-[11px] ${currentView === 'personas' ? 'text-slate-300' : 'text-slate-400'}`}>
+                    ICP & Fichas Slides
+                  </div>
+                </div>
+              </div>
+              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                currentView === 'personas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {personas.length}
+              </span>
+            </button>
+
+            {/* Block 2: Kanban */}
+            <button
+              type="button"
+              onClick={() => setCurrentView('kanban')}
+              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                currentView === 'kanban'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Kanban className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs sm:text-sm">2. Content Mapping</div>
+                  <div className={`text-[11px] ${currentView === 'kanban' ? 'text-slate-300' : 'text-slate-400'}`}>
+                    Reglas Página 6
+                  </div>
+                </div>
+              </div>
+              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                currentView === 'kanban' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {contents.length}
+              </span>
+            </button>
+
+            {/* Block 3: Grid */}
+            <button
+              type="button"
+              onClick={() => setCurrentView('grid')}
+              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                currentView === 'grid'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <TableIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs sm:text-sm">3. Base Relacional</div>
+                  <div className={`text-[11px] ${currentView === 'grid' ? 'text-slate-300' : 'text-slate-400'}`}>
+                    Matriz POEM
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className={`w-4 h-4 ${currentView === 'grid' ? 'text-white' : 'text-slate-400'}`} />
+            </button>
+
+            {/* Block 4: Dashboard */}
+            <button
+              type="button"
+              onClick={() => setCurrentView('dashboard')}
+              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                currentView === 'dashboard'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <PieChart className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs sm:text-sm">4. Dashboard & ROI</div>
+                  <div className={`text-[11px] ${currentView === 'dashboard' ? 'text-slate-300' : 'text-slate-400'}`}>
+                    Unit Economics
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className={`w-4 h-4 ${currentView === 'dashboard' ? 'text-white' : 'text-slate-400'}`} />
+            </button>
+
+            {/* Block 5: Automated SMART */}
+            <button
+              type="button"
+              onClick={() => setCurrentView('smart')}
+              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                currentView === 'smart'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs sm:text-sm">5. Automated SMART</div>
+                  <div className={`text-[11px] ${currentView === 'smart' ? 'text-slate-300' : 'text-slate-400'}`}>
+                    Calculadora MoM
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className={`w-4 h-4 ${currentView === 'smart' ? 'text-white' : 'text-slate-400'}`} />
             </button>
 
           </div>
 
         </div>
-      </header>
 
-      {/* MAIN CONTAINER */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-
-        {/* 2. ORDERED MULTI-VIEW SELECTOR BAR (1. BUYER PERSONAS AS FIRST TAB) */}
-        <div className="p-2 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center gap-2 overflow-x-auto scrollbar-none">
-          
-          {/* 1. Personas View (FIRST) */}
-          <button
-            type="button"
-            onClick={() => setCurrentView('personas')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              currentView === 'personas'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-md bg-purple-500 text-white flex items-center justify-center shrink-0">
-              <Users className="w-3.5 h-3.5" />
-            </div>
-            <span>1. Buyer Personas & Slides</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/60 text-slate-700 font-mono">
-              {personas.length}
+        {/* Sidebar Footer Status */}
+        <div className="pt-4 border-t border-slate-100 space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              SaaS Engine Activo
             </span>
-          </button>
-
-          {/* 2. Kanban View */}
-          <button
-            type="button"
-            onClick={() => setCurrentView('kanban')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              currentView === 'kanban'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-md bg-emerald-500 text-white flex items-center justify-center shrink-0">
-              <Kanban className="w-3.5 h-3.5" />
-            </div>
-            <span>2. Content Mapping (Pág. 6)</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/60 text-slate-700 font-mono">
-              {contents.length}
-            </span>
-          </button>
-
-          {/* 3. Grid Table View */}
-          <button
-            type="button"
-            onClick={() => setCurrentView('grid')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              currentView === 'grid'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-md bg-blue-500 text-white flex items-center justify-center shrink-0">
-              <TableIcon className="w-3.5 h-3.5" />
-            </div>
-            <span>3. Base Relacional POEM</span>
-          </button>
-
-          {/* 4. Dashboard View */}
-          <button
-            type="button"
-            onClick={() => setCurrentView('dashboard')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              currentView === 'dashboard'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-md bg-amber-500 text-white flex items-center justify-center shrink-0">
-              <PieChart className="w-3.5 h-3.5" />
-            </div>
-            <span>4. Dashboard & Unit Economics</span>
-          </button>
-
-          {/* 5. Automated SMART */}
-          <button
-            type="button"
-            onClick={() => setCurrentView('smart')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              currentView === 'smart'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <div className="w-6 h-6 rounded-md bg-cyan-500 text-white flex items-center justify-center shrink-0">
-              <Bot className="w-3.5 h-3.5" />
-            </div>
-            <span>5. Automated SMART</span>
-          </button>
-
+            <span className="font-mono text-slate-400">v4.2</span>
+          </div>
         </div>
 
-        {/* 3. ACTIVE VIEW CONTENT */}
-        <AnimatePresence mode="wait">
+      </aside>
 
-          {/* =========================================================================
-              VIEW 1: PERSONAS & PRESENTATION SLIDES (FIRST TAB)
-             ========================================================================= */}
-          {currentView === 'personas' && (
-            <motion.div
-              key="view-personas"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-purple-600" />
-                    <span>Perfiles de Buyer Personas & Fichas de Presentación</span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Diseño de fichas ejecutivas listas para exportar en PDF y presentar a clientes.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setEditingPersona(null)
-                    setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
-                    setShowPersonaModal(true)
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs sm:text-sm shadow-xs"
-                >
-                  + Agregar Persona
-                </button>
+      {/* =========================================================================
+          MAIN WORKSPACE CANVAS & FLOATING CLOUD BAR
+         ========================================================================= */}
+      <main className="flex-1 flex flex-col min-w-0 pb-20">
+        
+        {/* FLOATING TOP CLOUD BAR */}
+        <div className="sticky top-3 z-30 px-4 sm:px-8 pt-2">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            
+            {/* Active View Title & Breadcrumb */}
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl ${activeViewMeta.iconColor} text-white flex items-center justify-center shadow-xs shrink-0`}>
+                <activeViewMeta.icon className="w-4.5 h-4.5" />
               </div>
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                  {activeViewMeta.title}
+                </h2>
+                <p className="text-xs text-slate-500">{activeViewMeta.subtitle}</p>
+              </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {personas.map((persona) => (
-                  <div key={persona.id} className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-                    
-                    {/* Header with Avatar & Tags */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3.5">
-                        <img
-                          src={persona.avatarImg}
-                          alt={persona.name}
-                          className="w-14 h-14 rounded-xl object-cover ring-2 ring-slate-100 shadow-xs"
-                        />
-                        <div>
-                          <h4 className="text-base font-bold text-slate-900">{persona.name}</h4>
-                          <p className="text-xs sm:text-sm text-slate-500">{persona.title}</p>
+            {/* Cloud Bar Actions */}
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                title="Imprimir o Exportar PDF"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>PDF</span>
+              </button>
+
+              <button
+                onClick={activeViewMeta.onAction}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{activeViewMeta.actionText}</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* WORKSPACE BODY CONTENT */}
+        <div className="p-4 sm:p-8 space-y-6">
+          <AnimatePresence mode="wait">
+
+            {/* 1. BUYER PERSONAS & SLIDES (FIRST TAB) */}
+            {currentView === 'personas' && (
+              <motion.div
+                key="panel-personas"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {personas.map((persona) => (
+                    <div key={persona.id} className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3.5">
+                          <img
+                            src={persona.avatarImg}
+                            alt={persona.name}
+                            className="w-14 h-14 rounded-xl object-cover ring-2 ring-slate-100 shadow-xs"
+                          />
+                          <div>
+                            <h4 className="text-base font-bold text-slate-900">{persona.name}</h4>
+                            <p className="text-xs sm:text-sm text-slate-500">{persona.title}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-purple-100 text-purple-800">
+                            {persona.roleType}
+                          </span>
+                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
+                            persona.type === 'B2B' ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            {persona.type}
+                          </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-purple-100 text-purple-800">
-                          {persona.roleType}
-                        </span>
-                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${
-                          persona.type === 'B2B' ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-800'
-                        }`}>
-                          {persona.type}
-                        </span>
-                      </div>
-                    </div>
 
-                    {/* JTBD Quotation Card */}
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-xs sm:text-sm text-slate-700 italic leading-relaxed">
-                      "{persona.jtbd}"
-                    </div>
-
-                    {/* Pains & Gains Pastel Grid */}
-                    <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
-                      <div className="p-3.5 rounded-xl bg-red-50/70 border border-red-100">
-                        <div className="font-bold text-red-800 mb-1.5">Dolores Principales</div>
-                        <ul className="space-y-1 text-slate-700">
-                          {persona.pains.slice(0, 2).map((p, i) => (
-                            <li key={i} className="truncate">• {p}</li>
-                          ))}
-                        </ul>
+                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-xs sm:text-sm text-slate-700 italic leading-relaxed">
+                        "{persona.jtbd}"
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
-                        <div className="font-bold text-emerald-800 mb-1.5">Ganancias Deseadas</div>
-                        <ul className="space-y-1 text-slate-700">
-                          {persona.gains.slice(0, 2).map((g, i) => (
-                            <li key={i} className="truncate">• {g}</li>
-                          ))}
-                        </ul>
+                      <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm">
+                        <div className="p-3.5 rounded-xl bg-red-50/70 border border-red-100">
+                          <div className="font-bold text-red-800 mb-1.5">Dolores Principales</div>
+                          <ul className="space-y-1 text-slate-700">
+                            {persona.pains.slice(0, 2).map((p, i) => (
+                              <li key={i} className="truncate">• {p}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                          <div className="font-bold text-emerald-800 mb-1.5">Ganancias Deseadas</div>
+                          <ul className="space-y-1 text-slate-700">
+                            {persona.gains.slice(0, 2).map((g, i) => (
+                              <li key={i} className="truncate">• {g}</li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Actions & Slide Presentation Button */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <button
-                        onClick={() => {
-                          setViewingExecutivePersona(persona)
-                          setExecutiveSlideTab('messages')
-                        }}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
-                      >
-                        <FileText className="w-4 h-4 text-emerald-400" />
-                        <span>Ver Ficha Diapositiva (Slide)</span>
-                      </button>
-
-                      <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
-                        <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800">
-                          Editar
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <button
+                          onClick={() => {
+                            setViewingExecutivePersona(persona)
+                            setExecutiveSlideTab('messages')
+                          }}
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition-all"
+                        >
+                          <FileText className="w-4 h-4 text-emerald-400" />
+                          <span>Ver Ficha Diapositiva (Slide)</span>
                         </button>
-                        <button onClick={() => handleDeletePersona(persona.id)} className="text-red-500 hover:text-red-700">
-                          Eliminar
-                        </button>
+
+                        <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold">
+                          <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800">
+                            Editar
+                          </button>
+                          <button onClick={() => handleDeletePersona(persona.id)} className="text-red-500 hover:text-red-700">
+                            Eliminar
+                          </button>
+                        </div>
                       </div>
+
                     </div>
-
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* =========================================================================
-              VIEW 2: KANBAN VIEW (CONTENT MAPPING & TOFU-MOFU-BOFU STAGES)
-             ========================================================================= */}
-          {currentView === 'kanban' && (
-            <motion.div
-              key="view-kanban"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span>Mapeo de Contenidos por Etapas de Funnel (Pág. 6)</span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Formato Kanban con etiquetas pastel, objetivos y reglas de HubSpot.
-                  </p>
+                  ))}
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              {/* 3 Columns: TOFU, MOFU, BOFU */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+            {/* 2. KANBAN CONTENT MAPPING */}
+            {currentView === 'kanban' && (
+              <motion.div
+                key="panel-kanban"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start"
+              >
                 {[
                   { stage: 'TOFU', name: '1. Reconocimiento (TOFU)', badgeColor: 'bg-emerald-500', desc: 'Infografías y Videos Cortos (Descubrimiento)' },
                   { stage: 'MOFU', name: '2. Consideración (MOFU)', badgeColor: 'bg-blue-500', desc: 'Ebooks, Muestras y Webinars (Nutrición/Leads)' },
@@ -861,7 +966,6 @@ export default function MarketingStudioPage() {
                   return (
                     <div key={col.stage} className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4 min-h-[480px]">
                       
-                      {/* Column Header */}
                       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div className="flex items-center gap-2">
                           <span className={`w-3 h-3 rounded-full ${col.badgeColor}`} />
@@ -872,24 +976,20 @@ export default function MarketingStudioPage() {
                         </span>
                       </div>
 
-                      {/* Column Subtitle / Rule */}
                       <div className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
                         {col.desc}
                       </div>
 
-                      {/* Cards Stack */}
                       <div className="space-y-3">
                         {colItems.map((item) => (
                           <div
                             key={item.id}
                             className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all space-y-3"
                           >
-                            {/* Card Title */}
                             <h5 className="text-sm font-bold text-slate-900 leading-snug">
                               {item.title}
                             </h5>
 
-                            {/* Pastel Tags (Lark Style) */}
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${item.tagColor || 'bg-blue-100 text-blue-800'}`}>
                                 {item.tag || 'Product'}
@@ -899,13 +999,11 @@ export default function MarketingStudioPage() {
                               </span>
                             </div>
 
-                            {/* Date & Channel */}
                             <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
                               <span>{item.date || '2026/08/30'}</span>
                               <span className="text-indigo-600 font-semibold">{item.channel}</span>
                             </div>
 
-                            {/* Card Wireframe Visual Elements (Like Reference Image) */}
                             <div className="grid grid-cols-2 gap-2 pt-1">
                               <div className="p-2 rounded-lg bg-emerald-50/70 border border-emerald-100 text-center text-xs font-bold text-emerald-700">
                                 ✓ Formato Pág. 6
@@ -917,7 +1015,6 @@ export default function MarketingStudioPage() {
                           </div>
                         ))}
 
-                        {/* Quick Add Placeholder */}
                         <button
                           onClick={() => {
                             setNewContent(prev => ({ ...prev, stage: col.stage }))
@@ -932,316 +1029,262 @@ export default function MarketingStudioPage() {
                     </div>
                   )
                 })}
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-          {/* =========================================================================
-              VIEW 3: GRID TABLE VIEW (STRUCTURED RELATIONAL SPREADSHEET)
-             ========================================================================= */}
-          {currentView === 'grid' && (
-            <motion.div
-              key="view-grid"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-md bg-blue-500 text-white flex items-center justify-center">
-                    <TableIcon className="w-4 h-4" />
-                  </div>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900">Grid View • Base Relacional de Contenidos</h3>
-                </div>
-                <button
-                  onClick={() => setShowContentModal(true)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs sm:text-sm"
-                >
-                  + Agregar Fila
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-wider">
-                    <tr>
-                      <th className="py-3 px-4">#</th>
-                      <th className="py-3 px-4">Título del Activo</th>
-                      <th className="py-3 px-4">Etapa Funnel</th>
-                      <th className="py-3 px-4">Formato (Pág. 6)</th>
-                      <th className="py-3 px-4">Canal</th>
-                      <th className="py-3 px-4">Tag</th>
-                      <th className="py-3 px-4">Estado</th>
-                      <th className="py-3 px-4 text-right">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {contents.map((item, index) => (
-                      <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-mono text-slate-400">{index + 1}</td>
-                        <td className="py-3.5 px-4 font-bold text-slate-900">{item.title}</td>
-                        <td className="py-3.5 px-4">
-                          <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700">
-                            {item.stage} • {item.stageName}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 font-semibold text-slate-800">{item.format}</td>
-                        <td className="py-3.5 px-4 text-indigo-600 font-medium">{item.channel}</td>
-                        <td className="py-3.5 px-4">
-                          <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${item.tagColor || 'bg-blue-100 text-blue-800'}`}>
-                            {item.tag || 'Product'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <button
-                            onClick={() => handleDeleteContent(item.id)}
-                            className="p-1 rounded text-slate-400 hover:text-red-500"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
+            {/* 3. GRID TABLE VIEW */}
+            {currentView === 'grid' && (
+              <motion.div
+                key="panel-grid"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4"
+              >
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-xs uppercase tracking-wider">
+                      <tr>
+                        <th className="py-3 px-4">#</th>
+                        <th className="py-3 px-4">Título del Activo</th>
+                        <th className="py-3 px-4">Etapa Funnel</th>
+                        <th className="py-3 px-4">Formato (Pág. 6)</th>
+                        <th className="py-3 px-4">Canal</th>
+                        <th className="py-3 px-4">Tag</th>
+                        <th className="py-3 px-4">Estado</th>
+                        <th className="py-3 px-4 text-right">Acciones</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          )}
-
-          {/* =========================================================================
-              VIEW 4: DASHBOARD VIEW (WIDGETS, DONUT CHART & UNIT ECONOMICS)
-             ========================================================================= */}
-          {currentView === 'dashboard' && (
-            <motion.div
-              key="view-dashboard"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              {/* Top Widgets Grid (Like Reference Image: Giant Numbers 20, 17, Donut Chart) */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
-                
-                {/* Left Mini KPI Cards (Giant Numbers 20, 17) */}
-                <div className="md:col-span-4 space-y-4 flex flex-col justify-between">
-                  
-                  {/* Card 1: Giant 20 (Green) */}
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
-                    <div className="flex justify-between items-center text-slate-400 text-xs sm:text-sm font-bold">
-                      <span>Piezas de Contenido Activas</span>
-                      <span>•••</span>
-                    </div>
-                    <div className="text-5xl font-black font-mono text-emerald-500 tracking-tight">
-                      {contents.length * 3 + 2}
-                    </div>
-                    <div className="w-16 h-1.5 bg-emerald-500 rounded-full" />
-                    <div className="text-xs text-slate-500 pt-1 font-medium">
-                      +15% de alcance orgánico mensual
-                    </div>
-                  </div>
-
-                  {/* Card 2: Giant 17 (Orange) */}
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
-                    <div className="flex justify-between items-center text-slate-400 text-xs sm:text-sm font-bold">
-                      <span>Canales & Rutas POEM Auditadas</span>
-                      <span>•••</span>
-                    </div>
-                    <div className="text-5xl font-black font-mono text-amber-500 tracking-tight">
-                      {poemChannels.length * 2 + 5}
-                    </div>
-                    <div className="w-16 h-1.5 bg-amber-500 rounded-full" />
-                    <div className="text-xs text-slate-500 pt-1 font-medium">
-                      Medios Propios, Obtenidos y Pagados
-                    </div>
-                  </div>
-
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {contents.map((item, index) => (
+                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-3.5 px-4 font-mono text-slate-400">{index + 1}</td>
+                          <td className="py-3.5 px-4 font-bold text-slate-900">{item.title}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700">
+                              {item.stage} • {item.stageName}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-semibold text-slate-800">{item.format}</td>
+                          <td className="py-3.5 px-4 text-indigo-600 font-medium">{item.channel}</td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${item.tagColor || 'bg-blue-100 text-blue-800'}`}>
+                              {item.tag || 'Product'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <button
+                              onClick={() => handleDeleteContent(item.id)}
+                              className="p-1 rounded text-slate-400 hover:text-red-500"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
+              </motion.div>
+            )}
 
-                {/* Right Donut Chart & POEM Breakdown (Like Reference Image) */}
-                <div className="md:col-span-8 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4">
-                  <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <PieChart className="w-4 h-4 text-purple-600" />
-                        Distribución de Canales & Salud POEM
-                      </h4>
-                      <p className="text-xs text-slate-400 mt-0.5">Porcentaje de impacto por medio</p>
-                    </div>
-                    <span className="text-slate-400 text-xs font-bold">•••</span>
-                  </div>
-
-                  {/* Donut Chart Simulation */}
-                  <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center py-2">
-                    
-                    {/* SVG Donut Visual */}
-                    <div className="sm:col-span-5 flex justify-center">
-                      <div className="relative w-40 h-40">
-                        <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
-                          {/* Circle Segments */}
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#e2e8f0" strokeWidth="4" />
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#6366f1" strokeWidth="4" strokeDasharray="35 65" strokeDashoffset="0" />
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#3b82f6" strokeWidth="4" strokeDasharray="20 80" strokeDashoffset="-35" />
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#10b981" strokeWidth="4" strokeDasharray="15 85" strokeDashoffset="-55" />
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f59e0b" strokeWidth="4" strokeDasharray="18 82" strokeDashoffset="-70" />
-                          <circle cx="18" cy="18" r="14" fill="transparent" stroke="#ec4899" strokeWidth="4" strokeDasharray="12 88" strokeDashoffset="-88" />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                          <span className="text-xl font-black font-mono text-slate-900">100%</span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mix POEM</span>
-                        </div>
+            {/* 4. DASHBOARD & UNIT ECONOMICS */}
+            {currentView === 'dashboard' && (
+              <motion.div
+                key="panel-dashboard"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+                  
+                  <div className="md:col-span-4 space-y-4 flex flex-col justify-between">
+                    <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                      <div className="flex justify-between items-center text-slate-400 text-xs sm:text-sm font-bold">
+                        <span>Piezas de Contenido Activas</span>
+                        <span>•••</span>
+                      </div>
+                      <div className="text-5xl font-black font-mono text-emerald-500 tracking-tight">
+                        {contents.length * 3 + 2}
+                      </div>
+                      <div className="w-16 h-1.5 bg-emerald-500 rounded-full" />
+                      <div className="text-xs text-slate-500 pt-1 font-medium">
+                        +15% de alcance orgánico mensual
                       </div>
                     </div>
 
-                    {/* Channel Legend List */}
-                    <div className="sm:col-span-7 space-y-2">
-                      {poemChannels.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between text-xs sm:text-sm p-2 rounded-lg hover:bg-slate-50 transition-colors">
-                          <div className="flex items-center gap-2">
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="font-bold text-slate-800">{item.channel}</span>
-                          </div>
-                          <div className="flex items-center gap-3 font-mono">
-                            <span className="text-slate-400 text-xs">{item.efficiency}</span>
-                            <span className="font-bold text-slate-900">{item.share}%</span>
+                    <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                      <div className="flex justify-between items-center text-slate-400 text-xs sm:text-sm font-bold">
+                        <span>Canales & Rutas POEM Auditadas</span>
+                        <span>•••</span>
+                      </div>
+                      <div className="text-5xl font-black font-mono text-amber-500 tracking-tight">
+                        {poemChannels.length * 2 + 5}
+                      </div>
+                      <div className="w-16 h-1.5 bg-amber-500 rounded-full" />
+                      <div className="text-xs text-slate-500 pt-1 font-medium">
+                        Medios Propios, Obtenidos y Pagados
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-8 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between space-y-4">
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <PieChart className="w-4 h-4 text-purple-600" />
+                          Distribución de Canales & Salud POEM
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-0.5">Porcentaje de impacto por medio</p>
+                      </div>
+                      <span className="text-slate-400 text-xs font-bold">•••</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center py-2">
+                      <div className="sm:col-span-5 flex justify-center">
+                        <div className="relative w-40 h-40">
+                          <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#e2e8f0" strokeWidth="4" />
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#6366f1" strokeWidth="4" strokeDasharray="35 65" strokeDashoffset="0" />
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#3b82f6" strokeWidth="4" strokeDasharray="20 80" strokeDashoffset="-35" />
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#10b981" strokeWidth="4" strokeDasharray="15 85" strokeDashoffset="-55" />
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#f59e0b" strokeWidth="4" strokeDasharray="18 82" strokeDashoffset="-70" />
+                            <circle cx="18" cy="18" r="14" fill="transparent" stroke="#ec4899" strokeWidth="4" strokeDasharray="12 88" strokeDashoffset="-88" />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span className="text-xl font-black font-mono text-slate-900">100%</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mix POEM</span>
                           </div>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="sm:col-span-7 space-y-2">
+                        {poemChannels.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between text-xs sm:text-sm p-2 rounded-lg hover:bg-slate-50 transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                              <span className="font-bold text-slate-800">{item.channel}</span>
+                            </div>
+                            <div className="flex items-center gap-3 font-mono">
+                              <span className="text-slate-400 text-xs">{item.efficiency}</span>
+                              <span className="font-bold text-slate-900">{item.share}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
-                  </div>
-
-                  {/* Footer Action */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                    <span>Atribución multicanal calculada</span>
-                    <span className="text-emerald-600 font-bold">Salud General: 88% Óptimo</span>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Financial Simulator & Unit Economics (CAC, LTV, ROAS) */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-emerald-600" />
-                      Simulador de Retorno Financiero & Unit Economics ({businessModel})
-                    </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">Ajusta los parámetros para proyectar facturación y rentabilidad</p>
-                  </div>
-                  <div className="text-right font-mono text-sm font-bold text-emerald-600">
-                    ROAS: {calculatedRoas}x
-                  </div>
-                </div>
-
-                {/* 4 Financial Metric Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <div className="text-xs text-slate-400 font-bold uppercase">Facturación Estimada</div>
-                    <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedRevenue.toLocaleString()}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <div className="text-xs text-slate-400 font-bold uppercase">CAC (Costo Adquisición)</div>
-                    <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedCac}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <div className="text-xs text-slate-400 font-bold uppercase">LTV (Valor de Vida)</div>
-                    <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedLtv}</div>
-                  </div>
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <div className="text-xs text-slate-400 font-bold uppercase">Ratio LTV / CAC</div>
-                    <div className="text-xl font-bold font-mono text-emerald-600 mt-0.5">{calculatedLtvCacRatio}x</div>
-                  </div>
-                </div>
-
-                {/* Sliders Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
-                      <span>Tráfico Mensual:</span>
-                      <span className="font-mono text-indigo-600">{simTraffic.toLocaleString()}</span>
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                      <span>Atribución multicanal calculada</span>
+                      <span className="text-emerald-600 font-bold">Salud General: 88% Óptimo</span>
                     </div>
-                    <input
-                      type="range"
-                      min="1000"
-                      max="50000"
-                      step="500"
-                      value={simTraffic}
-                      onChange={(e) => setSimTraffic(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
-                    />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
-                      <span>Conversión a Lead:</span>
-                      <span className="font-mono text-blue-600">{simTofuToMofu}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="15"
-                      step="0.5"
-                      value={simTofuToMofu}
-                      onChange={(e) => setSimTofuToMofu(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
-                      <span>Ticket Promedio (AOV):</span>
-                      <span className="font-mono text-emerald-600">${simAov}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="50"
-                      max="3000"
-                      step="50"
-                      value={simAov}
-                      onChange={(e) => setSimAov(Number(e.target.value))}
-                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
-                    />
-                  </div>
                 </div>
 
-              </div>
-            </motion.div>
-          )}
+                {/* Financial Simulator */}
+                <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-5">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-emerald-600" />
+                        Simulador de Retorno Financiero & Unit Economics ({businessModel})
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5">Ajusta los parámetros para proyectar facturación y rentabilidad</p>
+                    </div>
+                    <div className="text-right font-mono text-sm font-bold text-emerald-600">
+                      ROAS: {calculatedRoas}x
+                    </div>
+                  </div>
 
-          {/* =========================================================================
-              VIEW 5: AUTOMATED SMART GOALS & MOM WORKFLOW (HUBSPOT SHEETS ENGINE)
-             ========================================================================= */}
-          {currentView === 'smart' && (
-            <motion.div
-              key="view-smart"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-6"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <Bot className="w-5 h-5 text-cyan-600" />
-                    <span>Automated SMART Engine • Planificador & Calculadora MoM</span>
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                    Fórmula matemática de crecimiento compuesto y evaluación de capacidad operativa.
-                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+                      <div className="text-xs text-slate-400 font-bold uppercase">Facturación Estimada</div>
+                      <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedRevenue.toLocaleString()}</div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+                      <div className="text-xs text-slate-400 font-bold uppercase">CAC (Costo Adquisición)</div>
+                      <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedCac}</div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+                      <div className="text-xs text-slate-400 font-bold uppercase">LTV (Valor de Vida)</div>
+                      <div className="text-xl font-bold font-mono text-slate-900 mt-0.5">${calculatedLtv}</div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+                      <div className="text-xs text-slate-400 font-bold uppercase">Ratio LTV / CAC</div>
+                      <div className="text-xl font-bold font-mono text-emerald-600 mt-0.5">{calculatedLtvCacRatio}x</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
+                        <span>Tráfico Mensual:</span>
+                        <span className="font-mono text-indigo-600">{simTraffic.toLocaleString()}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1000"
+                        max="50000"
+                        step="500"
+                        value={simTraffic}
+                        onChange={(e) => setSimTraffic(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
+                        <span>Conversión a Lead:</span>
+                        <span className="font-mono text-blue-600">{simTofuToMofu}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="15"
+                        step="0.5"
+                        value={simTofuToMofu}
+                        onChange={(e) => setSimTofuToMofu(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-xs sm:text-sm font-bold text-slate-700">
+                        <span>Ticket Promedio (AOV):</span>
+                        <span className="font-mono text-emerald-600">${simAov}</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="50"
+                        max="3000"
+                        step="50"
+                        value={simAov}
+                        onChange={(e) => setSimAov(Number(e.target.value))}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
+                      />
+                    </div>
+                  </div>
+
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
-                {/* 5-Step S-M-A-R-T Automated Workflow (Like Reference Image) */}
+            {/* 5. AUTOMATED SMART ENGINE */}
+            {currentView === 'smart' && (
+              <motion.div
+                key="panel-smart"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+              >
                 <div className="lg:col-span-7 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div className="flex items-center gap-2">
@@ -1253,7 +1296,6 @@ export default function MarketingStudioPage() {
                     <span className="text-xs font-bold text-slate-400">Paso a Paso</span>
                   </div>
 
-                  {/* S */}
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
                     <span className="text-xs font-bold uppercase text-indigo-700">S • Específico</span>
                     <input
@@ -1264,7 +1306,6 @@ export default function MarketingStudioPage() {
                     />
                   </div>
 
-                  {/* M */}
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
                     <span className="text-xs font-bold uppercase text-blue-700">M • Medible</span>
                     <input
@@ -1275,7 +1316,6 @@ export default function MarketingStudioPage() {
                     />
                   </div>
 
-                  {/* A */}
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
                     <span className="text-xs font-bold uppercase text-purple-700">A • Alcanzable</span>
                     <input
@@ -1286,7 +1326,6 @@ export default function MarketingStudioPage() {
                     />
                   </div>
 
-                  {/* R */}
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
                     <span className="text-xs font-bold uppercase text-amber-700">R • Relevante</span>
                     <input
@@ -1297,7 +1336,6 @@ export default function MarketingStudioPage() {
                     />
                   </div>
 
-                  {/* T */}
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
                     <span className="text-xs font-bold uppercase text-emerald-700">T • Límite de Tiempo</span>
                     <input
@@ -1308,7 +1346,6 @@ export default function MarketingStudioPage() {
                     />
                   </div>
 
-                  {/* Final Statement */}
                   <div className="p-4 rounded-xl bg-slate-900 text-white space-y-2">
                     <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Objetivo SMART Oficial</div>
                     <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
@@ -1317,7 +1354,6 @@ export default function MarketingStudioPage() {
                   </div>
                 </div>
 
-                {/* MoM Compound Calculator */}
                 <div className="lg:col-span-5 space-y-4">
                   <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -1361,7 +1397,6 @@ export default function MarketingStudioPage() {
                     </div>
                   </div>
 
-                  {/* Obstacle Test Box */}
                   <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200/80 space-y-2 text-amber-900">
                     <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
                       <ShieldCheck className="w-4 h-4 text-amber-600" />
@@ -1373,564 +1408,540 @@ export default function MarketingStudioPage() {
                   </div>
                 </div>
 
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
 
-        {/* =========================================================================
-            MODAL 1: PERSONA CREATION / EDITING (MODERN WORKSPACE REDESIGN)
-           ========================================================================= */}
-        {showPersonaModal && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50 overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white border border-slate-200 rounded-[28px] p-6 sm:p-8 max-w-xl w-full space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
-            >
-              {/* Modal Header */}
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                    <Users className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 leading-tight">
-                      {editingPersona ? 'Editar Buyer Persona' : 'Crear Nuevo Buyer Persona'}
-                    </h3>
-                    <p className="text-xs text-slate-500">Framework JTBD, StoryBrand & HubSpot Standards</p>
-                  </div>
+      </main>
+
+      {/* =========================================================================
+          MODAL 1: PERSONA CREATION / EDITING
+         ========================================================================= */}
+      {showPersonaModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white border border-slate-200 rounded-[28px] p-6 sm:p-8 max-w-xl w-full space-y-5 shadow-2xl my-auto max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Users className="w-4.5 h-4.5" />
                 </div>
-                <button
-                  onClick={() => setShowPersonaModal(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSavePersona} className="space-y-4 text-xs sm:text-sm">
-                
-                {/* Name & Role Type */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-slate-800 font-bold mb-1">Nombre Completo</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ej. Carlos Mendoza"
-                      value={newPersona.name}
-                      onChange={(e) => setNewPersona(p => ({ ...p, name: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-800 font-bold mb-1">
-                      {businessModel === 'B2B' ? 'Cargo / Rol' : 'Arquetipo'}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={businessModel === 'B2B' ? 'Ej. Director de Operaciones / CEO' : 'Ej. Compradora Frecuente'}
-                      value={newPersona.title}
-                      onChange={(e) => setNewPersona(p => ({ ...p, title: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
-                    />
-                  </div>
-                </div>
-
-                {/* JTBD */}
                 <div>
-                  <label className="block text-slate-800 font-bold mb-1">Job To Be Done (Progreso que busca)</label>
-                  <textarea
-                    rows="2"
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">
+                    {editingPersona ? 'Editar Buyer Persona' : 'Crear Nuevo Buyer Persona'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Framework JTBD, StoryBrand & HubSpot Standards</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPersonaModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePersona} className="space-y-4 text-xs sm:text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-800 font-bold mb-1">Nombre Completo</label>
+                  <input
+                    type="text"
                     required
-                    placeholder="Describe exactamente qué problema busca resolver y el resultado deseado..."
-                    value={newPersona.jtbd}
-                    onChange={(e) => setNewPersona(p => ({ ...p, jtbd: e.target.value }))}
+                    placeholder="Ej. Carlos Mendoza"
+                    value={newPersona.name}
+                    onChange={(e) => setNewPersona(p => ({ ...p, name: e.target.value }))}
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
                   />
                 </div>
 
-                {/* Pains & Gains */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div className="p-3.5 rounded-2xl bg-red-50/50 border border-red-100/80 space-y-1">
-                    <label className="block text-red-900 font-bold mb-1">Dolores Principales (1 por línea)</label>
-                    <textarea
-                      rows="3"
-                      placeholder="Pérdida de leads&#10;Falta de visibilidad ROI"
-                      value={newPersona.pains}
-                      onChange={(e) => setNewPersona(p => ({ ...p, pains: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-red-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/80 space-y-1">
-                    <label className="block text-emerald-900 font-bold mb-1">Ganancias Deseadas (1 por línea)</label>
-                    <textarea
-                      rows="3"
-                      placeholder="Aumento del 35%&#10;Ahorro de 15 horas"
-                      value={newPersona.gains}
-                      onChange={(e) => setNewPersona(p => ({ ...p, gains: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-white border border-emerald-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Channel Badges Selector */}
                 <div>
-                  <label className="block text-slate-800 font-bold mb-1.5">
-                    Canales de Información ({businessModel})
+                  <label className="block text-slate-800 font-bold mb-1">
+                    {businessModel === 'B2B' ? 'Cargo / Rol' : 'Arquetipo'}
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {(businessModel === 'B2B' ? PRESET_CHANNELS_B2B : PRESET_CHANNELS_B2C).map(ch => {
-                      const currentChannels = Array.isArray(newPersona.channels)
-                        ? newPersona.channels
-                        : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()) : [])
-                      const isSelected = currentChannels.includes(ch)
-                      return (
-                        <button
-                          key={ch}
-                          type="button"
-                          onClick={() => {
-                            let updated
-                            if (isSelected) {
-                              updated = currentChannels.filter(c => c !== ch)
-                            } else {
-                              updated = [...currentChannels, ch]
-                            }
-                            setNewPersona(p => ({ ...p, channels: updated }))
-                          }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                            isSelected
-                              ? 'bg-slate-900 text-white shadow-xs'
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                          {isSelected ? `✓ ${ch}` : `+ ${ch}`}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  <input
+                    type="text"
+                    placeholder={businessModel === 'B2B' ? 'Ej. Director de Operaciones / CEO' : 'Ej. Compradora Frecuente'}
+                    value={newPersona.title}
+                    onChange={(e) => setNewPersona(p => ({ ...p, title: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
+                  />
                 </div>
-
-                {/* Form Buttons */}
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setShowPersonaModal(false)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs sm:text-sm shadow-sm transition-all"
-                  >
-                    Guardar Persona
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-
-        {/* =========================================================================
-            MODAL 2: CONTENT PIECE FORM (MODERN WORKSPACE REDESIGN)
-           ========================================================================= */}
-        {showContentModal && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white border border-slate-200 rounded-[28px] p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl"
-            >
-              {/* Modal Header */}
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                    <Kanban className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 leading-tight">
-                      Mapear Pieza de Contenido
-                    </h3>
-                    <p className="text-xs text-slate-500">Validador de Formatos & Propósito (Página 6 HubSpot)</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowContentModal(false)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
-              <form onSubmit={handleSaveContent} className="space-y-4 text-xs sm:text-sm">
-                <div>
-                  <label className="block text-slate-800 font-bold mb-1">Título de la Pieza</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. Infografía de Errores Comunes"
-                    value={newContent.title}
-                    onChange={(e) => setNewContent(c => ({ ...c, title: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all text-xs sm:text-sm"
+              <div>
+                <label className="block text-slate-800 font-bold mb-1">Job To Be Done (Progreso que busca)</label>
+                <textarea
+                  rows="2"
+                  required
+                  placeholder="Describe exactamente qué problema busca resolver y el resultado deseado..."
+                  value={newPersona.jtbd}
+                  onChange={(e) => setNewPersona(p => ({ ...p, jtbd: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="p-3.5 rounded-2xl bg-red-50/50 border border-red-100/80 space-y-1">
+                  <label className="block text-red-900 font-bold mb-1">Dolores Principales (1 por línea)</label>
+                  <textarea
+                    rows="3"
+                    placeholder="Pérdida de leads&#10;Falta de visibilidad ROI"
+                    value={newPersona.pains}
+                    onChange={(e) => setNewPersona(p => ({ ...p, pains: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <div>
-                    <label className="block text-slate-800 font-bold mb-1">Etapa de Funnel</label>
-                    <select
-                      value={newContent.stage}
-                      onChange={(e) => setNewContent(c => ({ ...c, stage: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none font-semibold text-xs sm:text-sm"
-                    >
-                      <option value="TOFU">1. Reconocimiento (TOFU)</option>
-                      <option value="MOFU">2. Consideración (MOFU)</option>
-                      <option value="BOFU">3. Decisión (BOFU)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-800 font-bold mb-1">Formato (Página 6)</label>
-                    <select
-                      value={newContent.format}
-                      onChange={(e) => {
-                        const selectedFormat = e.target.value
-                        const match = HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.find(f => f.name === selectedFormat)
-                        setNewContent(c => ({
-                          ...c,
-                          format: selectedFormat,
-                          purpose: match ? match.purpose : ''
-                        }))
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none font-semibold text-xs sm:text-sm"
-                    >
-                      {HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.map(f => (
-                        <option key={f.name} value={f.name}>{f.name}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/80 space-y-1">
+                  <label className="block text-emerald-900 font-bold mb-1">Ganancias Deseadas (1 por línea)</label>
+                  <textarea
+                    rows="3"
+                    placeholder="Aumento del 35%&#10;Ahorro de 15 horas"
+                    value={newPersona.gains}
+                    onChange={(e) => setNewPersona(p => ({ ...p, gains: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-emerald-200 text-slate-900 focus:outline-none text-xs sm:text-sm"
+                  />
                 </div>
+              </div>
 
-                {/* Purpose Alert */}
-                <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-950">
-                  <div className="font-bold mb-0.5 flex items-center gap-1.5">
-                    <Info className="w-3.5 h-3.5 text-indigo-600" />
-                    <span>Propósito Metodológico Oficial (HubSpot):</span>
-                  </div>
-                  <div>{newContent.purpose}</div>
-                </div>
-
-                {/* Tag Selection */}
-                <div>
-                  <label className="block text-slate-800 font-bold mb-1.5">Etiqueta Visual</label>
-                  <div className="flex flex-wrap gap-2">
-                    {TAG_PRESETS.map((t) => (
+              <div>
+                <label className="block text-slate-800 font-bold mb-1.5">
+                  Canales de Información ({businessModel})
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(businessModel === 'B2B' ? PRESET_CHANNELS_B2B : PRESET_CHANNELS_B2C).map(ch => {
+                    const currentChannels = Array.isArray(newPersona.channels)
+                      ? newPersona.channels
+                      : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()) : [])
+                    const isSelected = currentChannels.includes(ch)
+                    return (
                       <button
-                        key={t.name}
+                        key={ch}
                         type="button"
-                        onClick={() => setNewContent(c => ({ ...c, tag: t.name, tagColor: t.color }))}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
-                          newContent.tag === t.name
-                            ? 'ring-2 ring-slate-900 shadow-xs'
-                            : 'opacity-70 hover:opacity-100'
-                        } ${t.color}`}
+                        onClick={() => {
+                          let updated
+                          if (isSelected) {
+                            updated = currentChannels.filter(c => c !== ch)
+                          } else {
+                            updated = [...currentChannels, ch]
+                          }
+                          setNewPersona(p => ({ ...p, channels: updated }))
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                          isSelected
+                            ? 'bg-slate-900 text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
                       >
-                        {t.name}
+                        {isSelected ? `✓ ${ch}` : `+ ${ch}`}
                       </button>
-                    ))}
-                  </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowPersonaModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs sm:text-sm shadow-sm transition-all"
+                >
+                  Guardar Persona
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 2: CONTENT PIECE FORM
+         ========================================================================= */}
+      {showContentModal && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white border border-slate-200 rounded-[28px] p-6 sm:p-8 max-w-lg w-full space-y-5 shadow-2xl"
+          >
+            <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Kanban className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 leading-tight">
+                    Mapear Pieza de Contenido
+                  </h3>
+                  <p className="text-xs text-slate-500">Validador de Formatos & Propósito (Página 6 HubSpot)</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowContentModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveContent} className="space-y-4 text-xs sm:text-sm">
+              <div>
+                <label className="block text-slate-800 font-bold mb-1">Título de la Pieza</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Infografía de Errores Comunes"
+                  value={newContent.title}
+                  onChange={(e) => setNewContent(c => ({ ...c, title: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none transition-all text-xs sm:text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="block text-slate-800 font-bold mb-1">Etapa de Funnel</label>
+                  <select
+                    value={newContent.stage}
+                    onChange={(e) => setNewContent(c => ({ ...c, stage: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none font-semibold text-xs sm:text-sm"
+                  >
+                    <option value="TOFU">1. Reconocimiento (TOFU)</option>
+                    <option value="MOFU">2. Consideración (MOFU)</option>
+                    <option value="BOFU">3. Decisión (BOFU)</option>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-slate-800 font-bold mb-1">Canal de Distribución</label>
-                  <input
-                    type="text"
-                    placeholder={businessModel === 'B2B' ? 'LinkedIn, Blog, Email' : 'Instagram, TikTok, WhatsApp'}
-                    value={newContent.channel}
-                    onChange={(e) => setNewContent(c => ({ ...c, channel: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none text-xs sm:text-sm"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setShowContentModal(false)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
+                  <label className="block text-slate-800 font-bold mb-1">Formato (Página 6)</label>
+                  <select
+                    value={newContent.format}
+                    onChange={(e) => {
+                      const selectedFormat = e.target.value
+                      const match = HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.find(f => f.name === selectedFormat)
+                      setNewContent(c => ({
+                        ...c,
+                        format: selectedFormat,
+                        purpose: match ? match.purpose : ''
+                      }))
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none font-semibold text-xs sm:text-sm"
                   >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs sm:text-sm shadow-sm transition-all"
-                  >
-                    Guardar Pieza
-                  </button>
+                    {HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.map(f => (
+                      <option key={f.name} value={f.name}>{f.name}</option>
+                    ))}
+                  </select>
                 </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
+              </div>
 
-        {/* =========================================================================
-            MODAL 3: EXECUTIVE SLIDE PRESENTATION (IDENTICAL TO REFERENCE SLIDE)
-           ========================================================================= */}
-        {viewingExecutivePersona && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white border border-slate-200 rounded-[32px] p-6 sm:p-8 max-w-5xl w-full space-y-6 shadow-2xl my-auto"
-            >
-              {/* Slide Control Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200">
-                    Ficha Ejecutiva HubSpot
-                  </span>
-                  <div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
-                      {viewingExecutivePersona.name}
-                    </h3>
-                    <p className="text-xs text-slate-500">
-                      {viewingExecutivePersona.title} • Modelo {viewingExecutivePersona.type}
-                    </p>
-                  </div>
+              <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-950">
+                <div className="font-bold mb-0.5 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Propósito Metodológico Oficial (HubSpot):</span>
                 </div>
+                <div>{newContent.purpose}</div>
+              </div>
 
-                {/* Slide Switcher Tabs */}
-                <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/60 overflow-x-auto">
-                  {[
-                    { id: 'messages', label: '1. Mensajes Clave (Slide)' },
-                    { id: 'dimensions', label: '2. 3 Dimensiones del Dolor' },
-                    { id: 'guide', label: '3. Plan de Acción & Hábitos' }
-                  ].map((tab) => (
+              <div>
+                <label className="block text-slate-800 font-bold mb-1.5">Etiqueta Visual</label>
+                <div className="flex flex-wrap gap-2">
+                  {TAG_PRESETS.map((t) => (
                     <button
-                      key={tab.id}
-                      onClick={() => setExecutiveSlideTab(tab.id)}
-                      className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
-                        executiveSlideTab === tab.id
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-500 hover:text-slate-800'
-                      }`}
+                      key={t.name}
+                      type="button"
+                      onClick={() => setNewContent(c => ({ ...c, tag: t.name, tagColor: t.color }))}
+                      className={`px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
+                        newContent.tag === t.name
+                          ? 'ring-2 ring-slate-900 shadow-xs'
+                          : 'opacity-70 hover:opacity-100'
+                      } ${t.color}`}
                     >
-                      {tab.label}
+                      {t.name}
                     </button>
                   ))}
                 </div>
+              </div>
 
-                {/* Print & Close */}
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  <button
-                    onClick={() => window.print()}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
-                    title="Imprimir o Guardar como PDF"
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>Guardar PDF</span>
-                  </button>
-                  <button
-                    onClick={() => setViewingExecutivePersona(null)}
-                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+              <div>
+                <label className="block text-slate-800 font-bold mb-1">Canal de Distribución</label>
+                <input
+                  type="text"
+                  placeholder={businessModel === 'B2B' ? 'LinkedIn, Blog, Email' : 'Instagram, TikTok, WhatsApp'}
+                  value={newContent.channel}
+                  onChange={(e) => setNewContent(c => ({ ...c, channel: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:bg-white focus:border-slate-900 focus:outline-none text-xs sm:text-sm"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowContentModal(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm hover:bg-slate-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 text-xs sm:text-sm shadow-sm transition-all"
+                >
+                  Guardar Pieza
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 3: EXECUTIVE SLIDE PRESENTATION
+         ========================================================================= */}
+      {viewingExecutivePersona && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white border border-slate-200 rounded-[32px] p-6 sm:p-8 max-w-5xl w-full space-y-6 shadow-2xl my-auto"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200">
+                  Ficha Ejecutiva HubSpot
+                </span>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+                    {viewingExecutivePersona.name}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {viewingExecutivePersona.title} • Modelo {viewingExecutivePersona.type}
+                  </p>
                 </div>
               </div>
 
-              {/* SLIDE CANVAS (HUBSPOT PRESENTATION LAYOUT) */}
-              <div className="bg-[#fafbfc] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner">
-                
-                {/* 1. SLIDE: MENSAJES CLAVE (EXACT HUBSPOT IMAGE LAYOUT) */}
-                {executiveSlideTab === 'messages' && (
-                  <div className="space-y-6">
-                    {/* Slide Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
-                      <div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                          Mensajes clave
-                        </h2>
-                        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                          Estrategia de comunicación diferenciada para atraer y convertir
-                        </p>
-                      </div>
-
-                      {/* Header Capsule Info Box */}
-                      <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 max-w-sm">
-                        <img
-                          src={viewingExecutivePersona.avatarImg}
-                          alt={viewingExecutivePersona.name}
-                          className="w-12 h-12 rounded-xl object-cover ring-2 ring-amber-200 shrink-0"
-                        />
-                        <div className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
-                          Define los mensajes principales desde las perspectivas de marketing y ventas
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Nodes & Connector Quotation Cards (Layout 1 - 2 - 3) */}
-                    <div className="space-y-4">
-                      
-                      {/* Node 1: Mensaje de Marketing */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                        <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
-                          <div>
-                            <div className="text-xs sm:text-sm font-bold">Mensaje de marketing</div>
-                            <div className="text-xs text-slate-300">Respuesta a la problemática del cliente.</div>
-                          </div>
-                          <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
-                            1
-                          </div>
-                        </div>
-                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm italic leading-relaxed">
-                          "{viewingExecutivePersona.keyMessages?.marketing || viewingExecutivePersona.jtbd}"
-                        </div>
-                      </div>
-
-                      {/* Node 2: Mensaje de Ventas */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                        <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
-                          <div>
-                            <div className="text-xs sm:text-sm font-bold">Mensaje de ventas</div>
-                            <div className="text-xs text-slate-300">Respuesta de ventas para llegar al cliente.</div>
-                          </div>
-                          <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
-                            2
-                          </div>
-                        </div>
-                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm leading-relaxed">
-                          "{viewingExecutivePersona.keyMessages?.sales || 'Prueba social y resultados comprobados con soporte dedicado.'}"
-                        </div>
-                      </div>
-
-                      {/* Node 3: Formatos Recomendados */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                        <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
-                          <div>
-                            <div className="text-xs sm:text-sm font-bold">Formatos</div>
-                            <div className="text-xs text-slate-300">Contenido más adecuado para transmitir los mensajes.</div>
-                          </div>
-                          <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
-                            3
-                          </div>
-                        </div>
-                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm text-slate-700 shadow-sm space-y-1.5">
-                          {viewingExecutivePersona.keyMessages?.formats?.map((fmt, i) => (
-                            <div key={i} className="flex items-start gap-2">
-                              <span className="w-2 h-2 rounded-full bg-slate-900 mt-1.5 shrink-0" />
-                              <span>{fmt}</span>
-                            </div>
-                          )) || (
-                            <div>Formatos personalizados según etapa del funnel.</div>
-                          )}
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-
-                {/* 2. SLIDE: 3 DIMENSIONES DEL DOLOR */}
-                {executiveSlideTab === 'dimensions' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-2xl font-black text-slate-900">Dimensión Psicológica del Problema</h2>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Framework StoryBrand & HubSpot para entender la raíz del dolor</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      
-                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                        <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-indigo-700">
-                          <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-xs font-black">1</span>
-                          <span>Problema Externo (Tangible)</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                          {viewingExecutivePersona.dimensions?.external || viewingExecutivePersona.pains[0]}
-                        </p>
-                      </div>
-
-                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                        <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-purple-700">
-                          <span className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center text-xs font-black">2</span>
-                          <span>Problema Interno (Emocional)</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                          {viewingExecutivePersona.dimensions?.internal || viewingExecutivePersona.pains[1]}
-                        </p>
-                      </div>
-
-                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                        <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-700">
-                          <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-black">3</span>
-                          <span>Problema Filosófico (Valores)</span>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                          {viewingExecutivePersona.dimensions?.philosophical || 'Cree que un negocio debe operar con excelencia y tecnología moderna.'}
-                        </p>
-                      </div>
-
-                    </div>
-
-                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-xs sm:text-sm text-amber-900 italic">
-                      <strong>Cita Textual del Cliente:</strong> {viewingExecutivePersona.habits?.quote || '“Buscamos soluciones que nos permitan crecer con orden y tranquilidad.”'}
-                    </div>
-                  </div>
-                )}
-
-                {/* 3. SLIDE: PLAN DE ACCIÓN & HÁBITOS */}
-                {executiveSlideTab === 'guide' && (
-                  <div className="space-y-6">
-                    <div>
-                      <h2 className="text-2xl font-black text-slate-900">Tu Empresa como Guía & Hábitos de Consumo</h2>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Plan estratégico de implementación y momentos ideales de contacto</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      
-                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Plan de Acción en 3 Pasos</h4>
-                        <div className="space-y-2 text-xs sm:text-sm text-slate-700">
-                          {viewingExecutivePersona.guidePlan?.actionSteps?.map((step, i) => (
-                            <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                              <span className="font-bold text-indigo-600 shrink-0">Paso {i + 1}:</span>
-                              <span>{step}</span>
-                            </div>
-                          )) || (
-                            <div>Diagnóstico ➔ Implementación ➔ Soporte</div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Horarios & Canales de Receptividad</h4>
-                        <div className="space-y-2 text-xs sm:text-sm text-slate-700">
-                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <span className="font-bold text-slate-900 block mb-0.5">Canales Digitales:</span>
-                            <span>{viewingExecutivePersona.channels?.join(', ')}</span>
-                          </div>
-                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                            <span className="font-bold text-slate-900 block mb-0.5">Ventanas de Contacto Óptimas:</span>
-                            <span>{viewingExecutivePersona.habits?.schedule || 'Horario laboral regular'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                )}
-
+              <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200/60 overflow-x-auto">
+                {[
+                  { id: 'messages', label: '1. Mensajes Clave (Slide)' },
+                  { id: 'dimensions', label: '2. 3 Dimensiones del Dolor' },
+                  { id: 'guide', label: '3. Plan de Acción & Hábitos' }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setExecutiveSlideTab(tab.id)}
+                    className={`px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
+                      executiveSlideTab === tab.id
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
-            </motion.div>
-          </div>
-        )}
 
-      </main>
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <button
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                  title="Imprimir o Guardar como PDF"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Guardar PDF</span>
+                </button>
+                <button
+                  onClick={() => setViewingExecutivePersona(null)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* SLIDE CANVAS */}
+            <div className="bg-[#fafbfc] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner">
+              
+              {/* 1. SLIDE: MENSAJES CLAVE */}
+              {executiveSlideTab === 'messages' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Mensajes clave
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Estrategia de comunicación diferenciada para atraer y convertir
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 max-w-sm">
+                      <img
+                        src={viewingExecutivePersona.avatarImg}
+                        alt={viewingExecutivePersona.name}
+                        className="w-12 h-12 rounded-xl object-cover ring-2 ring-amber-200 shrink-0"
+                      />
+                      <div className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
+                        Define los mensajes principales desde las perspectivas de marketing y ventas
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Mensaje de marketing</div>
+                          <div className="text-xs text-slate-300">Respuesta a la problemática del cliente.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          1
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm italic leading-relaxed">
+                        "{viewingExecutivePersona.keyMessages?.marketing || viewingExecutivePersona.jtbd}"
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Mensaje de ventas</div>
+                          <div className="text-xs text-slate-300">Respuesta de ventas para llegar al cliente.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          2
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm leading-relaxed">
+                        "{viewingExecutivePersona.keyMessages?.sales || 'Prueba social y resultados comprobados con soporte dedicado.'}"
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Formatos</div>
+                          <div className="text-xs text-slate-300">Contenido más adecuado para transmitir los mensajes.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          3
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm text-slate-700 shadow-sm space-y-1.5">
+                        {viewingExecutivePersona.keyMessages?.formats?.map((fmt, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="w-2 h-2 rounded-full bg-slate-900 mt-1.5 shrink-0" />
+                            <span>{fmt}</span>
+                          </div>
+                        )) || (
+                          <div>Formatos personalizados según etapa del funnel.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. SLIDE: 3 DIMENSIONES DEL DOLOR */}
+              {executiveSlideTab === 'dimensions' && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900">Dimensión Psicológica del Problema</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Framework StoryBrand & HubSpot para entender la raíz del dolor</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-indigo-700">
+                        <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-xs font-black">1</span>
+                        <span>Problema Externo (Tangible)</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                        {viewingExecutivePersona.dimensions?.external || viewingExecutivePersona.pains[0]}
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-purple-700">
+                        <span className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center text-xs font-black">2</span>
+                        <span>Problema Interno (Emocional)</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                        {viewingExecutivePersona.dimensions?.internal || viewingExecutivePersona.pains[1]}
+                      </p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-700">
+                        <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-black">3</span>
+                        <span>Problema Filosófico (Valores)</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
+                        {viewingExecutivePersona.dimensions?.philosophical || 'Cree que un negocio debe operar con excelencia y tecnología moderna.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-xs sm:text-sm text-amber-900 italic">
+                    <strong>Cita Textual del Cliente:</strong> {viewingExecutivePersona.habits?.quote || '“Buscamos soluciones que nos permitan crecer con orden y tranquilidad.”'}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. SLIDE: PLAN DE ACCIÓN & HÁBITOS */}
+              {executiveSlideTab === 'guide' && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900">Tu Empresa como Guía & Hábitos de Consumo</h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Plan estratégico de implementación y momentos ideales de contacto</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Plan de Acción en 3 Pasos</h4>
+                      <div className="space-y-2 text-xs sm:text-sm text-slate-700">
+                        {viewingExecutivePersona.guidePlan?.actionSteps?.map((step, i) => (
+                          <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span className="font-bold text-indigo-600 shrink-0">Paso {i + 1}:</span>
+                            <span>{step}</span>
+                          </div>
+                        )) || (
+                          <div>Diagnóstico ➔ Implementación ➔ Soporte</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Horarios & Canales de Receptividad</h4>
+                      <div className="space-y-2 text-xs sm:text-sm text-slate-700">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                          <span className="font-bold text-slate-900 block mb-0.5">Canales Digitales:</span>
+                          <span>{viewingExecutivePersona.channels?.join(', ')}</span>
+                        </div>
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                          <span className="font-bold text-slate-900 block mb-0.5">Ventanas de Contacto Óptimas:</span>
+                          <span>{viewingExecutivePersona.habits?.schedule || 'Horario laboral regular'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </motion.div>
+        </div>
+      )}
+
     </div>
   )
 }

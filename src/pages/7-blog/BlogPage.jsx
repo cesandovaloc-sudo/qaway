@@ -353,7 +353,7 @@ export default function BlogPage() {
             <img
               src={article.image}
               alt={article.title}
-              className="h-full w-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105 group-hover:opacity-100"
+              className="h-full w-full object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-100"
               loading="lazy"
             />
             <div className="absolute left-4 top-4 flex flex-wrap gap-2">
@@ -550,19 +550,21 @@ export default function BlogPage() {
               </>
             ) : (
               <>
-                {/* 1. SECCIÓN DESTACADOS */}
-                <div className="mb-8 border-b border-black/10 pb-4">
-                  <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
-                    Destacados
-                  </h2>
-                  <p className="mt-1 text-xs text-black/60 sm:text-sm">
-                    Guías y temas seleccionados por el equipo de Qaway Lab.
-                  </p>
-                </div>
-
+                {/* 1. SECCIÓN DESTACADOS (Solo se muestra si hay artículos) */}
                 {highlightedArticles.length > 0 && (
-                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {highlightedArticles.map((article, idx) => renderArticleCard(article, idx))}
+                  <div>
+                    <div className="mb-8 border-b border-black/10 pb-4">
+                      <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
+                        Destacados
+                      </h2>
+                      <p className="mt-1 text-xs text-black/60 sm:text-sm">
+                        Guías y temas seleccionados por el equipo de Qaway Lab.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                      {highlightedArticles.map((article, idx) => renderArticleCard(article, idx))}
+                    </div>
                   </div>
                 )}
 
