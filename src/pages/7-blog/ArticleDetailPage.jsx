@@ -433,8 +433,8 @@ export default function ArticleDetailPage() {
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 pt-[100px] pb-24 relative">
       
-      {/* Barra de progreso de lectura pegajosa justo debajo del Navbar */}
-      <div className="fixed top-[80px] left-0 right-0 h-1 bg-zinc-100 z-40">
+      {/* Barra de progreso de lectura pegajosa en el techo exacto de la pantalla */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-zinc-200/80 z-50">
         <div 
           className="h-full bg-linear-to-r from-qaway-accent to-qaway-accent-dark transition-all duration-100" 
           style={{ width: `${scrollProgress}%` }}
@@ -500,12 +500,12 @@ export default function ArticleDetailPage() {
               <button
                 type="button"
                 onClick={togglePlayAudio}
-                className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b] active:scale-95"
+                className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-1.5 text-xs sm:text-[13px] font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b] hover:text-[#ff4b0b] hover:shadow-sm active:scale-95"
               >
                 {isPlayingAudio && !isPausedAudio ? (
-                  <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                  <Pause className="h-4 w-4 text-[#ff4b0b] fill-current" />
                 ) : (
-                  <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                  <Play className="h-4 w-4 text-[#ff4b0b] fill-current" />
                 )}
                 <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
               </button>
@@ -594,12 +594,12 @@ export default function ArticleDetailPage() {
                 <button
                   type="button"
                   onClick={togglePlayAudio}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b] active:scale-95"
+                  className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-1.5 text-xs sm:text-[13px] font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b] hover:text-[#ff4b0b] hover:shadow-sm active:scale-95"
                 >
                   {isPlayingAudio && !isPausedAudio ? (
-                    <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                    <Pause className="h-4 w-4 text-[#ff4b0b] fill-current" />
                   ) : (
-                    <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                    <Play className="h-4 w-4 text-[#ff4b0b] fill-current" />
                   )}
                   <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
                 </button>

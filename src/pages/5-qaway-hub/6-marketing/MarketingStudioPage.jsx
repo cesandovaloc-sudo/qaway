@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { jsPDF } from 'jspdf'
+import html2canvas from 'html2canvas'
 import {
   Users,
   Kanban,
@@ -594,100 +596,106 @@ export default function MarketingStudioPage() {
     }))
   }
 
-  const handleDirectExportPersona = (persona) => {
+  const handleDirectExportPersona = async (persona) => {
     if (!persona) return
     const safeName = (persona.name || 'Buyer-Persona').replace(/[^a-zA-Z0-9_-]/g, '_')
-    const htmlContent = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Buyer Persona - ${persona.name}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f5f8; color: #0f172a; padding: 32px; margin: 0; }
-    .container { max-width: 900px; margin: 0 auto; background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 28px; }
-    .title { font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; }
-    .subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
-    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-    .quote-box { background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 16px 20px; border-radius: 12px; font-style: italic; color: #334155; margin-bottom: 28px; font-size: 15px; }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
-    .card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; }
-    .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 10px; letter-spacing: 0.05em; }
-    .card-content { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.5; }
-    .card-content p { margin: 6px 0; }
-    .highlight-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 16px; padding: 20px; margin-top: 24px; }
-    .highlight-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 6px; }
-    .highlight-body { font-size: 14px; font-weight: 600; color: #064e3b; line-height: 1.6; }
-    .btn-print { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; }
-    @media print { .btn-print { display: none; } body { padding: 0; background: white; } .container { box-shadow: none; border: none; padding: 0; } }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div>
-        <h1 class="title">${persona.name}</h1>
-        <div class="subtitle">${persona.title} • Modelo ${persona.type}</div>
-      </div>
-      <div>
-        <span class="badge">Ficha Oficial Qaway & HubSpot</span>
-        <button class="btn-print" onclick="window.print()" style="margin-left: 12px;">Imprimir / PDF</button>
-      </div>
-    </div>
-
-    <div class="quote-box">
-      "${persona.jtbd || 'Progreso estratégico del cliente'}"
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <div class="card-title">Perfil General</div>
-        <div class="card-content">
-          <p><strong>Edad:</strong> ${persona.age || '35-44 años'}</p>
-          <p><strong>Educación:</strong> ${persona.education || 'Profesional'}</p>
-          <p><strong>Industria:</strong> ${persona.industry || 'Servicios'}</p>
-          <p><strong>Empresa:</strong> ${persona.companySize || '1-10 empleados'}</p>
+    
+    // Create high-res offscreen DOM element
+    const printEl = document.createElement('div')
+    printEl.style.width = '850px'
+    printEl.style.padding = '36px'
+    printEl.style.background = '#ffffff'
+    printEl.style.position = 'fixed'
+    printEl.style.top = '-9999px'
+    printEl.style.left = '-9999px'
+    printEl.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+    printEl.style.color = '#0f172a'
+    printEl.style.boxSizing = 'border-box'
+    
+    printEl.innerHTML = `
+      <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 style="font-size: 26px; font-weight: 800; margin: 0; color: #0f172a;">${persona.name}</h1>
+          <div style="color: #64748b; font-size: 14px; margin-top: 4px;">${persona.title} • Modelo ${persona.type}</div>
+        </div>
+        <div style="background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
+          Ficha Oficial HubSpot
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Detalles Profesionales</div>
-        <div class="card-content">
-          <p><strong>Canales:</strong> ${Array.isArray(persona.commChannels) ? persona.commChannels.join(', ') : 'WhatsApp, Email'}</p>
-          <p><strong>Reporta a:</strong> ${persona.reportingTo || 'Dirección General'}</p>
-          <p><strong>Herramientas:</strong> ${Array.isArray(persona.tools) ? persona.tools.join(', ') : 'CRM, Email'}</p>
+      <div style="background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 14px 18px; border-radius: 12px; font-style: italic; color: #334155; margin-bottom: 24px; font-size: 14px; line-height: 1.5;">
+        "${persona.jtbd || 'Progreso estratégico del cliente'}"
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Perfil General</div>
+          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+            <div>• <strong>Edad:</strong> ${persona.age || '35-44 años'}</div>
+            <div>• <strong>Educación:</strong> ${persona.education || 'Profesional'}</div>
+            <div>• <strong>Industria:</strong> ${persona.industry || 'Servicios'}</div>
+            <div>• <strong>Empresa:</strong> ${persona.companySize || '1-10 empleados'}</div>
+          </div>
+        </div>
+
+        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Detalles Profesionales</div>
+          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+            <div>• <strong>Canales:</strong> ${Array.isArray(persona.commChannels) ? persona.commChannels.join(', ') : 'WhatsApp, Email'}</div>
+            <div>• <strong>Reporta a:</strong> ${persona.reportingTo || 'Dirección General'}</div>
+            <div>• <strong>Herramientas:</strong> ${Array.isArray(persona.tools) ? persona.tools.join(', ') : 'CRM, Email'}</div>
+          </div>
+        </div>
+
+        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Objetivos & Dolores</div>
+          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+            <div>• <strong>Métricas:</strong> ${Array.isArray(persona.kpis) ? persona.kpis.join(', ') : 'Crecimiento'}</div>
+            <div>• <strong>Dolor:</strong> ${Array.isArray(persona.pains) ? persona.pains[0] : persona.pains}</div>
+            <div>• <strong>Fuentes:</strong> ${Array.isArray(persona.infoSources) ? persona.infoSources.join(', ') : 'Online'}</div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Objetivos & Dolores</div>
-        <div class="card-content">
-          <p><strong>Métricas:</strong> ${Array.isArray(persona.kpis) ? persona.kpis.join(', ') : 'Crecimiento de clientes'}</p>
-          <p><strong>Dolor:</strong> ${Array.isArray(persona.pains) ? persona.pains[0] : persona.pains}</p>
-          <p><strong>Fuentes:</strong> ${Array.isArray(persona.infoSources) ? persona.infoSources.join(', ') : 'Online'}</p>
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 16px; margin-top: 16px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 6px;">Cómo Contribuimos a su Éxito</div>
+        <div style="font-size: 13px; font-weight: 600; color: #064e3b; line-height: 1.6;">
+          ${persona.howWeHelp || persona.jtbd}
         </div>
       </div>
-    </div>
 
-    <div class="highlight-card">
-      <div class="highlight-title">Cómo Contribuimos a su Éxito</div>
-      <div class="highlight-body">
-        ${persona.howWeHelp || persona.jtbd}
+      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; font-weight: 600;">
+        <span>Qaway Lab • Marketing Studio OS</span>
+        <span>Generado el ${new Date().toLocaleDateString('es-ES')}</span>
       </div>
-    </div>
-  </div>
-</body>
-</html>`
+    `
 
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `Buyer-Persona-${safeName}.html`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    document.body.appendChild(printEl)
+
+    try {
+      const canvas = await html2canvas(printEl, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+      
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width / 2, canvas.height / 2]
+      })
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2)
+      pdf.save(`Buyer-Persona-${safeName}.pdf`)
+    } catch (err) {
+      console.error('Error generating PDF:', err)
+    } finally {
+      if (document.body.contains(printEl)) {
+        document.body.removeChild(printEl)
+      }
+    }
   }
 
   const handleDeletePersona = (id) => {
