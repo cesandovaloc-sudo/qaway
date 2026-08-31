@@ -312,6 +312,8 @@ export default function MarketingStudioPage() {
   // Modals state
   const [showPersonaModal, setShowPersonaModal] = useState(false)
   const [editingPersona, setEditingPersona] = useState(null)
+  const [viewingExecutivePersona, setViewingExecutivePersona] = useState(null)
+  const [executiveSlideTab, setExecutiveSlideTab] = useState('messages') // 'messages' | 'dimensions' | 'profile'
   const [newPersona, setNewPersona] = useState({
     name: '',
     title: '',
@@ -892,10 +894,20 @@ export default function MarketingStudioPage() {
                             </div>
                           </div>
 
-                          {/* Actions */}
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
-                            <span className="text-slate-400">Canales: {persona.channels.join(', ')}</span>
-                            <div className="flex gap-2">
+                          {/* Actions & Slide Trigger */}
+                          <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]">
+                            <button
+                              onClick={() => {
+                                setViewingExecutivePersona(persona)
+                                setExecutiveSlideTab('messages')
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all w-fit"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Ver Ficha Ejecutiva (Slide)</span>
+                            </button>
+
+                            <div className="flex items-center gap-3 self-end sm:self-auto">
                               <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800 font-bold">
                                 Editar
                               </button>
@@ -1525,6 +1537,263 @@ export default function MarketingStudioPage() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+
+        {/* MODAL 4: EXECUTIVE SLIDE PRESENTATION VIEWER (HUBSPOT STANDARDS) */}
+        {viewingExecutivePersona && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white border border-slate-200 rounded-[32px] p-6 sm:p-8 max-w-5xl w-full space-y-6 shadow-2xl my-auto"
+            >
+              {/* Slide Control Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
+                    Ficha Ejecutiva HubSpot
+                  </span>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 leading-tight">
+                      {viewingExecutivePersona.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      {viewingExecutivePersona.title} • Modelo {viewingExecutivePersona.type}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Slide Switcher Tabs */}
+                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/60 overflow-x-auto">
+                  {[
+                    { id: 'messages', label: '1. Mensajes Clave (Slide)' },
+                    { id: 'dimensions', label: '2. 3 Dimensiones del Dolor' },
+                    { id: 'guide', label: '3. Plan de Acción & Hábitos' }
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setExecutiveSlideTab(tab.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                        executiveSlideTab === tab.id
+                          ? 'bg-white text-slate-900 shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Print & Close */}
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
+                    title="Imprimir o Guardar como PDF"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Guardar PDF</span>
+                  </button>
+                  <button
+                    onClick={() => setViewingExecutivePersona(null)}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* SLIDE CANVAS (HUBSPOT PRESENTATION LAYOUT) */}
+              <div className="bg-[#fafafa] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner">
+                
+                {/* 1. SLIDE: MENSAJES CLAVE (EXACT HUBSPOT IMAGE LAYOUT) */}
+                {executiveSlideTab === 'messages' && (
+                  <div className="space-y-6">
+                    {/* Slide Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                      <div>
+                        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                          Mensajes clave
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Estrategia de comunicación diferenciada para atraer y convertir
+                        </p>
+                      </div>
+
+                      {/* Header Capsule Info Box */}
+                      <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 max-w-sm">
+                        <img
+                          src={viewingExecutivePersona.avatarImg}
+                          alt={viewingExecutivePersona.name}
+                          className="w-12 h-12 rounded-xl object-cover ring-2 ring-amber-200 shrink-0"
+                        />
+                        <div className="text-xs font-bold text-slate-800 leading-snug">
+                          Define los mensajes principales desde las perspectivas de marketing y ventas
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Nodes & Connector Quotation Cards (Layout 1 - 2 - 3) */}
+                    <div className="space-y-4">
+                      
+                      {/* Node 1: Mensaje de Marketing */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <div className="md:col-span-4 flex items-center justify-between p-3.5 rounded-2xl bg-slate-900 text-white shadow-sm">
+                          <div>
+                            <div className="text-xs font-bold">Mensaje de marketing</div>
+                            <div className="text-[10px] text-slate-300">Respuesta a la problemática del cliente.</div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                            1
+                          </div>
+                        </div>
+                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs font-medium text-slate-800 shadow-sm italic leading-relaxed">
+                          "{viewingExecutivePersona.keyMessages?.marketing || viewingExecutivePersona.jtbd}"
+                        </div>
+                      </div>
+
+                      {/* Node 2: Mensaje de Ventas */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <div className="md:col-span-4 flex items-center justify-between p-3.5 rounded-2xl bg-slate-900 text-white shadow-sm">
+                          <div>
+                            <div className="text-xs font-bold">Mensaje de ventas</div>
+                            <div className="text-[10px] text-slate-300">Respuesta de ventas para llegar al cliente.</div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                            2
+                          </div>
+                        </div>
+                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs font-medium text-slate-800 shadow-sm leading-relaxed">
+                          "{viewingExecutivePersona.keyMessages?.sales || 'Prueba social y resultados comprobados con soporte dedicado.'}"
+                        </div>
+                      </div>
+
+                      {/* Node 3: Formatos Recomendados */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                        <div className="md:col-span-4 flex items-center justify-between p-3.5 rounded-2xl bg-slate-900 text-white shadow-sm">
+                          <div>
+                            <div className="text-xs font-bold">Formatos</div>
+                            <div className="text-[10px] text-slate-300">Contenido más adecuado para transmitir los mensajes.</div>
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                            3
+                          </div>
+                        </div>
+                        <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs text-slate-700 shadow-sm space-y-1.5">
+                          {viewingExecutivePersona.keyMessages?.formats?.map((fmt, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-slate-900 mt-1.5 shrink-0" />
+                              <span>{fmt}</span>
+                            </div>
+                          )) || (
+                            <div>Formatos personalizados según etapa del funnel.</div>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. SLIDE: 3 DIMENSIONES DEL DOLOR (EXTERNO, INTERNO, FILOSÓFICO) */}
+                {executiveSlideTab === 'dimensions' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-black text-slate-900">Dimensión Psicológica del Problema</h2>
+                      <p className="text-xs text-slate-500">Framework StoryBrand & HubSpot para entender la raíz del dolor</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      
+                      {/* Externo */}
+                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                        <div className="flex items-center gap-2 text-xs font-bold text-indigo-700">
+                          <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-[10px] font-black">1</span>
+                          <span>Problema Externo (Tangible)</span>
+                        </div>
+                        <p className="text-xs text-slate-700 leading-relaxed">
+                          {viewingExecutivePersona.dimensions?.external || viewingExecutivePersona.pains[0]}
+                        </p>
+                      </div>
+
+                      {/* Interno */}
+                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                        <div className="flex items-center gap-2 text-xs font-bold text-purple-700">
+                          <span className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center text-[10px] font-black">2</span>
+                          <span>Problema Interno (Emocional)</span>
+                        </div>
+                        <p className="text-xs text-slate-700 leading-relaxed">
+                          {viewingExecutivePersona.dimensions?.internal || viewingExecutivePersona.pains[1]}
+                        </p>
+                      </div>
+
+                      {/* Filosófico */}
+                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
+                        <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+                          <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-[10px] font-black">3</span>
+                          <span>Problema Filosófico (Valores)</span>
+                        </div>
+                        <p className="text-xs text-slate-700 leading-relaxed">
+                          {viewingExecutivePersona.dimensions?.philosophical || 'Cree que un negocio debe operar con excelencia y tecnología moderna.'}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* Cita Textual */}
+                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-xs text-amber-900 italic">
+                      <strong>Cita Textual del Cliente:</strong> {viewingExecutivePersona.habits?.quote || '“Buscamos soluciones que nos permitan crecer con orden y tranquilidad.”'}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. SLIDE: PLAN DE ACCIÓN & HÁBITOS */}
+                {executiveSlideTab === 'guide' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-black text-slate-900">Tu Empresa como Guía & Hábitos de Consumo</h2>
+                      <p className="text-xs text-slate-500">Plan estratégico de implementación y momentos ideales de contacto</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      
+                      {/* Plan de Acción */}
+                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Plan de Acción en 3 Pasos</h4>
+                        <div className="space-y-2 text-xs text-slate-700">
+                          {viewingExecutivePersona.guidePlan?.actionSteps?.map((step, i) => (
+                            <div key={i} className="flex items-start gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100">
+                              <span className="font-bold text-indigo-600 shrink-0">Paso {i + 1}:</span>
+                              <span>{step}</span>
+                            </div>
+                          )) || (
+                            <div>Diagnóstico ➔ Implementación ➔ Soporte</div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Hábitos y Horarios */}
+                      <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
+                        <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Horarios & Canales de Receptividad</h4>
+                        <div className="space-y-2 text-xs text-slate-700">
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span className="font-bold text-slate-900 block mb-0.5">Canales Digitales:</span>
+                            <span>{viewingExecutivePersona.channels?.join(', ')}</span>
+                          </div>
+                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span className="font-bold text-slate-900 block mb-0.5">Ventanas de Contacto Óptimas:</span>
+                            <span>{viewingExecutivePersona.habits?.schedule || 'Horario laboral regular'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                )}
+
+              </div>
             </motion.div>
           </div>
         )}

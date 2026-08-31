@@ -200,10 +200,10 @@ function ProjectCard({ project, index }) {
           </div>
           <Link
             to={project.path || '/landings/desarrollo-web'}
-            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
+            className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
           >
             <span>Ver proyecto</span>
-            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+            <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
           </Link>
         </div>
       </div>
@@ -256,9 +256,9 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
             </p>
           </div>
           <div className="pt-4 flex items-center">
-            <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#fe6612] transition-colors">
+            <span className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#fe6612] transition-colors">
               <span>Ver proyecto</span>
-              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
             </span>
           </div>
         </div>
@@ -603,20 +603,20 @@ export default function ProyectosPage() {
                   </div>
                 </div>
 
-                {/* Textos descriptivos debajo del móvil */}
+                {/* Textos descriptivos debajo del móvil homologados en jerarquía */}
                 <div className="mt-5 text-center px-2 flex flex-col items-center">
-                  <h3 className="text-base font-bold text-[#111210] group-hover:text-[#fe6612] transition-colors mb-1">
+                  <h3 className="text-[17px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] group-hover:text-[#fe6612] transition-colors mb-2">
                     {mockup.title}
                   </h3>
-                  <p className="text-xs text-[#71717a] leading-relaxed mb-3">
+                  <p className="text-[13.5px] text-[#71717a] leading-[1.5] max-w-[260px] mb-3.5">
                     {mockup.desc}
                   </p>
                   <Link
                     to="/landings/desarrollo-web"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
+                    className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
                   >
                     <span>Ver proyecto</span>
-                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                   </Link>
                 </div>
               </motion.div>
