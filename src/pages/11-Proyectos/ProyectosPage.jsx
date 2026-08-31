@@ -182,16 +182,16 @@ function ProjectCard({ project, index }) {
         </div>
       </div>
 
-      {/* Textos Editoriales Debajo (Estilo Benchmark) */}
+      {/* Textos Editoriales Debajo (Estilo Benchmark / Desarrollo Web) */}
       <div className="pt-6 pb-2">
-        <h3 className="text-2xl font-bold text-[#111210] tracking-[-0.03em] mb-2 group-hover:text-[#fe6612] transition-colors">
+        <h3 className="text-[22px] sm:text-[24px] font-bold text-[#111111] tracking-[-0.03em] mb-2 leading-[1.25] group-hover:text-[#fe6612] transition-colors">
           {project.title}
         </h3>
-        <p className="text-sm sm:text-[14.5px] leading-relaxed text-[#71717a] mb-4 max-w-xl">
+        <p className="text-[14px] sm:text-[14.5px] leading-[1.55] text-[#71717a] mb-4 max-w-xl">
           {project.subtitle}
         </p>
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex flex-wrap gap-4 text-xs font-semibold text-[#18181b]/75">
+          <div className="flex flex-wrap gap-4 text-[12px] font-semibold text-[#18181b]/75">
             {project.tags.map((tag) => (
               <span key={tag} className="border-b border-[#20201f]/30 pb-0.5">
                 {tag}
@@ -200,7 +200,7 @@ function ProjectCard({ project, index }) {
           </div>
           <Link
             to={project.path || '/landings/desarrollo-web'}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
+            className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
           >
             <span>Ver proyecto</span>
             <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
@@ -219,12 +219,12 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
       whileHover={{ y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="group flex flex-col overflow-hidden rounded-[14px] border border-black/8 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer"
+      className="group flex flex-col overflow-hidden rounded-[12px] border border-[#e4e4e7] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer"
     >
       <Link to={to} className="flex flex-col h-full">
         {isMockup ? (
-          <div className="flex h-[240px] sm:h-[280px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
-            <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+          <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+            <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
               <img
                 src={image}
                 alt={title}
@@ -233,7 +233,7 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
             </div>
           </div>
         ) : (
-          <div className="relative h-[240px] sm:h-[280px] overflow-hidden bg-zinc-100">
+          <div className="relative h-[260px] sm:h-[300px] overflow-hidden bg-zinc-100">
             <img
               src={image}
               alt={title}
@@ -246,17 +246,17 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
             )}
           </div>
         )}
-        <div className="flex flex-1 flex-col justify-between p-6">
+        <div className="flex flex-1 flex-col justify-between p-[24px] sm:p-[26px]">
           <div>
-            <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
+            <h3 className="mb-2.5 text-[19px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] transition-colors group-hover:text-[#fe6612]">
               {title}
             </h3>
-            <p className="text-[13.5px] leading-relaxed text-[#71717a]">
+            <p className="text-[14px] leading-[1.55] text-[#71717a]">
               {desc}
             </p>
           </div>
           <div className="pt-4 flex items-center">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#fe6612] transition-colors">
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-bold text-[#fe6612] transition-colors">
               <span>Ver proyecto</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
             </span>
@@ -509,10 +509,10 @@ export default function ProyectosPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
-            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#12131a] tracking-[-0.03em] leading-[1.18] mb-3">
+            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#111111] tracking-[-0.03em] leading-[1.18] mb-3.5">
               Proyectos en funcionamiento
             </h2>
-            <p className="text-[#71717a] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+            <p className="text-[#71717a] text-[15px] sm:text-[16px] leading-[1.55] max-w-[620px] mx-auto">
               Plataformas vivas, interacción en tiempo real y sistemas desplegados para marcas en producción.
             </p>
           </motion.div>
@@ -541,10 +541,10 @@ export default function ProyectosPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
           >
-            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#12131a] tracking-[-0.03em] leading-[1.18] mb-3">
+            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#111111] tracking-[-0.03em] leading-[1.18] mb-3.5">
               Diseño pensado para conversión móvil
             </h2>
-            <p className="text-[#71717a] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+            <p className="text-[#71717a] text-[15px] sm:text-[16px] leading-[1.55] max-w-[620px] mx-auto">
               Más del 70% del tráfico interactúa desde un smartphone. Optimizamos cada pantalla para respuesta táctil inmediata.
             </p>
           </motion.div>

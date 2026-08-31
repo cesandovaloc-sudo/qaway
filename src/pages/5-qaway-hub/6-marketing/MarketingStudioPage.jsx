@@ -55,6 +55,9 @@ const HUBSPOT_FORMATS_BY_STAGE = {
   ]
 }
 
+const PRESET_CHANNELS_B2B = ['LinkedIn', 'Google Search', 'Email Corporativo', 'Webinars & Demos', 'WhatsApp Business']
+const PRESET_CHANNELS_B2C = ['Instagram', 'TikTok', 'WhatsApp', 'YouTube', 'Google / Reseñas', 'Facebook']
+
 const INITIAL_PERSONAS = [
   {
     id: 'p-1',
@@ -318,33 +321,38 @@ export default function MarketingStudioPage() {
     e.preventDefault()
     if (!newPersona.name || !newPersona.jtbd) return
 
+    const resolvedChannels = Array.isArray(newPersona.channels)
+      ? newPersona.channels
+      : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()).filter(Boolean) : [])
+
     if (editingPersona) {
       setPersonas(prev => prev.map(p => (p.id === editingPersona.id ? {
         ...editingPersona,
         ...newPersona,
+        type: businessModel,
         pains: typeof newPersona.pains === 'string' ? newPersona.pains.split('\n').filter(Boolean) : newPersona.pains,
         gains: typeof newPersona.gains === 'string' ? newPersona.gains.split('\n').filter(Boolean) : newPersona.gains,
-        channels: typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()).filter(Boolean) : newPersona.channels
+        channels: resolvedChannels
       } : p)))
     } else {
       const created = {
         id: `p-${Date.now()}`,
         name: newPersona.name,
         title: newPersona.title,
-        type: newPersona.type,
+        type: businessModel,
         avatarImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        avatarBg: newPersona.type === 'B2B' ? 'bg-indigo-100 text-indigo-700' : 'bg-violet-100 text-violet-700',
+        avatarBg: businessModel === 'B2B' ? 'bg-indigo-100 text-indigo-700' : 'bg-violet-100 text-violet-700',
         jtbd: newPersona.jtbd,
-        pains: newPersona.pains.split('\n').filter(Boolean),
-        gains: newPersona.gains.split('\n').filter(Boolean),
-        channels: newPersona.channels.split(',').map(s => s.trim()).filter(Boolean),
+        pains: typeof newPersona.pains === 'string' ? newPersona.pains.split('\n').filter(Boolean) : newPersona.pains,
+        gains: typeof newPersona.gains === 'string' ? newPersona.gains.split('\n').filter(Boolean) : newPersona.gains,
+        channels: resolvedChannels.length > 0 ? resolvedChannels : (businessModel === 'B2B' ? ['LinkedIn', 'Google Search'] : ['Instagram', 'TikTok']),
         trigger: newPersona.trigger
       }
       setPersonas(prev => [...prev, created])
     }
     setShowPersonaModal(false)
     setEditingPersona(null)
-    setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
+    setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: [], trigger: '' })
   }
 
   const handleDeletePersona = (id) => {
@@ -360,7 +368,7 @@ export default function MarketingStudioPage() {
       jtbd: persona.jtbd,
       pains: Array.isArray(persona.pains) ? persona.pains.join('\n') : persona.pains,
       gains: Array.isArray(persona.gains) ? persona.gains.join('\n') : persona.gains,
-      channels: Array.isArray(persona.channels) ? persona.channels.join(', ') : persona.channels,
+      channels: Array.isArray(persona.channels) ? persona.channels : [],
       trigger: persona.trigger || ''
     })
     setShowPersonaModal(true)
@@ -487,16 +495,18 @@ export default function MarketingStudioPage() {
       {/* MAIN CONTENT AREA */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
 
-        {/* CONTEXT CALLOUT: B2B vs B2C Strategy Banner */}
-        <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between gap-4">
+        {/* CONTEXT CALLOUT: B2B vs B2C Strategy Banner with Direct Switcher */}
+        <div className="mb-6 p-4.5 rounded-2xl bg-white border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${businessModel === 'B2B' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+            <div className={`p-3 rounded-2xl transition-colors ${businessModel === 'B2B' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
               {businessModel === 'B2B' ? <Building2 className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
             </div>
             <div>
               <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
                 <span>Estrategia Activa: Modelo {businessModel === 'B2B' ? 'B2B (Ventas Consultivas / Leads)' : 'B2C (Conversión Directa)'}</span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  businessModel === 'B2B' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                }`}>
                   {businessModel === 'B2B' ? 'Enfoque MQL ➔ SQL' : 'Enfoque Checkout / Fricción Cero'}
                 </span>
               </div>
@@ -506,6 +516,34 @@ export default function MarketingStudioPage() {
                   : 'Canales prioritarios: Instagram, TikTok y WhatsApp. El recorrido busca llevar al usuario a la compra con mínima fricción.'}
               </p>
             </div>
+          </div>
+
+          {/* Interactive B2B / B2C Buttons inside Banner */}
+          <div className="flex items-center p-1 bg-slate-100/80 rounded-xl border border-slate-200/60 shrink-0 self-start md:self-auto">
+            <button
+              type="button"
+              onClick={() => setBusinessModel('B2B')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                businessModel === 'B2B'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Modelo B2B</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBusinessModel('B2C')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                businessModel === 'B2C'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Modelo B2C</span>
+            </button>
           </div>
         </div>
 
@@ -1136,71 +1174,89 @@ export default function MarketingStudioPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1">Cargo</label>
-                    <input
-                      type="text"
-                      placeholder="Ej. CEO / Gerente"
-                      value={newPersona.title}
-                      onChange={(e) => setNewPersona(p => ({ ...p, title: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-700 font-bold mb-1">Tipo de Mercado</label>
-                    <select
-                      value={newPersona.type}
-                      onChange={(e) => setNewPersona(p => ({ ...p, type: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
-                    >
-                      <option value="B2B">B2B (Empresas)</option>
-                      <option value="B2C">B2C (Consumidor)</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">
+                    {businessModel === 'B2B' ? 'Rol / Cargo en la Empresa' : 'Arquetipo / Perfil'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={businessModel === 'B2B' ? 'Ej. Director de Operaciones / CEO' : 'Ej. Comprador Digital Frecuente'}
+                    value={newPersona.title}
+                    onChange={(e) => setNewPersona(p => ({ ...p, title: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Job To Be Done (Trabajo Principal)</label>
+                  <label className="block text-slate-700 font-bold mb-1">Job To Be Done (¿Qué busca resolver?)</label>
                   <textarea
                     rows="2"
                     required
-                    placeholder="Qué progreso busca resolver el cliente..."
+                    placeholder="Describe el progreso principal que busca alcanzar..."
                     value={newPersona.jtbd}
                     onChange={(e) => setNewPersona(p => ({ ...p, jtbd: e.target.value }))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1">Dolores (Pains - 1 por línea)</label>
-                  <textarea
-                    rows="2"
-                    value={newPersona.pains}
-                    onChange={(e) => setNewPersona(p => ({ ...p, pains: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Dolores (Pains - 1 por línea)</label>
+                    <textarea
+                      rows="2"
+                      placeholder="Pérdida de tiempo&#10;Falta de reportes"
+                      value={newPersona.pains}
+                      onChange={(e) => setNewPersona(p => ({ ...p, pains: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-700 font-bold mb-1">Ganancias (Gains - 1 por línea)</label>
+                    <textarea
+                      rows="2"
+                      placeholder="Aumento del 30%&#10;Ahorro de horas"
+                      value={newPersona.gains}
+                      onChange={(e) => setNewPersona(p => ({ ...p, gains: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Ganancias (Gains - 1 por línea)</label>
-                  <textarea
-                    rows="2"
-                    value={newPersona.gains}
-                    onChange={(e) => setNewPersona(p => ({ ...p, gains: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-700 font-bold mb-1">Canales (separados por coma)</label>
-                  <input
-                    type="text"
-                    placeholder="LinkedIn, Google, Email"
-                    value={newPersona.channels}
-                    onChange={(e) => setNewPersona(p => ({ ...p, channels: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
-                  />
+                  <label className="block text-slate-700 font-bold mb-1.5">
+                    Canales de Información Preferidos ({businessModel})
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(businessModel === 'B2B' ? PRESET_CHANNELS_B2B : PRESET_CHANNELS_B2C).map(ch => {
+                      const currentChannels = Array.isArray(newPersona.channels)
+                        ? newPersona.channels
+                        : (typeof newPersona.channels === 'string' ? newPersona.channels.split(',').map(s => s.trim()) : [])
+                      const isSelected = currentChannels.includes(ch)
+                      return (
+                        <button
+                          key={ch}
+                          type="button"
+                          onClick={() => {
+                            let updated
+                            if (isSelected) {
+                              updated = currentChannels.filter(c => c !== ch)
+                            } else {
+                              updated = [...currentChannels, ch]
+                            }
+                            setNewPersona(p => ({ ...p, channels: updated }))
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white shadow-xs'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {isSelected ? `✓ ${ch}` : `+ ${ch}`}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
