@@ -30,6 +30,7 @@ import WabaCrmConsolePage from '@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'
 import GestorProyectosHubPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'
 import ProjectTimelineViewerPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'
 import AnalyticsStudioPage from '@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'
+import MarketingStudioPage from '@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
 import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
 import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
@@ -201,6 +202,10 @@ export default function AppRouter() {
           <Route
             path="hub/analytics"
             element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/marketing"
+            element={renderRoute('hub', <ProtectedRoute><MarketingStudioPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/dashboards"

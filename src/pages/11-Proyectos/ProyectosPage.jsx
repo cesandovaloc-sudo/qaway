@@ -34,79 +34,61 @@ const heroSlides = [
   },
 ]
 
-const OFFICIAL_CATEGORIES = ['Branding', 'Contenido visual', 'Sistemas digitales', 'Automatización', 'Páginas web']
+const featuredBrandLogos = [
+  { name: 'Mesa Selecta', style: { fontFamily: "'The Seasons', 'Georgia', 'Times New Roman', serif", fontWeight: 400 } },
+  { name: 'VALLET', style: { fontFamily: "'Space Grotesk', 'Inter', sans-serif", fontWeight: 700, letterSpacing: '0.18em' } },
+  { name: 'Nodo Urbano', style: { fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, letterSpacing: '-0.04em' } },
+  { name: 'WORLDCOM', style: { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '0.04em' } },
+  { name: 'Ayni Foods', style: { fontFamily: "'Brush Script MT', 'Segoe Script', cursive", fontWeight: 400, textTransform: 'none', letterSpacing: '0' } },
+  { name: 'ECP', style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 800, letterSpacing: '0.05em' } },
+  { name: 'Solar Finca', style: { fontFamily: "'Oswald', 'Arial Narrow', sans-serif", fontWeight: 600, letterSpacing: '-0.02em' } },
+  { name: 'principal.', style: { fontFamily: "'Space Grotesk', 'Inter', sans-serif", fontWeight: 500, letterSpacing: '-0.03em' } },
+  { name: 'SKYLINE', style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 800, letterSpacing: '0.08em' } },
+  { name: 'Horizonte', style: { fontFamily: "'Inter', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' } },
+  { name: 'DHARMA', style: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, letterSpacing: '0.05em' } },
+  { name: 'Vertice Lab', style: { fontFamily: "'Arial Narrow', 'Roboto Condensed', sans-serif", fontWeight: 700, letterSpacing: '-0.04em' } },
+]
 
 function extractVigenteCategories(projectsList) {
-  const activeSet = new Set(projectsList.flatMap((p) => p.categories || []))
-  const vigenteOfficial = OFFICIAL_CATEGORIES.filter((cat) => activeSet.has(cat))
-  return ['Todos', ...vigenteOfficial]
+  if (!projectsList || !Array.isArray(projectsList) || projectsList.length === 0) {
+    return ['Todos', 'Páginas web']
+  }
+  // Extrae dinámicamente SOLO las categorías de los proyectos existentes en la base de datos
+  const uniqueCategories = Array.from(
+    new Set(
+      projectsList.flatMap((p) => {
+        if (Array.isArray(p.categories)) return p.categories
+        if (p.category) return [p.category]
+        return []
+      }).filter(Boolean)
+    )
+  )
+  
+  return ['Todos', ...uniqueCategories]
 }
 
 const projects = [
   {
-    title: 'Brenda y Ely Cafe',
-    subtitle: 'Cafeteria joven en San Miguel',
-    image: `${estudioAssets}estudio-proyecto-cafe.webp`,
-    tags: ['Branding', 'Contenido visual', 'Aplicaciones de marca'],
-    categories: ['Branding', 'Contenido visual'],
-    kind: 'Proyecto',
-    featured: true,
-  },
-  {
-    title: 'Clinica Dental',
-    subtitle: 'Identidad visual para consulta profesional',
+    title: 'Horizonte Inmobiliaria',
+    subtitle: 'Ecosistema web inmobiliario con recorridos virtuales y captación automatizada a WhatsApp.',
     image: `${estudioAssets}estudio-proyecto-arquitectura.webp`,
-    tags: ['Branding', 'Contenido visual'],
-    categories: ['Branding', 'Contenido visual'],
-    kind: 'Caso aplicado por rubro',
+    bgImage: `${estudioAssets}estudio-proyecto-arquitectura.webp`,
+    video: '/assets/horizonte/hero-urban-apartment.mp4',
+    tags: ['Desarrollo Web', 'Captación Inmobiliaria', 'WhatsApp API'],
+    categories: ['Páginas web'],
+    kind: 'Ecosistema Digital',
+    path: '/landings/desarrollo-web',
   },
   {
-    title: 'Rapigo',
-    subtitle: 'Sistema visual para servicio digital',
-    image: `${sistemasAssets}content-ops-command-center.webp`,
-    tags: ['Sistemas digitales', 'Páginas web', 'Automatización'],
-    categories: ['Sistemas digitales', 'Páginas web', 'Automatización'],
-    kind: 'Proyecto',
-  },
-  {
-    title: 'Estudio Juridico',
-    subtitle: 'Presencia digital sobria y profesional',
-    image: `${estudioAssets}estudio-copy-showcase-web.webp`,
-    tags: ['Branding', 'Páginas web'],
-    categories: ['Branding', 'Páginas web'],
-    kind: 'Caso aplicado por rubro',
-  },
-  {
-    title: 'Fisioterapia',
-    subtitle: 'Presencia profesional para servicio local',
-    image: `${estudioAssets}estudio-servicio-presencia.webp`,
-    tags: ['Branding', 'Contenido visual'],
-    categories: ['Branding', 'Contenido visual'],
-    kind: 'Caso aplicado por rubro',
-  },
-  {
-    title: 'Qaway Academy',
-    subtitle: 'Experiencia educativa y sistema de contenidos',
-    image: '/assets/pages/1-inicio/aprendizaje-aplicado.webp',
-    tags: ['Contenido visual', 'Sistemas digitales', 'Páginas web'],
-    categories: ['Contenido visual', 'Sistemas digitales', 'Páginas web'],
-    kind: 'Proyecto',
-  },
-  {
-    title: 'Lumina Skin',
-    subtitle: 'Branding y packaging para linea cosmetica',
-    image: `${estudioAssets}estudio-proyecto-hospitalidad.webp`,
-    tags: ['Branding', 'Packaging'],
-    categories: ['Branding'],
-    kind: 'Caso aplicado por rubro',
-  },
-  {
-    title: 'Mesa Selecta',
-    subtitle: 'Marca premium para producto gourmet',
+    title: 'Identidad Visual & Contenido Digital',
+    subtitle: 'Dirección de arte, diseño de identidad y producción audiovisual de alto impacto para marcas.',
     image: `${estudioAssets}estudio-servicio-contenido.webp`,
-    tags: ['Branding', 'Contenido visual', 'Packaging'],
-    categories: ['Branding', 'Contenido visual'],
-    kind: 'Proyecto',
+    bgImage: `${estudioAssets}estudio-proyecto-hospitalidad.webp`,
+    video: '/assets/pages/2-estudio/estudio-social-media-reel.mp4',
+    tags: ['Identidad Visual', 'Contenido Visual', 'Dirección de Arte'],
+    categories: ['Páginas web'],
+    kind: 'Estudio Creativo',
+    path: '/landings/identidad-visual',
   },
 ]
 
@@ -133,61 +115,140 @@ function useHeroCarousel() {
 function ProjectCard({ project, index }) {
   const videoRef = useRef(null)
 
-  const handleMouseEnter = () => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {})
-    }
-  }
+  useEffect(() => {
+    if (!project.video || !videoRef.current) return
+    const video = videoRef.current
 
-  const handleMouseLeave = () => {
-    if (videoRef.current) {
-      videoRef.current.pause()
-    }
-  }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {})
+        } else {
+          video.pause()
+        }
+      },
+      { threshold: 0.2 }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [project.video])
 
   return (
     <motion.article
-      className="projects-card group cursor-pointer"
+      className="group flex flex-col cursor-pointer"
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.2), ease: [0.22, 1, 0.36, 1] }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      transition={{ duration: 0.55, delay: Math.min(index * 0.05, 0.2), ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="projects-card__image">
-        {project.video ? (
-          <video
-            ref={videoRef}
-            src={project.video}
-            poster={project.image}
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover object-top"
-          />
-        ) : (
-          <img
-            src={project.image}
-            alt={`Proyecto ${project.title}`}
-            loading="lazy"
-            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-          />
-        )}
-        <div className="absolute top-3.5 right-3.5 rounded-full bg-black/50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+      {/* Contenedor con Proporción Horizontal (16/10) */}
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[20px] bg-zinc-950 shadow-md">
+        {/* Imagen de Fondo Ambiental: Bokeh fotográfico sutil y sedoso en hover */}
+        <img
+          src={project.bgImage || project.image}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover filter blur-0 scale-[1.01] transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:blur-[3.5px]"
+        />
+
+        {/* Ventana / Mockup Flotante Central con el Video (Más compacta para dar mayor presencia al fondo) */}
+        <div className="absolute inset-6 sm:inset-10 z-10 flex items-center justify-center">
+          <div className="h-full w-full overflow-hidden rounded-[10px] sm:rounded-[12px] border border-white/40 bg-black shadow-[0_20px_45px_rgba(0,0,0,0.35)] transition-shadow duration-500 group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.5)]">
+            {project.video ? (
+              <video
+                ref={videoRef}
+                src={project.video}
+                poster={project.image}
+                muted
+                loop
+                playsInline
+                autoPlay
+                className="h-full w-full object-cover object-top"
+              />
+            ) : (
+              <img
+                src={project.image}
+                alt={project.title}
+                className="h-full w-full object-cover object-top"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Badge superior derecho */}
+        <div className="absolute top-3.5 right-3.5 z-20 rounded-full bg-black/60 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
           {project.kind || 'Proyecto'}
         </div>
       </div>
-      <div className="projects-card__body">
-        <h3 className="group-hover:text-[#fe6612] transition-colors">{project.title}</h3>
-        <p>{project.subtitle}</p>
-        <div className="projects-card__tags">
+
+      {/* Textos Editoriales Debajo (Estilo Benchmark) */}
+      <div className="pt-6 pb-2">
+        <h3 className="text-2xl font-bold text-[#111210] tracking-[-0.03em] mb-2 group-hover:text-[#fe6612] transition-colors">
+          {project.title}
+        </h3>
+        <p className="text-sm sm:text-[14.5px] leading-relaxed text-[#71717a] mb-4 max-w-xl">
+          {project.subtitle}
+        </p>
+        <div className="flex flex-wrap gap-4 text-xs font-semibold text-[#18181b]/75">
           {project.tags.map((tag) => (
-            <span key={tag}>{tag}</span>
+            <span key={tag} className="border-b border-[#20201f]/30 pb-0.5">
+              {tag}
+            </span>
           ))}
         </div>
       </div>
     </motion.article>
+  )
+}
+
+function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = false }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="group flex flex-col overflow-hidden rounded-[14px] border border-black/8 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer"
+    >
+      <Link to={to} className="flex flex-col h-full">
+        {isMockup ? (
+          <div className="flex h-[240px] sm:h-[280px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+            <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+              <img
+                src={image}
+                alt={title}
+                className="h-full w-full object-cover object-top transition-transform duration-300 ease-out"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="relative h-[240px] sm:h-[280px] overflow-hidden bg-zinc-100">
+            <img
+              src={image}
+              alt={title}
+              className="h-full w-full object-cover transition-transform duration-300 ease-out"
+            />
+            {tag && (
+              <div className="absolute top-3.5 right-3.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+                {tag}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="flex flex-1 flex-col justify-between p-6">
+          <div>
+            <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
+              {title}
+            </h3>
+            <p className="text-[13.5px] leading-relaxed text-[#71717a]">
+              {desc}
+            </p>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   )
 }
 
@@ -205,9 +266,13 @@ export default function ProyectosPage() {
         if (!error && data && data.length > 0) {
           setDbProjects(data)
           setDynamicFilters(extractVigenteCategories(data))
+        } else {
+          setDbProjects(projects)
+          setDynamicFilters(extractVigenteCategories(projects))
         }
       } catch (err) {
         console.warn('Fallback a datos de proyectos:', err)
+        setDbProjects(projects)
         setDynamicFilters(extractVigenteCategories(projects))
       }
     }
@@ -325,124 +390,90 @@ export default function ProyectosPage() {
       <section className="projects-listing">
         <div className="projects-shell">
 
-          {/* Fila Principal de Proyectos Web Destacados */}
+          {/* ========================================================================= */}
+          {/* BLOQUE 1: PROYECTOS ESTÁTICOS (2 FILAS DE 3 COLUMNAS = 6 TARJETAS) */}
+          {/* ========================================================================= */}
           {(!searchQuery && (activeFilter === 'Todos' || activeFilter === 'Páginas web')) && (
-            <div className="pt-6 pb-10">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Tarjeta 1: Landing Pages */}
-                <Link
+            <div className="pt-6 pb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
+                
+                {/* FILA 1 · FORMATOS WEB CORE */}
+                <StaticProjectCard
                   to="/landings/desarrollo-web"
-                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
-                >
-                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
-                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                      <img
-                        src={mockupLandingPages}
-                        alt="Landing Pages de Captación"
-                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-between p-6">
-                    <div>
-                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
-                        Landing Pages de Captación
-                      </h3>
-                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
-                        Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                  image={mockupLandingPages}
+                  title="Landing Pages de Captación"
+                  desc="Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp."
+                  delay={0.08}
+                  isMockup={true}
+                />
 
-                {/* Tarjeta 2: Sitios Web Corporativos */}
-                <Link
+                <StaticProjectCard
                   to="/landings/desarrollo-web"
-                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
-                >
-                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
-                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                      <img
-                        src={mockupSitiosWeb}
-                        alt="Sitios Web Corporativos"
-                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-between p-6">
-                    <div>
-                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
-                        Sitios Web Corporativos
-                      </h3>
-                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
-                        Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                  image={mockupSitiosWeb}
+                  title="Sitios Web Corporativos"
+                  desc="Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales."
+                  delay={0.24}
+                  isMockup={true}
+                />
 
-                {/* Tarjeta 3: Tiendas Online */}
-                <Link
+                <StaticProjectCard
                   to="/landings/desarrollo-web"
-                  className="group flex flex-col overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_45px_rgba(0,0,0,0.08)] cursor-pointer"
-                >
-                  <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
-                    <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/5 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                      <img
-                        src={mockupTiendasOnline}
-                        alt="Tiendas Online (E-commerce)"
-                        className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col justify-between p-6">
-                    <div>
-                      <h3 className="mb-2 text-lg font-bold text-[#111210] tracking-[-0.02em] transition-colors group-hover:text-[#fe6612]">
-                        Tiendas Online (E-commerce)
-                      </h3>
-                      <p className="text-[13.5px] leading-relaxed text-[#71717a]">
-                        Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7.
-                      </p>
-                    </div>
-                  </div>
-                </Link>
+                  image={mockupTiendasOnline}
+                  title="Tiendas Online (E-commerce)"
+                  desc="Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7."
+                  delay={0.40}
+                  isMockup={true}
+                />
+
+                {/* FILA 2 · CASOS APLICADOS & LANZAMIENTOS */}
+                <StaticProjectCard
+                  to="/proyectos/estudio/branding/cafe-brenda-y-ely"
+                  image={`${estudioAssets}estudio-proyecto-cafe.webp`}
+                  tag="Branding & Packaging"
+                  title="Brenda & Ely Café"
+                  desc="Identidad visual, packaging y dirección de arte en clave digital y física para cafetería de especialidad."
+                  delay={0.08}
+                />
+
+                <StaticProjectCard
+                  to="/sistemas-digitales"
+                  image={`${sistemasAssets}content-ops-command-center.webp`}
+                  tag="Automatización & CRM"
+                  title="Centro de Operaciones Digital"
+                  desc="Automatización de flujos de trabajo, conexión de bases de datos y dashboards en tiempo real con agentes IA."
+                  delay={0.24}
+                />
+
+                <StaticProjectCard
+                  to="/estudio"
+                  image={`${estudioAssets}estudio-proyecto-arquitectura.webp`}
+                  tag="Presencia B2B"
+                  title="Arquitectura & Firmas B2B"
+                  desc="Diseño sobrio de alta credibilidad, portafolios de proyectos y canales directos de asesoría profesional."
+                  delay={0.40}
+                />
+
               </div>
             </div>
           )}
 
-          {activeFilter === 'Todos' && (
-            <motion.article
-              className="projects-featured hidden md:grid"
-              initial={{ opacity: 0, y: 26 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="projects-featured__media">
-                <img src={`${estudioAssets}estudio-proyecto-cafe.webp`} alt="Aplicaciones de marca Brenda y Ely Cafe" />
-                <div className="projects-palette" aria-hidden="true">
-                  {['#101010', '#32170c', '#fe6612', '#788348', '#e8dece', '#f5f0e7'].map((color) => <span key={color} style={{ background: color }} />)}
-                </div>
-              </div>
-              <div className="projects-featured__copy">
-                <p><i />Proyecto destacado</p>
-                <h3>Brenda y Ely Cafe</h3>
-                <strong>Cafeteria joven en San Miguel</strong>
-                <span>Desarrollamos su identidad de marca, estrategia de contenido y aplicaciones en clave digital y fisica para conectar con una comunidad que valora el buen cafe y los momentos autenticos.</span>
-                <div className="projects-featured__tags">
-                  <small>Branding</small>
-                  <small>Contenido visual</small>
-                  <small>Aplicaciones de marca</small>
-                </div>
-                <Link to="/proyectos/estudio/branding/cafe-brenda-y-ely">Ver proyecto completo <ArrowRight size={15} /></Link>
-              </div>
-            </motion.article>
-          )}
+        </div>
+      </section>
 
-          <div className="projects-grid">
-            {visibleProjects.map((project, projectIndex) => (
-              <div key={project.title} className={activeFilter === 'Todos' && projectIndex === 0 ? 'hidden md:contents' : 'contents'}>
-                <ProjectCard project={project} index={projectIndex} />
+      {/* ========================================================================= */}
+      {/* BLOQUE 2: CORTE VISUAL CON LOGOTIPOS Y MARCAS EN BLANCO (ESTILO BENCHMARK) */}
+      {/* ========================================================================= */}
+      <section className="bg-white py-14 sm:py-20 border-y border-black/8">
+        <div className="projects-shell">
+          <div className="grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-6 items-center justify-items-center">
+            {featuredBrandLogos.map((brand) => (
+              <div key={brand.name} className="flex items-center justify-center h-14 w-full px-2">
+                <span
+                  className="text-center text-[clamp(1.1rem,1.8vw,1.65rem)] leading-none text-[#20201f] tracking-tight transition-opacity duration-300 hover:opacity-80"
+                  style={brand.style}
+                >
+                  {brand.name}
+                </span>
               </div>
             ))}
           </div>
@@ -450,99 +481,121 @@ export default function ProyectosPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* DESCANSO VISUAL: MARCAS Y CLIENTES EN MONOCROMO ESTÁTICO (MINIMALISTA) */}
+      {/* BLOQUE 3: PROYECTOS EN MOVIMIENTO (1 FILA DE 2 COLUMNAS CON VIDEO REAL) */}
       {/* ========================================================================= */}
-      <section className="border-y border-black/5 bg-[#fafaf9] py-14 sm:py-16">
+      <section className="bg-[#fafaf9] py-18 sm:py-24 border-b border-black/6">
         <div className="projects-shell">
-          <div className="mb-6 text-center">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#71717a]">
-              Marcas y ecosistemas que confían en Qaway Lab
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-6 items-center justify-items-center opacity-70">
-            {['VALLET INMOBILIARIA', 'ECP CONTABILIDAD', 'GELATO LAB', 'BRENDA & ELY', 'HORIZONTE DIGITAL', 'SANICLICK'].map((name) => (
-              <span
-                key={name}
-                className="font-mono text-xs font-bold uppercase tracking-wider text-[#191918]/60 transition-colors hover:text-[#fe6612]"
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* VITRINA POR SECTORES Y EXPERIENCIA MOBILE */}
-      {/* ========================================================================= */}
-      <section className="bg-white py-16 sm:py-24">
-        <div className="projects-shell">
-          <div className="mb-12 max-w-2xl">
-            <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#fe6612]">
-              <span>/ Adaptación y sectores</span>
-            </div>
-            <h2 className="text-3xl font-bold tracking-[-0.03em] text-[#111210] sm:text-4xl mb-3">
-              Soluciones diseñadas para cada tipo de industria
+          
+          {/* Encabezado divisor de sección (Estilo Desarrollo Web, 100% Centrado) */}
+          <motion.div
+            className="text-center max-w-2xl mx-auto pb-12"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#12131a] tracking-[-0.03em] leading-[1.18] mb-3">
+              Proyectos en funcionamiento
             </h2>
-            <p className="text-base text-[#71717a] leading-relaxed">
-              Experiencias pensadas primero en la conversión móvil y en los objetivos comerciales específicos de cada rubro.
+            <p className="text-[#71717a] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+              Plataformas vivas, interacción en tiempo real y sistemas desplegados para marcas en producción.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Grilla de 2 columnas para videos amplios */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
+            {visibleProjects.map((project, index) => (
+              <ProjectCard key={project.title} project={project} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* BLOQUE 4: SEPARADOR EDITORIAL (100% CENTRADO ESTILO DESARROLLO WEB) */}
+      {/* BLOQUE 5: PRESENTACIÓN DE MOCKUPS EN FORMATO CELULAR (4 COLUMNAS) */}
+      {/* ========================================================================= */}
+      <section className="bg-white py-18 sm:py-26">
+        <div className="projects-shell">
+          
+          {/* Separador Editorial Centrado */}
+          <motion.div
+            className="text-center max-w-2xl mx-auto pb-14"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
+          >
+            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#12131a] tracking-[-0.03em] leading-[1.18] mb-3">
+              Diseño pensado para conversión móvil
+            </h2>
+            <p className="text-[#71717a] text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+              Más del 70% del tráfico interactúa desde un smartphone. Optimizamos cada pantalla para respuesta táctil inmediata.
+            </p>
+          </motion.div>
+
+          {/* Grilla de 4 Columnas: Mockups de Teléfono Celular Vertical */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
             {[
               {
-                title: 'Inmobiliario & Construcción',
-                desc: 'Captación de compradores con recorridos y cotizadores integrados a WhatsApp.',
+                title: 'E-commerce & Catálogo',
+                desc: 'Checkout fluido y navegación de producto ágil en dispositivos móviles.',
+                image: mockupTiendasOnline,
+                tag: 'Mobile Store'
+              },
+              {
+                title: 'Captación Inmobiliaria',
+                desc: 'Tours inmersivos y contacto directo a WhatsApp en un solo toque.',
                 image: estudioAssets + 'estudio-proyecto-arquitectura.webp',
-                tag: 'Captación Rápida'
+                tag: 'Lead Directo'
               },
               {
-                title: 'Servicios B2B & Consultoría',
-                desc: 'Estructuras corporativas con agendamiento y autoridad visual inmediata.',
-                image: sistemasAssets + 'content-ops-command-center.webp',
-                tag: 'Alta Conversión'
-              },
-              {
-                title: 'Gastronomía & Experiencias',
-                desc: 'Menús digitales, reservas directas y contenido visual inmersivo.',
+                title: 'Gastronomía & Reservas',
+                desc: 'Menús digitales y reserva de mesas optimizados para carga ultra rápida.',
                 image: estudioAssets + 'estudio-proyecto-cafe.webp',
-                tag: 'Mobile First'
+                tag: 'Experiencia'
               },
               {
-                title: 'Retail & E-commerce',
-                desc: 'Catálogos autogestionables con checkout fluido y pasarelas 24/7.',
-                image: estudioAssets + 'estudio-servicio-contenido.webp',
-                tag: 'Ventas 24/7'
+                title: 'Servicios Profesionales',
+                desc: 'Agendamiento de citas y presentación corporativa de alta credibilidad.',
+                image: sistemasAssets + 'content-ops-command-center.webp',
+                tag: 'Agendamiento'
               }
-            ].map((sector, i) => (
+            ].map((mockup, i) => (
               <motion.div
-                key={sector.title}
-                className="group flex flex-col overflow-hidden rounded-[14px] border border-black/8 bg-[#fafaf9] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-black/15"
-                initial={{ opacity: 0, y: 18 }}
+                key={mockup.title}
+                className="group flex flex-col items-center w-full"
+                initial={{ opacity: 0, y: 22 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
+                transition={{ duration: 0.55, delay: i * 0.1 }}
               >
-                <div className="relative h-48 overflow-hidden bg-zinc-200">
-                  <img
-                    src={sector.image}
-                    alt={sector.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 left-3 rounded-full bg-black/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
-                    {sector.tag}
+                {/* Marco de Teléfono Celular (Mobile Device Frame) */}
+                <div className="relative w-full max-w-[270px] aspect-[9/18.5] rounded-[36px] border-[7px] border-[#18181b] bg-[#18181b] p-1.5 shadow-[0_22px_50px_rgba(0,0,0,0.12)] transition-transform duration-500 group-hover:-translate-y-2">
+                  {/* Notch / Dynamic Island */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 h-4 w-20 rounded-full bg-[#18181b]" />
+                  
+                  {/* Pantalla Interna del Celular */}
+                  <div className="h-full w-full overflow-hidden rounded-[28px] bg-zinc-100 relative">
+                    <img
+                      src={mockup.image}
+                      alt={mockup.title}
+                      className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute top-4 left-3 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+                      {mockup.tag}
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-1 flex-col justify-between p-5">
-                  <div>
-                    <h3 className="mb-1.5 text-base font-bold text-[#111210] group-hover:text-[#fe6612] transition-colors">
-                      {sector.title}
-                    </h3>
-                    <p className="text-xs text-[#71717a] leading-relaxed">
-                      {sector.desc}
-                    </p>
-                  </div>
+
+                {/* Textos descriptivos debajo del móvil */}
+                <div className="mt-5 text-center px-2">
+                  <h3 className="text-base font-bold text-[#111210] group-hover:text-[#fe6612] transition-colors mb-1">
+                    {mockup.title}
+                  </h3>
+                  <p className="text-xs text-[#71717a] leading-relaxed">
+                    {mockup.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}

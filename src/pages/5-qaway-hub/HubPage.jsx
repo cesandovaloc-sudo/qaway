@@ -16,6 +16,7 @@ import {
   PenSquare,
   Star,
   FolderKanban,
+  Target,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 
@@ -100,6 +101,15 @@ const routes = [
     badge: 'Pro',
     category: 'Herramientas',
     tone: 'bg-[#0080FF]/10 text-[#0080FF]',
+  },
+  {
+    icon: Target,
+    title: 'Marketing Studio OS (Revolut UI)',
+    description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping HubSpot, Auditoría POEM y Simulador de Funnel.',
+    path: '/hub/marketing',
+    badge: 'Nuevo',
+    category: 'Herramientas',
+    tone: 'bg-[#0075FF]/10 text-[#0075FF]',
   },
   {
     icon: Zap,
