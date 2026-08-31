@@ -478,7 +478,7 @@ export default function ProyectosPage() {
       {/* ========================================================================= */}
       {/* BLOQUE 2: CORTE VISUAL CON LOGOTIPOS Y MARCAS EN BLANCO (ESTILO BENCHMARK) */}
       {/* ========================================================================= */}
-      <section className="bg-white py-14 sm:py-20 border-y border-black/8">
+      <section className="bg-white py-12 sm:py-16 border-y border-black/8">
         <div className="projects-shell">
           <div className="grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-6 items-center justify-items-center">
             {featuredBrandLogos.map((brand) => (

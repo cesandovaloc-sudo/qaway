@@ -512,34 +512,30 @@ export default function MarketingStudioPage() {
         {/* NAVIGATION PILL SELECTOR */}
         <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto mb-6 scrollbar-none">
           {[
-            { id: 'content', label: 'Content Mapping (Pág. 6)', icon: Layers, count: contents.length },
-            { id: 'personas', label: 'Buyer Personas & JTBD', icon: Users, count: personas.length },
-            { id: 'poem', label: 'Auditoría POEM', icon: Radio, count: poemChannels.length },
-            { id: 'simulator', label: 'Simulador Funnel & ROI', icon: Calculator },
-            { id: 'campaigns', label: 'Plan de Campañas', icon: Zap, count: campaigns.length }
+            { id: 'personas', label: '1. Buyer Personas & JTBD', icon: Users, count: personas.length },
+            { id: 'content', label: '2. Content Mapping (Pág. 6)', icon: Layers, count: contents.length },
+            { id: 'poem', label: '3. Auditoría POEM', icon: Radio, count: poemChannels.length },
+            { id: 'simulator', label: '4. Simulador Funnel & ROI', icon: Calculator },
+            { id: 'campaigns', label: '5. Plan de Campañas', icon: Zap, count: campaigns.length }
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                  isActive ? 'text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 ring-1 ring-indigo-500'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTabPillLight2"
-                    className="absolute inset-0 bg-indigo-600 rounded-xl shadow-md shadow-indigo-600/20 -z-10"
-                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                  />
-                )}
                 <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span className={`px-1.5 py-0.2 text-[10px] rounded-full font-bold ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-600'
                   }`}>
                     {tab.count}
                   </span>
