@@ -470,38 +470,54 @@ export default function MarketingStudioPage() {
   const calculatedLtvCacRatio = useMemo(() => (calculatedCac > 0 ? (calculatedLtv / calculatedCac).toFixed(1) : '∞'), [calculatedLtv, calculatedCac])
   const calculatedRoas = useMemo(() => (simAdSpend > 0 ? (calculatedRevenue / simAdSpend).toFixed(1) : '0'), [calculatedRevenue, simAdSpend])
 
-  // HubSpot Wizard Step Progression
+  // HubSpot Wizard Step Progression (Official 6 Steps)
   const wizardQuestions = [
     {
       step: 1,
       key: 'name',
-      label: 'Describe tu cliente ideal',
-      question: '¿Cuál es el nombre o arquetipo de tu cliente ideal?',
-      placeholder: 'Ej. Roxana Jimenez / Directora Comercial',
+      label: 'Nombre del buyer persona',
+      question: '¿Cómo se llama tu buyer persona?',
+      placeholder: 'Ej. Mauricio Gutiérrez, Carlos Mendoza, Dra. Claudia Ramos...',
       minLength: 3
     },
     {
       step: 2,
-      key: 'challenge',
-      label: '¿Cuál es su mayor desafío?',
-      question: '¿Cuál es el principal desafío o problema que enfrenta?',
-      placeholder: 'Ej. Posicionar su marca de clínica dental frente a competidores agresivos...',
-      minLength: 6
+      key: 'roleDemographics',
+      label: 'Puesto y Demografía',
+      question: '¿Cuál es su puesto de trabajo, rango de edad y nivel educativo?',
+      placeholder: 'Ej. Director General de TI, entre 35 y 44 años, Licenciatura universitaria...',
+      minLength: 4
     },
     {
       step: 3,
-      key: 'howWeHelp',
-      label: '¿Cómo puedes contribuir a su éxito?',
-      question: '¿Cómo tu producto o servicio resuelve su necesidad?',
-      placeholder: 'Ej. Proporcionamos una estrategia integral de captación digital y automatización de citas...',
-      minLength: 8
+      key: 'industrySize',
+      label: 'Industria y Organización',
+      question: '¿En qué industria trabaja y cuál es el tamaño de su empresa?',
+      placeholder: 'Ej. Tecnología y Servicios Médicos, empresa de 11 a 50 empleados...',
+      minLength: 4
     },
     {
       step: 4,
-      key: 'channels',
-      label: 'Canales y medios preferidos',
-      question: '¿A través de qué canales prefiere comunicarse y buscar información?',
-      placeholder: 'Ej. WhatsApp Business, Instagram, LinkedIn y recomendaciones...',
+      key: 'challenge',
+      label: 'Puntos de Dolor & Retos',
+      question: '¿Cuáles son sus mayores obstáculos, dolores o dificultades actuales?',
+      placeholder: 'Ej. Pérdida de prospectos por falta de seguimiento ágil y desorden en la base de datos...',
+      minLength: 6
+    },
+    {
+      step: 5,
+      key: 'howWeHelp',
+      label: 'Cómo Contribuimos a su Éxito',
+      question: '¿De qué manera tu solución o servicio resuelve sus necesidades y le ayuda a crecer?',
+      placeholder: 'Ej. Implementación ágil de CRM, automatización de citas y análisis en tiempo real en menos de 14 días...',
+      minLength: 6
+    },
+    {
+      step: 6,
+      key: 'channelsHabits',
+      label: 'Canales & Hábitos de Consumo',
+      question: '¿Cuáles son sus canales de comunicación preferidos y momentos ideales de contacto?',
+      placeholder: 'Ej. WhatsApp Business, LinkedIn, Email corporativo. Receptivo de 2:00 PM a 4:00 PM...',
       minLength: 4
     }
   ]
@@ -521,70 +537,70 @@ export default function MarketingStudioPage() {
     if (wizardStep < wizardQuestions.length) {
       setWizardStep(wizardStep + 1)
     } else {
-      // Completed all steps: trigger generation animation
+      // Completed all 6 steps: trigger generation animation
       setPersonaCanvasMode('generating')
       setTimeout(() => {
         const newId = `p-${Date.now()}`
         const createdPersona = {
           id: newId,
           name: updatedAnswers.name || 'Nuevo Buyer Persona',
-          title: updatedAnswers.name.includes('/') ? updatedAnswers.name.split('/')[1].trim() : 'Líder de Área / Decisor',
+          title: updatedAnswers.roleDemographics || (businessModel === 'B2B' ? 'Director General / Líder de Área' : 'Comprador Principal'),
           type: businessModel,
           avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
-          roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Comprador Directo',
-          age: 'Entre 35 y 44 años',
-          education: 'Título profesional',
-          industry: businessModel === 'B2B' ? 'Servicios Profesionales / Salud' : 'Consumo & Estilo de Vida',
-          companySize: 'Entre 1 y 15 empleados',
+          roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Consumidor Final',
+          age: updatedAnswers.roleDemographics?.includes('año') ? 'Entre 35 y 44 años' : 'Entre 30 y 45 años',
+          education: updatedAnswers.roleDemographics?.includes('Lic') || updatedAnswers.roleDemographics?.includes('univ') ? 'Licenciatura universitaria' : 'Título profesional',
+          industry: updatedAnswers.industrySize || (businessModel === 'B2B' ? 'Servicios Profesionales & Tecnología' : 'Consumo & Estilo de Vida'),
+          companySize: updatedAnswers.industrySize?.includes('empleado') ? 'Entre 11 y 50 empleados' : 'Entre 1 y 20 empleados',
           socialNetworks: ['linkedin', 'instagram', 'facebook', 'x'],
-          commChannels: ['WhatsApp Business', 'Correo electrónico', 'Teléfono'],
-          reportingTo: 'Dirección General / Propietario',
-          tools: ['Software de CRM', 'WhatsApp Web', 'Sistemas de gestión'],
-          kpis: ['Crecimiento de clientes', 'Retención de pacientes', 'Satisfacción y recomendación'],
+          commChannels: ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
+          reportingTo: 'Dirección General / CEO',
+          tools: ['Software de CRM', 'WhatsApp Web', 'Gestión de proyectos'],
+          kpis: ['Crecimiento de clientes', 'Aumento de conversión', 'Satisfacción y recomendación'],
           pains: [
-            updatedAnswers.challenge || 'Posicionamiento frente a competidores',
-            'Falta de recursos y tiempo para marketing constante',
-            'Pérdida de prospectos por seguimiento manual'
+            updatedAnswers.challenge || 'Pérdida de prospectos por falta de seguimiento ágil',
+            'Desorden en la base de datos y métricas manuales',
+            'Falta de visibilidad sobre el ROI de marketing'
           ],
-          howWeHelp: updatedAnswers.howWeHelp || 'Infraestructura digital completa con automatización comercial y acompañamiento continuo.',
-          infoSources: [updatedAnswers.channels || 'Investigación en línea, redes sociales y recomendaciones'],
-          salary: '+$48,000 USD / año',
+          howWeHelp: updatedAnswers.howWeHelp || 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y acelerar ventas.',
+          infoSources: [updatedAnswers.channelsHabits || 'Investigación en línea, LinkedIn y recomendaciones del sector'],
+          salary: '+$60,000 USD / año',
           location: 'Latinoamérica',
-          jtbd: updatedAnswers.challenge ? `Superar el reto de ${updatedAnswers.challenge.toLowerCase()} de forma estructurada.` : 'Escalar su negocio con orden.',
+          jtbd: updatedAnswers.challenge ? `Superar la barrera de ${updatedAnswers.challenge.toLowerCase()} con herramientas a la medida.` : 'Escalar su negocio con orden y previsibilidad.',
           gains: [
             'Aumento comprobado en conversión y prospectos calificados',
             'Ahorro de horas operativas cada semana',
-            'Posicionamiento como referente en su nicho'
+            'Posicionamiento sólido como referente en el mercado'
           ],
           dimensions: {
             external: updatedAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
-            internal: 'Siente frustración cuando el esfuerzo no se traduce en crecimiento medible.',
-            philosophical: 'Cree que todo negocio merece contar con herramientas modernas para crecer.'
+            internal: 'Se siente frustrado cuando el esfuerzo del equipo no se refleja en resultados rápidos.',
+            philosophical: 'Cree que ninguna empresa debería perder ventas de calidad por carecer de sistemas ágiles.'
           },
           guidePlan: {
-            search: 'Busca soluciones probadas con soporte guiado.',
-            howWeHelp: updatedAnswers.howWeHelp || 'Implementación estratégica paso a paso.',
-            actionSteps: ['Diagnóstico inicial de cuellos de botella', 'Despliegue ágil en 14 días', 'Soporte y optimización']
+            search: 'Busca soluciones probadas con soporte guiado continuo.',
+            howWeHelp: updatedAnswers.howWeHelp || 'Implementación estratégica paso a paso con acompañamiento.',
+            actionSteps: ['Diagnóstico inicial de flujos de trabajo', 'Despliegue ágil en menos de 14 días', 'Capacitación y optimización de KPIs']
           },
           habits: {
-            channels: ['WhatsApp', 'LinkedIn', 'Google Search'],
-            schedule: 'Horario comercial y tardes',
-            quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados.”`
+            channels: ['WhatsApp Business', 'LinkedIn', 'Email corporativo'],
+            schedule: updatedAnswers.channelsHabits || 'Receptivo entre 2:00 PM y 4:00 PM los miércoles y jueves',
+            quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados medibles.”`
           },
           keyMessages: {
             marketing: `Descubre cómo superar ${updatedAnswers.challenge || 'tus desafíos'} con herramientas diseñadas a tu medida.`,
             sales: `Acompañamiento especializado con resultados medibles en los primeros 90 días.`,
-            formats: ['Publicaciones en redes sociales', 'Videos demostrativos', 'Casos de éxito reales']
+            formats: ['Publicaciones en LinkedIn', 'Videos demostrativos', 'Casos de éxito reales en PDF']
           },
           channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
-          trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia.'
+          trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia comercial.'
         }
 
         setPersonas(prev => [...prev, createdPersona])
         setActivePersonaId(newId)
         setPersonaCanvasMode('modular-view')
         setWizardStep(1)
-        setWizardAnswers({ name: '', role: '', industry: '', challenge: '', howWeHelp: '', channels: '' })
+        setWizardAnswers({ name: '', roleDemographics: '', industrySize: '', challenge: '', howWeHelp: '', channelsHabits: '' })
       }, 1200)
     }
   }

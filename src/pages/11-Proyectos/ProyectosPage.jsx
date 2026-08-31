@@ -468,6 +468,34 @@ export default function ProyectosPage() {
                   delay={0.40}
                 />
 
+                {/* FILA 3 · PROYECTOS REALES EN PRODUCCIÓN */}
+                <StaticProjectCard
+                  to="/proyectos/panaderia-josue"
+                  image="/josue-images/showcase/3-josue-panaderia-pedidos-contacto-footer.png"
+                  tag="E-commerce & Web"
+                  title="Josué Panadería"
+                  desc="Sitio web y catálogo digital de panadería artesanal, pedidos directos por WhatsApp y presencia de marca local."
+                  delay={0.08}
+                />
+
+                <StaticProjectCard
+                  to="/proyectos/aurea-skincare"
+                  image="/assets/hero-clean.png"
+                  tag="Tienda Online"
+                  title="Áurea Skincare"
+                  desc="E-commerce de cosmética botánica con catálogo dinámico de productos, carrito de compras y diseño editorial."
+                  delay={0.24}
+                />
+
+                <StaticProjectCard
+                  to="/proyectos/plantora"
+                  image="/assets/benefits-clean.png"
+                  tag="Landing Page"
+                  title="Plantora Paisajismo"
+                  desc="Landing page de alta conversión para proyectos botánicos, arquitectura de paisaje y captación de clientes."
+                  delay={0.40}
+                />
+
               </div>
             </div>
           )}

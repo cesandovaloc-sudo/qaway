@@ -127,6 +127,21 @@ export default function ArticleDetailPage() {
     }
   }
 
+  const handleShareX = () => {
+    if (typeof window !== 'undefined') {
+      const text = encodeURIComponent(article?.title || 'Artículo de Blog')
+      const url = encodeURIComponent(window.location.href)
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank')
+    }
+  }
+
+  const handleShareFacebook = () => {
+    if (typeof window !== 'undefined') {
+      const url = encodeURIComponent(window.location.href)
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+    }
+  }
+
   // Cargar artículo si no está en memoria local
   useEffect(() => {
     async function loadArticle() {
@@ -209,11 +224,22 @@ export default function ArticleDetailPage() {
     utterance.rate = audioSpeed
     utterance.pitch = 1.0
 
-    // Buscar una voz en español si está disponible
+    // Buscar y priorizar voz femenina natural de IA en español
     const voices = window.speechSynthesis.getVoices()
-    const spanishVoice = voices.find((v) => v.lang.startsWith('es') || v.lang.includes('es-'))
-    if (spanishVoice) {
-      utterance.voice = spanishVoice
+    const spanishVoices = voices.filter((v) => v.lang.startsWith('es') || v.lang.includes('es-') || v.lang.includes('ES'))
+    
+    // 1. Priorizar voces Neurales/Naturales modernas (Edge/Chrome)
+    const naturalFemaleVoice = spanishVoices.find((v) => 
+      /(natural|neural|online)/i.test(v.name) && /(paloma|elena|salma|dalia|ximena|sabina|monica|paulina|female|mujer)/i.test(v.name)
+    ) 
+    || spanishVoices.find((v) => /(natural|neural|online)/i.test(v.name))
+    || spanishVoices.find((v) => /google español/i.test(v.name))
+    || spanishVoices.find((v) => !/desktop/i.test(v.name) && /(paloma|elena|salma|dalia|ximena|monica|paulina|laura|marta|sofia|victoria|lucia|conchita|mia)/i.test(v.name))
+    || spanishVoices.find((v) => /(paloma|elena|salma|dalia|ximena|monica|paulina|laura|marta|sofia|victoria|lucia|conchita|mia|sabina|helena)/i.test(v.name))
+    || spanishVoices[0]
+
+    if (naturalFemaleVoice) {
+      utterance.voice = naturalFemaleVoice
     }
 
     utterance.onboundary = (event) => {
@@ -526,8 +552,9 @@ export default function ArticleDetailPage() {
           )}
         </motion.div>
 
-        {/* 2. TÍTULO EDITORIAL DOMINANTE */}
+        {/* 2. CABECERA EDITORIAL COMPLETA */}
         <div className="mb-8 max-w-4xl">
+          {/* Categoría Badge */}
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -536,76 +563,222 @@ export default function ArticleDetailPage() {
             {article.categoryLabel}
           </motion.span>
 
+          {/* Título Principal */}
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className="text-3xl sm:text-4xl lg:text-[44px] font-black text-zinc-950 tracking-tight leading-[1.14]"
+            className="text-3xl sm:text-4xl lg:text-[46px] font-black text-zinc-950 tracking-tight mb-5 leading-[1.12]"
           >
             {article.title}
           </motion.h1>
+
+          {/* Ficha de Autor y Metadatos */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="flex flex-wrap items-center gap-3 text-xs sm:text-[13px] text-zinc-600 mb-6 font-medium"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#ff703d] to-[#ff4b0b] flex items-center justify-center text-white text-[10px] font-bold shadow-2xs">
+                Q
+              </div>
+              <span>
+                Escrito por:{' '}
+                <strong className="text-zinc-950 underline decoration-[#ff4b0b] decoration-2 underline-offset-4">
+                  Qaway Lab
+                </strong>
+              </span>
+            </div>
+            <span className="text-zinc-300">•</span>
+            <span className="flex items-center gap-1.5 text-zinc-500 font-mono">
+              <Calendar className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.date}
+            </span>
+            <span className="text-zinc-300">•</span>
+            <span className="flex items-center gap-1.5 text-zinc-500 font-mono">
+              <Clock className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.readTime}
+            </span>
+          </motion.div>
         </div>
 
-        {/* 3. CUADRÍCULA UNIFORME DE DOS COLUMNAS (ESTILO HOSTINGER / WORDPRESS) */}
+        {/* 2. BARRA DE ACCIONES AL TOPE DE ANCHO (AUDIO + COMPARTIR) */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap items-center justify-between gap-4 py-3.5 px-5 rounded-2xl bg-white border border-black/5 shadow-2xs mb-8 w-full"
+        >
+          {/* Reproductor de Audio */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={togglePlayAudio}
+              className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-zinc-950 text-white hover:bg-zinc-800 px-4 py-1.5 text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
+            >
+              {isPlayingAudio && !isPausedAudio ? (
+                <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+              ) : (
+                <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+              )}
+              <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
+            </button>
+
+            {isPlayingAudio && (
+              <div className="inline-flex items-center gap-1">
+                {[1.0, 1.25, 1.5].map((speed) => (
+                  <button
+                    key={speed}
+                    type="button"
+                    onClick={() => changeAudioSpeed(speed)}
+                    className={`rounded px-2 py-0.5 text-xs font-bold font-mono ${
+                      audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60 hover:bg-black/10'
+                    }`}
+                  >
+                    {speed}x
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={stopAudio}
+                  className="rounded px-2 py-0.5 text-xs font-bold text-red-500 hover:bg-red-50"
+                  title="Detener audio"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Botones de Compartir con Redes Sociales Oficiales */}
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500">
+            <span className="text-zinc-400 mr-1 text-xs font-mono uppercase tracking-wider hidden sm:inline">Compartir:</span>
+            
+            {/* WhatsApp */}
+            <button
+              type="button"
+              onClick={handleShareWhatsApp}
+              title="Compartir en WhatsApp"
+              className="p-2 rounded-xl border border-black/10 bg-white hover:bg-[#25D366]/10 hover:border-[#25D366]/40 hover:text-[#25D366] text-zinc-700 transition-all duration-200 cursor-pointer shadow-2xs group active:scale-95"
+            >
+              <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.062-2.179-.556-1.503-.625-2.455-2.167-2.529-2.267-.074-.1-6.17-8.196.02-1.378.334-.614.67-.629.932-.629.176 0 .373.003.535.011.174.009.406-.066.634.48.238.573.811 1.979.882 2.124.072.145.12.316.024.509-.095.193-.143.313-.286.485-.143.173-.3.386-.429.518-.143.144-.292.3-.125.588.167.288.742 1.226 1.593 1.984 1.096.977 2.02 1.279 2.308 1.423.287.144.455.12.624-.073.167-.193.717-.834.908-1.12.19-.288.381-.24.644-.144.263.096 1.671.787 1.958.931.287.144.478.216.549.336.072.12.072.697-.072 1.102z"/>
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.98-1.306A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.167c-1.637 0-3.153-.497-4.42-1.353l-.317-.213-3.284.862.877-3.201-.233-.37A8.136 8.136 0 013.833 12c0-4.503 3.664-8.167 8.167-8.167 4.503 0 8.167 3.664 8.167 8.167 0 4.503-3.664 8.167-8.167 8.167z"/>
+              </svg>
+            </button>
+
+            {/* LinkedIn */}
+            <button
+              type="button"
+              onClick={handleShareLinkedIn}
+              title="Compartir en LinkedIn"
+              className="p-2 rounded-xl border border-black/10 bg-white hover:bg-[#0A66C2]/10 hover:border-[#0A66C2]/40 hover:text-[#0A66C2] text-zinc-700 transition-all duration-200 cursor-pointer shadow-2xs group active:scale-95"
+            >
+              <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 8.76c-.97 0-1.75-.79-1.75-1.76s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.76-1.75 1.76m1.39 9.74v-8.37H5.07v8.37h2.78z"/>
+              </svg>
+            </button>
+
+            {/* X / Twitter */}
+            <button
+              type="button"
+              onClick={handleShareX}
+              title="Compartir en X (Twitter)"
+              className="p-2 rounded-xl border border-black/10 bg-white hover:bg-black/10 hover:border-black/40 hover:text-black text-zinc-700 transition-all duration-200 cursor-pointer shadow-2xs group active:scale-95"
+            >
+              <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </button>
+
+            {/* Facebook */}
+            <button
+              type="button"
+              onClick={handleShareFacebook}
+              title="Compartir en Facebook"
+              className="p-2 rounded-xl border border-black/10 bg-white hover:bg-[#1877F2]/10 hover:border-[#1877F2]/40 hover:text-[#1877F2] text-zinc-700 transition-all duration-200 cursor-pointer shadow-2xs group active:scale-95"
+            >
+              <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </button>
+
+            {/* Copiar Enlace */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              title="Copiar enlace"
+              className="p-2 rounded-xl border border-black/10 hover:border-[#ff4b0b] hover:text-[#ff4b0b] bg-white transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-2xs group active:scale-95"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs text-emerald-600 font-bold">¡Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-semibold hidden md:inline">Copiar link</span>
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* 3. FILA DE PORTADA 16:9 + BLOQUE LATERAL DE LA MISMA ALTURA */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+          
+          {/* Imagen de Portada */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="lg:col-span-8 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-sm"
+          >
+            <img
+              src={article.image}
+              alt={article.title}
+              className="w-full h-full object-cover object-center"
+            />
+          </motion.div>
+
+          {/* Bloque Lateral con la misma altura que la imagen */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="lg:col-span-4 flex flex-col justify-between rounded-2xl border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-6 sm:p-7 shadow-xs"
+          >
+            <div>
+              <div className="inline-block text-xs font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-3 py-1 rounded-md mb-3 font-mono">
+                Recurso Destacado
+              </div>
+              <h4 className="text-base sm:text-lg font-black text-zinc-950 mb-2 leading-snug">
+                Guía y Prompts de IA para Negocios
+              </h4>
+              <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">
+                Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.
+              </p>
+            </div>
+            <div>
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] hover:from-[#ff5a22] hover:to-[#e03d00] text-white py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-sm shadow-[#ff4b0b]/25 transition-all cursor-pointer"
+              >
+                Descargar Guía Gratis <ArrowRight className="w-4 h-4" />
+              </a>
+            </div>
+          </motion.div>
+
+        </div>
+
+        {/* CONTENEDOR DE DOS COLUMNAS OPTIMIZADO */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-16">
           
-          {/* COLUMNA IZQUIERDA: Portada + Audio + Artículo + Comentarios (70%) */}
+          {/* COLUMNA IZQUIERDA: Articulo + Comentarios (70%) */}
           <div className="lg:col-span-2 space-y-8">
-            
-            {/* Portada 16:9 Alineada al 100% con los bordes de la columna de lectura */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="relative aspect-[16/9] w-full rounded-[18px] overflow-hidden bg-zinc-950 border border-black/10 shadow-xs"
-            >
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-full object-cover object-center"
-              />
-            </motion.div>
-
-            {/* Barra de Audio Integrada */}
-            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-zinc-200/80 shadow-2xs">
-              <button
-                type="button"
-                onClick={togglePlayAudio}
-                className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-zinc-950 text-white hover:bg-zinc-800 px-4 py-2 text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
-              >
-                {isPlayingAudio && !isPausedAudio ? (
-                  <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
-                ) : (
-                  <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
-                )}
-                <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar artículo en audio'}</span>
-              </button>
-
-              {isPlayingAudio && (
-                <div className="inline-flex items-center gap-1">
-                  {[1.0, 1.25, 1.5].map((speed) => (
-                    <button
-                      key={speed}
-                      type="button"
-                      onClick={() => changeAudioSpeed(speed)}
-                      className={`rounded px-2 py-1 text-[11px] font-bold ${
-                        audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60'
-                      }`}
-                    >
-                      {speed}x
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={stopAudio}
-                    className="rounded px-2 py-1 text-[11px] font-bold text-red-500 hover:bg-red-50"
-                    title="Detener audio"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-            </div>
             
             {/* Cuerpo del Artículo */}
             <motion.article
@@ -685,12 +858,12 @@ export default function ArticleDetailPage() {
                       : dateObj.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })
                     
                     return (
-                      <div key={comm.id} className="p-4 bg-zinc-50 rounded-[15px] border border-zinc-200/50">
-                        <div className="flex justify-between items-center mb-1.5">
-                          <span className="text-xs font-bold text-zinc-800">{comm.name}</span>
-                          <span className="text-[9px] text-zinc-400 font-mono">{formattedDate}</span>
+                      <div key={comm.id} className="p-4 sm:p-5 bg-zinc-50 rounded-[15px] border border-zinc-200/60">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-bold text-zinc-900">{comm.name}</span>
+                          <span className="text-xs text-zinc-400 font-mono">{formattedDate}</span>
                         </div>
-                        <p className="text-xs text-zinc-600 leading-relaxed whitespace-pre-line">
+                        <p className="text-[15px] text-zinc-700 leading-relaxed whitespace-pre-line">
                           {comm.comment}
                         </p>
                       </div>
@@ -713,7 +886,7 @@ export default function ArticleDetailPage() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleCommentSubmit} className="space-y-4 pt-4 border-t border-zinc-100">
-                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400">Deja tu opinión</h4>
+                  <h4 className="text-xs font-extrabold uppercase tracking-widest text-zinc-400 font-mono">Deja tu opinión</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input
                       type="text"
@@ -721,7 +894,7 @@ export default function ArticleDetailPage() {
                       value={commentName}
                       onChange={(e) => setCommentName(e.target.value)}
                       placeholder="Nombre"
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-xs font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all"
                     />
                     <input
                       type="email"
@@ -729,7 +902,7 @@ export default function ArticleDetailPage() {
                       value={commentEmail}
                       onChange={(e) => setCommentEmail(e.target.value)}
                       placeholder="Correo (No se publicará)"
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-xs font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all"
                     />
                   </div>
                   <textarea
@@ -738,15 +911,15 @@ export default function ArticleDetailPage() {
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Escribe tu comentario..."
-                    className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-xs font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all resize-none"
+                    className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 text-sm font-semibold rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-zinc-300 transition-all resize-none"
                   />
                   {commentError && (
-                    <p className="text-[11px] text-rose-500 font-semibold">{commentError}</p>
+                    <p className="text-xs text-rose-500 font-semibold">{commentError}</p>
                   )}
                   <button
                     type="submit"
                     disabled={commentSubmitting}
-                    className="bg-zinc-950 hover:bg-zinc-800 disabled:bg-zinc-400 text-white text-[10px] font-bold uppercase tracking-widest px-5 py-3 rounded-xl transition-all active:scale-95 flex items-center gap-1.5"
+                    className="bg-zinc-950 hover:bg-zinc-800 disabled:bg-zinc-400 text-white text-xs font-bold uppercase tracking-widest px-5 py-3 rounded-xl transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" /> 
                     {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
@@ -757,82 +930,12 @@ export default function ArticleDetailPage() {
 
           </div>
 
-          {/* COLUMNA DERECHA: Sidebar Sticky con Autor, CTA HubSpot, Compartir y Boletín (30%) */}
+          {/* COLUMNA DERECHA: Sidebar Sticky con Progreso de Lectura, Boletín y Patrocinio (30%) */}
           <div className="space-y-6 lg:sticky lg:top-[85px]">
             
-            {/* 1. Ficha de Autor (Estilo Hostinger / WordPress) */}
-            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#ff703d] to-[#ff4b0b] flex items-center justify-center text-white text-base font-black shadow-xs shrink-0">
-                Q
-              </div>
-              <div className="min-w-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 block mb-0.5 font-mono">
-                  Publicado por
-                </span>
-                <h4 className="text-sm font-bold text-zinc-950 leading-tight truncate">
-                  Qaway Lab
-                </h4>
-                <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
-                  {article.date} • {article.readTime}
-                </p>
-              </div>
-            </div>
-
-            {/* 2. Tarjeta CTA Estilo HubSpot (Alta Conversión) */}
-            <div className="rounded-[18px] border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-6 shadow-xs relative overflow-hidden">
-              <div className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-2.5 py-1 rounded-md mb-2.5 font-mono">
-                Recurso Gratuito
-              </div>
-              <h4 className="text-base font-black text-zinc-950 mb-2 leading-snug">
-                Guía y Prompts de IA para Negocios
-              </h4>
-              <p className="text-xs text-zinc-600 leading-relaxed mb-4">
-                Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.
-              </p>
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] hover:from-[#ff5a22] hover:to-[#e03d00] text-white py-3 px-4 rounded-xl text-xs font-bold shadow-sm shadow-[#ff4b0b]/25 transition-all cursor-pointer"
-              >
-                Descargar Guía Gratis <ArrowRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-
-            {/* 3. Barra de Compartir Rápido */}
+            {/* 1. Widget: Progreso de Lectura */}
             <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs">
-              <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3 font-mono">
-                Compartir Artículo
-              </h4>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleShareWhatsApp}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-black/10 hover:border-green-500 hover:text-green-600 bg-zinc-50 hover:bg-white text-xs font-semibold transition-all cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4 text-green-600" /> WhatsApp
-                </button>
-                <button
-                  type="button"
-                  onClick={handleShareLinkedIn}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-black/10 hover:border-blue-600 hover:text-blue-600 bg-zinc-50 hover:bg-white text-xs font-semibold transition-all cursor-pointer"
-                >
-                  <Linkedin className="w-4 h-4 text-blue-600" /> LinkedIn
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  title="Copiar enlace"
-                  className="p-2.5 rounded-xl border border-black/10 hover:border-[#ff4b0b] hover:text-[#ff4b0b] bg-zinc-50 hover:bg-white transition-all cursor-pointer"
-                >
-                  {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* 4. Widget: Progreso de Lectura */}
-            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs">
-              <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3 font-mono">Lectura</h4>
+              <h4 className="text-xs font-extrabold text-zinc-400 uppercase tracking-widest mb-3 font-mono">Lectura</h4>
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-zinc-500 font-semibold">Leído hasta:</span>
                 <span className="font-bold text-zinc-900 font-mono">{Math.round(scrollProgress)}%</span>
@@ -848,11 +951,11 @@ export default function ArticleDetailPage() {
             {/* 5. Widget: Newsletter (Captación) */}
             <div className="bg-white border border-zinc-200/80 rounded-[18px] p-6 shadow-2xs relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] rounded-t-[18px]" />
-              <h4 className="text-[10px] font-extrabold text-[#ff4b0b] uppercase tracking-widest mb-2 flex items-center gap-1 mt-1 font-mono">
+              <h4 className="text-xs font-extrabold text-[#ff4b0b] uppercase tracking-widest mb-2 flex items-center gap-1.5 mt-1 font-mono">
                 <Sparkles className="w-3.5 h-3.5" /> Boletín Semanal
               </h4>
-              <h5 className="text-sm font-black mb-1.5 leading-tight text-zinc-900">Únete al manual de operaciones de IA</h5>
-              <p className="text-[11px] text-zinc-500 mb-4 leading-relaxed">Recibe ideas prácticas de automatización directamente en tu correo cada semana.</p>
+              <h5 className="text-base font-black mb-1.5 leading-tight text-zinc-900">Únete al manual de operaciones de IA</h5>
+              <p className="text-[13px] text-zinc-500 mb-4 leading-relaxed">Recibe ideas prácticas de automatización directamente en tu correo cada semana.</p>
               
               {newsletterSubmitted ? (
                 <motion.div
@@ -861,7 +964,7 @@ export default function ArticleDetailPage() {
                   className="p-4 bg-[#ff4b0b]/8 border border-[#ff4b0b]/20 text-zinc-800 rounded-xl text-center"
                 >
                   <h5 className="font-bold text-xs mb-1">¡Suscrito con éxito!</h5>
-                  <p className="text-[10px] text-zinc-500 leading-normal">Pronto recibirás el manual de operaciones en tu correo.</p>
+                  <p className="text-xs text-zinc-500 leading-normal">Pronto recibirás el manual de operaciones en tu correo.</p>
                 </motion.div>
               ) : (
                 <form onSubmit={handleNewsletterSubmit} className="space-y-2.5">
@@ -873,11 +976,11 @@ export default function ArticleDetailPage() {
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="Tu correo electrónico"
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-[#ff4b0b] focus:bg-white transition-all font-semibold"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 text-sm rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-[#ff4b0b] focus:bg-white transition-all font-semibold"
                     />
                   </div>
                   {newsletterError && (
-                    <p className="text-[10px] text-rose-500 font-semibold px-1">{newsletterError}</p>
+                    <p className="text-xs text-rose-500 font-semibold px-1">{newsletterError}</p>
                   )}
                   <button
                     type="submit"
@@ -896,17 +999,17 @@ export default function ArticleDetailPage() {
 
         {/* RECOMENDACIONES / OTROS ARTÍCULOS */}
         <div className="pt-12 border-t border-zinc-200">
-          <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase tracking-widest mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+          <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold uppercase tracking-widest mb-8 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b]" />
             Otras publicaciones interesantes
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {recommendedArticles.map((art, idx) => (
+            {recommendedArticles.map((art) => (
               <Link
                 key={art.id}
                 to={`/blog/articulo/${art.id}`}
-                className="group bg-white rounded-[15px] border border-black/10 overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full justify-between"
+                className="group bg-white rounded-[18px] border border-black/10 overflow-hidden hover:shadow-md hover:border-black/20 transition-all duration-300 flex flex-col h-full justify-between"
               >
                 <div>
                   <div className="relative w-full aspect-video overflow-hidden bg-zinc-900 border-b border-black/5">
@@ -916,16 +1019,16 @@ export default function ArticleDetailPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
-                  <div className="p-4">
-                    <span className="text-[8px] bg-zinc-100 text-zinc-500 font-bold uppercase tracking-wider px-2 py-0.5 rounded border border-zinc-200/50 block mb-2 max-w-max">
+                  <div className="p-5">
+                    <span className="text-[11px] bg-zinc-100 text-zinc-700 font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md border border-zinc-200/70 inline-block mb-2.5 font-mono">
                       {art.categoryLabel}
                     </span>
-                    <h4 className="text-xs font-bold text-zinc-900 leading-tight group-hover:text-qaway-accent-dark transition-colors line-clamp-2">
+                    <h4 className="text-sm sm:text-[15px] font-bold text-zinc-900 leading-snug group-hover:text-[#ff4b0b] transition-colors line-clamp-2">
                       {art.title}
                     </h4>
                   </div>
                 </div>
-                <div className="px-4 pb-4 pt-2 text-[9px] text-zinc-400 font-mono border-t border-zinc-100 flex justify-between items-center">
+                <div className="px-5 pb-4 pt-3 text-xs text-zinc-400 font-mono border-t border-zinc-100 flex justify-between items-center">
                   <span>{art.date}</span>
                   <span>{art.readTime}</span>
                 </div>
