@@ -2032,11 +2032,38 @@ export default function MarketingStudioPage() {
           MODAL: EXECUTIVE SLIDE PRESENTATION
          ========================================================================= */}
       {viewingExecutivePersona && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto print:p-0 print:bg-white print:static">
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden !important;
+              }
+              #printable-slide-modal, #printable-slide-modal * {
+                visibility: visible !important;
+              }
+              #printable-slide-modal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: white !important;
+                padding: 24px !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+          `}</style>
           <motion.div
+            id="printable-slide-modal"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white border border-slate-200 rounded-[32px] p-6 sm:p-8 max-w-5xl w-full space-y-6 shadow-2xl my-auto"
+            className="bg-white border border-slate-200 rounded-[32px] p-6 sm:p-8 max-w-5xl w-full space-y-6 shadow-2xl my-auto print:border-none print:shadow-none print:rounded-none"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
@@ -2053,7 +2080,7 @@ export default function MarketingStudioPage() {
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative no-print">
                 <button
                   type="button"
                   onClick={() => setSlideDropdownOpen(prev => !prev)}
@@ -2093,7 +2120,7 @@ export default function MarketingStudioPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="flex items-center gap-2 self-end sm:self-auto no-print">
                 <button
                   onClick={() => window.print()}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
@@ -2112,7 +2139,7 @@ export default function MarketingStudioPage() {
             </div>
 
             {/* SLIDE CANVAS */}
-            <div className="bg-[#fafbfc] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner">
+            <div className="bg-[#fafbfc] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner print:bg-white print:border-none print:shadow-none print:p-0">
               
               {/* 1. SLIDE: MENSAJES CLAVE */}
               {executiveSlideTab === 'messages' && (

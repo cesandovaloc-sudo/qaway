@@ -370,7 +370,7 @@ export default function BlogPage() {
         className="group flex h-full flex-col justify-between overflow-hidden rounded-[14px] border border-black/10 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-400 hover:border-black/25 hover:shadow-[0_20px_50px_rgba(0,0,0,0.07)]"
       >
         <div>
-          <div className="relative h-48 overflow-hidden bg-zinc-950">
+          <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-950">
             <img
               src={article.image}
               alt={article.title}
@@ -523,7 +523,7 @@ export default function BlogPage() {
           </div>
         </section>
 
-        <section className="bg-white pb-16 pt-10 lg:pb-24 lg:pt-14">
+        <section className="bg-white pb-16 pt-8 sm:pt-10 lg:pb-24">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
             {loading ? (
               /* Skeleton Loader suave mientras conecta con Supabase */

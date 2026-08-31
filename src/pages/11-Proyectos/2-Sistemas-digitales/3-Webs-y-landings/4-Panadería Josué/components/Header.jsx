@@ -6,8 +6,7 @@ const links = [
   ["Productos", "#productos"],
   ["Nosotros", "#nosotros"],
   ["Pedidos", "#pedidos"],
-  ["Ubicación", "#ubicacion"],
-  ["Contacto", "#contacto"]
+  ["Ubicación", "#ubicacion"]
 ];
 
 export function Header() {
