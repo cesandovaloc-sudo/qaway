@@ -29,18 +29,31 @@ import {
   HelpCircle,
   Smartphone,
   Monitor,
-  Bell,
-  Settings,
-  Bookmark,
-  Compass,
-  ArrowUpRight,
-  ShieldCheck,
-  Check,
-  ChevronDown
+  Building2,
+  ShoppingBag,
+  Info,
+  Check
 } from 'lucide-react'
 
 // LocalStorage persistence key
-const STORAGE_KEY = 'qaway_marketing_revolut_os_v1'
+const STORAGE_KEY = 'qaway_marketing_revolut_os_v2'
+
+// HubSpot Page 6: Exact Format Mapping
+const HUBSPOT_FORMATS_BY_STAGE = {
+  TOFU: [
+    { name: 'Infografía', purpose: 'Fácil de compartir y aumenta el descubrimiento en redes' },
+    { name: 'Video Corto (Reels/TikTok/YT)', purpose: 'Ayuda a que nuevas personas descubran tu marca' }
+  ],
+  MOFU: [
+    { name: 'Ebook / Guía', purpose: 'Captar datos de contacto (leads) a cambio de valor' },
+    { name: 'Muestra Gratis / Demo', purpose: 'Permite probar el servicio antes de invertir' },
+    { name: 'Webinar / Masterclass', purpose: 'Formato interactivo audiovisual de alta información' }
+  ],
+  BOFU: [
+    { name: 'Caso de Éxito (Case Study)', purpose: 'Compara soluciones y demuestra resultados reales' },
+    { name: 'Testimonio / Demostración Social', purpose: 'Fotos/reseñas con prueba social para el cierre' }
+  ]
+}
 
 const INITIAL_PERSONAS = [
   {
@@ -67,7 +80,7 @@ const INITIAL_PERSONAS = [
   {
     id: 'p-2',
     name: 'Valeria Ramos',
-    title: 'Compradora Digital & Founder',
+    title: 'Compradora Digital & Emprendedora',
     type: 'B2C',
     avatarImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
     avatarBg: 'bg-violet-100 text-violet-700',
@@ -90,43 +103,69 @@ const INITIAL_PERSONAS = [
 const INITIAL_CONTENT = [
   {
     id: 'c-1',
-    title: 'Guía Definitiva: Cómo Automatizar tu Embudo Comercial',
-    stage: 'TOFU',
-    format: 'Ebook / Guía',
-    channel: 'Blog SEO & LinkedIn',
-    personaId: 'p-1',
-    status: 'Publicado',
-    kpi: 'Tráfico orgánico & Descargas'
-  },
-  {
-    id: 'c-2',
     title: 'Infografía: Los 5 Errores Costosos en la Gestión de Clientes',
     stage: 'TOFU',
     format: 'Infografía',
+    purpose: 'Fácil de compartir y aumenta el descubrimiento en redes',
     channel: 'Instagram & LinkedIn',
     personaId: 'p-1',
     status: 'Publicado',
-    kpi: 'Alcance & Guardados'
+    modelType: 'B2B'
+  },
+  {
+    id: 'c-2',
+    title: 'Video Corto: Cómo Ahorrar 15 Horas Semanales con Automatizaciones',
+    stage: 'TOFU',
+    format: 'Video Corto (Reels/TikTok/YT)',
+    purpose: 'Ayuda a que nuevas personas descubran tu marca',
+    channel: 'TikTok & Reels',
+    personaId: 'p-1',
+    status: 'Publicado',
+    modelType: 'B2B'
   },
   {
     id: 'c-3',
-    title: 'Masterclass: Arquitectura de Sistemas Digitales de Alto Rendimiento',
+    title: 'Ebook: Guía Definitiva de Arquitectura Comercial para Empresas',
     stage: 'MOFU',
-    format: 'Webinar',
-    channel: 'Email Marketing & Ads',
+    format: 'Ebook / Guía',
+    purpose: 'Captar datos de contacto (leads) a cambio de valor',
+    channel: 'Landing Page & Ads',
     personaId: 'p-1',
     status: 'En Progreso',
-    kpi: 'Registros & MQLs'
+    modelType: 'B2B'
   },
   {
     id: 'c-4',
-    title: 'Caso de Éxito: Cómo una Empresa Multiplicó sus Ventas x3 en 90 Días',
+    title: 'Webinar: Cómo Escalar Operaciones Digitales en 90 Días',
+    stage: 'MOFU',
+    format: 'Webinar / Masterclass',
+    purpose: 'Formato interactivo audiovisual de alta información',
+    channel: 'Email Marketing & Zoom',
+    personaId: 'p-1',
+    status: 'Borrador',
+    modelType: 'B2B'
+  },
+  {
+    id: 'c-5',
+    title: 'Caso de Éxito: Empresa B2B Multiplica x3 sus Ventas',
     stage: 'BOFU',
-    format: 'Caso de Éxito',
-    channel: 'Landing Page & Nurturing',
+    format: 'Caso de Éxito (Case Study)',
+    purpose: 'Compara soluciones y demuestra resultados reales',
+    channel: 'Landing Page & Ventas',
     personaId: 'p-1',
     status: 'Publicado',
-    kpi: 'Llamadas Agendadas & SQLs'
+    modelType: 'B2B'
+  },
+  {
+    id: 'c-6',
+    title: 'Testimonio en Video de Cliente Satisfecho con Resultados Reales',
+    stage: 'BOFU',
+    format: 'Testimonio / Demostración Social',
+    purpose: 'Fotos/reseñas con prueba social para el cierre',
+    channel: 'Instagram Stories & Web',
+    personaId: 'p-2',
+    status: 'Publicado',
+    modelType: 'B2C'
   }
 ]
 
@@ -165,9 +204,12 @@ const INITIAL_CAMPAIGNS = [
 ]
 
 export default function MarketingStudioPage() {
+  // Global Business Model Context: 'B2B' | 'B2C'
+  const [businessModel, setBusinessModel] = useState('B2B')
+
   // View mode: 'desktop' or 'mobile-preview'
   const [viewMode, setViewMode] = useState('desktop')
-  const [activeTab, setActiveTab] = useState('simulator')
+  const [activeTab, setActiveTab] = useState('content')
 
   // State initialization with LocalStorage
   const [personas, setPersonas] = useState(() => {
@@ -213,11 +255,12 @@ export default function MarketingStudioPage() {
   const [newContent, setNewContent] = useState({
     title: '',
     stage: 'TOFU',
-    format: 'Ebook / Guía',
+    format: 'Infografía',
+    purpose: 'Fácil de compartir y aumenta el descubrimiento en redes',
     channel: '',
     personaId: 'p-1',
     status: 'Borrador',
-    kpi: ''
+    modelType: 'B2B'
   })
 
   const [showCampaignModal, setShowCampaignModal] = useState(false)
@@ -231,6 +274,18 @@ export default function MarketingStudioPage() {
     roas: '3.0x',
     period: 'Mes Actual'
   })
+
+  // Auto-update default format and purpose when stage changes in modal
+  useEffect(() => {
+    const available = HUBSPOT_FORMATS_BY_STAGE[newContent.stage]
+    if (available && available[0]) {
+      setNewContent(prev => ({
+        ...prev,
+        format: available[0].name,
+        purpose: available[0].purpose
+      }))
+    }
+  }, [newContent.stage])
 
   // Save to localStorage on change
   useEffect(() => {
@@ -289,7 +344,7 @@ export default function MarketingStudioPage() {
     }
     setShowPersonaModal(false)
     setEditingPersona(null)
-    setNewPersona({ name: '', title: '', type: 'B2B', jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
+    setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
   }
 
   const handleDeletePersona = (id) => {
@@ -317,11 +372,21 @@ export default function MarketingStudioPage() {
     if (!newContent.title) return
     const created = {
       id: `c-${Date.now()}`,
-      ...newContent
+      ...newContent,
+      modelType: businessModel
     }
     setContents(prev => [...prev, created])
     setShowContentModal(false)
-    setNewContent({ title: '', stage: 'TOFU', format: 'Ebook / Guía', channel: '', personaId: personas[0]?.id || 'p-1', status: 'Borrador', kpi: '' })
+    setNewContent({
+      title: '',
+      stage: 'TOFU',
+      format: 'Infografía',
+      purpose: 'Fácil de compartir y aumenta el descubrimiento en redes',
+      channel: '',
+      personaId: personas[0]?.id || 'p-1',
+      status: 'Borrador',
+      modelType: businessModel
+    })
   }
 
   const handleDeleteContent = (id) => {
@@ -361,49 +426,60 @@ export default function MarketingStudioPage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight text-white">Marketing OS</h1>
                 <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/20 text-white border border-white/30">
-                  Minimal iOS
+                  HubSpot Standards
                 </span>
               </div>
               <p className="text-xs text-indigo-100 mt-0.5">
-                Estrategia Inbound, Buyer Personas (JTBD), Content Mapping & Unit Economics
+                Bifurcación B2B/B2C, Content Mapping (Pág. 6), Matriz POEM y Unit Economics
               </p>
             </div>
           </div>
 
-          {/* Quick Actions & View Switcher */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20 flex items-center">
+          {/* Quick Controls: Business Model (B2B vs B2C) + View Switcher */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Global Business Model Switch */}
+            <div className="bg-white/15 backdrop-blur-md rounded-full p-1 border border-white/25 flex items-center">
               <button
-                onClick={() => setViewMode('desktop')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  viewMode === 'desktop' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
+                onClick={() => setBusinessModel('B2B')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  businessModel === 'B2B' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
                 }`}
               >
-                <Monitor className="w-3.5 h-3.5" />
-                <span>Escritorio</span>
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Modelo B2B (Empresas)</span>
               </button>
               <button
-                onClick={() => setViewMode('mobile-preview')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  viewMode === 'mobile-preview' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
+                onClick={() => setBusinessModel('B2C')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  businessModel === 'B2C' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
                 }`}
               >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Vista Móvil</span>
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>Modelo B2C (Consumo)</span>
               </button>
             </div>
 
-            <button
-              onClick={() => {
-                setEditingPersona(null)
-                setNewPersona({ name: '', title: '', type: 'B2B', jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
-                setShowPersonaModal(true)
-              }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-white text-indigo-600 hover:bg-indigo-50 shadow-md shadow-indigo-900/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo Persona
-            </button>
+            {/* View Mode Switch */}
+            <div className="bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20 flex items-center">
+              <button
+                onClick={() => setViewMode('desktop')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  viewMode === 'desktop' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
+                }`}
+                title="Vista de escritorio"
+              >
+                <Monitor className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('mobile-preview')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  viewMode === 'mobile-preview' ? 'bg-white text-indigo-700 shadow-sm' : 'text-white hover:bg-white/10'
+                }`}
+                title="Vista móvil"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -411,47 +487,24 @@ export default function MarketingStudioPage() {
       {/* MAIN CONTENT AREA */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
 
-        {/* TOP FLOATING METRICS TICKER */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xs text-slate-500 font-medium">Ingresos Proyectados</div>
-            <div className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-              ${calculatedRevenue.toLocaleString()}
+        {/* CONTEXT CALLOUT: B2B vs B2C Strategy Banner */}
+        <div className="mb-6 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${businessModel === 'B2B' ? 'bg-indigo-50 text-indigo-600' : 'bg-emerald-50 text-emerald-600'}`}>
+              {businessModel === 'B2B' ? <Building2 className="w-5 h-5" /> : <ShoppingBag className="w-5 h-5" />}
             </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-emerald-600">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>ROAS {calculatedRoas}x</span>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xs text-slate-500 font-medium">CAC Estimado</div>
-            <div className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-              ${calculatedCac}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-1 font-medium">
-              Inversión: ${simAdSpend}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xs text-slate-500 font-medium">Ratio LTV : CAC</div>
-            <div className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-              {calculatedLtvCacRatio}x
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-[11px] font-bold text-indigo-600">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{Number(calculatedLtvCacRatio) >= 3 ? 'Saludable' : 'Ajustar'}</span>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all">
-            <div className="text-xs text-slate-500 font-medium">Clientes Cerrados</div>
-            <div className="text-2xl font-black text-slate-900 tracking-tight mt-1">
-              {calculatedCustomers}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-1 font-medium">
-              De {calculatedLeads} Leads MQL
+            <div>
+              <div className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                <span>Estrategia Activa: Modelo {businessModel === 'B2B' ? 'B2B (Ventas Consultivas / Leads)' : 'B2C (Conversión Directa)'}</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                  {businessModel === 'B2B' ? 'Enfoque MQL ➔ SQL' : 'Enfoque Checkout / Fricción Cero'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                {businessModel === 'B2B'
+                  ? 'Canales prioritarios: LinkedIn, Google Search y Email. Los contenidos buscan educar y calificar antes de la llamada comercial.'
+                  : 'Canales prioritarios: Instagram, TikTok y WhatsApp. El recorrido busca llevar al usuario a la compra con mínima fricción.'}
+              </p>
             </div>
           </div>
         </div>
@@ -459,11 +512,11 @@ export default function MarketingStudioPage() {
         {/* NAVIGATION PILL SELECTOR */}
         <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto mb-6 scrollbar-none">
           {[
-            { id: 'simulator', label: 'Simulador Funnel', icon: Calculator },
-            { id: 'personas', label: 'Buyer Personas', icon: Users, count: personas.length },
-            { id: 'content', label: 'Content Mapping', icon: Layers, count: contents.length },
+            { id: 'content', label: 'Content Mapping (Pág. 6)', icon: Layers, count: contents.length },
+            { id: 'personas', label: 'Buyer Personas & JTBD', icon: Users, count: personas.length },
             { id: 'poem', label: 'Auditoría POEM', icon: Radio, count: poemChannels.length },
-            { id: 'campaigns', label: 'Campañas', icon: Zap, count: campaigns.length }
+            { id: 'simulator', label: 'Simulador Funnel & ROI', icon: Calculator },
+            { id: 'campaigns', label: 'Plan de Campañas', icon: Zap, count: campaigns.length }
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -477,7 +530,7 @@ export default function MarketingStudioPage() {
               >
                 {isActive && (
                   <motion.div
-                    layoutId="activeTabPillLight"
+                    layoutId="activeTabPillLight2"
                     className="absolute inset-0 bg-indigo-600 rounded-xl shadow-md shadow-indigo-600/20 -z-10"
                     transition={{ type: 'spring', stiffness: 450, damping: 35 }}
                   />
@@ -500,12 +553,313 @@ export default function MarketingStudioPage() {
         <div className={viewMode === 'mobile-preview' ? 'flex justify-center' : ''}>
           <div className={viewMode === 'mobile-preview' ? 'w-full max-w-sm p-4 bg-slate-900 rounded-[48px] shadow-2xl border-8 border-slate-800' : 'w-full'}>
             
-            {/* If Mobile Preview, internal container simulates iOS app screen */}
             <div className={viewMode === 'mobile-preview' ? 'bg-[#f8fafc] rounded-[36px] overflow-hidden p-4 space-y-4 max-h-[750px] overflow-y-auto' : ''}>
 
               <AnimatePresence mode="wait">
 
-                {/* 1. SIMULATOR VIEW */}
+                {/* 1. CONTENT MAPPING VIEW (PÁGINA 6 HUBSPOT) */}
+                {activeTab === 'content' && (
+                  <motion.div
+                    key="view-content"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                          <span>Mapeo de Contenidos por Etapa (Estándar Página 6)</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                            Reglas HubSpot
+                          </span>
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Cada etapa del recorrido del comprador exige formatos con objetivos de comportamiento específicos.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowContentModal(true)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-all"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Mapear Nueva Pieza
+                      </button>
+                    </div>
+
+                    {/* 3 Columns: TOFU, MOFU, BOFU with Format Rules according to Page 6 */}
+                    <div className={viewMode === 'mobile-preview' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-3 gap-6'}>
+                      
+                      {/* TOFU: Reconocimiento */}
+                      <div className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-4">
+                        <div className="pb-3 border-b border-slate-100">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Etapa 1 • TOFU</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                              {contents.filter(c => c.stage === 'TOFU').length} piezas
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-900 mt-1">Reconocimiento</h4>
+                          <div className="mt-2 p-2 rounded-xl bg-indigo-50/60 text-[11px] text-indigo-900">
+                            <strong className="block font-bold mb-0.5">Formatos Regla Pág. 6:</strong>
+                            <ul className="list-disc list-inside space-y-0.5 text-[10px] text-indigo-700">
+                              <li><strong>Infografías:</strong> Fáciles de compartir.</li>
+                              <li><strong>Videos Cortos:</strong> Descubrimiento de marca.</li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {contents.filter(c => c.stage === 'TOFU').map((item) => (
+                            <div key={item.id} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5 hover:border-indigo-200 transition-all">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">
+                                  {item.format}
+                                </span>
+                                <button onClick={() => handleDeleteContent(item.id)} className="text-slate-400 hover:text-red-500">
+                                  ✕
+                                </button>
+                              </div>
+                              <h5 className="text-xs font-bold text-slate-800 leading-snug">{item.title}</h5>
+                              <p className="text-[10.5px] text-slate-500 italic">{item.purpose}</p>
+                              <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60">
+                                <span>Canal: {item.channel}</span>
+                                <span className="font-semibold text-indigo-600">{item.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* MOFU: Consideración */}
+                      <div className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-4">
+                        <div className="pb-3 border-b border-slate-100">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Etapa 2 • MOFU</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                              {contents.filter(c => c.stage === 'MOFU').length} piezas
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-900 mt-1">Consideración</h4>
+                          <div className="mt-2 p-2 rounded-xl bg-blue-50/60 text-[11px] text-blue-900">
+                            <strong className="block font-bold mb-0.5">Formatos Regla Pág. 6:</strong>
+                            <ul className="list-disc list-inside space-y-0.5 text-[10px] text-blue-700">
+                              <li><strong>Ebooks:</strong> Captan información/contacto.</li>
+                              <li><strong>Muestras/Demos:</strong> Probar antes de invertir.</li>
+                              <li><strong>Webinars:</strong> Información profunda e interactiva.</li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {contents.filter(c => c.stage === 'MOFU').map((item) => (
+                            <div key={item.id} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5 hover:border-blue-200 transition-all">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                                  {item.format}
+                                </span>
+                                <button onClick={() => handleDeleteContent(item.id)} className="text-slate-400 hover:text-red-500">
+                                  ✕
+                                </button>
+                              </div>
+                              <h5 className="text-xs font-bold text-slate-800 leading-snug">{item.title}</h5>
+                              <p className="text-[10.5px] text-slate-500 italic">{item.purpose}</p>
+                              <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60">
+                                <span>Canal: {item.channel}</span>
+                                <span className="font-semibold text-blue-600">{item.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* BOFU: Decisión */}
+                      <div className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-4">
+                        <div className="pb-3 border-b border-slate-100">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Etapa 3 • BOFU</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                              {contents.filter(c => c.stage === 'BOFU').length} piezas
+                            </span>
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-900 mt-1">Decisión & Cierre</h4>
+                          <div className="mt-2 p-2 rounded-xl bg-emerald-50/60 text-[11px] text-emerald-900">
+                            <strong className="block font-bold mb-0.5">Formatos Regla Pág. 6:</strong>
+                            <ul className="list-disc list-inside space-y-0.5 text-[10px] text-emerald-700">
+                              <li><strong>Casos de Éxito:</strong> Comparan y demuestran valor.</li>
+                              <li><strong>Testimonios:</strong> Demostración social directa.</li>
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {contents.filter(c => c.stage === 'BOFU').map((item) => (
+                            <div key={item.id} className="p-3.5 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5 hover:border-emerald-200 transition-all">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">
+                                  {item.format}
+                                </span>
+                                <button onClick={() => handleDeleteContent(item.id)} className="text-slate-400 hover:text-red-500">
+                                  ✕
+                                </button>
+                              </div>
+                              <h5 className="text-xs font-bold text-slate-800 leading-snug">{item.title}</h5>
+                              <p className="text-[10.5px] text-slate-500 italic">{item.purpose}</p>
+                              <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/60">
+                                <span>Canal: {item.channel}</span>
+                                <span className="font-semibold text-emerald-600">{item.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 2. BUYER PERSONAS (Clean iOS List) */}
+                {activeTab === 'personas' && (
+                  <motion.div
+                    key="view-personas"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">Perfiles de Cliente Ideal (ICP & JTBD)</h3>
+                        <p className="text-xs text-slate-500">Representación de las metas y dolores de tu audiencia</p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setEditingPersona(null)
+                          setNewPersona({ name: '', title: '', type: businessModel, jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
+                          setShowPersonaModal(true)
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-indigo-600 text-white"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Agregar Persona
+                      </button>
+                    </div>
+
+                    <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
+                      {personas.map((persona) => (
+                        <div key={persona.id} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={persona.avatarImg || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                                alt={persona.name}
+                                className="w-11 h-11 rounded-full object-cover ring-2 ring-indigo-50 shadow-sm"
+                              />
+                              <div>
+                                <h4 className="text-sm font-bold text-slate-900">{persona.name}</h4>
+                                <p className="text-[11px] text-slate-500">{persona.title}</p>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                              {persona.type}
+                            </span>
+                          </div>
+
+                          {/* JTBD */}
+                          <div className="p-3 rounded-2xl bg-slate-50 text-xs text-slate-700 italic">
+                            "{persona.jtbd}"
+                          </div>
+
+                          {/* Pains & Gains */}
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <div className="p-2.5 rounded-xl bg-red-50/50 border border-red-100">
+                              <div className="font-bold text-red-700 mb-1">Dolores (Pains)</div>
+                              <ul className="space-y-0.5 text-slate-600">
+                                {persona.pains.slice(0, 2).map((p, i) => (
+                                  <li key={i} className="truncate">• {p}</li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100">
+                              <div className="font-bold text-emerald-700 mb-1">Ganancias (Gains)</div>
+                              <ul className="space-y-0.5 text-slate-600">
+                                {persona.gains.slice(0, 2).map((g, i) => (
+                                  <li key={i} className="truncate">• {g}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                            <span className="text-slate-400">Canales: {persona.channels.join(', ')}</span>
+                            <div className="flex gap-2">
+                              <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800 font-bold">
+                                Editar
+                              </button>
+                              <button onClick={() => handleDeletePersona(persona.id)} className="text-red-500 hover:text-red-700">
+                                Eliminar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 3. POEM AUDIT */}
+                {activeTab === 'poem' && (
+                  <motion.div
+                    key="view-poem"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900">Auditoría de Canales POEM</h3>
+                      <p className="text-xs text-slate-500">Clasificación estándar: Medios Propios (Owned), Obtenidos (Earned) y Pagados (Paid)</p>
+                    </div>
+
+                    <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-3 gap-4'}>
+                      {['Owned', 'Earned', 'Paid'].map((category) => {
+                        const items = poemChannels.filter(c => c.category === category)
+                        return (
+                          <div key={category} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                              <span className="text-xs font-bold text-slate-900">
+                                {category === 'Owned' ? 'Medios Propios' : category === 'Earned' ? 'Medios Obtenidos' : 'Medios Pagados'}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
+                                {items.length}
+                              </span>
+                            </div>
+
+                            <div className="space-y-2">
+                              {items.map((ch) => (
+                                <div key={ch.id} className="p-3 rounded-2xl bg-slate-50/70 border border-slate-100 space-y-1.5">
+                                  <div className="flex justify-between text-xs font-bold text-slate-800">
+                                    <span>{ch.channel}</span>
+                                    <span className="text-[10px] text-slate-500">{ch.efficiency}</span>
+                                  </div>
+                                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                    <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${ch.health}%` }} />
+                                  </div>
+                                  <div className="flex justify-between text-[10px] text-slate-400">
+                                    <span>Salud: {ch.health}%</span>
+                                    <span className="font-semibold text-indigo-600">{ch.gapStatus}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 4. SIMULATOR VIEW */}
                 {activeTab === 'simulator' && (
                   <motion.div
                     key="view-sim"
@@ -627,7 +981,7 @@ export default function MarketingStudioPage() {
                     {/* Funnel Visualization */}
                     <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'lg:col-span-7 space-y-4'}>
                       <div className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
-                        <h3 className="text-sm font-bold text-slate-900">Embudo Estratégico</h3>
+                        <h3 className="text-sm font-bold text-slate-900">Embudo Estratégico ({businessModel})</h3>
 
                         {/* Step 1 TOFU */}
                         <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
@@ -688,196 +1042,6 @@ export default function MarketingStudioPage() {
                           Con un CAC de <strong className="text-white">${calculatedCac}</strong> y un LTV de <strong className="text-white">${calculatedLtv}</strong>, tu negocio genera un retorno de <strong className="text-emerald-400">${calculatedRoas}</strong> por cada dólar en publicidad.
                         </p>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 2. BUYER PERSONAS (Clean iOS List) */}
-                {activeTab === 'personas' && (
-                  <motion.div
-                    key="view-personas"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-slate-900">Buyer Personas & JTBD</h3>
-                      <button
-                        onClick={() => {
-                          setEditingPersona(null)
-                          setNewPersona({ name: '', title: '', type: 'B2B', jtbd: '', pains: '', gains: '', channels: '', trigger: '' })
-                          setShowPersonaModal(true)
-                        }}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Agregar
-                      </button>
-                    </div>
-
-                    <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
-                      {personas.map((persona) => (
-                        <div key={persona.id} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={persona.avatarImg || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-                                alt={persona.name}
-                                className="w-11 h-11 rounded-full object-cover ring-2 ring-indigo-50 shadow-sm"
-                              />
-                              <div>
-                                <h4 className="text-sm font-bold text-slate-900">{persona.name}</h4>
-                                <p className="text-[11px] text-slate-500">{persona.title}</p>
-                              </div>
-                            </div>
-                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
-                              {persona.type}
-                            </span>
-                          </div>
-
-                          {/* JTBD */}
-                          <div className="p-3 rounded-2xl bg-slate-50 text-xs text-slate-700 italic">
-                            "{persona.jtbd}"
-                          </div>
-
-                          {/* Pains & Gains */}
-                          <div className="grid grid-cols-2 gap-2 text-[11px]">
-                            <div className="p-2.5 rounded-xl bg-red-50/50 border border-red-100">
-                              <div className="font-bold text-red-700 mb-1">Dolores (Pains)</div>
-                              <ul className="space-y-0.5 text-slate-600">
-                                {persona.pains.slice(0, 2).map((p, i) => (
-                                  <li key={i} className="truncate">• {p}</li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            <div className="p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100">
-                              <div className="font-bold text-emerald-700 mb-1">Ganancias (Gains)</div>
-                              <ul className="space-y-0.5 text-slate-600">
-                                {persona.gains.slice(0, 2).map((g, i) => (
-                                  <li key={i} className="truncate">• {g}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-
-                          {/* Actions */}
-                          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
-                            <span className="text-slate-400">Canales: {persona.channels.join(', ')}</span>
-                            <div className="flex gap-2">
-                              <button onClick={() => handleOpenEditPersona(persona)} className="text-indigo-600 hover:text-indigo-800 font-bold">
-                                Editar
-                              </button>
-                              <button onClick={() => handleDeletePersona(persona.id)} className="text-red-500 hover:text-red-700">
-                                Eliminar
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 3. CONTENT MAPPING */}
-                {activeTab === 'content' && (
-                  <motion.div
-                    key="view-content"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-slate-900">Mapeo de Contenidos (HubSpot)</h3>
-                      <button
-                        onClick={() => setShowContentModal(true)}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-indigo-600 text-white"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Nuevo
-                      </button>
-                    </div>
-
-                    <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-3 gap-4'}>
-                      {['TOFU', 'MOFU', 'BOFU'].map((stage) => {
-                        const items = contents.filter(c => c.stage === stage)
-                        return (
-                          <div key={stage} className="p-4 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                              <span className="text-xs font-bold text-slate-900">
-                                {stage === 'TOFU' ? '1. TOFU • Atraer' : stage === 'MOFU' ? '2. MOFU • Nutrir' : '3. BOFU • Convertir'}
-                              </span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                                {items.length}
-                              </span>
-                            </div>
-
-                            <div className="space-y-2">
-                              {items.map((item) => (
-                                <div key={item.id} className="p-3 rounded-2xl bg-slate-50/70 border border-slate-100 space-y-1">
-                                  <div className="flex items-center justify-between text-[10px]">
-                                    <span className="font-bold text-indigo-600">{item.format}</span>
-                                    <button onClick={() => handleDeleteContent(item.id)} className="text-slate-400 hover:text-red-500">
-                                      ✕
-                                    </button>
-                                  </div>
-                                  <div className="text-xs font-bold text-slate-800">{item.title}</div>
-                                  <div className="text-[10px] text-slate-400">Canal: {item.channel}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* 4. POEM AUDIT */}
-                {activeTab === 'poem' && (
-                  <motion.div
-                    key="view-poem"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
-                  >
-                    <h3 className="text-sm font-bold text-slate-900">Auditoría de Canales (POEM)</h3>
-
-                    <div className={viewMode === 'mobile-preview' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-3 gap-4'}>
-                      {['Owned', 'Earned', 'Paid'].map((category) => {
-                        const items = poemChannels.filter(c => c.category === category)
-                        return (
-                          <div key={category} className="p-5 rounded-3xl bg-white border border-slate-100 shadow-sm space-y-3">
-                            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                              <span className="text-xs font-bold text-slate-900">
-                                {category === 'Owned' ? 'Medios Propios' : category === 'Earned' ? 'Medios Ganados' : 'Medios Pagos'}
-                              </span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600">
-                                {items.length}
-                              </span>
-                            </div>
-
-                            <div className="space-y-2">
-                              {items.map((ch) => (
-                                <div key={ch.id} className="p-3 rounded-2xl bg-slate-50/70 border border-slate-100 space-y-1.5">
-                                  <div className="flex justify-between text-xs font-bold text-slate-800">
-                                    <span>{ch.channel}</span>
-                                    <span className="text-[10px] text-slate-500">{ch.efficiency}</span>
-                                  </div>
-                                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-                                    <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${ch.health}%` }} />
-                                  </div>
-                                  <div className="flex justify-between text-[10px] text-slate-400">
-                                    <span>Salud: {ch.health}%</span>
-                                    <span className="font-semibold text-indigo-600">{ch.gapStatus}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      })}
                     </div>
                   </motion.div>
                 )}
@@ -988,7 +1152,7 @@ export default function MarketingStudioPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1">Tipo</label>
+                    <label className="block text-slate-700 font-bold mb-1">Tipo de Mercado</label>
                     <select
                       value={newPersona.type}
                       onChange={(e) => setNewPersona(p => ({ ...p, type: e.target.value }))}
@@ -1063,7 +1227,7 @@ export default function MarketingStudioPage() {
           </div>
         )}
 
-        {/* MODAL 2: CONTENT */}
+        {/* MODAL 2: CONTENT (PÁGINA 6 ENFORCED) */}
         {showContentModal && (
           <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <motion.div
@@ -1072,7 +1236,10 @@ export default function MarketingStudioPage() {
               className="bg-white border border-slate-100 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-xl"
             >
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-                <h3 className="text-sm font-bold text-slate-900">Mapear Contenido</h3>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">Mapear Pieza de Contenido</h3>
+                  <p className="text-[11px] text-slate-400">Validado con reglas de formato de HubSpot (Pág. 6)</p>
+                </div>
                 <button onClick={() => setShowContentModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
               </div>
 
@@ -1082,7 +1249,7 @@ export default function MarketingStudioPage() {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. Guía Completa de Automatización"
+                    placeholder="Ej. Infografía de Errores Comunes"
                     value={newContent.title}
                     onChange={(e) => setNewContent(c => ({ ...c, title: e.target.value }))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
@@ -1091,40 +1258,51 @@ export default function MarketingStudioPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1">Etapa</label>
+                    <label className="block text-slate-700 font-bold mb-1">Etapa de Funnel</label>
                     <select
                       value={newContent.stage}
                       onChange={(e) => setNewContent(c => ({ ...c, stage: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none font-semibold"
                     >
-                      <option value="TOFU">TOFU (Atraer)</option>
-                      <option value="MOFU">MOFU (Nutrir)</option>
-                      <option value="BOFU">BOFU (Cierre)</option>
+                      <option value="TOFU">1. Reconocimiento (TOFU)</option>
+                      <option value="MOFU">2. Consideración (MOFU)</option>
+                      <option value="BOFU">3. Decisión (BOFU)</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-slate-700 font-bold mb-1">Formato</label>
+                    <label className="block text-slate-700 font-bold mb-1">Formato (Página 6)</label>
                     <select
                       value={newContent.format}
-                      onChange={(e) => setNewContent(c => ({ ...c, format: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
+                      onChange={(e) => {
+                        const selectedFormat = e.target.value
+                        const match = HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.find(f => f.name === selectedFormat)
+                        setNewContent(c => ({
+                          ...c,
+                          format: selectedFormat,
+                          purpose: match ? match.purpose : ''
+                        }))
+                      }}
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none font-semibold"
                     >
-                      <option value="Infografía">Infografía</option>
-                      <option value="Video Corto">Video Corto</option>
-                      <option value="Ebook / Guía">Ebook / Guía</option>
-                      <option value="Webinar">Webinar</option>
-                      <option value="Caso de Éxito">Caso de Éxito</option>
-                      <option value="Testimonial">Testimonial</option>
+                      {HUBSPOT_FORMATS_BY_STAGE[newContent.stage]?.map(f => (
+                        <option key={f.name} value={f.name}>{f.name}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
+                {/* Purpose Alert based on Page 6 */}
+                <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-100 text-[11px] text-indigo-900">
+                  <div className="font-bold mb-0.5">Propósito Metodológico (HubSpot):</div>
+                  <div>{newContent.purpose}</div>
+                </div>
+
                 <div>
-                  <label className="block text-slate-700 font-bold mb-1">Canal</label>
+                  <label className="block text-slate-700 font-bold mb-1">Canal de Distribución</label>
                   <input
                     type="text"
-                    placeholder="LinkedIn, Blog, Email"
+                    placeholder={businessModel === 'B2B' ? 'LinkedIn, Blog, Email' : 'Instagram, TikTok, WhatsApp'}
                     value={newContent.channel}
                     onChange={(e) => setNewContent(c => ({ ...c, channel: e.target.value }))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:border-indigo-600 focus:outline-none"
