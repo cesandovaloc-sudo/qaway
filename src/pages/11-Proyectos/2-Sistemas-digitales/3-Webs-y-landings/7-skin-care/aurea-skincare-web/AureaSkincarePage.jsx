@@ -18,6 +18,7 @@ const IMG = {
   ritual: "/aurea-images/ritual.jpg",
   serum_orange: "/aurea-images/serum_orange.jpg",
   woman_story: "/aurea-images/woman_story.jpg",
+  hero_diseno_sin_titulo: "/aurea-images/hero_diseno_sin_titulo.png",
 };
 
 const products = [
@@ -130,6 +131,44 @@ export default function AureaSkincarePage() {
             <Reveal delay={.08}>
               <motion.div className="hero-visual" whileHover={{ scale:1.003 }} transition={{ duration:.5 }}>
                 <img src={IMG.hero_photo} alt="Sérum antioxidante Auréa junto a cítricos y botánicos"/>
+                <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
+                  <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
+                  <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
+                  <p>Fórmulas limpias, sin ingredientes innecesarios, pensadas para una piel saludable y luminosa.</p>
+                  <a href="#ingredientes">Conoce más <ArrowRight size={14}/></a>
+                </motion.div>
+                <motion.div className="hero-badge" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.65}}>
+                  <img className="mini-bottle" src={IMG.serum_orange} alt="" />
+                  <div><strong>Botánica consciente</strong><span>Sin parabenos · Sin fragancias sintéticas · Cruelty free</span></div>
+                </motion.div>
+              </motion.div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* HERO VARIANTE (CON NUEVA IMAGEN) */}
+        <section className="hero" style={{ paddingTop: "24px" }}>
+          <div className="container">
+            <Reveal>
+              <div className="hero-top">
+                <div>
+                  <span className="eyebrow"><span className="eyebrow-dot"/> Ciencia botánica · belleza real</span>
+                  <h1>Cuida tu piel.<br/><em>De forma consciente.</em></h1>
+                </div>
+                <div className="hero-copy">
+                  <div className="hero-pill"><img src={IMG.hero_products} alt="Colección de productos Auréa"/></div>
+                  <p>Fórmulas botánicas de alta eficacia, creadas para equilibrar, proteger y acompañar tu piel en cada etapa.</p>
+                  <div className="hero-actions">
+                    <a className="btn btn-primary" href="#coleccion">Descubre la colección <ArrowRight size={16}/></a>
+                    <a className="btn btn-secondary" href="#filosofia">Nuestra filosofía</a>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            <Reveal delay={.08}>
+              <motion.div className="hero-visual" whileHover={{ scale:1.003 }} transition={{ duration:.5 }}>
+                <img src={IMG.hero_diseno_sin_titulo} alt="Sérum y cosmética botánica Auréa"/>
                 <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
                   <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
                   <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
