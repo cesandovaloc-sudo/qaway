@@ -31,6 +31,7 @@ import GestorProyectosHubPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/Ge
 import ProjectTimelineViewerPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'
 import AnalyticsStudioPage from '@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'
 import MarketingStudioPage from '@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'
+import MarketingStudioTwentyPage from '@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
 import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
 import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
@@ -206,6 +207,10 @@ export default function AppRouter() {
           <Route
             path="hub/marketing"
             element={renderRoute('hub', <ProtectedRoute><MarketingStudioPage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/marketing2"
+            element={renderRoute('hub', <ProtectedRoute><MarketingStudioTwentyPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/dashboards"

@@ -66,6 +66,12 @@ const INITIAL_PERSONAS = [
     type: 'B2B',
     avatarImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     avatarBg: 'bg-indigo-100 text-indigo-700',
+    roleType: 'Decisor',
+    age: '46 años',
+    salary: '+$90,000 USD / año',
+    location: 'Lima, Perú / Santiago',
+    experience: '8 años como director',
+    family: 'Casado, 2 hijos',
     jtbd: 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y no depender de tareas manuales.',
     pains: [
       'Pérdida de leads por falta de seguimiento ágil',
@@ -77,8 +83,37 @@ const INITIAL_PERSONAS = [
       'Aumento del 35% en conversión de leads a ventas',
       'Ahorro de 15 horas semanales del equipo comercial'
     ],
+    dimensions: {
+      external: 'Los KPIs del área no cumplen con las expectativas de la empresa, lo que pone en riesgo el crecimiento y genera presión constante del directorio.',
+      internal: 'Se siente frustrado porque los resultados del área no reflejan el esfuerzo de su equipo, afectando su liderazgo y tranquilidad.',
+      philosophical: 'Cree firmemente que un negocio moderno no debe perder ventas por procesos manuales obsoletos cuando existe tecnología accesible.'
+    },
+    guidePlan: {
+      search: 'Busca información sobre cómo automatizar flujos comerciales y medir el ROI con claridad.',
+      howWeHelp: 'Auditoría inicial de embudo, desarrollo de infraestructura digital de alta conversión y soporte continuo.',
+      actionSteps: [
+        'Diagnóstico inicial: Auditoría de flujos y cuellos de botella actuales.',
+        'Optimización de KPIs: Configurar reportes automáticos y dashboard de conversión.',
+        'Implementación guiada: Despliegue ágil en menos de 14 días con capacitación.'
+      ]
+    },
+    habits: {
+      channels: ['LinkedIn', 'Google Search (SEO)', 'Email Corporativo'],
+      schedule: 'Miércoles y jueves de 2:00 PM a 4:00 PM (Receptivo a llamadas) • Noches 8:00 PM para webinars',
+      quote: '“Es frustrante intentar cumplir con los objetivos comerciales cuando no tenemos las herramientas para medir en tiempo real.”'
+    },
+    keyMessages: {
+      marketing: 'Optimiza tu área comercial con herramientas diseñadas para mejorar los KPIs, reducir tiempos de respuesta y aumentar las ventas. Solicita tu demo estratégica ahora.',
+      sales: 'Nuestros clientes han reportado un aumento del 35% en conversión y un ahorro de 15 horas semanales durante los primeros 90 días. Implementación ágil con soporte dedicado.',
+      formats: [
+        'Redes sociales (LinkedIn): Publicaciones educativas sobre KPIs y automatizaciones.',
+        'Anuncios pagados: Video corto mostrando la solución y comparativas de ROI.',
+        'Blogs & Ebooks: Guías paso a paso sobre arquitectura comercial.',
+        'Newsletters & Demos: Casos de éxito en PDF y webinars interactivos.'
+      ]
+    },
     channels: ['LinkedIn', 'Google Search', 'Email Corporativo'],
-    trigger: 'El equipo de ventas perdió una cuenta clave por falta de trazabilidad.'
+    trigger: 'El equipo comercial perdió una cuenta clave por falta de trazabilidad en WhatsApp.'
   },
   {
     id: 'p-2',
@@ -87,6 +122,12 @@ const INITIAL_PERSONAS = [
     type: 'B2C',
     avatarImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
     avatarBg: 'bg-violet-100 text-violet-700',
+    roleType: 'Compradora Directa',
+    age: '29 años',
+    salary: '+$28,000 USD / año',
+    location: 'Bogotá / Ciudad de México',
+    experience: 'Emprendedora digital',
+    family: 'Soltera',
     jtbd: 'Encontrar soluciones de bienestar y estilo de vida confiables con compra inmediata y entrega garantizada.',
     pains: [
       'Páginas de compra lentas o confusas',
@@ -98,6 +139,34 @@ const INITIAL_PERSONAS = [
       'Garantía de satisfacción y reviews verificadas',
       'Atención rápida y personalizada por WhatsApp'
     ],
+    dimensions: {
+      external: 'Pierde tiempo navegando en sitios lentos con pasarelas de pago dudosas que fallan al momento de pagar.',
+      internal: 'Siente ansiedad e inseguridad de que el producto no llegue como se muestra en fotos o que no haya atención.',
+      philosophical: 'Cree que comprar en línea debe ser una experiencia placentera, transparente y sin complicaciones.'
+    },
+    guidePlan: {
+      search: 'Descubre marcas a través de videos cortos en TikTok e Instagram Reels.',
+      howWeHelp: 'Plataforma de compra ultra-rápida, testimonios en video reales y confirmación directa por WhatsApp.',
+      actionSteps: [
+        'Descubrimiento visual en redes sociales.',
+        'Checkout transparente en 2 pasos con múltiples opciones de pago.',
+        'Seguimiento automático del pedido por WhatsApp.'
+      ]
+    },
+    habits: {
+      channels: ['Instagram', 'TikTok', 'WhatsApp'],
+      schedule: 'Tardes 1:00 PM a 3:00 PM y Noches 7:00 PM a 10:00 PM en redes móviles',
+      quote: '“Si una tienda online no me da confianza en los primeros 5 segundos o no tiene reseñas reales, me voy a otra.”'
+    },
+    keyMessages: {
+      marketing: 'Descubre la forma más fácil y segura de comprar lo que necesitas con entrega rápida y garantía total.',
+      sales: 'Más de 1,200 clientes satisfechos con calificación 4.9/5. Envío gratis y garantía de satisfacción de 30 días.',
+      formats: [
+        'Instagram & TikTok: Videos cortos con testimonios y unboxing de producto.',
+        'Anuncios en Stories: Ofertas flash y llamado directo a WhatsApp.',
+        'Demostración social: Fotos reales de clientes con el hashtag de marca.'
+      ]
+    },
     channels: ['Instagram', 'TikTok', 'WhatsApp'],
     trigger: 'Vio un video testimonial en redes sociales que resolvió su duda principal.'
   }

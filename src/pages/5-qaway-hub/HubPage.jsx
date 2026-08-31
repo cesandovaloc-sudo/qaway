@@ -17,6 +17,7 @@ import {
   Star,
   FolderKanban,
   Target,
+  Kanban,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 
@@ -107,9 +108,18 @@ const routes = [
     title: 'Marketing Studio OS (Revolut UI)',
     description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping HubSpot, Auditoría POEM y Simulador de Funnel.',
     path: '/hub/marketing',
-    badge: 'Nuevo',
+    badge: 'v1.0',
     category: 'Herramientas',
     tone: 'bg-[#0075FF]/10 text-[#0075FF]',
+  },
+  {
+    icon: Kanban,
+    title: 'Twenty Revenue OS (Pipeline CRM)',
+    description: 'CRM y Pipeline visual estilo Twenty CRM: Vista Kanban, Tablas Relacionales, Atribución HubSpot y Drawer Lateral.',
+    path: '/hub/marketing2',
+    badge: 'Twenty UI',
+    category: 'Herramientas',
+    tone: 'bg-slate-900 text-white',
   },
   {
     icon: Zap,

@@ -585,10 +585,10 @@ export default function ProyectosPage() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.55, delay: i * 0.1 }}
               >
-                {/* Marco de Teléfono Celular en Negro Carbón Suave (#262625) */}
-                <div className="relative w-full max-w-[270px] aspect-[9/18.5] rounded-[36px] border-[7px] border-[#262625] bg-[#262625] p-1.5 shadow-[0_20px_45px_rgba(0,0,0,0.1)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_28px_60px_rgba(0,0,0,0.18)]">
+                {/* Marco de Teléfono Celular en Gris Titanio / Grafito Mate (#3f3f46) */}
+                <div className="relative w-full max-w-[270px] aspect-[9/18.5] rounded-[36px] border-[7px] border-[#3f3f46] bg-[#3f3f46] p-1.5 shadow-[0_20px_45px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_28px_60px_rgba(0,0,0,0.14)]">
                   {/* Notch / Dynamic Island */}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 h-4 w-20 rounded-full bg-[#262625]" />
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 h-4 w-20 rounded-full bg-[#3f3f46]" />
                   
                   {/* Pantalla Interna del Celular (Imagen fija sin zoom, solo se eleva el marco) */}
                   <div className="h-full w-full overflow-hidden rounded-[28px] bg-zinc-100 relative">
@@ -597,7 +597,7 @@ export default function ProyectosPage() {
                       alt={mockup.title}
                       className="h-full w-full object-cover object-top"
                     />
-                    <div className="absolute top-4 left-3 rounded-full bg-[#262625]/80 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+                    <div className="absolute top-4 left-3 rounded-full bg-[#3f3f46]/85 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
                       {mockup.tag}
                     </div>
                   </div>
