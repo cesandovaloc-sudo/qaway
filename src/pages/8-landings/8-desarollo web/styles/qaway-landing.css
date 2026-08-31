@@ -811,11 +811,11 @@
 }
 
 .qaway-landing-root .qaway-marquee-left {
-  animation: qawayMarqueeLeft 38s linear infinite;
+  animation: qawayMarqueeLeft 95s linear infinite;
 }
 
 .qaway-landing-root .qaway-marquee-right {
-  animation: qawayMarqueeRight 38s linear infinite;
+  animation: qawayMarqueeRight 95s linear infinite;
 }
 
 .qaway-landing-root .qaway-marquee-wrapper:hover .qaway-marquee-row {
