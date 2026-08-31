@@ -157,11 +157,6 @@ export default function AureaSkincarePage() {
                 </div>
                 <div className="hero-copy">
                   <div className="hero-pill"><img src={IMG.hero_products} alt="Colección de productos Auréa"/></div>
-                  <p>Fórmulas botánicas de alta eficacia, creadas para equilibrar, proteger y acompañar tu piel en cada etapa.</p>
-                  <div className="hero-actions">
-                    <a className="btn btn-primary" href="#coleccion">Descubre la colección <ArrowRight size={16}/></a>
-                    <a className="btn btn-secondary" href="#filosofia">Nuestra filosofía</a>
-                  </div>
                 </div>
               </div>
             </Reveal>

@@ -847,11 +847,11 @@ export default function ArticleDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs space-y-6"
+              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs"
             >
               <div 
                 dangerouslySetInnerHTML={{ __html: sanitizeAndDecodeContent(article.content) }} 
-                className="space-y-6 text-base md:text-lg leading-relaxed text-zinc-800 [&_h2]:text-2xl sm:[&_h2]:text-[26px] [&_h2]:font-bold [&_h2]:text-zinc-950 [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-xl sm:[&_h3]:text-[22px] [&_h3]:font-bold [&_h3]:text-zinc-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:leading-[1.75] [&_p]:text-zinc-700"
+                className="blog-content blog-prose w-full"
               />
             </motion.article>
 
