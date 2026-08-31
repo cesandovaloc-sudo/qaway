@@ -208,8 +208,8 @@ export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
-  const [articlesList, setArticlesList] = useState(visibleArticles)
-  const [loading, setLoading] = useState(false)
+  const [articlesList, setArticlesList] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setActiveCategory(category || null)
@@ -258,9 +258,13 @@ export default function BlogPage() {
             audioUrl: item.audio_url || null,
           }))
           setArticlesList(mappedArticles)
+        } else {
+          // Fallback a artículos locales solo si no hay ninguno en Supabase
+          setArticlesList(visibleArticles)
         }
       } catch (err) {
         console.warn('[Blog] Fallback a artículos locales:', err)
+        setArticlesList(visibleArticles)
       } finally {
         setLoading(false)
       }
@@ -311,13 +315,29 @@ export default function BlogPage() {
     }
   }
 
-  const highlightedArticles = articlesList
+  // 1. Artículos con marca explícita de destacados
+  const explicitlyFeatured = articlesList
     .filter((article) => article.featured)
-    .sort((a, b) => a.featured.order - b.featured.order)
+    .sort((a, b) => (a.featured?.order || 1) - (b.featured?.order || 1))
 
-  const secondaryArticles = articlesList
-    .filter((article) => article.homeSection === 'more' || !article.featured)
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+  let highlightedArticles = []
+  let secondaryArticles = []
+
+  if (explicitlyFeatured.length > 0) {
+    highlightedArticles = explicitlyFeatured
+    secondaryArticles = articlesList
+      .filter((article) => !article.featured)
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+  } else if (articlesList.length <= 3) {
+    // Si hay 3 o menos publicaciones en total, todas van a Destacados (portada principal llena)
+    highlightedArticles = [...articlesList].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    secondaryArticles = []
+  } else {
+    // Si hay más de 3 y ninguna marcada: las primeras 3 más recientes son Destacadas, el resto va a Últimos artículos
+    const sorted = [...articlesList].sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    highlightedArticles = sorted.slice(0, 3)
+    secondaryArticles = sorted.slice(3)
+  }
 
   const renderArticleCard = (article, idx) => (
     <Link to={`/blog/articulo/${article.id}`} key={article.id} className="block">
@@ -481,32 +501,37 @@ export default function BlogPage() {
               })}
             </div>
 
-            {/* Selector lateral "Ver Todos" */}
-            <div className="hidden sm:block">
-              <button
-                type="button"
-                onClick={() => { selectCategory(null); setSearchQuery('') }}
-                className="flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3.5 py-2 text-xs font-medium text-[#191918] transition-colors hover:border-[#ff4b0b]/50 hover:text-[#ff4b0b]"
-              >
-                <span>Ver Todos</span>
-                <ChevronDown className="h-3.5 w-3.5 text-black/50" />
-              </button>
-            </div>
-
           </div>
         </div>
 
         <section className="bg-white pb-12 pt-10 lg:pb-24 lg:pt-12">
           <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-            {activeCategory || isSearchActive ? (
+            {loading ? (
+              /* Skeleton Loader suave mientras conecta con Supabase */
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse rounded-2xl border border-black/5 bg-[#fafafc] p-4">
+                    <div className="aspect-[16/9] w-full rounded-xl bg-black/5 mb-4" />
+                    <div className="h-4 w-1/4 rounded bg-black/5 mb-3" />
+                    <div className="h-6 w-3/4 rounded bg-black/5 mb-2" />
+                    <div className="h-4 w-full rounded bg-black/5 mb-4" />
+                    <div className="h-3 w-1/3 rounded bg-black/5" />
+                  </div>
+                ))}
+              </div>
+            ) : activeCategory || isSearchActive ? (
               <>
                 {filteredArticles.length > 0 ? (
                   <>
-                    <div className="mb-4 flex items-center justify-between gap-4">
-                      <p className="text-xs font-bold uppercase tracking-widest text-[#191918]/45">
-                        {filteredArticles.length} resultado{filteredArticles.length !== 1 ? 's' : ''}
+                    <div className="mb-6 flex items-center justify-between gap-4 border-b border-black/10 pb-3">
+                      <p className="text-xs font-bold uppercase tracking-widest text-[#191918]/60">
+                        {filteredArticles.length} publicación{filteredArticles.length !== 1 ? 'es' : ''} encontrada{filteredArticles.length !== 1 ? 's' : ''}
                       </p>
-                      <button type="button" onClick={() => { selectCategory(null); setSearchQuery('') }} className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#191918]/55 transition-colors hover:text-[#ff4b0b]">
+                      <button
+                        type="button"
+                        onClick={() => { selectCategory(null); setSearchQuery('') }}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#191918] transition-colors hover:text-[#ff4b0b]"
+                      >
                         <ArrowLeft size={13} /> Ver todo el blog
                       </button>
                     </div>
@@ -525,43 +550,38 @@ export default function BlogPage() {
               </>
             ) : (
               <>
-                <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-black/10 pb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
-                      Pilares destacados
-                    </h2>
-                    <p className="mt-1 text-xs text-black/60 sm:text-sm">
-                      Temas y guías seleccionadas por el equipo de Qaway Lab.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => selectCategory(null)}
-                    className="self-start sm:self-auto rounded-lg border border-black/15 bg-white px-4 py-2 text-xs font-semibold text-[#191918] transition-colors hover:border-black/40 hover:bg-[#f4f6fa]"
-                  >
-                    Ver todos
-                  </button>
+                {/* 1. SECCIÓN DESTACADOS */}
+                <div className="mb-8 border-b border-black/10 pb-4">
+                  <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
+                    Destacados
+                  </h2>
+                  <p className="mt-1 text-xs text-black/60 sm:text-sm">
+                    Guías y temas seleccionados por el equipo de Qaway Lab.
+                  </p>
                 </div>
 
                 {highlightedArticles.length > 0 && (
-                  <div className="mb-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {highlightedArticles.map((article, idx) => renderArticleCard(article, idx))}
                   </div>
                 )}
 
+                {/* 2. SECCIÓN ÚLTIMOS ARTÍCULOS */}
                 {secondaryArticles.length > 0 && (
-                  <>
+                  <div className="mt-16">
                     <div className="mb-8 border-b border-black/10 pb-4">
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-                        Más publicaciones
-                      </div>
+                      <h2 className="text-2xl font-bold tracking-tight text-[#191918] sm:text-3xl" style={displayFont}>
+                        Últimos artículos
+                      </h2>
+                      <p className="mt-1 text-xs text-black/60 sm:text-sm">
+                        Todas las publicaciones y novedades recientes.
+                      </p>
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                       {secondaryArticles.map((article, idx) => renderArticleCard(article, idx))}
                     </div>
-                  </>
+                  </div>
                 )}
               </>
             )}

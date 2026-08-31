@@ -625,15 +625,24 @@ export default function ProyectosPage() {
         </div>
       </section>
 
-      <section className="projects-areas">
+      <section className="projects-areas overflow-hidden">
         <div className="projects-shell projects-areas__grid">
-          {categories.map((category) => (
-            <Link key={category.label} to={category.path} className="projects-area-card">
-              <span>Proyectos / {category.label}</span>
-              <h2>{category.label}</h2>
-              <p>{category.detail}</p>
-              <small>{category.cta} <ArrowRight size={14} /></small>
-            </Link>
+          {categories.map((category, idx) => (
+            <motion.div
+              key={category.label}
+              initial={{ opacity: 0, x: idx === 0 ? -60 : 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="h-full flex flex-col"
+            >
+              <Link to={category.path} className="projects-area-card h-full">
+                <span>Proyectos / {category.label}</span>
+                <h2>{category.label}</h2>
+                <p>{category.detail}</p>
+                <small>{category.cta} <ArrowRight size={14} /></small>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </section>

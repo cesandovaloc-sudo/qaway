@@ -403,19 +403,23 @@
 .projects-area-card {
   min-height: 260px;
   padding: 36px;
-  border: 1px solid #111210;
-  border-radius: 6px;
-  background: #111210;
-  color: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #111111;
   text-decoration: none;
-  transition: background 220ms ease, border-color 220ms ease, color 220ms ease, transform 220ms ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: background 220ms ease, border-color 220ms ease, color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
 }
 
 .projects-area-card:hover {
-  background: #fe6612;
-  border-color: #fe6612;
-  color: #ffffff;
+  background: #ffffff;
+  border-color: rgba(254, 102, 18, 0.4);
   transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.07);
 }
 
 .projects-area-card > span {
@@ -423,26 +427,29 @@
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
   transition: color 220ms ease;
 }
 
-.projects-area-card:hover > span {
-  color: #ffffff;
+.projects-area-card h2 {
+  margin: 36px 0 0;
+  font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  font-size: clamp(2.6rem, 3.8vw, 4.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+  color: #111111;
+  transition: color 220ms ease;
 }
 
-.projects-area-card h2 {
-  margin: 42px 0 0;
-  font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
-  font-size: clamp(2.8rem, 4vw, 5rem);
-  line-height: 0.9;
-  letter-spacing: -0.065em;
+.projects-area-card:hover h2 {
+  color: #fe6612;
 }
 
 .projects-area-card p {
   max-width: 520px;
-  color: currentColor;
-  opacity: 0.68;
-  line-height: 1.65;
+  color: #71717a;
+  line-height: 1.6;
+  margin: 12px 0 0;
 }
 
 .projects-area-card small {
@@ -450,8 +457,9 @@
   align-items: center;
   gap: 8px;
   margin-top: 28px;
-  color: var(--projects-acid);
+  color: #fe6612;
   font-weight: 800;
+  font-size: 14px;
 }
 
 .projects-cta {
@@ -459,8 +467,8 @@
   overflow: hidden;
   padding: 78px 0;
   background:
-    radial-gradient(circle at 64% 100%, rgba(255, 75, 11, 0.18), transparent 34%),
-    #0d0e0d;
+    radial-gradient(circle at 64% 100%, rgba(254, 102, 18, 0.20), transparent 45%),
+    #20201f;
   color: #fff;
 }
 
