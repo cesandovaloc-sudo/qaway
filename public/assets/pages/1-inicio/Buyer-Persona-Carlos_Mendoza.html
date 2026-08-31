@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Persona - Carlos Mendoza</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f5f8; color: #0f172a; padding: 32px; margin: 0; }
+    .container { max-width: 900px; margin: 0 auto; background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 28px; }
+    .title { font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; }
+    .subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
+    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .quote-box { background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 16px 20px; border-radius: 12px; font-style: italic; color: #334155; margin-bottom: 28px; font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+    .card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; }
+    .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .card-content { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.5; }
+    .card-content p { margin: 6px 0; }
+    .highlight-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 16px; padding: 20px; margin-top: 24px; }
+    .highlight-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 6px; }
+    .highlight-body { font-size: 14px; font-weight: 600; color: #064e3b; line-height: 1.6; }
+    .btn-print { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; }
+    @media print { .btn-print { display: none; } body { padding: 0; background: white; } .container { box-shadow: none; border: none; padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 class="title">Carlos Mendoza</h1>
+        <div class="subtitle">Director de Operaciones / CEO • Modelo B2B</div>
+      </div>
+      <div>
+        <span class="badge">Ficha Oficial Qaway & HubSpot</span>
+        <button class="btn-print" onclick="window.print()" style="margin-left: 12px;">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <div class="quote-box">
+      "Digitalizar y automatizar los procesos comerciales para reducir costos operativos y no depender de tareas manuales."
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Perfil General</div>
+        <div class="card-content">
+          <p><strong>Edad:</strong> 46 años</p>
+          <p><strong>Educación:</strong> Profesional</p>
+          <p><strong>Industria:</strong> Servicios</p>
+          <p><strong>Empresa:</strong> 1-10 empleados</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detalles Profesionales</div>
+        <div class="card-content">
+          <p><strong>Canales:</strong> WhatsApp, Email</p>
+          <p><strong>Reporta a:</strong> Dirección General</p>
+          <p><strong>Herramientas:</strong> CRM, Email</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Objetivos & Dolores</div>
+        <div class="card-content">
+          <p><strong>Métricas:</strong> Crecimiento de clientes</p>
+          <p><strong>Dolor:</strong> Pérdida de leads por falta de seguimiento ágil</p>
+          <p><strong>Fuentes:</strong> Online</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-card">
+      <div class="highlight-title">Cómo Contribuimos a su Éxito</div>
+      <div class="highlight-body">
+        Digitalizar y automatizar los procesos comerciales para reducir costos operativos y no depender de tareas manuales.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

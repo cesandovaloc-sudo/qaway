@@ -36,17 +36,34 @@ export function Footer() {
         </div>
       </Reveal>
       <div className="container footerBottom">
-        <span>© 2026 Josué Panadería. Todos los derechos reservados.</span>
+        <span>© 2026 Josué Panadería.</span>
+        <span>Hecho en Lima, Perú.</span>
+      </div>
+      <div
+        className="container"
+        style={{
+          borderTop: "1px solid var(--border)",
+          padding: "16px 0 28px",
+          textAlign: "center",
+          fontSize: "0.78rem",
+          color: "#6b7280",
+        }}
+      >
         <span>
-          Diseño y desarrollo web por{" "}
+          Desarrollado por{" "}
           <a
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontWeight: "700", color: "var(--primary)" }}
+            style={{
+              fontWeight: "700",
+              color: "var(--primary)",
+              textDecoration: "none",
+            }}
           >
             Qaway Lab
           </a>
+          {" "}— Todos los derechos reservados
         </span>
       </div>
     </footer>

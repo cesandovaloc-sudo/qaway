@@ -594,6 +594,102 @@ export default function MarketingStudioPage() {
     }))
   }
 
+  const handleDirectExportPersona = (persona) => {
+    if (!persona) return
+    const safeName = (persona.name || 'Buyer-Persona').replace(/[^a-zA-Z0-9_-]/g, '_')
+    const htmlContent = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Buyer Persona - ${persona.name}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f4f5f8; color: #0f172a; padding: 32px; margin: 0; }
+    .container { max-width: 900px; margin: 0 auto; background: #ffffff; border-radius: 24px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 24px; margin-bottom: 28px; }
+    .title { font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; }
+    .subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
+    .badge { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .quote-box { background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 16px 20px; border-radius: 12px; font-style: italic; color: #334155; margin-bottom: 28px; font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 28px; }
+    .card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px; }
+    .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 10px; letter-spacing: 0.05em; }
+    .card-content { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.5; }
+    .card-content p { margin: 6px 0; }
+    .highlight-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 16px; padding: 20px; margin-top: 24px; }
+    .highlight-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 6px; }
+    .highlight-body { font-size: 14px; font-weight: 600; color: #064e3b; line-height: 1.6; }
+    .btn-print { background: #0f172a; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; }
+    @media print { .btn-print { display: none; } body { padding: 0; background: white; } .container { box-shadow: none; border: none; padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 class="title">${persona.name}</h1>
+        <div class="subtitle">${persona.title} • Modelo ${persona.type}</div>
+      </div>
+      <div>
+        <span class="badge">Ficha Oficial Qaway & HubSpot</span>
+        <button class="btn-print" onclick="window.print()" style="margin-left: 12px;">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <div class="quote-box">
+      "${persona.jtbd || 'Progreso estratégico del cliente'}"
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-title">Perfil General</div>
+        <div class="card-content">
+          <p><strong>Edad:</strong> ${persona.age || '35-44 años'}</p>
+          <p><strong>Educación:</strong> ${persona.education || 'Profesional'}</p>
+          <p><strong>Industria:</strong> ${persona.industry || 'Servicios'}</p>
+          <p><strong>Empresa:</strong> ${persona.companySize || '1-10 empleados'}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detalles Profesionales</div>
+        <div class="card-content">
+          <p><strong>Canales:</strong> ${Array.isArray(persona.commChannels) ? persona.commChannels.join(', ') : 'WhatsApp, Email'}</p>
+          <p><strong>Reporta a:</strong> ${persona.reportingTo || 'Dirección General'}</p>
+          <p><strong>Herramientas:</strong> ${Array.isArray(persona.tools) ? persona.tools.join(', ') : 'CRM, Email'}</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Objetivos & Dolores</div>
+        <div class="card-content">
+          <p><strong>Métricas:</strong> ${Array.isArray(persona.kpis) ? persona.kpis.join(', ') : 'Crecimiento de clientes'}</p>
+          <p><strong>Dolor:</strong> ${Array.isArray(persona.pains) ? persona.pains[0] : persona.pains}</p>
+          <p><strong>Fuentes:</strong> ${Array.isArray(persona.infoSources) ? persona.infoSources.join(', ') : 'Online'}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="highlight-card">
+      <div class="highlight-title">Cómo Contribuimos a su Éxito</div>
+      <div class="highlight-body">
+        ${persona.howWeHelp || persona.jtbd}
+      </div>
+    </div>
+  </div>
+</body>
+</html>`
+
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `Buyer-Persona-${safeName}.html`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   const handleDeletePersona = (id) => {
     if (personas.length <= 1) return
     const remaining = personas.filter(p => p.id !== id)
@@ -1124,7 +1220,7 @@ export default function MarketingStudioPage() {
                           </button>
 
                           <button
-                            onClick={() => window.print()}
+                            onClick={() => handleDirectExportPersona(currentPersona)}
                             className="px-4 py-2.5 rounded-xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-xs sm:text-sm shadow-md transition-all flex items-center gap-1.5"
                           >
                             <Download className="w-4 h-4" />
@@ -2122,12 +2218,20 @@ export default function MarketingStudioPage() {
 
               <div className="flex items-center gap-2 self-end sm:self-auto no-print">
                 <button
+                  onClick={() => handleDirectExportPersona(viewingExecutivePersona)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-xs transition-colors shadow-xs"
+                  title="Descargar Ficha Ejecutiva a tu PC"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Descargar Archivo</span>
+                </button>
+                <button
                   onClick={() => window.print()}
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
                   title="Imprimir o Guardar como PDF"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>Guardar PDF</span>
+                  <span>PDF</span>
                 </button>
                 <button
                   onClick={() => setViewingExecutivePersona(null)}

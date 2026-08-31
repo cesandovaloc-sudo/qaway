@@ -21,8 +21,25 @@ import {
 import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { useSetNavbarVariant } from '@/components/layout/Navbar'
+
+function sanitizeAndDecodeContent(htmlContent) {
+  if (!htmlContent) return ''
+  let decoded = htmlContent
+  // Desescapar entidades HTML que TipTap serializa en bloques personalizados
+  if (decoded.includes('&lt;') && decoded.includes('&gt;')) {
+    decoded = decoded
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, '&')
+  }
+  return decoded
+}
 
 export default function ArticleDetailPage() {
+  useSetNavbarVariant('light')
   const { id } = useParams()
   const [scrollProgress, setScrollProgress] = useState(0)
   const articleRef = useRef(null)
@@ -103,6 +120,7 @@ export default function ArticleDetailPage() {
             public: data.status === 'publicado' || data.public !== false,
             featured: data.featured ? { order: data.featured_order || 1, label: data.featured_label || 'Destacado' } : null,
             image: data.cover_url || data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            headerLayout: data.header_layout || data.headerLayout || 'split',
             audioUrl: data.audio_url || null,
           })
         }
@@ -429,7 +447,7 @@ export default function ArticleDetailPage() {
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-8"
+          className="mb-6 pt-2"
         >
           <Link
             to="/blog"
@@ -439,138 +457,195 @@ export default function ArticleDetailPage() {
           </Link>
         </motion.div>
 
-        {/* Cabecera del Artículo */}
-        <div className="mb-8">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-qaway-accent/10 text-qaway-accent-dark text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-qaway-accent/20"
-          >
-            {article.categoryLabel}
-          </motion.span>
-          
-          <motion.h1
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-black text-zinc-950 tracking-tight mt-4 mb-6 leading-tight"
-          >
-            {article.title}
-          </motion.h1>
+        {/* CABECERA: RESPETA EL DISEÑO CONFIGURADO EN EL STUDIO ('split' 2 columnas vs 'banner' 1 columna) */}
+        {article.headerLayout === 'banner' ? (
+          /* ========================================================================= */
+          /* MODO BANNER (1 COLUMNA CENTRADA + IMAGEN PANORÁMICA ABAJO)                */
+          /* ========================================================================= */
+          <div className="mb-10 text-center max-w-4xl mx-auto">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-[#ff4b0b]/20"
+            >
+              {article.categoryLabel}
+            </motion.span>
+            
+            <motion.h1
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-3xl md:text-4xl lg:text-5xl font-black text-zinc-950 tracking-tight mt-4 mb-6 leading-tight"
+            >
+              {article.title}
+            </motion.h1>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center gap-6 text-xs text-zinc-400 font-mono"
-          >
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" /> {article.date}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" /> {article.readTime} de lectura
-            </span>
-          </motion.div>
-        </div>
-
-        {/* REPRODUCTOR DE AUDIO DE LECTURA */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22 }}
-          className="mb-8 rounded-xl border border-black/10 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] sm:p-5"
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            {/* Controles de Reproducción y Estado */}
-            <div className="flex items-center gap-3">
+            {/* Fila Única de Metadatos + Reproductor de Audio Compacto */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-wrap items-center justify-center gap-3 text-xs text-zinc-500 font-mono mb-8"
+            >
+              <span className="flex items-center gap-1.5 text-zinc-600">
+                <Calendar className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.date}
+              </span>
+              <span className="text-zinc-300">•</span>
+              <span className="flex items-center gap-1.5 text-zinc-600">
+                <Clock className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.readTime}
+              </span>
+              <span className="text-zinc-300">•</span>
+              
+              {/* Cápsula de Audio en la misma fila */}
               <button
                 type="button"
                 onClick={togglePlayAudio}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-md shadow-[#ff4b0b]/25 transition-all hover:scale-105 active:scale-95"
-                title={isPlayingAudio && !isPausedAudio ? 'Pausar audio' : 'Escuchar artículo'}
+                className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b] active:scale-95"
               >
                 {isPlayingAudio && !isPausedAudio ? (
-                  <Pause className="h-5 w-5 fill-current" />
+                  <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
                 ) : (
-                  <Play className="h-5 w-5 fill-current translate-x-0.5" />
+                  <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
                 )}
+                <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
               </button>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <Headphones className="h-4 w-4 text-[#ff4b0b]" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#191918]">
-                    {isPlayingAudio
-                      ? isPausedAudio
-                        ? 'Lectura en pausa'
-                        : 'Reproduciendo lectura...'
-                      : 'Escuchar este artículo'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-black/50">
-                  {isPlayingAudio
-                    ? `Progreso: ${audioProgress}%`
-                    : `Voz de lectura • Tiempo est.: ${article.readTime}`}
-                </p>
-              </div>
-            </div>
-
-            {/* Controles de Velocidad y Detener */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center rounded-lg border border-black/10 bg-[#f8f9fc] p-0.5">
-                {[1.0, 1.25, 1.5].map((speed) => (
-                  <button
-                    key={speed}
-                    type="button"
-                    onClick={() => changeAudioSpeed(speed)}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-bold transition-all ${
-                      audioSpeed === speed
-                        ? 'bg-white text-[#ff4b0b] shadow-xs'
-                        : 'text-black/60 hover:text-black'
-                    }`}
-                  >
-                    {speed}x
-                  </button>
-                ))}
-              </div>
-
               {isPlayingAudio && (
+                <div className="inline-flex items-center gap-1">
+                  {[1.0, 1.25, 1.5].map((speed) => (
+                    <button
+                      key={speed}
+                      type="button"
+                      onClick={() => changeAudioSpeed(speed)}
+                      className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                        audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60'
+                      }`}
+                    >
+                      {speed}x
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={stopAudio}
+                    className="rounded px-1.5 py-0.5 text-[10px] font-bold text-red-500 hover:bg-red-50"
+                  >
+                    Detener
+                  </button>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Imagen Panorámica (Banner) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="relative aspect-[16/9] w-full rounded-[18px] overflow-hidden bg-zinc-900 border border-black/5 shadow-md"
+            >
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /* MODO SPLIT (2 COLUMNAS: TÍTULO Y AUDIO IZQ + IMAGEN DERECHA)              */
+          /* ========================================================================= */
+          <div className="mb-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Columna Izquierda: Título y Metadatos */}
+            <div className="lg:col-span-7">
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-[#ff4b0b]/20"
+              >
+                {article.categoryLabel}
+              </motion.span>
+              
+              <motion.h1
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-3xl md:text-4xl lg:text-[44px] font-black text-zinc-950 tracking-tight mt-4 mb-5 leading-[1.15]"
+              >
+                {article.title}
+              </motion.h1>
+
+              {/* Fila Única de Metadatos + Reproductor de Audio Compacto */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 font-mono"
+              >
+                <span className="flex items-center gap-1.5 text-zinc-600">
+                  <Calendar className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.date}
+                </span>
+                <span className="text-zinc-300">•</span>
+                <span className="flex items-center gap-1.5 text-zinc-600">
+                  <Clock className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.readTime}
+                </span>
+                <span className="text-zinc-300">•</span>
+                
+                {/* Cápsula de Audio en la misma fila */}
                 <button
                   type="button"
-                  onClick={stopAudio}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/10 text-black/60 transition-colors hover:border-red-500/40 hover:text-red-500"
-                  title="Detener lectura"
+                  onClick={togglePlayAudio}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3 py-1 text-xs font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b] active:scale-95"
                 >
-                  <Square className="h-3.5 w-3.5 fill-current" />
+                  {isPlayingAudio && !isPausedAudio ? (
+                    <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                  ) : (
+                    <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
+                  )}
+                  <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
                 </button>
-              )}
-            </div>
-          </div>
 
-          {/* Barra de progreso de lectura interactiva */}
-          {isPlayingAudio && (
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/5">
-              <div
-                className="h-full bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] transition-all duration-300"
-                style={{ width: `${audioProgress}%` }}
+                {isPlayingAudio && (
+                  <div className="inline-flex items-center gap-1">
+                    {[1.0, 1.25, 1.5].map((speed) => (
+                      <button
+                        key={speed}
+                        type="button"
+                        onClick={() => changeAudioSpeed(speed)}
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                          audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60'
+                        }`}
+                      >
+                        {speed}x
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={stopAudio}
+                      className="rounded px-1.5 py-0.5 text-[10px] font-bold text-red-500 hover:bg-red-50"
+                      title="Detener audio"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Columna Derecha: Imagen de Portada */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="lg:col-span-5 relative aspect-[16/10] rounded-[18px] overflow-hidden bg-zinc-900 border border-black/10 shadow-md"
+            >
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover"
               />
-            </div>
-          )}
-        </motion.div>
-
-        {/* Imagen de Portada */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="relative h-[250px] md:h-[400px] rounded-[15px] overflow-hidden bg-zinc-900 mb-12 border border-black/5 shadow-xs"
-        >
-          <img
-            src={article.image}
-            alt={article.title}
-            className="w-full h-full object-cover"
-          />
-        </motion.div>
+            </motion.div>
+          </div>
+        )}
 
         {/* CONTENEDOR DE DOS COLUMNAS OPTIMIZADO */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-16">
@@ -584,11 +659,11 @@ export default function ArticleDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs text-zinc-800 text-base md:text-lg leading-relaxed space-y-6"
+              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs space-y-6"
             >
               <div 
-                dangerouslySetInnerHTML={{ __html: article.content }} 
-                className="space-y-6"
+                dangerouslySetInnerHTML={{ __html: sanitizeAndDecodeContent(article.content) }} 
+                className="space-y-6 text-base md:text-lg leading-relaxed text-zinc-800 [&_h2]:text-2xl sm:[&_h2]:text-[26px] [&_h2]:font-bold [&_h2]:text-zinc-950 [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-xl sm:[&_h3]:text-[22px] [&_h3]:font-bold [&_h3]:text-zinc-900 [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:leading-[1.75] [&_p]:text-zinc-700"
               />
             </motion.article>
 
