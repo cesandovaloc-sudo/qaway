@@ -100,8 +100,9 @@ export default function ArticleDetailPage() {
   const [isPausedAudio, setIsPausedAudio] = useState(false)
   const [audioSpeed, setAudioSpeed] = useState(1.0)
   const [audioProgress, setAudioProgress] = useState(0)
-  const utteranceRef = useRef(null)
-  const textCharsCountRef = useRef(0)
+  const chunksRef = useRef([])
+  const currentChunkIdxRef = useRef(0)
+  const isSpeakingRef = useRef(false)
 
   // Compartir en Redes Sociales
   const [copied, setCopied] = useState(false)
@@ -222,25 +223,31 @@ export default function ArticleDetailPage() {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel()
       }
+      isSpeakingRef.current = false
     }
   }, [id])
 
-  const startSpeech = () => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !article) return
+  const playChunk = (index) => {
+    if (!isSpeakingRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return
 
-    window.speechSynthesis.cancel()
+    const chunks = chunksRef.current
+    if (!chunks || index >= chunks.length) {
+      setIsPlayingAudio(false)
+      setIsPausedAudio(false)
+      isSpeakingRef.current = false
+      setAudioProgress(100)
+      setTimeout(() => setAudioProgress(0), 1200)
+      return
+    }
 
-    // Limpiar texto de HTML para una lectura fluida
-    const cleanContent = (article.content || '').replace(/<[^>]+>/g, ' ')
-    const fullTextToRead = `${article.title}. ${article.excerpt ? article.excerpt + '.' : ''} ${cleanContent}`
-    textCharsCountRef.current = fullTextToRead.length
-
-    const utterance = new SpeechSynthesisUtterance(fullTextToRead)
+    currentChunkIdxRef.current = index
+    const textToSpeak = chunks[index]
+    const utterance = new SpeechSynthesisUtterance(textToSpeak)
     utterance.lang = 'es-ES'
     utterance.rate = audioSpeed
     utterance.pitch = 1.0
 
-    // Buscar y priorizar voz femenina natural de IA en español
+    // Buscar y asignar la mejor voz en español
     const allVoices = window.speechSynthesis.getVoices() || []
     const spanishVoices = allVoices.filter((v) => 
       v.lang && (v.lang.toLowerCase().startsWith('es') || v.lang.toLowerCase().includes('es-') || v.lang.toLowerCase().includes('es_'))
@@ -259,17 +266,12 @@ export default function ArticleDetailPage() {
       }
     }
 
-    utterance.onboundary = (event) => {
-      if (textCharsCountRef.current > 0) {
-        const progress = Math.min(100, Math.round((event.charIndex / textCharsCountRef.current) * 100))
-        setAudioProgress(progress)
-      }
-    }
-
     utterance.onend = () => {
-      setIsPlayingAudio(false)
-      setIsPausedAudio(false)
-      setAudioProgress(100)
+      if (!isSpeakingRef.current) return
+      const nextIdx = index + 1
+      const progress = Math.min(100, Math.round((nextIdx / chunks.length) * 100))
+      setAudioProgress(progress)
+      playChunk(nextIdx)
     }
 
     utterance.onerror = (e) => {
@@ -277,15 +279,50 @@ export default function ArticleDetailPage() {
         console.warn('[Audio Speech Error]', e)
         setIsPlayingAudio(false)
         setIsPausedAudio(false)
+        isSpeakingRef.current = false
       }
     }
 
-    utteranceRef.current = utterance
-    
-    // Ejecución síncrona en el contexto del click del usuario (requerido por políticas de audio)
     window.speechSynthesis.speak(utterance)
+  }
+
+  const startSpeech = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window) || !article) return
+
+    window.speechSynthesis.cancel()
+    window.speechSynthesis.resume()
+
+    // Limpiar texto de HTML para una lectura fluida
+    const cleanContent = (article.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+    const fullTextToRead = `${article.title}. ${article.excerpt ? article.excerpt + '.' : ''} ${cleanContent}`
+
+    // Dividir en oraciones naturales de menos de 150 caracteres para evitar limitaciones del navegador
+    const sentences = fullTextToRead.match(/[^.!?\n]+[.!?\n]*/g) || [fullTextToRead]
+    const chunks = []
+    let buffer = ''
+
+    sentences.forEach((s) => {
+      const trimmed = s.trim()
+      if (!trimmed) return
+      if ((buffer + ' ' + trimmed).length < 160) {
+        buffer += (buffer ? ' ' : '') + trimmed
+      } else {
+        if (buffer) chunks.push(buffer)
+        buffer = trimmed
+      }
+    })
+    if (buffer) chunks.push(buffer)
+
+    if (chunks.length === 0) return
+
+    chunksRef.current = chunks
+    currentChunkIdxRef.current = 0
+    isSpeakingRef.current = true
     setIsPlayingAudio(true)
     setIsPausedAudio(false)
+    setAudioProgress(0)
+
+    playChunk(0)
   }
 
   const togglePlayAudio = () => {
@@ -303,18 +340,20 @@ export default function ArticleDetailPage() {
   }
 
   const stopAudio = () => {
+    isSpeakingRef.current = false
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel()
-      setIsPlayingAudio(false)
-      setIsPausedAudio(false)
-      setAudioProgress(0)
     }
+    chunksRef.current = []
+    currentChunkIdxRef.current = 0
+    setIsPlayingAudio(false)
+    setIsPausedAudio(false)
+    setAudioProgress(0)
   }
 
   const changeAudioSpeed = (speed) => {
     setAudioSpeed(speed)
     if (isPlayingAudio && !isPausedAudio) {
-      // Reiniciar con la nueva velocidad
       startSpeech()
     }
   }
