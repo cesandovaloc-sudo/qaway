@@ -190,12 +190,21 @@ function ProjectCard({ project, index }) {
         <p className="text-sm sm:text-[14.5px] leading-relaxed text-[#71717a] mb-4 max-w-xl">
           {project.subtitle}
         </p>
-        <div className="flex flex-wrap gap-4 text-xs font-semibold text-[#18181b]/75">
-          {project.tags.map((tag) => (
-            <span key={tag} className="border-b border-[#20201f]/30 pb-0.5">
-              {tag}
-            </span>
-          ))}
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex flex-wrap gap-4 text-xs font-semibold text-[#18181b]/75">
+            {project.tags.map((tag) => (
+              <span key={tag} className="border-b border-[#20201f]/30 pb-0.5">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <Link
+            to={project.path || '/landings/desarrollo-web'}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
+          >
+            <span>Ver proyecto</span>
+            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </motion.article>
@@ -245,6 +254,12 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
             <p className="text-[13.5px] leading-relaxed text-[#71717a]">
               {desc}
             </p>
+          </div>
+          <div className="pt-4 flex items-center">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#fe6612] transition-colors">
+              <span>Ver proyecto</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+            </span>
           </div>
         </div>
       </Link>
@@ -589,13 +604,20 @@ export default function ProyectosPage() {
                 </div>
 
                 {/* Textos descriptivos debajo del móvil */}
-                <div className="mt-5 text-center px-2">
+                <div className="mt-5 text-center px-2 flex flex-col items-center">
                   <h3 className="text-base font-bold text-[#111210] group-hover:text-[#fe6612] transition-colors mb-1">
                     {mockup.title}
                   </h3>
-                  <p className="text-xs text-[#71717a] leading-relaxed">
+                  <p className="text-xs text-[#71717a] leading-relaxed mb-3">
                     {mockup.desc}
                   </p>
+                  <Link
+                    to="/landings/desarrollo-web"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-[#fe6612] transition-colors hover:text-[#e0550a]"
+                  >
+                    <span>Ver proyecto</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                  </Link>
                 </div>
               </motion.div>
             ))}
