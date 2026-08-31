@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users,
@@ -709,20 +710,16 @@ export default function MarketingStudioPage() {
         
         <div className="space-y-6">
           
-          {/* Brand Header */}
-          <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
-              <Sparkles className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-base font-bold text-slate-900 tracking-tight">Marketing OS</h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  HubSpot v1
-                </span>
-              </div>
-              <p className="text-xs text-slate-500">Panel & Fichas Modulares</p>
-            </div>
+          {/* Qaway Lab Brand Header & Return Link */}
+          <div className="pb-4 border-b border-slate-100 flex items-center justify-between">
+            <Link to="/hub" className="group flex items-center gap-2" title="Volver al Hub">
+              <span className="text-xl font-bold tracking-[-0.055em] text-slate-900 group-hover:text-slate-700 transition-colors">
+                Qaway <span className="text-[#fe6612]">Lab</span>
+              </span>
+            </Link>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Studio OS
+            </span>
           </div>
 
           {/* Business Model Switcher */}

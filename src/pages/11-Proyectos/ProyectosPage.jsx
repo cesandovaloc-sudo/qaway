@@ -634,7 +634,7 @@ export default function ProyectosPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
-              className="h-full flex flex-col"
+              className="h-full flex flex-col pt-2"
             >
               <Link to={category.path} className="projects-area-card h-full">
                 <span>Proyectos / {category.label}</span>

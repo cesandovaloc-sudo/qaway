@@ -83,10 +83,9 @@ export default function Navbar({ variant: explicitVariant }) {
   const isProyectos = location.pathname === '/proyectos' || location.pathname === '/proyectos/'
   const variant = explicitVariant || (isProyectos ? 'transparent' : contextVariant)
   const isMarketingHub = location.pathname.startsWith('/hub/marketing')
-  const isLogoOnly = variant === 'logo-only' || isMarketingHub
 
-  // Visor / reader pages hide the global Navbar for immersive experience
-  if (variant === 'hidden') return null
+  // Visor / reader pages and Marketing Studio hide the global Navbar for full-screen panel experience
+  if (variant === 'hidden' || isMarketingHub) return null
 
   const styles = variantStyles[variant] || variantStyles.light
   
