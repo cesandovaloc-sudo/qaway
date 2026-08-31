@@ -237,7 +237,7 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
             <img
               src={image}
               alt={title}
-              className="h-full w-full object-cover transition-transform duration-300 ease-out"
+              className="h-full w-full object-cover object-top transition-transform duration-300 ease-out"
             />
             {tag && (
               <div className="absolute top-3.5 right-3.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
@@ -480,7 +480,7 @@ export default function ProyectosPage() {
 
                 <StaticProjectCard
                   to="/proyectos/aurea-skincare"
-                  image="/assets/hero-clean.png"
+                  image="/aurea-images/hero_products.jpg"
                   tag="Tienda Online"
                   title="Áurea Skincare"
                   desc="E-commerce de cosmética botánica con catálogo dinámico de productos, carrito de compras y diseño editorial."
@@ -489,7 +489,7 @@ export default function ProyectosPage() {
 
                 <StaticProjectCard
                   to="/proyectos/plantora"
-                  image="/assets/benefits-clean.png"
+                  image="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=85"
                   tag="Landing Page"
                   title="Plantora Paisajismo"
                   desc="Landing page de alta conversión para proyectos botánicos, arquitectura de paisaje y captación de clientes."

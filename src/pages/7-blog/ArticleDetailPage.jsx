@@ -200,6 +200,22 @@ export default function ArticleDetailPage() {
     loadArticle()
   }, [id])
 
+  // Precargar lista de voces del navegador al montar el componente
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.getVoices()
+      const onVoicesReady = () => {
+        window.speechSynthesis.getVoices()
+      }
+      window.speechSynthesis.onvoiceschanged = onVoicesReady
+      return () => {
+        if (window.speechSynthesis.onvoiceschanged === onVoicesReady) {
+          window.speechSynthesis.onvoiceschanged = null
+        }
+      }
+    }
+  }, [])
+
   // Detener audio al desmontar o cambiar de artículo
   useEffect(() => {
     return () => {
@@ -225,21 +241,22 @@ export default function ArticleDetailPage() {
     utterance.pitch = 1.0
 
     // Buscar y priorizar voz femenina natural de IA en español
-    const voices = window.speechSynthesis.getVoices()
-    const spanishVoices = voices.filter((v) => v.lang.startsWith('es') || v.lang.includes('es-') || v.lang.includes('ES'))
+    const allVoices = window.speechSynthesis.getVoices() || []
+    const spanishVoices = allVoices.filter((v) => 
+      v.lang && (v.lang.toLowerCase().startsWith('es') || v.lang.toLowerCase().includes('es-') || v.lang.toLowerCase().includes('es_'))
+    )
     
-    // 1. Priorizar voces Neurales/Naturales modernas (Edge/Chrome)
-    const naturalFemaleVoice = spanishVoices.find((v) => 
-      /(natural|neural|online)/i.test(v.name) && /(paloma|elena|salma|dalia|ximena|sabina|monica|paulina|female|mujer)/i.test(v.name)
-    ) 
-    || spanishVoices.find((v) => /(natural|neural|online)/i.test(v.name))
-    || spanishVoices.find((v) => /google español/i.test(v.name))
-    || spanishVoices.find((v) => !/desktop/i.test(v.name) && /(paloma|elena|salma|dalia|ximena|monica|paulina|laura|marta|sofia|victoria|lucia|conchita|mia)/i.test(v.name))
-    || spanishVoices.find((v) => /(paloma|elena|salma|dalia|ximena|monica|paulina|laura|marta|sofia|victoria|lucia|conchita|mia|sabina|helena)/i.test(v.name))
-    || spanishVoices[0]
+    if (spanishVoices.length > 0) {
+      const bestFemaleVoice = 
+        spanishVoices.find((v) => /(natural|neural|online)/i.test(v.name) && /(paloma|elena|salma|dalia|ximena|monica|paulina|female|mujer)/i.test(v.name))
+        || spanishVoices.find((v) => /(natural|neural|online|google)/i.test(v.name))
+        || spanishVoices.find((v) => /google español/i.test(v.name))
+        || spanishVoices.find((v) => /(paloma|elena|salma|dalia|ximena|monica|paulina|laura|marta|sofia|victoria|lucia|conchita|mia|sabina|helena)/i.test(v.name))
+        || spanishVoices[0]
 
-    if (naturalFemaleVoice) {
-      utterance.voice = naturalFemaleVoice
+      if (bestFemaleVoice) {
+        utterance.voice = bestFemaleVoice
+      }
     }
 
     utterance.onboundary = (event) => {
@@ -255,12 +272,17 @@ export default function ArticleDetailPage() {
       setAudioProgress(100)
     }
 
-    utterance.onerror = () => {
-      setIsPlayingAudio(false)
-      setIsPausedAudio(false)
+    utterance.onerror = (e) => {
+      if (e.error !== 'canceled' && e.error !== 'interrupted') {
+        console.warn('[Audio Speech Error]', e)
+        setIsPlayingAudio(false)
+        setIsPausedAudio(false)
+      }
     }
 
     utteranceRef.current = utterance
+    
+    // Ejecución síncrona en el contexto del click del usuario (requerido por políticas de audio)
     window.speechSynthesis.speak(utterance)
     setIsPlayingAudio(true)
     setIsPausedAudio(false)

@@ -627,6 +627,15 @@ export default function MarketingStudioPage() {
     reader.readAsDataURL(file)
   }
 
+  const handleUpdatePersonaField = (field, value) => {
+    setPersonas(prev => prev.map(p => {
+      if (p.id === activePersonaId) {
+        return { ...p, [field]: value }
+      }
+      return p
+    }))
+  }
+
   const handleDirectExportPersona = async (persona) => {
     if (!persona) return
     const safeName = (persona.name || 'Buyer-Persona').replace(/[^a-zA-Z0-9_-]/g, '_')
@@ -1561,25 +1570,33 @@ export default function MarketingStudioPage() {
                         </div>
 
                         {/* Card: Edad */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Rango de edad</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            • {currentPersona.age || 'Entre 35 y 44 años'}
-                          </div>
+                          <input
+                            type="text"
+                            value={currentPersona.age || ''}
+                            onChange={(e) => handleUpdatePersonaField('age', e.target.value)}
+                            placeholder="Ej. Entre 30 y 45 años"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                         {/* Card: Nivel de educación */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Nivel de educación más alto</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            • {currentPersona.education || 'Título profesional'}
-                          </div>
+                          <input
+                            type="text"
+                            value={currentPersona.education || ''}
+                            onChange={(e) => handleUpdatePersonaField('education', e.target.value)}
+                            placeholder="Ej. Licenciatura universitaria"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                         {/* Card: Redes Sociales */}
@@ -1589,41 +1606,49 @@ export default function MarketingStudioPage() {
                             <MoreHorizontal className="w-4 h-4 text-slate-300" />
                           </div>
                           <div className="flex items-center gap-2 pt-1">
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
                               <Facebook className="w-4 h-4" />
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
                               <Instagram className="w-4 h-4" />
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
                               <Twitter className="w-4 h-4" />
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
                               <Linkedin className="w-4 h-4" />
                             </div>
                           </div>
                         </div>
 
                         {/* Card: Industria */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Industria</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            • {currentPersona.industry || 'Cuidado de la salud'}
-                          </div>
+                          <input
+                            type="text"
+                            value={currentPersona.industry || ''}
+                            onChange={(e) => handleUpdatePersonaField('industry', e.target.value)}
+                            placeholder="Ej. Tecnología / Servicios"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                         {/* Card: Tamaño organización */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1">
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Tamaño de la organización</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            • {currentPersona.companySize || 'Entre 1 y 10 empleados'}
-                          </div>
+                          <input
+                            type="text"
+                            value={currentPersona.companySize || ''}
+                            onChange={(e) => handleUpdatePersonaField('companySize', e.target.value)}
+                            placeholder="Ej. Entre 11 y 50 empleados"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                       </div>
@@ -1635,46 +1660,48 @@ export default function MarketingStudioPage() {
                         </div>
 
                         {/* Card: Canal favorito de comunicación */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Canal favorito de comunicación</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
-                            {currentPersona.commChannels?.map((ch, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span>{ch}</span>
-                              </li>
-                            )) || <li>• WhatsApp Business</li>}
-                          </ul>
+                          <textarea
+                            rows="2"
+                            value={Array.isArray(currentPersona.commChannels) ? currentPersona.commChannels.join(', ') : (currentPersona.commChannels || '')}
+                            onChange={(e) => handleUpdatePersonaField('commChannels', e.target.value.split(',').map(s => s.trim()))}
+                            placeholder="Ej. WhatsApp Business, Correo electrónico, LinkedIn"
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                         {/* Card: Su superior es */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Su superior es</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="text-xs sm:text-sm font-bold text-slate-800">
-                            • {currentPersona.reportingTo || 'Dirección General'}
-                          </div>
+                          <input
+                            type="text"
+                            value={currentPersona.reportingTo || ''}
+                            onChange={(e) => handleUpdatePersonaField('reportingTo', e.target.value)}
+                            placeholder="Ej. Dirección General / CEO"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                         {/* Card: Herramientas que necesita para trabajar */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Herramientas que necesita para trabajar</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
-                            {currentPersona.tools?.map((tool, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span>{tool}</span>
-                              </li>
-                            )) || <li>• Software de CRM</li>}
-                          </ul>
+                          <textarea
+                            rows="2"
+                            value={Array.isArray(currentPersona.tools) ? currentPersona.tools.join(', ') : (currentPersona.tools || '')}
+                            onChange={(e) => handleUpdatePersonaField('tools', e.target.value.split(',').map(s => s.trim()))}
+                            placeholder="Ej. Software de CRM, WhatsApp Web, Gestión de proyectos"
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                       </div>
@@ -1686,61 +1713,63 @@ export default function MarketingStudioPage() {
                         </div>
 
                         {/* Card: Su trabajo se mide en función de */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Su trabajo se mide en función de</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
-                            {currentPersona.kpis?.map((kpi, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span>{kpi}</span>
-                              </li>
-                            )) || <li>• Crecimiento de clientes</li>}
-                          </ul>
+                          <textarea
+                            rows="2"
+                            value={Array.isArray(currentPersona.kpis) ? currentPersona.kpis.join(', ') : (currentPersona.kpis || '')}
+                            onChange={(e) => handleUpdatePersonaField('kpis', e.target.value.split(',').map(s => s.trim()))}
+                            placeholder="Ej. Crecimiento de clientes, Conversión de leads"
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                         {/* Card: Dificultades principales (Dolores) */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Dificultades principales (Dolores)</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
-                            {currentPersona.pains?.map((pain, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                <span>{pain}</span>
-                              </li>
-                            )) || <li>• Dificultad de posicionamiento</li>}
-                          </ul>
+                          <textarea
+                            rows="3"
+                            value={Array.isArray(currentPersona.pains) ? currentPersona.pains.join('\n') : (currentPersona.pains || '')}
+                            onChange={(e) => handleUpdatePersonaField('pains', e.target.value.split('\n').filter(Boolean))}
+                            placeholder="Escribe cada dolor en una línea..."
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                         {/* Card: Obtiene información a través de */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
                             <span>Obtiene información a través de</span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <ul className="space-y-1.5 text-xs sm:text-sm text-slate-800 font-semibold">
-                            {currentPersona.infoSources?.map((source, i) => (
-                              <li key={i} className="flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-                                <span>{source}</span>
-                              </li>
-                            )) || <li>• Investigación en línea</li>}
-                          </ul>
+                          <textarea
+                            rows="2"
+                            value={Array.isArray(currentPersona.infoSources) ? currentPersona.infoSources.join(', ') : (currentPersona.infoSources || '')}
+                            onChange={(e) => handleUpdatePersonaField('infoSources', e.target.value.split(',').map(s => s.trim()))}
+                            placeholder="Ej. Investigación en línea, LinkedIn, Recomendaciones"
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                         {/* Card: Cómo contribuimos a su éxito */}
-                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2">
-                          <div className="text-xs text-emerald-800 font-bold uppercase">
-                            Cómo contribuimos a su éxito
+                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2 group">
+                          <div className="flex justify-between items-center text-xs text-emerald-800 font-bold uppercase">
+                            <span>Cómo contribuimos a su éxito</span>
+                            <Edit3 className="w-3.5 h-3.5 text-emerald-500 group-hover:text-emerald-700 transition-colors" />
                           </div>
-                          <p className="text-xs sm:text-sm text-emerald-950 font-semibold leading-relaxed">
-                            {currentPersona.howWeHelp || currentPersona.jtbd}
-                          </p>
+                          <textarea
+                            rows="2"
+                            value={currentPersona.howWeHelp || ''}
+                            onChange={(e) => handleUpdatePersonaField('howWeHelp', e.target.value)}
+                            placeholder="Describe cómo tu solución resuelve sus necesidades..."
+                            className="w-full text-xs sm:text-sm font-bold text-emerald-950 bg-transparent border-b border-transparent hover:border-emerald-300 focus:border-emerald-700 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
                         </div>
 
                       </div>
