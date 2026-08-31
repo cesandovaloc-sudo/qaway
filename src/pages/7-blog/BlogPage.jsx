@@ -314,20 +314,20 @@ export default function BlogPage() {
     return matchesCategory && matchesSearch
   })
 
-  // Conteo de artículos por categoría
-  const categoriesWithCounts = categories.map((cat) => {
-    const count = articlesList.filter((article) => article.category === cat.key).length
-    return {
-      ...cat,
-      countNum: count,
-      count: `${count} publicación${count !== 1 ? 'es' : ''}`,
-    }
-  })
-
-  // REGLA: SOLO mostrar categorías que tienen artículos publicados (count > 0)
-  const activeCategoriesWithArticles = categoriesWithCounts.filter((cat) => cat.countNum > 0)
-
-  const activeCategoryObj = categoriesWithCounts.find((cat) => cat.key === activeCategory)
+  // Extraer dinámicamente las categorías reales de los artículos de Supabase
+  const activeCategoriesWithArticles = (() => {
+    const map = new Map()
+    articlesList.forEach((article) => {
+      const key = article.category || 'general'
+      const title = article.categoryLabel || article.category || 'General'
+      if (!map.has(key)) {
+        map.set(key, { key, title, countNum: 1 })
+      } else {
+        map.get(key).countNum += 1
+      }
+    })
+    return Array.from(map.values())
+  })()
 
   const selectCategory = (nextCategory) => {
     setActiveCategory(nextCategory)
@@ -425,8 +425,8 @@ export default function BlogPage() {
         {/* ========================================================================= */}
         {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE CON CONTROLES INTEGRADOS            */}
         {/* ========================================================================= */}
-        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#fff9f6] to-[#fff1eb] pb-8 pt-20 sm:pb-10 sm:pt-28">
-          <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#ffe6d8] to-[#ffd0b5] pb-8 pt-20 sm:pb-10 sm:pt-28">
+          <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
             
             {/* Cabecera del Hero */}
             <div className="max-w-3xl">
@@ -524,9 +524,9 @@ export default function BlogPage() {
         </section>
 
         <section className="bg-white pb-16 pt-8 sm:pt-10 lg:pb-24">
-          <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-            {loading ? (
-              /* Skeleton Loader suave mientras conecta con Supabase */
+          <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
+            {loading && articlesList.length === 0 ? (
+              /* Skeleton Loader suave mientras conecta por primera vez con Supabase */
               <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="animate-pulse rounded-2xl border border-black/5 bg-[#fafafc] p-4">

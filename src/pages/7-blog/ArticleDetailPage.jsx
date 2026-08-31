@@ -17,6 +17,12 @@ import {
   VolumeX,
   Headphones,
   RotateCcw,
+  ChevronRight,
+  Copy,
+  Check,
+  MessageCircle,
+  Linkedin,
+  Share2,
 } from 'lucide-react'
 import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -44,9 +50,30 @@ export default function ArticleDetailPage() {
   const [scrollProgress, setScrollProgress] = useState(0)
   const articleRef = useRef(null)
 
-  // Estado del artículo (dinámico de Supabase o local)
-  const [article, setArticle] = useState(() => visibleArticles.find((art) => art.id === id) || null)
-  const [loadingArticle, setLoadingArticle] = useState(false)
+  // Estado del artículo (Caché SWR instantáneo a 0ms de Supabase con fallback local)
+  const [article, setArticle] = useState(() => {
+    try {
+      const cached = localStorage.getItem('qaway_blog_articles_cache')
+      if (cached) {
+        const list = JSON.parse(cached)
+        const found = list.find((art) => art.id === id || art.slug === id)
+        if (found) return found
+      }
+    } catch (e) {}
+    return visibleArticles.find((art) => art.id === id) || null
+  })
+
+  const [loadingArticle, setLoadingArticle] = useState(() => {
+    try {
+      const cached = localStorage.getItem('qaway_blog_articles_cache')
+      if (cached) {
+        const list = JSON.parse(cached)
+        const found = list.find((art) => art.id === id || art.slug === id)
+        if (found) return false
+      }
+    } catch (e) {}
+    return !visibleArticles.some((art) => art.id === id)
+  })
 
   // Estados para comentarios de Supabase
   const [comments, setComments] = useState([])
@@ -75,6 +102,30 @@ export default function ArticleDetailPage() {
   const [audioProgress, setAudioProgress] = useState(0)
   const utteranceRef = useRef(null)
   const textCharsCountRef = useRef(0)
+
+  // Compartir en Redes Sociales
+  const [copied, setCopied] = useState(false)
+  const handleCopyLink = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2200)
+    }
+  }
+
+  const handleShareWhatsApp = () => {
+    if (typeof window !== 'undefined') {
+      const text = encodeURIComponent(`${article?.title || 'Artículo de Blog'} - ${window.location.href}`)
+      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank')
+    }
+  }
+
+  const handleShareLinkedIn = () => {
+    if (typeof window !== 'undefined') {
+      const url = encodeURIComponent(window.location.href)
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank')
+    }
+  }
 
   // Cargar artículo si no está en memoria local
   useEffect(() => {
@@ -407,7 +458,22 @@ export default function ArticleDetailPage() {
     }
   }
 
-  if (!article) {
+  // Skeleton de carga suave (solo si se ingresa por link directo sin caché previa)
+  if (loadingArticle && !article) {
+    return (
+      <div className="min-h-screen bg-zinc-50 pt-[120px] pb-24">
+        <div className="max-w-6xl mx-auto px-6 lg:px-8 animate-pulse space-y-8">
+          <div className="h-5 w-28 bg-black/10 rounded-full" />
+          <div className="h-12 w-3/4 bg-black/10 rounded-xl" />
+          <div className="h-4 w-48 bg-black/10 rounded" />
+          <div className="aspect-[16/9] w-full bg-black/10 rounded-2xl" />
+        </div>
+      </div>
+    )
+  }
+
+  // Si la red confirmó que no existe el artículo
+  if (!loadingArticle && !article) {
     return (
       <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-8 mt-[73px]">
         <div className="text-center max-w-md bg-white p-8 rounded-[15px] border border-zinc-200 shadow-xs">
@@ -443,71 +509,76 @@ export default function ArticleDetailPage() {
 
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         
-        {/* Botón de regreso */}
+        {/* 1. BREADCRUMBS EDITORIAL (ESTILO HUBSPOT) */}
         <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="mb-6 pt-2"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-5 flex items-center gap-2 text-xs font-semibold text-zinc-500"
         >
-          <Link
-            to="/blog"
-            className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-950 text-xs font-bold uppercase tracking-wider transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" /> Volver al listado
-          </Link>
+          <Link to="/" className="hover:text-[#ff4b0b] transition-colors">Inicio</Link>
+          <ChevronRight className="w-3.5 h-3.5 text-zinc-300" />
+          <Link to="/blog" className="hover:text-[#ff4b0b] transition-colors">Blog</Link>
+          {article.categoryLabel && (
+            <>
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-300" />
+              <span className="text-zinc-950 font-bold">{article.categoryLabel}</span>
+            </>
+          )}
         </motion.div>
 
-        {/* CABECERA: RESPETA EL DISEÑO CONFIGURADO EN EL STUDIO ('split' 2 columnas vs 'banner' 1 columna) */}
-        {article.headerLayout === 'banner' ? (
-          /* ========================================================================= */
-          /* MODO BANNER (1 COLUMNA CENTRADA + IMAGEN PANORÁMICA ABAJO)                */
-          /* ========================================================================= */
-          <div className="mb-10 text-center max-w-4xl mx-auto">
-            <motion.span
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-[#ff4b0b]/20"
-            >
-              {article.categoryLabel}
-            </motion.span>
+        {/* 2. TÍTULO EDITORIAL DOMINANTE */}
+        <div className="mb-8 max-w-4xl">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-[#ff4b0b]/20 mb-3 font-mono"
+          >
+            {article.categoryLabel}
+          </motion.span>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="text-3xl sm:text-4xl lg:text-[44px] font-black text-zinc-950 tracking-tight leading-[1.14]"
+          >
+            {article.title}
+          </motion.h1>
+        </div>
+
+        {/* 3. CUADRÍCULA UNIFORME DE DOS COLUMNAS (ESTILO HOSTINGER / WORDPRESS) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-16">
+          
+          {/* COLUMNA IZQUIERDA: Portada + Audio + Artículo + Comentarios (70%) */}
+          <div className="lg:col-span-2 space-y-8">
             
-            <motion.h1
+            {/* Portada 16:9 Alineada al 100% con los bordes de la columna de lectura */}
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-3xl md:text-4xl lg:text-5xl font-black text-zinc-950 tracking-tight mt-4 mb-6 leading-tight"
+              transition={{ delay: 0.15 }}
+              className="relative aspect-[16/9] w-full rounded-[18px] overflow-hidden bg-zinc-950 border border-black/10 shadow-xs"
             >
-              {article.title}
-            </motion.h1>
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover object-center"
+              />
+            </motion.div>
 
-            {/* Fila Única de Metadatos + Reproductor de Audio Compacto */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-wrap items-center justify-center gap-3 text-xs text-zinc-500 font-mono mb-8"
-            >
-              <span className="flex items-center gap-1.5 text-zinc-600">
-                <Calendar className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.date}
-              </span>
-              <span className="text-zinc-300">•</span>
-              <span className="flex items-center gap-1.5 text-zinc-600">
-                <Clock className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.readTime}
-              </span>
-              <span className="text-zinc-300">•</span>
-              
-              {/* Cápsula de Audio en la misma fila */}
+            {/* Barra de Audio Integrada */}
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-zinc-200/80 shadow-2xs">
               <button
                 type="button"
                 onClick={togglePlayAudio}
-                className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-1.5 text-xs sm:text-[13px] font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b] hover:text-[#ff4b0b] hover:shadow-sm active:scale-95"
+                className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-zinc-950 text-white hover:bg-zinc-800 px-4 py-2 text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 {isPlayingAudio && !isPausedAudio ? (
-                  <Pause className="h-4 w-4 text-[#ff4b0b] fill-current" />
+                  <Pause className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
                 ) : (
-                  <Play className="h-4 w-4 text-[#ff4b0b] fill-current" />
+                  <Play className="h-3.5 w-3.5 text-[#ff4b0b] fill-current" />
                 )}
-                <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
+                <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar artículo en audio'}</span>
               </button>
 
               {isPlayingAudio && (
@@ -517,7 +588,7 @@ export default function ArticleDetailPage() {
                       key={speed}
                       type="button"
                       onClick={() => changeAudioSpeed(speed)}
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                      className={`rounded px-2 py-1 text-[11px] font-bold ${
                         audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60'
                       }`}
                     >
@@ -527,131 +598,14 @@ export default function ArticleDetailPage() {
                   <button
                     type="button"
                     onClick={stopAudio}
-                    className="rounded px-1.5 py-0.5 text-[10px] font-bold text-red-500 hover:bg-red-50"
+                    className="rounded px-2 py-1 text-[11px] font-bold text-red-500 hover:bg-red-50"
+                    title="Detener audio"
                   >
-                    Detener
+                    ✕
                   </button>
                 </div>
               )}
-            </motion.div>
-
-            {/* Imagen Panorámica (Banner) */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="relative aspect-[16/9] w-full rounded-[18px] overflow-hidden bg-zinc-900 border border-black/5 shadow-md"
-            >
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          </div>
-        ) : (
-          /* ========================================================================= */
-          /* MODO SPLIT (2 COLUMNAS: TÍTULO Y AUDIO IZQ + IMAGEN DERECHA)              */
-          /* ========================================================================= */
-          <div className="mb-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Columna Izquierda: Título y Metadatos */}
-            <div className="lg:col-span-7">
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border border-[#ff4b0b]/20"
-              >
-                {article.categoryLabel}
-              </motion.span>
-              
-              <motion.h1
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-3xl md:text-4xl lg:text-[44px] font-black text-zinc-950 tracking-tight mt-4 mb-5 leading-[1.15]"
-              >
-                {article.title}
-              </motion.h1>
-
-              {/* Fila Única de Metadatos + Reproductor de Audio Compacto */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-wrap items-center gap-3 text-xs text-zinc-500 font-mono"
-              >
-                <span className="flex items-center gap-1.5 text-zinc-600">
-                  <Calendar className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.date}
-                </span>
-                <span className="text-zinc-300">•</span>
-                <span className="flex items-center gap-1.5 text-zinc-600">
-                  <Clock className="w-3.5 h-3.5 text-[#ff4b0b]" /> {article.readTime}
-                </span>
-                <span className="text-zinc-300">•</span>
-                
-                {/* Cápsula de Audio en la misma fila */}
-                <button
-                  type="button"
-                  onClick={togglePlayAudio}
-                  className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-1.5 text-xs sm:text-[13px] font-bold text-[#191918] shadow-xs transition-all hover:border-[#ff4b0b] hover:text-[#ff4b0b] hover:shadow-sm active:scale-95"
-                >
-                  {isPlayingAudio && !isPausedAudio ? (
-                    <Pause className="h-4 w-4 text-[#ff4b0b] fill-current" />
-                  ) : (
-                    <Play className="h-4 w-4 text-[#ff4b0b] fill-current" />
-                  )}
-                  <span>{isPlayingAudio ? (isPausedAudio ? 'Pausado' : `Escuchando ${audioProgress}%`) : 'Escuchar audio'}</span>
-                </button>
-
-                {isPlayingAudio && (
-                  <div className="inline-flex items-center gap-1">
-                    {[1.0, 1.25, 1.5].map((speed) => (
-                      <button
-                        key={speed}
-                        type="button"
-                        onClick={() => changeAudioSpeed(speed)}
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                          audioSpeed === speed ? 'bg-[#ff4b0b] text-white' : 'bg-black/5 text-black/60'
-                        }`}
-                      >
-                        {speed}x
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={stopAudio}
-                      className="rounded px-1.5 py-0.5 text-[10px] font-bold text-red-500 hover:bg-red-50"
-                      title="Detener audio"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-              </motion.div>
             </div>
-
-            {/* Columna Derecha: Imagen de Portada */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="lg:col-span-5 relative aspect-[16/10] rounded-[18px] overflow-hidden bg-zinc-900 border border-black/10 shadow-md"
-            >
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-full object-cover"
-              />
-            </motion.div>
-          </div>
-        )}
-
-        {/* CONTENEDOR DE DOS COLUMNAS OPTIMIZADO */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-16">
-          
-          {/* COLUMNA IZQUIERDA: Articulo + Comentarios (70%) */}
-          <div className="lg:col-span-2 space-y-8">
             
             {/* Cuerpo del Artículo */}
             <motion.article
@@ -803,29 +757,99 @@ export default function ArticleDetailPage() {
 
           </div>
 
-          {/* COLUMNA DERECHA: Sidebar de Información y Publicidad (30%) */}
-          <div className="space-y-8 lg:sticky lg:top-[85px]">
+          {/* COLUMNA DERECHA: Sidebar Sticky con Autor, CTA HubSpot, Compartir y Boletín (30%) */}
+          <div className="space-y-6 lg:sticky lg:top-[85px]">
             
-            {/* Widget: Progreso de Lectura */}
-            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-xs">
-              <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3">Lectura</h4>
+            {/* 1. Ficha de Autor (Estilo Hostinger / WordPress) */}
+            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#ff703d] to-[#ff4b0b] flex items-center justify-center text-white text-base font-black shadow-xs shrink-0">
+                Q
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 block mb-0.5 font-mono">
+                  Publicado por
+                </span>
+                <h4 className="text-sm font-bold text-zinc-950 leading-tight truncate">
+                  Qaway Lab
+                </h4>
+                <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+                  {article.date} • {article.readTime}
+                </p>
+              </div>
+            </div>
+
+            {/* 2. Tarjeta CTA Estilo HubSpot (Alta Conversión) */}
+            <div className="rounded-[18px] border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-6 shadow-xs relative overflow-hidden">
+              <div className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-2.5 py-1 rounded-md mb-2.5 font-mono">
+                Recurso Gratuito
+              </div>
+              <h4 className="text-base font-black text-zinc-950 mb-2 leading-snug">
+                Guía y Prompts de IA para Negocios
+              </h4>
+              <p className="text-xs text-zinc-600 leading-relaxed mb-4">
+                Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.
+              </p>
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] hover:from-[#ff5a22] hover:to-[#e03d00] text-white py-3 px-4 rounded-xl text-xs font-bold shadow-sm shadow-[#ff4b0b]/25 transition-all cursor-pointer"
+              >
+                Descargar Guía Gratis <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* 3. Barra de Compartir Rápido */}
+            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs">
+              <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3 font-mono">
+                Compartir Artículo
+              </h4>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleShareWhatsApp}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-black/10 hover:border-green-500 hover:text-green-600 bg-zinc-50 hover:bg-white text-xs font-semibold transition-all cursor-pointer"
+                >
+                  <MessageCircle className="w-4 h-4 text-green-600" /> WhatsApp
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShareLinkedIn}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-black/10 hover:border-blue-600 hover:text-blue-600 bg-zinc-50 hover:bg-white text-xs font-semibold transition-all cursor-pointer"
+                >
+                  <Linkedin className="w-4 h-4 text-blue-600" /> LinkedIn
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  title="Copiar enlace"
+                  className="p-2.5 rounded-xl border border-black/10 hover:border-[#ff4b0b] hover:text-[#ff4b0b] bg-zinc-50 hover:bg-white transition-all cursor-pointer"
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* 4. Widget: Progreso de Lectura */}
+            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-5 shadow-2xs">
+              <h4 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-3 font-mono">Lectura</h4>
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="text-zinc-500 font-semibold">Leído hasta:</span>
-                <span className="font-bold text-zinc-900">{Math.round(scrollProgress)}%</span>
+                <span className="font-bold text-zinc-900 font-mono">{Math.round(scrollProgress)}%</span>
               </div>
               <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-qaway-accent transition-all duration-100" 
+                  className="h-full bg-[#ff4b0b] transition-all duration-100" 
                   style={{ width: `${scrollProgress}%` }}
                 />
               </div>
             </div>
 
-            {/* Widget: Newsletter (Captación) */}
-            <div className="bg-white border border-zinc-200/80 rounded-[15px] p-6 shadow-xs relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-qaway-accent/60 via-qaway-accent to-qaway-accent/60 rounded-t-[15px]" />
-              <h4 className="text-[9px] font-extrabold text-qaway-accent uppercase tracking-widest mb-2 flex items-center gap-1 mt-1">
-                <Sparkles className="w-3 h-3" /> Boletín Semanal
+            {/* 5. Widget: Newsletter (Captación) */}
+            <div className="bg-white border border-zinc-200/80 rounded-[18px] p-6 shadow-2xs relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] rounded-t-[18px]" />
+              <h4 className="text-[10px] font-extrabold text-[#ff4b0b] uppercase tracking-widest mb-2 flex items-center gap-1 mt-1 font-mono">
+                <Sparkles className="w-3.5 h-3.5" /> Boletín Semanal
               </h4>
               <h5 className="text-sm font-black mb-1.5 leading-tight text-zinc-900">Únete al manual de operaciones de IA</h5>
               <p className="text-[11px] text-zinc-500 mb-4 leading-relaxed">Recibe ideas prácticas de automatización directamente en tu correo cada semana.</p>
@@ -834,7 +858,7 @@ export default function ArticleDetailPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-qaway-accent/8 border border-qaway-accent/20 text-zinc-800 rounded-xl text-center"
+                  className="p-4 bg-[#ff4b0b]/8 border border-[#ff4b0b]/20 text-zinc-800 rounded-xl text-center"
                 >
                   <h5 className="font-bold text-xs mb-1">¡Suscrito con éxito!</h5>
                   <p className="text-[10px] text-zinc-500 leading-normal">Pronto recibirás el manual de operaciones en tu correo.</p>
@@ -849,7 +873,7 @@ export default function ArticleDetailPage() {
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
                       placeholder="Tu correo electrónico"
-                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-zinc-300 focus:bg-white transition-all font-semibold"
+                      className="w-full bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 text-xs rounded-xl pl-10 pr-4 py-3.5 outline-none focus:border-[#ff4b0b] focus:bg-white transition-all font-semibold"
                     />
                   </div>
                   {newsletterError && (
@@ -858,29 +882,12 @@ export default function ArticleDetailPage() {
                   <button
                     type="submit"
                     disabled={newsletterSubmitting}
-                    className="w-full bg-zinc-950 hover:bg-zinc-800 disabled:bg-zinc-300 text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl transition-all duration-300 active:scale-95"
+                    className="w-full bg-zinc-950 hover:bg-zinc-800 disabled:bg-zinc-300 text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl transition-all duration-300 active:scale-95 cursor-pointer"
                   >
                     {newsletterSubmitting ? 'Procesando...' : 'Suscribirme'}
                   </button>
                 </form>
               )}
-            </div>
-
-            {/* Widget: Espacio Publicitario / Patrocinio */}
-            <div className="bg-zinc-50 border border-dashed border-zinc-300 rounded-[15px] p-6 text-center shadow-2xs">
-              <h4 className="text-[9px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2.5">Patrocinio</h4>
-              <div className="h-44 bg-zinc-200/30 rounded-xl flex flex-col items-center justify-center border border-zinc-200 p-4">
-                <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider mb-1">Qaway LAB Consulting</span>
-                <p className="text-zinc-500 text-[9px] leading-normal mb-3">¿Buscas automatizar las operaciones de tu empresa con IA? Agenda una sesión hoy.</p>
-                <a 
-                  href={WHATSAPP_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 bg-zinc-950 hover:bg-zinc-800 text-white text-[9px] font-bold uppercase tracking-widest px-4 py-2 rounded-lg transition-all active:scale-95"
-                >
-                  Agendar Sesión
-                </a>
-              </div>
             </div>
 
           </div>

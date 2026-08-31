@@ -39,7 +39,8 @@ import {
   X,
   Sliders,
   ShieldCheck,
-  Activity,
+  PanelLeftClose,
+  PanelLeftOpen,
   ChevronRight,
   ChevronDown,
   Filter,
@@ -323,6 +324,9 @@ export default function MarketingStudioPage() {
   // Multi-View Selector: 'personas' (1) | 'kanban' (2) | 'grid' (3) | 'dashboard' (4) | 'smart' (5)
   const [currentView, setCurrentView] = useState('personas')
 
+  // Sidebar Collapse / Expand State
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
   // State initialization with LocalStorage
   const [personas, setPersonas] = useState(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_personas`)
@@ -596,13 +600,24 @@ export default function MarketingStudioPage() {
     }))
   }
 
+  const handleUploadAvatar = (e, personaId) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const dataUrl = event.target.result
+      setPersonas(prev => prev.map(p => p.id === personaId ? { ...p, avatarImg: dataUrl } : p))
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleDirectExportPersona = async (persona) => {
     if (!persona) return
     const safeName = (persona.name || 'Buyer-Persona').replace(/[^a-zA-Z0-9_-]/g, '_')
     
-    // Create high-res offscreen DOM element
+    // Create high-res executive document for PDF capture
     const printEl = document.createElement('div')
-    printEl.style.width = '850px'
+    printEl.style.width = '920px'
     printEl.style.padding = '36px'
     printEl.style.background = '#ffffff'
     printEl.style.position = 'fixed'
@@ -613,60 +628,128 @@ export default function MarketingStudioPage() {
     printEl.style.boxSizing = 'border-box'
     
     printEl.innerHTML = `
-      <div style="border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h1 style="font-size: 26px; font-weight: 800; margin: 0; color: #0f172a;">${persona.name}</h1>
-          <div style="color: #64748b; font-size: 14px; margin-top: 4px;">${persona.title} • Modelo ${persona.type}</div>
+      <!-- HEADER -->
+      <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <img src="${persona.avatarImg}" style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover; border: 2px solid #e2e8f0;" />
+          <div>
+            <h1 style="font-size: 26px; font-weight: 900; margin: 0; color: #0f172a; line-height: 1.1;">${persona.name}</h1>
+            <div style="color: #64748b; font-size: 13px; font-weight: 600; margin-top: 4px;">
+              ${persona.title} • <span style="color: #4f46e5; font-weight: 700;">Modelo ${persona.type}</span>
+            </div>
+          </div>
         </div>
-        <div style="background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
-          Ficha Oficial HubSpot
+        <div style="text-align: right;">
+          <div style="background: #0f172a; color: white; padding: 6px 14px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">
+            Ficha Ejecutiva HubSpot
+          </div>
+          <div style="color: #94a3b8; font-size: 11px; margin-top: 4px; font-weight: 600;">Qaway Lab • Studio OS</div>
         </div>
       </div>
 
-      <div style="background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 14px 18px; border-radius: 12px; font-style: italic; color: #334155; margin-bottom: 24px; font-size: 14px; line-height: 1.5;">
+      <!-- CITAS / JOB TO BE DONE -->
+      <div style="background: #f8fafc; border-left: 4px solid #ff4b0b; padding: 14px 18px; border-radius: 12px; font-style: italic; color: #1e293b; margin-bottom: 22px; font-size: 13px; line-height: 1.5;">
         "${persona.jtbd || 'Progreso estratégico del cliente'}"
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
-        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
-          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Perfil General</div>
-          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
-            <div>• <strong>Edad:</strong> ${persona.age || '35-44 años'}</div>
-            <div>• <strong>Educación:</strong> ${persona.education || 'Profesional'}</div>
-            <div>• <strong>Industria:</strong> ${persona.industry || 'Servicios'}</div>
-            <div>• <strong>Empresa:</strong> ${persona.companySize || '1-10 empleados'}</div>
-          </div>
+      <!-- SECCIÓN 1: DEMOGRAFÍA & DETALLES PROFESIONALES -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.05em; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+          1. Perfil Demográfico & Profesional
         </div>
-
-        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
-          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Detalles Profesionales</div>
-          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
-            <div>• <strong>Canales:</strong> ${Array.isArray(persona.commChannels) ? persona.commChannels.join(', ') : 'WhatsApp, Email'}</div>
-            <div>• <strong>Reporta a:</strong> ${persona.reportingTo || 'Dirección General'}</div>
-            <div>• <strong>Herramientas:</strong> ${Array.isArray(persona.tools) ? persona.tools.join(', ') : 'CRM, Email'}</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+          <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Datos Personales</div>
+            <div style="font-size: 11px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+              <div>• <strong>Edad:</strong> ${persona.age || '35-44 años'}</div>
+              <div>• <strong>Educación:</strong> ${persona.education || 'Profesional'}</div>
+              <div>• <strong>Personalidad:</strong> Decisor clave</div>
+            </div>
           </div>
-        </div>
 
-        <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
-          <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Objetivos & Dolores</div>
-          <div style="font-size: 12px; font-weight: 600; color: #1e293b; line-height: 1.6;">
-            <div>• <strong>Métricas:</strong> ${Array.isArray(persona.kpis) ? persona.kpis.join(', ') : 'Crecimiento'}</div>
-            <div>• <strong>Dolor:</strong> ${Array.isArray(persona.pains) ? persona.pains[0] : persona.pains}</div>
-            <div>• <strong>Fuentes:</strong> ${Array.isArray(persona.infoSources) ? persona.infoSources.join(', ') : 'Online'}</div>
+          <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Organización</div>
+            <div style="font-size: 11px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+              <div>• <strong>Industria:</strong> ${persona.industry || 'Servicios'}</div>
+              <div>• <strong>Tamaño:</strong> ${persona.companySize || '1-10 empleados'}</div>
+              <div>• <strong>Reporta a:</strong> ${persona.reportingTo || 'Dirección General'}</div>
+            </div>
+          </div>
+
+          <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px;">Canales & Herramientas</div>
+            <div style="font-size: 11px; font-weight: 600; color: #1e293b; line-height: 1.6;">
+              <div>• <strong>Canales:</strong> ${Array.isArray(persona.commChannels) ? persona.commChannels.join(', ') : 'WhatsApp, Email'}</div>
+              <div>• <strong>Herramientas:</strong> ${Array.isArray(persona.tools) ? persona.tools.join(', ') : 'CRM, Analytics'}</div>
+              <div>• <strong>Métricas:</strong> ${Array.isArray(persona.kpis) ? persona.kpis.join(', ') : 'Crecimiento'}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 16px; margin-top: 16px;">
-        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 6px;">Cómo Contribuimos a su Éxito</div>
-        <div style="font-size: 13px; font-weight: 600; color: #064e3b; line-height: 1.6;">
+      <!-- SECCIÓN 2: 3 DIMENSIONES DEL DOLOR -->
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.05em; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+          2. Las 3 Dimensiones del Dolor (Metodología Oficial)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #be123c; margin-bottom: 6px;">Dolor Interno (Emocional)</div>
+            <div style="font-size: 11px; font-weight: 600; color: #881337; line-height: 1.5;">
+              ${persona.dimensions?.internal || 'Frustración por sentir que la carga operativa frena la capacidad de liderazgo estratégico.'}
+            </div>
+          </div>
+
+          <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #b45309; margin-bottom: 6px;">Dolor Externo (Visible)</div>
+            <div style="font-size: 11px; font-weight: 600; color: #78350f; line-height: 1.5;">
+              ${persona.dimensions?.external || 'Cuellos de botella en conversión y reportes inconsistentes que dificultan el seguimiento.'}
+            </div>
+          </div>
+
+          <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 12px; padding: 12px;">
+            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: #6d28d9; margin-bottom: 6px;">Dolor Filosófico (Valores)</div>
+            <div style="font-size: 11px; font-weight: 600; color: #4c1d95; line-height: 1.5;">
+              ${persona.dimensions?.philosophical || 'Cree que ninguna empresa debería perder ventas de calidad por carecer de sistemas ágiles.'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: MENSAJES CLAVE & PLAN DE ACCIÓN -->
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #475569; letter-spacing: 0.05em; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+          3. Mensajes Clave & Propuesta de Valor
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #0284c7; margin-bottom: 6px;">Mensaje de Marketing (Atracción)</div>
+            <div style="font-size: 11px; font-weight: 600; color: #0f172a; line-height: 1.5;">
+              "${persona.messages?.marketing || 'Descubre cómo superar las barreras operativas con soluciones a tu medida.'}"
+            </div>
+          </div>
+
+          <div style="background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+            <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #059669; margin-bottom: 6px;">Mensaje de Ventas (Conversión)</div>
+            <div style="font-size: 11px; font-weight: 600; color: #0f172a; line-height: 1.5;">
+              "${persona.messages?.sales || 'Acompañamiento especializado con resultados medibles en los primeros 90 días.'}"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HIGHLIGHT: CÓMO CONTRIBUIMOS A SU ÉXITO -->
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 14px;">
+        <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: #065f46; margin-bottom: 4px;">Cómo Contribuimos a su Éxito</div>
+        <div style="font-size: 12px; font-weight: 600; color: #064e3b; line-height: 1.5;">
           ${persona.howWeHelp || persona.jtbd}
         </div>
       </div>
 
-      <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; font-weight: 600;">
-        <span>Qaway Lab • Marketing Studio OS</span>
-        <span>Generado el ${new Date().toLocaleDateString('es-ES')}</span>
+      <!-- FOOTER -->
+      <div style="margin-top: 20px; padding-top: 14px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 600;">
+        <span>Documento Generado por Qaway Lab Digital • Marketing Studio OS</span>
+        <span>Fecha de Emisión: ${new Date().toLocaleDateString('es-ES')}</span>
       </div>
     `
 
@@ -817,201 +900,340 @@ export default function MarketingStudioPage() {
       {/* =========================================================================
           LEFT SIDEBAR: 5 BIG NAVIGATION BLOCKS & MODEL SWITCHER
          ========================================================================= */}
-      <aside className="w-full lg:w-80 h-auto lg:h-screen lg:overflow-y-auto bg-white border-r border-slate-200/90 p-5 flex flex-col justify-between shrink-0 shadow-xs">
+      <aside className={`w-full ${sidebarCollapsed ? 'lg:w-[76px] p-3' : 'lg:w-80 p-5'} h-auto lg:h-screen lg:overflow-y-auto bg-white border-r border-slate-200/90 flex flex-col justify-between shrink-0 shadow-xs transition-all duration-300 ease-in-out`}>
         
         <div className="space-y-6">
           
           {/* Qaway Lab Brand Header & Return Link */}
-          <div className="pb-4 border-b border-slate-100 flex items-center justify-between">
-            <Link to="/hub" className="group flex items-center gap-2" title="Volver al Hub">
-              <span className="text-xl font-bold tracking-[-0.055em] text-slate-900 group-hover:text-slate-700 transition-colors">
-                Qaway <span className="text-[#fe6612]">Lab</span>
-              </span>
-            </Link>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Studio OS
-            </span>
-          </div>
+          {!sidebarCollapsed ? (
+            <div className="pb-4 border-b border-slate-100 flex items-center justify-between gap-2">
+              <Link to="/hub" className="group flex items-center gap-2 min-w-0" title="Volver al Hub">
+                <span className="text-xl font-bold tracking-[-0.055em] text-slate-900 group-hover:text-slate-700 transition-colors truncate">
+                  Qaway <span className="text-[#fe6612]">Lab</span>
+                </span>
+              </Link>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Studio OS
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSidebarCollapsed(true)}
+                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                  title="Colapsar barra lateral"
+                >
+                  <PanelLeftClose className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="pb-4 border-b border-slate-100 flex flex-col items-center gap-3">
+              <Link to="/hub" className="group" title="Volver al Hub">
+                <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-sm shadow-xs">
+                  Q
+                </div>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSidebarCollapsed(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                title="Desplegar barra lateral"
+              >
+                <PanelLeftOpen className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* Business Model Switcher */}
-          <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 grid grid-cols-2 gap-1">
-            <button
-              type="button"
-              onClick={() => setBusinessModel('B2B')}
-              className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                businessModel === 'B2B'
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Modelo B2B</span>
-            </button>
+          {!sidebarCollapsed ? (
+            <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 grid grid-cols-2 gap-1">
+              <button
+                type="button"
+                onClick={() => setBusinessModel('B2B')}
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  businessModel === 'B2B'
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Modelo B2B</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setBusinessModel('B2C')}
-              className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                businessModel === 'B2C'
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Modelo B2C</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setBusinessModel('B2C')}
+                className={`flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  businessModel === 'B2C'
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Modelo B2C</span>
+              </button>
+            </div>
+          ) : (
+            <div className="p-1 bg-slate-100 rounded-2xl border border-slate-200 flex flex-col gap-1 items-center">
+              <button
+                type="button"
+                onClick={() => setBusinessModel('B2B')}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                  businessModel === 'B2B'
+                    ? 'bg-white text-indigo-600 shadow-xs border border-slate-200'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+                title="Modelo B2B"
+              >
+                <Building2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setBusinessModel('B2C')}
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                  businessModel === 'B2C'
+                    ? 'bg-white text-emerald-600 shadow-xs border border-slate-200'
+                    : 'text-slate-400 hover:text-slate-700'
+                }`}
+                title="Modelo B2C"
+              >
+                <ShoppingBag className="w-4 h-4" />
+              </button>
+            </div>
+          )}
 
           {/* 5 Big Navigation Blocks */}
-          <div className="space-y-2">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3">
-              Ecosistema de Trabajo
+          {!sidebarCollapsed ? (
+            <div className="space-y-2">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3">
+                Ecosistema de Trabajo
+              </div>
+
+              {/* Block 1: Personas */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentView('personas')
+                  setPersonaCanvasMode('modular-view')
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'personas'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">1. Buyer Personas</div>
+                    <div className={`text-[11px] ${currentView === 'personas' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Resumen Modular
+                    </div>
+                  </div>
+                </div>
+                <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                  currentView === 'personas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {personas.length}
+                </span>
+              </button>
+
+              {/* Block 2: Kanban */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('kanban')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'kanban'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Kanban className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">2. Content Mapping</div>
+                    <div className={`text-[11px] ${currentView === 'kanban' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Reglas Página 6
+                    </div>
+                  </div>
+                </div>
+                <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                  currentView === 'kanban' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  {contents.length}
+                </span>
+              </button>
+
+              {/* Block 3: Grid */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('grid')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'grid'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <TableIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">3. Base Relacional</div>
+                    <div className={`text-[11px] ${currentView === 'grid' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Matriz POEM
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${currentView === 'grid' ? 'text-white' : 'text-slate-400'}`} />
+              </button>
+
+              {/* Block 4: Dashboard */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('dashboard')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'dashboard'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <PieChart className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">4. Dashboard & ROI</div>
+                    <div className={`text-[11px] ${currentView === 'dashboard' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Unit Economics
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${currentView === 'dashboard' ? 'text-white' : 'text-slate-400'}`} />
+              </button>
+
+              {/* Block 5: Automated SMART */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('smart')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'smart'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">5. Automated SMART</div>
+                    <div className={`text-[11px] ${currentView === 'smart' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Calculadora MoM
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${currentView === 'smart' ? 'text-white' : 'text-slate-400'}`} />
+              </button>
             </div>
+          ) : (
+            <div className="space-y-3 flex flex-col items-center pt-2">
+              {/* Block 1 */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCurrentView('personas')
+                  setPersonaCanvasMode('modular-view')
+                }}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'personas'
+                    ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-purple-600'
+                }`}
+                title="1. Buyer Personas"
+              >
+                <Users className="w-4.5 h-4.5" />
+              </button>
 
-            {/* Block 1: Personas */}
-            <button
-              type="button"
-              onClick={() => {
-                setCurrentView('personas')
-                setPersonaCanvasMode('modular-view')
-              }}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                currentView === 'personas'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs sm:text-sm">1. Buyer Personas</div>
-                  <div className={`text-[11px] ${currentView === 'personas' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    Resumen Modular
-                  </div>
-                </div>
-              </div>
-              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
-                currentView === 'personas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-              }`}>
-                {personas.length}
-              </span>
-            </button>
+              {/* Block 2 */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('kanban')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'kanban'
+                    ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-emerald-600'
+                }`}
+                title="2. Content Mapping"
+              >
+                <Kanban className="w-4.5 h-4.5" />
+              </button>
 
-            {/* Block 2: Kanban */}
-            <button
-              type="button"
-              onClick={() => setCurrentView('kanban')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                currentView === 'kanban'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Kanban className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs sm:text-sm">2. Content Mapping</div>
-                  <div className={`text-[11px] ${currentView === 'kanban' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    Reglas Página 6
-                  </div>
-                </div>
-              </div>
-              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
-                currentView === 'kanban' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
-              }`}>
-                {contents.length}
-              </span>
-            </button>
+              {/* Block 3 */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('grid')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'grid'
+                    ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-blue-600'
+                }`}
+                title="3. Base Relacional (POEM)"
+              >
+                <TableIcon className="w-4.5 h-4.5" />
+              </button>
 
-            {/* Block 3: Grid */}
-            <button
-              type="button"
-              onClick={() => setCurrentView('grid')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                currentView === 'grid'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <TableIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs sm:text-sm">3. Base Relacional</div>
-                  <div className={`text-[11px] ${currentView === 'grid' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    Matriz POEM
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${currentView === 'grid' ? 'text-white' : 'text-slate-400'}`} />
-            </button>
+              {/* Block 4 */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('dashboard')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'dashboard'
+                    ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-amber-600'
+                }`}
+                title="4. Dashboard & ROI"
+              >
+                <PieChart className="w-4.5 h-4.5" />
+              </button>
 
-            {/* Block 4: Dashboard */}
-            <button
-              type="button"
-              onClick={() => setCurrentView('dashboard')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                currentView === 'dashboard'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <PieChart className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs sm:text-sm">4. Dashboard & ROI</div>
-                  <div className={`text-[11px] ${currentView === 'dashboard' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    Unit Economics
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${currentView === 'dashboard' ? 'text-white' : 'text-slate-400'}`} />
-            </button>
-
-            {/* Block 5: Automated SMART */}
-            <button
-              type="button"
-              onClick={() => setCurrentView('smart')}
-              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                currentView === 'smart'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs sm:text-sm">5. Automated SMART</div>
-                  <div className={`text-[11px] ${currentView === 'smart' ? 'text-slate-300' : 'text-slate-400'}`}>
-                    Calculadora MoM
-                  </div>
-                </div>
-              </div>
-              <ChevronRight className={`w-4 h-4 ${currentView === 'smart' ? 'text-white' : 'text-slate-400'}`} />
-            </button>
-
-          </div>
+              {/* Block 5 */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('smart')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'smart'
+                    ? 'bg-cyan-600 text-white shadow-md ring-2 ring-cyan-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-cyan-600'
+                }`}
+                title="5. Automated SMART"
+              >
+                <Bot className="w-4.5 h-4.5" />
+              </button>
+            </div>
+          )}
 
         </div>
 
         {/* Sidebar Footer Status */}
         <div className="pt-4 border-t border-slate-100 space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              SaaS Engine Activo
-            </span>
-            <span className="font-mono text-slate-400">v4.3</span>
-          </div>
+          {!sidebarCollapsed ? (
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                SaaS Engine Activo
+              </span>
+              <span className="font-mono text-slate-400">v4.3</span>
+            </div>
+          ) : (
+            <div className="flex justify-center" title="SaaS Engine Activo v4.3">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+          )}
         </div>
 
       </aside>
@@ -1301,12 +1523,23 @@ export default function MarketingStudioPage() {
                             alt={currentPersona.name}
                             className="w-24 h-24 rounded-2xl object-cover mx-auto ring-4 ring-slate-100 shadow-sm"
                           />
-                          <div>
+                          <div className="flex items-center justify-center gap-3 pt-1">
+                            <label className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-2 cursor-pointer">
+                              Subir foto
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleUploadAvatar(e, currentPersona.id)}
+                              />
+                            </label>
+                            <span className="text-slate-300">•</span>
                             <button
+                              type="button"
                               onClick={() => handleCycleAvatar(currentPersona.id)}
-                              className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline underline-offset-2"
+                              className="text-xs font-bold text-slate-500 hover:text-slate-800 underline underline-offset-2"
                             >
-                              Cambiar avatar
+                              Rotar avatar
                             </button>
                           </div>
                         </div>
