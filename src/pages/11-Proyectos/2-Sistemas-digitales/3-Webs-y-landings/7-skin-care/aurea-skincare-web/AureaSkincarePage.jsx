@@ -115,9 +115,6 @@ export default function AureaSkincarePage() {
 
   return (
     <div className="aurea-landing">
-      {/* Visual Studio Panel */}
-      <AureaStudioPanel config={config} setConfig={setConfig} onReset={handleReset} />
-
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" aria-label="Auréa inicio">

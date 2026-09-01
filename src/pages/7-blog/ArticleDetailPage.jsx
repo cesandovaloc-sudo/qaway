@@ -358,23 +358,7 @@ export default function ArticleDetailPage() {
     }
   }
 
-  // Comentarios iniciales de respaldo en caso de que no haya conexión a Supabase o esté vacío
-  const fallbackComments = [
-    {
-      id: 'mock-1',
-      name: 'María Silva',
-      comment: '¡Excelente explicación! Ya logré integrar mi primer webhook entre Stripe y Make. El truco de ChatGPT para procesar los datos fiscales me ahorró muchísimo tiempo de configuración manual.',
-      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'mock-2',
-      name: 'Roberto K.',
-      comment: 'Muy buen artículo. ¿Recomiendan usar la API de WhatsApp oficial o algún proveedor externo para los envíos automatizados desde el CRM de Notion? Estaré atento a sus tutoriales.',
-      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    }
-  ]
-
-  // Cargar comentarios desde Supabase
+  // Cargar comentarios aprobados desde Supabase
   useEffect(() => {
     async function loadComments() {
       setLoadingComments(true)
@@ -388,14 +372,10 @@ export default function ArticleDetailPage() {
 
         if (error) throw error
 
-        if (data && data.length > 0) {
-          setComments(data)
-        } else {
-          setComments(fallbackComments)
-        }
+        setComments(data || [])
       } catch (err) {
         console.error('Error al cargar comentarios:', err)
-        setComments(fallbackComments)
+        setComments([])
       } finally {
         setLoadingComments(false)
       }
