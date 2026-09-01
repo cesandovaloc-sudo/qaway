@@ -177,6 +177,18 @@ export default function AppRouter() {
           path="/hub/blog-editor"
           element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
         />
+        <Route
+          path="/hub/blog-editor/editor/:id"
+          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+        />
+        <Route
+          path="/editor/:id"
+          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+        />
+        <Route
+          path="/editor/new"
+          element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
+        />
         <Route index element={<InicioPage />} />
 
         <Route element={<Layout />}>
