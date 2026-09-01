@@ -100,17 +100,67 @@
 }
 
 /* Editor Tiptap y bloques */
-.blog-editor-root .ProseMirror {
-  color: #1e2026 !important;
+.blog-editor-root .ProseMirror,
+.blog-editor-root .blog-prose,
+.blog-editor-root .tiptap {
+  color: #27272a !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-size: 1.125rem !important;
+  line-height: 1.68 !important;
+}
+
+.blog-editor-root .ProseMirror p,
+.blog-editor-root .blog-prose p,
+.blog-editor-root .tiptap p {
+  font-size: 1.125rem !important;
+  line-height: 1.68 !important;
+  color: #27272a !important;
+  margin-bottom: 1.25rem !important;
 }
 
 .blog-editor-root .ProseMirror h1,
-.blog-editor-root .ProseMirror h2,
-.blog-editor-root .ProseMirror h3,
-.blog-editor-root .ProseMirror h4 {
-  color: #111111 !important;
+.blog-editor-root .blog-prose h1,
+.blog-editor-root .tiptap h1 {
+  font-size: 2.25rem !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.035em !important;
+  color: #09090b !important;
+  margin-top: 2rem !important;
+  margin-bottom: 1rem !important;
 }
 
-.blog-editor-root .ProseMirror p {
-  color: #27272a !important;
+.blog-editor-root .ProseMirror h2,
+.blog-editor-root .blog-prose h2,
+.blog-editor-root .tiptap h2 {
+  font-size: 1.65rem !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.025em !important;
+  color: #09090b !important;
+  margin-top: 2rem !important;
+  margin-bottom: 0.85rem !important;
+}
+
+.blog-editor-root .ProseMirror h3,
+.blog-editor-root .blog-prose h3,
+.blog-editor-root .tiptap h3 {
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
+  color: #09090b !important;
+  margin-top: 1.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.blog-editor-root .ProseMirror h4,
+.blog-editor-root .blog-prose h4,
+.blog-editor-root .tiptap h4 {
+  font-size: 1.15rem !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+  color: #09090b !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
 }
