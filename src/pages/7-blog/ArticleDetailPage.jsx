@@ -196,6 +196,8 @@ export default function ArticleDetailPage() {
       } finally {
         setLoadingArticle(false)
       }
+    }
+
     loadArticle()
   }, [id])
 
