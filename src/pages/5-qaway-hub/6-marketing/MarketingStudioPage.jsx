@@ -983,6 +983,18 @@ export default function MarketingStudioPage() {
   // View Metadata for Cloud Header Bar
   const activeViewMeta = useMemo(() => {
     switch (currentView) {
+      case 'company':
+        return {
+          title: '0. ADN & Perfil de Mi Empresa',
+          subtitle: 'Contexto de Negocio, Oferta Real y Propuesta de Valor Sincronizada con Supabase',
+          icon: Building2,
+          iconColor: 'bg-[#ff4b0b]',
+          actionText: 'Guardar en Supabase',
+          onAction: () => {
+            const btn = document.getElementById('btn-submit-company-profile')
+            if (btn) btn.click()
+          }
+        }
       case 'personas':
         return {
           title: '1. Buyer Personas & Slides Ejecutivos',
@@ -1169,6 +1181,30 @@ export default function MarketingStudioPage() {
                 Ecosistema de Trabajo
               </div>
 
+              {/* Block 0: ADN & Perfil de Empresa */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('company')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'company'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#ff4b0b] text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">0. ADN de Empresa</div>
+                    <div className={`text-[11px] ${currentView === 'company' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      {companyContext.name || 'Mi Negocio'}
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${currentView === 'company' ? 'text-white' : 'text-slate-400'}`} />
+              </button>
+
               {/* Block 1: Personas */}
               <button
                 type="button"
@@ -1302,6 +1338,20 @@ export default function MarketingStudioPage() {
             </div>
           ) : (
             <div className="space-y-3 flex flex-col items-center pt-2">
+              {/* Block 0 */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('company')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'company'
+                    ? 'bg-[#ff4b0b] text-white shadow-md ring-2 ring-orange-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-[#ff4b0b]'
+                }`}
+                title="0. ADN & Perfil de Empresa"
+              >
+                <Building2 className="w-4.5 h-4.5" />
+              </button>
+
               {/* Block 1 */}
               <button
                 type="button"
@@ -1421,22 +1471,7 @@ export default function MarketingStudioPage() {
             </div>
 
             {/* Cloud Bar Actions */}
-            <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingCompany(companyContext)
-                  setIsCompanyModalOpen(true)
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
-                title="Configurar los datos de mi empresa (Supabase)"
-              >
-                <Building2 className="w-3.5 h-3.5 text-[#ff4b0b]" />
-                <span className="hidden sm:inline text-slate-400 font-normal">Mi Empresa:</span>
-                <span>{companyContext.name}</span>
-                <span className="text-[10px] text-slate-300 font-normal underline underline-offset-2 ml-1">Editar</span>
-              </button>
-
+            <div className="flex items-center gap-2 self-end sm:self-auto">
               <button
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
@@ -1461,6 +1496,147 @@ export default function MarketingStudioPage() {
         {/* WORKSPACE BODY CONTENT */}
         <div className="p-4 sm:p-8 space-y-6">
           <AnimatePresence mode="wait">
+
+            {/* =========================================================================
+                0. ADN & PERFIL DE EMPRESA: CONTEXTO DE NEGOCIO & SUPABASE
+               ========================================================================= */}
+            {currentView === 'company' && (
+              <motion.div
+                key="panel-company"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-6"
+              >
+                {/* Header Banner */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-[#ff4b0b]/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100 relative z-10">
+                    <div className="space-y-1">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] text-xs font-bold uppercase tracking-wider">
+                        <Building2 className="w-3.5 h-3.5" />
+                        <span>Módulo Base • Contexto Estratégico</span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        ADN & Perfil de Mi Empresa
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
+                        Configura aquí la información de tu negocio. El generador de Buyer Personas y los demás módulos utilizarán estos datos para no adivinar y generar análisis 100% certeros.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>Sincronizado con Supabase</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Container */}
+                  <form onSubmit={handleSaveCompanyContext} className="pt-6 space-y-6 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Nombre de la Empresa */}
+                      <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-[#ff4b0b]/40 transition-all">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                          Nombre de tu Empresa / Marca
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editingCompany.name}
+                          onChange={(e) => setEditingCompany({ ...editingCompany, name: e.target.value })}
+                          placeholder="Ej. Qaway Lab"
+                          className="w-full text-sm sm:text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-[#ff4b0b] focus:outline-none py-1 transition-colors"
+                        />
+                        <p className="text-[11px] text-slate-400">Identificador oficial de tu marca.</p>
+                      </div>
+
+                      {/* Rubro o Industria */}
+                      <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-[#ff4b0b]/40 transition-all">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                          Tu Rubro / Industria
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editingCompany.industry}
+                          onChange={(e) => setEditingCompany({ ...editingCompany, industry: e.target.value })}
+                          placeholder="Ej. Tecnología, IA y Desarrollo de Software"
+                          className="w-full text-sm sm:text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-[#ff4b0b] focus:outline-none py-1 transition-colors"
+                        />
+                        <p className="text-[11px] text-slate-400">Sector en el que compites en el mercado.</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Qué vendes exactamente */}
+                      <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-[#ff4b0b]/40 transition-all">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                          ¿Qué servicios o productos vendes exactamente?
+                        </label>
+                        <textarea
+                          rows="3"
+                          required
+                          value={editingCompany.offer}
+                          onChange={(e) => setEditingCompany({ ...editingCompany, offer: e.target.value })}
+                          placeholder="Ej. Páginas web de alta conversión, automatizaciones con IA y CRM de WhatsApp..."
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-slate-300 focus:border-[#ff4b0b] focus:outline-none py-1 transition-colors resize-none leading-relaxed"
+                        />
+                        <p className="text-[11px] text-slate-400">Tu catálogo de soluciones concretas para tus clientes.</p>
+                      </div>
+
+                      {/* Propuesta de Valor */}
+                      <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-[#ff4b0b]/40 transition-all">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                          Tu Propuesta de Valor Principal
+                        </label>
+                        <textarea
+                          rows="3"
+                          required
+                          value={editingCompany.valueProp}
+                          onChange={(e) => setEditingCompany({ ...editingCompany, valueProp: e.target.value })}
+                          placeholder="Ej. Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden..."
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-slate-300 focus:border-[#ff4b0b] focus:outline-none py-1 transition-colors resize-none leading-relaxed"
+                        />
+                        <p className="text-[11px] text-slate-400">La promesa principal por la que los clientes te eligen.</p>
+                      </div>
+                    </div>
+
+                    {/* Nicho / Clientes Objetivo */}
+                    <div className="p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-[#ff4b0b]/40 transition-all">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                        Nicho o Clientes Objetivo que buscas atraer
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={editingCompany.targetNiche}
+                        onChange={(e) => setEditingCompany({ ...editingCompany, targetNiche: e.target.value })}
+                        placeholder="Ej. Clínicas Dentales, Veterinarias, Consultorías, Negocios B2B/B2C"
+                        className="w-full text-sm sm:text-base font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:border-[#ff4b0b] focus:outline-none py-1 transition-colors"
+                      />
+                      <p className="text-[11px] text-slate-400">Los segmentos y tipos de negocio donde tu solución genera mayor impacto.</p>
+                    </div>
+
+                    {/* Botón de guardado oculto para disparar desde Cloud Bar */}
+                    <button id="btn-submit-company-profile" type="submit" className="hidden" />
+
+                    {/* Botón visible de Guardar */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span>Guardar en Supabase & Actualizar ADN</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            )}
 
             {/* =========================================================================
                 1. BUYER PERSONAS: HUBSPOT RESUMEN MODULAR & CONVERSATIONAL WIZARD

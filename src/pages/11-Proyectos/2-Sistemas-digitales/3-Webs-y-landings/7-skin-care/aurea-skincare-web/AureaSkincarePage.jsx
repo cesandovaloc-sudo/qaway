@@ -55,6 +55,13 @@ export default function AureaSkincarePage() {
   const [scrolled, setScrolled] = useState(false);
   const [formula, setFormula] = useState(0);
   const [subscribed, setSubscribed] = useState(false);
+  const [positions, setPositions] = useState({
+    title: { x: 0, y: 0 },
+    pill: { x: 0, y: 0 },
+    cardLeft: { x: 0, y: 0 },
+    cardRight: { x: 0, y: 0 },
+  });
+  const [copied, setCopied] = useState(false);
   const active = formulas[formula] ?? formulas[0];
 
   useEffect(() => {
@@ -85,6 +92,54 @@ export default function AureaSkincarePage() {
 
   return (
     <div className="aurea-landing">
+      {/* Floating Calibrator HUD */}
+      <div style={{
+        position: "fixed",
+        bottom: 20,
+        right: 20,
+        zIndex: 9999,
+        background: "rgba(24, 34, 25, 0.94)",
+        color: "#fff",
+        padding: "14px 18px",
+        borderRadius: 14,
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+        fontFamily: "monospace",
+        fontSize: 11,
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        border: "1px solid rgba(255,255,255,0.15)",
+      }}>
+        <div style={{ fontWeight: "bold", color: "#8be78b", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <span>🎯 Arrastre Libre Activo</span>
+          <span style={{ fontSize: 9, opacity: 0.7 }}>Arrastra con el mouse</span>
+        </div>
+        <div>Título: X={Math.round(positions.title.x)}px, Y={Math.round(positions.title.y)}px</div>
+        <div>Cápsula: X={Math.round(positions.pill.x)}px, Y={Math.round(positions.pill.y)}px</div>
+        <div>Tarjeta Izq: X={Math.round(positions.cardLeft.x)}px, Y={Math.round(positions.cardLeft.y)}px</div>
+        <div>Badge Der: X={Math.round(positions.cardRight.x)}px, Y={Math.round(positions.cardRight.y)}px</div>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(JSON.stringify(positions, null, 2));
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+          style={{
+            background: copied ? "#22c55e" : "#3b583c",
+            color: "#fff",
+            border: 0,
+            borderRadius: 6,
+            padding: "6px 10px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            marginTop: 4,
+          }}
+        >
+          {copied ? "✓ ¡Coordenadas Copiadas!" : "📋 Copiar Coordenadas"}
+        </button>
+      </div>
+
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" aria-label="Auréa inicio">
@@ -116,30 +171,58 @@ export default function AureaSkincarePage() {
                 {/* 1. Lienzo Maestro PNG de Fondo */}
                 <img className="hero-stage-bg" src={IMG.hero_diseno_sin_titulo} alt="Auréa Skincare Sérum y Cítricos" />
 
-                {/* 2. Textos y Botón montados arriba a la izquierda */}
-                <div className="hero-stage-content">
+                {/* 2. Textos y Botón montados arriba a la izquierda (Arrastrable) */}
+                <motion.div
+                  className="hero-stage-content"
+                  drag
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => setPositions(p => ({ ...p, title: { x: p.title.x + info.offset.x, y: p.title.y + info.offset.y } }))}
+                  style={{ cursor: "grab" }}
+                  whileDrag={{ cursor: "grabbing", scale: 1.01 }}
+                >
                   <h1>Cuida tu piel.<br/>De forma consciente.</h1>
                   <p className="hero-subtext">Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.</p>
                   <div className="hero-actions">
                     <a className="btn btn-primary" href="#coleccion">Descubre la colección</a>
                   </div>
-                </div>
+                </motion.div>
 
-                {/* 3. Cápsula montada arriba a la derecha */}
-                <div className="hero-pill">
+                {/* 3. Cápsula montada arriba a la derecha (Arrastrable) */}
+                <motion.div
+                  className="hero-pill"
+                  drag
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => setPositions(p => ({ ...p, pill: { x: p.pill.x + info.offset.x, y: p.pill.y + info.offset.y } }))}
+                  style={{ cursor: "grab" }}
+                  whileDrag={{ cursor: "grabbing", scale: 1.02 }}
+                >
                   <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
-                </div>
+                </motion.div>
 
-                {/* 4. Tarjeta Glassmorphism izquierda */}
-                <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
+                {/* 4. Tarjeta Glassmorphism izquierda (Arrastrable) */}
+                <motion.div
+                  className="hero-overlay"
+                  drag
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => setPositions(p => ({ ...p, cardLeft: { x: p.cardLeft.x + info.offset.x, y: p.cardLeft.y + info.offset.y } }))}
+                  style={{ cursor: "grab" }}
+                  whileDrag={{ cursor: "grabbing", scale: 1.02 }}
+                >
                   <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
                   <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
-                  <p>Fórmulas limpias, sin ingredientes innecesarios, para una piel saludable y luminosa.</p>
+                  <p>Fórmulas limpias, sin ingredientes innecesarios, pensadas para una piel saludable y luminosa.</p>
                   <a href="#ingredientes">Conoce más →</a>
                 </motion.div>
 
-                {/* 5. Badge Glassmorphism derecha */}
-                <motion.div className="hero-badge" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.65}}>
+                {/* 5. Badge Glassmorphism derecha (Arrastrable) */}
+                <motion.div
+                  className="hero-badge"
+                  drag
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => setPositions(p => ({ ...p, cardRight: { x: p.cardRight.x + info.offset.x, y: p.cardRight.y + info.offset.y } }))}
+                  style={{ cursor: "grab" }}
+                  whileDrag={{ cursor: "grabbing", scale: 1.02 }}
+                >
                   <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" />
                   <div className="badge-list">
                     <span>100% Natural</span>
