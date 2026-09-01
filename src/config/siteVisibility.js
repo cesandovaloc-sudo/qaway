@@ -4,11 +4,11 @@ export const isPublicSiteMode = SITE_MODE === 'public'
 
 const routeVisibility = {
   inicio: true,
-  estudio: true,
+  estudio: false,
   proyectos: true,
   brief: false,
-  sistemasDigitales: true,
-  academy: true,
+  sistemasDigitales: false,
+  academy: false,
   hub: false,
   recursos: false,
   blog: false,
@@ -19,19 +19,8 @@ const routeVisibility = {
 
 const publicPathAllowList = new Set([
   '/',
-  '/estudio',
   '/proyectos',
-  '/proyectos/horizonte',
-  '/sistemas-digitales',
-  '/landings/sistema-contenido-notion',
-  '/landings/identidad-visual',
   '/landings/desarrollo-web',
-  '/landings/desarrollo-web-superpower',
-  '/landings/hostinger',
-  '/landings/desarrollo-web-hostinger',
-  '/landings/desarrollo-web-qaway',
-  '/inicio-v2',
-  '/academy',
 ])
 
 const navigationRegistry = [
