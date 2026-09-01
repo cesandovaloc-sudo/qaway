@@ -1,5 +1,4 @@
-﻿node_modules/
-dist/
+node_modules/
 .env
 *.log
 nul
@@ -15,7 +14,7 @@ hostinger_websites.png
 hero_screenshot.png
 fotografia-linkedin-desktop.png
 .seo-cache/
-
-
 .aider*
 .gstack/
+src/**/dist/
+docs/**/dist/

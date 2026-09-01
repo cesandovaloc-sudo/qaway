@@ -1,13 +1,18 @@
-# Qaway Lab - SPA Fallback para Hostinger
-# Permite que rutas como /estudio, /sistemas-digitales funcionen al recargar
+# Qaway Lab - SPA Fallback y Produccion para Hostinger
+DirectoryIndex dist/index.html index.html
 
 RewriteEngine On
 RewriteBase /
 
-# Si el archivo o carpeta no existe, servir index.html
+# Servir archivos estaticos directamente desde dist/ si existen
+RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f [OR]
+RewriteCond %{DOCUMENT_ROOT}/dist/$1 -d
+RewriteRule ^(.*)$ dist/$1 [L]
+
+# Fallback para SPA a dist/index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+RewriteRule . /dist/index.html [L]
 
 # Compresión gzip
 <IfModule mod_deflate.c>
