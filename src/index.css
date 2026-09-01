@@ -343,6 +343,33 @@
     display: flex !important;
     align-items: flex-start !important;
   }
+
+  /* 3. Bloques de Columnas (ColumnsBlock: Texto + Imagen o Doble Columna) */
+  .blog-prose [data-type="columns-block"],
+  .blog-prose .columns-block {
+    margin: 2rem 0 !important;
+  }
+  .blog-prose [data-type="columns-block"] p,
+  .blog-prose .columns-block p {
+    font-size: var(--blog-font-size) !important;
+    line-height: var(--blog-line-height) !important;
+    color: var(--blog-text-color) !important;
+    margin-bottom: 1.15rem !important;
+  }
+  .blog-prose [data-type="columns-block"] p:last-child,
+  .blog-prose .columns-block p:last-child {
+    margin-bottom: 0 !important;
+  }
+  .blog-prose [data-type="columns-block"] h3,
+  .blog-prose .columns-block h3 {
+    font-size: clamp(1.4rem, 2.2vw, 1.65rem) !important;
+    font-weight: 750 !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.02em !important;
+    color: var(--blog-heading-color) !important;
+    margin-top: 0 !important;
+    margin-bottom: 1rem !important;
+  }
   /* Kicker del Hero Secundario */
   .qw-hero-secondary-kicker {
     margin-bottom: 1.25rem;

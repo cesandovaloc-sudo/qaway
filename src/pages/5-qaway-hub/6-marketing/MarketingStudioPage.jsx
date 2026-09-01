@@ -58,6 +58,8 @@ import {
   Target
 } from 'lucide-react'
 
+import { supabase } from '@/config/supabase'
+
 // LocalStorage persistence key
 const STORAGE_KEY = 'qaway_marketing_workspace_v6'
 
@@ -333,6 +335,64 @@ export default function MarketingStudioPage() {
   // Sidebar Collapse / Expand State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  // Company Profile Context (Supabase + LocalStorage Cache)
+  const [companyContext, setCompanyContext] = useState(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_company`)
+    return saved ? JSON.parse(saved) : {
+      name: 'Qaway Lab',
+      industry: 'Tecnología, IA y Sistemas Digitales',
+      offer: 'Desarrollo web de alta conversión, automatización con IA y CRM de WhatsApp',
+      valueProp: 'Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden.',
+      targetNiche: 'Clínicas, Consultorías, Negocios y Empresas de Servicios'
+    }
+  })
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
+  const [editingCompany, setEditingCompany] = useState(companyContext)
+
+  // Load Company from Supabase on mount
+  useEffect(() => {
+    async function loadCompanyFromSupabase() {
+      try {
+        const { data, error } = await supabase.from('company_profiles').select('*').limit(1).single()
+        if (data && !error) {
+          const loaded = {
+            name: data.name || 'Qaway Lab',
+            industry: data.industry || 'Tecnología, IA y Sistemas Digitales',
+            offer: data.offer || 'Desarrollo web de alta conversión, automatización con IA y CRM de WhatsApp',
+            valueProp: data.value_prop || 'Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden.',
+            targetNiche: data.target_niche || 'Clínicas, Consultorías y Empresas de Servicios'
+          }
+          setCompanyContext(loaded)
+          setEditingCompany(loaded)
+          localStorage.setItem(`${STORAGE_KEY}_company`, JSON.stringify(loaded))
+        }
+      } catch (e) {
+        // Fallback to local storage silently
+      }
+    }
+    loadCompanyFromSupabase()
+  }, [])
+
+  const handleSaveCompanyContext = async (e) => {
+    e.preventDefault()
+    setCompanyContext(editingCompany)
+    localStorage.setItem(`${STORAGE_KEY}_company`, JSON.stringify(editingCompany))
+    setIsCompanyModalOpen(false)
+    try {
+      await supabase.from('company_profiles').upsert([{
+        id: 'default-company',
+        name: editingCompany.name,
+        industry: editingCompany.industry,
+        offer: editingCompany.offer,
+        value_prop: editingCompany.valueProp,
+        target_niche: editingCompany.targetNiche,
+        updated_at: new Date().toISOString()
+      }])
+    } catch (err) {
+      console.log('[Supabase] Guardado local exitoso:', err)
+    }
+  }
+
   // State initialization with LocalStorage
   const [personas, setPersonas] = useState(() => {
     const saved = localStorage.getItem(`${STORAGE_KEY}_personas`)
@@ -350,10 +410,12 @@ export default function MarketingStudioPage() {
   const [wizardAnswers, setWizardAnswers] = useState({
     name: '',
     role: '',
-    industry: '',
+    age: '',
+    education: '',
+    industrySize: '',
     challenge: '',
     howWeHelp: '',
-    channels: ''
+    channelsHabits: ''
   })
   const [currentWizardInput, setCurrentWizardInput] = useState('')
 
@@ -552,8 +614,15 @@ export default function MarketingStudioPage() {
       key: 'channelsHabits',
       label: 'Canales & Hábitos de Consumo',
       question: '¿Cuáles son sus canales de comunicación preferidos y momentos ideales de contacto?',
-      placeholder: 'Ej. WhatsApp Business, LinkedIn, Email corporativo. Receptivo de 2:00 PM a 4:00 PM...',
-      type: 'text',
+      type: 'options',
+      options: [
+        'WhatsApp Business & Correo (Tardes)',
+        'LinkedIn & Email Corporativo (Mañanas)',
+        'Llamada Telefónica & WhatsApp (Horario Comercial)',
+        'Instagram & Mensajes Directos',
+        'Reuniones Virtuales / Google Meet'
+      ],
+      placeholder: 'Selecciona una opción rápida o escribe...',
       minLength: 4
     }
   ]
@@ -562,29 +631,40 @@ export default function MarketingStudioPage() {
     setPersonaCanvasMode('generating')
     setTimeout(() => {
       const newId = `p-${Date.now()}`
+      const isOwnerRole = /dueño|propietari|fundador|ceo|director general|gerente general/i.test(finalAnswers.role || '')
+      const isVetOrClinic = /veterinar|salud|clínica|clinica|dental|médic|farmacia/i.test(finalAnswers.industrySize || '')
+
+      const tailoredTools = isVetOrClinic
+        ? ['Software de gestión clínica / historias', 'WhatsApp Business automatizado', 'Sistema POS / Facturación']
+        : ['Software de CRM', 'WhatsApp Web / Automatización', 'Gestión de proyectos y tareas']
+
+      const tailoredKpis = isVetOrClinic
+        ? ['Retención y recurrencia de pacientes', 'Aumento de citas completadas', 'Satisfacción y recomendaciones']
+        : ['Crecimiento de clientes', 'Aumento de tasa de conversión', 'Satisfacción y retención']
+
       const createdPersona = {
         id: newId,
         name: finalAnswers.name || 'Nuevo Buyer Persona',
         title: finalAnswers.role || (businessModel === 'B2B' ? 'Director General / Líder de Área' : 'Comprador Principal'),
         type: businessModel,
         avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
-        roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Consumidor Final',
+        roleType: businessModel === 'B2B' ? (isOwnerRole ? 'Propietario / Decisor Principal' : 'Líder de Área') : 'Consumidor Final',
         age: finalAnswers.age || 'Entre 35 y 44 años',
         education: finalAnswers.education || 'Licenciatura universitaria',
         industry: finalAnswers.industrySize || (businessModel === 'B2B' ? 'Servicios Profesionales & Tecnología' : 'Consumo & Estilo de Vida'),
         companySize: finalAnswers.industrySize?.includes('empleado') ? 'Entre 11 y 50 empleados' : 'Entre 1 y 20 empleados',
-        socialNetworks: ['linkedin', 'instagram', 'facebook', 'x'],
-        commChannels: ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
-        reportingTo: 'Dirección General / CEO',
-        tools: ['Software de CRM', 'WhatsApp Web', 'Gestión de proyectos'],
-        kpis: ['Crecimiento de clientes', 'Aumento de conversión', 'Satisfacción y recomendación'],
+        socialNetworks: ['whatsapp', 'instagram', 'facebook', 'linkedin'],
+        commChannels: finalAnswers.channelsHabits ? [finalAnswers.channelsHabits] : ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
+        reportingTo: isOwnerRole ? 'Propietario Independiente (Sin superior)' : (businessModel === 'B2B' ? 'Dirección General / CEO' : 'Decisión Autónoma'),
+        tools: tailoredTools,
+        kpis: tailoredKpis,
         pains: [
           finalAnswers.challenge || 'Pérdida de prospectos por falta de seguimiento ágil',
-          'Desorden en la base de datos y métricas manuales',
-          'Falta de visibilidad sobre el ROI de marketing'
+          'Desorden en la base de datos y control de oportunidades',
+          'Falta de visibilidad sobre el retorno de inversión en marketing'
         ],
-        howWeHelp: finalAnswers.howWeHelp || 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y acelerar ventas.',
-        infoSources: [finalAnswers.channelsHabits || 'Investigación en línea, LinkedIn y recomendaciones del sector'],
+        howWeHelp: finalAnswers.howWeHelp || `${companyContext.valueProp} A través de ${companyContext.offer}.`,
+        infoSources: [finalAnswers.channelsHabits || 'Investigación en línea, redes sociales y recomendaciones del sector'],
         salary: '+$60,000 USD / año',
         location: 'Latinoamérica',
         jtbd: finalAnswers.challenge ? `Superar la barrera de ${finalAnswers.challenge.toLowerCase()} con herramientas a la medida.` : 'Escalar su negocio con orden y previsibilidad.',
@@ -596,25 +676,25 @@ export default function MarketingStudioPage() {
         dimensions: {
           external: finalAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
           internal: 'Se siente frustrado cuando el esfuerzo del equipo no se refleja en resultados rápidos.',
-          philosophical: 'Cree que ninguna empresa debería perder ventas de calidad por carecer de sistemas ágiles.'
+          philosophical: `Cree que cualquier negocio en ${finalAnswers.industrySize || 'su sector'} merece contar con herramientas modernas para crecer con tranquilidad.`
         },
         guidePlan: {
           search: 'Busca soluciones probadas con soporte guiado continuo.',
-          howWeHelp: finalAnswers.howWeHelp || 'Implementación estratégica paso a paso con acompañamiento.',
+          howWeHelp: finalAnswers.howWeHelp || `Implementación estratégica de ${companyContext.name} paso a paso con acompañamiento.`,
           actionSteps: ['Diagnóstico inicial de flujos de trabajo', 'Despliegue ágil en menos de 14 días', 'Capacitación y optimización de KPIs']
         },
         habits: {
-          channels: ['WhatsApp Business', 'LinkedIn', 'Email corporativo'],
+          channels: ['WhatsApp Business', 'Instagram', 'LinkedIn', 'Email'],
           schedule: finalAnswers.channelsHabits || 'Receptivo entre 2:00 PM y 4:00 PM los miércoles y jueves',
-          quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados medibles.”`
+          quote: `“Buscamos soluciones de ${companyContext.name} que realmente nos den tranquilidad y resultados medibles.”`
         },
         keyMessages: {
-          marketing: `Descubre cómo superar ${finalAnswers.challenge || 'tus desafíos'} con herramientas diseñadas a tu medida.`,
-          sales: `Acompañamiento especializado con resultados medibles en los primeros 90 días.`,
-          formats: ['Publicaciones en LinkedIn', 'Videos demostrativos', 'Casos de éxito reales en PDF']
+          marketing: `Descubre cómo ${companyContext.name} ayuda a superar ${finalAnswers.challenge || 'tus desafíos'} implementando ${companyContext.offer}.`,
+          sales: `En ${companyContext.name} te acompañamos paso a paso con resultados medibles en los primeros 90 días.`,
+          formats: ['Publicaciones en redes sociales', 'Demostraciones en vivo', 'Casos de éxito reales en PDF']
         },
         channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
-        trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia comercial.'
+        trigger: `Identificó la necesidad de modernizar sus sistemas comerciales y contactó a ${companyContext.name}.`
       }
 
       setPersonas(prev => [...prev, createdPersona])
@@ -1341,7 +1421,22 @@ export default function MarketingStudioPage() {
             </div>
 
             {/* Cloud Bar Actions */}
-            <div className="flex items-center gap-2 self-end sm:self-auto">
+            <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCompany(companyContext)
+                  setIsCompanyModalOpen(true)
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                title="Configurar los datos de mi empresa (Supabase)"
+              >
+                <Building2 className="w-3.5 h-3.5 text-[#ff4b0b]" />
+                <span className="hidden sm:inline text-slate-400 font-normal">Mi Empresa:</span>
+                <span>{companyContext.name}</span>
+                <span className="text-[10px] text-slate-300 font-normal underline underline-offset-2 ml-1">Editar</span>
+              </button>
+
               <button
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors"
@@ -1642,7 +1737,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Edad */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('input-persona-age')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Calendar className="w-3.5 h-3.5 text-slate-400" />
                               <span>Rango de edad</span>
@@ -1650,6 +1748,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
+                            id="input-persona-age"
                             type="text"
                             value={currentPersona.age || ''}
                             onChange={(e) => handleUpdatePersonaField('age', e.target.value)}
@@ -1660,7 +1759,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Nivel de educación */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('input-persona-education')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
                               <span>Nivel de educación más alto</span>
@@ -1668,6 +1770,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
+                            id="input-persona-education"
                             type="text"
                             value={currentPersona.education || ''}
                             onChange={(e) => handleUpdatePersonaField('education', e.target.value)}
@@ -1676,34 +1779,34 @@ export default function MarketingStudioPage() {
                           />
                         </div>
 
-                        {/* Card: Redes Sociales */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                        {/* Card: Canales & Redes donde te descubre */}
+                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
+                          <div
+                            onClick={() => document.getElementById('input-persona-networks')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Globe className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Redes sociales</span>
+                              <span>Redes & Canales donde te descubre</span>
                             </span>
-                            <MoreHorizontal className="w-4 h-4 text-slate-300" />
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
-                          <div className="flex items-center gap-2 pt-1">
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                              <Facebook className="w-4 h-4" />
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                              <Instagram className="w-4 h-4" />
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                              <Twitter className="w-4 h-4" />
-                            </div>
-                            <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                              <Linkedin className="w-4 h-4" />
-                            </div>
-                          </div>
+                          <input
+                            id="input-persona-networks"
+                            type="text"
+                            value={Array.isArray(currentPersona.socialNetworks) ? currentPersona.socialNetworks.join(', ') : (currentPersona.socialNetworks || '')}
+                            onChange={(e) => handleUpdatePersonaField('socialNetworks', e.target.value.split(',').map(s => s.trim()))}
+                            placeholder="Ej. Instagram, WhatsApp, Facebook, LinkedIn"
+                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
+                          />
                         </div>
 
                         {/* Card: Industria */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('input-persona-industry')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Building2 className="w-3.5 h-3.5 text-slate-400" />
                               <span>Industria</span>
@@ -1711,6 +1814,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
+                            id="input-persona-industry"
                             type="text"
                             value={currentPersona.industry || ''}
                             onChange={(e) => handleUpdatePersonaField('industry', e.target.value)}
@@ -1721,7 +1825,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Tamaño organización */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('input-persona-companysize')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Users className="w-3.5 h-3.5 text-slate-400" />
                               <span>Tamaño de la organización</span>
@@ -1729,6 +1836,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
+                            id="input-persona-companysize"
                             type="text"
                             value={currentPersona.companySize || ''}
                             onChange={(e) => handleUpdatePersonaField('companySize', e.target.value)}
@@ -1747,7 +1855,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Canal favorito de comunicación */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-commchannels')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
                               <span>Canal favorito de comunicación</span>
@@ -1755,6 +1866,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-commchannels"
                             rows="2"
                             value={Array.isArray(currentPersona.commChannels) ? currentPersona.commChannels.join(', ') : (currentPersona.commChannels || '')}
                             onChange={(e) => handleUpdatePersonaField('commChannels', e.target.value.split(',').map(s => s.trim()))}
@@ -1765,7 +1877,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Su superior es */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('input-persona-reportingto')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <UserCheck className="w-3.5 h-3.5 text-slate-400" />
                               <span>Su superior es</span>
@@ -1773,6 +1888,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
+                            id="input-persona-reportingto"
                             type="text"
                             value={currentPersona.reportingTo || ''}
                             onChange={(e) => handleUpdatePersonaField('reportingTo', e.target.value)}
@@ -1783,7 +1899,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Herramientas que necesita para trabajar */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-tools')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Wrench className="w-3.5 h-3.5 text-slate-400" />
                               <span>Herramientas que necesita para trabajar</span>
@@ -1791,6 +1910,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-tools"
                             rows="2"
                             value={Array.isArray(currentPersona.tools) ? currentPersona.tools.join(', ') : (currentPersona.tools || '')}
                             onChange={(e) => handleUpdatePersonaField('tools', e.target.value.split(',').map(s => s.trim()))}
@@ -1809,7 +1929,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Su trabajo se mide en función de */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-kpis')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Target className="w-3.5 h-3.5 text-slate-400" />
                               <span>Su trabajo se mide en función de</span>
@@ -1817,6 +1940,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-kpis"
                             rows="2"
                             value={Array.isArray(currentPersona.kpis) ? currentPersona.kpis.join(', ') : (currentPersona.kpis || '')}
                             onChange={(e) => handleUpdatePersonaField('kpis', e.target.value.split(',').map(s => s.trim()))}
@@ -1827,7 +1951,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Dificultades principales (Dolores) */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-pains')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <AlertCircle className="w-3.5 h-3.5 text-red-500" />
                               <span>Dificultades principales (Dolores)</span>
@@ -1835,6 +1962,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-pains"
                             rows="3"
                             value={Array.isArray(currentPersona.pains) ? currentPersona.pains.join('\n') : (currentPersona.pains || '')}
                             onChange={(e) => handleUpdatePersonaField('pains', e.target.value.split('\n').filter(Boolean))}
@@ -1845,7 +1973,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Obtiene información a través de */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-infosources')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Search className="w-3.5 h-3.5 text-slate-400" />
                               <span>Obtiene información a través de</span>
@@ -1853,6 +1984,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-infosources"
                             rows="2"
                             value={Array.isArray(currentPersona.infoSources) ? currentPersona.infoSources.join(', ') : (currentPersona.infoSources || '')}
                             onChange={(e) => handleUpdatePersonaField('infoSources', e.target.value.split(',').map(s => s.trim()))}
@@ -1863,7 +1995,10 @@ export default function MarketingStudioPage() {
 
                         {/* Card: Cómo contribuimos a su éxito */}
                         <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2 group">
-                          <div className="flex justify-between items-center text-xs text-emerald-800 font-bold uppercase">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-howwehelp')?.focus()}
+                            className="flex justify-between items-center text-xs text-emerald-800 font-bold uppercase cursor-pointer"
+                          >
                             <span className="flex items-center gap-1.5">
                               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                               <span>Cómo contribuimos a su éxito</span>
@@ -1871,6 +2006,7 @@ export default function MarketingStudioPage() {
                             <Edit3 className="w-3.5 h-3.5 text-emerald-500 group-hover:text-emerald-700 transition-colors" />
                           </div>
                           <textarea
+                            id="textarea-persona-howwehelp"
                             rows="2"
                             value={currentPersona.howWeHelp || ''}
                             onChange={(e) => handleUpdatePersonaField('howWeHelp', e.target.value)}
@@ -2806,6 +2942,131 @@ export default function MarketingStudioPage() {
               )}
 
             </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          COMPANY PROFILE & BUSINESS CONTEXT MODAL (SUPABASE INTEGRATION)
+         ========================================================================= */}
+      {isCompanyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]"
+          >
+            {/* Header */}
+            <div className="p-6 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#ff4b0b] flex items-center justify-center text-white shadow-md shrink-0">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white leading-tight">
+                    Perfil & Contexto de Mi Empresa
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    Sincronizado con Supabase • La IA utilizará estos datos para no adivinar
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCompanyModalOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form Content */}
+            <form onSubmit={handleSaveCompanyContext} className="p-6 overflow-y-auto space-y-4">
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900 leading-relaxed">
+                <strong>¿Cómo funciona?</strong> Carga estos datos una sola vez. Cada nuevo Buyer Persona cruzará automáticamente la necesidad de tu cliente con lo que tú ofreces.
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Nombre de tu Empresa / Marca</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCompany.name}
+                    onChange={(e) => setEditingCompany({ ...editingCompany, name: e.target.value })}
+                    placeholder="Ej. Qaway Lab"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#ff4b0b] focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Tu Rubro / Industria</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingCompany.industry}
+                    onChange={(e) => setEditingCompany({ ...editingCompany, industry: e.target.value })}
+                    placeholder="Ej. Tecnología, IA y Desarrollo de Software"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#ff4b0b] focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">¿Qué servicios o productos vendes exactamente?</label>
+                <textarea
+                  rows="2"
+                  required
+                  value={editingCompany.offer}
+                  onChange={(e) => setEditingCompany({ ...editingCompany, offer: e.target.value })}
+                  placeholder="Ej. Páginas web de alta conversión, automatizaciones con IA y CRM de WhatsApp..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#ff4b0b] focus:outline-none transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Tu Propuesta de Valor principal</label>
+                <textarea
+                  rows="2"
+                  required
+                  value={editingCompany.valueProp}
+                  onChange={(e) => setEditingCompany({ ...editingCompany, valueProp: e.target.value })}
+                  placeholder="Ej. Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#ff4b0b] focus:outline-none transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Nicho o Clientes Objetivo que buscas atraer</label>
+                <input
+                  type="text"
+                  required
+                  value={editingCompany.targetNiche}
+                  onChange={(e) => setEditingCompany({ ...editingCompany, targetNiche: e.target.value })}
+                  placeholder="Ej. Clínicas, Veterinarias, Consultorías, Negocios B2B/B2C"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-semibold text-slate-900 focus:bg-white focus:border-[#ff4b0b] focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCompanyModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Guardar Perfil de Empresa</span>
+                </button>
+              </div>
+            </form>
           </motion.div>
         </div>
       )}

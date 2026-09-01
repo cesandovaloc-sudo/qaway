@@ -94,7 +94,7 @@ export const ColumnsBlock = Node.create({
         col1Content.push([
           'p',
           {
-            class: `text-sm sm:text-base leading-relaxed m-0 ${
+            class: `leading-relaxed m-0 ${
               layoutType === 'highlight' ? 'text-zinc-300' : 'text-primary'
             }`,
           },
