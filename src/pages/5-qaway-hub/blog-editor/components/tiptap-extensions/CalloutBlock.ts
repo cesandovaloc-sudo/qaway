@@ -84,7 +84,7 @@ export const CalloutBlock = Node.create({
       { class: 'space-y-1 flex-1 min-w-0' },
       [
         'p',
-        { class: 'text-xs sm:text-sm text-primary leading-relaxed m-0 font-sans' },
+        { class: 'text-base text-primary leading-relaxed m-0 font-sans' },
         title ? ['strong', { class: `font-bold mr-1.5 ${currentStyle.titleColor}` }, `${title}: `] : '',
         ['span', {}, text],
       ],

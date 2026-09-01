@@ -49,7 +49,12 @@ import {
   Instagram,
   Facebook,
   Twitter,
-  MoreHorizontal
+  MoreHorizontal,
+  GraduationCap,
+  UserCheck,
+  Wrench,
+  MessageSquare,
+  Briefcase
 } from 'lucide-react'
 
 // LocalStorage persistence key
@@ -450,27 +455,31 @@ export default function MarketingStudioPage() {
     return (momConvRateCurrent * Math.pow(1 + momConvRateGrowth / 100, momMonths)).toFixed(2)
   }, [momConvRateCurrent, momConvRateGrowth, momMonths])
 
-  const calculatedMomLeadsGoal = useMemo(() => {
-    return Math.round(momVisitorsCurrent * (calculatedMomConvRateGoal / 100))
-  }, [momVisitorsCurrent, calculatedMomConvRateGoal])
+  const calculatedLeadsGoal = useMemo(() => {
+    return Math.round(calculatedMomVisitorsGoal * (parseFloat(calculatedMomConvRateGoal) / 100))
+  }, [calculatedMomVisitorsGoal, calculatedMomConvRateGoal])
 
   const calculatedMomCloseRateGoal = useMemo(() => {
     return (momCloseRateCurrent * Math.pow(1 + momCloseRateGrowth / 100, momMonths)).toFixed(2)
   }, [momCloseRateCurrent, momCloseRateGrowth, momMonths])
 
-  const calculatedMomCustomersGoal = useMemo(() => {
-    return Math.round(100 * (calculatedMomCloseRateGoal / 100))
-  }, [calculatedMomCloseRateGoal])
+  const calculatedRevenue = useMemo(() => {
+    return calculatedLeadsGoal * (parseFloat(calculatedMomCloseRateGoal) / 100) * simAov
+  }, [calculatedLeadsGoal, calculatedMomCloseRateGoal, simAov])
 
-  const calculatedLeads = useMemo(() => Math.round(simTraffic * (simTofuToMofu / 100)), [simTraffic, simTofuToMofu])
-  const calculatedCustomers = useMemo(() => Math.round(calculatedLeads * (simMofuToBofu / 100)), [calculatedLeads, simMofuToBofu])
-  const calculatedRevenue = useMemo(() => calculatedCustomers * simAov, [calculatedCustomers, simAov])
-  const calculatedCac = useMemo(() => (calculatedCustomers > 0 ? Math.round(simAdSpend / calculatedCustomers) : 0), [simAdSpend, calculatedCustomers])
-  const calculatedLtv = useMemo(() => Math.round(simAov * simLtvMultiplier), [simAov, simLtvMultiplier])
-  const calculatedLtvCacRatio = useMemo(() => (calculatedCac > 0 ? (calculatedLtv / calculatedCac).toFixed(1) : '∞'), [calculatedLtv, calculatedCac])
+  const calculatedCac = useMemo(() => {
+    const totalCustomers = calculatedLeadsGoal * (parseFloat(calculatedMomCloseRateGoal) / 100)
+    return totalCustomers > 0 ? (simAdSpend / totalCustomers).toFixed(1) : '0'
+  }, [calculatedLeadsGoal, calculatedMomCloseRateGoal, simAdSpend])
+
+  const calculatedLtv = useMemo(() => {
+    return Math.round(simAov * simLtvMultiplier)
+  }, [simAov, simLtvMultiplier])
+
+  const calculatedLtvCacRatio = useMemo(() => (parseFloat(calculatedCac) > 0 ? (calculatedLtv / parseFloat(calculatedCac)).toFixed(1) : '∞'), [calculatedLtv, calculatedCac])
   const calculatedRoas = useMemo(() => (simAdSpend > 0 ? (calculatedRevenue / simAdSpend).toFixed(1) : '0'), [calculatedRevenue, simAdSpend])
 
-  // HubSpot Wizard Step Progression (Official 6 Steps)
+  // HubSpot Wizard Step Progression (Official Structured Steps)
   const wizardQuestions = [
     {
       step: 1,
@@ -478,49 +487,142 @@ export default function MarketingStudioPage() {
       label: 'Nombre del buyer persona',
       question: '¿Cómo se llama tu buyer persona?',
       placeholder: 'Ej. Mauricio Gutiérrez, Carlos Mendoza, Dra. Claudia Ramos...',
+      type: 'text',
       minLength: 3
     },
     {
       step: 2,
-      key: 'roleDemographics',
-      label: 'Puesto y Demografía',
-      question: '¿Cuál es su puesto de trabajo, rango de edad y nivel educativo?',
-      placeholder: 'Ej. Director General de TI, entre 35 y 44 años, Licenciatura universitaria...',
-      minLength: 4
+      key: 'role',
+      label: 'Puesto o Cargo',
+      question: '¿Cuál es su puesto de trabajo o cargo?',
+      placeholder: 'Ej. Dueño de clínica dental, Director Comercial, Gerente de Operaciones...',
+      type: 'text',
+      minLength: 3
     },
     {
       step: 3,
-      key: 'industrySize',
-      label: 'Industria y Organización',
-      question: '¿En qué industria trabaja y cuál es el tamaño de su empresa?',
-      placeholder: 'Ej. Tecnología y Servicios Médicos, empresa de 11 a 50 empleados...',
-      minLength: 4
+      key: 'age',
+      label: 'Rango de edad',
+      question: '¿Cuál es su rango de edad?',
+      type: 'options',
+      options: ['Entre 18 y 24 años', 'Entre 25 y 34 años', 'Entre 35 y 44 años', 'Entre 45 y 54 años', 'Más de 55 años'],
+      placeholder: 'Selecciona una opción o escribe...',
+      minLength: 3
     },
     {
       step: 4,
+      key: 'education',
+      label: 'Nivel educativo más alto',
+      question: '¿Cuál es su nivel de educación más alto?',
+      type: 'options',
+      options: ['Secundaria / Bachillerato', 'Título Técnico', 'Licenciatura Universitaria', 'Maestría / Posgrado', 'Doctorado'],
+      placeholder: 'Selecciona una opción o escribe...',
+      minLength: 3
+    },
+    {
+      step: 5,
+      key: 'industrySize',
+      label: 'Industria y Organización',
+      question: '¿En qué industria trabaja y cuál es el tamaño de su empresa?',
+      placeholder: 'Ej. Salud y Odontología, empresa de 11 a 50 empleados...',
+      type: 'text',
+      minLength: 4
+    },
+    {
+      step: 6,
       key: 'challenge',
       label: 'Puntos de Dolor & Retos',
       question: '¿Cuáles son sus mayores obstáculos, dolores o dificultades actuales?',
       placeholder: 'Ej. Pérdida de prospectos por falta de seguimiento ágil y desorden en la base de datos...',
+      type: 'text',
       minLength: 6
     },
     {
-      step: 5,
+      step: 7,
       key: 'howWeHelp',
       label: 'Cómo Contribuimos a su Éxito',
       question: '¿De qué manera tu solución o servicio resuelve sus necesidades y le ayuda a crecer?',
       placeholder: 'Ej. Implementación ágil de CRM, automatización de citas y análisis en tiempo real en menos de 14 días...',
+      type: 'text',
       minLength: 6
     },
     {
-      step: 6,
+      step: 8,
       key: 'channelsHabits',
       label: 'Canales & Hábitos de Consumo',
       question: '¿Cuáles son sus canales de comunicación preferidos y momentos ideales de contacto?',
       placeholder: 'Ej. WhatsApp Business, LinkedIn, Email corporativo. Receptivo de 2:00 PM a 4:00 PM...',
+      type: 'text',
       minLength: 4
     }
   ]
+
+  const finalizePersonaGeneration = (finalAnswers) => {
+    setPersonaCanvasMode('generating')
+    setTimeout(() => {
+      const newId = `p-${Date.now()}`
+      const createdPersona = {
+        id: newId,
+        name: finalAnswers.name || 'Nuevo Buyer Persona',
+        title: finalAnswers.role || (businessModel === 'B2B' ? 'Director General / Líder de Área' : 'Comprador Principal'),
+        type: businessModel,
+        avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
+        roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Consumidor Final',
+        age: finalAnswers.age || 'Entre 35 y 44 años',
+        education: finalAnswers.education || 'Licenciatura universitaria',
+        industry: finalAnswers.industrySize || (businessModel === 'B2B' ? 'Servicios Profesionales & Tecnología' : 'Consumo & Estilo de Vida'),
+        companySize: finalAnswers.industrySize?.includes('empleado') ? 'Entre 11 y 50 empleados' : 'Entre 1 y 20 empleados',
+        socialNetworks: ['linkedin', 'instagram', 'facebook', 'x'],
+        commChannels: ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
+        reportingTo: 'Dirección General / CEO',
+        tools: ['Software de CRM', 'WhatsApp Web', 'Gestión de proyectos'],
+        kpis: ['Crecimiento de clientes', 'Aumento de conversión', 'Satisfacción y recomendación'],
+        pains: [
+          finalAnswers.challenge || 'Pérdida de prospectos por falta de seguimiento ágil',
+          'Desorden en la base de datos y métricas manuales',
+          'Falta de visibilidad sobre el ROI de marketing'
+        ],
+        howWeHelp: finalAnswers.howWeHelp || 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y acelerar ventas.',
+        infoSources: [finalAnswers.channelsHabits || 'Investigación en línea, LinkedIn y recomendaciones del sector'],
+        salary: '+$60,000 USD / año',
+        location: 'Latinoamérica',
+        jtbd: finalAnswers.challenge ? `Superar la barrera de ${finalAnswers.challenge.toLowerCase()} con herramientas a la medida.` : 'Escalar su negocio con orden y previsibilidad.',
+        gains: [
+          'Aumento comprobado en conversión y prospectos calificados',
+          'Ahorro de horas operativas cada semana',
+          'Posicionamiento sólido como referente en el mercado'
+        ],
+        dimensions: {
+          external: finalAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
+          internal: 'Se siente frustrado cuando el esfuerzo del equipo no se refleja en resultados rápidos.',
+          philosophical: 'Cree que ninguna empresa debería perder ventas de calidad por carecer de sistemas ágiles.'
+        },
+        guidePlan: {
+          search: 'Busca soluciones probadas con soporte guiado continuo.',
+          howWeHelp: finalAnswers.howWeHelp || 'Implementación estratégica paso a paso con acompañamiento.',
+          actionSteps: ['Diagnóstico inicial de flujos de trabajo', 'Despliegue ágil en menos de 14 días', 'Capacitación y optimización de KPIs']
+        },
+        habits: {
+          channels: ['WhatsApp Business', 'LinkedIn', 'Email corporativo'],
+          schedule: finalAnswers.channelsHabits || 'Receptivo entre 2:00 PM y 4:00 PM los miércoles y jueves',
+          quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados medibles.”`
+        },
+        keyMessages: {
+          marketing: `Descubre cómo superar ${finalAnswers.challenge || 'tus desafíos'} con herramientas diseñadas a tu medida.`,
+          sales: `Acompañamiento especializado con resultados medibles en los primeros 90 días.`,
+          formats: ['Publicaciones en LinkedIn', 'Videos demostrativos', 'Casos de éxito reales en PDF']
+        },
+        channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
+        trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia comercial.'
+      }
+
+      setPersonas(prev => [...prev, createdPersona])
+      setActivePersonaId(newId)
+      setPersonaCanvasMode('modular-view')
+      setWizardStep(1)
+      setWizardAnswers({ name: '', role: '', age: '', education: '', industrySize: '', challenge: '', howWeHelp: '', channelsHabits: '' })
+    }, 1200)
+  }
 
   const handleWizardSubmit = (e) => {
     e.preventDefault()
@@ -537,71 +639,23 @@ export default function MarketingStudioPage() {
     if (wizardStep < wizardQuestions.length) {
       setWizardStep(wizardStep + 1)
     } else {
-      // Completed all 6 steps: trigger generation animation
-      setPersonaCanvasMode('generating')
-      setTimeout(() => {
-        const newId = `p-${Date.now()}`
-        const createdPersona = {
-          id: newId,
-          name: updatedAnswers.name || 'Nuevo Buyer Persona',
-          title: updatedAnswers.roleDemographics || (businessModel === 'B2B' ? 'Director General / Líder de Área' : 'Comprador Principal'),
-          type: businessModel,
-          avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
-          roleType: businessModel === 'B2B' ? 'Decisor Principal' : 'Consumidor Final',
-          age: updatedAnswers.roleDemographics?.includes('año') ? 'Entre 35 y 44 años' : 'Entre 30 y 45 años',
-          education: updatedAnswers.roleDemographics?.includes('Lic') || updatedAnswers.roleDemographics?.includes('univ') ? 'Licenciatura universitaria' : 'Título profesional',
-          industry: updatedAnswers.industrySize || (businessModel === 'B2B' ? 'Servicios Profesionales & Tecnología' : 'Consumo & Estilo de Vida'),
-          companySize: updatedAnswers.industrySize?.includes('empleado') ? 'Entre 11 y 50 empleados' : 'Entre 1 y 20 empleados',
-          socialNetworks: ['linkedin', 'instagram', 'facebook', 'x'],
-          commChannels: ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
-          reportingTo: 'Dirección General / CEO',
-          tools: ['Software de CRM', 'WhatsApp Web', 'Gestión de proyectos'],
-          kpis: ['Crecimiento de clientes', 'Aumento de conversión', 'Satisfacción y recomendación'],
-          pains: [
-            updatedAnswers.challenge || 'Pérdida de prospectos por falta de seguimiento ágil',
-            'Desorden en la base de datos y métricas manuales',
-            'Falta de visibilidad sobre el ROI de marketing'
-          ],
-          howWeHelp: updatedAnswers.howWeHelp || 'Digitalizar y automatizar los procesos comerciales para reducir costos operativos y acelerar ventas.',
-          infoSources: [updatedAnswers.channelsHabits || 'Investigación en línea, LinkedIn y recomendaciones del sector'],
-          salary: '+$60,000 USD / año',
-          location: 'Latinoamérica',
-          jtbd: updatedAnswers.challenge ? `Superar la barrera de ${updatedAnswers.challenge.toLowerCase()} con herramientas a la medida.` : 'Escalar su negocio con orden y previsibilidad.',
-          gains: [
-            'Aumento comprobado en conversión y prospectos calificados',
-            'Ahorro de horas operativas cada semana',
-            'Posicionamiento sólido como referente en el mercado'
-          ],
-          dimensions: {
-            external: updatedAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
-            internal: 'Se siente frustrado cuando el esfuerzo del equipo no se refleja en resultados rápidos.',
-            philosophical: 'Cree que ninguna empresa debería perder ventas de calidad por carecer de sistemas ágiles.'
-          },
-          guidePlan: {
-            search: 'Busca soluciones probadas con soporte guiado continuo.',
-            howWeHelp: updatedAnswers.howWeHelp || 'Implementación estratégica paso a paso con acompañamiento.',
-            actionSteps: ['Diagnóstico inicial de flujos de trabajo', 'Despliegue ágil en menos de 14 días', 'Capacitación y optimización de KPIs']
-          },
-          habits: {
-            channels: ['WhatsApp Business', 'LinkedIn', 'Email corporativo'],
-            schedule: updatedAnswers.channelsHabits || 'Receptivo entre 2:00 PM y 4:00 PM los miércoles y jueves',
-            quote: `“Buscamos soluciones que realmente nos den tranquilidad y resultados medibles.”`
-          },
-          keyMessages: {
-            marketing: `Descubre cómo superar ${updatedAnswers.challenge || 'tus desafíos'} con herramientas diseñadas a tu medida.`,
-            sales: `Acompañamiento especializado con resultados medibles en los primeros 90 días.`,
-            formats: ['Publicaciones en LinkedIn', 'Videos demostrativos', 'Casos de éxito reales en PDF']
-          },
-          channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
-          trigger: 'Identificó una fuga de oportunidades y decidió profesionalizar su estrategia comercial.'
-        }
+      finalizePersonaGeneration(updatedAnswers)
+    }
+  }
 
-        setPersonas(prev => [...prev, createdPersona])
-        setActivePersonaId(newId)
-        setPersonaCanvasMode('modular-view')
-        setWizardStep(1)
-        setWizardAnswers({ name: '', roleDemographics: '', industrySize: '', challenge: '', howWeHelp: '', channelsHabits: '' })
-      }, 1200)
+  const handleWizardOptionSelect = (option) => {
+    const activeQ = wizardQuestions[wizardStep - 1]
+    const updatedAnswers = {
+      ...wizardAnswers,
+      [activeQ.key]: option
+    }
+    setWizardAnswers(updatedAnswers)
+    setCurrentWizardInput('')
+
+    if (wizardStep < wizardQuestions.length) {
+      setWizardStep(wizardStep + 1)
+    } else {
+      finalizePersonaGeneration(updatedAnswers)
     }
   }
 
@@ -1376,10 +1430,26 @@ export default function MarketingStudioPage() {
                         {wizardQuestions[wizardStep - 1].question}
                       </h4>
 
+                      {/* Interactive Option Pills for 1-Click Fast Selection */}
+                      {wizardQuestions[wizardStep - 1].options && (
+                        <div className="flex flex-wrap gap-2 pt-1 pb-1">
+                          {wizardQuestions[wizardStep - 1].options.map((opt) => (
+                            <button
+                              key={opt}
+                              type="button"
+                              onClick={() => handleWizardOptionSelect(opt)}
+                              className="px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-900 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 text-xs sm:text-sm font-bold transition-all shadow-xs"
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       <form onSubmit={handleWizardSubmit} className="space-y-4">
                         <div className="relative">
                           <textarea
-                            rows="3"
+                            rows="2"
                             autoFocus
                             placeholder={wizardQuestions[wizardStep - 1].placeholder}
                             value={currentWizardInput}
@@ -1572,7 +1642,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Edad */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Rango de edad</span>
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Rango de edad</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
@@ -1587,7 +1660,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Nivel de educación */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Nivel de educación más alto</span>
+                            <span className="flex items-center gap-1.5">
+                              <GraduationCap className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Nivel de educación más alto</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
@@ -1602,7 +1678,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Redes Sociales */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Redes sociales</span>
+                            <span className="flex items-center gap-1.5">
+                              <Globe className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Redes sociales</span>
+                            </span>
                             <MoreHorizontal className="w-4 h-4 text-slate-300" />
                           </div>
                           <div className="flex items-center gap-2 pt-1">
@@ -1624,7 +1703,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Industria */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Industria</span>
+                            <span className="flex items-center gap-1.5">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Industria</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
@@ -1639,7 +1721,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Tamaño organización */}
                         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Tamaño de la organización</span>
+                            <span className="flex items-center gap-1.5">
+                              <Users className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Tamaño de la organización</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
@@ -1662,7 +1747,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Canal favorito de comunicación */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Canal favorito de comunicación</span>
+                            <span className="flex items-center gap-1.5">
+                              <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Canal favorito de comunicación</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
@@ -1677,7 +1765,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Su superior es */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Su superior es</span>
+                            <span className="flex items-center gap-1.5">
+                              <UserCheck className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Su superior es</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
@@ -1692,7 +1783,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Herramientas que necesita para trabajar */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Herramientas que necesita para trabajar</span>
+                            <span className="flex items-center gap-1.5">
+                              <Wrench className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Herramientas que necesita para trabajar</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
@@ -1715,7 +1809,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Su trabajo se mide en función de */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Su trabajo se mide en función de</span>
+                            <span className="flex items-center gap-1.5">
+                              <Target className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Su trabajo se mide en función de</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
@@ -1730,7 +1827,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Dificultades principales (Dolores) */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Dificultades principales (Dolores)</span>
+                            <span className="flex items-center gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                              <span>Dificultades principales (Dolores)</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
@@ -1745,7 +1845,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Obtiene información a través de */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-slate-400 font-bold">
-                            <span>Obtiene información a través de</span>
+                            <span className="flex items-center gap-1.5">
+                              <Search className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Obtiene información a través de</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
@@ -1760,7 +1863,10 @@ export default function MarketingStudioPage() {
                         {/* Card: Cómo contribuimos a su éxito */}
                         <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2 group">
                           <div className="flex justify-between items-center text-xs text-emerald-800 font-bold uppercase">
-                            <span>Cómo contribuimos a su éxito</span>
+                            <span className="flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Cómo contribuimos a su éxito</span>
+                            </span>
                             <Edit3 className="w-3.5 h-3.5 text-emerald-500 group-hover:text-emerald-700 transition-colors" />
                           </div>
                           <textarea

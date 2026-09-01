@@ -90,16 +90,16 @@ export const InfographicBlock = Node.create({
       const stepsHtml = (data.flowSteps || [])
         .map(
           (step, idx, arr) => `
-          <div class="relative flex flex-col justify-between">
-            <div style="border-top: 3px solid ${color};" class="bg-white border border-line rounded-2xl p-3.5 sm:p-4 shadow-2xs h-full flex flex-col justify-between space-y-1.5">
+          <div class="relative flex flex-col justify-between h-full">
+            <div style="border-top: 3px solid ${color};" class="bg-white border border-line rounded-2xl p-3.5 sm:p-4 shadow-2xs h-full flex flex-col justify-between space-y-2">
               <div>
                 <div class="flex items-center justify-between mb-1.5">
                   <span style="background-color: ${color};" class="w-5 h-5 rounded-full text-white font-bold text-[10px] flex items-center justify-center shadow-2xs">${step.stepNumber || idx + 1}</span>
                   <span class="text-[9px] font-bold text-muted uppercase tracking-wider">Paso ${idx + 1}</span>
                 </div>
-                <strong class="font-bold text-primary text-xs sm:text-sm block leading-snug">${step.title}</strong>
+                <strong class="font-bold text-primary text-xs sm:text-sm block leading-snug min-h-[2.25rem]">${step.title}</strong>
               </div>
-              ${step.desc ? `<p class="text-[11px] text-muted leading-relaxed m-0">${step.desc}</p>` : ''}
+              ${step.desc ? `<p class="text-[11.5px] text-muted leading-normal m-0 pt-1">${step.desc}</p>` : ''}
             </div>
             ${!isVertical && idx < arr.length - 1 ? `<div class="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-6 h-6 rounded-full bg-white border border-line shadow-2xs items-center justify-center text-xs font-bold" style="color: ${color};">➔</div>` : ''}
             ${isVertical && idx < arr.length - 1 ? `<div class="flex justify-center my-1 font-bold text-xs" style="color: ${color};">↓</div>` : ''}

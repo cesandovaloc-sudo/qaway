@@ -283,6 +283,19 @@
   .blog-prose .text-accent { color: var(--blog-accent-color) !important; }
   .blog-prose .border-line { border-color: var(--blog-border-color) !important; }
   .blog-prose .bg-surface-muted { background-color: var(--blog-surface-color) !important; }
+
+  /* Bloques de Llamada (Callouts) e Infografías */
+  .blog-prose div[data-type="callout-block"] p {
+    font-size: var(--blog-font-size);
+    line-height: var(--blog-line-height);
+    margin-bottom: 0;
+  }
+
+  .blog-prose div[data-type="infographic-block"] p {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    margin-bottom: 0;
+  }
   /* Kicker del Hero Secundario */
   .qw-hero-secondary-kicker {
     margin-bottom: 1.25rem;
