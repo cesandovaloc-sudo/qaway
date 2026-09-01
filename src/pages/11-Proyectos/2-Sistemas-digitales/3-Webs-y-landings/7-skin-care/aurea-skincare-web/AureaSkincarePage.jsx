@@ -80,7 +80,7 @@ export default function AureaSkincarePage() {
   }, []);
 
   const navItems = useMemo(() => [
-    ["Colección","#coleccion"],["Filosofía","#filosofia"],["Ingredientes","#ingredientes"],["Rituales","#rituales"],["Beneficios","#beneficios"]
+    ["Colección","#coleccion"],["Sobre nosotros","#filosofia"],["Ingredientes","#ingredientes"],["Rituales","#rituales"],["Beneficios","#beneficios"]
   ], []);
 
   return (
@@ -100,7 +100,7 @@ export default function AureaSkincarePage() {
 
           <div className="nav-actions">
             <a className="signin" href="#contacto">Iniciar sesión</a>
-            <a className="btn btn-primary" href="#coleccion">Regístrate</a>
+            <a className="btn btn-primary" href="#coleccion">Registrarme</a>
             <button className="mobile-toggle" onClick={() => setMenuOpen(v => !v)} aria-label="Abrir menú">
               {menuOpen ? <X size={20}/> : <Menu size={20}/>}
             </button>
@@ -114,47 +114,12 @@ export default function AureaSkincarePage() {
             <Reveal>
               <div className="hero-top">
                 <div>
-                  <span className="eyebrow"><span className="eyebrow-dot"/> Ciencia botánica · belleza real</span>
-                  <h1>Cuida tu piel.<br/><em>De forma consciente.</em></h1>
-                </div>
-                <div className="hero-copy">
-                  <div className="hero-pill"><img src={IMG.hero_products} alt="Colección de productos Auréa"/></div>
-                  <p>Fórmulas botánicas de alta eficacia, creadas para equilibrar, proteger y acompañar tu piel en cada etapa.</p>
+                  <h1>Cuida tu piel.<br/>De forma consciente.</h1>
+                  <p className="hero-subtext">Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.</p>
                   <div className="hero-actions">
-                    <a className="btn btn-primary" href="#coleccion">Descubre la colección <ArrowRight size={16}/></a>
-                    <a className="btn btn-secondary" href="#filosofia">Nuestra filosofía</a>
+                    <a className="btn btn-primary" href="#coleccion">Descubre la colección</a>
                   </div>
                 </div>
-              </div>
-            </Reveal>
-
-            <Reveal delay={.08}>
-              <motion.div className="hero-visual" whileHover={{ scale:1.003 }} transition={{ duration:.5 }}>
-                <img src={IMG.hero_photo} alt="Sérum antioxidante Auréa junto a cítricos y botánicos"/>
-                <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
-                  <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
-                  <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
-                  <p>Fórmulas limpias, sin ingredientes innecesarios, pensadas para una piel saludable y luminosa.</p>
-                  <a href="#ingredientes">Conoce más <ArrowRight size={14}/></a>
-                </motion.div>
-                <motion.div className="hero-badge" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.65}}>
-                  <img className="mini-bottle" src={IMG.serum_orange} alt="" />
-                  <div><strong>Botánica consciente</strong><span>Sin parabenos · Sin fragancias sintéticas · Cruelty free</span></div>
-                </motion.div>
-              </motion.div>
-            </Reveal>
-          </div>
-        </section>
-
-        {/* HERO VARIANTE (CON NUEVA IMAGEN) */}
-        <section className="hero" style={{ paddingTop: "24px" }}>
-          <div className="container">
-            <Reveal>
-              <div className="hero-top">
-                <div>
-                  <span className="eyebrow"><span className="eyebrow-dot"/> Ciencia botánica · belleza real</span>
-                  <h1>Cuida tu piel.<br/><em>De forma consciente.</em></h1>
-                </div>
                 <div className="hero-copy">
                   <div className="hero-pill"><img src={IMG.hero_products} alt="Colección de productos Auréa"/></div>
                 </div>
@@ -162,17 +127,22 @@ export default function AureaSkincarePage() {
             </Reveal>
 
             <Reveal delay={.08}>
-              <motion.div className="hero-visual" whileHover={{ scale:1.003 }} transition={{ duration:.5 }}>
-                <img src={IMG.hero_diseno_sin_titulo} alt="Sérum y cosmética botánica Auréa"/>
+              <motion.div className="hero-visual" whileHover={{ scale:1.002 }} transition={{ duration:.5 }}>
+                <img src={IMG.hero_diseno_sin_titulo} alt="Sérum antioxidante Auréa junto a cítricos y botánicos"/>
                 <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
                   <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
                   <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
-                  <p>Fórmulas limpias, sin ingredientes innecesarios, pensadas para una piel saludable y luminosa.</p>
-                  <a href="#ingredientes">Conoce más <ArrowRight size={14}/></a>
+                  <p>Fórmulas limpias, sin ingredientes innecesarios, para una piel saludable y luminosa.</p>
+                  <a href="#ingredientes">Conoce más →</a>
                 </motion.div>
                 <motion.div className="hero-badge" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.65}}>
-                  <img className="mini-bottle" src={IMG.serum_orange} alt="" />
-                  <div><strong>Botánica consciente</strong><span>Sin parabenos · Sin fragancias sintéticas · Cruelty free</span></div>
+                  <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" />
+                  <div className="badge-list">
+                    <span>100% Natural</span>
+                    <span>Sin parabenos</span>
+                    <span>Sin fragancias sintéticas</span>
+                    <span>Libre de crueldad animal</span>
+                  </div>
                 </motion.div>
               </motion.div>
             </Reveal>
