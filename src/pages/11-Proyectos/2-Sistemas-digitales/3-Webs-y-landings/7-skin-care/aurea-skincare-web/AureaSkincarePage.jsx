@@ -54,6 +54,7 @@ export default function AureaSkincarePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [formula, setFormula] = useState(0);
+  const [subscribed, setSubscribed] = useState(false);
 
   const active = formulas[formula] ?? formulas[0];
 
