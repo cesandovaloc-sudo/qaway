@@ -219,7 +219,7 @@ export default function AureaSkincarePage() {
                   <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
                 </motion.div>
 
-                {/* 4. Tarjeta Glassmorphism izquierda (Arrastrable & Calibrable) */}
+                {/* 4. Tarjeta Glassmorphism izquierda (Compacta y estilizada) */}
                 <motion.div
                   className="hero-overlay"
                   drag
@@ -232,10 +232,13 @@ export default function AureaSkincarePage() {
                   }}
                   whileDrag={{ cursor: "grabbing" }}
                 >
-                  <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
-                  <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
-                  <p>Fórmulas limpias, sin ingredientes innecesarios, pensadas para una piel saludable y luminosa.</p>
-                  <a href="#ingredientes">Conoce más →</a>
+                  <div className="overlay-icon-title">
+                    <div className="mini-leaf-icon"><Leaf size={15} strokeWidth={1.5}/></div>
+                    <div>
+                      <h4>Ingredientes reales</h4>
+                      <small>Fórmulas 100% puras</small>
+                    </div>
+                  </div>
                 </motion.div>
 
                 {/* 5. Badge Glassmorphism derecha (Arrastrable & Calibrable) */}
