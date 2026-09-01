@@ -56,6 +56,7 @@ export default function AureaSkincarePage() {
   const [formula, setFormula] = useState(0);
   const [subscribed, setSubscribed] = useState(false);
   const [positions, setPositions] = useState({
+    bgImage: { x: 0, y: 0 },
     title: { x: 0, y: 0 },
     pill: { x: 0, y: 0 },
     cardLeft: { x: 0, y: 0 },
@@ -115,6 +116,7 @@ export default function AureaSkincarePage() {
           <span>🎯 Arrastre Libre Activo</span>
           <span style={{ fontSize: 9, opacity: 0.7 }}>Arrastra con el mouse</span>
         </div>
+        <div>Fondo PNG: X={Math.round(positions.bgImage.x)}px, Y={Math.round(positions.bgImage.y)}px</div>
         <div>Título: X={Math.round(positions.title.x)}px, Y={Math.round(positions.title.y)}px</div>
         <div>Cápsula: X={Math.round(positions.pill.x)}px, Y={Math.round(positions.pill.y)}px</div>
         <div>Tarjeta Izq: X={Math.round(positions.cardLeft.x)}px, Y={Math.round(positions.cardLeft.y)}px</div>
@@ -168,8 +170,17 @@ export default function AureaSkincarePage() {
           <div className="container">
             <Reveal>
               <div className="hero-stage">
-                {/* 1. Lienzo Maestro PNG de Fondo */}
-                <img className="hero-stage-bg" src={IMG.hero_diseno_sin_titulo} alt="Auréa Skincare Sérum y Cítricos" />
+                {/* 1. Lienzo Maestro PNG de Fondo (Arrastrable) */}
+                <motion.img
+                  className="hero-stage-bg"
+                  src={IMG.hero_diseno_sin_titulo}
+                  alt="Auréa Skincare Sérum y Cítricos"
+                  drag
+                  dragMomentum={false}
+                  onDragEnd={(_, info) => setPositions(p => ({ ...p, bgImage: { x: p.bgImage.x + info.offset.x, y: p.bgImage.y + info.offset.y } }))}
+                  style={{ cursor: "grab", userSelect: "none" }}
+                  whileDrag={{ cursor: "grabbing" }}
+                />
 
                 {/* 2. Textos y Botón montados arriba a la izquierda (Arrastrable) */}
                 <motion.div
