@@ -17,7 +17,7 @@ const IMG = {
   ingredient_rose: "/aurea-images/ingredient_rose.jpg",
   ritual: "/aurea-images/ritual.jpg",
   serum_orange: "/aurea-images/serum_orange.jpg",
-  woman_story: "/aurea-images/woman_story.jpg",
+  woman_story: "/aurea-images/woman_story_new.png",
   hero_diseno_sin_titulo: "/aurea-images/hero_diseno_sin_titulo.png",
 };
 
@@ -161,23 +161,7 @@ export default function AureaSkincarePage() {
           </div>
         </section>
 
-        <section id="filosofia" className="section">
-          <div className="container split">
-            <Reveal>
-              <div className="media-card"><img src={IMG.woman_story} alt="Mujer disfrutando de una rutina de cuidado consciente"/></div>
-            </Reveal>
-            <Reveal delay={.1}>
-              <div className="copy-block">
-                <span className="eyebrow">Filosofía Auréa</span>
-                <h2>Belleza real.<br/>Cuidado esencial.</h2>
-                <p>Creemos en el poder de la naturaleza y en rutinas simples que transforman tu piel día a día. Menos pasos, mejores fórmulas y una relación más consciente con lo que aplicas sobre tu piel.</p>
-                <a className="link-arrow" href="#ingredientes">Descubre nuestra historia <ArrowRight size={15}/></a>
-              </div>
-            </Reveal>
-          </div>
-        </section>
-
-        <section id="beneficios" className="section" style={{paddingTop:20}}>
+        <section id="beneficios" className="section section-benefits">
           <div className="container">
             <Reveal><div className="benefit-grid">
               {[
@@ -193,6 +177,22 @@ export default function AureaSkincarePage() {
                 </motion.div>
               })}
             </div></Reveal>
+          </div>
+        </section>
+
+        <section id="filosofia" className="section">
+          <div className="container split">
+            <Reveal>
+              <div className="media-card"><img src={IMG.woman_story} alt="Mujer disfrutando de una rutina de cuidado consciente"/></div>
+            </Reveal>
+            <Reveal delay={.1}>
+              <div className="copy-block">
+                <span className="eyebrow">Filosofía Auréa</span>
+                <h2>Belleza real.<br/>Cuidado esencial.</h2>
+                <p>Creemos en el poder de la naturaleza y en rutinas simples que transforman tu piel día a día. Menos pasos, mejores fórmulas y una relación más consciente con lo que aplicas sobre tu piel.</p>
+                <a className="link-arrow" href="#ingredientes">Descubre nuestra historia <ArrowRight size={15}/></a>
+              </div>
+            </Reveal>
           </div>
         </section>
 
