@@ -4,18 +4,7 @@ import {
   ArrowDownRight, ArrowRight, Check, Leaf, Menu, ShieldCheck,
   Sparkles, Sun, Droplets, Heart, X, Instagram, Facebook, ShoppingBag
 } from "lucide-react";
-import AureaStudioPanel from "./AureaStudioPanel";
 import "./aurea-landing.css";
-
-const DEFAULT_CONFIG = {
-  heroBg: { x: 3, y: 290, scale: 101, opacity: 100 },
-  heroTitle: { x: -38, y: -17, scale: 114, fontSize: 47 },
-  heroSubtext: { x: 0, y: 0, fontSize: 15 },
-  heroBtn: { x: 0, y: 0, scale: 100 },
-  heroPill: { x: 0, y: 0, scale: 105 },
-  cardLeft: { x: -6, y: -66, scale: 100, opacity: 100 },
-  cardRight: { x: 299, y: -54, scale: 100, opacity: 100 },
-};
 
 const IMG = {
   hero_photo: "/aurea-images/hero_photo.jpg",
@@ -42,9 +31,39 @@ const products = [
 ];
 
 const formulas = [
-  { label:"Botanical Glow", title:"Sérum antioxidante", text:"Vitamina C estabilizada, ácido ferúlico y niacinamida para iluminar, proteger y devolver vitalidad.", chips:["Vitamina C","Ácido ferúlico","Niacinamida"], price:"S/ 129.00", image:IMG.serum_orange },
-  { label:"Calm Ritual", title:"Sérum calmante", text:"Una fórmula ligera con aloe y pantenol para acompañar pieles sensibles con un gesto esencial.", chips:["Aloe vera","Pantenol","Betaína"], price:"S/ 119.00", image:IMG.ingredient_aloe },
-  { label:"Renew Balance", title:"Aceite regenerador", text:"Rosa mosqueta, jojoba y extractos botánicos para nutrir sin sobrecargar la rutina.", chips:["Rosa mosqueta","Jojoba","Vitamina E"], price:"S/ 139.00", image:IMG.ingredient_pomegranate },
+  {
+    tag: "Fórmula 01",
+    name: "Sérum Iluminador Botánico",
+    desc: "Vitamina C estable, extracto de cítricos y rosa mosqueta para un tono uniforme y luminosidad natural.",
+    badge: "Bestseller",
+    rating: "4.9 / 5.0",
+    reviews: "1,240 reseñas",
+    items: ["Unifica el tono","Protege contra radicales libres","Textura ligera sin residuo graso"],
+    image: IMG.serum_orange,
+    price: "S/ 129.00"
+  },
+  {
+    tag: "Fórmula 02",
+    name: "Crema Hidratante Calmante",
+    desc: "Ceramidas vegetales, aloe vera y té verde para restaurar la barrera cutánea y calmar rojeces.",
+    badge: "Piel sensible",
+    rating: "4.8 / 5.0",
+    reviews: "980 reseñas",
+    items: ["Hidratación 24 horas","Calma irritación y rojeces","Acabado mate aterciopelado"],
+    image: IMG.ritual,
+    price: "S/ 119.00"
+  },
+  {
+    tag: "Fórmula 03",
+    name: "Aceite Nutritivo Regenerador",
+    desc: "Escualano botánico, jojoba y granada para sellar la hidratación y devolver la elasticidad.",
+    badge: "Uso nocturno",
+    rating: "5.0 / 5.0",
+    reviews: "640 reseñas",
+    items: ["Regeneración nocturna profunda","Mejora la elasticidad","Aroma sutil 100% natural"],
+    image: IMG.ingredient_rose,
+    price: "S/ 139.00"
+  }
 ];
 
 function Reveal({ children, className="", delay=0 }) {
@@ -65,43 +84,12 @@ export default function AureaSkincarePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [formula, setFormula] = useState(0);
-  const [subscribed, setSubscribed] = useState(false);
-  const [config, setConfig] = useState(() => {
-    try {
-      const saved = localStorage.getItem("aurea_studio_config");
-      return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : DEFAULT_CONFIG;
-    } catch {
-      return DEFAULT_CONFIG;
-    }
-  });
 
   const active = formulas[formula] ?? formulas[0];
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("aurea_studio_config", JSON.stringify(config));
-    } catch {}
-  }, [config]);
-
-  const handleReset = () => {
-    setConfig(DEFAULT_CONFIG);
-    try { localStorage.removeItem("aurea_studio_config"); } catch {}
-  };
-
-  const updateOffset = (key, offset) => {
-    setConfig(prev => ({
-      ...prev,
-      [key]: {
-        ...prev[key],
-        x: (prev[key]?.x || 0) + offset.x,
-        y: (prev[key]?.y || 0) + offset.y,
-      }
-    }));
-  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -158,98 +146,40 @@ export default function AureaSkincarePage() {
           <div className="container">
             <Reveal>
               <div className="hero-stage">
-                {/* 1. Lienzo Maestro PNG de Fondo (Arrastrable & Calibrable) */}
-                <motion.img
+                {/* 1. Lienzo Maestro PNG de Fondo */}
+                <img
                   className="hero-stage-bg"
                   src={IMG.hero_diseno_sin_titulo}
                   alt="Auréa Skincare Sérum y Cítricos"
-                  drag
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => updateOffset("heroBg", info.offset)}
-                  style={{
-                    cursor: "grab",
-                    userSelect: "none",
-                    transform: `translate(${config.heroBg?.x || 0}px, ${config.heroBg?.y || 0}px) scale(${(config.heroBg?.scale || 100) / 100})`,
-                    opacity: (config.heroBg?.opacity ?? 100) / 100,
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
                 />
 
-                {/* 2. Textos y Botón montados arriba a la izquierda (Arrastrable & Calibrable) */}
-                <motion.div
-                  className="hero-stage-content"
-                  drag
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => updateOffset("heroTitle", info.offset)}
-                  style={{
-                    cursor: "grab",
-                    transform: `translate(${config.heroTitle?.x || 0}px, ${config.heroTitle?.y || 0}px) scale(${(config.heroTitle?.scale || 100) / 100})`,
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
-                >
-                  <h1 style={{ fontSize: config.heroTitle?.fontSize ? `${config.heroTitle.fontSize}px` : undefined }}>
+                {/* 2. Textos montados arriba a la izquierda */}
+                <div className="hero-stage-content">
+                  <h1>
                     Cuida tu piel.<br/>De forma consciente.
                   </h1>
-                  <p
-                    className="hero-subtext"
-                    style={{
-                      fontSize: config.heroSubtext?.fontSize ? `${config.heroSubtext.fontSize}px` : undefined,
-                      transform: `translate(${config.heroSubtext?.x || 0}px, ${config.heroSubtext?.y || 0}px)`,
-                    }}
-                  >
+                  <p className="hero-subtext">
                     Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.
                   </p>
-                </motion.div>
+                </div>
 
-                {/* 3. Cápsula montada arriba a la derecha (Arrastrable & Calibrable) */}
-                <motion.div
-                  className="hero-pill"
-                  drag
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => updateOffset("heroPill", info.offset)}
-                  style={{
-                    cursor: "grab",
-                    transform: `translate(${config.heroPill?.x || 0}px, ${config.heroPill?.y || 0}px) scale(${(config.heroPill?.scale || 100) / 100})`,
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
-                >
+                {/* 3. Cápsula montada arriba a la derecha */}
+                <div className="hero-pill">
                   <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
-                </motion.div>
+                </div>
 
                 {/* 4. Tarjeta Glassmorphism izquierda fiel a la referencia original */}
-                <motion.div
-                  className="hero-overlay"
-                  drag
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => updateOffset("cardLeft", info.offset)}
-                  style={{
-                    cursor: "grab",
-                    transform: `translate(${config.cardLeft?.x || 0}px, ${config.cardLeft?.y || 0}px) scale(${(config.cardLeft?.scale || 100) / 100})`,
-                    opacity: (config.cardLeft?.opacity ?? 100) / 100,
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
-                >
+                <div className="hero-overlay">
                   <p className="overlay-desc">
                     Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
                   </p>
                   <a className="btn-ref-cta" href="#coleccion">
                     Descubre la colección <span className="arrow">→</span>
                   </a>
-                </motion.div>
+                </div>
 
-                {/* 5. Badge Glassmorphism derecha (Arrastrable & Calibrable) */}
-                <motion.div
-                  className="hero-badge"
-                  drag
-                  dragMomentum={false}
-                  onDragEnd={(_, info) => updateOffset("cardRight", info.offset)}
-                  style={{
-                    cursor: "grab",
-                    transform: `translate(${config.cardRight?.x || 0}px, ${config.cardRight?.y || 0}px) scale(${(config.cardRight?.scale || 100) / 100})`,
-                    opacity: (config.cardRight?.opacity ?? 100) / 100,
-                  }}
-                  whileDrag={{ cursor: "grabbing" }}
-                >
+                {/* 5. Badge Glassmorphism derecha */}
+                <div className="hero-badge">
                   <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" />
                   <div className="badge-list">
                     <span>100% Natural</span>
@@ -257,7 +187,7 @@ export default function AureaSkincarePage() {
                     <span>Sin fragancias sintéticas</span>
                     <span>Libre de crueldad animal</span>
                   </div>
-                </motion.div>
+                </div>
               </div>
             </Reveal>
           </div>

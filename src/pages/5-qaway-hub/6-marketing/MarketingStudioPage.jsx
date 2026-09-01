@@ -467,13 +467,15 @@ export default function MarketingStudioPage() {
   // Modals state
   const [showContentModal, setShowContentModal] = useState(false)
   const [viewingExecutivePersona, setViewingExecutivePersona] = useState(null)
-  const [executiveSlideTab, setExecutiveSlideTab] = useState('messages')
+  const [executiveSlideTab, setExecutiveSlideTab] = useState('demography')
   const [slideDropdownOpen, setSlideDropdownOpen] = useState(false)
 
   const SLIDE_TABS = [
-    { id: 'messages', label: 'Mensajes Clave & Formatos' },
-    { id: 'dimensions', label: 'Dimensiones Psicológicas del Problema' },
-    { id: 'guide', label: 'Plan de Acción & Hábitos de Consumo' }
+    { id: 'demography', label: '1. Demografía (Perfil & Personalidad)' },
+    { id: 'needs', label: '2. Necesidades (Dolores & Dimensiones)' },
+    { id: 'solution', label: '3. Solución (Guía & Plan de Acción)' },
+    { id: 'diffusion', label: '4. Difusión (Citas & Canales)' },
+    { id: 'messages', label: '5. Mensajes Clave (Marketing & Ventas)' }
   ]
 
   const [newContent, setNewContent] = useState({
@@ -563,8 +565,8 @@ export default function MarketingStudioPage() {
       step: 1,
       key: 'name',
       label: 'Nombre del buyer persona',
-      question: '¿Cómo se llama tu buyer persona?',
-      placeholder: 'Ej. Mauricio Gutiérrez, Carlos Mendoza, Dra. Claudia Ramos...',
+      question: '1. ¿Cómo se llama tu buyer persona?',
+      placeholder: 'Ej. Mauricio Gutiérrez, Carlos Mendoza, Mary Gonzales...',
       type: 'text',
       minLength: 3
     },
@@ -572,152 +574,302 @@ export default function MarketingStudioPage() {
       step: 2,
       key: 'role',
       label: 'Puesto o Cargo',
-      question: '¿Cuál es su puesto de trabajo o cargo?',
-      placeholder: 'Ej. Dueño de clínica dental, Director Comercial, Gerente de Operaciones...',
+      question: '2. ¿Cuál es su puesto de trabajo o cargo?',
+      placeholder: 'Ej. Gerente de Auditoría, Dueño de clínica dental, Director Comercial...',
       type: 'text',
       minLength: 3
     },
     {
       step: 3,
-      key: 'age',
-      label: 'Rango de edad',
-      question: '¿Cuál es su rango de edad?',
+      key: 'reportingTo',
+      label: 'Jerarquía / Superior',
+      question: '3. ¿A quién reporta o cuál es su jerarquía en la empresa?',
       type: 'options',
-      options: ['Entre 18 y 24 años', 'Entre 25 y 34 años', 'Entre 35 y 44 años', 'Entre 45 y 54 años', 'Más de 55 años'],
+      options: [
+        'Propietario / Fundador (Sin superior)',
+        'Dirección General / CEO',
+        'Junta Directiva / Accionistas',
+        'Gerencia de Área',
+        'Cliente Independiente (No aplica)'
+      ],
       placeholder: 'Selecciona una opción o escribe...',
       minLength: 3
     },
     {
       step: 4,
-      key: 'education',
-      label: 'Nivel educativo más alto',
-      question: '¿Cuál es su nivel de educación más alto?',
+      key: 'age',
+      label: 'Rango de edad',
+      question: '4. ¿Cuál es su rango de edad?',
       type: 'options',
-      options: ['Secundaria / Bachillerato', 'Título Técnico', 'Licenciatura Universitaria', 'Maestría / Posgrado', 'Doctorado'],
-      placeholder: 'Selecciona una opción o escribe...',
+      options: ['Entre 18 y 24 años', 'Entre 25 y 34 años', 'Entre 35 y 44 años', 'Entre 45 y 54 años', 'Más de 55 años'],
+      placeholder: 'Selecciona una opción...',
       minLength: 3
     },
     {
       step: 5,
-      key: 'industrySize',
-      label: 'Industria y Organización',
-      question: '¿En qué industria trabaja y cuál es el tamaño de su empresa?',
-      placeholder: 'Ej. Salud y Odontología, empresa de 11 a 50 empleados...',
-      type: 'text',
-      minLength: 4
+      key: 'education',
+      label: 'Nivel educativo',
+      question: '5. ¿Cuál es su nivel de educación más alto?',
+      type: 'options',
+      options: ['Secundaria / Bachillerato', 'Título Técnico', 'Licenciatura Universitaria', 'Maestría / Posgrado', 'Doctorado'],
+      placeholder: 'Selecciona una opción...',
+      minLength: 3
     },
     {
       step: 6,
-      key: 'challenge',
-      label: 'Puntos de Dolor & Retos',
-      question: '¿Cuáles son sus mayores obstáculos, dolores o dificultades actuales?',
-      placeholder: 'Ej. Pérdida de prospectos por falta de seguimiento ágil y desorden en la base de datos...',
-      type: 'text',
-      minLength: 6
+      key: 'industry',
+      label: 'Industria / Rubro',
+      question: '6. ¿En qué industria o sector de actividad trabaja?',
+      type: 'options',
+      options: [
+        'Salud, Odontología & Clínicas',
+        'Auditoría, Contabilidad & Legal',
+        'Tecnología & Software',
+        'Comercio, Retail & E-commerce',
+        'Consultoría & Servicios B2B'
+      ],
+      placeholder: 'Selecciona un rubro o escribe el tuyo...',
+      minLength: 3
     },
     {
       step: 7,
-      key: 'howWeHelp',
-      label: 'Cómo Contribuimos a su Éxito',
-      question: '¿De qué manera tu solución o servicio resuelve sus necesidades y le ayuda a crecer?',
-      placeholder: 'Ej. Implementación ágil de CRM, automatización de citas y análisis en tiempo real en menos de 14 días...',
-      type: 'text',
-      minLength: 6
+      key: 'companySize',
+      label: 'Tamaño de la organización',
+      question: '7. ¿Cuántas personas o empleados trabajan en su organización?',
+      type: 'options',
+      options: [
+        'Independiente (1 persona)',
+        'Entre 1 y 10 empleados',
+        'Entre 11 y 50 empleados',
+        'Entre 51 y 200 empleados',
+        'Más de 200 empleados (Corporación)'
+      ],
+      placeholder: 'Selecciona el rango de tamaño...',
+      minLength: 3
     },
     {
       step: 8,
-      key: 'channelsHabits',
-      label: 'Canales & Hábitos de Consumo',
-      question: '¿Cuáles son sus canales de comunicación preferidos y momentos ideales de contacto?',
+      key: 'socialNetworks',
+      label: 'Canales & Redes Digitales',
+      question: '8. ¿Qué canales y redes sociales utiliza tu cliente? (Puedes marcar varios)',
+      type: 'multiselect',
+      options: [
+        'WhatsApp Business',
+        'Instagram',
+        'LinkedIn',
+        'Facebook',
+        'TikTok',
+        'Correo Electrónico'
+      ],
+      placeholder: 'Haz clic en las opciones para activar/desactivar o escribe...',
+      minLength: 2
+    },
+    {
+      step: 9,
+      key: 'infoSources',
+      label: 'Dónde busca información',
+      question: '9. ¿Cómo y dónde se informa cuando busca soluciones para su trabajo?',
       type: 'options',
       options: [
-        'WhatsApp Business & Correo (Tardes)',
-        'LinkedIn & Email Corporativo (Mañanas)',
-        'Llamada Telefónica & WhatsApp (Horario Comercial)',
-        'Instagram & Mensajes Directos',
-        'Reuniones Virtuales / Google Meet'
+        'Recomendaciones de colegas y boca a boca',
+        'Búsqueda en Google y páginas web',
+        'Redes sociales y contenido de expertos',
+        'Eventos, webinars y congresos de su sector'
       ],
-      placeholder: 'Selecciona una opción rápida o escribe...',
+      placeholder: 'Selecciona una opción o escribe...',
+      minLength: 4
+    },
+    {
+      step: 10,
+      key: 'challenge',
+      label: 'Puntos de Dolor & Retos',
+      question: '10. ¿Cuál es su mayor dolor, dificultad u obstáculo actual?',
+      placeholder: 'Ej. No puede gestionar a su equipo de trabajo, desorden en la base de datos...',
+      type: 'text',
+      minLength: 4
+    },
+    {
+      step: 11,
+      key: 'howWeHelp',
+      label: 'Cómo contribuimos a su éxito',
+      question: '11. ¿Cómo tu producto o servicio resuelve este problema específico?',
+      placeholder: 'Ej. Implementación ágil de software y automatización comercial con acompañamiento...',
+      type: 'text',
       minLength: 4
     }
   ]
+
+  const handleToggleWizardMultiOption = (opt) => {
+    let currentArr = currentWizardInput ? currentWizardInput.split(',').map(s => s.trim()).filter(Boolean) : []
+    if (currentArr.includes(opt)) {
+      currentArr = currentArr.filter(item => item !== opt)
+    } else {
+      currentArr.push(opt)
+    }
+    setCurrentWizardInput(currentArr.join(', '))
+  }
+
+  const handleRegenerateBlock = (personaId, blockKey) => {
+    setPersonas(prev => prev.map(p => {
+      if (p.id !== personaId) return p
+      const currentRegens = (p.aiRegens?.[blockKey] ?? 3)
+      if (currentRegens <= 0) return p
+
+      const newRegens = currentRegens - 1
+      let updatedData = { ...p }
+
+      if (blockKey === 'howWeHelp') {
+        const angles = [
+          `Implementación ágil de ${companyContext.name}: resolvemos ${p.pains?.[0] || 'sus dolores'} mediante ${companyContext.offer} con métricas claras desde el día 1.`,
+          `Como socio estratégico, ${companyContext.name} optimiza sus procesos con ${companyContext.valueProp}, liberando tiempo operativo para su equipo.`,
+          `Ecosistema integral a la medida: acompañamos a ${p.name} con soporte dedicado para transformar ${p.pains?.[0] || 'sus desafíos'} en crecimiento ordenado.`
+        ]
+        updatedData.howWeHelp = angles[(3 - newRegens) % angles.length]
+      } else if (blockKey === 'dimensions') {
+        const dimAngles = [
+          {
+            external: p.pains?.[0] || 'Desafíos operativos y falta de visibilidad en el día a día.',
+            internal: 'Siente frustración y sobrecarga al no ver reflejado el esfuerzo de su equipo en los resultados.',
+            philosophical: `Cree firmemente que cualquier profesional en ${p.industry || 'su rubro'} merece operar con tranquilidad y herramientas que funcionen.`
+          },
+          {
+            external: `Pérdida de oportunidades comerciales y desorden en los flujos de ${p.industry || 'su negocio'}.`,
+            internal: 'Le preocupa quedarse atrás frente a competidores más digitalizados y perder autoridad.',
+            philosophical: `No es justo perder clientes valiosos por culpa de sistemas obsoletos o procesos manuales.`
+          },
+          {
+            external: `Dificultad para coordinar a su equipo y medir el retorno real de cada acción.`,
+            internal: 'Desea tener el control absoluto de sus números sin depender de tareas repetitivas.',
+            philosophical: `La tecnología debe ser un facilitador de libertad empresarial, no una fuente adicional de estrés.`
+          }
+        ]
+        updatedData.dimensions = dimAngles[(3 - newRegens) % dimAngles.length]
+      } else if (blockKey === 'guidePlan') {
+        const planAngles = [
+          {
+            search: `Busca una solución sólida y comprobada para ${p.industry || 'su sector'}.`,
+            howWeHelp: `Acompañamiento integral de ${companyContext.name} enfocado en ${companyContext.valueProp}.`,
+            actionSteps: ['1. Diagnóstico de procesos actuales', '2. Despliegue de herramientas en 14 días', '3. Capacitación y optimización continua']
+          },
+          {
+            search: `Compara alternativas de software que no requieran meses de aprendizaje.`,
+            howWeHelp: `Estrategia personalizada de ${companyContext.name} con ${companyContext.offer}.`,
+            actionSteps: ['1. Auditoría de flujos críticos', '2. Configuración rápida y migración de datos', '3. Soporte prioritario y seguimiento mensual']
+          }
+        ]
+        updatedData.guidePlan = planAngles[(3 - newRegens) % planAngles.length]
+      } else if (blockKey === 'messages') {
+        const msgAngles = [
+          {
+            marketing: `Descubre cómo ${companyContext.name} ayuda a profesionales en ${p.industry} a superar ${p.pains?.[0] || 'sus desafíos'}. Solicita una sesión estratégica.`,
+            sales: `Con ${companyContext.name} eliminas la fricción operativa y garantizas resultados comprobados en tus primeros 60 días.`,
+            formats: ['Casos de éxito reales en PDF', 'Demostraciones interactivas', 'Publicaciones educativas en LinkedIn']
+          },
+          {
+            marketing: `Moderniza la gestión de tu empresa con ${companyContext.name}. Menos caos, más ventas y control total.`,
+            sales: `Implementación guiada paso a paso: nuestro equipo se encarga de la configuración técnica para que tú solo veas los resultados.`,
+            formats: ['Guías paso a paso', 'Webinars prácticos', 'Mensajes personalizados por WhatsApp']
+          }
+        ]
+        updatedData.keyMessages = msgAngles[(3 - newRegens) % msgAngles.length]
+      }
+
+      updatedData.aiRegens = { ...(p.aiRegens || {}), [blockKey]: newRegens }
+      updatedData.aiStatus = { ...(p.aiStatus || {}), [blockKey]: 'pending' }
+      return updatedData
+    }))
+  }
+
+  const handleApproveBlock = (personaId, blockKey) => {
+    setPersonas(prev => prev.map(p => {
+      if (p.id !== personaId) return p
+      return {
+        ...p,
+        aiStatus: { ...(p.aiStatus || {}), [blockKey]: 'approved' }
+      }
+    }))
+  }
 
   const finalizePersonaGeneration = (finalAnswers) => {
     setPersonaCanvasMode('generating')
     setTimeout(() => {
       const newId = `p-${Date.now()}`
-      const isOwnerRole = /dueño|propietari|fundador|ceo|director general|gerente general/i.test(finalAnswers.role || '')
-      const isVetOrClinic = /veterinar|salud|clínica|clinica|dental|médic|farmacia/i.test(finalAnswers.industrySize || '')
-
-      const tailoredTools = isVetOrClinic
-        ? ['Software de gestión clínica / historias', 'WhatsApp Business automatizado', 'Sistema POS / Facturación']
-        : ['Software de CRM', 'WhatsApp Web / Automatización', 'Gestión de proyectos y tareas']
-
-      const tailoredKpis = isVetOrClinic
-        ? ['Retención y recurrencia de pacientes', 'Aumento de citas completadas', 'Satisfacción y recomendaciones']
-        : ['Crecimiento de clientes', 'Aumento de tasa de conversión', 'Satisfacción y retención']
+      const userNetworks = finalAnswers.socialNetworks
+        ? finalAnswers.socialNetworks.split(',').map(s => s.trim()).filter(Boolean)
+        : ['WhatsApp Business']
 
       const createdPersona = {
         id: newId,
         name: finalAnswers.name || 'Nuevo Buyer Persona',
-        title: finalAnswers.role || (businessModel === 'B2B' ? 'Director General / Líder de Área' : 'Comprador Principal'),
+        title: finalAnswers.role || 'Responsable de Área',
         type: businessModel,
         avatarImg: AVATAR_PRESETS[Math.floor(Math.random() * AVATAR_PRESETS.length)],
-        roleType: businessModel === 'B2B' ? (isOwnerRole ? 'Propietario / Decisor Principal' : 'Líder de Área') : 'Consumidor Final',
+        roleType: finalAnswers.role || 'Decisor Principal',
         age: finalAnswers.age || 'Entre 35 y 44 años',
-        education: finalAnswers.education || 'Licenciatura universitaria',
-        industry: finalAnswers.industrySize || (businessModel === 'B2B' ? 'Servicios Profesionales & Tecnología' : 'Consumo & Estilo de Vida'),
-        companySize: finalAnswers.industrySize?.includes('empleado') ? 'Entre 11 y 50 empleados' : 'Entre 1 y 20 empleados',
-        socialNetworks: ['whatsapp', 'instagram', 'facebook', 'linkedin'],
-        commChannels: finalAnswers.channelsHabits ? [finalAnswers.channelsHabits] : ['WhatsApp Business', 'Correo electrónico', 'LinkedIn'],
-        reportingTo: isOwnerRole ? 'Propietario Independiente (Sin superior)' : (businessModel === 'B2B' ? 'Dirección General / CEO' : 'Decisión Autónoma'),
-        tools: tailoredTools,
-        kpis: tailoredKpis,
+        education: finalAnswers.education || 'Licenciatura Universitaria',
+        industry: finalAnswers.industry || 'Servicios Profesionales',
+        companySize: finalAnswers.companySize || 'Entre 11 y 50 empleados',
+        socialNetworks: userNetworks,
+        commChannels: userNetworks,
+        reportingTo: finalAnswers.reportingTo || 'Propietario / Sin superior',
+        tools: ['Software de gestión y CRM', 'WhatsApp Business', 'Hojas de cálculo'],
+        kpis: ['Aumento de eficiencia operativa', 'Crecimiento de clientes', 'Satisfacción del equipo'],
         pains: [
-          finalAnswers.challenge || 'Pérdida de prospectos por falta de seguimiento ágil',
-          'Desorden en la base de datos y control de oportunidades',
-          'Falta de visibilidad sobre el retorno de inversión en marketing'
+          finalAnswers.challenge || 'Dificultad en el control y gestión del equipo'
         ],
         howWeHelp: finalAnswers.howWeHelp || `${companyContext.valueProp} A través de ${companyContext.offer}.`,
-        infoSources: [finalAnswers.channelsHabits || 'Investigación en línea, redes sociales y recomendaciones del sector'],
-        salary: '+$60,000 USD / año',
+        infoSources: [finalAnswers.infoSources || 'Recomendaciones de colegas y búsquedas en línea'],
+        salary: 'Acorde al mercado',
         location: 'Latinoamérica',
-        jtbd: finalAnswers.challenge ? `Superar la barrera de ${finalAnswers.challenge.toLowerCase()} con herramientas a la medida.` : 'Escalar su negocio con orden y previsibilidad.',
+        jtbd: `Superar la barrera de ${finalAnswers.challenge || 'gestión'} con el respaldo de ${companyContext.name}.`,
         gains: [
-          'Aumento comprobado en conversión y prospectos calificados',
-          'Ahorro de horas operativas cada semana',
-          'Posicionamiento sólido como referente en el mercado'
+          'Mayor orden y tranquilidad operativa',
+          'Ahorro de tiempo en tareas repetitivas',
+          'Decisiones basadas en datos claros'
         ],
         dimensions: {
-          external: finalAnswers.challenge || 'Dificultades operativas y comerciales en el día a día.',
-          internal: 'Se siente frustrado cuando el esfuerzo del equipo no se refleja en resultados rápidos.',
-          philosophical: `Cree que cualquier negocio en ${finalAnswers.industrySize || 'su sector'} merece contar con herramientas modernas para crecer con tranquilidad.`
+          external: finalAnswers.challenge || 'Desafíos diarios en la organización y seguimiento del equipo.',
+          internal: 'Siente frustración cuando el esfuerzo no se traduce en avances visibles y rápidos.',
+          philosophical: `Cree que un negocio en ${finalAnswers.industry || 'su sector'} merece operar con procesos modernos y eficientes.`
         },
         guidePlan: {
-          search: 'Busca soluciones probadas con soporte guiado continuo.',
-          howWeHelp: finalAnswers.howWeHelp || `Implementación estratégica de ${companyContext.name} paso a paso con acompañamiento.`,
-          actionSteps: ['Diagnóstico inicial de flujos de trabajo', 'Despliegue ágil en menos de 14 días', 'Capacitación y optimización de KPIs']
+          search: 'Busca soluciones comprobadas con acompañamiento cercano.',
+          howWeHelp: finalAnswers.howWeHelp || `Implementación guiada de ${companyContext.name} adaptada a sus necesidades.`,
+          actionSteps: ['1. Diagnóstico de procesos actuales', '2. Configuración y despliegue ágil', '3. Capacitación y soporte continuo']
         },
         habits: {
-          channels: ['WhatsApp Business', 'Instagram', 'LinkedIn', 'Email'],
-          schedule: finalAnswers.channelsHabits || 'Receptivo entre 2:00 PM y 4:00 PM los miércoles y jueves',
-          quote: `“Buscamos soluciones de ${companyContext.name} que realmente nos den tranquilidad y resultados medibles.”`
+          channels: userNetworks,
+          schedule: 'Receptivo en horario laboral matutino',
+          quote: `“Buscamos soluciones que realmente nos den tranquilidad y orden.”`
         },
         keyMessages: {
-          marketing: `Descubre cómo ${companyContext.name} ayuda a superar ${finalAnswers.challenge || 'tus desafíos'} implementando ${companyContext.offer}.`,
-          sales: `En ${companyContext.name} te acompañamos paso a paso con resultados medibles en los primeros 90 días.`,
-          formats: ['Publicaciones en redes sociales', 'Demostraciones en vivo', 'Casos de éxito reales en PDF']
+          marketing: `Descubre cómo ${companyContext.name} ayuda a superar ${finalAnswers.challenge || 'tus desafíos'} con ${companyContext.offer}.`,
+          sales: `En ${companyContext.name} te acompañamos paso a paso con resultados medibles y soporte dedicado.`,
+          formats: ['Casos de éxito reales en PDF', 'Demostraciones en vivo', 'Contenido educativo en redes']
         },
-        channels: ['WhatsApp Business', 'Instagram', 'LinkedIn'],
-        trigger: `Identificó la necesidad de modernizar sus sistemas comerciales y contactó a ${companyContext.name}.`
+        channels: userNetworks,
+        trigger: `Decidió modernizar sus procesos para resolver ${finalAnswers.challenge || 'sus desafíos'}.`,
+        aiStatus: {
+          howWeHelp: 'pending',
+          dimensions: 'pending',
+          guidePlan: 'pending',
+          messages: 'pending'
+        },
+        aiRegens: {
+          howWeHelp: 3,
+          dimensions: 3,
+          guidePlan: 3,
+          messages: 3
+        }
       }
 
       setPersonas(prev => [...prev, createdPersona])
       setActivePersonaId(newId)
       setPersonaCanvasMode('modular-view')
       setWizardStep(1)
-      setWizardAnswers({ name: '', role: '', age: '', education: '', industrySize: '', challenge: '', howWeHelp: '', channelsHabits: '' })
-    }, 1200)
+      setWizardAnswers({ name: '', role: '', reportingTo: '', age: '', education: '', industry: '', companySize: '', socialNetworks: '', infoSources: '', challenge: '', howWeHelp: '' })
+      setCurrentWizardInput('')
+    }, 1000)
   }
 
   const handleWizardSubmit = (e) => {
@@ -752,7 +904,6 @@ export default function MarketingStudioPage() {
       setWizardStep(wizardStep + 1)
     } else {
       finalizePersonaGeneration(updatedAnswers)
-    }
   }
 
   const handleCycleAvatar = (personaId) => {
@@ -1751,17 +1902,41 @@ export default function MarketingStudioPage() {
 
                       {/* Interactive Option Pills for 1-Click Fast Selection */}
                       {wizardQuestions[wizardStep - 1].options && (
-                        <div className="flex flex-wrap gap-2 pt-1 pb-1">
-                          {wizardQuestions[wizardStep - 1].options.map((opt) => (
-                            <button
-                              key={opt}
-                              type="button"
-                              onClick={() => handleWizardOptionSelect(opt)}
-                              className="px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-900 bg-slate-50 hover:bg-slate-900 hover:text-white text-slate-800 text-xs sm:text-sm font-bold transition-all shadow-xs"
-                            >
-                              {opt}
-                            </button>
-                          ))}
+                        <div className="space-y-2 pt-1 pb-1">
+                          {wizardQuestions[wizardStep - 1].type === 'multiselect' && (
+                            <p className="text-xs font-bold text-indigo-600">
+                              Selección múltiple (puedes marcar varios canales):
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {wizardQuestions[wizardStep - 1].options.map((opt) => {
+                              const isSelected = wizardQuestions[wizardStep - 1].type === 'multiselect'
+                                ? currentWizardInput.split(',').map(s => s.trim()).includes(opt)
+                                : currentWizardInput.trim() === opt
+
+                              return (
+                                <button
+                                  key={opt}
+                                  type="button"
+                                  onClick={() => {
+                                    if (wizardQuestions[wizardStep - 1].type === 'multiselect') {
+                                      handleToggleWizardMultiOption(opt)
+                                    } else {
+                                      handleWizardOptionSelect(opt)
+                                    }
+                                  }}
+                                  className={`px-4 py-2.5 rounded-xl border text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5 ${
+                                    isSelected
+                                      ? 'bg-slate-900 text-white border-slate-900 ring-2 ring-indigo-500/40'
+                                      : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                                  <span>{opt}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
                         </div>
                       )}
 
@@ -1784,11 +1959,22 @@ export default function MarketingStudioPage() {
                           <button
                             type="submit"
                             disabled={!currentWizardInput.trim() || currentWizardInput.trim().length < wizardQuestions[wizardStep - 1].minLength}
-                            className="absolute right-3 bottom-4 w-10 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center disabled:opacity-30 disabled:hover:bg-slate-900 shadow-md transition-all"
+                            className="absolute right-3 bottom-4 w-10 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center disabled:opacity-30 disabled:hover:bg-slate-900 shadow-md transition-all cursor-pointer"
                           >
                             <ArrowUp className="w-5 h-5 font-black" />
                           </button>
                         </div>
+                        {wizardQuestions[wizardStep - 1].type === 'multiselect' && currentWizardInput.trim().length >= wizardQuestions[wizardStep - 1].minLength && (
+                          <div className="flex justify-end">
+                            <button
+                              type="submit"
+                              className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <span>Continuar al siguiente paso</span>
+                              <ArrowRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
 
                         {currentWizardInput.trim().length > 0 && currentWizardInput.trim().length < wizardQuestions[wizardStep - 1].minLength && (
                           <div className="px-3 py-1.5 rounded-lg bg-red-100 text-red-800 text-xs font-bold inline-block">
@@ -2217,24 +2403,59 @@ export default function MarketingStudioPage() {
                         </div>
 
                         {/* Card: Cómo contribuimos a su éxito */}
-                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-2 group">
-                          <div
-                            onClick={() => document.getElementById('textarea-persona-howwehelp')?.focus()}
-                            className="flex justify-between items-center text-xs text-emerald-800 font-bold uppercase cursor-pointer"
-                          >
-                            <span className="flex items-center gap-1.5">
+                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-3 group">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div
+                              onClick={() => document.getElementById('textarea-persona-howwehelp')?.focus()}
+                              className="flex items-center gap-1.5 text-xs text-emerald-800 font-bold uppercase cursor-pointer"
+                            >
                               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                               <span>Cómo contribuimos a su éxito</span>
-                            </span>
-                            <Edit3 className="w-3.5 h-3.5 text-emerald-500 group-hover:text-emerald-700 transition-colors" />
+                            </div>
+
+                            {/* AI Coproduction Actions */}
+                            <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                currentPersona.aiStatus?.howWeHelp === 'approved'
+                                  ? 'bg-emerald-200 text-emerald-900'
+                                  : 'bg-amber-100 text-amber-900'
+                              }`}>
+                                {currentPersona.aiStatus?.howWeHelp === 'approved' ? '✓ Aprobado' : '✨ Propuesta IA'}
+                              </span>
+
+                              {(currentPersona.aiRegens?.howWeHelp ?? 3) > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRegenerateBlock(currentPersona.id, 'howWeHelp')}
+                                  className="px-2 py-1 rounded-lg bg-white/80 hover:bg-white text-emerald-900 text-[10px] font-bold border border-emerald-200 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                                  title="Replantear propuesta con IA"
+                                >
+                                  <RefreshCw className="w-3 h-3 text-emerald-600" />
+                                  <span>Replantear ({currentPersona.aiRegens?.howWeHelp ?? 3})</span>
+                                </button>
+                              )}
+
+                              {currentPersona.aiStatus?.howWeHelp !== 'approved' && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveBlock(currentPersona.id, 'howWeHelp')}
+                                  className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                                  title="Aprobar esta versión"
+                                >
+                                  <Check className="w-3 h-3" />
+                                  <span>Aprobar</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
+
                           <textarea
                             id="textarea-persona-howwehelp"
-                            rows="2"
+                            rows="3"
                             value={currentPersona.howWeHelp || ''}
                             onChange={(e) => handleUpdatePersonaField('howWeHelp', e.target.value)}
                             placeholder="Describe cómo tu solución resuelve sus necesidades..."
-                            className="w-full text-xs sm:text-sm font-bold text-emerald-950 bg-transparent border-b border-transparent hover:border-emerald-300 focus:border-emerald-700 focus:outline-none py-0.5 transition-colors resize-none"
+                            className="w-full text-xs sm:text-sm font-bold text-emerald-950 bg-transparent border-b border-transparent hover:border-emerald-300 focus:border-emerald-700 focus:outline-none py-0.5 transition-colors resize-none leading-relaxed"
                           />
                         </div>
 
@@ -2242,17 +2463,17 @@ export default function MarketingStudioPage() {
 
                     </div>
 
-                    {/* Bottom Add Section Button (Like HubSpot Screenshot 5) */}
+                    {/* Bottom Add Section Button (Opens Official 5 Slides Presentation) */}
                     <div className="pt-4 flex justify-center">
                       <button
                         onClick={() => {
                           setViewingExecutivePersona(currentPersona)
-                          setExecutiveSlideTab('dimensions')
+                          setExecutiveSlideTab('demography')
                         }}
-                        className="w-full max-w-md py-3.5 rounded-2xl bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2"
+                        className="w-full max-w-md py-3.5 rounded-2xl bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        <Plus className="w-4 h-4" />
-                        <span>Ver Análisis de Dimensiones Psicológicas (StoryBrand)</span>
+                        <FileText className="w-4 h-4 text-emerald-600" />
+                        <span>Ver Presentación Oficial (5 Slides HubSpot)</span>
                       </button>
                     </div>
 
@@ -3124,33 +3345,425 @@ export default function MarketingStudioPage() {
             {/* SLIDE CANVAS */}
             <div className="bg-[#fafbfc] rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-inner print:bg-white print:border-none print:shadow-none print:p-0">
               
-              {/* 1. SLIDE: MENSAJES CLAVE */}
-              {executiveSlideTab === 'messages' && (
+              {/* 1. SLIDE: DEMOGRAFÍA (PÁGINA 6 & 12) */}
+              {executiveSlideTab === 'demography' && (
                 <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                     <div>
                       <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                        Mensajes clave
+                        Demografía
                       </h2>
                       <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                        Estrategia de comunicación diferenciada para atraer y convertir
+                        Perfil general, entorno laboral y características sociodemográficas
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-amber-50/80 border border-amber-200/70 max-w-sm">
+                    <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 border border-slate-200 max-w-sm">
                       <img
                         src={viewingExecutivePersona.avatarImg}
                         alt={viewingExecutivePersona.name}
-                        className="w-12 h-12 rounded-xl object-cover ring-2 ring-amber-200 shrink-0"
+                        className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-300 shrink-0"
                       />
-                      <div className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
-                        Define los mensajes principales desde las perspectivas de marketing y ventas
+                      <div>
+                        <div className="text-sm font-bold text-slate-900 leading-snug">
+                          {viewingExecutivePersona.name}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {viewingExecutivePersona.title}
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    {/* 1. Perfil General */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Perfil general</div>
+                          <div className="text-xs text-slate-300">Puesto, rol y entorno laboral.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          1
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Puesto de trabajo:</strong> {viewingExecutivePersona.title || viewingExecutivePersona.roleType}</div>
+                        <div><strong>• Jerarquía / Superior:</strong> {viewingExecutivePersona.reportingTo || 'Propietario / Sin superior'}</div>
+                        <div><strong>• Tamaño de la organización:</strong> {viewingExecutivePersona.companySize || 'Entre 11 y 50 empleados'}</div>
+                      </div>
+                    </div>
+
+                    {/* 2. Características Sociodemográficas */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Características sociodemográficas</div>
+                          <div className="text-xs text-slate-300">Edad, educación y ubicación.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          2
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Rango de edad:</strong> {viewingExecutivePersona.age || 'Entre 35 y 44 años'}</div>
+                        <div><strong>• Nivel de educación:</strong> {viewingExecutivePersona.education || 'Licenciatura Universitaria'}</div>
+                        <div><strong>• Industria / Sector:</strong> {viewingExecutivePersona.industry || 'Servicios Profesionales'}</div>
+                      </div>
+                    </div>
+
+                    {/* 3. Descripción de la Personalidad */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Descripción de la personalidad</div>
+                          <div className="text-xs text-slate-300">Rol en la toma de decisiones y trato.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          3
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Tipo de personalidad:</strong> Perfil Decisor & Estratégico</div>
+                        <div><strong>• Canales de preferencia:</strong> {Array.isArray(viewingExecutivePersona.socialNetworks) ? viewingExecutivePersona.socialNetworks.join(', ') : viewingExecutivePersona.socialNetworks}</div>
+                        <div><strong>• Fuentes de información:</strong> {Array.isArray(viewingExecutivePersona.infoSources) ? viewingExecutivePersona.infoSources.join(', ') : viewingExecutivePersona.infoSources}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 2. SLIDE: NECESIDADES (PÁGINA 7 & 13) */}
+              {executiveSlideTab === 'needs' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Necesidades
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Identifica la raíz de sus problemas y los factores que influyen en su toma de decisiones
+                      </p>
+                    </div>
+
+                    {/* AI Coproduction controls */}
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        viewingExecutivePersona.aiStatus?.dimensions === 'approved'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-900'
+                      }`}>
+                        {viewingExecutivePersona.aiStatus?.dimensions === 'approved' ? '✓ Dimensiones Aprobadas' : '✨ Análisis IA'}
+                      </span>
+
+                      {(viewingExecutivePersona.aiRegens?.dimensions ?? 3) > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateBlock(viewingExecutivePersona.id, 'dimensions')}
+                          className="px-3 py-1.5 rounded-xl bg-white text-slate-800 text-xs font-bold border border-slate-200 shadow-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Replantear ({viewingExecutivePersona.aiRegens?.dimensions ?? 3})</span>
+                        </button>
+                      )}
+
+                      {viewingExecutivePersona.aiStatus?.dimensions !== 'approved' && (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveBlock(viewingExecutivePersona.id, 'dimensions')}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Aprobar</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* 1. Puntos de dolor */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Puntos de dolor</div>
+                          <div className="text-xs text-slate-300">Obstáculos que dificultan sus objetivos.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          1
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        {viewingExecutivePersona.pains?.map((p, i) => (
+                          <div key={i}><strong>•</strong> {p}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Retos y Desafíos */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Retos y desafíos</div>
+                          <div className="text-xs text-slate-300">Objetivos que representan un reto.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          2
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Reto a corto plazo:</strong> Ordenar flujos y eliminar tareas manuales.</div>
+                        <div><strong>• Reto a mediano plazo:</strong> {viewingExecutivePersona.jtbd}</div>
+                      </div>
+                    </div>
+
+                    {/* 3. Dimensión del problema */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Dimensión del problema</div>
+                          <div className="text-xs text-slate-300">Interno, Externo y Filosófico (StoryBrand).</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          3
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-2 flex flex-col justify-center">
+                        <div><strong>• Externo (Tangible):</strong> {viewingExecutivePersona.dimensions?.external || viewingExecutivePersona.pains?.[0]}</div>
+                        <div><strong>• Interno (Emocional):</strong> {viewingExecutivePersona.dimensions?.internal}</div>
+                        <div><strong>• Filosófico (Valores):</strong> {viewingExecutivePersona.dimensions?.philosophical}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 3. SLIDE: SOLUCIÓN (PÁGINA 8 & 14) */}
+              {executiveSlideTab === 'solution' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Solución
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Identifica cómo tu producto o servicio resuelve las necesidades del buyer persona
+                      </p>
+                    </div>
+
+                    {/* AI Coproduction controls */}
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        viewingExecutivePersona.aiStatus?.guidePlan === 'approved'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-900'
+                      }`}>
+                        {viewingExecutivePersona.aiStatus?.guidePlan === 'approved' ? '✓ Plan Aprobado' : '✨ Propuesta IA'}
+                      </span>
+
+                      {(viewingExecutivePersona.aiRegens?.guidePlan ?? 3) > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateBlock(viewingExecutivePersona.id, 'guidePlan')}
+                          className="px-3 py-1.5 rounded-xl bg-white text-slate-800 text-xs font-bold border border-slate-200 shadow-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Replantear ({viewingExecutivePersona.aiRegens?.guidePlan ?? 3})</span>
+                        </button>
+                      )}
+
+                      {viewingExecutivePersona.aiStatus?.guidePlan !== 'approved' && (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveBlock(viewingExecutivePersona.id, 'guidePlan')}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Aprobar</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* 1. Un Guía */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Un guía</div>
+                          <div className="text-xs text-slate-300">Tu empresa como socio estratégico.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          1
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Posicionamiento:</strong> {companyContext.name} actúa como guía especializado en {companyContext.industry}.</div>
+                        <div><strong>• Propuesta de valor:</strong> {companyContext.valueProp}</div>
+                      </div>
+                    </div>
+
+                    {/* 2. Cómo lo podemos ayudar */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Cómo lo podemos ayudar</div>
+                          <div className="text-xs text-slate-300">Atributos del servicio y diferenciadores.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          2
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div>{viewingExecutivePersona.howWeHelp}</div>
+                      </div>
+                    </div>
+
+                    {/* 3. Planes de acción */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Planes de acción</div>
+                          <div className="text-xs text-slate-300">Pasos para superar los retos y cumplir metas.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          3
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        {viewingExecutivePersona.guidePlan?.actionSteps?.map((step, i) => (
+                          <div key={i} className="flex items-start gap-2">
+                            <span className="font-bold text-indigo-600 shrink-0">Paso {i + 1}:</span>
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 4. SLIDE: DIFUSIÓN (PÁGINA 9 & 15) */}
+              {executiveSlideTab === 'diffusion' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Difusión
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Identifica las mejores formas de comunicarte aprovechando sus preferencias de consumo
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-2xl bg-slate-100 border border-slate-200 text-xs text-slate-700">
+                      <strong>Canales activos:</strong> {Array.isArray(viewingExecutivePersona.socialNetworks) ? viewingExecutivePersona.socialNetworks.join(', ') : viewingExecutivePersona.socialNetworks}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* 1. Citas del cliente */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Citas del cliente</div>
+                          <div className="text-xs text-slate-300">Citas reales sobre retos y objetivos.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          1
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs italic flex flex-col justify-center">
+                        “{viewingExecutivePersona.habits?.quote || `Buscamos herramientas que nos permitan resolver ${viewingExecutivePersona.pains?.[0] || 'nuestros problemas'} con tranquilidad.`}”
+                      </div>
+                    </div>
+
+                    {/* 2. Hábitos de consumo */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Hábitos de consumo</div>
+                          <div className="text-xs text-slate-300">Dónde pasa más tiempo e interactúa.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          2
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Canales de comunicación:</strong> {Array.isArray(viewingExecutivePersona.socialNetworks) ? viewingExecutivePersona.socialNetworks.join(', ') : viewingExecutivePersona.socialNetworks}</div>
+                        <div><strong>• Búsqueda de soluciones:</strong> {Array.isArray(viewingExecutivePersona.infoSources) ? viewingExecutivePersona.infoSources.join(', ') : viewingExecutivePersona.infoSources}</div>
+                      </div>
+                    </div>
+
+                    {/* 3. Horarios */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
+                      <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <div>
+                          <div className="text-xs sm:text-sm font-bold">Horarios</div>
+                          <div className="text-xs text-slate-300">Momentos del día con mayor receptividad.</div>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                          3
+                        </div>
+                      </div>
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border border-slate-200 text-xs sm:text-sm text-slate-800 shadow-xs space-y-1.5 flex flex-col justify-center">
+                        <div><strong>• Ventana óptima:</strong> Horario laboral regular (Martes a Jueves entre 9:00 AM y 5:00 PM).</div>
+                        <div><strong>• Formato de primer contacto:</strong> Mensaje directo / WhatsApp y llamada de diagnóstico breve.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 5. SLIDE: MENSAJES CLAVE (PÁGINA 10 & 16) */}
+              {executiveSlideTab === 'messages' && (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+                    <div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Mensajes clave
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Define los mensajes principales desde las perspectivas de marketing y ventas
+                      </p>
+                    </div>
+
+                    {/* AI Coproduction controls */}
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                        viewingExecutivePersona.aiStatus?.messages === 'approved'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : 'bg-amber-100 text-amber-900'
+                      }`}>
+                        {viewingExecutivePersona.aiStatus?.messages === 'approved' ? '✓ Mensajes Aprobados' : '✨ Redacción IA'}
+                      </span>
+
+                      {(viewingExecutivePersona.aiRegens?.messages ?? 3) > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateBlock(viewingExecutivePersona.id, 'messages')}
+                          className="px-3 py-1.5 rounded-xl bg-white text-slate-800 text-xs font-bold border border-slate-200 shadow-xs hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Replantear ({viewingExecutivePersona.aiRegens?.messages ?? 3})</span>
+                        </button>
+                      )}
+
+                      {viewingExecutivePersona.aiStatus?.messages !== 'approved' && (
+                        <button
+                          type="button"
+                          onClick={() => handleApproveBlock(viewingExecutivePersona.id, 'messages')}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Aprobar</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* 1. Mensaje de marketing */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
                       <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
                         <div>
                           <div className="text-xs sm:text-sm font-bold">Mensaje de marketing</div>
@@ -3160,12 +3773,13 @@ export default function MarketingStudioPage() {
                           1
                         </div>
                       </div>
-                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm italic leading-relaxed">
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-xs italic leading-relaxed flex flex-col justify-center">
                         "{viewingExecutivePersona.keyMessages?.marketing || viewingExecutivePersona.jtbd}"
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    {/* 2. Mensaje de ventas */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
                       <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
                         <div>
                           <div className="text-xs sm:text-sm font-bold">Mensaje de ventas</div>
@@ -3175,12 +3789,13 @@ export default function MarketingStudioPage() {
                           2
                         </div>
                       </div>
-                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-sm leading-relaxed">
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm font-medium text-slate-800 shadow-xs leading-relaxed flex flex-col justify-center">
                         "{viewingExecutivePersona.keyMessages?.sales || 'Prueba social y resultados comprobados con soporte dedicado.'}"
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    {/* 3. Formatos */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-stretch">
                       <div className="md:col-span-4 flex items-center justify-between p-4 rounded-2xl bg-slate-900 text-white shadow-sm">
                         <div>
                           <div className="text-xs sm:text-sm font-bold">Formatos</div>
@@ -3190,7 +3805,7 @@ export default function MarketingStudioPage() {
                           3
                         </div>
                       </div>
-                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm text-slate-700 shadow-sm space-y-1.5">
+                      <div className="md:col-span-8 p-4 rounded-2xl bg-white border-2 border-slate-700/80 text-xs sm:text-sm text-slate-700 shadow-xs space-y-1.5 flex flex-col justify-center">
                         {viewingExecutivePersona.keyMessages?.formats?.map((fmt, i) => (
                           <div key={i} className="flex items-start gap-2">
                             <span className="w-2 h-2 rounded-full bg-slate-900 mt-1.5 shrink-0" />
@@ -3205,92 +3820,6 @@ export default function MarketingStudioPage() {
                 </div>
               )}
 
-              {/* 2. SLIDE: 3 DIMENSIONES DEL DOLOR */}
-              {executiveSlideTab === 'dimensions' && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-900">Dimensión Psicológica del Problema</h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Framework StoryBrand & HubSpot para entender la raíz del dolor</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-indigo-700">
-                        <span className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center text-xs font-black">1</span>
-                        <span>Problema Externo (Tangible)</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                        {viewingExecutivePersona.dimensions?.external || viewingExecutivePersona.pains[0]}
-                      </p>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-purple-700">
-                        <span className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center text-xs font-black">2</span>
-                        <span>Problema Interno (Emocional)</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                        {viewingExecutivePersona.dimensions?.internal || viewingExecutivePersona.pains[1]}
-                      </p>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-2 shadow-xs">
-                      <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-700">
-                        <span className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-black">3</span>
-                        <span>Problema Filosófico (Valores)</span>
-                      </div>
-                      <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                        {viewingExecutivePersona.dimensions?.philosophical || 'Cree que un negocio debe operar con excelencia y tecnología moderna.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/70 text-xs sm:text-sm text-amber-900 italic">
-                    <strong>Cita Textual del Cliente:</strong> {viewingExecutivePersona.habits?.quote || '“Buscamos soluciones que nos permitan crecer con orden y tranquilidad.”'}
-                  </div>
-                </div>
-              )}
-
-              {/* 3. SLIDE: PLAN DE ACCIÓN & HÁBITOS */}
-              {executiveSlideTab === 'guide' && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-900">Tu Empresa como Guía & Hábitos de Consumo</h2>
-                    <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Plan estratégico de implementación y momentos ideales de contacto</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Plan de Acción en 3 Pasos</h4>
-                      <div className="space-y-2 text-xs sm:text-sm text-slate-700">
-                        {viewingExecutivePersona.guidePlan?.actionSteps?.map((step, i) => (
-                          <div key={i} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                            <span className="font-bold text-indigo-600 shrink-0">Paso {i + 1}:</span>
-                            <span>{step}</span>
-                          </div>
-                        )) || (
-                          <div>Diagnóstico ➔ Implementación ➔ Soporte</div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-xs">
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Horarios & Canales de Receptividad</h4>
-                      <div className="space-y-2 text-xs sm:text-sm text-slate-700">
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="font-bold text-slate-900 block mb-0.5">Canales Digitales:</span>
-                          <span>{viewingExecutivePersona.channels?.join(', ')}</span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="font-bold text-slate-900 block mb-0.5">Ventanas de Contacto Óptimas:</span>
-                          <span>{viewingExecutivePersona.habits?.schedule || 'Horario laboral regular'}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
             </div>
           </motion.div>
         </div>
@@ -3299,4 +3828,5 @@ export default function MarketingStudioPage() {
 
     </div>
   )
+}
 }
