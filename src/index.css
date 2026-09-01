@@ -370,6 +370,43 @@
     margin-top: 0 !important;
     margin-bottom: 1rem !important;
   }
+
+  /* 4. Figuras e Imágenes centradas (CustomImage) */
+  .blog-prose figure[data-type="custom-image"],
+  .blog-prose figure {
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+    clear: both !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .blog-prose figure[data-type="custom-image"][data-align="center"],
+  .blog-prose figure.text-center,
+  .blog-prose figure.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+    display: block !important;
+  }
+
+  .blog-prose figure[data-type="custom-image"][data-align="center"] img,
+  .blog-prose figure.text-center img,
+  .blog-prose figure.mx-auto img {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: block !important;
+  }
+
+  .blog-prose figcaption {
+    margin-top: 0.6rem !important;
+    font-size: 0.8125rem !important;
+    color: var(--blog-muted-color) !important;
+    font-style: italic !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+  }
   /* Kicker del Hero Secundario */
   .qw-hero-secondary-kicker {
     margin-bottom: 1.25rem;
