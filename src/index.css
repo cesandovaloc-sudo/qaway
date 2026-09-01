@@ -282,19 +282,66 @@
   .blog-prose .text-muted { color: var(--blog-muted-color) !important; }
   .blog-prose .text-accent { color: var(--blog-accent-color) !important; }
   .blog-prose .border-line { border-color: var(--blog-border-color) !important; }
-  .blog-prose .bg-surface-muted { background-color: var(--blog-surface-color) !important; }
-
-  /* Bloques de Llamada (Callouts) e Infografías */
-  .blog-prose div[data-type="callout-block"] p {
-    font-size: var(--blog-font-size);
-    line-height: var(--blog-line-height);
-    margin-bottom: 0;
+  /* =========================================================================
+     BLOQUES ENRIQUECIDOS DEL BLOG (Callouts, Infografías, Bookmarks)
+     ========================================================================= */
+  /* 1. Tarjetas de Llamada / Callouts ("Dato del Foro Económico Mundial") */
+  .blog-prose [data-type="callout-block"],
+  .blog-prose .callout-block {
+    margin: 1.75rem 0 !important;
+  }
+  .blog-prose [data-type="callout-block"] p,
+  .blog-prose .callout-block p {
+    font-size: var(--blog-font-size) !important;
+    line-height: var(--blog-line-height) !important;
+    color: var(--blog-text-color) !important;
+    margin-bottom: 0 !important;
+  }
+  .blog-prose [data-type="callout-block"] p span,
+  .blog-prose [data-type="callout-block"] p strong {
+    font-size: var(--blog-font-size) !important;
+    line-height: var(--blog-line-height) !important;
   }
 
-  .blog-prose div[data-type="infographic-block"] p {
-    font-size: 0.75rem;
-    line-height: 1.35;
-    margin-bottom: 0;
+  /* 2. Infografías y Gráficos de Pasos / Flow Cards */
+  .blog-prose [data-type="infographic-block"],
+  .blog-prose [data-infographic] {
+    margin: 2rem 0 !important;
+  }
+  .blog-prose [data-type="infographic-block"] .grid,
+  .blog-prose [data-infographic] .grid {
+    align-items: stretch !important;
+  }
+  .blog-prose [data-type="infographic-block"] .grid > div,
+  .blog-prose [data-infographic] .grid > div {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+  }
+  .blog-prose [data-type="infographic-block"] .grid > div > div,
+  .blog-prose [data-infographic] .grid > div > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    min-height: 140px !important;
+  }
+  .blog-prose [data-type="infographic-block"] strong,
+  .blog-prose [data-infographic] strong {
+    font-size: 0.8125rem !important;
+    line-height: 1.3 !important;
+    min-height: 2.4rem !important;
+    display: block !important;
+  }
+  .blog-prose [data-type="infographic-block"] p,
+  .blog-prose [data-infographic] p {
+    font-size: 0.72rem !important;
+    line-height: 1.35 !important;
+    color: var(--blog-muted-color) !important;
+    margin-bottom: 0 !important;
+    min-height: 2.8rem !important;
+    display: flex !important;
+    align-items: flex-start !important;
   }
   /* Kicker del Hero Secundario */
   .qw-hero-secondary-kicker {
