@@ -15,7 +15,7 @@ const IMG = {
   ingredient_orange: "/aurea-images/ingredient_orange.jpg",
   ingredient_pomegranate: "/aurea-images/ingredient_pomegranate.jpg",
   ingredient_rose: "/aurea-images/ingredient_rose.jpg",
-  ritual: "/aurea-images/ritual.jpg",
+  ritual: "/aurea-images/ritual_v2.png",
   serum_orange: "/aurea-images/serum_orange.jpg",
   woman_story: "/aurea-images/woman_story_v2.png",
   hero_diseno_sin_titulo: "/aurea-images/hero_diseno_sin_titulo.png",
