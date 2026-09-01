@@ -55,7 +55,8 @@ import {
   Wrench,
   MessageSquare,
   Briefcase,
-  Target
+  Target,
+  Activity
 } from 'lucide-react'
 
 import { supabase } from '@/config/supabase'
@@ -527,22 +528,27 @@ export default function MarketingStudioPage() {
     return (momConvRateCurrent * Math.pow(1 + momConvRateGrowth / 100, momMonths)).toFixed(2)
   }, [momConvRateCurrent, momConvRateGrowth, momMonths])
 
-  const calculatedLeadsGoal = useMemo(() => {
+  const calculatedMomLeadsGoal = useMemo(() => {
     return Math.round(calculatedMomVisitorsGoal * (parseFloat(calculatedMomConvRateGoal) / 100))
   }, [calculatedMomVisitorsGoal, calculatedMomConvRateGoal])
+
+  const calculatedLeadsGoal = calculatedMomLeadsGoal
 
   const calculatedMomCloseRateGoal = useMemo(() => {
     return (momCloseRateCurrent * Math.pow(1 + momCloseRateGrowth / 100, momMonths)).toFixed(2)
   }, [momCloseRateCurrent, momCloseRateGrowth, momMonths])
 
+  const calculatedMomCustomersGoal = useMemo(() => {
+    return Math.round(calculatedMomLeadsGoal * (parseFloat(calculatedMomCloseRateGoal) / 100))
+  }, [calculatedMomLeadsGoal, calculatedMomCloseRateGoal])
+
   const calculatedRevenue = useMemo(() => {
-    return calculatedLeadsGoal * (parseFloat(calculatedMomCloseRateGoal) / 100) * simAov
-  }, [calculatedLeadsGoal, calculatedMomCloseRateGoal, simAov])
+    return calculatedMomCustomersGoal * simAov
+  }, [calculatedMomCustomersGoal, simAov])
 
   const calculatedCac = useMemo(() => {
-    const totalCustomers = calculatedLeadsGoal * (parseFloat(calculatedMomCloseRateGoal) / 100)
-    return totalCustomers > 0 ? (simAdSpend / totalCustomers).toFixed(1) : '0'
-  }, [calculatedLeadsGoal, calculatedMomCloseRateGoal, simAdSpend])
+    return calculatedMomCustomersGoal > 0 ? (simAdSpend / calculatedMomCustomersGoal).toFixed(1) : '0'
+  }, [calculatedMomCustomersGoal, simAdSpend])
 
   const calculatedLtv = useMemo(() => {
     return Math.round(simAov * simLtvMultiplier)
@@ -1021,9 +1027,18 @@ export default function MarketingStudioPage() {
             }
           }
         }
+      case 'smart':
+        return {
+          title: '2. Objetivos SMART & Crecimiento MoM',
+          subtitle: 'Framework de Metas, Calculadora Compuesta de Tráfico/Conversión y Mitigación de Obstáculos',
+          icon: Target,
+          iconColor: 'bg-cyan-500',
+          actionText: 'Exportar Metas (PDF)',
+          onAction: () => window.print()
+        }
       case 'kanban':
         return {
-          title: '2. Content Mapping (Página 6)',
+          title: '3. Content Mapping (Página 6)',
           subtitle: 'Tablero Kanban por Nivel de Conciencia: TOFU, MOFU y BOFU',
           icon: Kanban,
           iconColor: 'bg-emerald-500',
@@ -1032,7 +1047,7 @@ export default function MarketingStudioPage() {
         }
       case 'grid':
         return {
-          title: '3. Base Relacional POEM',
+          title: '4. Base Relacional POEM',
           subtitle: 'Planilla estructurada de activos digitales y formatos certificados',
           icon: TableIcon,
           iconColor: 'bg-blue-500',
@@ -1041,7 +1056,7 @@ export default function MarketingStudioPage() {
         }
       case 'dashboard':
         return {
-          title: '4. Dashboard & Unit Economics',
+          title: '5. Dashboard & Unit Economics',
           subtitle: 'Widgets analíticos, Mix POEM y Simulador Financiero CAC / LTV',
           icon: PieChart,
           iconColor: 'bg-amber-500',
@@ -1053,15 +1068,6 @@ export default function MarketingStudioPage() {
             setSimAov(480)
             setSimAdSpend(1500)
           }
-        }
-      case 'smart':
-        return {
-          title: '5. Automated SMART Engine',
-          subtitle: 'Fórmula de Crecimiento Compuesto MoM y Mitigación de Obstáculos',
-          icon: Bot,
-          iconColor: 'bg-cyan-500',
-          actionText: 'Exportar Meta',
-          onAction: () => window.print()
         }
       default:
         return {
@@ -1245,7 +1251,31 @@ export default function MarketingStudioPage() {
                 </span>
               </button>
 
-              {/* Block 2: Kanban */}
+              {/* Block 2: Objetivos SMART & Crecimiento */}
+              <button
+                type="button"
+                onClick={() => setCurrentView('smart')}
+                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                  currentView === 'smart'
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm">2. Objetivos SMART</div>
+                    <div className={`text-[11px] ${currentView === 'smart' ? 'text-slate-300' : 'text-slate-400'}`}>
+                      Calculadora MoM
+                    </div>
+                  </div>
+                </div>
+                <ChevronRight className={`w-4 h-4 ${currentView === 'smart' ? 'text-white' : 'text-slate-400'}`} />
+              </button>
+
+              {/* Block 3: Kanban */}
               <button
                 type="button"
                 onClick={() => setCurrentView('kanban')}
@@ -1260,7 +1290,7 @@ export default function MarketingStudioPage() {
                     <Kanban className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="font-bold text-xs sm:text-sm">2. Content Mapping</div>
+                    <div className="font-bold text-xs sm:text-sm">3. Content Mapping</div>
                     <div className={`text-[11px] ${currentView === 'kanban' ? 'text-slate-300' : 'text-slate-400'}`}>
                       Reglas Página 6
                     </div>
@@ -1273,7 +1303,7 @@ export default function MarketingStudioPage() {
                 </span>
               </button>
 
-              {/* Block 3: Grid */}
+              {/* Block 4: Grid */}
               <button
                 type="button"
                 onClick={() => setCurrentView('grid')}
@@ -1288,7 +1318,7 @@ export default function MarketingStudioPage() {
                     <TableIcon className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="font-bold text-xs sm:text-sm">3. Base Relacional</div>
+                    <div className="font-bold text-xs sm:text-sm">4. Base Relacional</div>
                     <div className={`text-[11px] ${currentView === 'grid' ? 'text-slate-300' : 'text-slate-400'}`}>
                       Matriz POEM
                     </div>
@@ -1297,7 +1327,7 @@ export default function MarketingStudioPage() {
                 <ChevronRight className={`w-4 h-4 ${currentView === 'grid' ? 'text-white' : 'text-slate-400'}`} />
               </button>
 
-              {/* Block 4: Dashboard */}
+              {/* Block 5: Dashboard */}
               <button
                 type="button"
                 onClick={() => setCurrentView('dashboard')}
@@ -1312,37 +1342,13 @@ export default function MarketingStudioPage() {
                     <PieChart className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="font-bold text-xs sm:text-sm">4. Dashboard & ROI</div>
+                    <div className="font-bold text-xs sm:text-sm">5. Dashboard & ROI</div>
                     <div className={`text-[11px] ${currentView === 'dashboard' ? 'text-slate-300' : 'text-slate-400'}`}>
                       Unit Economics
                     </div>
                   </div>
                 </div>
                 <ChevronRight className={`w-4 h-4 ${currentView === 'dashboard' ? 'text-white' : 'text-slate-400'}`} />
-              </button>
-
-              {/* Block 5: Automated SMART */}
-              <button
-                type="button"
-                onClick={() => setCurrentView('smart')}
-                className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                  currentView === 'smart'
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-slate-50/70 hover:bg-slate-100 text-slate-700 border border-slate-100'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-xs sm:text-sm">5. Automated SMART</div>
-                    <div className={`text-[11px] ${currentView === 'smart' ? 'text-slate-300' : 'text-slate-400'}`}>
-                      Calculadora MoM
-                    </div>
-                  </div>
-                </div>
-                <ChevronRight className={`w-4 h-4 ${currentView === 'smart' ? 'text-white' : 'text-slate-400'}`} />
               </button>
             </div>
           ) : (
@@ -1381,18 +1387,32 @@ export default function MarketingStudioPage() {
               {/* Block 2 */}
               <button
                 type="button"
+                onClick={() => setCurrentView('smart')}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                  currentView === 'smart'
+                    ? 'bg-cyan-600 text-white shadow-md ring-2 ring-cyan-400/40'
+                    : 'bg-slate-100 hover:bg-slate-200 text-cyan-600'
+                }`}
+                title="2. Objetivos SMART & Crecimiento"
+              >
+                <Target className="w-4.5 h-4.5" />
+              </button>
+
+              {/* Block 3 */}
+              <button
+                type="button"
                 onClick={() => setCurrentView('kanban')}
                 className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
                   currentView === 'kanban'
                     ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-400/40'
                     : 'bg-slate-100 hover:bg-slate-200 text-emerald-600'
                 }`}
-                title="2. Content Mapping"
+                title="3. Content Mapping"
               >
                 <Kanban className="w-4.5 h-4.5" />
               </button>
 
-              {/* Block 3 */}
+              {/* Block 4 */}
               <button
                 type="button"
                 onClick={() => setCurrentView('grid')}
@@ -1401,12 +1421,12 @@ export default function MarketingStudioPage() {
                     ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-400/40'
                     : 'bg-slate-100 hover:bg-slate-200 text-blue-600'
                 }`}
-                title="3. Base Relacional (POEM)"
+                title="4. Base Relacional (POEM)"
               >
                 <TableIcon className="w-4.5 h-4.5" />
               </button>
 
-              {/* Block 4 */}
+              {/* Block 5 */}
               <button
                 type="button"
                 onClick={() => setCurrentView('dashboard')}
@@ -1415,23 +1435,9 @@ export default function MarketingStudioPage() {
                     ? 'bg-amber-600 text-white shadow-md ring-2 ring-amber-400/40'
                     : 'bg-slate-100 hover:bg-slate-200 text-amber-600'
                 }`}
-                title="4. Dashboard & ROI"
+                title="5. Dashboard & ROI"
               >
                 <PieChart className="w-4.5 h-4.5" />
-              </button>
-
-              {/* Block 5 */}
-              <button
-                type="button"
-                onClick={() => setCurrentView('smart')}
-                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-                  currentView === 'smart'
-                    ? 'bg-cyan-600 text-white shadow-md ring-2 ring-cyan-400/40'
-                    : 'bg-slate-100 hover:bg-slate-200 text-cyan-600'
-                }`}
-                title="5. Automated SMART"
-              >
-                <Bot className="w-4.5 h-4.5" />
               </button>
             </div>
           )}
@@ -2257,7 +2263,270 @@ export default function MarketingStudioPage() {
             )}
 
             {/* =========================================================================
-                2. KANBAN CONTENT MAPPING
+                2. OBJETIVOS SMART & CALCULADORA DE CRECIMIENTO MoM (HUBSPOT SHEETS)
+               ========================================================================= */}
+            {currentView === 'smart' && (
+              <motion.div
+                key="panel-smart"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-6"
+              >
+                {/* Header Banner */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100 relative z-10">
+                    <div className="space-y-1">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 text-cyan-800 text-xs font-bold uppercase tracking-wider">
+                        <Target className="w-3.5 h-3.5 text-cyan-600" />
+                        <span>Módulo 2 • Metodología Oficial HubSpot</span>
+                      </div>
+                      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                        Objetivos SMART & Crecimiento MoM
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
+                        Estructura metas comerciales claras y calcula tu proyección mensual compuesta de visitas, leads y clientes.
+                      </p>
+                    </div>
+
+                    {/* Presets Rápidos */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSmartSpecific(`Aumentar prospectos calificados para ${companyContext.name} desde canales digitales.`)
+                          setSmartMeasurable('+25% de MQLs y consultas directas por WhatsApp.')
+                          setSmartAchievable('Escalar de 50 a 65 prospectos calificados al mes con optimización de campañas.')
+                          setSmartRelevant(`Permite alimentar el pipeline comercial con clientes del sector ${companyContext.targetNiche}.`)
+                          setSmartTimeBound('Meta proyectada a 6 meses con revisiones quincenales.')
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        🎯 Preset: Leads & Ventas
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSmartSpecific(`Escalar el tráfico calificado del sitio web mediante contenidos TOFU/MOFU.`)
+                          setSmartMeasurable('+40% en visitantes únicos mensuales.')
+                          setSmartAchievable('Publicar 4 artículos SEO y 8 piezas de contenido de valor al mes.')
+                          setSmartRelevant('El tráfico orgánico reduce nuestro costo por adquisición en más de un 30%.')
+                          setSmartTimeBound('Plazo límite de 90 días.')
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        🚀 Preset: Tráfico SEO
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Main Grid: SMART Form & MoM Calculator */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 relative z-10 items-start">
+                    
+                    {/* LEFT COLUMN: 5 PASOS SMART */}
+                    <div className="lg:col-span-7 space-y-4">
+                      <div className="flex items-center justify-between pb-2">
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <Bot className="w-4 h-4 text-cyan-600" />
+                          <span>Desglose de Meta SMART</span>
+                        </h4>
+                        <span className="text-xs text-slate-400 font-medium">Editable directamente</span>
+                      </div>
+
+                      {/* S: Específico */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 group hover:bg-white hover:border-indigo-300 transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase text-indigo-700">S • Específico (Specific)</span>
+                          <span className="text-[11px] text-slate-400">¿Qué quieres lograr exactamente?</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={smartSpecific}
+                          onChange={(e) => setSmartSpecific(e.target.value)}
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-1 transition-colors"
+                        />
+                      </div>
+
+                      {/* M: Medible */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 group hover:bg-white hover:border-blue-300 transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase text-blue-700">M • Medible (Measurable)</span>
+                          <span className="text-[11px] text-slate-400">¿Qué métrica o KPI define el éxito?</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={smartMeasurable}
+                          onChange={(e) => setSmartMeasurable(e.target.value)}
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-600 focus:outline-none py-1 transition-colors"
+                        />
+                      </div>
+
+                      {/* A: Alcanzable */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 group hover:bg-white hover:border-purple-300 transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase text-purple-700">A • Alcanzable (Attainable)</span>
+                          <span className="text-[11px] text-slate-400">¿Cómo lo lograrás de forma realista?</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={smartAchievable}
+                          onChange={(e) => setSmartAchievable(e.target.value)}
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-slate-300 focus:border-purple-600 focus:outline-none py-1 transition-colors"
+                        />
+                      </div>
+
+                      {/* R: Relevante */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 group hover:bg-white hover:border-amber-300 transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase text-amber-700">R • Relevante (Relevant)</span>
+                          <span className="text-[11px] text-slate-400">¿Por qué es crucial para tu negocio?</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={smartRelevant}
+                          onChange={(e) => setSmartRelevant(e.target.value)}
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-slate-300 focus:border-amber-600 focus:outline-none py-1 transition-colors"
+                        />
+                      </div>
+
+                      {/* T: Límite de Tiempo */}
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1 group hover:bg-white hover:border-emerald-300 transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase text-emerald-700">T • Límite de Tiempo (Time-bound)</span>
+                          <span className="text-[11px] text-slate-400">¿En qué plazo temporal se medirá?</span>
+                        </div>
+                        <input
+                          type="text"
+                          value={smartTimeBound}
+                          onChange={(e) => setSmartTimeBound(e.target.value)}
+                          className="w-full text-xs sm:text-sm font-semibold text-slate-900 bg-transparent border-b border-slate-300 focus:border-emerald-600 focus:outline-none py-1 transition-colors"
+                        />
+                      </div>
+
+                      {/* Declaración Oficial SMART */}
+                      <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-2 shadow-md">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                            Declaración Oficial de Objetivo SMART
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">Formato HubSpot</span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed italic">
+                          "{smartSpecific} {smartMeasurable} {smartRelevant} {smartTimeBound}"
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: CALCULADORA DE CRECIMIENTO MoM */}
+                    <div className="lg:col-span-5 space-y-6">
+                      <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-sm space-y-5">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-200/70">
+                          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-emerald-600" />
+                            <span>Calculadora MoM (Compuesto)</span>
+                          </h4>
+                          <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+                            {momMonths} Meses
+                          </span>
+                        </div>
+
+                        {/* Slider Meses */}
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-bold text-slate-700">
+                            <span>Horizonte de Tiempo:</span>
+                            <span>{momMonths} Meses</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="3"
+                            max="24"
+                            step="1"
+                            value={momMonths}
+                            onChange={(e) => setMomMonths(Number(e.target.value))}
+                            className="w-full accent-cyan-600"
+                          />
+                        </div>
+
+                        {/* Tráfico Inicial & Tasa MoM */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500 block">Visitas / Mes Actual</label>
+                            <input
+                              type="number"
+                              value={momVisitorsCurrent}
+                              onChange={(e) => setMomVisitorsCurrent(Number(e.target.value))}
+                              className="w-full font-mono font-bold text-xs sm:text-sm text-slate-900 focus:outline-none"
+                            />
+                          </div>
+                          <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500 block">Crecimiento MoM (%)</label>
+                            <input
+                              type="number"
+                              step="0.5"
+                              value={momVisitorsRate}
+                              onChange={(e) => setMomVisitorsRate(Number(e.target.value))}
+                              className="w-full font-mono font-bold text-xs sm:text-sm text-slate-900 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Métricas Proyectadas */}
+                        <div className="space-y-3 pt-2">
+                          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200/70 flex items-center justify-between">
+                            <div>
+                              <div className="text-[11px] font-bold text-emerald-800 uppercase">Meta Tráfico Final</div>
+                              <div className="text-xs text-emerald-600">Al finalizar mes {momMonths}</div>
+                            </div>
+                            <div className="text-base sm:text-lg font-mono font-black text-emerald-900">
+                              {calculatedMomVisitorsGoal.toLocaleString()} <span className="text-xs font-normal">visitas/mes</span>
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200/70 flex items-center justify-between">
+                            <div>
+                              <div className="text-[11px] font-bold text-blue-800 uppercase">Meta Leads Proyectados</div>
+                              <div className="text-xs text-blue-600">Conversión estimada {momConvRateCurrent}%</div>
+                            </div>
+                            <div className="text-base sm:text-lg font-mono font-black text-blue-900">
+                              {calculatedMomLeadsGoal.toLocaleString()} <span className="text-xs font-normal">leads/mes</span>
+                            </div>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200/70 flex items-center justify-between">
+                            <div>
+                              <div className="text-[11px] font-bold text-purple-800 uppercase">Clientes Nuevos / Mes</div>
+                              <div className="text-xs text-purple-600">Cierre estimado {momCloseRateCurrent}%</div>
+                            </div>
+                            <div className="text-base sm:text-lg font-mono font-black text-purple-900">
+                              {calculatedMomCustomersGoal.toLocaleString()} <span className="text-xs font-normal">clientes/mes</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Obstáculos & Mitigación */}
+                        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200/80 space-y-2 text-amber-900">
+                          <div className="text-xs font-bold flex items-center gap-1.5">
+                            <ShieldCheck className="w-4 h-4 text-amber-600" />
+                            <span>Mitigación de Obstáculos (Página 2)</span>
+                          </div>
+                          <p className="text-xs text-amber-800 leading-relaxed">
+                            Para alcanzar esta meta de <strong>{calculatedMomLeadsGoal} leads/mes</strong>, se requiere asegurar seguimiento de WhatsApp en menos de 15 minutos para evitar fugas de conversión.
+                          </p>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* =========================================================================
+                3. KANBAN CONTENT MAPPING
                ========================================================================= */}
             {currentView === 'kanban' && (
               <motion.div
@@ -2590,142 +2859,6 @@ export default function MarketingStudioPage() {
               </motion.div>
             )}
 
-            {/* =========================================================================
-                5. AUTOMATED SMART ENGINE
-               ========================================================================= */}
-            {currentView === 'smart' && (
-              <motion.div
-                key="panel-smart"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
-              >
-                <div className="lg:col-span-7 p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-md bg-cyan-500 text-white flex items-center justify-center">
-                        <Bot className="w-4 h-4" />
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-900">Automated SMART Workflow</h4>
-                    </div>
-                    <span className="text-xs font-bold text-slate-400">Paso a Paso</span>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                    <span className="text-xs font-bold uppercase text-indigo-700">S • Específico</span>
-                    <input
-                      type="text"
-                      value={smartSpecific}
-                      onChange={(e) => setSmartSpecific(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-800"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                    <span className="text-xs font-bold uppercase text-blue-700">M • Medible</span>
-                    <input
-                      type="text"
-                      value={smartMeasurable}
-                      onChange={(e) => setSmartMeasurable(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-800"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                    <span className="text-xs font-bold uppercase text-purple-700">A • Alcanzable</span>
-                    <input
-                      type="text"
-                      value={smartAchievable}
-                      onChange={(e) => setSmartAchievable(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-800"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                    <span className="text-xs font-bold uppercase text-amber-700">R • Relevante</span>
-                    <input
-                      type="text"
-                      value={smartRelevant}
-                      onChange={(e) => setSmartRelevant(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-800"
-                    />
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1.5">
-                    <span className="text-xs font-bold uppercase text-emerald-700">T • Límite de Tiempo</span>
-                    <input
-                      type="text"
-                      value={smartTimeBound}
-                      onChange={(e) => setSmartTimeBound(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-800"
-                    />
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-900 text-white space-y-2">
-                    <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Objetivo SMART Oficial</div>
-                    <p className="text-xs sm:text-sm text-slate-200 font-medium leading-relaxed">
-                      "{smartSpecific} {smartRelevant} {smartTimeBound}"
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-5 space-y-4">
-                  <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                        <Activity className="w-4 h-4 text-emerald-600" />
-                        Calculadora MoM (Compuesto)
-                      </h4>
-                      <span className="text-xs font-mono font-bold text-indigo-600">{momMonths} Meses</span>
-                    </div>
-
-                    <div className="space-y-3.5 text-xs sm:text-sm">
-                      <div>
-                        <div className="flex justify-between font-bold text-slate-700 mb-1">
-                          <span>Visitantes Iniciales:</span>
-                          <span className="font-mono">{momVisitorsCurrent}</span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 font-mono font-bold">
-                          Meta Tráfico: {calculatedMomVisitorsGoal.toLocaleString()} visitas/mes
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between font-bold text-slate-700 mb-1">
-                          <span>Conversión a Lead:</span>
-                          <span className="font-mono">{momConvRateCurrent}%</span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-blue-50 text-blue-800 font-mono font-bold">
-                          Meta Leads: {calculatedMomConvRateGoal}% ({calculatedMomLeadsGoal} leads/mes)
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between font-bold text-slate-700 mb-1">
-                          <span>Cierre a Clientes:</span>
-                          <span className="font-mono">{momCloseRateCurrent}%</span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-purple-50 text-purple-800 font-mono font-bold">
-                          Meta Cierre: {calculatedMomCloseRateGoal}% ({calculatedMomCustomersGoal} clientes/mes)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200/80 space-y-2 text-amber-900">
-                    <div className="text-xs sm:text-sm font-bold flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-amber-600" />
-                      <span>Evaluación de Obstáculos & Capacidad</span>
-                    </div>
-                    <p className="text-xs text-amber-800 leading-relaxed">
-                      Para asegurar el cumplimiento de esta meta, se recomienda reservar <strong>6 a 8 horas semanales</strong> del equipo comercial dedicadas a la nutrición de prospectos.
-                    </p>
-                  </div>
-                </div>
-
-              </motion.div>
-            )}
 
           </AnimatePresence>
         </div>

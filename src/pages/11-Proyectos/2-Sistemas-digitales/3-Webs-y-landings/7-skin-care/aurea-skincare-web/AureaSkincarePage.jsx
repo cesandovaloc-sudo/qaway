@@ -8,13 +8,13 @@ import AureaStudioPanel from "./AureaStudioPanel";
 import "./aurea-landing.css";
 
 const DEFAULT_CONFIG = {
-  heroBg: { x: 0, y: 0, scale: 100, opacity: 100 },
-  heroTitle: { x: 0, y: 0, scale: 100, fontSize: 48 },
+  heroBg: { x: 2, y: 359, scale: 101, opacity: 100 },
+  heroTitle: { x: -38, y: -17, scale: 114, fontSize: 47 },
   heroSubtext: { x: 0, y: 0, fontSize: 15 },
   heroBtn: { x: 0, y: 0, scale: 100 },
-  heroPill: { x: 0, y: 0, scale: 100 },
-  cardLeft: { x: 0, y: 0, scale: 100, opacity: 100 },
-  cardRight: { x: 0, y: 0, scale: 100, opacity: 100 },
+  heroPill: { x: 0, y: 0, scale: 105 },
+  cardLeft: { x: -270, y: -55, scale: 100, opacity: 100 },
+  cardRight: { x: 299, y: -54, scale: 100, opacity: 100 },
 };
 
 const IMG = {
@@ -199,9 +199,6 @@ export default function AureaSkincarePage() {
                   >
                     Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.
                   </p>
-                  <div className="hero-actions">
-                    <a className="btn btn-primary" href="#coleccion">Descubre la colección</a>
-                  </div>
                 </motion.div>
 
                 {/* 3. Cápsula montada arriba a la derecha (Arrastrable & Calibrable) */}
@@ -219,7 +216,7 @@ export default function AureaSkincarePage() {
                   <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
                 </motion.div>
 
-                {/* 4. Tarjeta Glassmorphism izquierda (Compacta y estilizada) */}
+                {/* 4. Tarjeta Glassmorphism izquierda con CTA dentro (Compacta y estilizada) */}
                 <motion.div
                   className="hero-overlay"
                   drag
@@ -239,6 +236,9 @@ export default function AureaSkincarePage() {
                       <small>Fórmulas 100% puras</small>
                     </div>
                   </div>
+                  <a className="btn btn-primary btn-overlay-cta" href="#coleccion">
+                    Descubre la colección <ArrowRight size={13}/>
+                  </a>
                 </motion.div>
 
                 {/* 5. Badge Glassmorphism derecha (Arrastrable & Calibrable) */}
