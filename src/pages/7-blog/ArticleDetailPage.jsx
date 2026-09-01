@@ -847,7 +847,7 @@ export default function ArticleDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white border border-zinc-200/80 rounded-[15px] p-8 md:p-10 shadow-xs"
+              className="bg-white border border-zinc-200/80 rounded-[15px] p-6 sm:p-7 md:px-7 md:py-9 shadow-xs"
             >
               <div 
                 dangerouslySetInnerHTML={{ __html: sanitizeAndDecodeContent(article.content) }} 

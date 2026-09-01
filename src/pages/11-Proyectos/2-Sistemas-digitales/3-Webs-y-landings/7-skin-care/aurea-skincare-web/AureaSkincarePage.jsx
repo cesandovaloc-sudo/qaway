@@ -112,29 +112,33 @@ export default function AureaSkincarePage() {
         <section className="hero">
           <div className="container">
             <Reveal>
-              <div className="hero-top">
-                <div>
+              <div className="hero-stage">
+                {/* 1. Lienzo Maestro PNG de Fondo */}
+                <img className="hero-stage-bg" src={IMG.hero_diseno_sin_titulo} alt="Auréa Skincare Sérum y Cítricos" />
+
+                {/* 2. Textos y Botón montados arriba a la izquierda */}
+                <div className="hero-stage-content">
                   <h1>Cuida tu piel.<br/>De forma consciente.</h1>
                   <p className="hero-subtext">Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.</p>
                   <div className="hero-actions">
                     <a className="btn btn-primary" href="#coleccion">Descubre la colección</a>
                   </div>
                 </div>
-                <div className="hero-copy">
-                  <div className="hero-pill"><img src={IMG.hero_products} alt="Colección de productos Auréa"/></div>
-                </div>
-              </div>
-            </Reveal>
 
-            <Reveal delay={.08}>
-              <motion.div className="hero-visual" whileHover={{ scale:1.002 }} transition={{ duration:.5 }}>
-                <img src={IMG.hero_diseno_sin_titulo} alt="Sérum antioxidante Auréa junto a cítricos y botánicos"/>
+                {/* 3. Cápsula montada arriba a la derecha */}
+                <div className="hero-pill">
+                  <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
+                </div>
+
+                {/* 4. Tarjeta Glassmorphism izquierda */}
                 <motion.div className="hero-overlay" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} transition={{delay:.35,duration:.7}}>
                   <div className="icon-wrap"><Leaf size={18} strokeWidth={1.4}/></div>
                   <h3>Ingredientes reales.<br/>Resultados visibles.</h3>
                   <p>Fórmulas limpias, sin ingredientes innecesarios, para una piel saludable y luminosa.</p>
                   <a href="#ingredientes">Conoce más →</a>
                 </motion.div>
+
+                {/* 5. Badge Glassmorphism derecha */}
                 <motion.div className="hero-badge" initial={{opacity:0,y:15}} animate={{opacity:1,y:0}} transition={{delay:.65,duration:.65}}>
                   <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" />
                   <div className="badge-list">
@@ -144,7 +148,7 @@ export default function AureaSkincarePage() {
                     <span>Libre de crueldad animal</span>
                   </div>
                 </motion.div>
-              </motion.div>
+              </div>
             </Reveal>
           </div>
         </section>
