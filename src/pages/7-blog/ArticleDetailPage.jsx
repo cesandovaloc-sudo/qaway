@@ -196,10 +196,32 @@ export default function ArticleDetailPage() {
       } finally {
         setLoadingArticle(false)
       }
-    }
-
     loadArticle()
   }, [id])
+
+  // Actualizar Meta Tags Open Graph (Facebook, LinkedIn, X) dinámicamente según el artículo
+  useEffect(() => {
+    if (!article) return
+
+    document.title = `${article.title} | Blog Qaway Lab`
+
+    const setMeta = (property, content) => {
+      if (!content) return
+      let el = document.querySelector(`meta[property="${property}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', property)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
+    setMeta('og:title', article.title)
+    setMeta('og:description', article.excerpt || 'Artículo publicado en Qaway Lab.')
+    setMeta('og:image', article.image)
+    setMeta('og:url', typeof window !== 'undefined' ? window.location.href : '')
+    setMeta('og:type', 'article')
+  }, [article])
 
   // Precargar lista de voces del navegador al montar el componente
   useEffect(() => {

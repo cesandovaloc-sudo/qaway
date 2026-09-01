@@ -189,6 +189,14 @@ export default function AppRouter() {
           path="/editor/new"
           element={renderRoute('hub', <ProtectedRoute><BlogEditorPage /></ProtectedRoute>)}
         />
+        <Route
+          path="/hub/marketing"
+          element={renderRoute('hub', <ProtectedRoute><MarketingStudioPage /></ProtectedRoute>)}
+        />
+        <Route
+          path="/hub/marketing2"
+          element={renderRoute('hub', <ProtectedRoute><MarketingStudioTwentyPage /></ProtectedRoute>)}
+        />
         <Route index element={<InicioPage />} />
 
         <Route element={<Layout />}>
@@ -215,14 +223,6 @@ export default function AppRouter() {
           <Route
             path="hub/analytics"
             element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
-          />
-          <Route
-            path="hub/marketing"
-            element={renderRoute('hub', <ProtectedRoute><MarketingStudioPage /></ProtectedRoute>)}
-          />
-          <Route
-            path="hub/marketing2"
-            element={renderRoute('hub', <ProtectedRoute><MarketingStudioTwentyPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/dashboards"

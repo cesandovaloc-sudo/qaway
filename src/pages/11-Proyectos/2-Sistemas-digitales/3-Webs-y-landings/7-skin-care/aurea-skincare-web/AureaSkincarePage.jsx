@@ -31,39 +31,9 @@ const products = [
 ];
 
 const formulas = [
-  {
-    tag: "Fórmula 01",
-    name: "Sérum Iluminador Botánico",
-    desc: "Vitamina C estable, extracto de cítricos y rosa mosqueta para un tono uniforme y luminosidad natural.",
-    badge: "Bestseller",
-    rating: "4.9 / 5.0",
-    reviews: "1,240 reseñas",
-    items: ["Unifica el tono","Protege contra radicales libres","Textura ligera sin residuo graso"],
-    image: IMG.serum_orange,
-    price: "S/ 129.00"
-  },
-  {
-    tag: "Fórmula 02",
-    name: "Crema Hidratante Calmante",
-    desc: "Ceramidas vegetales, aloe vera y té verde para restaurar la barrera cutánea y calmar rojeces.",
-    badge: "Piel sensible",
-    rating: "4.8 / 5.0",
-    reviews: "980 reseñas",
-    items: ["Hidratación 24 horas","Calma irritación y rojeces","Acabado mate aterciopelado"],
-    image: IMG.ritual,
-    price: "S/ 119.00"
-  },
-  {
-    tag: "Fórmula 03",
-    name: "Aceite Nutritivo Regenerador",
-    desc: "Escualano botánico, jojoba y granada para sellar la hidratación y devolver la elasticidad.",
-    badge: "Uso nocturno",
-    rating: "5.0 / 5.0",
-    reviews: "640 reseñas",
-    items: ["Regeneración nocturna profunda","Mejora la elasticidad","Aroma sutil 100% natural"],
-    image: IMG.ingredient_rose,
-    price: "S/ 139.00"
-  }
+  { label:"Botanical Glow", title:"Sérum antioxidante", text:"Vitamina C estabilizada, ácido ferúlico y niacinamida para iluminar, proteger y devolver vitalidad.", chips:["Vitamina C","Ácido ferúlico","Niacinamida"], price:"S/ 129.00", image:IMG.serum_orange },
+  { label:"Calm Ritual", title:"Sérum calmante", text:"Una fórmula ligera con aloe y pantenol para acompañar pieles sensibles con un gesto esencial.", chips:["Aloe vera","Pantenol","Betaína"], price:"S/ 119.00", image:IMG.ingredient_aloe },
+  { label:"Renew Balance", title:"Aceite regenerador", text:"Rosa mosqueta, jojoba y extractos botánicos para nutrir sin sobrecargar la rutina.", chips:["Rosa mosqueta","Jojoba","Vitamina E"], price:"S/ 139.00", image:IMG.ingredient_pomegranate },
 ];
 
 function Reveal({ children, className="", delay=0 }) {
