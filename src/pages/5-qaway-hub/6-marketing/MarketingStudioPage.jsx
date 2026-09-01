@@ -348,6 +348,7 @@ export default function MarketingStudioPage() {
   })
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
   const [editingCompany, setEditingCompany] = useState(companyContext)
+  const [companySaveStatus, setCompanySaveStatus] = useState('idle') // 'idle' | 'saving' | 'saved'
 
   // Load Company from Supabase on mount
   useEffect(() => {
@@ -374,10 +375,11 @@ export default function MarketingStudioPage() {
   }, [])
 
   const handleSaveCompanyContext = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
+    setCompanySaveStatus('saving')
     setCompanyContext(editingCompany)
     localStorage.setItem(`${STORAGE_KEY}_company`, JSON.stringify(editingCompany))
-    setIsCompanyModalOpen(false)
+    
     try {
       await supabase.from('company_profiles').upsert([{
         id: 'default-company',
@@ -391,6 +393,13 @@ export default function MarketingStudioPage() {
     } catch (err) {
       console.log('[Supabase] Guardado local exitoso:', err)
     }
+
+    setTimeout(() => {
+      setCompanySaveStatus('saved')
+      setTimeout(() => {
+        setCompanySaveStatus('idle')
+      }, 2500)
+    }, 600)
   }
 
   // State initialization with LocalStorage
@@ -989,7 +998,7 @@ export default function MarketingStudioPage() {
           subtitle: 'Contexto de Negocio, Oferta Real y Propuesta de Valor Sincronizada con Supabase',
           icon: Building2,
           iconColor: 'bg-[#ff4b0b]',
-          actionText: 'Guardar en Supabase',
+          actionText: companySaveStatus === 'saving' ? 'Guardando...' : (companySaveStatus === 'saved' ? '¡Guardado con éxito! ✓' : 'Guardar en Supabase'),
           onAction: () => {
             const btn = document.getElementById('btn-submit-company-profile')
             if (btn) btn.click()
@@ -1527,10 +1536,21 @@ export default function MarketingStudioPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Sincronizado con Supabase</span>
-                      </div>
+                      {companySaveStatus === 'saved' ? (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-600 text-white text-xs font-bold shadow-sm"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>¡Sincronizado con Supabase!</span>
+                        </motion.div>
+                      ) : (
+                        <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>Sincronizado con Supabase</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1627,10 +1647,31 @@ export default function MarketingStudioPage() {
                     <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#ff4b0b] hover:bg-[#e04008] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer"
+                        disabled={companySaveStatus === 'saving'}
+                        className={`inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-white font-bold text-sm shadow-md transition-all cursor-pointer ${
+                          companySaveStatus === 'saved'
+                            ? 'bg-emerald-600 hover:bg-emerald-700'
+                            : companySaveStatus === 'saving'
+                              ? 'bg-slate-700 opacity-90 cursor-wait'
+                              : 'bg-[#ff4b0b] hover:bg-[#e04008] hover:shadow-lg'
+                        }`}
                       >
-                        <Sparkles className="w-4 h-4" />
-                        <span>Guardar en Supabase & Actualizar ADN</span>
+                        {companySaveStatus === 'saving' ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            <span>Guardando en Supabase...</span>
+                          </>
+                        ) : companySaveStatus === 'saved' ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>¡ADN Guardado en Supabase!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            <span>Guardar en Supabase & Actualizar ADN</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </form>
