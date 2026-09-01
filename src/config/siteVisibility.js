@@ -11,7 +11,7 @@ const routeVisibility = {
   academy: false,
   hub: false,
   recursos: false,
-  blog: false,
+  blog: true,
   landings: true,
   auth: false,
   pruebas: false,
@@ -21,6 +21,8 @@ const publicPathAllowList = new Set([
   '/',
   '/proyectos',
   '/landings/desarrollo-web',
+  '/blog',
+  '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
 ])
 
 const navigationRegistry = [
