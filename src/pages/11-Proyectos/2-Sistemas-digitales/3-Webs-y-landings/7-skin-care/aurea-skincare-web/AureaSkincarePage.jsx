@@ -17,23 +17,26 @@ const IMG = {
   ingredient_rose: "/aurea-images/ingredient_rose.jpg",
   ritual: "/aurea-images/ritual.jpg",
   serum_orange: "/aurea-images/serum_orange.jpg",
-  woman_story: "/aurea-images/woman_story_new.png",
+  woman_story: "/aurea-images/woman_story_v2.png",
   hero_diseno_sin_titulo: "/aurea-images/hero_diseno_sin_titulo.png",
+  signature_1: "/aurea-images/signature_1.png",
+  signature_2: "/aurea-images/signature_2.png",
+  signature_3: "/aurea-images/signature_3.png",
 };
 
 const products = [
-  { name:"Sérum antioxidante", subtitle:"Vitamina C · Ácido ferúlico", image:IMG.serum_orange, description:"Ilumina y protege la piel frente al estrés oxidativo." },
+  { name:"Sérum antioxidante", subtitle:"Vitamina C · Ácido ferúlico", image:IMG.signature_1, description:"Ilumina y protege la piel frente al estrés oxidativo." },
   { name:"Gel limpiador purificante", subtitle:"Té verde · Hamamelis", image:IMG.hero_products, description:"Limpieza suave para comenzar el ritual sin resecar." },
-  { name:"Crema hidratante", subtitle:"Ácido hialurónico · Escualano", image:IMG.ingredient_aloe, description:"Hidratación esencial y sensación de confort." },
+  { name:"Crema hidratante", subtitle:"Ácido hialurónico · Escualano", image:IMG.signature_2, description:"Hidratación esencial y sensación de confort." },
   { name:"Tónico renovador", subtitle:"Rosa · Niacinamida", image:IMG.ingredient_rose, description:"Equilibra la piel y prepara el rostro para el siguiente paso." },
-  { name:"Aceite regenerador", subtitle:"Rosa mosqueta · Jojoba", image:IMG.ingredient_pomegranate, description:"Nutrición concentrada para una piel más flexible." },
+  { name:"Aceite regenerador", subtitle:"Rosa mosqueta · Jojoba", image:IMG.signature_3, description:"Nutrición concentrada para una piel más flexible." },
   { name:"Mascarilla detox", subtitle:"Arcilla verde · Espirulina", image:IMG.ingredient_green, description:"Un ritual semanal para limpiar y devolver frescura." },
 ];
 
 const formulas = [
-  { label:"Botanical Glow", title:"Sérum antioxidante", text:"Vitamina C estabilizada, ácido ferúlico y niacinamida para iluminar, proteger y devolver vitalidad.", chips:["Vitamina C","Ácido ferúlico","Niacinamida"], price:"S/ 129.00", image:IMG.serum_orange },
-  { label:"Calm Ritual", title:"Sérum calmante", text:"Una fórmula ligera con aloe y pantenol para acompañar pieles sensibles con un gesto esencial.", chips:["Aloe vera","Pantenol","Betaína"], price:"S/ 119.00", image:IMG.ingredient_aloe },
-  { label:"Renew Balance", title:"Aceite regenerador", text:"Rosa mosqueta, jojoba y extractos botánicos para nutrir sin sobrecargar la rutina.", chips:["Rosa mosqueta","Jojoba","Vitamina E"], price:"S/ 139.00", image:IMG.ingredient_pomegranate },
+  { label:"Botanical Glow", title:"Sérum antioxidante", text:"Vitamina C estabilizada, ácido ferúlico y niacinamida para iluminar, proteger y devolver vitalidad.", chips:["Vitamina C","Ácido ferúlico","Niacinamida"], price:"S/ 129.00", image:IMG.signature_1 },
+  { label:"Calm Ritual", title:"Sérum calmante", text:"Una fórmula ligera con aloe y pantenol para acompañar pieles sensibles con un gesto esencial.", chips:["Aloe vera","Pantenol","Betaína"], price:"S/ 119.00", image:IMG.signature_2 },
+  { label:"Renew Balance", title:"Aceite regenerador", text:"Rosa mosqueta, jojoba y extractos botánicos para nutrir sin sobrecargar la rutina.", chips:["Rosa mosqueta","Jojoba","Vitamina E"], price:"S/ 139.00", image:IMG.signature_3 },
 ];
 
 function Reveal({ children, className="", delay=0 }) {
@@ -220,8 +223,8 @@ export default function AureaSkincarePage() {
               <motion.div className="product-feature" layout>
                 <div className="product-gallery">
                   <div className="large"><motion.img key={active.image} initial={{opacity:0,scale:1.03}} animate={{opacity:1,scale:1}} transition={{duration:.5}} src={active.image} alt={active.title}/></div>
-                  <img src={IMG.ingredient_citrus} alt="Ingredientes botánicos"/>
-                  <img src={IMG.ingredient_rose} alt="Botánicos para cuidado de la piel"/>
+                  <img src={IMG.signature_2} alt="Colección Signature Auréa"/>
+                  <img src={IMG.signature_3} alt="Colección Signature Auréa"/>
                 </div>
                 <div className="product-info">
                   <span className="kicker">Fórmula seleccionada</span>
