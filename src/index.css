@@ -132,8 +132,8 @@
      ========================================================================= */
   .blog-prose {
     --blog-font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    --blog-font-size: 1rem;
-    --blog-line-height: 1.68;
+    --blog-font-size: 1.125rem;
+    --blog-line-height: 1.75;
     --blog-text-color: #27272a;
     --blog-heading-color: #09090b;
     --blog-muted-color: #71717a;
@@ -151,7 +151,7 @@
     font-size: var(--blog-font-size);
     line-height: var(--blog-line-height);
     color: var(--blog-text-color);
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.35rem;
   }
 
   .blog-prose p:last-child {
