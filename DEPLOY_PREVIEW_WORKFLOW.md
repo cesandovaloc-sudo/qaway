@@ -1,4 +1,4 @@
-﻿# Workflow de Deploy Preview en Hostinger
+# Workflow de Deploy Preview en Hostinger
 
 ## Objetivo
 
@@ -380,3 +380,26 @@ Este flujo aplica cuando:
 - solo quieres cambiar que paginas quedan publicas
 - no quieres rehacer router, navbar y footer manualmente en cada salida
 - quieres mantener simple el deploy manual
+
+## Workflow 3: Método Híbrido (Switch IA + Push Directo del Usuario)
+
+Este flujo combina la precisión de la IA para configurar rutas con la máxima velocidad y ahorro de tokens al delegar la compilación y subida al usuario en PowerShell.
+
+### Cuándo usarlo
+- Cuando quieres ahorrar turnos/tokens de la IA (~80% de ahorro).
+- Cuando quieres un despliegue inmediato sin esperar respuestas de chat.
+
+### Pasos exactos
+
+1. **Paso 1 (IA):**
+   - Le pides a la IA: *"Habilita en visibilidad la ruta X e Y"*.
+   - La IA modifica únicamente `src/config/siteVisibility.js` (~1 segundo).
+
+2. **Paso 2 (Usuario en PowerShell):**
+   - Abres tu terminal en la raíz del proyecto y ejecutas esta sola línea:
+   ```powershell
+   npm run build; git add .; git commit -m "2026-XX-XX_HH:MM_A22@@@_deploy-visibilidad-paginas"; git push origin main-web
+   ```
+
+3. **Paso 3 (Automático en Hostinger):**
+   - Hostinger detecta el commit en `main-web` mediante Auto-deployment y publica la nueva versión en ~30 segundos.
