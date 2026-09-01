@@ -216,7 +216,7 @@ export default function AureaSkincarePage() {
                   <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
                 </motion.div>
 
-                {/* 4. Tarjeta Glassmorphism izquierda con CTA dentro (Compacta y estilizada) */}
+                {/* 4. Tarjeta Glassmorphism izquierda fiel a la referencia original */}
                 <motion.div
                   className="hero-overlay"
                   drag
@@ -229,15 +229,11 @@ export default function AureaSkincarePage() {
                   }}
                   whileDrag={{ cursor: "grabbing" }}
                 >
-                  <div className="overlay-icon-title">
-                    <div className="mini-leaf-icon"><Leaf size={15} strokeWidth={1.5}/></div>
-                    <div>
-                      <h4>Ingredientes reales</h4>
-                      <small>Fórmulas 100% puras</small>
-                    </div>
-                  </div>
-                  <a className="btn btn-primary btn-overlay-cta" href="#coleccion">
-                    Descubre la colección <ArrowRight size={13}/>
+                  <p className="overlay-desc">
+                    Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
+                  </p>
+                  <a className="btn-ref-cta" href="#coleccion">
+                    Descubre la colección →
                   </a>
                 </motion.div>
 
