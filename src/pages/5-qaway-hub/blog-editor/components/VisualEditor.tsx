@@ -558,9 +558,11 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
         }}
       />
 
-      {/* Único Campo de Texto con Scroll Interno y Enmarcado */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 min-h-0 bg-white">
-        <EditorContent editor={editor} className="h-full" />
+      {/* Único Campo de Texto con Canvas de Redacción Idéntico a Producción (712px) */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 min-h-0 bg-[#fafafc]">
+        <div className="max-w-[712px] mx-auto w-full bg-white border border-zinc-200/80 rounded-[15px] p-6 sm:p-7 md:px-7 md:py-9 shadow-xs min-h-full">
+          <EditorContent editor={editor} className="h-full w-full" />
+        </div>
       </div>
     </div>
   )

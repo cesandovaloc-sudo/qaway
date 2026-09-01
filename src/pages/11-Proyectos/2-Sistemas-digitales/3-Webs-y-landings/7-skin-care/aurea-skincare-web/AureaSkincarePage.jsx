@@ -8,12 +8,12 @@ import AureaStudioPanel from "./AureaStudioPanel";
 import "./aurea-landing.css";
 
 const DEFAULT_CONFIG = {
-  heroBg: { x: 2, y: 359, scale: 101, opacity: 100 },
+  heroBg: { x: 3, y: 290, scale: 101, opacity: 100 },
   heroTitle: { x: -38, y: -17, scale: 114, fontSize: 47 },
   heroSubtext: { x: 0, y: 0, fontSize: 15 },
   heroBtn: { x: 0, y: 0, scale: 100 },
   heroPill: { x: 0, y: 0, scale: 105 },
-  cardLeft: { x: -270, y: -55, scale: 100, opacity: 100 },
+  cardLeft: { x: -6, y: -66, scale: 100, opacity: 100 },
   cardRight: { x: 299, y: -54, scale: 100, opacity: 100 },
 };
 
@@ -233,7 +233,7 @@ export default function AureaSkincarePage() {
                     Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
                   </p>
                   <a className="btn-ref-cta" href="#coleccion">
-                    Descubre la colección →
+                    Descubre la colección <span className="arrow">→</span>
                   </a>
                 </motion.div>
 

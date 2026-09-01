@@ -824,11 +824,11 @@ export default function EditorPage() {
             {/* 2. Vista Previa de Lectura Fiel (WYSIWYG) */}
             <div
               ref={previewContainerRef}
-              className={`flex-1 overflow-y-auto bg-white border border-line rounded-2xl p-6 sm:p-10 shadow-xs min-h-0 ${
+              className={`flex-1 overflow-y-auto bg-[#fafafc] p-4 sm:p-6 min-h-0 ${
                 viewMode === 'preview' ? '' : 'hidden'
               }`}
             >
-              <div className="max-w-3xl mx-auto w-full">
+              <div className="max-w-[712px] mx-auto w-full bg-white border border-zinc-200/80 rounded-[15px] p-6 sm:p-7 md:px-7 md:py-9 shadow-xs">
                 {headerLayout === 'split' ? (
                   /* 1. Cabecera Dividida a 2 Columnas (Estilo Oficial HubSpot Hero) */
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-8 pb-8 border-b border-line">
