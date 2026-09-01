@@ -54,7 +54,8 @@ import {
   UserCheck,
   Wrench,
   MessageSquare,
-  Briefcase
+  Briefcase,
+  Target
 } from 'lucide-react'
 
 // LocalStorage persistence key
