@@ -906,7 +906,7 @@ export default function EditorPage() {
                 )}
 
                 <div
-                  className="tiptap prose max-w-none"
+                  className="blog-content blog-prose w-full"
                   dangerouslySetInnerHTML={{
                     __html: processBlogHtml(contentHtml) || '<p class="text-muted-light italic">Sin contenido aún.</p>',
                   }}

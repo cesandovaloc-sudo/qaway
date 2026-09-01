@@ -132,7 +132,7 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
     content: initialContent || '',
     editorProps: {
       attributes: {
-        class: 'tiptap focus:outline-none min-h-full text-primary leading-relaxed text-base font-sans max-w-3xl mx-auto w-full',
+        class: 'tiptap blog-content blog-prose focus:outline-none min-h-full max-w-3xl mx-auto w-full',
       },
     },
     onUpdate: ({ editor }) => {
