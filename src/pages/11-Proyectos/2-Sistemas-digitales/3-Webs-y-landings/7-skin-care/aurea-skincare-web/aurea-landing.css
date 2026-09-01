@@ -35,7 +35,7 @@
 .aurea-landing .nav-actions{display:flex;align-items:center;gap:14px;font-size:12px}
 .aurea-landing .mobile-toggle{display:none;background:none;border:0;padding:7px}
 
-.aurea-landing .hero{padding:20px 0 40px}
+.aurea-landing .hero{padding:16px 0 14px}
 .aurea-landing .hero-stage{position:relative;border-radius:24px;overflow:hidden;background:#faf8f2;max-height:clamp(540px,62vw,680px);box-shadow:0 24px 60px rgba(0,0,0,.08)}
 .aurea-landing .hero-stage-bg{width:100%;height:auto;display:block;margin-top:85px}
 
@@ -54,6 +54,8 @@
 .aurea-landing .btn-ref-cta:hover{background:#f4f5f2}
 .aurea-landing .hero-badge{display:none}
 
+.aurea-landing .section.section-benefits{padding:10px 0 0}
+.aurea-landing #filosofia.section{padding-top:48px}
 .aurea-landing .split{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(35px,7vw,90px);align-items:center}
 .aurea-landing .media-card{border-radius:18px;overflow:hidden;background:var(--surface-2)}
 .aurea-landing .media-card img{width:100%;aspect-ratio:1.05;object-fit:cover}

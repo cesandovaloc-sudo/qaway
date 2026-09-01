@@ -177,8 +177,8 @@ const scaleUpImage = {
 
 function ArrowLink({ to, children, light = false, newTab = false }) {
   const classes = `group inline-flex items-center gap-4 border-b pb-2 text-sm font-medium transition-colors ${light
-    ? 'border-[#ff4b0b] text-white/78 hover:text-white'
-    : 'border-[#ff4b0b] text-[#20201f]/72 hover:text-[#20201f]'
+    ? 'border-[#fe6612] text-white/78 hover:text-white'
+    : 'border-[#fe6612] text-[#20201f]/72 hover:text-[#20201f]'
     }`
 
   if (newTab) {
@@ -281,7 +281,7 @@ function Hero() {
               className="max-w-[58rem] qw-hero-title text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Construimos marcas, sistemas y <span className="text-[#ff4b0b]">formamos con&nbsp;IA.</span></span>
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
@@ -291,14 +291,14 @@ function Hero() {
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] transition-colors hover:bg-[#e05508] rounded-[10px] active:translate-y-px"
               >
                 Cuéntanos tu proyecto
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a
                 href="#primary-areas"
-                className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#ff4b0b]"
+                className="inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
               >
                 Elige por dónde empezar
               </a>
@@ -336,17 +336,17 @@ function Hero() {
             <p className="qw-hero-secondary-kicker">Qaway Lab</p>
             <p className="qw-hero-secondary-title text-balance">
               Todo lo que necesitas para crear,
-              <span className="block">automatizar y aprender<span className="text-[#ff4b0b]">.</span></span>
+              <span className="block">automatizar y aprender<span className="text-[#fe6612]">.</span></span>
             </p>
-            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b] hidden" />
+            <div className="mt-5 h-[3px] w-8 bg-[#fe6612] hidden" />
 
             <a
               href="#sistemas"
               className="qw-hero-secondary-card-btn group"
             >
-              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#ff4b0b]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#ff4b0b] bg-white" /></span>
+              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#fe6612]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#fe6612] bg-white" /></span>
               <span className="flex items-center gap-2.5">
-                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(254,102,18,0.22)]">
                   <Workflow size={20} strokeWidth={1.65} />
                 </span>
                 <span className="min-w-0">
@@ -370,7 +370,7 @@ function BrandMarquee() {
   const track = [...brandNames, ...brandNames]
 
   return (
-    <section className="relative overflow-hidden border-y border-[#ff4b0b]/20 bg-[#151514] py-8 text-white sm:py-10">
+    <section className="relative overflow-hidden border-y border-[#fe6612]/20 bg-[#151514] py-8 text-white sm:py-10">
       <style>
         {`
           @keyframes qawayBrandMarquee {
@@ -393,7 +393,7 @@ function BrandMarquee() {
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-linear-to-r from-[#151514] to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-linear-to-l from-[#151514] to-transparent" />
       <div className="mx-auto mb-5 flex max-w-[94rem] items-center justify-between gap-6 px-6 sm:px-10 lg:px-14">
-        <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Marcas que toman forma</p>
+        <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#fe6612]">Marcas que toman forma</p>
         <div className="hidden h-px flex-1 bg-white/10 sm:block" />
       </div>
       <div className="flex w-max qaway-brand-track">
@@ -404,7 +404,7 @@ function BrandMarquee() {
             style={brand.style}
           >
             {brand.name}
-            <span className="h-8 w-px bg-[#ff4b0b]" />
+            <span className="h-8 w-px bg-[#fe6612]" />
           </span>
         ))}
       </div>
@@ -434,7 +434,7 @@ function EcosystemPhoto() {
           loading="lazy"
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/8 via-transparent to-white/8" />
-        <div className="absolute inset-y-10 left-0 w-2 bg-[#ff4b0b]" />
+        <div className="absolute inset-y-10 left-0 w-2 bg-[#fe6612]" />
       </div>
     </motion.div>
   )
@@ -451,7 +451,7 @@ function EcosystemIntro() {
               className="qw-section-title mx-auto lg:mx-0 max-w-[42rem]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#ff4b0b]">se conectan.</span>
+              Tu proyecto y aprendizaje funcionan mejor cuando <span className="text-[#fe6612]">se conectan.</span>
             </h2>
             <p className="qw-section-copy mx-auto lg:mx-0">
               No necesitas piezas sueltas. Necesitas que tu marca, tus procesos y tus herramientas trabajen juntos.
@@ -493,7 +493,7 @@ function EstudioSection() {
                   className="qw-section-title"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
-                  Haz que tu marca se vea<br /><span className="text-[#ff4b0b]">clara, sólida y profesional.</span>
+                  Haz que tu marca se vea<br /><span className="text-[#fe6612]">clara, sólida y profesional.</span>
                 </h2>
                 <p className="qw-section-copy">
                   Define tu marca, mejora tu contenido y construye una presencia digital más clara con apoyo de IA.
@@ -532,17 +532,17 @@ function EstudioSection() {
                     type="button"
                     onClick={() => setActive(index)}
                     className={`group flex h-full w-full items-center gap-2.5 border px-3.5 py-2.5 text-left transition-all duration-300 sm:px-4 sm:py-2.5 ${active === index
-                      ? 'border-[#ff4b0b] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
-                      : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#ff4b0b]/30'
+                      ? 'border-[#fe6612] bg-white shadow-[0_4px_16px_rgba(255,75,11,0.08)]'
+                      : 'border-black/10 bg-white/40 hover:bg-white hover:border-[#fe6612]/30'
                       }`}
                   >
                     <span className={`grid h-8 w-8 shrink-0 place-items-center transition-colors duration-300 ${active === index
-                      ? 'bg-[#ff4b0b] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
-                      : 'border border-black/10 text-[#20201f] group-hover:border-[#ff4b0b]/30 group-hover:text-[#ff4b0b]'
+                      ? 'bg-[#fe6612] text-white shadow-[0_4px_12px_rgba(255,75,11,0.18)]'
+                      : 'border border-black/10 text-[#20201f] group-hover:border-[#fe6612]/30 group-hover:text-[#fe6612]'
                       }`}>
                       <Icon size={17} strokeWidth={1.5} />
                     </span>
-                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${active === index ? 'text-[#ff4b0b]' : 'text-[#20201f]'
+                    <span className={`text-xs font-bold uppercase tracking-[-0.01em] leading-tight transition-colors ${active === index ? 'text-[#fe6612]' : 'text-[#20201f]'
                       }`}>
                       {title}
                     </span>
@@ -599,7 +599,7 @@ function PrimaryAreas() {
     <section id="primary-areas" className="bg-[#191918] px-6 py-18 text-white sm:px-10 lg:px-14 lg:py-24">
       <div className="mx-auto max-w-[94rem]">
         <Reveal className="mb-12 lg:mb-16">
-          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Empieza aquí</p>
+          <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#fe6612]">Empieza aquí</p>
           <h2
             className="qw-section-title qw-section-title--impact"
             style={{ ...displayFont, fontWeight: 680 }}
@@ -626,7 +626,7 @@ function PrimaryAreas() {
                   0{index + 1}
                 </span>
                 <div className="relative mb-10 flex justify-end">
-                  <span className="grid h-12 w-12 place-items-center rounded-[6px] border border-white/15 text-[#ff4b0b] transition-all duration-500 group-hover:border-[#ff4b0b] group-hover:bg-[#ff4b0b] group-hover:text-white group-hover:shadow-[0_0_24px_rgba(255,75,11,0.25)]">
+                  <span className="grid h-12 w-12 place-items-center rounded-[6px] border border-white/15 text-[#fe6612] transition-all duration-500 group-hover:border-[#fe6612] group-hover:bg-[#fe6612] group-hover:text-white group-hover:shadow-[0_0_24px_rgba(255,75,11,0.25)]">
                     <Icon size={21} strokeWidth={1.45} />
                   </span>
                 </div>
@@ -713,7 +713,7 @@ function OpsImageStage({ reduceMotion }) {
         <motion.div
           animate={reduceMotion ? undefined : { x: ['-20%', '120%'] }}
           transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-[#ff4b0b] to-transparent opacity-50"
+          className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-[#fe6612] to-transparent opacity-50"
         />
       </div>
     </div>
@@ -769,9 +769,9 @@ function SistemasDigitalesSection() {
                 className="qw-section-title"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
-                Automatiza tus procesos y <span className="text-[#ff4b0b]">reduce</span>
+                Automatiza tus procesos y <span className="text-[#fe6612]">reduce</span>
                 <br />
-                <span className="text-[#ff4b0b]">la carga manual.</span>
+                <span className="text-[#fe6612]">la carga manual.</span>
               </h2>
               <p className="qw-section-copy">
                 Organiza tus herramientas, automatiza tareas repetitivas y conecta tus procesos con apoyo de IA.
@@ -788,7 +788,7 @@ function SistemasDigitalesSection() {
                   transition={{ duration: 0.4, delay: 0.04 * index, ease: [0.22, 1, 0.36, 1] }}
                   className="group flex cursor-pointer items-start gap-3 border-t border-black/8 pt-3"
                 >
-                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center border border-[#ff4b0b]/15 bg-[#ff4b0b] text-white transition-colors duration-300 group-hover:bg-[#ff4b0b]/80">
+                  <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center border border-[#fe6612]/15 bg-[#fe6612] text-white transition-colors duration-300 group-hover:bg-[#fe6612]/80">
                     <Icon size={13} strokeWidth={1.5} />
                   </span>
                   <div className="relative">
@@ -844,7 +844,7 @@ function AcademyFeature() {
           className="qw-section-title"
           style={{ ...displayFont, fontWeight: 760 }}
         >
-          <span className="text-[#ff4b0b]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#ff4b0b]">.</span>
+          <span className="text-[#fe6612]">Aprende</span> a usar IA y herramientas digitales en tus Proyectos<span className="text-[#fe6612]">.</span>
         </motion.h2>
         <motion.p
           initial={reduceMotion ? false : 'hidden'}
@@ -901,7 +901,7 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
           <Reveal>
             <p className="qw-section-kicker">Contacto</p>
             <h2 className="qw-section-title" style={{ ...displayFont, fontWeight: 760 }}>
-              Cuéntanos <span className="text-[#ff4b0b]">qué necesitas</span><span className="text-[#ff4b0b]">.</span>
+              Cuéntanos <span className="text-[#fe6612]">qué necesitas</span><span className="text-[#fe6612]">.</span>
             </h2>
             <p className="qw-section-copy">
               Escríbenos para ayudarte a elegir el servicio, sistema o formación que mejor encaja contigo.
@@ -1080,7 +1080,7 @@ function AcademyCoursesInner({ tick }) {
               {course.badgeText && <span>{course.badgeText}</span>}
             </div>
             <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-              <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{course.category || 'Curso'}</p>
+              <p className="text-[#fe6612]" style={{ fontSize: '0.69rem', color: '#fe6612', marginTop: '1.2rem' }}>{course.category || 'Curso'}</p>
               <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{course.title}</h3>
             </div>
           </motion.a>
@@ -1100,7 +1100,7 @@ function AcademyCoursesInner({ tick }) {
           </span>
         </div>
         <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-          <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>Formación</p>
+          <p className="text-[#fe6612]" style={{ fontSize: '0.69rem', color: '#fe6612', marginTop: '1.2rem' }}>Formación</p>
           <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{neutral.title}</h3>
           <p className="text-[0.95rem] leading-relaxed text-[#20201f]/72" style={{ marginBottom: '0.6rem' }}>{neutral.text}</p>
         </div>
@@ -1128,7 +1128,7 @@ function CoursesLandings() {
             className="qw-section-title mx-auto"
             style={{ ...displayFont, fontWeight: 760 }}
           >
-            Aprende y <span className="text-[#ff4b0b]">aplica.</span>
+            Aprende y <span className="text-[#fe6612]">aplica.</span>
           </h2>
         </Reveal>
 
@@ -1140,7 +1140,7 @@ function CoursesLandings() {
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <div className="mb-5 flex items-center gap-4">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#fe6612] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                   <Compass size={19} strokeWidth={1.45} />
                 </span>
                 <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
@@ -1164,13 +1164,13 @@ function CoursesLandings() {
                         {landing.featured && <span>{landing.featured}</span>}
                       </div>
                       <div style={{ padding: '1.3rem 1.3rem 1.9rem', justifyContent: 'center' }} className="academy-course-content">
-                        <p className="text-[#ff4b0b]" style={{ fontSize: '0.69rem', color: '#ff4b0b', marginTop: '1.2rem' }}>{landing.category}</p>
+                        <p className="text-[#fe6612]" style={{ fontSize: '0.69rem', color: '#fe6612', marginTop: '1.2rem' }}>{landing.category}</p>
                         <h3 className="no-qw text-[#20201f]" style={{ fontSize: 'clamp(1.15rem,1.6vw,1.7rem)', marginTop: '0.7rem', marginBottom: '0.6rem' }}>{landing.title}</h3>
                       </div>
                     </motion.article>
                   </AnimatePresence>
                 </div>
-                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
+                <span className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#fe6612] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]">
                   Explorar
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
                 </span>
@@ -1184,7 +1184,7 @@ function CoursesLandings() {
               className="academy-outer-card group flex flex-col justify-between border border-[#20201f]/12 bg-white/40 px-6 pt-7 pb-3"
             >
               <div className="mb-5 flex items-center gap-4">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#ff4b0b] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[6px] bg-[#fe6612] text-white shadow-[0_12px_28px_rgba(255,75,11,0.18)]">
                   <GraduationCap size={19} strokeWidth={1.45} />
                 </span>
                 <h3 className="no-qw text-[clamp(1.25rem,2.1vw,2.25rem)] font-bold tracking-[-0.03em]" style={{ ...displayFont, fontWeight: 760 }}>
@@ -1197,7 +1197,7 @@ function CoursesLandings() {
                   href={cursosHref}
                   target={academyHref ? '_blank' : undefined}
                   rel={academyHref ? 'noopener noreferrer' : undefined}
-                  className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#ff4b0b] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]"
+                  className="mt-3 mb-1 inline-flex w-max items-center gap-[1.2rem] border-b-[1.5px] border-[#fe6612] pb-[0.6rem] text-[1.05rem] font-medium text-[#20201f]/72 transition-colors group-hover:text-[#20201f]"
                 >
                   Ver formación
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
