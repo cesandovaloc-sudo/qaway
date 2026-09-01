@@ -841,11 +841,11 @@ export default function EditorPage() {
                           ~{readingTime} min de lectura ({words} palabras)
                         </span>
                       </div>
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold tracking-tight text-primary leading-tight">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl font-black font-display tracking-tight text-primary leading-[1.15]">
                         {title || 'Sin título'}
                       </h1>
                       {excerpt && (
-                        <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                        <p className="text-sm sm:text-base text-muted leading-relaxed">
                           {excerpt}
                         </p>
                       )}
