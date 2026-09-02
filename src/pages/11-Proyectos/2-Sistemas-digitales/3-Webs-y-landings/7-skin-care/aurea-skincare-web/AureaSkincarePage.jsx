@@ -130,17 +130,6 @@ export default function AureaSkincarePage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const nodes = document.querySelectorAll(".aurea-landing .reveal");
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add("is-visible");
-      });
-    }, { threshold:.14 });
-    nodes.forEach(n => observer.observe(n));
-    return () => observer.disconnect();
-  }, []);
-
   const navItems = useMemo(() => [
     ["Colección","#coleccion"],["Sobre nosotros","#filosofia"],["Ingredientes","#ingredientes"],["Rituales","#rituales"],["Beneficios","#beneficios"]
   ], []);

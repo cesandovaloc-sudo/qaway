@@ -252,110 +252,115 @@ function Hero() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section className="relative overflow-hidden pt-28 pb-12 sm:pt-36 sm:pb-16 text-[#20201f] bg-white border-b border-zinc-200/80">
+    <section
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
+    >
       <Navbar variant="light" />
 
-      <div className="mx-auto max-w-[1240px] px-6 sm:px-10 lg:px-12">
-        <div className="max-w-4xl">
-          
-          {/* 1. Kicker minimalista */}
-          <div className="mb-4 inline-flex items-center gap-2 font-mono text-[12px] font-bold uppercase tracking-widest text-[#fe6612]">
-            <span>/ Ecosistema Qaway Lab</span>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 180 180%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.74%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.44%22/%3E%3C/svg%3E")',
+        }}
+      />
+
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
+          <motion.div
+            initial={reduceMotion ? false : 'hidden'}
+            animate={reduceMotion ? undefined : 'show'}
+            variants={fadeUp}
+            custom={0}
+            className="relative z-10"
+          >
+            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
+              Marcas, Automatización y formación con IA
+            </p>
+            <h1
+              className="max-w-[58rem] qw-hero-title text-[#20201f]"
+              style={{ ...displayFont, fontWeight: 760 }}
+            >
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
+            </h1>
+            <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
+              Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center gap-5">
+              <a
+                href={WHATSAPP_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] transition-colors hover:bg-[#e05508] rounded-[10px] active:translate-y-px"
+              >
+                Cuéntanos tu proyecto
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </a>
+              <a
+                href="#primary-areas"
+                className="inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
+              >
+                Elige por dónde empezar
+              </a>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+          transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-20 min-h-[40vh] overflow-visible border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
+        >
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              src={`${base}hero-qaway-vision-lab.webp`}
+              alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
+              className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-white/12" />
           </div>
 
-          {/* 2. Titular contundente y limpio con punto naranja */}
-          <motion.h1
-            className="text-[clamp(2.6rem,4.8vw,4.4rem)] font-bold text-[#111210] leading-[1.04] tracking-[-0.035em] mb-5"
-            style={{ ...displayFont, fontWeight: 700 }}
-            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-          >
-            Construimos marcas, sistemas y{' '}
-            <span className="text-[#fe6612]">formación con IA.</span>
-          </motion.h1>
 
-          {/* 3. Lead / Bajada */}
-          <motion.p
-            className="max-w-2xl text-base sm:text-lg leading-relaxed text-[#52525b] mb-8"
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-          >
-            Diseñamos marcas memorables, automatizamos procesos operativos y formamos a profesionales y equipos en Inteligencia Artificial aplicada.
-          </motion.p>
+        </motion.div>
 
-          {/* 4. Botones de Acción principales con redondeo de 10px */}
+        <aside className="relative hidden lg:grid min-h-auto overflow-visible bg-white text-[#20201f] lg:min-h-[26rem] after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']">
           <motion.div
-            className="flex flex-wrap items-center gap-4 mb-10"
-            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.15 }}
+            initial={reduceMotion ? false : 'hidden'}
+            whileInView={reduceMotion ? undefined : 'show'}
+            viewport={{ once: true, amount: 0.35 }}
+            variants={fadeUp}
+            custom={0.22}
+            className="flex flex-col justify-center items-center text-center px-7 py-10 sm:px-10 lg:px-9"
           >
-            <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex min-h-[48px] items-center justify-center gap-2.5 bg-[#fe6612] px-7 py-3.5 text-[14.5px] font-bold text-white rounded-[10px] shadow-[0_12px_28px_rgba(255,75,11,0.22)] hover:bg-[#df3900] active:translate-y-px transition-all"
-            >
-              <span>Cuéntanos tu proyecto</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </a>
+            <p className="qw-hero-secondary-kicker">Qaway Lab</p>
+            <p className="qw-hero-secondary-title text-balance">
+              Todo lo que necesitas para crear,
+              <span className="block">automatizar y aprender<span className="text-[#fe6612]">.</span></span>
+            </p>
+            <div className="mt-5 h-[3px] w-8 bg-[#fe6612] hidden" />
 
-            <a
-              href="#primary-areas"
-              className="inline-flex min-h-[48px] items-center justify-center px-6 py-3.5 border border-zinc-200 bg-white text-[14.5px] font-bold text-[#20201f] rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-colors shadow-xs"
-            >
-              <span>Explorar áreas</span>
-            </a>
-          </motion.div>
-
-          {/* 5. Pills de Categorías / Divisiones con rounded 10px */}
-          <motion.div
-            className="flex flex-wrap items-center gap-2 pt-6 border-t border-zinc-100"
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.2 }}
-          >
-            <a
-              href="#ecosistema"
-              className="px-4 py-2 bg-[#fe6612] text-white text-xs font-bold rounded-[10px] shadow-xs transition-all"
-            >
-              Todos
-            </a>
-            <a
-              href="#estudio"
-              className="px-4 py-2 bg-white border border-zinc-200 text-[#27272a] text-xs font-bold rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-all"
-            >
-              Estudio Creativo
-            </a>
             <a
               href="#sistemas"
-              className="px-4 py-2 bg-white border border-zinc-200 text-[#27272a] text-xs font-bold rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-all"
+              className="qw-hero-secondary-card-btn group"
             >
-              Sistemas con IA
+              <span className="pointer-events-none absolute -left-10 top-1/2 h-px w-10 bg-[#fe6612]/80"><span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full border border-[#fe6612] bg-white" /></span>
+              <span className="flex items-center gap-2.5">
+                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(254,102,18,0.22)]">
+                  <Workflow size={20} strokeWidth={1.65} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                    Sistemas
+                  </span>
+                  <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                    Automatización e IA
+                  </span>
+                </span>
+              </span>
             </a>
-            <a
-              href="#academy"
-              className="px-4 py-2 bg-white border border-zinc-200 text-[#27272a] text-xs font-bold rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-all"
-            >
-              Academy
-            </a>
-            <Link
-              to="/recursos"
-              className="px-4 py-2 bg-white border border-zinc-200 text-[#27272a] text-xs font-bold rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-all"
-            >
-              Recursos
-            </Link>
-            <Link
-              to="/proyectos"
-              className="px-4 py-2 bg-white border border-zinc-200 text-[#27272a] text-xs font-bold rounded-[10px] hover:bg-zinc-50 hover:border-zinc-300 transition-all"
-            >
-              Proyectos
-            </Link>
           </motion.div>
-
-        </div>
+        </aside>
       </div>
     </section>
   )
