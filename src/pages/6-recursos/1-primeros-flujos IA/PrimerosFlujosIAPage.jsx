@@ -304,7 +304,7 @@ export default function PrimerosFlujosIAPage() {
                     className="inline-flex items-center gap-2.5 rounded-[10px] bg-[#fe6612] px-6 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Download className="h-4 w-4" />
-                    <span>{downloading ? 'Descargando Guía...' : 'Descargar Guía Gratuita (PDF)'}</span>
+                    <span>{downloading ? 'Descargando...' : 'Descargar Guía'}</span>
                   </button>
 
                   <a

@@ -480,7 +480,7 @@ export default function ProyectosPage() {
 
                 <StaticProjectCard
                   to="/proyectos/aurea-skincare"
-                  image="/aurea-images/hero_products.jpg"
+                  image="/aurea-images/showcase/1-aurea-skincare-showcase.png"
                   tag="Tienda Online"
                   title="Áurea Skincare"
                   desc="E-commerce de cosmética botánica con catálogo dinámico de productos, carrito de compras y diseño editorial."
