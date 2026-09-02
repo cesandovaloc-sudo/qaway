@@ -42,6 +42,8 @@ export default function EditorPage() {
   const [coverUrl, setCoverUrl] = useState(existing?.coverUrl || '')
   const [coverAlt, setCoverAlt] = useState(existing?.coverAlt || '')
   const [contentHtml, setContentHtml] = useState(existing?.contentHtml || existing?.body || '')
+  const [contentJson, setContentJson] = useState(existing?.contentJson || '')
+  const [plainText, setPlainText] = useState(existing?.body || '')
   const [status, setStatus] = useState<PostStatus>(existing?.status || 'borrador')
   const [headerLayout, setHeaderLayout] = useState<'editorial-cta' | 'split' | 'banner'>(existing?.headerLayout || 'editorial-cta')
   const [headerCtaTag, setHeaderCtaTag] = useState(existing?.headerCtaTag || '')

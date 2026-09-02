@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowDownRight, ArrowRight, Check, Leaf, Menu, ShieldCheck,
   Sparkles, Sun, Droplets, Heart, X, Instagram, Facebook, ShoppingBag
 } from "lucide-react";
+import SEO from "@/components/seo/SEO";
 import "./aurea-landing.css";
 
 const IMG = {
@@ -50,6 +51,44 @@ const formulas = [
   { label:"Renew Balance", title:"Aceite regenerador", text:"Rosa mosqueta, jojoba y extractos botánicos para nutrir sin sobrecargar la rutina.", chips:["Rosa mosqueta","Jojoba","Vitamina E"], price:"S/ 139.00", image:IMG.signature_3 },
 ];
 
+const schemaData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BeautySalon",
+      "@id": "https://qawaylab.com/proyectos/aurea-skincare/#organization",
+      "name": "Auréa Skincare Botánico",
+      "url": "https://qawaylab.com/proyectos/aurea-skincare",
+      "logo": "https://qawaylab.com/aurea-images/hero_products.jpg",
+      "description": "Fórmulas botánicas conscientes, ingredientes puros y rituales diarios para una piel radiante y saludable.",
+      "priceRange": "S/ 119 - S/ 139"
+    },
+    {
+      "@type": "ItemList",
+      "itemListElement": products.map((p, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "item": {
+          "@type": "Product",
+          "name": p.name,
+          "description": p.description,
+          "image": `https://qawaylab.com${p.image}`,
+          "brand": {
+            "@type": "Brand",
+            "name": "Auréa"
+          },
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "PEN",
+            "price": "129.00",
+            "availability": "https://schema.org/InStock"
+          }
+        }
+      }))
+    }
+  ]
+};
+
 function Reveal({ children, className="", delay=0 }) {
   return (
     <motion.div
@@ -69,8 +108,16 @@ export default function AureaSkincarePage() {
   const [scrolled, setScrolled] = useState(false);
   const [formula, setFormula] = useState(0);
   const [subscribed, setSubscribed] = useState(false);
+  const [cartToast, setCartToast] = useState(null);
 
   const active = formulas[formula] ?? formulas[0];
+
+  const handleAddToCart = (productName) => {
+    setCartToast(productName);
+    setTimeout(() => {
+      setCartToast((prev) => (prev === productName ? null : prev));
+    }, 3200);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -100,6 +147,12 @@ export default function AureaSkincarePage() {
 
   return (
     <div className="aurea-landing">
+      <SEO
+        title="Auréa | Skincare Botánico Consciente & Fórmulas Puras"
+        description="Descubre Auréa: cosmética botánica y fórmulas conscientes elaboradas con extractos puros, vitamina C estabilizada y aceites regeneradores para una piel luminosa y equilibrada."
+        canonical="https://qawaylab.com/proyectos/aurea-skincare"
+        schema={schemaData}
+      />
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" aria-label="Auréa inicio">
@@ -133,6 +186,9 @@ export default function AureaSkincarePage() {
                   className="hero-stage-bg"
                   src={IMG.hero_diseno_sin_titulo}
                   alt="Auréa Skincare Sérum y Cítricos"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                 />
 
                 {/* 2. Textos montados arriba a la izquierda */}
@@ -147,7 +203,7 @@ export default function AureaSkincarePage() {
 
                 {/* 3. Cápsula montada arriba a la derecha */}
                 <div className="hero-pill">
-                  <img src={IMG.hero_products} alt="Colección de productos Auréa"/>
+                  <img src={IMG.hero_products} alt="Colección de productos botánicos Auréa" loading="eager" decoding="async"/>
                 </div>
 
                 {/* 4. Tarjeta Glassmorphism izquierda fiel a la referencia original */}
@@ -155,14 +211,14 @@ export default function AureaSkincarePage() {
                   <p className="overlay-desc">
                     Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
                   </p>
-                  <a className="btn-ref-cta" href="#coleccion">
+                  <a className="btn-ref-cta" href="#coleccion" aria-label="Descubre la colección Auréa">
                     Descubre la colección <span className="arrow">→</span>
                   </a>
                 </div>
 
                 {/* 5. Badge Glassmorphism derecha */}
                 <div className="hero-badge">
-                  <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" />
+                  <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" loading="lazy" decoding="async"/>
                   <div className="badge-list">
                     <span>100% Natural</span>
                     <span>Sin parabenos</span>
@@ -183,7 +239,7 @@ export default function AureaSkincarePage() {
                 [Sparkles,"Eficacia botánica","Concentraciones pensadas para aportar resultados sin complicar el ritual."],
                 [Heart,"Resultados reales","Rutinas consistentes para una piel que se siente y se ve más saludable."],
                 [ShieldCheck,"Conciencia","Ingredientes seleccionados y procesos que respetan tu piel y el entorno."]
-              ].map(([Icon,title,text],i) => {
+              ].map(([Icon,title,text]) => {
                 const I = Icon;
                 return <motion.div className="benefit" key={String(title)} whileHover={{y:-5}}>
                   <div className="icon-wrap"><I size={18} strokeWidth={1.4}/></div>
@@ -197,14 +253,16 @@ export default function AureaSkincarePage() {
         <section id="filosofia" className="section">
           <div className="container split">
             <Reveal>
-              <div className="media-card"><img src={IMG.woman_story} alt="Mujer disfrutando de una rutina de cuidado consciente"/></div>
+              <div className="media-card">
+                <img src={IMG.woman_story} alt="Mujer disfrutando de una rutina de cuidado consciente" loading="lazy" decoding="async"/>
+              </div>
             </Reveal>
             <Reveal delay={.1}>
               <div className="copy-block">
                 <span className="eyebrow">Filosofía Auréa</span>
                 <h2>Belleza real.<br/>Cuidado esencial.</h2>
                 <p>Creemos en el poder de la naturaleza y en rutinas simples que transforman tu piel día a día. Menos pasos, mejores fórmulas y una relación más consciente con lo que aplicas sobre tu piel.</p>
-                <a className="link-arrow" href="#ingredientes">Descubre nuestra historia <ArrowRight size={15}/></a>
+                <a className="link-arrow" href="#ingredientes" aria-label="Descubre nuestra historia de formulación botánica">Descubre nuestra historia <ArrowRight size={15}/></a>
               </div>
             </Reveal>
           </div>
@@ -223,9 +281,17 @@ export default function AureaSkincarePage() {
             </Reveal>
 
             <Reveal delay={.06}>
-              <div className="formula-switch">
+              <div className="formula-switch" role="tablist" aria-label="Selección de fórmula botánica">
                 {formulas.map((f,i) => (
-                  <button key={f.label} className={i===formula ? "active" : ""} onClick={() => setFormula(i)}>{f.label}</button>
+                  <button
+                    key={f.label}
+                    role="tab"
+                    aria-selected={i===formula}
+                    className={i===formula ? "active" : ""}
+                    onClick={() => setFormula(i)}
+                  >
+                    {f.label}
+                  </button>
                 ))}
               </div>
             </Reveal>
@@ -233,9 +299,20 @@ export default function AureaSkincarePage() {
             <Reveal delay={.1}>
               <motion.div className="product-feature" layout>
                 <div className="product-gallery">
-                  <div className="large"><motion.img key={active.image} initial={{opacity:0,scale:1.03}} animate={{opacity:1,scale:1}} transition={{duration:.5}} src={active.image} alt={active.title}/></div>
-                  <img src={IMG.signature_2} alt="Colección Signature Auréa"/>
-                  <img src={IMG.signature_3} alt="Colección Signature Auréa"/>
+                  <div className="large">
+                    <motion.img
+                      key={active.image}
+                      initial={{opacity:0,scale:1.03}}
+                      animate={{opacity:1,scale:1}}
+                      transition={{duration:.5}}
+                      src={active.image}
+                      alt={active.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                  <img src={IMG.signature_2} alt="Colección Signature Auréa Calm Ritual" loading="lazy" decoding="async"/>
+                  <img src={IMG.signature_3} alt="Colección Signature Auréa Renew Balance" loading="lazy" decoding="async"/>
                 </div>
                 <div className="product-info">
                   <span className="kicker">Fórmula seleccionada</span>
@@ -244,7 +321,13 @@ export default function AureaSkincarePage() {
                   <div className="chips">{active.chips.map(c => <span className="chip" key={c}>{c}</span>)}</div>
                   <div className="price-row">
                     <div className="price"><small>Presentación 30 ml</small><strong>{active.price}</strong></div>
-                    <button className="btn btn-primary">Agregar al carrito <ShoppingBag size={16}/></button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => handleAddToCart(active.title)}
+                      aria-label={`Agregar ${active.title} al carrito de compras`}
+                    >
+                      Agregar al carrito <ShoppingBag size={16}/>
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -259,7 +342,9 @@ export default function AureaSkincarePage() {
                 <span className="eyebrow">Tu ritual diario</span>
                 <h2>¿Qué puede hacer por ti una fórmula fresca, botánica y pensada con propósito?</h2>
               </div>
-              <div className="editorial-image"><img src={IMG.ritual} alt="Ingredientes botánicos alrededor de un producto Auréa"/></div>
+              <div className="editorial-image">
+                <img src={IMG.ritual} alt="Ingredientes botánicos alrededor de un producto Auréa" loading="lazy" decoding="async"/>
+              </div>
               <div className="editorial-features">
                 {[
                   [Droplets,"Nutre de verdad","Ingredientes que la piel reconoce y absorbe."],
@@ -293,7 +378,7 @@ export default function AureaSkincarePage() {
               ].map(([n,title,text,img],i) => (
                 <Reveal key={n} delay={i*.05}>
                   <motion.article className="commitment-card" whileHover={{backgroundColor:"rgba(255,255,255,.52)"}}>
-                    <div className="photo"><img src={img} alt={title}/></div>
+                    <div className="photo"><img src={img} alt={title} loading="lazy" decoding="async"/></div>
                     <div className="commitment-copy"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>
                   </motion.article>
                 </Reveal>
@@ -319,7 +404,7 @@ export default function AureaSkincarePage() {
               <Reveal delay={0.04}>
                 <div className="mosaic-column">
                   <div className="mosaic-photo">
-                    <img src={IMG.commitment_1} alt="Gel limpiador botánico" />
+                    <img src={IMG.commitment_1} alt="Gel limpiador botánico" loading="lazy" decoding="async"/>
                   </div>
                   <div className="mosaic-text">
                     <div className="mosaic-glyph"><Leaf size={18} strokeWidth={1.4} /></div>
@@ -338,7 +423,7 @@ export default function AureaSkincarePage() {
                     <p>Trabajamos con ingredientes botánicos cultivados de forma responsable y extraídos en su máximo potencial.</p>
                   </div>
                   <div className="mosaic-photo">
-                    <img src={IMG.commitment_3} alt="Tónico regenerador botánico" />
+                    <img src={IMG.commitment_3} alt="Tónico regenerador botánico" loading="lazy" decoding="async"/>
                   </div>
                 </div>
               </Reveal>
@@ -347,7 +432,7 @@ export default function AureaSkincarePage() {
               <Reveal delay={0.12}>
                 <div className="mosaic-column">
                   <div className="mosaic-photo">
-                    <img src={IMG.commitment_2} alt="Sérum iluminador botánico" />
+                    <img src={IMG.commitment_2} alt="Sérum iluminador botánico" loading="lazy" decoding="async"/>
                   </div>
                   <div className="mosaic-text">
                     <div className="mosaic-glyph"><Sparkles size={18} strokeWidth={1.4} /></div>
@@ -366,7 +451,7 @@ export default function AureaSkincarePage() {
                     <p>Fórmulas limpias, efectivas y transparentes. Sin parabenos, sin fragancias sintéticas, sin ingredientes innecesarios.</p>
                   </div>
                   <div className="mosaic-photo">
-                    <img src={IMG.commitment_4} alt="Crema barrera botánica" />
+                    <img src={IMG.commitment_4} alt="Crema barrera botánica" loading="lazy" decoding="async"/>
                   </div>
                 </div>
               </Reveal>
@@ -385,8 +470,8 @@ export default function AureaSkincarePage() {
                 <div className="why-center">
                   <span className="eyebrow">¿Por qué Auréa?</span>
                   <h2>Creado para tu<br/>bienestar diario.</h2>
-                  <motion.img whileHover={{scale:1.02}} transition={{duration:.45}} src={IMG.why_products} alt="Productos Auréa para el ritual diario"/>
-                  <a className="btn btn-primary" href="#coleccion">Conoce nuestra colección <ArrowRight size={16}/></a>
+                  <motion.img whileHover={{scale:1.02}} transition={{duration:.45}} src={IMG.why_products} alt="Productos Auréa para el ritual diario" loading="lazy" decoding="async"/>
+                  <a className="btn btn-primary" href="#coleccion" aria-label="Conoce nuestra colección de productos botánicos">Conoce nuestra colección <ArrowRight size={16}/></a>
                 </div>
               </Reveal>
               <div className="why-side">
@@ -402,17 +487,25 @@ export default function AureaSkincarePage() {
             <Reveal>
               <div className="collection-head">
                 <div><span className="eyebrow">Selección Auréa</span><h2>Descubre nuestra colección</h2></div>
-                <a className="btn btn-secondary" href="#contacto">Ver toda la colección <ArrowRight size={16}/></a>
+                <a className="btn btn-secondary" href="#contacto" aria-label="Ver toda la colección en tienda">Ver toda la colección <ArrowRight size={16}/></a>
               </div>
             </Reveal>
             <div className="collection-grid">
               {products.map((p,i) => (
                 <Reveal key={p.name} delay={Math.min(i*.05,.2)}>
                   <motion.article className="product-card" whileHover={{y:-7}} transition={{duration:.3}}>
-                    <div className="photo"><img src={p.image} alt={p.name}/></div>
+                    <div className="photo">
+                      <img src={p.image} alt={`${p.name} - ${p.subtitle}`} loading="lazy" decoding="async"/>
+                    </div>
                     <div className="meta">
                       <div><h3>{p.name}</h3><p>{p.subtitle} · {p.description}</p></div>
-                      <span className="circle-arrow"><ArrowDownRight size={16}/></span>
+                      <button
+                        className="circle-arrow"
+                        onClick={() => handleAddToCart(p.name)}
+                        aria-label={`Agregar ${p.name} al carrito`}
+                      >
+                        <ArrowDownRight size={16}/>
+                      </button>
                     </div>
                   </motion.article>
                 </Reveal>
@@ -427,9 +520,22 @@ export default function AureaSkincarePage() {
               <span className="eyebrow">Círculo Auréa</span>
               <h2>Cuida tu piel.<br/>Mantente conectado.</h2>
               <p>Recibe 15% de descuento en tu primera compra, novedades de temporada y consejos de cuidado sin ruido.</p>
-              <form className="news-form" onSubmit={(e) => { e.preventDefault(); setSubscribed(true); }}>
-                <input type="email" required placeholder="Ingresa tu correo electrónico" aria-label="Correo electrónico"/>
-                <button className="btn btn-primary" type="submit">{subscribed ? "Suscrito" : "Suscribirme"}</button>
+              <form
+                className="news-form"
+                onSubmit={(e) => { e.preventDefault(); setSubscribed(true); }}
+                aria-label="Formulario de suscripción al Círculo Auréa"
+              >
+                <label htmlFor="newsletter-email" className="sr-only">Correo electrónico</label>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  required
+                  placeholder="Ingresa tu correo electrónico"
+                  aria-label="Ingresa tu correo electrónico"
+                />
+                <button className="btn btn-primary" type="submit" aria-live="polite">
+                  {subscribed ? "¡Suscrito!" : "Suscribirme"}
+                </button>
               </form>
               <div className="news-benefits">
                 {[
@@ -444,18 +550,36 @@ export default function AureaSkincarePage() {
       <footer className="footer">
         <div className="container footer-top">
           <div className="footer-brand">
-            <a className="brand" href="#inicio"><span className="brand-mark"><Leaf strokeWidth={1.4}/></span><span className="brand-copy"><strong>AURÉA</strong><small>Skincare botánico</small></span></a>
+            <a className="brand" href="#inicio" aria-label="Auréa inicio"><span className="brand-mark"><Leaf strokeWidth={1.4}/></span><span className="brand-copy"><strong>AURÉA</strong><small>Skincare botánico</small></span></a>
             <p>Ingredientes reales, fórmulas conscientes y rituales simples para una piel saludable y luminosa.</p>
           </div>
           <div className="footer-col"><h4>Explorar</h4><a href="#coleccion">Colección</a><a href="#rituales">Rituales</a><a href="#ingredientes">Ingredientes</a><a href="#filosofia">Nuestra historia</a></div>
           <div className="footer-col"><h4>Ayuda</h4><a href="#contacto">Preguntas frecuentes</a><a href="#contacto">Envíos y entregas</a><a href="#contacto">Políticas</a><a href="#contacto">Contacto</a></div>
-          <div className="footer-col"><h4>Síguenos</h4><a href="#contacto"><Instagram size={15} style={{verticalAlign:"middle",marginRight:7}}/> Instagram</a><a href="#contacto"><Facebook size={15} style={{verticalAlign:"middle",marginRight:7}}/> Facebook</a><a href="#contacto"><Sparkles size={15} style={{verticalAlign:"middle",marginRight:7}}/> Diario Auréa</a></div>
+          <div className="footer-col"><h4>Síguenos</h4><a href="#contacto" aria-label="Síguenos en Instagram"><Instagram size={15} style={{verticalAlign:"middle",marginRight:7}}/> Instagram</a><a href="#contacto" aria-label="Síguenos en Facebook"><Facebook size={15} style={{verticalAlign:"middle",marginRight:7}}/> Facebook</a><a href="#contacto" aria-label="Lee nuestro Diario Auréa"><Sparkles size={15} style={{verticalAlign:"middle",marginRight:7}}/> Diario Auréa</a></div>
         </div>
         <div className="container footer-bottom">
           <div className="big-brand">AURÉA</div>
           <p>© 2026 Auréa Skincare Botánico. Todos los derechos reservados.</p>
         </div>
       </footer>
+
+      {/* Toast Flotante Accesible de Carrito */}
+      <AnimatePresence>
+        {cartToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.95 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="aurea-cart-toast"
+            role="status"
+            aria-live="polite"
+          >
+            <span className="toast-icon-wrap"><Check size={14} strokeWidth={2.5}/></span>
+            <span><strong>{cartToast}</strong> añadido a tu ritual</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

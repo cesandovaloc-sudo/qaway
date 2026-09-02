@@ -250,32 +250,38 @@ export default function PrimerosFlujosIAPage() {
         {/* ========================================================================= */}
         <section className="relative overflow-hidden bg-[#ffffff] px-6 pt-12 pb-16 sm:px-10 lg:px-14 lg:pt-16 lg:pb-24 border-b border-[#20201f]/10">
           <div className="mx-auto max-w-[1240px]">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               
-              {/* Columna Izquierda: Información Principal */}
-              <div className="lg:col-span-7">
-                <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+              {/* Columna Izquierda: Información Principal (50%) */}
+              <div className="lg:col-span-6">
+                <div className="mb-3.5 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
                   <span>/ Recursos · Guía Práctica</span>
                 </div>
 
                 <h1
-                  className="text-3xl font-bold tracking-tight text-[#191918] sm:text-4xl lg:text-5xl"
-                  style={displayFont}
+                  className="text-[#191918]"
+                  style={{
+                    ...displayFont,
+                    fontSize: 'clamp(2.35rem, 3.8vw, 3.35rem)',
+                    fontWeight: 600,
+                    lineHeight: 1.12,
+                    letterSpacing: '-0.035em',
+                  }}
                 >
                   Cómo estructurar tus primeros flujos de trabajo con <span className="text-[#ff4b0b]">IA.</span>
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-base leading-relaxed text-black/70 sm:text-lg">
+                <p className="mt-4 max-w-lg text-[15px] sm:text-base leading-relaxed text-black/75">
                   No necesitas aprender diez herramientas. Empieza por una tarea que quieras mejorar y divídela en pasos para saber exactamente dónde y cómo aplicar Inteligencia Artificial con criterio.
                 </p>
 
                 {/* Bullets institucionales con respiro calibrado */}
-                <div className="mt-8 sm:mt-9 space-y-3.5 max-w-xl">
+                <div className="mt-7 space-y-3 max-w-lg">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#fe6612]/15 text-[#fe6612]">
                       <Check className="h-3 w-3 stroke-[3]" />
                     </div>
-                    <p className="text-sm font-medium text-[#20201f]/80">
+                    <p className="text-[14px] font-medium text-[#20201f]/85">
                       <strong>Metodología paso a paso:</strong> 10 páginas con arquitectura real de trabajo.
                     </p>
                   </div>
@@ -284,18 +290,18 @@ export default function PrimerosFlujosIAPage() {
                     <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#fe6612]/15 text-[#fe6612]">
                       <Check className="h-3 w-3 stroke-[3]" />
                     </div>
-                    <p className="text-sm font-medium text-[#20201f]/80">
+                    <p className="text-[14px] font-medium text-[#20201f]/85">
                       <strong>Enfoque de criterio:</strong> La IA ejecuta la tarea, tú mantienes la dirección.
                     </p>
                   </div>
                 </div>
 
                 {/* Acciones con respiro visual amplio */}
-                <div className="mt-9 sm:mt-11 flex flex-wrap items-center gap-5 sm:gap-6">
+                <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-5">
                   <button
                     onClick={handleDownloadClick}
                     disabled={downloading}
-                    className="inline-flex items-center gap-2.5 rounded-[10px] bg-[#fe6612] px-7 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all active:scale-[0.98] cursor-pointer"
+                    className="inline-flex items-center gap-2.5 rounded-[10px] bg-[#fe6612] px-6 py-3.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Download className="h-4 w-4" />
                     <span>{downloading ? 'Descargando Guía...' : 'Descargar Guía Gratuita (PDF)'}</span>
@@ -305,26 +311,26 @@ export default function PrimerosFlujosIAPage() {
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex min-h-[46px] items-center gap-2 border-b-2 border-[#fe6612] pb-1.5 pt-1 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
+                    className="inline-flex min-h-[42px] items-center gap-2 border-b-2 border-[#fe6612] pb-1 text-xs sm:text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
                   >
                     <span>Consultar por WhatsApp</span>
-                    <ArrowRight className="h-4 w-4 text-[#fe6612]" />
+                    <ArrowRight className="h-3.5 w-3.5 text-[#fe6612]" />
                   </a>
                 </div>
               </div>
 
-              {/* Columna Derecha: Imagen Flotante */}
-              <div className="lg:col-span-5 flex justify-center">
+              {/* Columna Derecha: Imagen Flotante Agrandada (50%) */}
+              <div className="lg:col-span-6 flex justify-center lg:justify-end">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full max-w-[475px] flex justify-center"
+                  className="relative w-full max-w-[560px] flex justify-center"
                 >
                   <img
                     src={heroImage}
                     alt="Guía Qaway Lab - Cómo estructurar tus primeros flujos de trabajo con IA"
-                    className="w-full h-auto rounded-[12px] shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-[1.01]"
+                    className="w-full h-auto rounded-[12px] shadow-[0_24px_60px_rgba(0,0,0,0.14)] transition-transform duration-500 hover:scale-[1.01]"
                   />
                 </motion.div>
               </div>
@@ -345,12 +351,18 @@ export default function PrimerosFlujosIAPage() {
                 <span>/ Metodología de Flujo</span>
               </div>
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#191918]"
-                style={displayFont}
+                className="text-[#191918]"
+                style={{
+                  ...displayFont,
+                  fontSize: 'clamp(1.85rem, 2.8vw, 2.35rem)',
+                  fontWeight: 600,
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.03em',
+                }}
               >
                 El ciclo operativo de 5 pasos<span className="text-[#fe6612]">.</span>
               </h2>
-              <p className="mt-4 text-base sm:text-lg text-black/70 leading-relaxed max-w-xl mx-auto">
+              <p className="mt-3.5 text-[15px] sm:text-base text-black/75 leading-relaxed max-w-xl mx-auto">
                 La estructura lógica para transformar tareas manuales en procesos automatizados con criterio.
               </p>
             </div>
@@ -396,15 +408,24 @@ export default function PrimerosFlujosIAPage() {
         {/* ========================================================================= */}
         <section className="bg-[#f8f9fc] border-t border-[#20201f]/10 py-16 px-6 sm:px-10 lg:px-14">
           <div className="mx-auto max-w-[1240px]">
-            <div className="rounded-[20px] border border-[#20201f]/12 bg-white p-8 sm:p-14 shadow-[0_20px_60px_rgba(32,32,31,0.06)] flex flex-col lg:flex-row items-center justify-between gap-8">
-              <div className="max-w-2xl">
+            <div className="rounded-[20px] border border-[#20201f]/12 bg-white p-8 sm:p-12 shadow-[0_20px_60px_rgba(32,32,31,0.06)] flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-14">
+              <div className="max-w-xl">
                 <span className="qw-section-kicker mb-2">
                   Acceso Gratuito
                 </span>
-                <h3 className="qw-section-title text-[#20201f]" style={{ fontSize: 'clamp(2rem, 3.2vw, 3rem)' }}>
-                  Descarga la guía en PDF y empieza hoy mismo<span className="text-[#fe6612]">.</span>
+                <h3
+                  className="text-[#20201f] text-balance max-w-lg"
+                  style={{
+                    ...displayFont,
+                    fontSize: 'clamp(1.85rem, 2.8vw, 2.35rem)',
+                    fontWeight: 600,
+                    lineHeight: 1.18,
+                    letterSpacing: '-0.03em',
+                  }}
+                >
+                  Descarga la guía en PDF <br className="hidden sm:inline" />y empieza hoy mismo<span className="text-[#fe6612]">.</span>
                 </h3>
-                <p className="qw-section-copy mt-2">
+                <p className="mt-2.5 max-w-md text-[15px] text-black/75 leading-relaxed">
                   Documento completo de 10 páginas con plantillas de trabajo y metodología lista para ejecutar en tu negocio.
                 </p>
               </div>
@@ -413,7 +434,7 @@ export default function PrimerosFlujosIAPage() {
                 <button
                   onClick={handleDownloadClick}
                   disabled={downloading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-[10px] bg-[#fe6612] px-8 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 rounded-[10px] bg-[#fe6612] px-8 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all cursor-pointer"
                 >
                   <Download className="h-4 w-4" />
                   <span>{downloading ? 'Descargando...' : 'Descargar PDF (10 Páginas)'}</span>
