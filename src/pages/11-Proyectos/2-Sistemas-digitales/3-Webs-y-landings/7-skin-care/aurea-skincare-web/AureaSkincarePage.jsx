@@ -406,7 +406,7 @@ export default function AureaSkincarePage() {
               ].map(([n,title,text,img],i) => (
                 <Reveal key={n} delay={i*.05}>
                   <motion.article className="commitment-card" whileHover={{backgroundColor:"rgba(255,255,255,.52)"}}>
-                    <div className="photo"><motion.img whileHover={{scale:1.02}} transition={{duration:.45}} src={img} alt={title} loading="lazy" decoding="async"/></div>
+                    <div className="photo"><motion.img style={{transformOrigin:"50% 50%"}} whileHover={{scale:1.02}} transition={{duration:.45}} src={img} alt={title} loading="lazy" decoding="async"/></div>
                     <div className="commitment-copy"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>
                   </motion.article>
                 </Reveal>

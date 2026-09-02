@@ -131,7 +131,7 @@
 .aurea-landing .commitment-card:nth-child(2n){border-right:0}
 .aurea-landing .commitment-card:nth-last-child(-n+2){border-bottom:0}
 .aurea-landing .commitment-card .photo{overflow:hidden}
-.aurea-landing .commitment-card img{width:100%;height:100%;object-fit:cover}
+.aurea-landing .commitment-card img{width:100%;height:100%;object-fit:cover;object-position:center;transform-origin:50% 50%}
 .aurea-landing .commitment-copy{padding:28px;display:flex;flex-direction:column;justify-content:center}
 .aurea-landing .commitment-copy span{font-size:11px;letter-spacing:.12em;color:#62705f;margin-bottom:10px}
 .aurea-landing .commitment-copy h3{font-size:26px;line-height:1.1;margin-bottom:12px}
