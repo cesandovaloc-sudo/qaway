@@ -193,11 +193,11 @@ export default function AppRouter() {
         />
         <Route
           path="/hub/marketing"
-          element={renderRoute('hub', <ProtectedRoute><MarketingStudioPage /></ProtectedRoute>)}
+          element={<MarketingStudioPage />}
         />
         <Route
           path="/hub/marketing2"
-          element={renderRoute('hub', <ProtectedRoute><MarketingStudioTwentyPage /></ProtectedRoute>)}
+          element={<MarketingStudioTwentyPage />}
         />
         <Route index element={<InicioPage />} />
 

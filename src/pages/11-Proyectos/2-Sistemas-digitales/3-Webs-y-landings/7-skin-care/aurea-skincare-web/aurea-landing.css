@@ -56,19 +56,17 @@
 
 .aurea-landing .hero-overlay{position:absolute;left:42px;bottom:110px;width:min(300px,calc(100% - 84px));padding:20px 22px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.30);backdrop-filter:blur(16px);border-radius:6px;box-shadow:0 12px 35px rgba(0,0,0,.08);z-index:30;display:flex;flex-direction:column;gap:14px;transition:all .45s cubic-bezier(.16,1,.3,1);cursor:pointer}
 .aurea-landing .hero-overlay:hover{background:rgba(255,255,255,.45);border-color:rgba(255,255,255,.85);box-shadow:0 18px 45px rgba(0,0,0,.12);transform:translateY(-3px)}
+.aurea-landing .hero-overlay:hover .overlay-cta{background:#f0eeea}
 .aurea-landing .hero-overlay .overlay-desc{color:var(--ink);font-size:13px;font-weight:500;line-height:1.55;margin:0}
-.aurea-landing .btn-ref-cta{display:inline-flex;align-items:center;gap:8px;background:#ffffff;color:#182219;font-size:13px;font-weight:600;padding:9px 18px;border-radius:6px;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 12px rgba(0,0,0,.08);width:fit-content;transition:all .25s ease}
-.aurea-landing .btn-ref-cta:hover{background:#f4f5f2;transform:translateX(2px)}
-.aurea-landing .btn-ref-cta .arrow{transition:transform .25s ease}
-.aurea-landing .btn-ref-cta:hover .arrow{transform:translateX(4px)}
+.aurea-landing .overlay-cta{display:inline-flex;align-items:center;gap:8px;background:#ffffff;color:#182219;font-size:13px;font-weight:600;padding:9px 18px;border-radius:6px;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 12px rgba(0,0,0,.08);width:fit-content;transition:background .25s ease}
 .aurea-landing .hero-badge{display:none}
 
 .aurea-landing .section.section-benefits{padding:10px 0 0}
 .aurea-landing #filosofia.section{padding-top:48px}
 .aurea-landing .split{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(35px,7vw,90px);align-items:center}
-.aurea-landing .media-card{border-radius:18px;overflow:hidden;background:var(--surface-2)}
-.aurea-landing .media-card img{width:100%;aspect-ratio:1.05;object-fit:cover;transition:transform .65s cubic-bezier(.16,1,.3,1)}
-.aurea-landing .media-card:hover img{transform:scale(1.03)}
+.aurea-landing .media-card{border-radius:18px;overflow:hidden;background:var(--surface-2);box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s ease}
+.aurea-landing .media-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.10)}
+.aurea-landing .media-card img{width:100%;aspect-ratio:1.05;object-fit:cover}
 .aurea-landing .copy-block{max-width:590px}
 .aurea-landing .copy-block h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin:15px 0 20px}
 .aurea-landing .copy-block p{font-size:16px;line-height:1.7;color:var(--muted);max-width:540px}

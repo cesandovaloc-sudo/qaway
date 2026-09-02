@@ -202,28 +202,28 @@ export default function AureaSkincarePage() {
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ y: -2 }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6, boxShadow: '0 12px 28px rgba(0,0,0,0.12)' }}
+                  transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
                   className="hero-pill"
                 >
                   <img src={IMG.hero_products} alt="Colección de productos botánicos Auréa" loading="eager" decoding="async"/>
                 </motion.div>
 
-                {/* 4. Tarjeta Glassmorphism izquierda fiel a la referencia original */}
-                <motion.div
+                {/* 4. Tarjeta Glassmorphism izquierda — toda la tarjeta es el botón */}
+                <motion.a
+                  href="#coleccion"
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="hero-overlay"
+                  aria-label="Descubre la colección Auréa"
                 >
                   <p className="overlay-desc">
                     Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
                   </p>
-                  <a className="btn-ref-cta" href="#coleccion" aria-label="Descubre la colección Auréa">
-                    Descubre la colección <span className="arrow">→</span>
-                  </a>
-                </motion.div>
+                  <span className="overlay-cta">Descubre la colección →</span>
+                </motion.a>
 
                 {/* 5. Badge Glassmorphism derecha */}
                 <motion.div

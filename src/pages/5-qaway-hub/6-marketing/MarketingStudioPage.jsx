@@ -62,7 +62,7 @@ import {
 import { supabase } from '@/config/supabase'
 
 // LocalStorage persistence key
-const STORAGE_KEY = 'qaway_marketing_workspace_v6'
+const STORAGE_KEY = 'qaway_marketing_workspace_v7'
 
 // HubSpot Page 6: Exact Format Mapping
 const HUBSPOT_FORMATS_BY_STAGE = {
