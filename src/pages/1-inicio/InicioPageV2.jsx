@@ -255,10 +255,10 @@ function Hero() {
       <Navbar variant="light" />
 
       <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-center min-h-[calc(100dvh-5rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.88fr_1.22fr] gap-8 lg:gap-12 items-center min-h-[calc(100dvh-5rem)]">
           
-          {/* Columna Izquierda: Textos y Botones con fondo blanco y tipografía del Blog */}
-          <div className="flex flex-col items-start max-w-3xl py-10">
+          {/* Columna Izquierda: Textos y Botones contenidos antes de la línea de la imagen */}
+          <div className="flex flex-col items-start max-w-[36rem] py-10">
             <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#fe6612]">
               <span>/ MARCAS, SISTEMAS Y FORMACIÓN</span>
             </div>
@@ -275,7 +275,7 @@ function Hero() {
             </motion.h1>
 
             <motion.p
-              className="mt-4 max-w-2xl text-base leading-relaxed text-[#52525b] sm:text-lg mb-8"
+              className="mt-4 max-w-[30rem] text-base leading-relaxed text-[#52525b] sm:text-lg mb-8"
               initial={reduceMotion ? false : { opacity: 0, y: 14 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -309,7 +309,7 @@ function Hero() {
             </motion.div>
           </div>
 
-          {/* Columna Derecha: Imagen Principal de top a top en toda la altura de la columna */}
+          {/* Columna Derecha: Imagen Principal expandida hacia la izquierda y de top a top */}
           <motion.div
             initial={reduceMotion ? false : { opacity: 0, scale: 1.01 }}
             animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
