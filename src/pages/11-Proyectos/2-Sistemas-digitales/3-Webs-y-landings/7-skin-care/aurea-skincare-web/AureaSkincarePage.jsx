@@ -9,7 +9,7 @@ import "./aurea-landing.css";
 
 const IMG = {
   hero_photo: "/aurea-images/hero_photo.jpg",
-  hero_products: "/aurea-images/hero_products.jpg",
+  hero_products: "/aurea-images/hero_pill_v2.png",
   ingredient_aloe: "/aurea-images/ingredient_aloe.jpg",
   ingredient_citrus: "/aurea-images/ingredient_citrus.jpg",
   ingredient_green: "/aurea-images/ingredient_green.jpg",

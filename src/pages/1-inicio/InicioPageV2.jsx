@@ -251,36 +251,31 @@ function Hero() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section
-      className="relative z-20 overflow-hidden border-b border-black/10 pb-12 pt-20 sm:pb-16 sm:pt-28 text-white"
-      style={{
-        background: 'radial-gradient(ellipse 110% 90% at 50% 15%, #ff833b 0%, #fe6612 48%, #e85505 80%, #d24600 100%)',
-      }}
-    >
-      <Navbar variant="transparent" />
+    <section className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#191918] bg-white border-b border-black/5">
+      <Navbar variant="light" />
 
       <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center min-h-[calc(100dvh-12rem)]">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-center min-h-[calc(100dvh-5rem)]">
           
-          {/* Columna Izquierda: Contenido con tipografía del Blog y contraste para fondo de Proyectos */}
-          <div className="flex flex-col items-start max-w-3xl">
-            <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs shadow-xs">
+          {/* Columna Izquierda: Textos y Botones con fondo blanco y tipografía del Blog */}
+          <div className="flex flex-col items-start max-w-3xl py-10">
+            <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#fe6612]">
               <span>/ MARCAS, SISTEMAS Y FORMACIÓN</span>
             </div>
 
             <motion.h1
-              className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+              className="text-4xl font-bold tracking-tight text-[#191918] sm:text-5xl lg:text-6xl"
               style={displayFont}
               initial={reduceMotion ? false : { opacity: 0, y: 20 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               Construimos marcas, sistemas y{' '}
-              <span className="text-white/80">formamos con&nbsp;IA.</span>
+              <span className="text-[#fe6612]">formamos con&nbsp;IA.</span>
             </motion.h1>
 
             <motion.p
-              className="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg mb-8 font-normal"
+              className="mt-4 max-w-2xl text-base leading-relaxed text-[#52525b] sm:text-lg mb-8"
               initial={reduceMotion ? false : { opacity: 0, y: 14 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -288,7 +283,7 @@ function Hero() {
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
             </motion.p>
 
-            {/* Botones de acción adaptados al fondo difuminado de Proyectos */}
+            {/* Botones de acción */}
             <motion.div
               className="flex flex-wrap items-center gap-4"
               initial={reduceMotion ? false : { opacity: 0, y: 12 }}
@@ -299,7 +294,7 @@ function Hero() {
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-[48px] items-center justify-center gap-2.5 bg-white text-[#fe6612] px-7 py-3.5 text-[14.5px] font-bold rounded-lg shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:bg-zinc-50 active:translate-y-px transition-all"
+                className="group inline-flex min-h-[48px] items-center justify-center gap-2.5 bg-[#fe6612] px-7 py-3.5 text-[14.5px] font-bold text-white rounded-lg shadow-sm shadow-[#fe6612]/25 hover:bg-[#e05508] active:translate-y-px transition-all"
               >
                 <span>Cuéntanos tu proyecto</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
@@ -307,37 +302,37 @@ function Hero() {
 
               <a
                 href="#primary-areas"
-                className="inline-flex min-h-[48px] items-center justify-center px-6 py-3.5 border border-white/40 bg-white/15 backdrop-blur-xs text-[14px] font-semibold text-white rounded-lg hover:bg-white/25 transition-colors shadow-xs"
+                className="inline-flex min-h-[48px] items-center justify-center px-6 py-3.5 border border-black/10 bg-white text-[14px] font-semibold text-[#191918] rounded-lg hover:border-[#fe6612]/40 hover:text-[#fe6612] transition-colors shadow-xs"
               >
                 <span>Elige por dónde empezar</span>
               </a>
             </motion.div>
           </div>
 
-          {/* Columna Derecha: Imagen Principal con +10% de altura y botón flotante */}
+          {/* Columna Derecha: Imagen Principal de top a top en toda la altura de la columna */}
           <motion.div
-            initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
+            initial={reduceMotion ? false : { opacity: 0, scale: 1.01 }}
             animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
             transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full aspect-4/3 sm:aspect-16/11 lg:aspect-auto lg:h-[530px] rounded-[18px] overflow-hidden border border-white/20 shadow-2xl bg-zinc-950"
+            className="relative w-full h-[calc(100dvh-5rem)] min-h-[34rem] overflow-hidden border-x border-[#20201f]/10 shadow-sm bg-zinc-100"
           >
             <img
               src={`${base}hero-qaway-vision-lab.webp`}
               alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-white/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
 
             {/* Botón Flotante interactivo sobre la imagen */}
             <motion.div
               initial={reduceMotion ? false : { opacity: 0, y: 18 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-5 right-5 z-20"
+              className="absolute bottom-8 right-6 z-20"
             >
               <a
                 href="#sistemas"
-                className="group inline-flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-[14px] shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/70 hover:bg-white hover:scale-[1.02] transition-all"
+                className="group inline-flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-[14px] shadow-[0_12px_32px_rgba(0,0,0,0.18)] border border-white/70 hover:bg-white hover:scale-[1.02] transition-all"
               >
                 <span className="grid h-[2.7rem] w-[2.7rem] shrink-0 place-items-center bg-[#fe6612] text-white rounded-[10px] shadow-[0_8px_20px_rgba(254,102,18,0.3)]">
                   <Workflow size={19} strokeWidth={1.8} />
