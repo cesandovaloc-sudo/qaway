@@ -35,6 +35,7 @@ import MarketingStudioTwentyPage from '@/pages/5-qaway-hub/7-marketing2/Marketin
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
 import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
 import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
+import PrimerosFlujosIAPage from '@/pages/6-recursos/1-primeros-flujos IA/PrimerosFlujosIAPage'
 import BlogPage from '@/pages/7-blog/BlogPage'
 import ArticleDetailPage from '@/pages/7-blog/ArticleDetailPage'
 import LandingsPage from '@/pages/8-landings/LandingsPage'
@@ -310,6 +311,10 @@ export default function AppRouter() {
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />
+          <Route
+            path="recursos/primeros-flujos-ia"
+            element={renderPublicPathRoute('recursos', '/recursos/primeros-flujos-ia', <PrimerosFlujosIAPage />)}
+          />
           <Route
             path="recursos/ebooks/google-calendar-dominado"
             element={renderPublicPathRoute('recursos', '/recursos/ebooks/google-calendar-dominado', <EbookDigitalPage />)}

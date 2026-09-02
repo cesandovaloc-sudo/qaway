@@ -10,7 +10,7 @@ const routeVisibility = {
   sistemasDigitales: false,
   academy: false,
   hub: false,
-  recursos: false,
+  recursos: true,
   blog: true,
   landings: true,
   auth: false,
@@ -23,6 +23,9 @@ const publicPathAllowList = new Set([
   '/landings/desarrollo-web',
   '/blog',
   '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
+  '/recursos',
+  '/recursos/primeros-flujos-ia',
+  '/recursos/ebooks/google-calendar-dominado',
 ])
 
 const navigationRegistry = [
@@ -85,7 +88,7 @@ export function isRouteEnabled(routeKey) {
 export function isPublicPathAllowed(pathname) {
   if (!isPublicSiteMode) return true
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
-  return publicPathAllowList.has(normalizedPath)
+  return publicPathAllowList.has(normalizedPath) || normalizedPath.startsWith('/recursos')
 }
 
 function isLinkVisible(link) {

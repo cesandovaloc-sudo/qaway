@@ -15,6 +15,7 @@ import qawayChecklistAdsImage from './assets/qaway-checklist-ads.png'
 import qawayChecklistSeguridadImage from './assets/qaway-checklist-seguridad.png'
 import qawayScriptWhatsappImage from './assets/qaway-script-whatsapp.png'
 import qawayScriptBackupImage from './assets/qaway-script-backup.png'
+import primerosFlujosImage from './1-primeros-flujos IA/ChatGPT Image 1 sept 2026, 19_04_24.png'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
@@ -26,6 +27,25 @@ const categories = [
 ]
 
 const resources = [
+  {
+    id: 'primeros-flujos-ia',
+    category: 'ebooks',
+    categoryLabel: 'Ebooks',
+    title: 'Cómo estructurar tus primeros flujos de trabajo con IA',
+    description: 'Aprende a identificar una tarea, dividirla en pasos y trabajar mejor con IA sin complicarte con diez herramientas.',
+    type: 'Guía Práctica Oficial (10 Páginas)',
+    badge: 'Gratis',
+    publishedAt: '2026-09-01',
+    public: true,
+    homeSection: 'featured',
+    featured: {
+      order: 1,
+      label: 'Nuevo Lanzamiento',
+      icon: 'star'
+    },
+    path: '/recursos/primeros-flujos-ia',
+    image: primerosFlujosImage
+  },
   {
     id: 'google-calendar-dominado',
     category: 'ebooks',
@@ -156,9 +176,7 @@ const resources = [
   }
 ]
 
-const visibleResources = isPublicSiteMode
-  ? resources.filter((resource) => resource.public)
-  : resources
+const visibleResources = resources
 
 const displayFont = {
   fontFamily: "'Oswald', sans-serif",

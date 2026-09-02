@@ -119,6 +119,18 @@
 .aurea-landing .commitment-copy h3{font-size:30px;line-height:1;margin-bottom:14px}
 .aurea-landing .commitment-copy p{color:var(--muted);line-height:1.6;font-size:13px}
 
+.aurea-landing .editorial-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:28px 24px;align-items:center}
+.aurea-landing .mosaic-photo{border-radius:16px;overflow:hidden;box-shadow:0 12px 32px rgba(20,30,20,.08);background:var(--surface-2);aspect-ratio:1.02/1}
+.aurea-landing .mosaic-photo img{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.aurea-landing .mosaic-photo:hover img{transform:scale(1.04)}
+.aurea-landing .mosaic-text{display:flex;flex-direction:column;justify-content:center;padding:6px 2px}
+.aurea-landing .mosaic-glyph{color:#587052;margin-bottom:12px;display:inline-flex}
+.aurea-landing .mosaic-text h3{font-family:"DM Sans",sans-serif;font-size:18px;font-weight:500;line-height:1.28;color:var(--ink);margin-bottom:10px;letter-spacing:-.02em}
+.aurea-landing .mosaic-text p{color:var(--muted);font-size:13px;line-height:1.55}
+
+@media(max-width:980px){.aurea-landing .editorial-mosaic{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.aurea-landing .editorial-mosaic{grid-template-columns:1fr}}
+
 .aurea-landing .why{background:#f0eee7}
 .aurea-landing .why-grid{display:grid;grid-template-columns:.7fr 1.2fr .7fr;align-items:center;gap:20px}
 .aurea-landing .why-side{display:grid;gap:60px}
