@@ -185,43 +185,55 @@ export default function PrimerosFlujosIAPage() {
         </section>
 
         {/* ========================================================================= */}
-        {/* PIPELINE VISUAL METODOLÓGICO: ENTRADA ➔ TAREA ➔ IA ➔ REVISIÓN ➔ RESULTADO */}
+        {/* PIPELINE VISUAL METODOLÓGICO EN CONTENEDOR NARANJA DE MARCA (#fe6612)    */}
         {/* ========================================================================= */}
-        <section className="bg-[#f8f9fc] py-14 px-6 sm:px-10 lg:px-14 border-b border-[#20201f]/10">
+        <section className="bg-white py-16 px-6 sm:px-10 lg:px-14">
           <div className="mx-auto max-w-[1240px]">
-            <div className="mb-8">
-              <span className="qw-section-kicker mb-2">
-                Arquitectura del Flujo
-              </span>
-              <h2 className="qw-section-title text-[#20201f]" style={{ fontSize: 'clamp(1.8rem, 2.8vw, 2.6rem)' }}>
-                El ciclo operativo de 5 fases<span className="text-[#fe6612]">.</span>
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {pipelineSteps.map((item, idx) => (
-                <div
-                  key={item.step}
-                  className="relative rounded-[12px] border border-[#20201f]/10 bg-white p-5 shadow-[0_4px_16px_rgba(0,0,0,0.03)] flex flex-col justify-between"
+            <div className="rounded-[28px] sm:rounded-[36px] bg-[#fe6612] p-8 sm:p-12 lg:p-14 text-white shadow-[0_24px_70px_rgba(254,102,18,0.28)] relative overflow-hidden">
+              
+              {/* Encabezado del bloque naranja */}
+              <div className="max-w-2xl mb-10">
+                <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs mb-3 font-mono">
+                  Metodología de Flujo
+                </span>
+                <h2
+                  className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-3"
+                  style={displayFont}
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono text-xs font-bold text-[#fe6612] bg-[#fe6612]/10 px-2 py-0.5 rounded-md">
-                        FASE {item.step}
-                      </span>
-                      {idx < pipelineSteps.length - 1 && (
-                        <ArrowRight className="hidden lg:block h-3.5 w-3.5 text-[#20201f]/30" />
-                      )}
+                  El ciclo operativo de 5 pasos.
+                </h2>
+                <p className="text-white/90 text-sm sm:text-base leading-relaxed">
+                  La estructura lógica para transformar tareas manuales en procesos automatizados con criterio.
+                </p>
+              </div>
+
+              {/* Grid de 5 tarjetas flotantes blancas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {pipelineSteps.map((item, idx) => (
+                  <div
+                    key={item.step}
+                    className="relative rounded-[18px] bg-white p-5 text-[#191918] shadow-[0_12px_28px_rgba(0,0,0,0.08)] flex flex-col justify-between hover:-translate-y-1 transition-all duration-300"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-mono text-xs font-black text-[#fe6612] tracking-wider">
+                          {item.step}
+                        </span>
+                        {idx < pipelineSteps.length - 1 && (
+                          <ArrowRight className="hidden lg:block h-3.5 w-3.5 text-[#191918]/25" />
+                        )}
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-[#191918] mb-1.5 font-display-condensed">
+                        {item.name}
+                      </h3>
+                      <p className="text-xs text-black/70 leading-relaxed font-normal">
+                        {item.desc}
+                      </p>
                     </div>
-                    <h3 className="text-base font-bold text-[#20201f] mb-1.5">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs text-[#4e4d4a] leading-relaxed">
-                      {item.desc}
-                    </p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
             </div>
           </div>
         </section>

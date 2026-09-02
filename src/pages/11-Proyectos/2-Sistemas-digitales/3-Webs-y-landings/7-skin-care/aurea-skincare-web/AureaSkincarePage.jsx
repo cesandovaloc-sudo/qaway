@@ -309,61 +309,59 @@ export default function AureaSkincarePage() {
             </Reveal>
 
             <div className="editorial-mosaic">
-              {/* FILA 1: [Foto 1] [Texto 02] [Foto 2] [Texto 04] */}
+              {/* Columna 1: [Foto 1] arriba, [Texto 01] abajo */}
               <Reveal delay={0.04}>
-                <div className="mosaic-photo">
-                  <img src={IMG.commitment_1} alt="Gel limpiador botánico" />
+                <div className="mosaic-column">
+                  <div className="mosaic-photo">
+                    <img src={IMG.commitment_1} alt="Gel limpiador botánico" />
+                  </div>
+                  <div className="mosaic-text">
+                    <div className="mosaic-glyph"><Leaf size={18} strokeWidth={1.4} /></div>
+                    <h3>01. Máxima retención de nutrientes</h3>
+                    <p>Procesos en frío y extracción de última generación para conservar intactos los nutrientes, vitaminas y antioxidantes.</p>
+                  </div>
                 </div>
               </Reveal>
 
+              {/* Columna 2: [Texto 02] arriba, [Foto 3] abajo */}
               <Reveal delay={0.08}>
-                <div className="mosaic-text">
-                  <div className="mosaic-glyph"><Leaf size={18} strokeWidth={1.4} /></div>
-                  <h3>02. Directo de la naturaleza</h3>
-                  <p>Trabajamos con ingredientes botánicos cultivados de forma responsable y extraídos en su máximo potencial.</p>
+                <div className="mosaic-column">
+                  <div className="mosaic-text">
+                    <div className="mosaic-glyph"><Leaf size={18} strokeWidth={1.4} /></div>
+                    <h3>02. Directo de la naturaleza</h3>
+                    <p>Trabajamos con ingredientes botánicos cultivados de forma responsable y extraídos en su máximo potencial.</p>
+                  </div>
+                  <div className="mosaic-photo">
+                    <img src={IMG.commitment_3} alt="Tónico regenerador botánico" />
+                  </div>
                 </div>
               </Reveal>
 
+              {/* Columna 3: [Foto 2] arriba, [Texto 03] abajo */}
               <Reveal delay={0.12}>
-                <div className="mosaic-photo">
-                  <img src={IMG.commitment_2} alt="Sérum iluminador botánico" />
+                <div className="mosaic-column">
+                  <div className="mosaic-photo">
+                    <img src={IMG.commitment_2} alt="Sérum iluminador botánico" />
+                  </div>
+                  <div className="mosaic-text">
+                    <div className="mosaic-glyph"><Sparkles size={18} strokeWidth={1.4} /></div>
+                    <h3>03. Formulación con propósito</h3>
+                    <p>Cada fórmula está diseñada para equilibrar, proteger y potenciar la salud natural de tu piel.</p>
+                  </div>
                 </div>
               </Reveal>
 
+              {/* Columna 4: [Texto 04] arriba, [Foto 4] abajo */}
               <Reveal delay={0.16}>
-                <div className="mosaic-text">
-                  <div className="mosaic-glyph"><Droplets size={18} strokeWidth={1.4} /></div>
-                  <h3>04. Sin compromisos</h3>
-                  <p>Fórmulas limpias, efectivas y transparentes. Sin parabenos, sin fragancias sintéticas, sin ingredientes innecesarios.</p>
-                </div>
-              </Reveal>
-
-              {/* FILA 2: [Texto 01] [Foto 3] [Texto 03] [Foto 4] */}
-              <Reveal delay={0.20}>
-                <div className="mosaic-text">
-                  <div className="mosaic-glyph"><Leaf size={18} strokeWidth={1.4} /></div>
-                  <h3>01. Máxima retención de nutrientes</h3>
-                  <p>Procesos en frío y extracción de última generación para conservar intactos los nutrientes, vitaminas y antioxidantes.</p>
-                </div>
-              </Reveal>
-
-              <Reveal delay={0.24}>
-                <div className="mosaic-photo">
-                  <img src={IMG.commitment_3} alt="Tónico regenerador botánico" />
-                </div>
-              </Reveal>
-
-              <Reveal delay={0.28}>
-                <div className="mosaic-text">
-                  <div className="mosaic-glyph"><Sparkles size={18} strokeWidth={1.4} /></div>
-                  <h3>03. Formulación con propósito</h3>
-                  <p>Cada fórmula está diseñada para equilibrar, proteger y potenciar la salud natural de tu piel.</p>
-                </div>
-              </Reveal>
-
-              <Reveal delay={0.32}>
-                <div className="mosaic-photo">
-                  <img src={IMG.commitment_4} alt="Crema barrera botánica" />
+                <div className="mosaic-column">
+                  <div className="mosaic-text">
+                    <div className="mosaic-glyph"><Droplets size={18} strokeWidth={1.4} /></div>
+                    <h3>04. Sin compromisos</h3>
+                    <p>Fórmulas limpias, efectivas y transparentes. Sin parabenos, sin fragancias sintéticas, sin ingredientes innecesarios.</p>
+                  </div>
+                  <div className="mosaic-photo">
+                    <img src={IMG.commitment_4} alt="Crema barrera botánica" />
+                  </div>
                 </div>
               </Reveal>
             </div>
