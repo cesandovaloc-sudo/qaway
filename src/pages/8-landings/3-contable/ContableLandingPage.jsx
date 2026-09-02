@@ -614,7 +614,7 @@ function ContableCTA() {
       console.error('Error al procesar formulario:', err);
     }
 
-    window.open(waUrl, '_blank')
+    window.location.href = waUrl
   }
 
   return (

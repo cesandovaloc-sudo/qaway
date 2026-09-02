@@ -755,7 +755,7 @@ function Diagnostic() {
       
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest} (Estudio). ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
-      window.open(waUrl, '_blank', 'noopener,noreferrer')
+      window.location.href = waUrl
     } catch (e) {
       console.error(e)
       setSubmitError('Hubo un error al enviar tu solicitud. Inténtalo de nuevo.')

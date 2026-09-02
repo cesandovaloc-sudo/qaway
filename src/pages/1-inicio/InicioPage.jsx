@@ -1288,7 +1288,7 @@ export default function InicioPage() {
       
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
-      window.open(waUrl, '_blank', 'noopener,noreferrer')
+      window.location.href = waUrl
     } catch (error) {
       console.error('Error al enviar consulta de Academy:', error)
       setSubmitError(error.message || 'No pudimos enviar tu consulta. Inténtalo nuevamente.')

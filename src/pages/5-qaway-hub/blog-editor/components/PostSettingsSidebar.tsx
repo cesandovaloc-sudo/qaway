@@ -18,6 +18,7 @@ import {
   ChevronDown,
   PanelRightClose,
   BookOpen,
+  ExternalLink,
 } from 'lucide-react'
 import type { PostStatus } from '../types'
 import CategoryPicker from './CategoryPicker'
@@ -332,20 +333,37 @@ export default function PostSettingsSidebar({
               <button
                 type="button"
                 onClick={onPublish}
-                className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-dark text-white font-bold py-2.5 px-4 rounded-lg text-xs sm:text-sm transition-colors shadow-xs cursor-pointer"
+                className="btn-publish w-full inline-flex items-center justify-center gap-2 bg-[#fe6612] hover:bg-[#e0550a] !text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
+                style={{ backgroundColor: '#fe6612', color: '#ffffff' }}
               >
-                <Send className="w-4 h-4" />
-                <span>{status === 'publicado' ? 'Actualizar Artículo' : 'Publicar Ahora'}</span>
+                <Send className="w-4 h-4 !text-white" style={{ color: '#ffffff' }} />
+                <span className="!text-white font-bold" style={{ color: '#ffffff' }}>
+                  {status === 'publicado' ? 'Actualizar Artículo' : 'Publicar Ahora'}
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={onSaveDraft}
-                className="w-full inline-flex items-center justify-center gap-2 bg-[#24262e] hover:bg-[#2f323c] text-white font-bold py-2.5 px-4 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer"
+                className="btn-draft w-full inline-flex items-center justify-center gap-2 bg-[#272a34] hover:bg-[#333644] !text-white font-bold py-2.5 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
+                style={{ backgroundColor: '#272a34', color: '#ffffff', borderColor: '#363945' }}
               >
-                <Save className="w-4 h-4" />
-                <span>Guardar Borrador</span>
+                <Save className="w-4 h-4 !text-white" style={{ color: '#ffffff' }} />
+                <span className="!text-white font-semibold" style={{ color: '#ffffff' }}>
+                  Guardar Borrador
+                </span>
               </button>
+
+              {/* Botón Ver en Producción con el Slug Creado */}
+              <a
+                href={`/blog/articulo/${currentSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-white hover:bg-zinc-50 text-zinc-800 border border-zinc-200 hover:border-[#fe6612]/50 hover:text-[#fe6612] font-semibold py-2 px-4 rounded-xl text-xs sm:text-[13px] transition-all shadow-2xs no-underline cursor-pointer group"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#fe6612] transition-colors" />
+                <span>Ver en Producción</span>
+              </a>
             </div>
 
             {/* Metadatos del Estado */}

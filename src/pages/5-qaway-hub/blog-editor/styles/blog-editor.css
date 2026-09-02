@@ -76,15 +76,38 @@
   color: #1e2026 !important;
 }
 
-.blog-editor-root aside span,
-.blog-editor-root aside p,
-.blog-editor-root aside button {
+.blog-editor-root aside p {
   color: inherit;
 }
 
-/* Botones en hover y activos */
-.blog-editor-root button {
-  transition: all 0.2s ease;
+/* Botones con contraste garantizado */
+.blog-editor-root button.bg-accent,
+.blog-editor-root .bg-accent,
+.blog-editor-root .btn-publish {
+  background-color: #fe6612 !important;
+  color: #ffffff !important;
+}
+
+.blog-editor-root button.bg-accent *,
+.blog-editor-root .bg-accent *,
+.blog-editor-root .btn-publish * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.blog-editor-root .btn-draft {
+  background-color: #272a34 !important;
+  color: #ffffff !important;
+  border: 1px solid #363945 !important;
+}
+
+.blog-editor-root .btn-draft:hover {
+  background-color: #333644 !important;
+}
+
+.blog-editor-root .btn-draft * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
 
 .blog-editor-root input,

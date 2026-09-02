@@ -105,7 +105,7 @@ export function QawayLeadContactForm() {
         `Hola Qaway Lab, quiero cotizar mi proyecto web:\n\n• Nombre: ${lead.name}\n• Empresa: ${lead.company || "No especificada"}\n• WhatsApp: ${lead.phone}\n• Email: ${lead.email}\n• Presupuesto: ${lead.budget}\n• Plazo: ${lead.timeline}\n• Mensaje: ${lead.message || "Solicito cotización"}`
       );
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
-      window.open(waUrl, "_blank", "noopener,noreferrer");
+      window.location.href = waUrl;
     } catch (err) {
       console.error("Error al enviar formulario:", err);
       setSubmitError("Hubo un problema de conexión. Puedes escribirnos directamente por WhatsApp.");

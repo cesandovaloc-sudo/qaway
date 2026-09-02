@@ -569,7 +569,7 @@ const ContactForm = () => {
       console.error('Error al procesar formulario:', err);
     }
 
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    window.location.href = waUrl;
     setFormData({ nombre: '', email: '', mensaje: '' });
     setIsSubmitted(true);
   };

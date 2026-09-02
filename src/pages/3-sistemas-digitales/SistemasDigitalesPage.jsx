@@ -733,7 +733,7 @@ export default function SistemasDigitalesPage() {
 
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`);
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
+      window.location.href = waUrl;
     } catch {
       setFormError('Ocurrió un error al enviar. Intenta de nuevo.');
     } finally {
