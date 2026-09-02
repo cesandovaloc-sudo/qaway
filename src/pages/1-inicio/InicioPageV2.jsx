@@ -252,101 +252,108 @@ function Hero() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section className="relative overflow-hidden pt-28 pb-14 sm:pt-36 sm:pb-20 text-[#20201f] bg-white border-b border-zinc-200/70">
+    <section
+      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
+    >
       <Navbar variant="light" />
 
-      <div className="mx-auto max-w-[1200px] px-6 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1.2fr] gap-10 lg:gap-14 items-center">
-          
-          {/* Columna Izquierda: Textos y Botones */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 180 180%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.74%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.44%22/%3E%3C/svg%3E")',
+        }}
+      />
+
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.3fr_1.05fr]">
+        
+        {/* Columna Izquierda: Textos y Botones */}
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             animate={reduceMotion ? undefined : 'show'}
             variants={fadeUp}
             custom={0}
-            className="flex flex-col items-start"
+            className="relative z-10"
           >
-            {/* Kicker cápsula minimalista */}
-            <span className="inline-block px-3.5 py-1 rounded-full border border-[#e4e4e7] bg-transparent text-[#71717a] text-[11px] font-bold tracking-[0.08em] uppercase mb-4 leading-normal font-sans">
+            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
               Marcas, Automatización y formación con IA
-            </span>
-
-            {/* Titular H1 idéntico en proporción y estilo al de referencia */}
+            </p>
             <h1
-              className="text-[clamp(2.4rem,4vw,3.4rem)] font-bold text-[#111111] leading-[1.12] tracking-[-0.035em] mb-5 max-w-[540px]"
+              className="max-w-[44rem] text-[clamp(2.4rem,4vw,3.4rem)] font-bold text-[#111111] leading-[1.12] tracking-[-0.035em] mb-5"
               style={{ ...displayFont, fontWeight: 700 }}
             >
               Construimos marcas, sistemas y{' '}
               <span className="text-[#fe6612]">formamos con&nbsp;IA.</span>
             </h1>
-
-            {/* Párrafo descriptivo con tipografía sans limpia */}
-            <p className="max-w-[480px] text-[15px] leading-[1.5] text-[#52525b] mb-7 font-sans">
+            <p className="max-w-[32rem] text-[15px] leading-[1.5] text-[#52525b] mb-7">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
             </p>
-
-            {/* Botones de acción principales */}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-5">
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-[48px] items-center justify-center gap-2.5 bg-[#fe6612] px-7 py-3.5 text-[15px] font-bold text-white rounded-full shadow-[0_4px_16px_rgba(254,102,18,0.25)] hover:bg-[#ff7527] active:translate-y-px transition-all"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] transition-colors hover:bg-[#e05508] rounded-[10px] active:translate-y-px"
               >
-                <span>Cuéntanos tu proyecto</span>
+                Cuéntanos tu proyecto
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
-
               <a
                 href="#primary-areas"
-                className="inline-flex min-h-[48px] items-center justify-center px-6 py-3.5 border border-[#191918] bg-white text-[14.5px] font-bold text-[#191918] rounded-full hover:bg-[#191918] hover:text-white transition-all cursor-pointer"
+                className="inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
               >
-                <span>Elige por dónde empezar</span>
+                Elige por dónde empezar
               </a>
             </div>
           </motion.div>
+        </div>
 
-          {/* Columna Derecha: Imagen del Hero con Botón Flotante interactivo */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
-            animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
-            transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full aspect-4/3 sm:aspect-16/11 lg:aspect-auto lg:h-[480px] rounded-[18px] overflow-hidden border border-[#20201f]/10 shadow-md bg-zinc-100"
-          >
+        {/* Columna Derecha: Franja vertical alargada de imagen (de top a bottom con border-x) */}
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
+          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+          transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-20 min-h-[40vh] overflow-hidden border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
+        >
+          <div className="absolute inset-0 overflow-hidden">
             <img
               src={`${base}hero-qaway-vision-lab.webp`}
               alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-white/10 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-white/12" />
+          </div>
 
-            {/* Botón flotante rescatado sobre la imagen */}
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute bottom-5 right-5 z-20"
+          {/* Botón Flotante interactivo sobre la franja vertical de la imagen */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute bottom-8 right-6 z-30"
+          >
+            <a
+              href="#sistemas"
+              className="qw-hero-secondary-card-btn group bg-white shadow-[0_16px_34px_rgba(0,0,0,0.22)]"
             >
-              <a
-                href="#sistemas"
-                className="group inline-flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-[14px] shadow-[0_12px_32px_rgba(0,0,0,0.2)] border border-white/70 hover:bg-white hover:scale-[1.02] transition-all"
-              >
-                <span className="grid h-[2.7rem] w-[2.7rem] shrink-0 place-items-center bg-[#fe6612] text-white rounded-[10px] shadow-[0_8px_20px_rgba(254,102,18,0.3)]">
-                  <Workflow size={19} strokeWidth={1.8} />
+              <span className="flex items-center gap-2.5">
+                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(254,102,18,0.22)]">
+                  <Workflow size={20} strokeWidth={1.65} />
                 </span>
-                <span className="text-left pr-1.5">
-                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">
+                <span className="min-w-0 pr-2">
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
                     Sistemas
                   </span>
-                  <span className="block text-xs font-bold text-[#1e2026]">
+                  <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
                     Automatización e IA
                   </span>
                 </span>
-              </a>
-            </motion.div>
+              </span>
+            </a>
           </motion.div>
 
-        </div>
+        </motion.div>
+
       </div>
     </section>
   )
