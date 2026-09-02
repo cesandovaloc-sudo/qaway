@@ -269,12 +269,12 @@ export default function AureaSkincarePage() {
           </div>
         </section>
 
-        {/* --- VERSIÓN 1: CUADRÍCULA 2x2 ORIGINAL --- */}
+        {/* --- SECCIÓN NUESTRO COMPROMISO (ACTIVA) --- */}
         <section className="section commitment">
           <div className="container">
             <Reveal>
               <div className="commitment-head">
-                <span className="eyebrow">Nuestro compromiso (Versión 1 - Cuadrícula)</span>
+                <span className="eyebrow">Nuestro compromiso</span>
                 <h2>Belleza consciente,<br/>desde el origen.</h2>
               </div>
             </Reveal>
@@ -296,8 +296,8 @@ export default function AureaSkincarePage() {
           </div>
         </section>
 
-        {/* --- VERSIÓN 2: DAMERO EDITORIAL ALTERNADO (IMAGEN 2) --- */}
-        <section className="section commitment-v2" style={{ paddingTop: 30, paddingBottom: 80 }}>
+        {/* --- PROPUESTA EDITORIAL ALTERNADA (PRESERVADA Y OCULTA PARA FUTUROS PROYECTOS) --- */}
+        <section className="section commitment-v2" style={{ display: "none" }}>
           <div className="container">
             <Reveal>
               <div className="commitment-head" style={{ textAlign: "center", marginBottom: 52 }}>

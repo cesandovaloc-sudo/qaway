@@ -49,6 +49,7 @@ import DesarrolloWebQawayPage from '@/pages/8-landings/8-desarollo web/Desarroll
 import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
 import DiscardedInicioPage from '@/pages/9-pruebas/1-paginas_descartadas/1-inicio/InicioPage.jsx'
+import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
 import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
 import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
@@ -332,6 +333,8 @@ export default function AppRouter() {
 
           <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
           <Route path="landings/*" element={<PublicPathRoute routeKey="landings"><LandingsPage /></PublicPathRoute>} />
+
+          <Route path="rutas" element={<RutasPage />} />
 
           <Route path="*" element={notFoundElement} />
         </Route>
