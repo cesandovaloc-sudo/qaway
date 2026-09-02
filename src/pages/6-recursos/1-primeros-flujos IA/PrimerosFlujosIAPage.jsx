@@ -19,6 +19,11 @@ const pipelineSteps = [
   { step: '05', name: 'Resultado', desc: 'Entrega final en CRM, Notion, WhatsApp o correo.' },
 ]
 
+const displayFont = {
+  fontFamily: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif',
+  letterSpacing: '-0.03em',
+}
+
 export default function PrimerosFlujosIAPage() {
   useSetNavbarVariant('light')
   const [downloading, setDownloading] = useState(false)
@@ -100,20 +105,18 @@ export default function PrimerosFlujosIAPage() {
               
               {/* Columna Izquierda: Información Principal */}
               <div className="lg:col-span-7">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="qw-hero-kicker mb-0">
-                    Recursos & Formación · Guía Oficial
-                  </span>
-                  <span className="inline-block rounded-full bg-[#fe6612]/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#fe6612] border border-[#fe6612]/20">
-                    10 Páginas · PDF
-                  </span>
+                <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+                  <span>/ Recursos · Guía Práctica</span>
                 </div>
 
-                <h1 className="qw-hero-title text-[#20201f]">
-                  Cómo estructurar tus primeros flujos de trabajo con <span className="text-[#fe6612]">IA.</span>
+                <h1
+                  className="text-4xl font-bold tracking-tight text-[#191918] sm:text-5xl lg:text-6xl"
+                  style={displayFont}
+                >
+                  Cómo estructurar tus primeros flujos de trabajo con <span className="text-[#ff4b0b]">IA.</span>
                 </h1>
 
-                <p className="qw-hero-copy">
+                <p className="mt-4 max-w-2xl text-base leading-relaxed text-black/70 sm:text-lg">
                   No necesitas aprender diez herramientas. Empieza por una tarea que quieras mejorar y divídela en pasos para saber exactamente dónde y cómo aplicar Inteligencia Artificial con criterio.
                 </p>
 
@@ -235,201 +238,6 @@ export default function PrimerosFlujosIAPage() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ========================================================================= */}
-        {/* BENTO OPERATIVO: LOS 6 PASOS TÁCTICOS CON RIQUEZA TÉCNICA                */}
-        {/* ========================================================================= */}
-        <section className="bg-white py-16 sm:py-24 px-6 sm:px-10 lg:px-14">
-          <div className="mx-auto max-w-[1240px]">
-            
-            <div className="max-w-3xl mb-14">
-              <span className="qw-section-kicker">
-                Metodología Detallada
-              </span>
-              <h2 className="qw-section-title text-[#20201f]">
-                Los 6 pasos prácticos para automatizar con criterio<span className="text-[#fe6612]">.</span>
-              </h2>
-              <p className="qw-section-copy">
-                Cada paso responde a un criterio de ingeniería de procesos. No se trata de conectar herramientas al azar, sino de construir un sistema repetible y seguro.
-              </p>
-            </div>
-
-            {/* Bento Grid 3x2 con identidad técnica */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              
-              {/* PASO 01: Matriz de Tarea Concreta */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      01 · Selección
-                    </span>
-                    <span className="h-2 w-2 rounded-full bg-[#fe6612]" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Empieza por una tarea concreta
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-6">
-                    Aplica el filtro de viabilidad. Si no cumple estos 3 factores, no intentes automatizar todavía.
-                  </p>
-
-                  <div className="space-y-2 rounded-xl bg-white border border-[#20201f]/8 p-3.5 text-xs font-mono text-[#20201f]/80">
-                    <div className="flex items-center gap-2 text-emerald-700">
-                      <Check className="h-3.5 w-3.5" /> <span>Se repite semanalmente</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-emerald-700">
-                      <Check className="h-3.5 w-3.5" /> <span>Consume tiempo operativo</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-emerald-700">
-                      <Check className="h-3.5 w-3.5" /> <span>Se puede dividir en fases</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PASO 02: Desarmar pasos */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      02 · Mapeo
-                    </span>
-                    <Workflow className="h-4 w-4 text-[#20201f]/40" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Desarma la tarea en pasos visibles
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-6">
-                    Mapea la cadena de datos antes de tocar cualquier software:
-                  </p>
-
-                  <div className="flex flex-col gap-1.5 text-xs font-mono text-[#20201f]/75">
-                    <div className="p-2 rounded-md bg-white border border-[#20201f]/8 flex items-center justify-between">
-                      <span>1. Recibir</span> <span className="text-[10px] text-zinc-400">Webhook / Form</span>
-                    </div>
-                    <div className="p-2 rounded-md bg-white border border-[#20201f]/8 flex items-center justify-between">
-                      <span>2. Procesar</span> <span className="text-[10px] text-[#fe6612] font-bold">Módulo IA</span>
-                    </div>
-                    <div className="p-2 rounded-md bg-white border border-[#20201f]/8 flex items-center justify-between">
-                      <span>3. Aplicar</span> <span className="text-[10px] text-zinc-400">CRM / Salida</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PASO 03: Roles Claros */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      03 · Gobernanza
-                    </span>
-                    <UserCheck className="h-4 w-4 text-[#20201f]/40" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Decide el rol: La IA ejecuta, tú decides
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-6">
-                    Evita la automatización ciega asignando responsabilidades:
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-3 rounded-xl bg-white border border-[#20201f]/8">
-                      <strong className="block text-[#fe6612] font-mono text-[11px] mb-1">ROL DE IA</strong>
-                      <p className="text-[11px] text-[#4e4d4a]">Búsqueda, redacción preliminar y formateo veloz.</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-[#20201f] text-white">
-                      <strong className="block text-[#fe6612] font-mono text-[11px] mb-1">TU ROL</strong>
-                      <p className="text-[11px] text-white/80">Estrategia, contexto real y decisión final.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PASO 04: Estructura CTR (Terminal Preview) */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      04 · Prompting
-                    </span>
-                    <Terminal className="h-4 w-4 text-[#20201f]/40" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Estructura CTR de Instrucción
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-4">
-                    Elimina alucinaciones usando el estándar de 3 componentes:
-                  </p>
-
-                  <div className="rounded-xl bg-[#191918] p-3 text-[11px] font-mono text-white/80 space-y-1.5">
-                    <div><span className="text-[#fe6612] font-bold">[C] Contexto:</span> Tipo de negocio y rol.</div>
-                    <div><span className="text-sky-400 font-bold">[T] Tarea:</span> Acción específica sin rodeos.</div>
-                    <div><span className="text-emerald-400 font-bold">[R] Resultado:</span> Formato exacto (JSON/Tabla).</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PASO 05: Check de Revisión */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      05 · Calidad
-                    </span>
-                    <ShieldCheck className="h-4 w-4 text-[#20201f]/40" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Check de revisión crítica
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-4">
-                    Puntos de control obligatorios antes de enviar o publicar:
-                  </p>
-
-                  <div className="space-y-2 text-xs font-medium text-[#20201f]/80">
-                    <div className="p-2 rounded-lg bg-white border border-[#20201f]/8 flex items-center gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>¿Las cifras y datos clave son exactos?</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white border border-[#20201f]/8 flex items-center gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>¿El tono coincide con la marca?</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white border border-[#20201f]/8 flex items-center gap-2">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>¿Aporta valor real o es texto genérico?</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* PASO 06: Documentar y Escalar */}
-              <div className="rounded-[16px] border border-[#20201f]/12 bg-[#fdfdfd] p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between hover:border-[#fe6612]/50 transition-all">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] uppercase tracking-wider">
-                      06 · Escala
-                    </span>
-                    <Layers className="h-4 w-4 text-[#20201f]/40" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#20201f] mb-2 font-display-condensed">
-                    Documenta, repite y escala
-                  </h3>
-                  <p className="text-xs text-[#4e4d4a] leading-relaxed mb-4">
-                    La meta final: convertir una prueba en un activo delegable.
-                  </p>
-
-                  <div className="rounded-xl bg-white border border-[#20201f]/8 p-3 text-xs text-[#4e4d4a] space-y-1.5">
-                    <div className="font-mono font-bold text-[#20201f]">SOP ESTANDARIZADO:</div>
-                    <p className="text-[11px]">Guarda el prompt, las entradas requeridas y el criterio de revisión en Notion para que cualquier miembro del equipo pueda ejecutarlo.</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
           </div>
         </section>
 
