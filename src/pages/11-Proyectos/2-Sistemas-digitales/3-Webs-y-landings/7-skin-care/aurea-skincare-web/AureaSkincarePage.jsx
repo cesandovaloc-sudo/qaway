@@ -171,7 +171,10 @@ export default function AureaSkincarePage() {
             <Reveal>
               <div className="hero-stage">
                 {/* 1. Lienzo Maestro PNG de Fondo */}
-                <img
+                <motion.img
+                  initial={{ opacity: 0, scale: 1.03 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                   className="hero-stage-bg"
                   src={IMG.hero_diseno_sin_titulo}
                   alt="Auréa Skincare Sérum y Cítricos"
@@ -181,32 +184,52 @@ export default function AureaSkincarePage() {
                 />
 
                 {/* 2. Textos montados arriba a la izquierda */}
-                <div className="hero-stage-content">
+                <motion.div
+                  initial={{ opacity: 0, y: 22 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+                  className="hero-stage-content"
+                >
                   <h1>
                     Cuida tu piel.<br/>De forma consciente.
                   </h1>
                   <p className="hero-subtext">
                     Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.
                   </p>
-                </div>
+                </motion.div>
 
                 {/* 3. Cápsula montada arriba a la derecha */}
-                <div className="hero-pill">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="hero-pill"
+                >
                   <img src={IMG.hero_products} alt="Colección de productos botánicos Auréa" loading="eager" decoding="async"/>
-                </div>
+                </motion.div>
 
                 {/* 4. Tarjeta Glassmorphism izquierda fiel a la referencia original */}
-                <div className="hero-overlay">
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  className="hero-overlay"
+                >
                   <p className="overlay-desc">
                     Fórmulas botánicas creadas para restaurar el equilibrio, elevar la vitalidad natural y revelar tu mejor versión.
                   </p>
                   <a className="btn-ref-cta" href="#coleccion" aria-label="Descubre la colección Auréa">
                     Descubre la colección <span className="arrow">→</span>
                   </a>
-                </div>
+                </motion.div>
 
                 {/* 5. Badge Glassmorphism derecha */}
-                <div className="hero-badge">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="hero-badge"
+                >
                   <img className="mini-bottle" src={IMG.serum_orange} alt="Sérum botánico" loading="lazy" decoding="async"/>
                   <div className="badge-list">
                     <span>100% Natural</span>
@@ -214,7 +237,7 @@ export default function AureaSkincarePage() {
                     <span>Sin fragancias sintéticas</span>
                     <span>Libre de crueldad animal</span>
                   </div>
-                </div>
+                </motion.div>
               </div>
             </Reveal>
           </div>
@@ -300,8 +323,22 @@ export default function AureaSkincarePage() {
                       decoding="async"
                     />
                   </div>
-                  <img src={IMG.signature_2} alt="Colección Signature Auréa Calm Ritual" loading="lazy" decoding="async"/>
-                  <img src={IMG.signature_3} alt="Colección Signature Auréa Renew Balance" loading="lazy" decoding="async"/>
+                  <motion.img
+                    whileHover={{ scale: 1.025 }}
+                    transition={{ duration: 0.4 }}
+                    src={IMG.signature_2}
+                    alt="Colección Signature Auréa Calm Ritual"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <motion.img
+                    whileHover={{ scale: 1.025 }}
+                    transition={{ duration: 0.4 }}
+                    src={IMG.signature_3}
+                    alt="Colección Signature Auréa Renew Balance"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
                 <div className="product-info">
                   <span className="kicker">Fórmula seleccionada</span>
@@ -488,13 +525,15 @@ export default function AureaSkincarePage() {
                     </div>
                     <div className="meta">
                       <div><h3>{p.name}</h3><p>{p.subtitle} · {p.description}</p></div>
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.12, rotate: -8 }}
+                        whileTap={{ scale: 0.9 }}
                         className="circle-arrow"
                         onClick={() => handleAddToCart(p.name)}
                         aria-label={`Agregar ${p.name} al carrito`}
                       >
                         <ArrowDownRight size={16}/>
-                      </button>
+                      </motion.button>
                     </div>
                   </motion.article>
                 </Reveal>

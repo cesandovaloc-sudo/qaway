@@ -252,109 +252,109 @@ function Hero() {
 
   return (
     <section
-      className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
+      className="relative z-20 overflow-hidden border-b border-black/10 pb-12 pt-20 sm:pb-16 sm:pt-28 text-white"
+      style={{
+        background: 'radial-gradient(ellipse 110% 90% at 50% 15%, #ff833b 0%, #fe6612 48%, #e85505 80%, #d24600 100%)',
+      }}
     >
-      <Navbar variant="light" />
+      <Navbar variant="transparent" />
 
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 180 180%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.74%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22 opacity=%220.44%22/%3E%3C/svg%3E")',
-        }}
-      />
+      <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center min-h-[calc(100dvh-12rem)]">
+          
+          {/* Columna Izquierda: Contenido con tipografía del Blog y contraste para fondo de Proyectos */}
+          <div className="flex flex-col items-start max-w-3xl">
+            <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs shadow-xs">
+              <span>/ MARCAS, SISTEMAS Y FORMACIÓN</span>
+            </div>
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
-        
-        {/* Columna Izquierda: Textos y Botones alineados con el Navbar (lg:px-14) */}
-        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-14 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
-          <motion.div
-            initial={reduceMotion ? false : 'hidden'}
-            animate={reduceMotion ? undefined : 'show'}
-            variants={fadeUp}
-            custom={0}
-            className="relative z-10"
-          >
-            <p className="mb-4 text-[0.75rem] font-bold uppercase tracking-[0.015em] text-[#73716d]">
-              Marcas, Automatización y formación con IA
-            </p>
-            <h1
-              className="max-w-[44rem] text-[clamp(2.4rem,4vw,3.4rem)] font-bold text-[#111111] leading-[1.12] tracking-[-0.035em] mb-5"
-              style={{ ...displayFont, fontWeight: 760 }}
+            <motion.h1
+              className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+              style={displayFont}
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
-            </h1>
-            <p className="mt-4 max-w-[32rem] text-[15px] leading-[1.5] text-[#52525b] mb-7">
+              Construimos marcas, sistemas y{' '}
+              <span className="text-white/80">formamos con&nbsp;IA.</span>
+            </motion.h1>
+
+            <motion.p
+              className="mt-4 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg mb-8 font-normal"
+              initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
-            </p>
-            <div className="flex flex-wrap items-center gap-5">
+            </motion.p>
+
+            {/* Botones de acción adaptados al fondo difuminado de Proyectos */}
+            <motion.div
+              className="flex flex-wrap items-center gap-4"
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <a
                 href={WHATSAPP_LINK}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(254,102,18,0.22)] transition-colors hover:bg-[#e05508] rounded-[10px] active:translate-y-px"
+                className="group inline-flex min-h-[48px] items-center justify-center gap-2.5 bg-white text-[#fe6612] px-7 py-3.5 text-[14.5px] font-bold rounded-lg shadow-[0_12px_28px_rgba(0,0,0,0.18)] hover:bg-zinc-50 active:translate-y-px transition-all"
               >
-                Cuéntanos tu proyecto
+                <span>Cuéntanos tu proyecto</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </a>
+
               <a
                 href="#primary-areas"
-                className="inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
+                className="inline-flex min-h-[48px] items-center justify-center px-6 py-3.5 border border-white/40 bg-white/15 backdrop-blur-xs text-[14px] font-semibold text-white rounded-lg hover:bg-white/25 transition-colors shadow-xs"
               >
-                Elige por dónde empezar
+                <span>Elige por dónde empezar</span>
               </a>
-            </div>
-          </motion.div>
-        </div>
+            </motion.div>
+          </div>
 
-        {/* Columna Central: Franja vertical delimitada de imagen con border-x */}
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
-          animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
-          transition={{ duration: 0.95, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-20 min-h-[40vh] overflow-hidden border-[#20201f]/10 lg:min-h-[30rem] lg:border-x"
-        >
-          <div className="absolute inset-0 overflow-hidden">
+          {/* Columna Derecha: Imagen Principal con +10% de altura y botón flotante */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, scale: 1.02 }}
+            animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
+            transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full aspect-4/3 sm:aspect-16/11 lg:aspect-auto lg:h-[530px] rounded-[18px] overflow-hidden border border-white/20 shadow-2xl bg-zinc-950"
+          >
             <img
               src={`${base}hero-qaway-vision-lab.webp`}
               alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
               className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/25 via-transparent to-white/12" />
-          </div>
+            <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-white/10 pointer-events-none" />
 
-          {/* Botón Flotante interactivo sobre la franja vertical de la imagen */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-            animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-8 right-6 z-30"
-          >
-            <a
-              href="#sistemas"
-              className="qw-hero-secondary-card-btn group bg-white shadow-[0_16px_34px_rgba(0,0,0,0.22)]"
+            {/* Botón Flotante interactivo sobre la imagen */}
+            <motion.div
+              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute bottom-5 right-5 z-20"
             >
-              <span className="flex items-center gap-2.5">
-                <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(254,102,18,0.22)]">
-                  <Workflow size={20} strokeWidth={1.65} />
+              <a
+                href="#sistemas"
+                className="group inline-flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-[14px] shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/70 hover:bg-white hover:scale-[1.02] transition-all"
+              >
+                <span className="grid h-[2.7rem] w-[2.7rem] shrink-0 place-items-center bg-[#fe6612] text-white rounded-[10px] shadow-[0_8px_20px_rgba(254,102,18,0.3)]">
+                  <Workflow size={19} strokeWidth={1.8} />
                 </span>
-                <span className="min-w-0 pr-2">
-                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#5c5a57]">
+                <span className="text-left pr-1.5">
+                  <span className="block text-[0.72rem] font-bold uppercase tracking-[0.1em] text-[#5c5a57]">
                     Sistemas
                   </span>
-                  <span className="mt-1 block text-xs leading-snug text-[#3e3d3b]">
+                  <span className="block text-xs font-bold text-[#1e2026]">
                     Automatización e IA
                   </span>
                 </span>
-              </span>
-            </a>
+              </a>
+            </motion.div>
           </motion.div>
 
-        </motion.div>
-
-        {/* Columna Derecha: Margen y espacio lateral derecho limpio */}
-        <div className="relative hidden lg:block bg-white after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']" />
-
+        </div>
       </div>
     </section>
   )
