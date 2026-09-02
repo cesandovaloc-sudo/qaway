@@ -599,7 +599,7 @@ export default function AureaSkincarePage() {
           </div>
           <div className="footer-col"><h4>Explorar</h4><a href="#coleccion">Colección</a><a href="#rituales">Rituales</a><a href="#ingredientes">Ingredientes</a><a href="#filosofia">Nuestra historia</a></div>
           <div className="footer-col"><h4>Ayuda</h4><a href="#contacto">Preguntas frecuentes</a><a href="#contacto">Envíos y entregas</a><a href="#contacto">Políticas</a><a href="#contacto">Contacto</a></div>
-          <div className="footer-col"><h4>Síguenos</h4><a href="#contacto" aria-label="Síguenos en Instagram"><Instagram size={15} style={{verticalAlign:"middle",marginRight:7}}/> Instagram</a><a href="#contacto" aria-label="Síguenos en Facebook"><Facebook size={15} style={{verticalAlign:"middle",marginRight:7}}/> Facebook</a><a href="#contacto" aria-label="Lee nuestro Diario Auréa"><Sparkles size={15} style={{verticalAlign:"middle",marginRight:7}}/> Diario Auréa</a></div>
+          <div className="footer-col"><h4>Síguenos</h4><a href="#contacto" aria-label="Síguenos en Instagram"><InstagramIcon size={15} style={{verticalAlign:"middle",marginRight:7}}/> Instagram</a><a href="#contacto" aria-label="Síguenos en Facebook"><FacebookIcon size={15} style={{verticalAlign:"middle",marginRight:7}}/> Facebook</a><a href="#contacto" aria-label="Lee nuestro Diario Auréa"><Sparkles size={15} style={{verticalAlign:"middle",marginRight:7}}/> Diario Auréa</a></div>
         </div>
         <div className="container footer-bottom">
           <div className="big-brand">AURÉA</div>
