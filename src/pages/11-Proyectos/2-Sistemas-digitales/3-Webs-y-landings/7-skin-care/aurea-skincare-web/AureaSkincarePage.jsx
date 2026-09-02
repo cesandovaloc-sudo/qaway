@@ -22,6 +22,10 @@ const IMG = {
   signature_1: "/aurea-images/signature_1.png",
   signature_2: "/aurea-images/signature_2.png",
   signature_3: "/aurea-images/signature_3.png",
+  commitment_1: "/aurea-images/commitment_1.png",
+  commitment_2: "/aurea-images/commitment_2.png",
+  commitment_3: "/aurea-images/commitment_3.png",
+  commitment_4: "/aurea-images/commitment_4.png",
 };
 
 const products = [
@@ -274,10 +278,10 @@ export default function AureaSkincarePage() {
             </Reveal>
             <div className="commitment-grid">
               {[
-                ["01","Máxima pureza","Seleccionamos ingredientes botánicos con procesos cuidadosos para preservar su calidad.",IMG.ingredient_green],
-                ["02","Directo de la naturaleza","Trabajamos con extractos y activos botánicos elegidos por su función y trazabilidad.",IMG.ingredient_aloe],
-                ["03","Formulación con propósito","Cada fórmula nace de una necesidad concreta de la piel, no de una tendencia pasajera.",IMG.serum_orange],
-                ["04","Sin compromisos","Fórmulas transparentes, sin parabenos ni fragancias sintéticas innecesarias.",IMG.ingredient_pomegranate],
+                ["01","Máxima pureza","Seleccionamos ingredientes botánicos con procesos cuidadosos para preservar su calidad.",IMG.commitment_1],
+                ["02","Directo de la naturaleza","Trabajamos con extractos y activos botánicos elegidos por su función y trazabilidad.",IMG.commitment_2],
+                ["03","Formulación con propósito","Cada fórmula nace de una necesidad concreta de la piel, no de una tendencia pasajera.",IMG.commitment_3],
+                ["04","Sin compromisos","Fórmulas transparentes, sin parabenos ni fragancias sintéticas innecesarias.",IMG.commitment_4],
               ].map(([n,title,text,img],i) => (
                 <Reveal key={n} delay={i*.05}>
                   <motion.article className="commitment-card" whileHover={{backgroundColor:"rgba(255,255,255,.52)"}}>
