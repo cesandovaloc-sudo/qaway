@@ -136,15 +136,6 @@ export default function PrimerosFlujosIAPage() {
                       <Check className="h-3 w-3 stroke-[3]" />
                     </div>
                     <p className="text-sm font-medium text-[#20201f]/80">
-                      <strong>Plantilla de trabajo editable:</strong> Lista para duplicar y aplicar en tu equipo.
-                    </p>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#fe6612]/15 text-[#fe6612]">
-                      <Check className="h-3 w-3 stroke-[3]" />
-                    </div>
-                    <p className="text-sm font-medium text-[#20201f]/80">
                       <strong>Enfoque de criterio:</strong> La IA ejecuta la tarea, tú mantienes la dirección.
                     </p>
                   </div>
@@ -165,33 +156,27 @@ export default function PrimerosFlujosIAPage() {
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-[10px] border border-[#20201f]/15 bg-white px-6 py-4 text-sm font-bold text-[#20201f] shadow-xs hover:border-[#fe6612] hover:text-[#fe6612] transition-all"
+                    className="inline-flex min-h-[46px] items-center gap-2 border-b-2 border-[#fe6612] pb-1.5 pt-1 text-sm font-bold text-[#20201f] transition-colors hover:text-[#fe6612]"
                   >
-                    <MessageCircle className="h-4 w-4 text-[#25D366]" />
                     <span>Consultar por WhatsApp</span>
+                    <ArrowRight className="h-4 w-4 text-[#fe6612]" />
                   </a>
                 </div>
               </div>
 
-              {/* Columna Derecha: Mockup de la Portada */}
+              {/* Columna Derecha: Imagen Flotante */}
               <div className="lg:col-span-5 flex justify-center">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full max-w-[420px]"
+                  className="relative w-full max-w-[420px] flex justify-center"
                 >
-                  <div className="relative overflow-hidden rounded-[16px] border border-[#20201f]/15 bg-[#f8f9fc] p-3 shadow-[0_24px_70px_rgba(32,32,31,0.12)]">
-                    <img
-                      src={heroImage}
-                      alt="Guía Qaway Lab - Cómo estructurar tus primeros flujos de trabajo con IA"
-                      className="w-full h-auto rounded-[12px] object-cover shadow-sm"
-                    />
-                    <div className="mt-3 flex items-center justify-between px-1 text-xs text-[#20201f]/60 font-mono">
-                      <span>DOC-QAWAY-2026-V1</span>
-                      <span className="text-[#fe6612] font-bold">DESCARGA DIRECTA</span>
-                    </div>
-                  </div>
+                  <img
+                    src={heroImage}
+                    alt="Guía Qaway Lab - Cómo estructurar tus primeros flujos de trabajo con IA"
+                    className="w-full h-auto rounded-[12px] shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-[1.01]"
+                  />
                 </motion.div>
               </div>
 
