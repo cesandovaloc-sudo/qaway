@@ -202,7 +202,8 @@ export default function AureaSkincarePage() {
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -5 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="hero-pill"
                 >
                   <img src={IMG.hero_products} alt="Colección de productos botánicos Auréa" loading="eager" decoding="async"/>
@@ -212,7 +213,8 @@ export default function AureaSkincarePage() {
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -5 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="hero-overlay"
                 >
                   <p className="overlay-desc">
