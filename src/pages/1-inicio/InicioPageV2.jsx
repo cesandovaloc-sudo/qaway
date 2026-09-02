@@ -314,14 +314,13 @@ function Hero() {
             initial={reduceMotion ? false : { opacity: 0, scale: 1.01 }}
             animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
             transition={{ duration: 0.85, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full h-[calc(100dvh-5rem)] min-h-[34rem] overflow-hidden border-x border-[#20201f]/10 shadow-sm bg-zinc-100"
+            className="relative w-full h-[calc(100dvh-5rem)] min-h-[34rem] overflow-hidden border-x border-[#20201f]/10"
           >
             <img
-              src={`${base}hero-qaway-vision-lab.webp`}
-              alt="Profesional creativo de Qaway Lab mirando hacia el horizonte en un estudio digital"
-              className="absolute inset-0 h-full w-full object-cover object-[52%_18%] grayscale"
+              src={`${base}Diseño sin título.png`}
+              alt="Profesional creativo de Qaway Lab en estudio digital"
+              className="absolute inset-0 h-full w-full object-contain object-bottom"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-white/10 pointer-events-none" />
 
             {/* Botón Flotante interactivo sobre la imagen */}
             <motion.div
