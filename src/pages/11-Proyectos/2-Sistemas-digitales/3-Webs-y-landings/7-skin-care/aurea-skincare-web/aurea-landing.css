@@ -80,8 +80,8 @@
 .aurea-landing .product-feature{display:grid;grid-template-columns:1.08fr .92fr;gap:50px;align-items:center}
 .aurea-landing .product-gallery{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .aurea-landing .product-gallery .large{grid-row:span 2}
-.aurea-landing .product-gallery img{width:100%;height:230px;object-fit:cover;border-radius:16px}
-.aurea-landing .product-gallery .large img{width:100%;height:470px;object-fit:cover;border-radius:16px}
+.aurea-landing .product-gallery img{width:100%;height:253px;object-fit:cover;border-radius:16px}
+.aurea-landing .product-gallery .large img{width:100%;height:517px;object-fit:cover;border-radius:16px}
 .aurea-landing .product-info{padding-right:30px}
 .aurea-landing .product-info .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted)}
 .aurea-landing .product-info h3{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin:14px 0 18px}

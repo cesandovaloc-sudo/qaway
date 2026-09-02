@@ -245,8 +245,7 @@ se deben seguir estrictamente las siguientes reglas en la sección Hero:
    - El panel de contenido secundario (la tercera columna, si existe) debe ocultarse en 
      móviles usando las clases de Tailwind `hidden lg:flex` o `hidden lg:grid` para evitar 
      que se apile al final y rompa la fluidez del Hero.
-================================================================================
-*/
+============================================================================= */
 
 function Hero() {
   const reduceMotion = useReducedMotion()
@@ -265,10 +264,10 @@ function Hero() {
         }}
       />
 
-      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.3fr_1.05fr]">
+      <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
         
-        {/* Columna Izquierda: Textos y Botones */}
-        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
+        {/* Columna Izquierda: Textos y Botones alineados con el Navbar (lg:px-14) */}
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-14 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             animate={reduceMotion ? undefined : 'show'}
@@ -281,12 +280,11 @@ function Hero() {
             </p>
             <h1
               className="max-w-[44rem] text-[clamp(2.4rem,4vw,3.4rem)] font-bold text-[#111111] leading-[1.12] tracking-[-0.035em] mb-5"
-              style={{ ...displayFont, fontWeight: 700 }}
+              style={{ ...displayFont, fontWeight: 760 }}
             >
-              Construimos marcas, sistemas y{' '}
-              <span className="text-[#fe6612]">formamos con&nbsp;IA.</span>
+              <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>
             </h1>
-            <p className="max-w-[32rem] text-[15px] leading-[1.5] text-[#52525b] mb-7">
+            <p className="mt-4 max-w-[32rem] text-[15px] leading-[1.5] text-[#52525b] mb-7">
               Mejora tu marca, organiza tus sistemas y aprende a usar IA con claridad.
             </p>
             <div className="flex flex-wrap items-center gap-5">
@@ -309,7 +307,7 @@ function Hero() {
           </motion.div>
         </div>
 
-        {/* Columna Derecha: Franja vertical alargada de imagen (de top a bottom con border-x) */}
+        {/* Columna Central: Franja vertical delimitada de imagen con border-x */}
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, scale: 1.025 }}
           animate={reduceMotion ? undefined : { opacity: 1, scale: 1 }}
@@ -353,6 +351,9 @@ function Hero() {
           </motion.div>
 
         </motion.div>
+
+        {/* Columna Derecha: Margen y espacio lateral derecho limpio */}
+        <div className="relative hidden lg:block bg-white after:pointer-events-none after:absolute after:inset-y-0 after:left-full after:w-[50vw] after:bg-white after:content-['']" />
 
       </div>
     </section>
