@@ -304,7 +304,6 @@ export default function AureaSkincarePage() {
                   <span className="eyebrow">Colección Signature</span>
                   <h2>De la naturaleza<br/>a tu piel.</h2>
                 </div>
-                <p>Explora fórmulas botánicas creadas para rutinas reales: limpiar, tratar, hidratar y renovar sin añadir complejidad.</p>
               </div>
             </Reveal>
 
