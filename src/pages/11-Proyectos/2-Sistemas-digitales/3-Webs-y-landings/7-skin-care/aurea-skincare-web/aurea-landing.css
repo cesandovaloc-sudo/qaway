@@ -11,7 +11,7 @@
 
 .aurea-landing .container{width:min(calc(100% - 48px),var(--max));margin-inline:auto}
 .aurea-landing .section{padding:clamp(80px,8vw,120px) 0}
-.aurea-landing .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#4d554c;background:rgba(255,255,255,.38)}
+.aurea-landing .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#4d554c;background:rgba(255,255,255,.38);margin-bottom:15px}
 .aurea-landing .eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#587052}
 
 .aurea-landing .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 18px;border-radius:9px;border:1px solid var(--accent);cursor:pointer;transition:transform .25s cubic-bezier(.16,1,.3,1),background .25s ease,color .25s ease,box-shadow .25s ease}
@@ -69,7 +69,7 @@
 .aurea-landing .media-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.10)}
 .aurea-landing .media-card img{width:100%;aspect-ratio:1.05;object-fit:cover}
 .aurea-landing .copy-block{max-width:590px}
-.aurea-landing .copy-block h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin:15px 0 20px}
+.aurea-landing .copy-block h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin:0 0 20px}
 .aurea-landing .copy-block p{font-size:16px;line-height:1.7;color:var(--muted);max-width:540px}
 .aurea-landing .link-arrow{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:13px;border-bottom:1px solid var(--ink);padding-bottom:5px;transition:gap .25s ease,color .2s ease,border-color .2s ease}
 .aurea-landing .link-arrow:hover{gap:12px;color:var(--accent);border-color:var(--accent)}
@@ -125,7 +125,7 @@
 
 .aurea-landing .commitment{background:#e9e6dc}
 .aurea-landing .commitment-head{text-align:center;max-width:780px;margin:0 auto 46px}
-.aurea-landing .commitment-head h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin-top:15px}
+.aurea-landing .commitment-head h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15;margin-top:0}
 .aurea-landing .commitment-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:rgba(255,255,255,.26)}
 .aurea-landing .commitment-card{display:grid;grid-template-columns:1fr 1fr;min-height:280px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);transition:background .3s ease}
 .aurea-landing .commitment-card:nth-child(2n){border-right:0}
