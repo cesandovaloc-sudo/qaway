@@ -259,7 +259,7 @@ export default function PrimerosFlujosIAPage() {
                 </div>
 
                 <h1
-                  className="text-4xl font-bold tracking-tight text-[#191918] sm:text-5xl lg:text-6xl"
+                  className="text-3xl font-bold tracking-tight text-[#191918] sm:text-4xl lg:text-5xl"
                   style={displayFont}
                 >
                   Cómo estructurar tus primeros flujos de trabajo con <span className="text-[#ff4b0b]">IA.</span>
@@ -319,7 +319,7 @@ export default function PrimerosFlujosIAPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative w-full max-w-[420px] flex justify-center"
+                  className="relative w-full max-w-[475px] flex justify-center"
                 >
                   <img
                     src={heroImage}
