@@ -176,8 +176,8 @@ const fadeUp = {
 };
 
 function SectionLabel({ children, inverse = false }) {
-  const tone = inverse ? "text-[#ff4b0b]" : "text-[#ff4b0b]";
-  const dot = inverse ? "bg-[#ff4b0b]" : "bg-[#ff4b0b]";
+  const tone = inverse ? "text-[#fe6612]" : "text-[#fe6612]";
+  const dot = inverse ? "bg-[#fe6612]" : "bg-[#fe6612]";
 
   return (
     <div
@@ -265,7 +265,7 @@ function HeroInicioBlockPractice() {
                   className="max-w-[58rem] qw-hero-title text-[#20201f]"
                   style={{ ...displayFont, fontWeight: 700 }}
                 >
-                  <span className="block text-[#161616]">Diseñamos sistemas digitales <span className="text-[#ff4b0b]">para tu proyecto.</span></span>
+                  <span className="block text-[#161616]">Diseñamos sistemas digitales <span className="text-[#fe6612]">para tu proyecto.</span></span>
                 </h1>
                 <p className="mt-6 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#6b6a67]">
                   Implementamos automatizaciones, CRM, herramientas y procesos digitales para mejorar la operación de tu proyecto.
@@ -275,14 +275,14 @@ function HeroInicioBlockPractice() {
                     href={WHATSAPP_LINK}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
+                    className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px"
                   >
                     Cuéntanos tu proyecto
                     <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                   </a>
                   <a
                     href="#estrategia-digital"
-                    className="inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-[#3e3d3b] transition-colors hover:text-[#ff4b0b]"
+                    className="inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-[#3e3d3b] transition-colors hover:text-[#fe6612]"
                   >
                     Elige por dónde empezar
                   </a>
@@ -297,9 +297,9 @@ function HeroInicioBlockPractice() {
               className="relative z-20 bg-[#161616] min-h-[40vh] mt-6 lg:mt-0 overflow-visible border-white/10 lg:min-h-[30rem] lg:border-x"
             >
               <div className="absolute inset-0 overflow-visible lg:overflow-hidden flex items-end justify-center pt-4 lg:pt-0">
-                <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#ff4b0b] z-0"></div>
+                <div className="absolute left-0 top-[20%] bottom-[25%] w-24 md:w-32 border-l-4 border-t-4 border-b-4 border-[#fe6612] z-0"></div>
                 <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-[1px] bg-white/5 rotate-[15deg] origin-bottom-right"></div>
-                <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#ff4b0b] z-20"></div>
+                <div className="absolute right-[8%] top-[20%] bottom-[25%] w-12 border-r-4 border-t-4 border-b-4 border-[#fe6612] z-20"></div>
                 <img
                   src="/assets/pages/3-sistemas-digitales/Hero-sistemas-digitales2.webp"
                   alt="Sistemas Digitales Qaway"
@@ -318,12 +318,12 @@ function HeroInicioBlockPractice() {
             <div className="relative z-20 bg-white hidden lg:flex flex-col justify-center lg:mt-0 lg:border-l lg:border-black/5 lg:pl-10">
               <div className="qw-hero-secondary-enter relative z-10 w-full">
                 <div className="mb-8 text-center">
-                  <div className="mb-5 h-[3px] w-7 bg-[#ff4b0b] hidden"></div>
+                  <div className="mb-5 h-[3px] w-7 bg-[#fe6612] hidden"></div>
                   <p className="qw-hero-secondary-kicker">
                     Sistemas digitales
                   </p>
                   <p className="qw-hero-secondary-title text-balance">
-                    Automatización para negocios que necesitan operar mejor<span className="text-[#ff4b0b]">.</span>
+                    Automatización para negocios que necesitan operar mejor<span className="text-[#fe6612]">.</span>
                   </p>
                 </div>
 
@@ -331,10 +331,10 @@ function HeroInicioBlockPractice() {
                   className="mb-8 hidden lg:flex justify-center"
                 >
                   <div
-                    className="block border border-[#ff4b0b]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#ff4b0b] hover:bg-white w-[250px] rounded"
+                    className="block border border-[#fe6612]/50 bg-[#fbfaf8]/55 p-3 text-[#20201f] shadow-[0_24px_70px_rgba(32,32,31,0.16)] backdrop-blur-md transition-all duration-300 hover:border-[#fe6612] hover:bg-white w-[250px] rounded"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-xs">
+                      <span className="grid h-[3.25rem] w-[3.25rem] shrink-0 place-items-center bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)] rounded-xs">
                         <Brush size={22} />
                       </span>
                       <span className="min-w-0">
@@ -346,7 +346,7 @@ function HeroInicioBlockPractice() {
                         </span>
                       </span>
                     </span>
-                    <span className="absolute h-px w-10 bg-[#ff4b0b]/80 -left-10 top-1/2 hidden lg:block" />
+                    <span className="absolute h-px w-10 bg-[#fe6612]/80 -left-10 top-1/2 hidden lg:block" />
                   </div>
                 </div>
               </div>
@@ -359,19 +359,19 @@ function HeroInicioBlockPractice() {
     {/* Banda de botones — fuera del hero, fila completa */}
     <div className="w-full border-b-[3px] border-black/5 bg-[#ffffff] grid grid-cols-2 lg:grid-cols-4">
       <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-        <Settings className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <Settings className="w-6 h-6 shrink-0 text-[#fe6612] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Automatización</span>
       </div>
       <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-        <LayoutDashboard className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <LayoutDashboard className="w-6 h-6 shrink-0 text-[#fe6612] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">Dashboards</span>
       </div>
       <div className="group flex items-center gap-3 justify-center border-r-[3px] border-black/5 py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-        <Users className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <Users className="w-6 h-6 shrink-0 text-[#fe6612] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">CRM</span>
       </div>
       <div className="group flex items-center gap-3 justify-center py-7 px-4 transition-all duration-300 hover:bg-black/[0.02]">
-        <Brain className="w-6 h-6 shrink-0 text-[#ff4b0b] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
+        <Brain className="w-6 h-6 shrink-0 text-[#fe6612] transition-transform duration-300 group-hover:scale-110" strokeWidth={1.5} />
         <span className="text-sm text-gray-500 font-medium transition-colors duration-300 group-hover:text-[#191918]">IA aplicada</span>
       </div>
     </div>
@@ -742,7 +742,7 @@ export default function SistemasDigitalesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff] text-[#191918] selection:bg-[#ff4b0b] selection:text-white">
+    <div className="min-h-screen bg-[#ffffff] text-[#191918] selection:bg-[#fe6612] selection:text-white">
       <SEO
         title="Sistemas Digitales y Automatización con IA | Qaway LAB"
         description="Implementamos sistemas, CRMs y agentes con IA para optimizar la operación de tu negocio."
@@ -788,7 +788,7 @@ export default function SistemasDigitalesPage() {
                 <p className="qw-section-kicker">SERVICIOS DE SISTEMAS DIGITALES</p>
                 <h2 className="qw-section-title text-white">
                   Soluciones digitales <br />
-                  adaptadas a <span className="text-[#ff4b0b]">tu proyecto.</span>
+                  adaptadas a <span className="text-[#fe6612]">tu proyecto.</span>
                 </h2>
                 <p className="qw-section-copy !text-zinc-200" style={{ color: 'rgba(255, 255, 255, 0.78)' }}>
                   Automatización, canales digitales, CRM y herramientas internas y más, para ordenar, conectar procesos e información y facilitar el trabajo diario.
@@ -810,11 +810,11 @@ export default function SistemasDigitalesPage() {
                       variants={revealUp}
                       custom={0.08 * idx}
                       className={`text-left flex items-center gap-3 p-4 border transition-all duration-300 w-full rounded-[5px] ${isActive
-                        ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
-                        : 'border-[#ff4b0b]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#ff4b0b]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
+                        ? 'border-[#fe6612]/60 bg-[#fe6612]/4 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
+                        : 'border-[#fe6612]/60 bg-white/[0.01] text-zinc-400 hover:bg-[#fe6612]/3 hover:shadow-[0_0_12px_rgba(255,75,11,0.08)] hover:-translate-y-[2px] hover:text-white'
                         }`}
                     >
-                      <Icon className="h-4.5 w-4.5 shrink-0 text-[#ff4b0b]" />
+                      <Icon className="h-4.5 w-4.5 shrink-0 text-[#fe6612]" />
                       <span className={`text-[13px] font-bold tracking-tight transition-colors ${isActive ? 'text-white' : 'text-zinc-500 font-medium'}`}>
                         {item.title}
                       </span>
@@ -938,11 +938,11 @@ export default function SistemasDigitalesPage() {
                       key={`mob-${item.title}`}
                       onClick={() => setActiveIdx(idx)}
                       className={`text-left flex items-center gap-2 p-2 border transition-all duration-300 w-full rounded-[5px] ${isActive
-                        ? 'border-[#ff4b0b]/60 bg-[#ff4b0b]/10 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
+                        ? 'border-[#fe6612]/60 bg-[#fe6612]/10 shadow-[0_0_15px_rgba(255,75,11,0.12)] text-white font-bold'
                         : 'border-white/10 bg-white/[0.02] text-zinc-400'
                         }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-[#ff4b0b]" />
+                      <Icon className="h-4 w-4 shrink-0 text-[#fe6612]" />
                       <span className={`text-[12px] font-bold tracking-tight ${isActive ? 'text-white' : 'text-zinc-400 font-medium'}`}>
                         {item.title}
                       </span>
@@ -970,7 +970,7 @@ export default function SistemasDigitalesPage() {
             <h2 className="qw-section-title">
               Automatizamos tareas repetitivas
               <br />
-              <span className="text-[#ff4b0b]">
+              <span className="text-[#fe6612]">
                 y procesos de trabajo.
               </span>
             </h2>
@@ -994,12 +994,12 @@ export default function SistemasDigitalesPage() {
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span
-                          className="text-[26px] sm:text-[32px] font-bold uppercase tracking-tight text-[#ff4b0b]"
+                          className="text-[26px] sm:text-[32px] font-bold uppercase tracking-tight text-[#fe6612]"
                           style={displayFont}
                         >
                           {card.num}
                         </span>
-                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] border border-[#ff4b0b]/20">
+                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[#fe6612]/10 text-[#fe6612] border border-[#fe6612]/20">
                           <Icon className="h-4 w-4" />
                         </span>
                       </div>
@@ -1013,7 +1013,7 @@ export default function SistemasDigitalesPage() {
 
                     <div className="mt-5 w-full bg-black/5 h-[3px] rounded-full overflow-hidden">
                       <motion.div
-                        className="bg-[#ff4b0b] h-full"
+                        className="bg-[#fe6612] h-full"
                         initial={{ width: "0%" }}
                         animate={{ width: "100%" }}
                         transition={{
@@ -1047,7 +1047,7 @@ export default function SistemasDigitalesPage() {
             />
             <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
               <div className="flex items-center gap-3 text-white">
-                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
+                <Sparkles className="h-4 w-4 text-[#fe6612]" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
                   Flujos automatizados
                 </span>
@@ -1081,7 +1081,7 @@ export default function SistemasDigitalesPage() {
             />
             <div className="absolute bottom-8 left-8 right-8 z-20 border border-white/12 bg-black/55 px-6 py-5 backdrop-blur-md">
               <div className="flex items-center gap-3 text-white">
-                <Sparkles className="h-4 w-4 text-[#ff4b0b]" />
+                <Sparkles className="h-4 w-4 text-[#fe6612]" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/76">
                   CRM Y SEGUIMIENTO COMERCIAL
                 </span>
@@ -1106,7 +1106,7 @@ export default function SistemasDigitalesPage() {
             <h2 className="qw-section-title">
               Organizamos contactos, consultas y
               <br />
-              <span className="text-[#ff4b0b]">seguimiento comercial.</span>
+              <span className="text-[#fe6612]">seguimiento comercial.</span>
             </h2>
             <p className="qw-section-copy">
               Implementamos un CRM para registrar contactos, ordenar oportunidades y centralizar el seguimiento comercial. Configuramos paneles para visualizar pendientes, avances y resultados.
@@ -1127,8 +1127,8 @@ export default function SistemasDigitalesPage() {
                     className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                       }`}
                   >
-                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <Icon className="h-6 w-6 text-[#fe6612] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
+                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#fe6612]">
                       {col.title}
                     </h3>
                     <p className="mt-2 text-[13px] leading-relaxed text-black/60">
@@ -1157,7 +1157,7 @@ export default function SistemasDigitalesPage() {
             <h2 className="qw-section-title">
               Páginas web para presentar,
               <br />
-              <span className="text-[#ff4b0b]">captar y convertir.</span>
+              <span className="text-[#fe6612]">captar y convertir.</span>
             </h2>
             <p className="qw-section-copy">
               Desarrollamos plataformas web de alto rendimiento. Desde la estructura visual hasta la integración técnica, diseñamos páginas preparadas para recibir tráfico, captar consultas y registrar cada oportunidad.
@@ -1178,8 +1178,8 @@ export default function SistemasDigitalesPage() {
                     className={`group pr-2 ${index !== 2 ? "sm:border-r sm:border-black/10 sm:pr-4" : ""
                       }`}
                   >
-                    <Icon className="h-6 w-6 text-[#ff4b0b] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
-                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#ff4b0b]">
+                    <Icon className="h-6 w-6 text-[#fe6612] mb-3 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-translate-y-0.5" />
+                    <h3 className="no-qw text-[16px] font-bold leading-tight text-[#191918] transition-colors duration-300 group-hover:text-[#fe6612]">
                       {col.title}
                     </h3>
                     <p className="mt-2 text-[13px] leading-relaxed text-black/60">
@@ -1198,7 +1198,7 @@ export default function SistemasDigitalesPage() {
               custom={0.3}
               className="mt-10"
             >
-              <Link to="/portafolio" className="inline-flex items-center gap-3 border-b-2 border-[#ff4b0b] pb-1.5 text-xs sm:text-sm font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]">
+              <Link to="/portafolio" className="inline-flex items-center gap-3 border-b-2 border-[#fe6612] pb-1.5 text-xs sm:text-sm font-bold text-[#191918] transition-colors hover:text-[#fe6612]">
                 Ver proyectos
               </Link>
             </motion.div>
@@ -1238,7 +1238,7 @@ export default function SistemasDigitalesPage() {
               <h2 className="qw-section-title text-white">
                 El sistema de contenido
                 <br />
-                no vive solo<span className="text-[#ff4b0b]">.</span>
+                no vive solo<span className="text-[#fe6612]">.</span>
               </h2>
 
               <div className="mt-8 overflow-hidden border border-white/10 bg-white/[0.03] p-3 shadow-[0_28px_80px_rgba(0,0,0,0.28)]">
@@ -1272,7 +1272,7 @@ export default function SistemasDigitalesPage() {
                     className="group text-left border border-white/10 bg-white/[0.03] p-5 w-full rounded-[5px] block"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#ff4b0b]">
+                      <span className="grid h-9 w-9 place-items-center border border-white/10 bg-white/5 text-[#fe6612]">
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/34">
@@ -1296,7 +1296,7 @@ export default function SistemasDigitalesPage() {
                 custom={0.4}
                 className="sm:col-span-2 mt-8 lg:mt-8 flex justify-start"
               >
-                <a href="#diagnostico" className="group inline-flex items-center gap-4 border-b-2 border-[#ff4b0b] pb-2 text-sm font-bold text-white transition-colors hover:text-[#ff4b0b]">
+                <a href="#diagnostico" className="group inline-flex items-center gap-4 border-b-2 border-[#fe6612] pb-2 text-sm font-bold text-white transition-colors hover:text-[#fe6612]">
                   Solicitar diagnóstico
                   <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </a>
@@ -1319,7 +1319,7 @@ export default function SistemasDigitalesPage() {
             <p className="qw-section-kicker">Aplicaciones reales</p>
             <h2 className="qw-section-title mx-auto text-center">
               Diseñamos infraestructura para{" "}
-              <span className="text-[#ff4b0b]">creadores</span>,{" "}
+              <span className="text-[#fe6612]">creadores</span>,{" "}
               equipos y proyectos.
             </h2>
           </motion.div>
@@ -1360,7 +1360,7 @@ export default function SistemasDigitalesPage() {
                             key={point}
                             className="flex items-start gap-3 text-sm leading-relaxed text-black/60"
                           >
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#ff4b0b]" />
+                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#fe6612]" />
                             <span>{point}</span>
                           </li>
                         );
@@ -1389,7 +1389,7 @@ export default function SistemasDigitalesPage() {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/10 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 hidden border border-white/16 bg-black/45 px-5 py-4 backdrop-blur-md sm:block">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#ff4b0b]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#fe6612]">
                     Asesoría y acompañamiento
                   </span>
                   <p className="mt-3 max-w-lg text-sm leading-relaxed text-white">
@@ -1412,7 +1412,7 @@ export default function SistemasDigitalesPage() {
                 >
                   Ya tienes la Idea.
                   <br />
-                  <span className="text-[#ff4b0b]">Ahora Construimos</span>
+                  <span className="text-[#fe6612]">Ahora Construimos</span>
                   <br />
                   Su Infraestructura.
                 </motion.h2>
@@ -1426,7 +1426,7 @@ export default function SistemasDigitalesPage() {
                     custom={0.1}
                     className="mt-8 flex min-h-[22rem] flex-col items-start justify-center"
                   >
-                    <div className="grid h-16 w-16 place-items-center bg-[#ff4b0b] text-white">
+                    <div className="grid h-16 w-16 place-items-center bg-[#fe6612] text-white">
                       <Check size={28} />
                     </div>
                     <h3 className="mt-7 text-3xl font-semibold tracking-[-0.05em] text-[#191918]">
@@ -1438,7 +1438,7 @@ export default function SistemasDigitalesPage() {
                     <button
                       type="button"
                       onClick={() => setFormSubmitted(false)}
-                      className="mt-8 border-b-2 border-[#ff4b0b] pb-1 text-xs font-bold text-[#191918] transition-colors hover:text-[#ff4b0b]"
+                      className="mt-8 border-b-2 border-[#fe6612] pb-1 text-xs font-bold text-[#191918] transition-colors hover:text-[#fe6612]"
                     >
                       Enviar otra consulta
                     </button>
@@ -1459,7 +1459,7 @@ export default function SistemasDigitalesPage() {
                         <input
                           id="sd-name" name="name" type="text" required
                           placeholder="Tu nombre completo"
-                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#fe6612]/60 transition-colors"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -1467,7 +1467,7 @@ export default function SistemasDigitalesPage() {
                         <input
                           id="sd-phone" name="phone" type="tel" required
                           placeholder="+51 999 999 999"
-                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#fe6612]/60 transition-colors"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -1475,14 +1475,14 @@ export default function SistemasDigitalesPage() {
                         <input
                           id="sd-email" name="email" type="email" required
                           placeholder="tucorreo@empresa.com"
-                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#fe6612]/60 transition-colors"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label htmlFor="sd-profile" className="text-[11px] font-bold uppercase tracking-wider text-black/50">¿A qué te dedicas?</label>
                         <select
                           id="sd-profile" name="profile" required
-                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                          className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#fe6612]/60 transition-colors"
                         >
                           <option value="">Selecciona tu perfil</option>
                           <option value="Profesional">Profesional</option>
@@ -1500,7 +1500,7 @@ export default function SistemasDigitalesPage() {
                       <label htmlFor="sd-service" className="text-[11px] font-bold uppercase tracking-wider text-black/50">¿Qué necesitas implementar?</label>
                       <select
                         id="sd-service" name="service" required
-                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#ff4b0b]/60 transition-colors"
+                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] outline-none focus:border-[#fe6612]/60 transition-colors"
                       >
                         <option value="">Selecciona un servicio</option>
                         <option value="Automatización y Workflows">Automatización y Workflows</option>
@@ -1519,7 +1519,7 @@ export default function SistemasDigitalesPage() {
                       <textarea
                         id="sd-message" name="message" rows={3}
                         placeholder="¿Qué quieres ordenar, automatizar o mejorar?"
-                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#ff4b0b]/60 transition-colors resize-none"
+                        className="border border-black/12 bg-[#f8f6f2] px-4 py-2.5 text-sm text-[#191918] placeholder:text-black/30 outline-none focus:border-[#fe6612]/60 transition-colors resize-none"
                       />
                     </div>
 
@@ -1528,7 +1528,7 @@ export default function SistemasDigitalesPage() {
                     <button
                       type="submit"
                       disabled={formSubmitting}
-                      className="inline-flex items-center gap-2 bg-[#ff4b0b] px-7 py-3 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#e03a00] disabled:opacity-60"
+                      className="inline-flex items-center gap-2 bg-[#fe6612] px-7 py-3 text-sm font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#e03a00] disabled:opacity-60"
                     >
                       {formSubmitting ? 'Enviando...' : 'Solicitar diagnóstico'}
                       <ArrowRight className="h-4 w-4" />

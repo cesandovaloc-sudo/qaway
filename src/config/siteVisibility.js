@@ -9,7 +9,7 @@ const routeVisibility = {
   brief: false,
   sistemasDigitales: false,
   academy: false,
-  hub: false,
+  hub: true,
   recursos: true,
   blog: true,
   landings: true,
@@ -26,6 +26,9 @@ const publicPathAllowList = new Set([
   '/recursos',
   '/recursos/primeros-flujos-ia',
   '/recursos/ebooks/google-calendar-dominado',
+  '/hub',
+  '/hub/marketing',
+  '/hub/marketing2',
 ])
 
 const navigationRegistry = [

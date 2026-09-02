@@ -371,7 +371,7 @@ export default function AureaSkincarePage() {
                 <h2>¿Qué puede hacer por ti una fórmula fresca, botánica y pensada con propósito?</h2>
               </div>
               <div className="editorial-image">
-                <img src={IMG.ritual} alt="Ingredientes botánicos alrededor de un producto Auréa" loading="lazy" decoding="async"/>
+                <motion.img whileHover={{scale:1.02}} transition={{duration:.45}} src={IMG.ritual} alt="Ingredientes botánicos alrededor de un producto Auréa" loading="lazy" decoding="async"/>
               </div>
               <div className="editorial-features">
                 {[
@@ -406,7 +406,7 @@ export default function AureaSkincarePage() {
               ].map(([n,title,text,img],i) => (
                 <Reveal key={n} delay={i*.05}>
                   <motion.article className="commitment-card" whileHover={{backgroundColor:"rgba(255,255,255,.52)"}}>
-                    <div className="photo"><img src={img} alt={title} loading="lazy" decoding="async"/></div>
+                    <div className="photo"><motion.img whileHover={{scale:1.02}} transition={{duration:.45}} src={img} alt={title} loading="lazy" decoding="async"/></div>
                     <div className="commitment-copy"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>
                   </motion.article>
                 </Reveal>
@@ -521,7 +521,7 @@ export default function AureaSkincarePage() {
             <div className="collection-grid">
               {products.map((p,i) => (
                 <Reveal key={p.name} delay={Math.min(i*.05,.2)}>
-                  <motion.article className="product-card" whileHover={{y:-7}} transition={{duration:.3}}>
+                  <motion.article className="product-card">
                     <div className="photo">
                       <img src={p.image} alt={`${p.name} - ${p.subtitle}`} loading="lazy" decoding="async"/>
                     </div>

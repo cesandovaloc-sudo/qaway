@@ -213,7 +213,7 @@ function Hero() {
               className="max-w-[58rem] qw-hero-title text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              <span className="block">Creamos la identidad y <span className="text-[#ff4b0b]">presencia digital para tu marca.</span></span>
+              <span className="block">Creamos la identidad y <span className="text-[#fe6612]">presencia digital para tu marca.</span></span>
             </h1>
             <p className="mt-4 max-w-[34rem] text-[clamp(0.88rem,1vw,1rem)] leading-[1.5] text-[#4e4d4a]">
               Desarrollamos el branding y contenido digital para que tu proyecto o marca tenga una presencia profesional, confiable y lista para vender.
@@ -221,7 +221,7 @@ function Hero() {
             <div className="mt-5 flex flex-wrap items-center gap-5">
               <a
                 href="#diagnostico"
-                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#ff4b0b] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta"
+                className="group inline-flex min-h-[46px] items-center gap-2.5 bg-[#fe6612] px-6 py-3 text-[0.82rem] font-bold text-white shadow-[0_14px_36px_rgba(168,53,8,0.16)] transition-colors hover:bg-[#df3900] active:translate-y-px vl-branding__cta"
               >
                 Quiero mejorar mi marca
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
@@ -250,9 +250,9 @@ function Hero() {
           <div className="hidden">
             <a
               href="#branding"
-              className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
+              className="flex items-center gap-3 border border-[#fe6612]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
+              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#fe6612] text-white">
                 <PenTool size={21} strokeWidth={1.65} />
               </span>
               <span>
@@ -263,9 +263,9 @@ function Hero() {
 
             <a
               href="#contenido"
-              className="flex items-center gap-3 border border-[#ff4b0b]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
+              className="flex items-center gap-3 border border-[#fe6612]/45 bg-[#fbfaf8]/75 p-3 text-[#20201f] shadow-[0_16px_45px_rgba(32,32,31,0.12)]"
             >
-              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#ff4b0b] text-white">
+              <span className="grid h-12 w-12 shrink-0 place-items-center bg-[#fe6612] text-white">
                 <ImageIcon size={21} strokeWidth={1.65} />
               </span>
               <span>
@@ -282,15 +282,15 @@ function Hero() {
             <p className="qw-hero-secondary-kicker">Estudio Visual</p>
             <p className="qw-hero-secondary-title text-balance">
               Identidad visual<br />
-              lista para vender<span className="text-[#ff4b0b]">.</span>
+              lista para vender<span className="text-[#fe6612]">.</span>
             </p>
-            <div className="mt-5 h-[3px] w-8 bg-[#ff4b0b] hidden" />
+            <div className="mt-5 h-[3px] w-8 bg-[#fe6612] hidden" />
 
             <a
               href="#branding"
               className="qw-hero-secondary-card-btn group rounded-[6px]"
             >
-              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center rounded-[4px] bg-[#ff4b0b] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
+              <span className="grid h-[2.9rem] w-[2.9rem] shrink-0 place-items-center rounded-[4px] bg-[#fe6612] text-white shadow-[0_16px_34px_rgba(255,75,11,0.22)]">
                 <PenTool size={20} strokeWidth={1.65} />
               </span>
               <span className="min-w-0">
@@ -350,7 +350,7 @@ function BrandingSpotlight() {
               className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              Branding para que tu marca<br />se vea <span className="text-[#ff4b0b]">clara y profesional.</span>
+              Branding para que tu marca<br />se vea <span className="text-[#fe6612]">clara y profesional.</span>
             </motion.h2>
             <motion.p variants={copyItem} className="qw-section-copy">
               Desarrollamos una identidad visual coherente para aplicar en redes, web, presentaciones y piezas comerciales.
@@ -417,7 +417,7 @@ function Services() {
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={revealUp} className="vl-services__heading" style={{ marginBottom: '40px', display: 'flex', justifyContent: 'center', width: '100%', maxWidth: 'none' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', width: '100%' }}>
             <div>
-              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#ff4b0b]">Servicios Creativos</p>
+              <p className="mb-5 text-[12px] font-bold uppercase tracking-[0.22em] text-[#fe6612]">Servicios Creativos</p>
               <h2
                 className="qw-section-title qw-section-title--impact mx-auto"
                 style={{ ...displayFont, fontWeight: 680 }}
@@ -500,7 +500,7 @@ function TransformacionVisualCarousel() {
               className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              Tu imagen también<br /><span className="text-[#ff4b0b]">comunica profesionalismo.</span>
+              Tu imagen también<br /><span className="text-[#fe6612]">comunica profesionalismo.</span>
             </h2>
             <p className="qw-section-copy">
               Transformamos tus imágenes de productos, servicios y perfiles comerciales en un portafolio visual moderno, profesional y listo para transmitir autoridad y confianza a tus clientes.
@@ -550,7 +550,7 @@ function TransformacionVisualCarousel() {
                   transition={{ duration: 2, repeat: 4, ease: "easeInOut" }}
                   className={`flex items-center gap-2.5 lg:gap-4 p-2 lg:p-4 border rounded-[6px] cursor-pointer transition-all duration-300 text-left w-full ${
                     activeSlide === index
-                      ? 'border-[#ff4b0b] bg-[#fff4ec] text-[#ff4b0b]'
+                      ? 'border-[#fe6612] bg-[#fff4ec] text-[#fe6612]'
                       : 'border-black/10 bg-transparent text-[#8b8c88] hover:bg-black/5'
                   }`}
                 >
@@ -626,7 +626,7 @@ function ContentSystem() {
               className="qw-section-title"
               style={{ ...displayFont, fontWeight: 760 }}
             >
-              Diseñamos contenido visual<br />para una <span className="text-[#ff4b0b]">marca coherente.</span>
+              Diseñamos contenido visual<br />para una <span className="text-[#fe6612]">marca coherente.</span>
             </h2>
             <p className="qw-section-copy">
               Creamos contenido visual para que tus reels, carruseles y publicaciones mantengan una misma dirección visual y te ayuden a posicionarte.
@@ -777,7 +777,7 @@ function Diagnostic() {
                 className="qw-section-title"
                 style={{ ...displayFont, fontWeight: 760 }}
               >
-                Hablemos de tu <span className="text-[#ff4b0b]">proyecto.</span>
+                Hablemos de tu <span className="text-[#fe6612]">proyecto.</span>
               </h2>
             </div>
           </motion.div>

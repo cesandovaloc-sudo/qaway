@@ -1,4 +1,4 @@
-.vl-digital-copy { --vl-ink: #0d0f0d; --vl-paper: #ffffff; --vl-acid: #ff4b0b; }
+.vl-digital-copy { --vl-ink: #0d0f0d; --vl-paper: #ffffff; --vl-acid: #fe6612; }
 .vl-digital-copy .vl-shell { width: min(1504px, calc(100% - 64px)); margin: 0 auto; }
 .vl-digital-copy.vl-section { padding: 140px 0; }
 .vl-digital-copy.vl-dark { position: relative; background: var(--vl-ink); color: var(--vl-paper); }

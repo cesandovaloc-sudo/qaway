@@ -338,13 +338,24 @@ export default function MarketingStudioPage() {
 
   // Company Profile Context (Supabase + LocalStorage Cache)
   const [companyContext, setCompanyContext] = useState(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_company`)
-    return saved ? JSON.parse(saved) : {
-      name: 'Qaway Lab',
-      industry: 'Tecnología, IA y Sistemas Digitales',
-      offer: 'Desarrollo web de alta conversión, automatización con IA y CRM de WhatsApp',
-      valueProp: 'Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden.',
-      targetNiche: 'Clínicas, Consultorías, Negocios y Empresas de Servicios'
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_company`)
+      const parsed = saved ? JSON.parse(saved) : null
+      return parsed && typeof parsed === 'object' ? parsed : {
+        name: 'Qaway Lab',
+        industry: 'Tecnología, IA y Sistemas Digitales',
+        offer: 'Desarrollo web de alta conversión, automatización con IA y CRM de WhatsApp',
+        valueProp: 'Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden.',
+        targetNiche: 'Clínicas, Consultorías, Negocios y Empresas de Servicios'
+      }
+    } catch {
+      return {
+        name: 'Qaway Lab',
+        industry: 'Tecnología, IA y Sistemas Digitales',
+        offer: 'Desarrollo web de alta conversión, automatización con IA y CRM de WhatsApp',
+        valueProp: 'Digitalizamos y automatizamos tus procesos comerciales para escalar ventas con orden.',
+        targetNiche: 'Clínicas, Consultorías, Negocios y Empresas de Servicios'
+      }
     }
   })
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false)
@@ -405,11 +416,16 @@ export default function MarketingStudioPage() {
 
   // State initialization with LocalStorage
   const [personas, setPersonas] = useState(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_personas`)
-    return saved ? JSON.parse(saved) : INITIAL_PERSONAS
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_personas`)
+      const parsed = saved ? JSON.parse(saved) : null
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_PERSONAS
+    } catch {
+      return INITIAL_PERSONAS
+    }
   })
   const [activePersonaId, setActivePersonaId] = useState(() => {
-    return personas[0]?.id || 'p-1'
+    return (Array.isArray(personas) && personas[0]?.id) || 'p-1'
   })
 
   // Persona Center Canvas Mode: 'modular-view' | 'wizard' | 'generating'
@@ -430,12 +446,22 @@ export default function MarketingStudioPage() {
   const [currentWizardInput, setCurrentWizardInput] = useState('')
 
   const [contents, setContents] = useState(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_contents`)
-    return saved ? JSON.parse(saved) : INITIAL_CONTENT
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_contents`)
+      const parsed = saved ? JSON.parse(saved) : null
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_CONTENT
+    } catch {
+      return INITIAL_CONTENT
+    }
   })
   const [poemChannels, setPoemChannels] = useState(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}_poem`)
-    return saved ? JSON.parse(saved) : INITIAL_POEM
+    try {
+      const saved = localStorage.getItem(`${STORAGE_KEY}_poem`)
+      const parsed = saved ? JSON.parse(saved) : null
+      return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_POEM
+    } catch {
+      return INITIAL_POEM
+    }
   })
 
   // SMART Goal Builder State (HubSpot Sheets)
@@ -518,6 +544,7 @@ export default function MarketingStudioPage() {
 
   // Active persona object
   const currentPersona = useMemo(() => {
+    if (!Array.isArray(personas) || personas.length === 0) return INITIAL_PERSONAS[0]
     return personas.find(p => p.id === activePersonaId) || personas[0] || INITIAL_PERSONAS[0]
   }, [personas, activePersonaId])
 
@@ -904,6 +931,7 @@ export default function MarketingStudioPage() {
       setWizardStep(wizardStep + 1)
     } else {
       finalizePersonaGeneration(updatedAnswers)
+    }
   }
 
   const handleCycleAvatar = (personaId) => {
@@ -1233,7 +1261,7 @@ export default function MarketingStudioPage() {
   }, [currentView, businessModel, personaCanvasMode])
 
   return (
-    <div className="h-screen bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f4f5f8] text-slate-900 selection:bg-slate-900 selection:text-white font-sans text-sm flex flex-col lg:flex-row">
       
       {/* =========================================================================
           LEFT SIDEBAR: 5 BIG NAVIGATION BLOCKS & MODEL SWITCHER
@@ -3828,5 +3856,4 @@ export default function MarketingStudioPage() {
 
     </div>
   )
-}
 }

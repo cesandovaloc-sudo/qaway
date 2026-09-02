@@ -10,7 +10,7 @@
 .aurea-landing h1,.aurea-landing h2,.aurea-landing h3{font-family:"DM Serif Display",Georgia,serif;font-weight:400;letter-spacing:-.03em}
 
 .aurea-landing .container{width:min(calc(100% - 48px),var(--max));margin-inline:auto}
-.aurea-landing .section{padding:clamp(72px,9vw,132px) 0}
+.aurea-landing .section{padding:clamp(80px,8vw,120px) 0}
 .aurea-landing .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#4d554c;background:rgba(255,255,255,.38)}
 .aurea-landing .eyebrow-dot{width:5px;height:5px;border-radius:50%;background:#587052}
 
@@ -61,8 +61,9 @@
 .aurea-landing .overlay-cta{display:inline-flex;align-items:center;gap:8px;background:#ffffff;color:#182219;font-size:13px;font-weight:600;padding:9px 18px;border-radius:6px;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 12px rgba(0,0,0,.08);width:fit-content;transition:background .25s ease}
 .aurea-landing .hero-badge{display:none}
 
-.aurea-landing .section.section-benefits{padding:10px 0 0}
-.aurea-landing #filosofia.section{padding-top:48px}
+.aurea-landing .section.section-benefits{padding:clamp(40px,4vw,56px) 0}
+.aurea-landing #filosofia.section{padding-top:clamp(40px,4vw,60px);padding-bottom:clamp(40px,4vw,60px)}
+.aurea-landing #rituales.section{position:relative;padding-top:clamp(40px,4vw,60px);padding-bottom:clamp(40px,4vw,60px)}
 .aurea-landing .split{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(35px,7vw,90px);align-items:center}
 .aurea-landing .media-card{border-radius:18px;overflow:hidden;background:var(--surface-2);box-shadow:0 8px 24px rgba(0,0,0,.06);transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s ease}
 .aurea-landing .media-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.10)}
@@ -82,6 +83,9 @@
 .aurea-landing .benefit h3{font-family:"DM Sans";font-size:18px;font-weight:500;letter-spacing:-.02em;margin-bottom:9px}
 .aurea-landing .benefit p{color:var(--muted);line-height:1.55;font-size:13px}
 
+.aurea-landing #rituales.section::before{content:'';position:absolute;inset:0;background:url('/aurea-images/signature_bg.png') center bottom/cover no-repeat;opacity:0.25;pointer-events:none;z-index:0}
+.aurea-landing #rituales.section>*{position:relative;z-index:1}
+.aurea-landing #ingredientes.section{padding-top:clamp(40px,4vw,60px)}
 .aurea-landing .product-intro{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:34px}
 .aurea-landing .product-intro h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15}
 .aurea-landing .product-intro p{max-width:390px;color:var(--muted);line-height:1.6;font-size:14px}
@@ -127,8 +131,7 @@
 .aurea-landing .commitment-card:nth-child(2n){border-right:0}
 .aurea-landing .commitment-card:nth-last-child(-n+2){border-bottom:0}
 .aurea-landing .commitment-card .photo{overflow:hidden}
-.aurea-landing .commitment-card img{width:100%;height:100%;object-fit:cover;transition:transform .65s cubic-bezier(.16,1,.3,1)}
-.aurea-landing .commitment-card:hover img{transform:scale(1.04)}
+.aurea-landing .commitment-card img{width:100%;height:100%;object-fit:cover}
 .aurea-landing .commitment-copy{padding:28px;display:flex;flex-direction:column;justify-content:center}
 .aurea-landing .commitment-copy span{font-size:11px;letter-spacing:.12em;color:#62705f;margin-bottom:10px}
 .aurea-landing .commitment-copy h3{font-size:26px;line-height:1.1;margin-bottom:12px}
@@ -159,20 +162,21 @@
 .aurea-landing .why-center img{width:min(500px,100%);margin:30px auto 10px;max-height:390px;object-fit:cover;object-position:center;border-radius:18px;transition:transform .6s cubic-bezier(.16,1,.3,1)}
 .aurea-landing .why-center:hover img{transform:scale(1.025)}
 
-.aurea-landing .collection{background:#faf9f5}
+.aurea-landing .collection{background:#faf9f5;padding-bottom:clamp(40px,4vw,60px)}
 .aurea-landing .collection-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:35px}
 .aurea-landing .collection-head h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15}
 .aurea-landing .collection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:34px 20px}
+.aurea-landing .product-card{transition:transform .3s ease}
+.aurea-landing .product-card:hover{transform:translateY(-3px)}
 .aurea-landing .product-card .photo{overflow:hidden;border-radius:16px;background:#f1f0eb}
-.aurea-landing .product-card .photo img{width:100%;aspect-ratio:1.05;object-fit:cover;transition:transform .65s cubic-bezier(.2,.7,.2,1),filter .5s ease}
-.aurea-landing .product-card:hover .photo img{transform:scale(1.045);filter:saturate(1.04)}
+.aurea-landing .product-card .photo img{width:100%;aspect-ratio:1.05;object-fit:cover}
 .aurea-landing .product-card .meta{padding:15px 3px 0;display:flex;align-items:end;justify-content:space-between;gap:20px}
 .aurea-landing .product-card h3{font-family:"DM Sans",sans-serif;font-weight:600;font-size:17px;margin-bottom:5px;letter-spacing:-.01em}
 .aurea-landing .product-card p{color:var(--muted);font-size:12px;line-height:1.5;max-width:250px}
 .aurea-landing .circle-arrow{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;flex:0 0 auto;transition:.3s ease;cursor:pointer;background:transparent}
 .aurea-landing .product-card:hover .circle-arrow{background:var(--accent);color:white;border-color:var(--accent);transform:rotate(-8deg)}
 
-.aurea-landing .newsletter{padding:90px 0 80px;text-align:center;border-top:1px solid var(--line)}
+.aurea-landing .newsletter{padding:clamp(40px,4vw,60px) 0 clamp(80px,8vw,120px);text-align:center;border-top:1px solid var(--line)}
 .aurea-landing .newsletter h2{font-size:clamp(30px,3.2vw,44px);line-height:1.15}
 .aurea-landing .newsletter p{max-width:580px;margin:20px auto 28px;color:var(--muted);line-height:1.6}
 .aurea-landing .news-form{width:min(620px,100%);margin:0 auto;display:flex;gap:8px;padding:6px;border:1px solid var(--line);background:#fff;border-radius:10px}
@@ -241,4 +245,4 @@
 }
 
 @media(max-width:980px){.aurea-landing .container{width:min(calc(100% - 32px),var(--max))}.aurea-landing .nav-links{display:none;position:absolute;top:78px;left:16px;right:16px;padding:16px;background:rgba(247,245,239,.98);border:1px solid var(--line);border-radius:14px;flex-direction:column;align-items:flex-start;box-shadow:0 20px 60px rgba(0,0,0,.08)}.aurea-landing .nav-links.open{display:flex}.aurea-landing .mobile-toggle{display:block}.aurea-landing .nav-actions{margin-left:auto}.aurea-landing .hero-top{grid-template-columns:1fr;gap:20px}.aurea-landing .hero-copy,.aurea-landing .hero-pill{justify-self:start}.aurea-landing .hero-pill{width:260px}.aurea-landing .benefit-grid{grid-template-columns:1fr 1fr}.aurea-landing .benefit:nth-child(2){border-right:0}.aurea-landing .benefit:nth-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .product-feature{grid-template-columns:1fr}.aurea-landing .product-info{padding-right:0}.aurea-landing .commitment-grid{grid-template-columns:1fr}.aurea-landing .commitment-card,.aurea-landing .commitment-card:nth-child(2n){border-right:0}.aurea-landing .commitment-card:nth-last-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .commitment-card:last-child{border-bottom:0}.aurea-landing .why-grid{grid-template-columns:1fr}.aurea-landing .why-side{grid-template-columns:1fr 1fr;gap:30px}.aurea-landing .why-item{max-width:none}.aurea-landing .why-center{order:-1}.aurea-landing .collection-grid{grid-template-columns:1fr 1fr}.aurea-landing .footer-top{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.aurea-landing .container{width:min(calc(100% - 24px),var(--max))}.aurea-landing .section{padding:72px 0}.aurea-landing .nav-inner{min-height:70px}.aurea-landing .nav-actions .signin{display:none}.aurea-landing .hero{padding-top:35px}.aurea-landing .hero h1{font-size:54px}.aurea-landing .hero-visual,.aurea-landing .hero-visual>img{min-height:560px}.aurea-landing .hero-overlay{left:14px;bottom:14px;top:auto;transform:none;padding:20px}.aurea-landing .hero-badge{right:14px;top:14px;bottom:auto}.aurea-landing .split{grid-template-columns:1fr}.aurea-landing .benefit-grid{grid-template-columns:1fr}.aurea-landing .benefit,.aurea-landing .benefit:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.aurea-landing .benefit:last-child{border-bottom:0}.aurea-landing .product-intro,.aurea-landing .collection-head{align-items:start;flex-direction:column}.aurea-landing .product-gallery{grid-template-columns:1fr 1fr}.aurea-landing .product-gallery .large{grid-row:span 1;grid-column:span 2}.aurea-landing .product-gallery .large img{min-height:360px}.aurea-landing .product-gallery img{min-height:175px}.aurea-landing .editorial-image img{aspect-ratio:1.2}.aurea-landing .editorial-features{grid-template-columns:1fr 1fr}.aurea-landing .editorial-feature:nth-child(2){border-right:0}.aurea-landing .editorial-feature:nth-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .commitment-card{grid-template-columns:1fr}.aurea-landing .commitment-card .photo{min-height:220px}.aurea-landing .why-side{grid-template-columns:1fr;gap:25px}.aurea-landing .collection-grid{grid-template-columns:1fr}.aurea-landing .news-benefits{grid-template-columns:1fr 1fr}.aurea-landing .news-benefit:nth-child(2){border-right:0}.aurea-landing .news-benefit:nth-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .news-form{flex-direction:column;padding:7px}.aurea-landing .news-form input{min-height:44px}.aurea-landing .footer-top{grid-template-columns:1fr 1fr;gap:30px 18px}.aurea-landing .footer-bottom{flex-direction:column;align-items:flex-start}.aurea-landing .footer-bottom .big-brand{font-size:54px}.aurea-cart-toast{right:16px;left:16px;bottom:16px;justify-content:center}}
+@media(max-width:640px){.aurea-landing .container{width:min(calc(100% - 24px),var(--max))}.aurea-landing .section{padding:64px 0}.aurea-landing .section.section-benefits{padding:36px 0}.aurea-landing .nav-inner{min-height:70px}.aurea-landing .nav-actions .signin{display:none}.aurea-landing .hero{padding-top:35px}.aurea-landing .hero h1{font-size:54px}.aurea-landing .hero-visual,.aurea-landing .hero-visual>img{min-height:560px}.aurea-landing .hero-overlay{left:14px;bottom:14px;top:auto;transform:none;padding:20px}.aurea-landing .hero-badge{right:14px;top:14px;bottom:auto}.aurea-landing .split{grid-template-columns:1fr}.aurea-landing .benefit-grid{grid-template-columns:1fr}.aurea-landing .benefit,.aurea-landing .benefit:nth-child(2){border-right:0;border-bottom:1px solid var(--line)}.aurea-landing .benefit:last-child{border-bottom:0}.aurea-landing .product-intro,.aurea-landing .collection-head{align-items:start;flex-direction:column}.aurea-landing .product-gallery{grid-template-columns:1fr 1fr}.aurea-landing .product-gallery .large{grid-row:span 1;grid-column:span 2}.aurea-landing .product-gallery .large img{min-height:360px}.aurea-landing .product-gallery img{min-height:175px}.aurea-landing .editorial-image img{aspect-ratio:1.2}.aurea-landing .editorial-features{grid-template-columns:1fr 1fr}.aurea-landing .editorial-feature:nth-child(2){border-right:0}.aurea-landing .editorial-feature:nth-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .commitment-card{grid-template-columns:1fr}.aurea-landing .commitment-card .photo{min-height:220px}.aurea-landing .why-side{grid-template-columns:1fr;gap:25px}.aurea-landing .collection-grid{grid-template-columns:1fr}.aurea-landing .news-benefits{grid-template-columns:1fr 1fr}.aurea-landing .news-benefit:nth-child(2){border-right:0}.aurea-landing .news-benefit:nth-child(-n+2){border-bottom:1px solid var(--line)}.aurea-landing .news-form{flex-direction:column;padding:7px}.aurea-landing .news-form input{min-height:44px}.aurea-landing .footer-top{grid-template-columns:1fr 1fr;gap:30px 18px}.aurea-landing .footer-bottom{flex-direction:column;align-items:flex-start}.aurea-landing .footer-bottom .big-brand{font-size:54px}.aurea-cart-toast{right:16px;left:16px;bottom:16px;justify-content:center}}

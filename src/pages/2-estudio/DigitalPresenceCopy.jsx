@@ -74,7 +74,7 @@ export default function DigitalPresenceCopy() {
                   className="qw-section-title"
                   style={{ ...displayFont, fontWeight: 760 }}
                 >
-                  Tu marca lista<br /><span className="text-[#ff4b0b]">para vivir online.</span>
+                  Tu marca lista<br /><span className="text-[#fe6612]">para vivir online.</span>
                 </h2>
               </div>
             </motion.div>
