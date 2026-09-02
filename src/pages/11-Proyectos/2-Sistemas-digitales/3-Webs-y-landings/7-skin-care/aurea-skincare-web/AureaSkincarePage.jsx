@@ -269,11 +269,39 @@ export default function AureaSkincarePage() {
           </div>
         </section>
 
+        {/* --- VERSIÓN 1: CUADRÍCULA 2x2 ORIGINAL --- */}
         <section className="section commitment">
           <div className="container">
             <Reveal>
+              <div className="commitment-head">
+                <span className="eyebrow">Nuestro compromiso (Versión 1 - Cuadrícula)</span>
+                <h2>Belleza consciente,<br/>desde el origen.</h2>
+              </div>
+            </Reveal>
+            <div className="commitment-grid">
+              {[
+                ["01","Máxima pureza","Seleccionamos ingredientes botánicos con procesos cuidadosos para preservar su calidad.",IMG.commitment_1],
+                ["02","Directo de la naturaleza","Trabajamos con extractos y activos botánicos elegidos por su función y trazabilidad.",IMG.commitment_2],
+                ["03","Formulación con propósito","Cada fórmula nace de una necesidad concreta de la piel, no de una tendencia pasajera.",IMG.commitment_3],
+                ["04","Sin compromisos","Fórmulas transparentes, sin parabenos ni fragancias sintéticas innecesarias.",IMG.commitment_4],
+              ].map(([n,title,text,img],i) => (
+                <Reveal key={n} delay={i*.05}>
+                  <motion.article className="commitment-card" whileHover={{backgroundColor:"rgba(255,255,255,.52)"}}>
+                    <div className="photo"><img src={img} alt={title}/></div>
+                    <div className="commitment-copy"><span>{n}</span><h3>{title}</h3><p>{text}</p></div>
+                  </motion.article>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* --- VERSIÓN 2: DAMERO EDITORIAL ALTERNADO (IMAGEN 2) --- */}
+        <section className="section commitment-v2" style={{ paddingTop: 30, paddingBottom: 80 }}>
+          <div className="container">
+            <Reveal>
               <div className="commitment-head" style={{ textAlign: "center", marginBottom: 52 }}>
-                <span className="eyebrow" style={{ marginBottom: 12 }}>NUESTRO COMPROMISO</span>
+                <span className="eyebrow" style={{ marginBottom: 12 }}>NUESTRO COMPROMISO (Versión 2 - Alternada)</span>
                 <h2 style={{ fontSize: "clamp(38px, 4.6vw, 64px)", letterSpacing: "-0.03em" }}>
                   Belleza consciente, desde el origen.
                 </h2>
