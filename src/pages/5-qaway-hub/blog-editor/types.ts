@@ -9,7 +9,12 @@ export interface Post {
   tags?: string[]
   coverUrl: string
   coverAlt?: string
-  headerLayout?: 'split' | 'banner' // Estilo de cabecera: 2 Columnas (HubSpot) o Panorámica Superior
+  headerLayout?: 'editorial-cta' | 'split' | 'banner' // Estilo de cabecera: Portada + CTA Lateral, 2 Columnas o Panorámica Superior
+  headerCtaTag?: string
+  headerCtaTitle?: string
+  headerCtaDesc?: string
+  headerCtaBtnText?: string
+  headerCtaUrl?: string
   body: string // Texto plano fallback
   contentHtml?: string // Contenido formateado WYSIWYG
   contentJson?: string // Estructura JSON de nodos Tiptap

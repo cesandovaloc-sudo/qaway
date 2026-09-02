@@ -42,10 +42,13 @@ export default function EditorPage() {
   const [coverUrl, setCoverUrl] = useState(existing?.coverUrl || '')
   const [coverAlt, setCoverAlt] = useState(existing?.coverAlt || '')
   const [contentHtml, setContentHtml] = useState(existing?.contentHtml || existing?.body || '')
-  const [contentJson, setContentJson] = useState(existing?.contentJson || '')
-  const [plainText, setPlainText] = useState(existing?.body || '')
   const [status, setStatus] = useState<PostStatus>(existing?.status || 'borrador')
-  const [headerLayout, setHeaderLayout] = useState<'split' | 'banner'>(existing?.headerLayout || 'split')
+  const [headerLayout, setHeaderLayout] = useState<'editorial-cta' | 'split' | 'banner'>(existing?.headerLayout || 'editorial-cta')
+  const [headerCtaTag, setHeaderCtaTag] = useState(existing?.headerCtaTag || '')
+  const [headerCtaTitle, setHeaderCtaTitle] = useState(existing?.headerCtaTitle || '')
+  const [headerCtaDesc, setHeaderCtaDesc] = useState(existing?.headerCtaDesc || '')
+  const [headerCtaBtnText, setHeaderCtaBtnText] = useState(existing?.headerCtaBtnText || '')
+  const [headerCtaUrl, setHeaderCtaUrl] = useState(existing?.headerCtaUrl || '')
   const [internalNotes, setInternalNotes] = useState('')
   const [focusKeyword, setFocusKeyword] = useState('')
 
@@ -208,7 +211,12 @@ export default function EditorPage() {
         setCategory(p.category)
         setCoverUrl(p.coverUrl)
         setCoverAlt(p.coverAlt || '')
-        setHeaderLayout(p.headerLayout || 'split')
+        setHeaderLayout(p.headerLayout || 'editorial-cta')
+        setHeaderCtaTag(p.headerCtaTag || '')
+        setHeaderCtaTitle(p.headerCtaTitle || '')
+        setHeaderCtaDesc(p.headerCtaDesc || '')
+        setHeaderCtaBtnText(p.headerCtaBtnText || '')
+        setHeaderCtaUrl(p.headerCtaUrl || '')
         setContentHtml(p.contentHtml || p.body)
         setContentJson(p.contentJson || '')
         setPlainText(p.body)
@@ -235,6 +243,11 @@ export default function EditorPage() {
           coverUrl,
           coverAlt,
           headerLayout,
+          headerCtaTag,
+          headerCtaTitle,
+          headerCtaDesc,
+          headerCtaBtnText,
+          headerCtaUrl,
           body: plainText,
           contentHtml,
           contentJson,
@@ -874,7 +887,7 @@ export default function EditorPage() {
                       </div>
                     )}
                   </div>
-                ) : (
+                ) : headerLayout === 'banner' ? (
                   /* 2. Cabecera Panorámica Superior (Full Banner) */
                   <div className="mb-8 pb-8 border-b border-line space-y-6">
                     {coverUrl && (
@@ -903,6 +916,66 @@ export default function EditorPage() {
                       )}
                     </div>
                   </div>
+                ) : (
+                  /* 3. Cabecera Oficial Producción (Portada 16:9 + Tarjeta CTA Lateral) */
+                  <div className="mb-8 pb-8 border-b border-line space-y-6">
+                    <div>
+                      <span className="inline-block bg-[#ff4b0b]/10 text-[#ff4b0b] text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-[#ff4b0b]/20 mb-3 font-mono">
+                        {category}
+                      </span>
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight mb-4 leading-[1.15]">
+                        {title || 'Sin título'}
+                      </h1>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-600 mb-5 font-medium">
+                        <span>Escrito por: <strong className="text-zinc-950">Qaway Lab</strong></span>
+                        <span>•</span>
+                        <span className="text-zinc-500 font-mono">~{readingTime} min de lectura</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
+                      {/* Portada 16:9 */}
+                      <div className="md:col-span-8 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-xs">
+                        {coverUrl ? (
+                          <img
+                            src={coverUrl}
+                            alt={coverAlt || title}
+                            className="w-full h-full object-cover object-center"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-zinc-500 text-xs bg-zinc-100">
+                            Sin imagen de portada
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tarjeta Lateral CTA */}
+                      <div className="md:col-span-4 flex flex-col justify-between rounded-2xl border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-5 shadow-2xs">
+                        <div>
+                          <div className="inline-block text-[10px] font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-2.5 py-0.5 rounded-md mb-2 font-mono">
+                            {headerCtaTag || 'Recurso Destacado'}
+                          </div>
+                          <h4 className="text-sm font-black text-zinc-950 mb-1.5 leading-snug">
+                            {headerCtaTitle || 'Guía y Prompts de IA para Negocios'}
+                          </h4>
+                          <p className="text-[12px] text-zinc-600 leading-relaxed mb-3">
+                            {headerCtaDesc || 'Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.'}
+                          </p>
+                        </div>
+                        <div>
+                          <a
+                            href={headerCtaUrl || '/recursos/primeros-flujos-ia'}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="w-full inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] text-white py-2.5 px-3 rounded-xl text-xs font-bold shadow-xs no-underline"
+                          >
+                            <span>{headerCtaBtnText || 'Descargar Guía Gratis'}</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 <div
@@ -926,6 +999,11 @@ export default function EditorPage() {
               contentHtml={contentHtml}
               coverUrl={coverUrl}
               headerLayout={headerLayout}
+              headerCtaTag={headerCtaTag}
+              headerCtaTitle={headerCtaTitle}
+              headerCtaDesc={headerCtaDesc}
+              headerCtaBtnText={headerCtaBtnText}
+              headerCtaUrl={headerCtaUrl}
               status={status}
               readingTime={readingTime}
               wordCount={words}
@@ -938,6 +1016,11 @@ export default function EditorPage() {
               onExcerptChange={setExcerpt}
               onCategoryChange={setCategory}
               onHeaderLayoutChange={setHeaderLayout}
+              onHeaderCtaTagChange={setHeaderCtaTag}
+              onHeaderCtaTitleChange={setHeaderCtaTitle}
+              onHeaderCtaDescChange={setHeaderCtaDesc}
+              onHeaderCtaBtnTextChange={setHeaderCtaBtnText}
+              onHeaderCtaUrlChange={setHeaderCtaUrl}
               onNotesChange={setInternalNotes}
               onFocusKeywordChange={setFocusKeyword}
               onOpenQuickRules={() => setIsQuickRulesOpen(true)}

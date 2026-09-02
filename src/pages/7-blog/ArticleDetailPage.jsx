@@ -187,7 +187,12 @@ export default function ArticleDetailPage() {
             public: data.status === 'publicado' || data.public !== false,
             featured: data.featured ? { order: data.featured_order || 1, label: data.featured_label || 'Destacado' } : null,
             image: data.cover_url || data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
-            headerLayout: data.header_layout || data.headerLayout || 'split',
+            headerLayout: data.header_layout || data.headerLayout || 'editorial-cta',
+            headerCtaTag: data.header_cta_tag || data.headerCtaTag || (data.relatedCta ? data.relatedCta.tag : 'Recurso Destacado'),
+            headerCtaTitle: data.header_cta_title || data.headerCtaTitle || (data.relatedCta ? data.relatedCta.title : 'Guía y Prompts de IA para Negocios'),
+            headerCtaDesc: data.header_cta_desc || data.headerCtaDesc || (data.relatedCta ? data.relatedCta.description : 'Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.'),
+            headerCtaBtnText: data.header_cta_btn_text || data.headerCtaBtnText || (data.relatedCta ? data.relatedCta.buttonText : 'Descargar Guía Gratis'),
+            headerCtaUrl: data.header_cta_url || data.headerCtaUrl || (data.relatedCta ? data.relatedCta.link : '/recursos/primeros-flujos-ia'),
             audioUrl: data.audio_url || null,
           })
         }
@@ -790,54 +795,93 @@ export default function ArticleDetailPage() {
           </div>
         </motion.div>
 
-        {/* 3. FILA DE PORTADA 16:9 + BLOQUE LATERAL DE LA MISMA ALTURA */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
-          
-          {/* Imagen de Portada */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22 }}
-            className="lg:col-span-8 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-sm"
-          >
-            <img
-              src={article.image}
-              alt={article.title}
-              className="w-full h-full object-cover object-center"
-            />
-          </motion.div>
-
-          {/* Bloque Lateral con la misma altura que la imagen */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="lg:col-span-4 flex flex-col justify-between rounded-2xl border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-6 sm:p-7 shadow-xs"
-          >
-            <div>
-              <div className="inline-block text-xs font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-3 py-1 rounded-md mb-3 font-mono">
-                Recurso Destacado
-              </div>
-              <h4 className="text-base sm:text-lg font-black text-zinc-950 mb-2 leading-snug">
-                Guía y Prompts de IA para Negocios
-              </h4>
-              <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">
-                Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.
+        {/* 3. CABECERA DINÁMICA SEGÚN LAYOUT */}
+        {article.headerLayout === 'banner' ? (
+          /* Opción Panorámica Full */
+          <div className="mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-sm"
+            >
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover object-center"
+              />
+            </motion.div>
+          </div>
+        ) : article.headerLayout === 'split' ? (
+          /* Opción 2 Columnas */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-center">
+            <div className="lg:col-span-5 space-y-4">
+              <p className="text-base sm:text-lg text-zinc-700 leading-relaxed font-normal">
+                {article.excerpt}
               </p>
             </div>
-            <div>
-              <a
-                href={WHATSAPP_LINK}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] hover:from-[#ff5a22] hover:to-[#e03d00] text-white py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-sm shadow-[#ff4b0b]/25 transition-all cursor-pointer"
-              >
-                Descargar Guía Gratis <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="lg:col-span-7 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-sm"
+            >
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover object-center"
+              />
+            </motion.div>
+          </div>
+        ) : (
+          /* Opción Oficial Producción (Portada 16:9 + Bloque Lateral CTA Dinámico) */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12 items-stretch">
+            {/* Imagen de Portada 16:9 */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="lg:col-span-8 relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-black/10 shadow-sm"
+            >
+              <img
+                src={article.image}
+                alt={article.title}
+                className="w-full h-full object-cover object-center"
+              />
+            </motion.div>
 
-        </div>
+            {/* Bloque Lateral con CTA Dinámico */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="lg:col-span-4 flex flex-col justify-between rounded-2xl border border-[#ff4b0b]/25 bg-gradient-to-br from-[#fff9f6] via-[#fff2eb] to-[#ffe7d9] p-6 sm:p-7 shadow-xs"
+            >
+              <div>
+                <div className="inline-block text-xs font-bold uppercase tracking-widest text-[#ff4b0b] bg-[#ff4b0b]/10 px-3 py-1 rounded-md mb-3 font-mono">
+                  {article.headerCtaTag || 'Recurso Destacado'}
+                </div>
+                <h4 className="text-base sm:text-lg font-black text-zinc-950 mb-2 leading-snug">
+                  {article.headerCtaTitle || 'Guía y Prompts de IA para Negocios'}
+                </h4>
+                <p className="text-[13px] text-zinc-600 leading-relaxed mb-4">
+                  {article.headerCtaDesc || 'Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.'}
+                </p>
+              </div>
+              <div>
+                <a
+                  href={article.headerCtaUrl || '/recursos/primeros-flujos-ia'}
+                  target={article.headerCtaUrl && article.headerCtaUrl.startsWith('http') ? '_blank' : undefined}
+                  rel="noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff703d] to-[#ff4b0b] hover:from-[#ff5a22] hover:to-[#e03d00] text-white py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold shadow-sm shadow-[#ff4b0b]/25 transition-all cursor-pointer no-underline"
+                >
+                  <span>{article.headerCtaBtnText || 'Descargar Guía Gratis'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
 
         {/* CONTENEDOR DE DOS COLUMNAS OPTIMIZADO */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start mb-16">

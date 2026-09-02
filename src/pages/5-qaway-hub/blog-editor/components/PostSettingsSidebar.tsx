@@ -37,15 +37,23 @@ interface PostSettingsSidebarProps {
   isSaving: boolean
   isSaved: boolean
   isExisting: boolean
-  internalNotes?: string
-  focusKeyword?: string
-  headerLayout?: 'split' | 'banner'
+  headerLayout?: 'editorial-cta' | 'split' | 'banner'
+  headerCtaTag?: string
+  headerCtaTitle?: string
+  headerCtaDesc?: string
+  headerCtaBtnText?: string
+  headerCtaUrl?: string
   onSlugChange: (slug: string) => void
   onExcerptChange: (excerpt: string) => void
   onCategoryChange: (category: string) => void
   onNotesChange?: (notes: string) => void
   onFocusKeywordChange?: (keyword: string) => void
-  onHeaderLayoutChange?: (layout: 'split' | 'banner') => void
+  onHeaderLayoutChange?: (layout: 'editorial-cta' | 'split' | 'banner') => void
+  onHeaderCtaTagChange?: (tag: string) => void
+  onHeaderCtaTitleChange?: (title: string) => void
+  onHeaderCtaDescChange?: (desc: string) => void
+  onHeaderCtaBtnTextChange?: (text: string) => void
+  onHeaderCtaUrlChange?: (url: string) => void
   onOpenQuickRules?: () => void
   onNavigateKeywordMatch?: (keyword: string, targetIndex: number) => { total: number; current: number }
   onCloseSidebar?: () => void
@@ -69,13 +77,23 @@ export default function PostSettingsSidebar({
   isExisting,
   internalNotes = '',
   focusKeyword = '',
-  headerLayout = 'split',
+  headerLayout = 'editorial-cta',
+  headerCtaTag = '',
+  headerCtaTitle = '',
+  headerCtaDesc = '',
+  headerCtaBtnText = '',
+  headerCtaUrl = '',
   onSlugChange,
   onExcerptChange,
   onCategoryChange,
   onNotesChange,
   onFocusKeywordChange,
   onHeaderLayoutChange,
+  onHeaderCtaTagChange,
+  onHeaderCtaTitleChange,
+  onHeaderCtaDescChange,
+  onHeaderCtaBtnTextChange,
+  onHeaderCtaUrlChange,
   onOpenQuickRules,
   onNavigateKeywordMatch,
   onCloseSidebar,
@@ -425,12 +443,25 @@ export default function PostSettingsSidebar({
             />
           </div>
 
-          {/* 3. Diseño de Cabecera Oficial HubSpot */}
-          <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-2.5">
+          {/* 3. Diseño de Cabecera */}
+          <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-muted block">
               Diseño de Cabecera
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => onHeaderLayoutChange && onHeaderLayoutChange('editorial-cta')}
+                className={`p-2.5 rounded-xl border text-left font-bold transition-all cursor-pointer ${
+                  headerLayout === 'editorial-cta'
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-line bg-surface-muted text-muted hover:text-primary'
+                }`}
+              >
+                <span className="text-xs block">▤ Portada + CTA</span>
+                <span className="text-[10px] font-normal text-muted-light block">Producción oficial</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => onHeaderLayoutChange && onHeaderLayoutChange('split')}
@@ -441,7 +472,7 @@ export default function PostSettingsSidebar({
                 }`}
               >
                 <span className="text-xs block">◫ 2 Columnas</span>
-                <span className="text-[10px] font-normal text-muted-light block">Estilo HubSpot Hero</span>
+                <span className="text-[10px] font-normal text-muted-light block">HubSpot Hero</span>
               </button>
 
               <button
@@ -457,6 +488,88 @@ export default function PostSettingsSidebar({
                 <span className="text-[10px] font-normal text-muted-light block">Foto superior full</span>
               </button>
             </div>
+
+            {/* Configuración del CTA Lateral (cuando headerLayout es editorial-cta) */}
+            {headerLayout === 'editorial-cta' && (
+              <div className="pt-3 border-t border-line space-y-2.5 bg-surface-muted/60 p-3 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-primary flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-accent" />
+                    Personalizar CTA Lateral
+                  </span>
+                  <span className="text-[10px] text-muted-light">Editable</span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <label className="block text-[11px] font-medium text-muted mb-1">
+                      Etiqueta Superior
+                    </label>
+                    <input
+                      type="text"
+                      value={headerCtaTag}
+                      onChange={e => onHeaderCtaTagChange && onHeaderCtaTagChange(e.target.value)}
+                      placeholder="Ej: Recurso Destacado"
+                      className="w-full text-xs p-2 rounded-lg border border-line bg-white focus:outline-none focus:border-accent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-muted mb-1">
+                      Título del Recurso
+                    </label>
+                    <input
+                      type="text"
+                      value={headerCtaTitle}
+                      onChange={e => onHeaderCtaTitleChange && onHeaderCtaTitleChange(e.target.value)}
+                      placeholder="Ej: Guía Primeros Flujos de IA"
+                      className="w-full text-xs p-2 rounded-lg border border-line bg-white focus:outline-none focus:border-accent font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-muted mb-1">
+                      Descripción Corta
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={headerCtaDesc}
+                      onChange={e => onHeaderCtaDescChange && onHeaderCtaDescChange(e.target.value)}
+                      placeholder="Ej: Maximiza la productividad de tu equipo con nuestras plantillas listas para usar."
+                      className="w-full text-xs p-2 rounded-lg border border-line bg-white focus:outline-none focus:border-accent resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-medium text-muted mb-1">
+                        Texto del Botón
+                      </label>
+                      <input
+                        type="text"
+                        value={headerCtaBtnText}
+                        onChange={e => onHeaderCtaBtnTextChange && onHeaderCtaBtnTextChange(e.target.value)}
+                        placeholder="Ej: Descargar Guía"
+                        className="w-full text-xs p-2 rounded-lg border border-line bg-white focus:outline-none focus:border-accent"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-muted mb-1">
+                        Enlace (URL o /ruta)
+                      </label>
+                      <input
+                        type="text"
+                        value={headerCtaUrl}
+                        onChange={e => onHeaderCtaUrlChange && onHeaderCtaUrlChange(e.target.value)}
+                        placeholder="Ej: /recursos/primeros-flujos-ia"
+                        className="w-full text-xs p-2 rounded-lg border border-line bg-white focus:outline-none focus:border-accent font-mono text-[11px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 4. Metadescripción (Extracto SEO) */}

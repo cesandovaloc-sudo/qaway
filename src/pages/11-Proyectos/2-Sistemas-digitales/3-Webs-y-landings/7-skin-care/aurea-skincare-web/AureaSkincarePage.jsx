@@ -27,15 +27,21 @@ const IMG = {
   commitment_3: "/aurea-images/commitment_3.png",
   commitment_4: "/aurea-images/commitment_4.png",
   why_products: "/aurea-images/why_products_v2.png",
+  product_col_1: "/aurea-images/product_col_1.png",
+  product_col_2: "/aurea-images/product_col_2.png",
+  product_col_3: "/aurea-images/product_col_3.png",
+  product_col_4: "/aurea-images/product_col_4.png",
+  product_col_5: "/aurea-images/product_col_5.png",
+  product_col_6: "/aurea-images/product_col_6.png",
 };
 
 const products = [
-  { name:"Sérum antioxidante", subtitle:"Vitamina C · Ácido ferúlico", image:IMG.signature_1, description:"Ilumina y protege la piel frente al estrés oxidativo." },
-  { name:"Gel limpiador purificante", subtitle:"Té verde · Hamamelis", image:IMG.hero_products, description:"Limpieza suave para comenzar el ritual sin resecar." },
-  { name:"Crema hidratante", subtitle:"Ácido hialurónico · Escualano", image:IMG.signature_2, description:"Hidratación esencial y sensación de confort." },
-  { name:"Tónico renovador", subtitle:"Rosa · Niacinamida", image:IMG.ingredient_rose, description:"Equilibra la piel y prepara el rostro para el siguiente paso." },
-  { name:"Aceite regenerador", subtitle:"Rosa mosqueta · Jojoba", image:IMG.signature_3, description:"Nutrición concentrada para una piel más flexible." },
-  { name:"Mascarilla detox", subtitle:"Arcilla verde · Espirulina", image:IMG.ingredient_green, description:"Un ritual semanal para limpiar y devolver frescura." },
+  { name:"Gel limpiador purificante", subtitle:"Té verde · Hamamelis", image:IMG.product_col_1, description:"Limpieza suave para comenzar el ritual sin resecar." },
+  { name:"Sérum iluminador antioxidante", subtitle:"Vitamina C · Ácido ferúlico", image:IMG.product_col_2, description:"Ilumina y protege la piel frente al estrés oxidativo." },
+  { name:"Tónico regenerador botánico", subtitle:"Rosa damascena · Niacinamida", image:IMG.product_col_3, description:"Equilibra la piel y prepara el rostro para el siguiente paso." },
+  { name:"Crema barrera reparadora", subtitle:"Ceramidas · Centella asiática", image:IMG.product_col_4, description:"Hidratación esencial y sensación de confort prolongado." },
+  { name:"Aceite facial nutritivo", subtitle:"Rosa mosqueta · Jojoba", image:IMG.product_col_5, description:"Nutrición concentrada para una piel más flexible y luminosa." },
+  { name:"Mascarilla detox purificante", subtitle:"Arcilla verde · Espirulina", image:IMG.product_col_6, description:"Un ritual semanal para limpiar y devolver frescura." },
 ];
 
 const formulas = [

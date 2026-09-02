@@ -269,8 +269,8 @@ export default function PrimerosFlujosIAPage() {
                   No necesitas aprender diez herramientas. Empieza por una tarea que quieras mejorar y divídela en pasos para saber exactamente dónde y cómo aplicar Inteligencia Artificial con criterio.
                 </p>
 
-                {/* Bullets institucionales */}
-                <div className="mt-6 space-y-2.5 max-w-xl">
+                {/* Bullets institucionales con respiro calibrado */}
+                <div className="mt-8 sm:mt-9 space-y-3.5 max-w-xl">
                   <div className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#fe6612]/15 text-[#fe6612]">
                       <Check className="h-3 w-3 stroke-[3]" />
@@ -290,12 +290,12 @@ export default function PrimerosFlujosIAPage() {
                   </div>
                 </div>
 
-                {/* Acciones */}
-                <div className="qw-hero-actions">
+                {/* Acciones con respiro visual amplio */}
+                <div className="mt-9 sm:mt-11 flex flex-wrap items-center gap-5 sm:gap-6">
                   <button
                     onClick={handleDownloadClick}
                     disabled={downloading}
-                    className="inline-flex items-center gap-2.5 rounded-[10px] bg-[#fe6612] px-7 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all active:scale-[0.98]"
+                    className="inline-flex items-center gap-2.5 rounded-[10px] bg-[#fe6612] px-7 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_14px_36px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <Download className="h-4 w-4" />
                     <span>{downloading ? 'Descargando Guía...' : 'Descargar Guía Gratuita (PDF)'}</span>
@@ -355,143 +355,37 @@ export default function PrimerosFlujosIAPage() {
               </p>
             </div>
 
-            {/* Grid de 5 Variaciones de Diseño Arquitectónico y Editorial para Evaluación */}
+            {/* Grid del Ciclo Operativo con Hover Naranja de Marca (#fe6612) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 items-stretch">
-              
-              {/* ========================================================================= */}
-              {/* VARIACIÓN 1: SWISS EDITORIAL & TIPOGRAFÍA MONOCROMO                      */}
-              {/* ========================================================================= */}
-              <div className="group relative flex flex-col justify-between rounded-xl border border-black/15 bg-white p-6 shadow-xs hover:border-[#fe6612] hover:shadow-md transition-all duration-300 text-left">
-                <div>
-                  <div className="flex items-baseline justify-between mb-4 border-b border-black/10 pb-3">
-                    <span className="font-mono text-2xl font-black text-[#191918] tracking-tight">
-                      01<span className="text-[#fe6612]">.</span>
-                    </span>
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-black/50">
-                      Entrada
-                    </span>
+              {pipelineSteps.map((item) => {
+                const IconComponent = item.icon
+                return (
+                  <div
+                    key={item.step}
+                    className="group relative flex flex-col justify-between rounded-[10px] border border-black/10 bg-white p-7 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300 hover:-translate-y-1.5 hover:bg-[#fe6612] hover:border-[#fe6612] hover:shadow-[0_16px_36px_rgba(254,102,18,0.22)] cursor-default text-left"
+                  >
+                    <div>
+                      {/* Contenedor del Icono */}
+                      <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-[#fe6612]/10 text-[#fe6612] transition-colors duration-300 group-hover:bg-white group-hover:text-[#fe6612]">
+                        <IconComponent className="h-6 w-6 stroke-[2]" />
+                      </div>
+
+                      {/* Título del Paso */}
+                      <h3
+                        className="text-lg sm:text-xl font-bold text-[#191918] transition-colors duration-300 group-hover:text-white mb-2.5"
+                        style={displayFont}
+                      >
+                        {item.step}. {item.name}
+                      </h3>
+
+                      {/* Descripción */}
+                      <p className="text-xs sm:text-[13px] text-black/70 leading-relaxed transition-colors duration-300 group-hover:text-white/90">
+                        {item.desc}
+                      </p>
+                    </div>
                   </div>
-
-                  <h3 className="text-base font-bold text-[#191918] mb-2 tracking-tight">
-                    Recepción de Datos
-                  </h3>
-                  <p className="text-xs text-black/70 leading-relaxed mb-4">
-                    Estandariza los inputs de clientes, correos y formularios en una única puerta de enlace.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-black/5 flex items-center justify-between text-[10px] font-mono text-black/50">
-                  <span>VAR 1 · SWISS</span>
-                  <span className="font-bold text-[#fe6612]">INPUT</span>
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* VARIACIÓN 2: LINEAR / BENTO SYSTEM CONECTOR                               */}
-              {/* ========================================================================= */}
-              <div className="group relative flex flex-col justify-between rounded-xl border border-black/10 bg-[#f9f9f8] p-6 shadow-xs hover:bg-white hover:border-black/20 hover:shadow-md transition-all duration-300 text-left">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1 text-[11px] font-mono font-bold text-[#191918] border border-black/10 shadow-2xs">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#fe6612]" />
-                      FASE 02
-                    </span>
-                    <span className="text-xs text-black/30 font-mono">SOP</span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-[#191918] mb-1.5 tracking-tight">
-                    Mapeo y Desglose
-                  </h3>
-                  <p className="text-xs text-black/70 leading-relaxed mb-4">
-                    Divide tareas complejas en pasos atómicos y predecibles antes de aplicar automatización.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-black/10 flex items-center justify-between text-[10px] font-mono text-black/50">
-                  <span>VAR 2 · LINEAR BENTO</span>
-                  <span className="font-bold text-black/70">LÓGICA</span>
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* VARIACIÓN 3: ACENTO EDITORIAL QAWAY (BORDE LATERAL + CONTRASTE)           */}
-              {/* ========================================================================= */}
-              <div className="group relative flex flex-col justify-between rounded-xl border-l-[3px] border-l-[#fe6612] border-y border-r border-black/10 bg-white p-6 shadow-xs hover:shadow-md transition-all duration-300 text-left">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-xs font-bold text-[#fe6612] tracking-wider uppercase">
-                      Paso 03 / Núcleo
-                    </span>
-                    <span className="h-2 w-2 rounded-full bg-[#fe6612]/30" />
-                  </div>
-
-                  <h3 className="text-base font-bold text-[#191918] mb-1.5 tracking-tight">
-                    Ejecución con IA
-                  </h3>
-                  <p className="text-xs text-black/70 leading-relaxed mb-4">
-                    La inteligencia artificial procesa, sintetiza y genera borradores en segundos con prompts CTR.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-black/5 flex items-center justify-between text-[10px] font-mono text-black/50">
-                  <span>VAR 3 · STUDIO ACCENT</span>
-                  <span className="font-bold text-[#fe6612]">MOTOR</span>
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* VARIACIÓN 4: FICHA TÉCNICA DE CONTROL & CRITERIO                          */}
-              {/* ========================================================================= */}
-              <div className="group relative flex flex-col justify-between rounded-xl border border-black/15 bg-white p-6 shadow-xs hover:border-black/40 hover:shadow-md transition-all duration-300 text-left">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-[10px] font-bold text-black/40 uppercase tracking-widest">
-                      CONTROL QA
-                    </span>
-                    <span className="font-mono text-xs font-bold text-[#191918]">
-                      04
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-[#191918] mb-1.5 tracking-tight">
-                    Revisión Humana
-                  </h3>
-                  <p className="text-xs text-black/70 leading-relaxed mb-4">
-                    Aplica criterio experto para verificar datos, validar el tono de marca y garantizar precisión.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-black/5 flex items-center justify-between text-[10px] font-mono text-black/50">
-                  <span>VAR 4 · FICHA TÉCNICA</span>
-                  <span className="font-bold text-emerald-600">VALIDACIÓN</span>
-                </div>
-              </div>
-
-              {/* ========================================================================= */}
-              {/* VARIACIÓN 5: MINIMALISTA DE ALTO CONTRASTE (ESTILO APPLE / FIGMA)        */}
-              {/* ========================================================================= */}
-              <div className="group relative flex flex-col justify-between rounded-xl border border-black/10 bg-[#ffffff] p-6 shadow-xs hover:border-black hover:shadow-md transition-all duration-300 text-left">
-                <div>
-                  <div className="mb-4">
-                    <span className="inline-block font-mono text-[11px] font-black text-[#191918] bg-black/5 px-2 py-0.5 rounded">
-                      05
-                    </span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-[#191918] mb-1.5 tracking-tight">
-                    Entrega de Valor
-                  </h3>
-                  <p className="text-xs text-black/70 leading-relaxed mb-4">
-                    El resultado queda organizado e integrado en tu CRM, Notion o canal de mensajería comercial.
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-black/5 flex items-center justify-between text-[10px] font-mono text-black/50">
-                  <span>VAR 5 · MINIMAL STUDIO</span>
-                  <span className="font-bold text-[#191918]">RESULTADO</span>
-                </div>
-              </div>
-
+                )
+              })}
             </div>
 
           </div>
@@ -534,124 +428,119 @@ export default function PrimerosFlujosIAPage() {
       {/* ========================================================================= */}
       {/* MODAL OFICIAL DE CAPTURA DE LEADS (LEAD GATE)                            */}
       {/* ========================================================================= */}
+      {/* LEAD CAPTURE MODAL (DISEÑO MINIMALISTA ESTILO HUBSPOT)                     */}
+      {/* ========================================================================= */}
       <AnimatePresence>
         {showModal && !isUnlocked && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.96, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-w-md rounded-[24px] bg-white p-7 sm:p-9 shadow-2xl border border-black/10 text-left overflow-hidden"
+              exit={{ opacity: 0, scale: 0.96, y: 15 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-lg rounded-[14px] bg-white p-8 sm:p-10 shadow-2xl border border-black/10 text-left"
             >
               {/* Botón Cerrar */}
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-5 right-5 h-8 w-8 rounded-full bg-black/5 hover:bg-black/10 text-black/60 flex items-center justify-center transition-colors cursor-pointer"
+                className="absolute top-5 right-5 h-8 w-8 rounded-md text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 flex items-center justify-center transition-colors cursor-pointer"
                 aria-label="Cerrar ventana"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
 
-              {/* Cabecera del Modal */}
-              <div className="mb-6 pr-6">
-                <div className="mb-2 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#fe6612]">
-                  <span>/ Descarga Oficial</span>
-                </div>
-                <h3 className="text-2xl font-bold tracking-tight text-[#191918]" style={displayFont}>
-                  Descarga la Guía en PDF<span className="text-[#fe6612]">.</span>
+              {/* Cabecera limpia estilo HubSpot */}
+              <div className="text-center mb-7 pr-3 pl-3">
+                <h3 className="text-2xl sm:text-3xl font-bold text-[#191918] tracking-tight">
+                  Descarga la guía en PDF
                 </h3>
-                <p className="mt-1.5 text-xs text-black/70 leading-relaxed">
-                  Completa tus datos para iniciar la descarga directa del documento de 10 páginas con plantillas operativas.
+                <p className="mt-2 text-xs sm:text-[13px] text-[#516f90]">
+                  Completa tus datos para recibir el acceso directo e inmediato.
                 </p>
               </div>
 
-              {/* Formulario */}
+              {/* Formulario minimalista */}
               <form onSubmit={handleLeadSubmit} className="space-y-4">
                 <div>
-                  <label htmlFor="modalLeadName" className="block text-xs font-bold text-[#191918] mb-1.5">
+                  <label htmlFor="modalLeadName" className="block text-xs font-semibold text-[#33475b] mb-1.5">
                     Nombre completo
                   </label>
-                  <div className="relative">
-                    <input
-                      id="modalLeadName"
-                      type="text"
-                      required
-                      placeholder="Ej. Carlos Mendoza"
-                      value={leadName}
-                      onChange={(e) => setLeadName(e.target.value)}
-                      disabled={isSubmittingLead}
-                      className="w-full rounded-[10px] border border-black/15 bg-[#fbfbfa] px-3.5 py-2.5 text-xs text-[#191918] placeholder:text-black/35 focus:border-[#fe6612] focus:bg-white focus:outline-none transition-all"
-                    />
-                  </div>
+                  <input
+                    id="modalLeadName"
+                    type="text"
+                    required
+                    placeholder="Ej. Carlos Mendoza"
+                    value={leadName}
+                    onChange={(e) => setLeadName(e.target.value)}
+                    disabled={isSubmittingLead}
+                    className="w-full rounded-[6px] border border-[#cbd6e2] bg-[#f4f7f9] px-3.5 py-2.5 text-sm text-[#191918] placeholder:text-zinc-400 focus:border-[#fe6612] focus:bg-white focus:ring-2 focus:ring-[#fe6612]/15 focus:outline-none transition-all"
+                  />
                 </div>
 
                 <div>
-                  <label htmlFor="modalLeadEmail" className="block text-xs font-bold text-[#191918] mb-1.5">
-                    Correo corporativo o personal
+                  <label htmlFor="modalLeadEmail" className="block text-xs font-semibold text-[#33475b] mb-1.5">
+                    Correo electrónico
                   </label>
-                  <div className="relative">
-                    <input
-                      id="modalLeadEmail"
-                      type="email"
-                      required
-                      placeholder="carlos@empresa.com"
-                      value={leadEmail}
-                      onChange={(e) => setLeadEmail(e.target.value)}
-                      disabled={isSubmittingLead}
-                      className="w-full rounded-[10px] border border-black/15 bg-[#fbfbfa] px-3.5 py-2.5 text-xs text-[#191918] placeholder:text-black/35 focus:border-[#fe6612] focus:bg-white focus:outline-none transition-all"
-                    />
-                  </div>
+                  <input
+                    id="modalLeadEmail"
+                    type="email"
+                    required
+                    placeholder="carlos@empresa.com"
+                    value={leadEmail}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                    disabled={isSubmittingLead}
+                    className="w-full rounded-[6px] border border-[#cbd6e2] bg-[#f4f7f9] px-3.5 py-2.5 text-sm text-[#191918] placeholder:text-zinc-400 focus:border-[#fe6612] focus:bg-white focus:ring-2 focus:ring-[#fe6612]/15 focus:outline-none transition-all"
+                  />
                 </div>
 
                 <div>
-                  <label htmlFor="modalLeadPhone" className="block text-xs font-bold text-[#191918] mb-1.5">
-                    Número de WhatsApp / Teléfono
+                  <label htmlFor="modalLeadPhone" className="block text-xs font-semibold text-[#33475b] mb-1.5">
+                    Número de teléfono / WhatsApp
                   </label>
-                  <div className="relative">
-                    <input
-                      id="modalLeadPhone"
-                      type="tel"
-                      required
-                      placeholder="+51 987 654 321"
-                      value={leadPhone}
-                      onChange={(e) => setLeadPhone(e.target.value)}
-                      disabled={isSubmittingLead}
-                      className="w-full rounded-[10px] border border-black/15 bg-[#fbfbfa] px-3.5 py-2.5 text-xs text-[#191918] placeholder:text-black/35 focus:border-[#fe6612] focus:bg-white focus:outline-none transition-all"
-                    />
-                  </div>
+                  <input
+                    id="modalLeadPhone"
+                    type="tel"
+                    required
+                    placeholder="+51 987 654 321"
+                    value={leadPhone}
+                    onChange={(e) => setLeadPhone(e.target.value)}
+                    disabled={isSubmittingLead}
+                    className="w-full rounded-[6px] border border-[#cbd6e2] bg-[#f4f7f9] px-3.5 py-2.5 text-sm text-[#191918] placeholder:text-zinc-400 focus:border-[#fe6612] focus:bg-white focus:ring-2 focus:ring-[#fe6612]/15 focus:outline-none transition-all"
+                  />
                 </div>
 
                 {leadError && (
-                  <p className="text-xs text-red-600 font-semibold bg-red-50 p-2.5 rounded-lg border border-red-200">
+                  <p className="text-xs text-red-600 font-semibold bg-red-50 p-2.5 rounded-md border border-red-200">
                     {leadError}
                   </p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isSubmittingLead}
-                  className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-[10px] bg-[#fe6612] py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-white shadow-[0_10px_25px_rgba(254,102,18,0.28)] hover:bg-[#e05508] transition-all disabled:opacity-70 cursor-pointer"
-                >
-                  {isSubmittingLead ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Procesando descarga...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4" />
-                      <span>Descargar PDF Ahora</span>
-                    </>
-                  )}
-                </button>
-              </form>
+                {/* Pie con botón estilo HubSpot */}
+                <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <span className="text-[11px] text-[#516f90] flex items-center gap-1.5 order-2 sm:order-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    Tus datos están protegidos.
+                  </span>
 
-              {/* Pie de seguridad */}
-              <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-center gap-1.5 text-[11px] text-black/50">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                <span>Tus datos están protegidos. Sin spam.</span>
-              </div>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingLead}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-[6px] bg-[#fe6612] py-2.5 px-6 text-sm font-bold text-white shadow-xs hover:bg-[#e05508] transition-all disabled:opacity-70 cursor-pointer order-1 sm:order-2"
+                  >
+                    {isSubmittingLead ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Procesando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Descargar ahora</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
