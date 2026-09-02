@@ -81,7 +81,7 @@
 .aurea-landing .benefit:hover{background:rgba(255,255,255,.5)}
 .aurea-landing .icon-wrap{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;margin-bottom:24px}
 .aurea-landing .benefit h3{font-family:"DM Sans";font-size:18px;font-weight:500;letter-spacing:-.02em;margin-bottom:9px}
-.aurea-landing .benefit p{color:var(--muted);line-height:1.55;font-size:13px}
+.aurea-landing .benefit p{color:var(--muted);line-height:1.55;font-size:14px}
 
 .aurea-landing #rituales.section::before{content:'';position:absolute;inset:0;background:url('/aurea-images/signature_bg.png') center bottom/cover no-repeat;opacity:0.25;pointer-events:none;z-index:0}
 .aurea-landing #rituales.section>*{position:relative;z-index:1}
@@ -121,7 +121,7 @@
 .aurea-landing .editorial-feature:hover{background:rgba(255,255,255,.3)}
 .aurea-landing .editorial-feature:last-child{border-right:0}
 .aurea-landing .editorial-feature h3{font-family:"DM Sans";font-weight:500;font-size:15px;margin:12px 0 7px}
-.aurea-landing .editorial-feature p{font-size:12px;line-height:1.5;color:var(--muted)}
+.aurea-landing .editorial-feature p{font-size:13.5px;line-height:1.55;color:var(--muted)}
 
 .aurea-landing .commitment{background:#e9e6dc}
 .aurea-landing .commitment-head{text-align:center;max-width:780px;margin:0 auto 46px}
@@ -135,7 +135,7 @@
 .aurea-landing .commitment-copy{padding:28px;display:flex;flex-direction:column;justify-content:center}
 .aurea-landing .commitment-copy span{font-size:11px;letter-spacing:.12em;color:#62705f;margin-bottom:10px}
 .aurea-landing .commitment-copy h3{font-size:26px;line-height:1.1;margin-bottom:12px}
-.aurea-landing .commitment-copy p{color:var(--muted);line-height:1.6;font-size:13px}
+.aurea-landing .commitment-copy p{color:var(--muted);line-height:1.6;font-size:14.5px}
 
 .aurea-landing .editorial-mosaic{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:start}
 .aurea-landing .mosaic-column{display:flex;flex-direction:column;gap:12px}
@@ -172,7 +172,7 @@
 .aurea-landing .product-card .photo img{width:100%;aspect-ratio:1.05;object-fit:cover}
 .aurea-landing .product-card .meta{padding:15px 3px 0;display:flex;align-items:end;justify-content:space-between;gap:20px}
 .aurea-landing .product-card h3{font-family:"DM Sans",sans-serif;font-weight:600;font-size:17px;margin-bottom:5px;letter-spacing:-.01em}
-.aurea-landing .product-card p{color:var(--muted);font-size:12px;line-height:1.5;max-width:250px}
+.aurea-landing .product-card p{color:var(--muted);font-size:13.5px;line-height:1.5;max-width:260px}
 .aurea-landing .circle-arrow{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;flex:0 0 auto;transition:.3s ease;cursor:pointer;background:transparent}
 .aurea-landing .product-card:hover .circle-arrow{background:var(--accent);color:white;border-color:var(--accent);transform:rotate(-8deg)}
 
@@ -182,10 +182,10 @@
 .aurea-landing .news-form{width:min(620px,100%);margin:0 auto;display:flex;gap:8px;padding:6px;border:1px solid var(--line);background:#fff;border-radius:10px}
 .aurea-landing .news-form input{min-width:0;flex:1;border:0;outline:0;padding:0 12px;background:transparent}
 .aurea-landing .news-benefits{display:grid;grid-template-columns:repeat(4,1fr);max-width:850px;margin:50px auto 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.aurea-landing .news-benefit{padding:22px 14px;border-right:1px solid var(--line);font-size:12px}
+.aurea-landing .news-benefit{padding:22px 14px;border-right:1px solid var(--line);font-size:13px}
 .aurea-landing .news-benefit:last-child{border-right:0}
-.aurea-landing .news-benefit strong{display:block;margin-top:9px;font-size:12px}
-.aurea-landing .news-benefit span{color:var(--muted)}
+.aurea-landing .news-benefit strong{display:block;margin-top:9px;font-size:14.5px;font-weight:600}
+.aurea-landing .news-benefit span{color:var(--muted);font-size:13px;line-height:1.4}
 
 .aurea-landing footer{border-top:1px solid var(--line)}
 .aurea-landing .footer-top{padding:55px 0;display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px}
