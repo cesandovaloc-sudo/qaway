@@ -61,6 +61,7 @@ import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-la
 import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
 import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
 import MesaSelectaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'
+import ValletInmobiliariaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -166,6 +167,22 @@ export default function AppRouter() {
         <Route
           path="/proyectos/mesa-selecta"
           element={renderRoute('proyectos', <MesaSelectaPage />)}
+        />
+        <Route
+          path="/proyectos/vallet-inmobiliaria"
+          element={renderRoute('proyectos', <ValletInmobiliariaPage />)}
+        />
+        <Route
+          path="/proyectos/veller-inmobiliaria"
+          element={renderRoute('proyectos', <ValletInmobiliariaPage />)}
+        />
+        <Route
+          path="/proyectos/vallet"
+          element={renderRoute('proyectos', <ValletInmobiliariaPage />)}
+        />
+        <Route
+          path="/proyectos/veller"
+          element={renderRoute('proyectos', <ValletInmobiliariaPage />)}
         />
         <Route
           path="/proyectos/epc/*"

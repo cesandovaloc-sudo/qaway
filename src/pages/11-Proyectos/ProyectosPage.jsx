@@ -8,6 +8,7 @@ import { supabase } from '@/config/supabase'
 import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
 import mockupTiendasOnline from '../8-landings/8-desarollo web/assets/Tiendas-Online.webp'
+import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max).png'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -440,35 +441,7 @@ export default function ProyectosPage() {
                   isMockup={true}
                 />
 
-                {/* FILA 2 · CASOS APLICADOS & LANZAMIENTOS */}
-                <StaticProjectCard
-                  to="/proyectos/estudio/branding/cafe-brenda-y-ely"
-                  image={`${estudioAssets}estudio-proyecto-cafe.webp`}
-                  tag="Branding & Packaging"
-                  title="Brenda & Ely Café"
-                  desc="Identidad visual, packaging y dirección de arte en clave digital y física para cafetería de especialidad."
-                  delay={0.08}
-                />
-
-                <StaticProjectCard
-                  to="/sistemas-digitales"
-                  image={`${sistemasAssets}content-ops-command-center.webp`}
-                  tag="Automatización & CRM"
-                  title="Centro de Operaciones Digital"
-                  desc="Automatización de flujos de trabajo, conexión de bases de datos y dashboards en tiempo real con agentes IA."
-                  delay={0.24}
-                />
-
-                <StaticProjectCard
-                  to="/estudio"
-                  image={`${estudioAssets}estudio-proyecto-arquitectura.webp`}
-                  tag="Presencia B2B"
-                  title="Arquitectura & Firmas B2B"
-                  desc="Diseño sobrio de alta credibilidad, portafolios de proyectos y canales directos de asesoría profesional."
-                  delay={0.40}
-                />
-
-                {/* FILA 3 · PROYECTOS REALES EN PRODUCCIÓN */}
+                {/* FILA 2 · PROYECTOS REALES EN PRODUCCIÓN */}
                 <StaticProjectCard
                   to="/proyectos/panaderia-josue"
                   image="/josue-images/showcase/3-josue-panaderia-pedidos-contacto-footer.png"
@@ -583,8 +556,10 @@ export default function ProyectosPage() {
               {
                 title: 'E-commerce & Catálogo',
                 desc: 'Checkout fluido y navegación de producto ágil en dispositivos móviles.',
-                image: mockupTiendasOnline,
-                tag: 'Mobile Store'
+                image: mockupAureaSkincare,
+                tag: 'Mobile Store',
+                statusBg: '#FAF7F2',
+                statusColor: '#111111'
               },
               {
                 title: 'Captación Inmobiliaria',
@@ -613,26 +588,51 @@ export default function ProyectosPage() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={{ duration: 0.55, delay: i * 0.1 }}
               >
-                {/* Marco de Teléfono Celular en Gris Titanio Grafito Equilibrado (#52525b) */}
-                <div className="relative w-full max-w-[270px] aspect-[9/18.5] rounded-[36px] border-[7px] border-[#52525b] bg-[#52525b] p-1.5 shadow-[0_20px_45px_rgba(0,0,0,0.08)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_28px_60px_rgba(0,0,0,0.16)]">
-                  {/* Notch / Dynamic Island */}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 h-4 w-20 rounded-full bg-[#52525b]" />
-                  
-                  {/* Pantalla Interna del Celular (Imagen fija sin zoom, solo se eleva el marco) */}
-                  <div className="h-full w-full overflow-hidden rounded-[28px] bg-zinc-100 relative">
-                    <img
-                      src={mockup.image}
-                      alt={mockup.title}
-                      className="h-full w-full object-cover object-top"
-                    />
-                    <div className="absolute top-4 left-3 rounded-full bg-[#52525b]/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
-                      {mockup.tag}
+                {/* Marco de Teléfono Celular Moderno en Titanio Iluminado (Sin botones, con destello metálico) */}
+                <div className="relative w-full max-w-[270px] aspect-[9/18.5] rounded-[34px] bg-gradient-to-tr from-[#18181b] via-[#8e8e93] via-35% to-[#27272a] p-[3.5px] ring-1 ring-white/35 shadow-[0_22px_50px_rgba(0,0,0,0.15),inset_0_1.5px_2px_rgba(255,255,255,0.7),inset_0_-1.5px_2px_rgba(0,0,0,0.8)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_30px_65px_rgba(0,0,0,0.22),inset_0_1.5px_2.5px_rgba(255,255,255,0.85)]">
+                  {/* Pantalla Interna del Celular con Status Bar Integrada */}
+                  <div className="h-full w-full overflow-hidden rounded-[28px] relative flex flex-col" style={{ backgroundColor: mockup.statusBg || '#ffffff' }}>
+                    {/* Barra de estado (Hora, Señal, WiFi, Batería) */}
+                    <div className="h-6 w-full px-4 pt-1 flex items-center justify-between shrink-0 select-none z-10" style={{ backgroundColor: mockup.statusBg || '#ffffff', color: mockup.statusColor || '#111111' }}>
+                      <span className="text-[11px] font-semibold tracking-tight">9:41</span>
+                      <div className="flex items-center gap-1.5 opacity-90">
+                        {/* Señal */}
+                        <svg className="w-3.5 h-2.5" viewBox="0 0 17 11" fill="currentColor">
+                          <rect x="0" y="8" width="2.5" height="3" rx="0.5" />
+                          <rect x="4.5" y="5.5" width="2.5" height="5.5" rx="0.5" />
+                          <rect x="9" y="3" width="2.5" height="8" rx="0.5" />
+                          <rect x="13.5" y="0" width="2.5" height="11" rx="0.5" />
+                        </svg>
+                        {/* WiFi */}
+                        <svg className="w-3.5 h-2.5" viewBox="0 0 16 12" fill="currentColor">
+                          <path d="M8 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm-3.89-3.64a5.5 5.5 0 0 1 7.78 0 .75.75 0 1 0 1.06-1.06 7 7 0 0 0-9.9 0 .75.75 0 0 0 1.06 1.06zm-2.83-2.83a9.5 9.5 0 0 1 13.44 0 .75.75 0 1 0 1.06-1.06 11 11 0 0 0-15.56 0 .75.75 0 1 0 1.06 1.06z" />
+                        </svg>
+                        {/* Batería */}
+                        <div className="flex items-center">
+                          <div className="w-[18px] h-[9px] rounded-[2.5px] border border-current p-[1px] flex items-center">
+                            <div className="h-full w-3/4 bg-current rounded-[1px]" />
+                          </div>
+                          <div className="w-[1.5px] h-[3.5px] bg-current rounded-r-[0.8px]" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Pantalla del sitio web */}
+                    <div className="flex-1 w-full overflow-hidden relative">
+                      <img
+                        src={mockup.image}
+                        alt={mockup.title}
+                        className="h-full w-full object-cover object-top"
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Textos descriptivos debajo del móvil homologados en jerarquía */}
                 <div className="mt-5 text-center px-2 flex flex-col items-center">
+                  <span className="mb-2 rounded-full bg-zinc-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-600">
+                    {mockup.tag}
+                  </span>
                   <h3 className="text-[17px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] group-hover:text-[#fe6612] transition-colors mb-2">
                     {mockup.title}
                   </h3>

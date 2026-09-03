@@ -435,13 +435,15 @@ export default function MarketingStudioPage() {
   const [wizardStep, setWizardStep] = useState(1)
   const [wizardAnswers, setWizardAnswers] = useState({
     name: '',
+    industry: '',
     role: '',
+    companySize: '',
     age: '',
     education: '',
-    industrySize: '',
+    socialNetworks: '',
+    infoSources: '',
     challenge: '',
-    howWeHelp: '',
-    channelsHabits: ''
+    howWeHelp: ''
   })
   const [currentWizardInput, setCurrentWizardInput] = useState('')
 
@@ -593,92 +595,84 @@ export default function MarketingStudioPage() {
       key: 'name',
       label: 'Nombre del buyer persona',
       question: '1. ¿Cómo se llama tu buyer persona?',
-      placeholder: 'Ej. Mauricio Gutiérrez, Carlos Mendoza, Mary Gonzales...',
+      placeholder: 'Ej. Rosario, Mauricio Gutiérrez, Carlos Mendoza...',
       type: 'text',
       minLength: 3
     },
     {
       step: 2,
-      key: 'role',
-      label: 'Puesto o Cargo',
-      question: '2. ¿Cuál es su puesto de trabajo o cargo?',
-      placeholder: 'Ej. Gerente de Auditoría, Dueño de clínica dental, Director Comercial...',
-      type: 'text',
-      minLength: 3
-    },
-    {
-      step: 3,
-      key: 'reportingTo',
-      label: 'Jerarquía / Superior',
-      question: '3. ¿A quién reporta o cuál es su jerarquía en la empresa?',
-      type: 'options',
-      options: [
-        'Propietario / Fundador (Sin superior)',
-        'Dirección General / CEO',
-        'Junta Directiva / Accionistas',
-        'Gerencia de Área',
-        'Cliente Independiente (No aplica)'
-      ],
-      placeholder: 'Selecciona una opción o escribe...',
-      minLength: 3
-    },
-    {
-      step: 4,
-      key: 'age',
-      label: 'Rango de edad',
-      question: '4. ¿Cuál es su rango de edad?',
-      type: 'options',
-      options: ['Entre 18 y 24 años', 'Entre 25 y 34 años', 'Entre 35 y 44 años', 'Entre 45 y 54 años', 'Más de 55 años'],
-      placeholder: 'Selecciona una opción...',
-      minLength: 3
-    },
-    {
-      step: 5,
-      key: 'education',
-      label: 'Nivel educativo',
-      question: '5. ¿Cuál es su nivel de educación más alto?',
-      type: 'options',
-      options: ['Secundaria / Bachillerato', 'Título Técnico', 'Licenciatura Universitaria', 'Maestría / Posgrado', 'Doctorado'],
-      placeholder: 'Selecciona una opción...',
-      minLength: 3
-    },
-    {
-      step: 6,
       key: 'industry',
       label: 'Industria / Rubro',
-      question: '6. ¿En qué industria o sector de actividad trabaja?',
+      question: '2. ¿En qué industria o rubro opera su negocio o actividad?',
       type: 'options',
       options: [
         'Salud, Odontología & Clínicas',
         'Auditoría, Contabilidad & Legal',
         'Tecnología & Software',
         'Comercio, Retail & E-commerce',
+        'Gastronomía & Restaurantes',
         'Consultoría & Servicios B2B'
       ],
       placeholder: 'Selecciona un rubro o escribe el tuyo...',
       minLength: 3
     },
     {
-      step: 7,
-      key: 'companySize',
-      label: 'Tamaño de la organización',
-      question: '7. ¿Cuántas personas o empleados trabajan en su organización?',
+      step: 3,
+      key: 'role',
+      label: 'Puesto o Rol en el negocio',
+      question: '3. ¿Cuál es su rol o relación con el negocio?',
       type: 'options',
       options: [
-        'Independiente (1 persona)',
+        'Dueño(a) / Fundador(a) / Propietario(a)',
+        'Administrador(a) / Gerencia de Operaciones',
+        'Director(a) Comercial / Ventas',
+        'Profesional Independiente / Consultor(a)',
+        'Consumidor Final / Cliente Directo (B2C)'
+      ],
+      placeholder: 'Selecciona una opción o escribe...',
+      minLength: 3
+    },
+    {
+      step: 4,
+      key: 'companySize',
+      label: 'Tamaño de la organización',
+      question: '4. ¿Cuántas personas o empleados trabajan en su organización / negocio?',
+      type: 'options',
+      options: [
+        'Negocio Unipersonal / Independiente (1 persona)',
         'Entre 1 y 10 empleados',
         'Entre 11 y 50 empleados',
         'Entre 51 y 200 empleados',
-        'Más de 200 empleados (Corporación)'
+        'Consumidor Directo / B2C (No aplica)'
       ],
       placeholder: 'Selecciona el rango de tamaño...',
       minLength: 3
     },
     {
-      step: 8,
+      step: 5,
+      key: 'age',
+      label: 'Rango de edad',
+      question: '5. ¿Cuál es su rango de edad?',
+      type: 'options',
+      options: ['Entre 18 y 24 años', 'Entre 25 y 34 años', 'Entre 35 y 44 años', 'Entre 45 y 54 años', 'Más de 55 años'],
+      placeholder: 'Selecciona una opción...',
+      minLength: 3
+    },
+    {
+      step: 6,
+      key: 'education',
+      label: 'Nivel educativo',
+      question: '6. ¿Cuál es su nivel de educación?',
+      type: 'options',
+      options: ['Secundaria', 'Técnico', 'Universitario', 'Maestría / Posgrado', 'Doctorado'],
+      placeholder: 'Selecciona una opción o escribe otro nivel...',
+      minLength: 3
+    },
+    {
+      step: 7,
       key: 'socialNetworks',
       label: 'Canales & Redes Digitales',
-      question: '8. ¿Qué canales y redes sociales utiliza tu cliente? (Puedes marcar varios)',
+      question: '7. ¿Qué canales y redes sociales utiliza tu cliente? (Puedes marcar varios)',
       type: 'multiselect',
       options: [
         'WhatsApp Business',
@@ -692,34 +686,34 @@ export default function MarketingStudioPage() {
       minLength: 2
     },
     {
-      step: 9,
+      step: 8,
       key: 'infoSources',
       label: 'Dónde busca información',
-      question: '9. ¿Cómo y dónde se informa cuando busca soluciones para su trabajo?',
-      type: 'options',
+      question: '8. ¿Cómo y dónde se informa cuando busca soluciones o productos? (Puedes marcar varios)',
+      type: 'multiselect',
       options: [
         'Recomendaciones de colegas y boca a boca',
         'Búsqueda en Google y páginas web',
         'Redes sociales y contenido de expertos',
-        'Eventos, webinars y congresos de su sector'
+        'Eventos, webinars y comunidades'
       ],
-      placeholder: 'Selecciona una opción o escribe...',
-      minLength: 4
+      placeholder: 'Haz clic en las opciones para activar/desactivar o escribe...',
+      minLength: 2
     },
     {
-      step: 10,
+      step: 9,
       key: 'challenge',
       label: 'Puntos de Dolor & Retos',
-      question: '10. ¿Cuál es su mayor dolor, dificultad u obstáculo actual?',
+      question: '9. ¿Cuál es su mayor dolor, dificultad o frustración actual?',
       placeholder: 'Ej. No puede gestionar a su equipo de trabajo, desorden en la base de datos...',
       type: 'text',
       minLength: 4
     },
     {
-      step: 11,
+      step: 10,
       key: 'howWeHelp',
       label: 'Cómo contribuimos a su éxito',
-      question: '11. ¿Cómo tu producto o servicio resuelve este problema específico?',
+      question: '10. ¿Cómo tu producto o servicio resuelve este problema específico?',
       placeholder: 'Ej. Implementación ágil de software y automatización comercial con acompañamiento...',
       type: 'text',
       minLength: 4
@@ -894,7 +888,7 @@ export default function MarketingStudioPage() {
       setActivePersonaId(newId)
       setPersonaCanvasMode('modular-view')
       setWizardStep(1)
-      setWizardAnswers({ name: '', role: '', reportingTo: '', age: '', education: '', industry: '', companySize: '', socialNetworks: '', infoSources: '', challenge: '', howWeHelp: '' })
+      setWizardAnswers({ name: '', industry: '', role: '', companySize: '', age: '', education: '', socialNetworks: '', infoSources: '', challenge: '', howWeHelp: '' })
       setCurrentWizardInput('')
     }, 1000)
   }
@@ -1933,7 +1927,7 @@ export default function MarketingStudioPage() {
                         <div className="space-y-2 pt-1 pb-1">
                           {wizardQuestions[wizardStep - 1].type === 'multiselect' && (
                             <p className="text-xs font-bold text-indigo-600">
-                              Selección múltiple (puedes marcar varios canales):
+                              Selección múltiple (puedes marcar varias opciones):
                             </p>
                           )}
                           <div className="flex flex-wrap gap-2">
@@ -2135,7 +2129,7 @@ export default function MarketingStudioPage() {
 
                     </div>
 
-                    {/* 3-COLUMN MODULAR CARD GRID (LIKE HUBSPOT) */}
+                    {/* 3-COLUMN MODULAR CARD GRID: TUS DATOS REALES */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
                       
                       {/* COLUMN 1: PERFIL GENERAL */}
@@ -2189,7 +2183,7 @@ export default function MarketingStudioPage() {
                             type="text"
                             value={currentPersona.age || ''}
                             onChange={(e) => handleUpdatePersonaField('age', e.target.value)}
-                            placeholder="Ej. Entre 30 y 45 años"
+                            placeholder="Ej. Entre 25 y 34 años"
                             className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
                           />
                         </div>
@@ -2211,29 +2205,7 @@ export default function MarketingStudioPage() {
                             type="text"
                             value={currentPersona.education || ''}
                             onChange={(e) => handleUpdatePersonaField('education', e.target.value)}
-                            placeholder="Ej. Licenciatura universitaria"
-                            className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
-                          />
-                        </div>
-
-                        {/* Card: Canales & Redes donde te descubre */}
-                        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-1 group">
-                          <div
-                            onClick={() => document.getElementById('input-persona-networks')?.focus()}
-                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <Globe className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Redes & Canales donde te descubre</span>
-                            </span>
-                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                          </div>
-                          <input
-                            id="input-persona-networks"
-                            type="text"
-                            value={Array.isArray(currentPersona.socialNetworks) ? currentPersona.socialNetworks.join(', ') : (currentPersona.socialNetworks || '')}
-                            onChange={(e) => handleUpdatePersonaField('socialNetworks', e.target.value.split(',').map(s => s.trim()))}
-                            placeholder="Ej. Instagram, WhatsApp, Facebook, LinkedIn"
+                            placeholder="Ej. Universitario / Técnico"
                             className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
                           />
                         </div>
@@ -2246,7 +2218,7 @@ export default function MarketingStudioPage() {
                           >
                             <span className="flex items-center gap-1.5">
                               <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Industria</span>
+                              <span>Industria / Rubro</span>
                             </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
@@ -2255,7 +2227,7 @@ export default function MarketingStudioPage() {
                             type="text"
                             value={currentPersona.industry || ''}
                             onChange={(e) => handleUpdatePersonaField('industry', e.target.value)}
-                            placeholder="Ej. Tecnología / Servicios"
+                            placeholder="Ej. Salud, Odontología & Clínicas"
                             className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
                           />
                         </div>
@@ -2277,133 +2249,66 @@ export default function MarketingStudioPage() {
                             type="text"
                             value={currentPersona.companySize || ''}
                             onChange={(e) => handleUpdatePersonaField('companySize', e.target.value)}
-                            placeholder="Ej. Entre 11 y 50 empleados"
+                            placeholder="Ej. Entre 1 y 10 empleados"
                             className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
                           />
                         </div>
 
                       </div>
 
-                      {/* COLUMN 2: DETALLES PROFESIONALES */}
+                      {/* COLUMN 2: NEGOCIO & CANALES */}
                       <div className="md:col-span-4 space-y-4">
                         <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
-                          Detalles profesionales
+                          Negocio & Canales
                         </div>
 
-                        {/* Card: Canal favorito de comunicación */}
+                        {/* Card: Puesto o Rol en el negocio */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div
-                            onClick={() => document.getElementById('textarea-persona-commchannels')?.focus()}
+                            onClick={() => document.getElementById('input-persona-role')?.focus()}
                             className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
                           >
                             <span className="flex items-center gap-1.5">
-                              <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Canal favorito de comunicación</span>
-                            </span>
-                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                          </div>
-                          <textarea
-                            id="textarea-persona-commchannels"
-                            rows="2"
-                            value={Array.isArray(currentPersona.commChannels) ? currentPersona.commChannels.join(', ') : (currentPersona.commChannels || '')}
-                            onChange={(e) => handleUpdatePersonaField('commChannels', e.target.value.split(',').map(s => s.trim()))}
-                            placeholder="Ej. WhatsApp Business, Correo electrónico, LinkedIn"
-                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
-                          />
-                        </div>
-
-                        {/* Card: Su superior es */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div
-                            onClick={() => document.getElementById('input-persona-reportingto')?.focus()}
-                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <UserCheck className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Su superior es</span>
+                              <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Puesto o Rol en el negocio</span>
                             </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <input
-                            id="input-persona-reportingto"
+                            id="input-persona-role"
                             type="text"
-                            value={currentPersona.reportingTo || ''}
-                            onChange={(e) => handleUpdatePersonaField('reportingTo', e.target.value)}
-                            placeholder="Ej. Dirección General / CEO"
+                            value={currentPersona.title || currentPersona.roleType || ''}
+                            onChange={(e) => {
+                              handleUpdatePersonaField('title', e.target.value)
+                              handleUpdatePersonaField('roleType', e.target.value)
+                            }}
+                            placeholder="Ej. Dueño(a) / Fundador(a) / Administradora"
                             className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors"
                           />
                         </div>
 
-                        {/* Card: Herramientas que necesita para trabajar */}
+                        {/* Card: Canales & Redes donde te descubre */}
                         <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
                           <div
-                            onClick={() => document.getElementById('textarea-persona-tools')?.focus()}
+                            onClick={() => document.getElementById('input-persona-networks')?.focus()}
                             className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
                           >
                             <span className="flex items-center gap-1.5">
-                              <Wrench className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Herramientas que necesita para trabajar</span>
+                              <Globe className="w-3.5 h-3.5 text-slate-400" />
+                              <span>Redes & Canales donde te descubre</span>
                             </span>
                             <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
                           <textarea
-                            id="textarea-persona-tools"
+                            id="input-persona-networks"
                             rows="2"
-                            value={Array.isArray(currentPersona.tools) ? currentPersona.tools.join(', ') : (currentPersona.tools || '')}
-                            onChange={(e) => handleUpdatePersonaField('tools', e.target.value.split(',').map(s => s.trim()))}
-                            placeholder="Ej. Software de CRM, WhatsApp Web, Gestión de proyectos"
-                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
-                          />
-                        </div>
-
-                      </div>
-
-                      {/* COLUMN 3: OBJETIVOS, DOLORES & CÓMO AYUDAMOS */}
-                      <div className="md:col-span-4 space-y-4">
-                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
-                          Objetivos y Desafíos
-                        </div>
-
-                        {/* Card: Su trabajo se mide en función de */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div
-                            onClick={() => document.getElementById('textarea-persona-kpis')?.focus()}
-                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <Target className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Su trabajo se mide en función de</span>
-                            </span>
-                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                          </div>
-                          <textarea
-                            id="textarea-persona-kpis"
-                            rows="2"
-                            value={Array.isArray(currentPersona.kpis) ? currentPersona.kpis.join(', ') : (currentPersona.kpis || '')}
-                            onChange={(e) => handleUpdatePersonaField('kpis', e.target.value.split(',').map(s => s.trim()))}
-                            placeholder="Ej. Crecimiento de clientes, Conversión de leads"
-                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
-                          />
-                        </div>
-
-                        {/* Card: Dificultades principales (Dolores) */}
-                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
-                          <div
-                            onClick={() => document.getElementById('textarea-persona-pains')?.focus()}
-                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
-                          >
-                            <span className="flex items-center gap-1.5">
-                              <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                              <span>Dificultades principales (Dolores)</span>
-                            </span>
-                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
-                          </div>
-                          <textarea
-                            id="textarea-persona-pains"
-                            rows="3"
-                            value={Array.isArray(currentPersona.pains) ? currentPersona.pains.join('\n') : (currentPersona.pains || '')}
-                            onChange={(e) => handleUpdatePersonaField('pains', e.target.value.split('\n').filter(Boolean))}
-                            placeholder="Escribe cada dolor en una línea..."
+                            value={Array.isArray(currentPersona.socialNetworks) ? currentPersona.socialNetworks.join(', ') : (currentPersona.socialNetworks || '')}
+                            onChange={(e) => {
+                              const arr = e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                              handleUpdatePersonaField('socialNetworks', arr)
+                              handleUpdatePersonaField('commChannels', arr)
+                            }}
+                            placeholder="Ej. WhatsApp Business, Instagram, TikTok"
                             className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
                           />
                         </div>
@@ -2422,68 +2327,63 @@ export default function MarketingStudioPage() {
                           </div>
                           <textarea
                             id="textarea-persona-infosources"
-                            rows="2"
+                            rows="3"
                             value={Array.isArray(currentPersona.infoSources) ? currentPersona.infoSources.join(', ') : (currentPersona.infoSources || '')}
                             onChange={(e) => handleUpdatePersonaField('infoSources', e.target.value.split(',').map(s => s.trim()))}
-                            placeholder="Ej. Investigación en línea, LinkedIn, Recomendaciones"
+                            placeholder="Ej. Recomendaciones de colegas, Búsqueda en Google, Redes sociales"
                             className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
                           />
                         </div>
 
-                        {/* Card: Cómo contribuimos a su éxito */}
-                        <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-sm space-y-3 group">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div
-                              onClick={() => document.getElementById('textarea-persona-howwehelp')?.focus()}
-                              className="flex items-center gap-1.5 text-xs text-emerald-800 font-bold uppercase cursor-pointer"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                              <span>Cómo contribuimos a su éxito</span>
-                            </div>
+                      </div>
 
-                            {/* AI Coproduction Actions */}
-                            <div className="flex items-center gap-1.5 self-end sm:self-auto">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                currentPersona.aiStatus?.howWeHelp === 'approved'
-                                  ? 'bg-emerald-200 text-emerald-900'
-                                  : 'bg-amber-100 text-amber-900'
-                              }`}>
-                                {currentPersona.aiStatus?.howWeHelp === 'approved' ? '✓ Aprobado' : '✨ Propuesta IA'}
-                              </span>
+                      {/* COLUMN 3: DOLORES Y SOLUCIÓN (DATOS REALES DEL USUARIO) */}
+                      <div className="md:col-span-4 space-y-4">
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+                          Dolores & Solución Real
+                        </div>
 
-                              {(currentPersona.aiRegens?.howWeHelp ?? 3) > 0 && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRegenerateBlock(currentPersona.id, 'howWeHelp')}
-                                  className="px-2 py-1 rounded-lg bg-white/80 hover:bg-white text-emerald-900 text-[10px] font-bold border border-emerald-200 shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-                                  title="Replantear propuesta con IA"
-                                >
-                                  <RefreshCw className="w-3 h-3 text-emerald-600" />
-                                  <span>Replantear ({currentPersona.aiRegens?.howWeHelp ?? 3})</span>
-                                </button>
-                              )}
-
-                              {currentPersona.aiStatus?.howWeHelp !== 'approved' && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleApproveBlock(currentPersona.id, 'howWeHelp')}
-                                  className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-                                  title="Aprobar esta versión"
-                                >
-                                  <Check className="w-3 h-3" />
-                                  <span>Aprobar</span>
-                                </button>
-                              )}
-                            </div>
+                        {/* Card: Dificultades principales (Dolores ingresados) */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-pains')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+                              <span>Dificultades principales (Dolores)</span>
+                            </span>
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
                           </div>
+                          <textarea
+                            id="textarea-persona-pains"
+                            rows="3"
+                            value={Array.isArray(currentPersona.pains) ? currentPersona.pains.join('\n') : (currentPersona.pains || '')}
+                            onChange={(e) => handleUpdatePersonaField('pains', e.target.value.split('\n').filter(Boolean))}
+                            placeholder="Escribe cada dolor en una línea..."
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none"
+                          />
+                        </div>
 
+                        {/* Card: Cómo tu servicio resuelve su problema */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm space-y-2 group">
+                          <div
+                            onClick={() => document.getElementById('textarea-persona-howwehelp')?.focus()}
+                            className="flex justify-between items-center text-xs text-slate-400 font-bold cursor-pointer"
+                          >
+                            <span className="flex items-center gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Tu propuesta de solución</span>
+                            </span>
+                            <Edit3 className="w-3.5 h-3.5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                          </div>
                           <textarea
                             id="textarea-persona-howwehelp"
-                            rows="3"
+                            rows="4"
                             value={currentPersona.howWeHelp || ''}
                             onChange={(e) => handleUpdatePersonaField('howWeHelp', e.target.value)}
                             placeholder="Describe cómo tu solución resuelve sus necesidades..."
-                            className="w-full text-xs sm:text-sm font-bold text-emerald-950 bg-transparent border-b border-transparent hover:border-emerald-300 focus:border-emerald-700 focus:outline-none py-0.5 transition-colors resize-none leading-relaxed"
+                            className="w-full text-xs sm:text-sm font-semibold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-600 focus:outline-none py-0.5 transition-colors resize-none leading-relaxed"
                           />
                         </div>
 
@@ -2491,18 +2391,330 @@ export default function MarketingStudioPage() {
 
                     </div>
 
-                    {/* Bottom Add Section Button (Opens Official 5 Slides Presentation) */}
-                    <div className="pt-4 flex justify-center">
-                      <button
-                        onClick={() => {
-                          setViewingExecutivePersona(currentPersona)
-                          setExecutiveSlideTab('demography')
-                        }}
-                        className="w-full max-w-md py-3.5 rounded-2xl bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <FileText className="w-4 h-4 text-emerald-600" />
-                        <span>Ver Presentación Oficial (5 Slides HubSpot)</span>
-                      </button>
+                    {/* =========================================================================
+                        SECCIÓN DE SOLUCIÓN ESTRATÉGICA INTEGRADA (QAWAY STUDIO OS)
+                       ========================================================================= */}
+                    <div className="mt-8 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
+                      
+                      {/* Strategic Suite Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="p-1.5 rounded-xl bg-[#ff4b0b]/10 text-[#ff4b0b]">
+                              <Sparkles className="w-4 h-4" />
+                            </span>
+                            <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900">
+                              Propuesta Estratégica & Solución Comercial con IA
+                            </h3>
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                              Qaway Studio OS
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            Estrategia integral generada a partir de los datos de <strong className="text-slate-800">{currentPersona.name}</strong> ({currentPersona.title || currentPersona.industry}).
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDirectExportPersona(currentPersona)}
+                            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                            title="Descargar reporte ejecutivo"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Exportar Estrategia</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Strategic Navigation Tabs */}
+                      <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-100 no-scrollbar">
+                        {[
+                          { id: 'needs', label: '1. Diagnóstico de Necesidades (3 Dimensiones)', icon: AlertCircle },
+                          { id: 'solution', label: '2. Plan de Acompañamiento (3 Pasos)', icon: CheckCircle2 },
+                          { id: 'diffusion', label: '3. Estrategia de Difusión', icon: Globe },
+                          { id: 'messages', label: '4. Mensajes Clave (Marketing & Ventas)', icon: MessageSquare }
+                        ].map((tab) => {
+                          const isActive = executiveSlideTab === tab.id
+                          const IconComp = tab.icon
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => setExecutiveSlideTab(tab.id)}
+                              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                                isActive
+                                  ? 'bg-slate-900 text-white shadow-xs'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                              }`}
+                            >
+                              <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-[#ff4b0b]' : 'text-slate-400'}`} />
+                              <span>{tab.label}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      {/* Strategic Tab Content */}
+                      <div className="space-y-6 pt-2">
+
+                        {/* TAB 1: DIAGNÓSTICO DE NECESIDADES (3 DIMENSIONES) */}
+                        {executiveSlideTab === 'needs' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                Diagnóstico de Dolores en 3 Dimensiones
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  currentPersona.aiStatus?.dimensions === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {currentPersona.aiStatus?.dimensions === 'approved' ? '✓ Aprobado' : '✨ Propuesta IA'}
+                                </span>
+                                {(currentPersona.aiRegens?.dimensions ?? 3) > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRegenerateBlock(currentPersona.id, 'dimensions')}
+                                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <RefreshCw className="w-3 h-3 text-[#ff4b0b]" />
+                                    <span>Replantear ({currentPersona.aiRegens?.dimensions ?? 3})</span>
+                                  </button>
+                                )}
+                                {currentPersona.aiStatus?.dimensions !== 'approved' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveBlock(currentPersona.id, 'dimensions')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Aprobar</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {/* Dolor Externo */}
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                                  <span>1. Dolor Externo (Operativo)</span>
+                                </div>
+                                <textarea
+                                  rows="3"
+                                  value={currentPersona.dimensions?.external || (Array.isArray(currentPersona.pains) ? currentPersona.pains[0] : currentPersona.pains) || ''}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, dimensions: { ...(p.dimensions || {}), external: e.target.value } } : p))}
+                                  placeholder="¿Qué problema operativo visible enfrenta?"
+                                  className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                                <p className="text-[10px] text-slate-400">El problema tangible que afecta sus ventas o procesos diarios.</p>
+                              </div>
+
+                              {/* Dolor Interno */}
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                  <span>2. Dolor Interno (Frustración)</span>
+                                </div>
+                                <textarea
+                                  rows="3"
+                                  value={currentPersona.dimensions?.internal || ''}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, dimensions: { ...(p.dimensions || {}), internal: e.target.value } } : p))}
+                                  placeholder="¿Cómo se siente internamente frente a este obstáculo?"
+                                  className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                                <p className="text-[10px] text-slate-400">La emoción, estrés o desgaste que le genera no solucionarlo.</p>
+                              </div>
+
+                              {/* Dolor Filosófico */}
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                  <span>3. Dolor Filosófico (Convicción)</span>
+                                </div>
+                                <textarea
+                                  rows="3"
+                                  value={currentPersona.dimensions?.philosophical || ''}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, dimensions: { ...(p.dimensions || {}), philosophical: e.target.value } } : p))}
+                                  placeholder="¿Por qué es injusto que ocurra esto en su rubro?"
+                                  className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                                <p className="text-[10px] text-slate-400">Lo que considera inaceptable que ocurra con la tecnología actual.</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* TAB 2: PLAN DE SOLUCIÓN (3 PASOS) */}
+                        {executiveSlideTab === 'solution' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                Plan de Acompañamiento en 3 Pasos
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  currentPersona.aiStatus?.guidePlan === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {currentPersona.aiStatus?.guidePlan === 'approved' ? '✓ Aprobado' : '✨ Propuesta IA'}
+                                </span>
+                                {(currentPersona.aiRegens?.guidePlan ?? 3) > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRegenerateBlock(currentPersona.id, 'guidePlan')}
+                                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <RefreshCw className="w-3 h-3 text-[#ff4b0b]" />
+                                    <span>Replantear ({currentPersona.aiRegens?.guidePlan ?? 3})</span>
+                                  </button>
+                                )}
+                                {currentPersona.aiStatus?.guidePlan !== 'approved' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveBlock(currentPersona.id, 'guidePlan')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Aprobar</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {(currentPersona.guidePlan?.actionSteps || [
+                                '1. Diagnóstico de procesos actuales',
+                                '2. Configuración y despliegue ágil',
+                                '3. Capacitación y soporte continuo'
+                              ]).map((stepText, sIdx) => (
+                                <div key={sIdx} className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#ff4b0b]">
+                                    <span>Paso {sIdx + 1}</span>
+                                  </div>
+                                  <textarea
+                                    rows="3"
+                                    value={stepText}
+                                    onChange={(e) => {
+                                      const updatedSteps = [...(currentPersona.guidePlan?.actionSteps || [])]
+                                      updatedSteps[sIdx] = e.target.value
+                                      setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, guidePlan: { ...(p.guidePlan || {}), actionSteps: updatedSteps } } : p))
+                                    }}
+                                    className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* TAB 3: ESTRATEGIA DE DIFUSIÓN */}
+                        {executiveSlideTab === 'diffusion' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                Canales & Formatos Recomendados
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                <span className="text-xs font-bold text-slate-700 block">Canales Digitales Activos:</span>
+                                <div className="flex flex-wrap gap-2">
+                                  {(Array.isArray(currentPersona.socialNetworks) ? currentPersona.socialNetworks : [currentPersona.socialNetworks || 'WhatsApp']).map((net, nIdx) => (
+                                    <span key={nIdx} className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs">
+                                      {net}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                                <span className="text-xs font-bold text-slate-700 block">Frase / Cita de Convicción:</span>
+                                <textarea
+                                  rows="3"
+                                  value={currentPersona.habits?.quote || '“Buscamos soluciones que realmente nos den tranquilidad y resultados.”'}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, habits: { ...(p.habits || {}), quote: e.target.value } } : p))}
+                                  className="w-full text-xs font-semibold italic text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* TAB 4: MENSAJES CLAVE (MARKETING & VENTAS) */}
+                        {executiveSlideTab === 'messages' && (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                                Guiones de Atracción (Marketing) y Cierre (Ventas)
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  currentPersona.aiStatus?.messages === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {currentPersona.aiStatus?.messages === 'approved' ? '✓ Aprobado' : '✨ Propuesta IA'}
+                                </span>
+                                {(currentPersona.aiRegens?.messages ?? 3) > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRegenerateBlock(currentPersona.id, 'messages')}
+                                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <RefreshCw className="w-3 h-3 text-[#ff4b0b]" />
+                                    <span>Replantear ({currentPersona.aiRegens?.messages ?? 3})</span>
+                                  </button>
+                                )}
+                                {currentPersona.aiStatus?.messages !== 'approved' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveBlock(currentPersona.id, 'messages')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Aprobar</span>
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Copy de Marketing */}
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-700">
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                  <span>Mensaje de Marketing (Anuncios & Web)</span>
+                                </div>
+                                <textarea
+                                  rows="4"
+                                  value={currentPersona.keyMessages?.marketing || ''}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, keyMessages: { ...(p.keyMessages || {}), marketing: e.target.value } } : p))}
+                                  placeholder="Escribe el copy de atracción..."
+                                  className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                              </div>
+
+                              {/* Argumento de Ventas */}
+                              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 group hover:bg-white hover:border-slate-300 transition-all">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700">
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  <span>Argumento de Cierre (Ventas & WhatsApp)</span>
+                                </div>
+                                <textarea
+                                  rows="4"
+                                  value={currentPersona.keyMessages?.sales || ''}
+                                  onChange={(e) => setPersonas(prev => prev.map(p => p.id === currentPersona.id ? { ...p, keyMessages: { ...(p.keyMessages || {}), sales: e.target.value } } : p))}
+                                  placeholder="Escribe el argumento de cierre..."
+                                  className="w-full text-xs font-semibold text-slate-800 bg-transparent border-none focus:outline-none resize-none leading-relaxed"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                      </div>
+
                     </div>
 
                   </div>
