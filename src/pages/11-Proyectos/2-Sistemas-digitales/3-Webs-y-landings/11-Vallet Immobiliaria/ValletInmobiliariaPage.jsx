@@ -5,11 +5,13 @@ import {
   Phone, Ruler, ShieldCheck, X, BadgeCheck, CalendarDays, FileText, Handshake, House, KeyRound, MapPin, Search, Users, WalletCards
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
+import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
 import { valletProperties } from './valletPropertiesData';
 import './vallet-inmobiliaria.css';
 
 // Assets locales
-import logo from './vallet-web/src/assets/vallet-logo.png';
+import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
+import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
 import heroImage from './hero.png';
 import consultationImage from './vallet-web/src/assets/consultation-interior.jpg';
 import contactImage from './vallet-web/src/assets/contact-interior.jpg';
@@ -133,7 +135,16 @@ export default function ValletInmobiliariaPage() {
 
   const submit = (event) => {
     event.preventDefault();
+    const formData = new FormData(event.target);
+    const name = formData.get('name') || '';
+    const phone = formData.get('phone') || '';
+    const email = formData.get('email') || '';
+    const need = formData.get('need') || formData.get('message') || 'Asesoría inmobiliaria';
+
+    const msg = `Hola Qaway Lab, vi la demo del ecosistema inmobiliario Vallet.\n\n*Datos de contacto:*\n• Nombre: ${name}\n• Teléfono: ${phone}\n• Correo: ${email}\n• Interés: ${need}\n\nMe gustaría cotizar una solución digital similar para mi negocio.`;
+
     setSubmitted(true);
+    window.open(`https://wa.me/51930756781?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const handleScrollToTop = (e) => {
@@ -151,6 +162,7 @@ export default function ValletInmobiliariaPage() {
         description="Te acompañamos en la compra, venta o alquiler de propiedades en Lima con total transparencia, seguridad y atención directa."
         canonical="https://qawaylab.com/proyectos/vallet-inmobiliaria"
       />
+      <DemoFloatingBadge backTo="/proyectos" brand="Qaway Lab" label="Demo interactiva" threshold={100} />
       <header className="site-header">
         <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
@@ -191,7 +203,12 @@ export default function ValletInmobiliariaPage() {
                 ))}
               </div>
               <div className="hero-actions">
-                <a className="button button-outline" href="https://wa.me/51987654321" target="_blank" rel="noreferrer">
+                <a
+                  className="button button-outline"
+                  href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20estoy%20viendo%20el%20proyecto%20Vallet%20Inmobiliaria%20y%20quiero%20cotizar%20un%20sitio%20web%20para%20mi%20empresa."
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <MessageCircle size={19}/> Habla con un asesor
                 </a>
                 <a className="text-link" href="#servicios">Conocer más <ArrowRight size={18}/></a>
@@ -315,10 +332,15 @@ export default function ValletInmobiliariaPage() {
               <h2>Hablemos de tu próxima<br/>propiedad o inversión.</h2>
               <p>Déjanos tus datos o escríbenos directamente. Estamos para ayudarte.</p>
               <div className="cta-row">
-                <a className="button button-dark" href="https://wa.me/51987654321" target="_blank" rel="noreferrer">
+                <a
+                  className="button button-dark"
+                  href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20quiero%20cotizar%20un%20ecosistema%20digital%20como%20el%20de%20Vallet%20Inmobiliaria."
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   <MessageCircle size={18}/> Escríbenos por WhatsApp
                 </a>
-                <a className="button button-outline-dark" href="tel:+51987654321">
+                <a className="button button-outline-dark" href="tel:+51930756781">
                   <Phone size={18}/> Llámanos ahora
                 </a>
               </div>
@@ -366,7 +388,7 @@ export default function ValletInmobiliariaPage() {
       <footer className="footer">
         <div className="container footer-grid">
           <div>
-            <img src={logo} alt="Vallet" className="footer-logo"/>
+            <img src={logoWhite} alt="Vallet" className="footer-logo"/>
             <p>Te acompañamos en la compra, venta o alquiler de propiedades con total transparencia, seguridad y atención directa.</p>
             <div className="socials">
               <a href="#" aria-label="Facebook"><Facebook size={18}/></a>
