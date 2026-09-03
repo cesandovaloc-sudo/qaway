@@ -148,8 +148,16 @@ export default function AureaSkincarePage() {
     ["Colección","#coleccion"],["Sobre nosotros","#filosofia"],["Ingredientes","#ingredientes"],["Rituales","#rituales"],["Beneficios","#beneficios"]
   ], []);
 
+  const handleScrollToTop = (e) => {
+    if (e) e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  };
+
   return (
-    <div className="aurea-landing">
+    <div className="aurea-landing" id="inicio">
       <SEO
         title="Auréa | Skincare Botánico Consciente & Fórmulas Puras"
         description="Descubre Auréa: cosmética botánica y fórmulas conscientes elaboradas con extractos puros, vitamina C estabilizada y aceites regeneradores para una piel luminosa y equilibrada."
@@ -158,7 +166,7 @@ export default function AureaSkincarePage() {
       />
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
-          <a className="brand" href="#inicio" aria-label="Auréa inicio">
+          <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio">
             <span className="brand-mark"><Leaf strokeWidth={1.4}/></span>
             <span className="brand-copy"><strong>AURÉA</strong><small>Skincare botánico</small></span>
           </a>
@@ -179,7 +187,7 @@ export default function AureaSkincarePage() {
         </div>
       </header>
 
-      <main id="inicio">
+      <main>
         <section className="hero">
           <div className="container">
             <Reveal>
@@ -593,7 +601,7 @@ export default function AureaSkincarePage() {
       <footer className="footer">
         <div className="container footer-top">
           <div className="footer-brand">
-            <a className="brand" href="#inicio" aria-label="Auréa inicio"><span className="brand-mark"><Leaf strokeWidth={1.4}/></span><span className="brand-copy"><strong>AURÉA</strong><small>Skincare botánico</small></span></a>
+            <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio"><span className="brand-mark"><Leaf strokeWidth={1.4}/></span><span className="brand-copy"><strong>AURÉA</strong><small>Skincare botánico</small></span></a>
             <p>Ingredientes reales, fórmulas conscientes y rituales simples para una piel saludable y luminosa.</p>
           </div>
           <div className="footer-col"><h4>Explorar</h4><a href="#coleccion">Colección</a><a href="#rituales">Rituales</a><a href="#ingredientes">Ingredientes</a><a href="#filosofia">Nuestra historia</a></div>
