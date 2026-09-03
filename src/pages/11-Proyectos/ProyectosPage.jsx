@@ -413,9 +413,9 @@ export default function ProyectosPage() {
             <div className="pt-6 pb-12">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
                 
-                {/* FILA 1 · FORMATOS WEB CORE */}
+                {/* FILA 1 · FORMATOS WEB Y PROYECTOS TERMINADOS */}
                 <StaticProjectCard
-                  to="/landings/desarrollo-web"
+                  to="/proyectos/vallet-inmobiliaria"
                   image={mockupLandingPages}
                   title="Landing Pages de Captación"
                   desc="Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp."
@@ -424,40 +424,31 @@ export default function ProyectosPage() {
                 />
 
                 <StaticProjectCard
-                  to="/landings/desarrollo-web"
-                  image={mockupSitiosWeb}
-                  title="Sitios Web Corporativos"
-                  desc="Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales."
+                  to="/proyectos/aurea-skincare"
+                  image="/aurea-images/showcase/1-aurea-skincare-showcase.png"
+                  title="Tiendas Online (E-commerce)"
+                  desc="E-commerce con catálogo interactivo de productos, carrito de compras integrado y diseño editorial de alta conversión."
                   delay={0.24}
                   isMockup={true}
                 />
 
                 <StaticProjectCard
-                  to="/landings/desarrollo-web"
-                  image={mockupTiendasOnline}
-                  title="Tiendas Online (E-commerce)"
-                  desc="Plataforma completa de ventas con catálogo autogestionable, carrito de compras y pasarelas de pago para vender 24/7."
+                  to="/proyectos/panaderia-josue"
+                  image="/josue-images/showcase/1-josue-panaderia-hero-productos.png"
+                  title="Sitios Web One Page"
+                  desc="Sitios web de una sola página, pedidos directos por WhatsApp y presencia local."
                   delay={0.40}
                   isMockup={true}
                 />
 
-                {/* FILA 2 · PROYECTOS REALES EN PRODUCCIÓN */}
+                {/* FILA 2 · OTROS FORMATOS Y PROYECTOS EN PRODUCCIÓN */}
                 <StaticProjectCard
-                  to="/proyectos/panaderia-josue"
-                  image="/josue-images/showcase/3-josue-panaderia-pedidos-contacto-footer.png"
-                  tag="E-commerce & Web"
-                  title="Josué Panadería"
-                  desc="Sitio web y catálogo digital de panadería artesanal, pedidos directos por WhatsApp y presencia de marca local."
+                  to="/landings/desarrollo-web"
+                  image={mockupSitiosWeb}
+                  title="Sitios Web Corporativos"
+                  desc="Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales."
                   delay={0.08}
-                />
-
-                <StaticProjectCard
-                  to="/proyectos/aurea-skincare"
-                  image="/aurea-images/showcase/1-aurea-skincare-showcase.png"
-                  tag="Tienda Online"
-                  title="Áurea Skincare"
-                  desc="E-commerce de cosmética botánica con catálogo dinámico de productos, carrito de compras y diseño editorial."
-                  delay={0.24}
+                  isMockup={true}
                 />
 
                 <StaticProjectCard
@@ -466,6 +457,15 @@ export default function ProyectosPage() {
                   tag="Landing Page"
                   title="Plantora Paisajismo"
                   desc="Landing page de alta conversión para proyectos botánicos, arquitectura de paisaje y captación de clientes."
+                  delay={0.24}
+                />
+
+                <StaticProjectCard
+                  to="/proyectos/saniclick"
+                  image="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85"
+                  tag="Servicios & Catálogo"
+                  title="Saniclick Servicios"
+                  desc="Plataforma de servicios de mantenimiento, cotizaciones inmediatas y gestión de citas directas."
                   delay={0.40}
                 />
 
@@ -497,35 +497,37 @@ export default function ProyectosPage() {
       </section>
 
       {/* ========================================================================= */}
-      {/* BLOQUE 3: PROYECTOS EN MOVIMIENTO (1 FILA DE 2 COLUMNAS CON VIDEO REAL) */}
+      {/* BLOQUE 3: PROYECTOS EN MOVIMIENTO (OCULTO TEMPORALMENTE HASTA TENER VIDEOS) */}
       {/* ========================================================================= */}
-      <section className="bg-[#fafaf9] py-18 sm:py-24 border-b border-black/6">
-        <div className="projects-shell">
-          
-          {/* Encabezado divisor de sección (Estilo Desarrollo Web, 100% Centrado) */}
-          <motion.div
-            className="text-center max-w-2xl mx-auto pb-12"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
-          >
-            <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#111111] tracking-[-0.03em] leading-[1.18] mb-3.5">
-              Proyectos en funcionamiento
-            </h2>
-            <p className="text-[#71717a] text-[15px] sm:text-[16px] leading-[1.55] max-w-[620px] mx-auto">
-              Plataformas vivas, interacción en tiempo real y sistemas desplegados para marcas en producción.
-            </p>
-          </motion.div>
+      {false && (
+        <section className="bg-[#fafaf9] py-18 sm:py-24 border-b border-black/6">
+          <div className="projects-shell">
+            
+            {/* Encabezado divisor de sección (Estilo Desarrollo Web, 100% Centrado) */}
+            <motion.div
+              className="text-center max-w-2xl mx-auto pb-12"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] }}
+            >
+              <h2 className="text-[clamp(1.9rem,3.2vw,2.6rem)] font-bold text-[#111111] tracking-[-0.03em] leading-[1.18] mb-3.5">
+                Proyectos en funcionamiento
+              </h2>
+              <p className="text-[#71717a] text-[15px] sm:text-[16px] leading-[1.55] max-w-[620px] mx-auto">
+                Plataformas vivas, interacción en tiempo real y sistemas desplegados para marcas en producción.
+              </p>
+            </motion.div>
 
-          {/* Grilla de 2 columnas para videos amplios */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
-            {visibleProjects.map((project, index) => (
-              <ProjectCard key={project.title} project={project} index={index} />
-            ))}
+            {/* Grilla de 2 columnas para videos amplios */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
+              {visibleProjects.map((project, index) => (
+                <ProjectCard key={project.title} project={project} index={index} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ========================================================================= */}
       {/* BLOQUE 4: SEPARADOR EDITORIAL (100% CENTRADO ESTILO DESARROLLO WEB) */}
