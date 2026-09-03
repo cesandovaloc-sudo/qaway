@@ -266,7 +266,7 @@ function Hero() {
       />
 
       <div className="relative mx-auto grid min-h-[calc(100dvh-5rem)] max-w-[96rem] lg:grid-cols-[1.08fr_1.05fr_.55fr]">
-        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:py-10 lg:px-10 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
+        <div className="relative flex flex-col justify-center bg-white px-6 py-10 sm:px-12 lg:min-h-[28rem] lg:justify-center lg:py-12 lg:pl-14 lg:pr-10 xl:pl-16 xl:pr-12 before:pointer-events-none before:absolute before:inset-y-0 before:right-full before:w-[50vw] before:bg-white before:content-['']">
           <motion.div
             initial={reduceMotion ? false : 'hidden'}
             animate={reduceMotion ? undefined : 'show'}
@@ -278,7 +278,7 @@ function Hero() {
               Marcas, Automatización y formación con IA
             </p>
             <h1
-              className="max-w-[58rem] qw-hero-title text-[#20201f]"
+              className="max-w-[54rem] text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.92] text-[#20201f]"
               style={{ ...displayFont, fontWeight: 760 }}
             >
               <span className="block">Construimos marcas, sistemas y <span className="text-[#fe6612]">formamos con&nbsp;IA.</span></span>

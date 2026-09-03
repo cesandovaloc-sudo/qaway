@@ -62,6 +62,8 @@ import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-la
 import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
 import MesaSelectaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'
 import ValletInmobiliariaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'
+import ValletPropertyDetailPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletPropertyDetailPage'
+import ValletCatalogPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletCatalogPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
@@ -179,6 +181,22 @@ export default function AppRouter() {
         <Route
           path="/proyectos/vallet"
           element={renderRoute('proyectos', <ValletInmobiliariaPage />)}
+        />
+        <Route
+          path="/proyectos/vallet/propiedades"
+          element={renderRoute('proyectos', <ValletCatalogPage />)}
+        />
+        <Route
+          path="/proyectos/vallet-inmobiliaria/propiedades"
+          element={renderRoute('proyectos', <ValletCatalogPage />)}
+        />
+        <Route
+          path="/proyectos/vallet/propiedad/:slug"
+          element={renderRoute('proyectos', <ValletPropertyDetailPage />)}
+        />
+        <Route
+          path="/proyectos/vallet-inmobiliaria/propiedad/:slug"
+          element={renderRoute('proyectos', <ValletPropertyDetailPage />)}
         />
         <Route
           path="/proyectos/veller"

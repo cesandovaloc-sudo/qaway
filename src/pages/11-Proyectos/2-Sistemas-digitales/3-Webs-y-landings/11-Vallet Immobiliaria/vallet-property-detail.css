@@ -1,0 +1,922 @@
+/* Vallet Property Detail Page Styles */
+
+.vallet-property-detail-page {
+  background: var(--paper, #f8f6f2);
+  color: var(--ink, #082e34);
+  min-height: 100vh;
+}
+
+.vallet-property-detail-page .property-detail-main {
+  padding-block: 28px 72px;
+}
+
+.vallet-property-detail-page .header-nav-back {
+  display: flex;
+  align-items: center;
+}
+
+.vallet-property-detail-page .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--teal, #002f35);
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: rgba(0, 47, 53, 0.05);
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .back-link:hover {
+  background: rgba(0, 47, 53, 0.1);
+  color: var(--orange, #f45116);
+}
+
+/* Top Bar: Breadcrumbs & Actions */
+.vallet-property-detail-page .detail-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.vallet-property-detail-page .detail-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #6b777a;
+}
+
+.vallet-property-detail-page .detail-breadcrumbs a {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.vallet-property-detail-page .detail-breadcrumbs a:hover {
+  color: var(--orange, #f45116);
+}
+
+.vallet-property-detail-page .detail-breadcrumbs .current {
+  color: var(--ink, #082e34);
+  font-weight: 600;
+  max-width: 380px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vallet-property-detail-page .detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vallet-property-detail-page .action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border: 1px solid #e0dbd1;
+  background: #fff;
+  border-radius: 6px;
+  color: var(--ink, #082e34);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .action-btn:hover {
+  border-color: var(--orange, #f45116);
+  color: var(--orange, #f45116);
+}
+
+.vallet-property-detail-page .action-btn.saved {
+  border-color: var(--orange, #f45116);
+  color: var(--orange, #f45116);
+}
+
+/* Title & Header Block */
+.vallet-property-detail-page .detail-header-block {
+  margin-bottom: 24px;
+}
+
+.vallet-property-detail-page .detail-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.vallet-property-detail-page .verified-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #e6f6f1;
+  color: #0d7a5b;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.vallet-property-detail-page .detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.5vw, 42px);
+  line-height: 1.15;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .detail-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #556265;
+}
+
+.vallet-property-detail-page .meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vallet-property-detail-page .meta-sep {
+  color: #b0b8b9;
+}
+
+/* Mosaic Photo Grid (Airbnb + Boutique Style) */
+.vallet-property-detail-page .property-mosaic-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  height: 480px;
+  margin-bottom: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.vallet-property-detail-page .mosaic-main-photo {
+  position: relative;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.vallet-property-detail-page .mosaic-main-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.vallet-property-detail-page .mosaic-main-photo:hover img {
+  transform: scale(1.02);
+}
+
+.vallet-property-detail-page .mosaic-sub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  height: 100%;
+}
+
+.vallet-property-detail-page .mosaic-sub-photo {
+  position: relative;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.vallet-property-detail-page .mosaic-sub-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.vallet-property-detail-page .mosaic-sub-photo:hover img {
+  transform: scale(1.03);
+}
+
+.vallet-property-detail-page .photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.vallet-property-detail-page .mosaic-main-photo:hover .photo-overlay,
+.vallet-property-detail-page .mosaic-sub-photo:hover .photo-overlay {
+  opacity: 1;
+}
+
+.vallet-property-detail-page .photo-overlay span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 30px;
+  background: rgba(0, 40, 46, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.vallet-property-detail-page .view-all-photos-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal, #002f35);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.vallet-property-detail-page .view-all-photos-btn:hover {
+  background: var(--teal, #002f35);
+  color: #fff;
+  border-color: var(--teal, #002f35);
+}
+
+/* 2-Column Content Layout */
+.vallet-property-detail-page .property-content-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 60px;
+  align-items: start;
+}
+
+/* Spec Chips Row */
+.vallet-property-detail-page .property-spec-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.vallet-property-detail-page .spec-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #fffdfb;
+  border: 1px solid #e8e3d9;
+  border-radius: 10px;
+}
+
+.vallet-property-detail-page .spec-chip svg {
+  color: var(--orange, #f45116);
+  flex-shrink: 0;
+}
+
+.vallet-property-detail-page .spec-chip strong {
+  display: block;
+  font-size: 14px;
+  color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .spec-chip span {
+  font-size: 12px;
+  color: #728082;
+}
+
+/* Agent Banner */
+.vallet-property-detail-page .agent-card-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+  background: #fffdfb;
+  border: 1px solid #e8e3d9;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.vallet-property-detail-page .agent-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--teal, #002f35);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.vallet-property-detail-page .agent-info {
+  flex: 1;
+}
+
+.vallet-property-detail-page .agent-info h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.vallet-property-detail-page .agent-info p {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  color: #617073;
+}
+
+.vallet-property-detail-page .response-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0d7a5b;
+}
+
+.vallet-property-detail-page .agent-contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #eaf7f2;
+  color: #086b4f;
+  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .agent-contact-link:hover {
+  background: #0d7a5b;
+  color: #fff;
+}
+
+.vallet-property-detail-page .detail-divider {
+  border: 0;
+  border-top: 1px solid #e6e1d6;
+  margin: 32px 0;
+}
+
+/* Highlights */
+.vallet-property-detail-page .detail-highlights-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.vallet-property-detail-page .highlight-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.vallet-property-detail-page .highlight-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(244, 81, 22, 0.1);
+  color: var(--orange, #f45116);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.vallet-property-detail-page .highlight-row h4 {
+  margin: 0 0 2px;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .highlight-row p {
+  margin: 0;
+  font-size: 14px;
+  color: #5c696c;
+}
+
+/* Description */
+.vallet-property-detail-page .detail-description-section h3,
+.vallet-property-detail-page .detail-spaces-section h3,
+.vallet-property-detail-page .detail-amenities-section h3,
+.vallet-property-detail-page .detail-schedule-section h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .section-subtext {
+  margin: -6px 0 20px;
+  font-size: 14px;
+  color: #6a7779;
+}
+
+.vallet-property-detail-page .description-paragraphs p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #3b484b;
+  margin: 0 0 14px;
+}
+
+/* Spaces Breakdown */
+.vallet-property-detail-page .spaces-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.vallet-property-detail-page .space-card {
+  background: #fff;
+  border: 1px solid #e8e3d9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.vallet-property-detail-page .space-image {
+  height: 140px;
+  overflow: hidden;
+}
+
+.vallet-property-detail-page .space-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vallet-property-detail-page .space-details {
+  padding: 14px 16px;
+}
+
+.vallet-property-detail-page .space-details h4 {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.vallet-property-detail-page .space-details p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #6a7779;
+  line-height: 1.4;
+}
+
+/* Amenities Grid */
+.vallet-property-detail-page .amenities-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.vallet-property-detail-page .amenity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14.5px;
+  color: #334346;
+}
+
+.vallet-property-detail-page .amenity-check {
+  color: var(--orange, #f45116);
+  flex-shrink: 0;
+}
+
+/* Schedule / Visit Booking */
+.vallet-property-detail-page .visit-type-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.vallet-property-detail-page .visit-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid #dcd5c9;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink, #082e34);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .visit-tab.active {
+  background: var(--teal, #002f35);
+  color: #fff;
+  border-color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .schedule-form-inline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.vallet-property-detail-page .schedule-field label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--teal, #002f35);
+}
+
+.vallet-property-detail-page .schedule-field input[type="date"] {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #dcd5c9;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--ink, #082e34);
+  outline: none;
+}
+
+.vallet-property-detail-page .time-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.vallet-property-detail-page .time-pill {
+  flex: 1;
+  height: 44px;
+  border: 1px solid #dcd5c9;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4a5c5f;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .time-pill.active {
+  background: rgba(244, 81, 22, 0.1);
+  border-color: var(--orange, #f45116);
+  color: var(--orange, #f45116);
+}
+
+.vallet-property-detail-page .schedule-cta-btn {
+  width: 100%;
+  height: 48px;
+  background: var(--teal, #002f35);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.vallet-property-detail-page .schedule-cta-btn:hover {
+  background: #001f23;
+}
+
+/* Sticky Sidebar Column */
+.vallet-property-detail-page .sticky-booking-card {
+  position: sticky;
+  top: 102px;
+  background: #fff;
+  border: 1px solid #e2ddd3;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+}
+
+.vallet-property-detail-page .booking-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #ede8df;
+}
+
+.vallet-property-detail-page .price-main {
+  display: block;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--teal, #002f35);
+  letter-spacing: -0.02em;
+}
+
+.vallet-property-detail-page .price-label {
+  font-size: 12.5px;
+  color: #728082;
+}
+
+.vallet-property-detail-page .booking-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #fdf6ec;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.vallet-property-detail-page .booking-selector-box {
+  border: 1px solid #dcd5c9;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.vallet-property-detail-page .selector-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid #dcd5c9;
+}
+
+.vallet-property-detail-page .selector-half {
+  padding: 10px 12px;
+}
+
+.vallet-property-detail-page .selector-half:first-child {
+  border-right: 1px solid #dcd5c9;
+}
+
+.vallet-property-detail-page .selector-full {
+  padding: 10px 12px;
+}
+
+.vallet-property-detail-page .box-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #8c9799;
+  margin-bottom: 2px;
+}
+
+.vallet-property-detail-page .booking-submit-btn {
+  width: 100%;
+  height: 52px;
+  background: var(--orange, #f45116);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(244, 81, 22, 0.35);
+}
+
+.vallet-property-detail-page .booking-submit-btn:hover {
+  background: #d63f09;
+  transform: translateY(-1px);
+}
+
+.vallet-property-detail-page .booking-notice {
+  text-align: center;
+  font-size: 12px;
+  color: #7b888a;
+  margin: 12px 0 20px;
+}
+
+.vallet-property-detail-page .booking-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #ede8df;
+  margin-bottom: 20px;
+}
+
+.vallet-property-detail-page .breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #556265;
+}
+
+.vallet-property-detail-page .breakdown-row.highlight {
+  color: var(--teal, #002f35);
+  font-weight: 700;
+}
+
+.vallet-property-detail-page .booking-guarantee-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #f0f7f5;
+  border-radius: 8px;
+  color: #0b674d;
+}
+
+.vallet-property-detail-page .booking-guarantee-badge svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vallet-property-detail-page .booking-guarantee-badge strong {
+  display: block;
+  font-size: 13px;
+}
+
+.vallet-property-detail-page .booking-guarantee-badge p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Fullscreen Modal Gallery */
+.vallet-property-detail-page .gallery-fullscreen-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(10, 25, 28, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 30px;
+  color: #fff;
+}
+
+.vallet-property-detail-page .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px;
+}
+
+.vallet-property-detail-page .modal-counter {
+  font-size: 15px;
+  color: #d1dbdc;
+}
+
+.vallet-property-detail-page .modal-close-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 0;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.vallet-property-detail-page .modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.vallet-property-detail-page .modal-body-viewer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  padding: 10px 0;
+}
+
+.vallet-property-detail-page .modal-image-stage {
+  max-width: 86vw;
+  max-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vallet-property-detail-page .modal-image-stage img {
+  max-width: 100%;
+  max-height: 68vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.vallet-property-detail-page .modal-nav-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 0;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+.vallet-property-detail-page .modal-nav-btn:hover {
+  background: var(--orange, #f45116);
+  transform: scale(1.08);
+}
+
+.vallet-property-detail-page .modal-thumbnails-strip {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  height: 70px;
+  overflow-x: auto;
+  padding-top: 10px;
+}
+
+.vallet-property-detail-page .thumb-btn {
+  width: 80px;
+  height: 54px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.vallet-property-detail-page .thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vallet-property-detail-page .thumb-btn.active {
+  opacity: 1;
+  border-color: var(--orange, #f45116);
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .vallet-property-detail-page .property-content-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .vallet-property-detail-page .property-mosaic-grid {
+    height: 380px;
+  }
+  .vallet-property-detail-page .property-spec-chips {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .vallet-property-detail-page .sticky-booking-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .vallet-property-detail-page .property-mosaic-grid {
+    grid-template-columns: 1fr;
+    height: 280px;
+  }
+  .vallet-property-detail-page .mosaic-sub-grid {
+    display: none;
+  }
+  .vallet-property-detail-page .spaces-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .vallet-property-detail-page .schedule-form-inline {
+    grid-template-columns: 1fr;
+  }
+  .vallet-property-detail-page .amenities-grid {
+    grid-template-columns: 1fr;
+  }
+}

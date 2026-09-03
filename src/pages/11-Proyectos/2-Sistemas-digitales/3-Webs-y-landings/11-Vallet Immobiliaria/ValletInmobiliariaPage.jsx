@@ -1,25 +1,98 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
-  ArrowRight, BedDouble, Building2, ChevronDown, Facebook, Instagram, Linkedin, Mail, Menu, MessageCircle,
+  ArrowRight, BedDouble, Building2, ChevronDown, ChevronLeft, ChevronRight, Facebook, Instagram, Linkedin, Mail, Menu, MessageCircle,
   Phone, Ruler, ShieldCheck, X, BadgeCheck, CalendarDays, FileText, Handshake, House, KeyRound, MapPin, Search, Users, WalletCards
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
+import { valletProperties } from './valletPropertiesData';
 import './vallet-inmobiliaria.css';
 
 // Assets locales
 import logo from './vallet-web/src/assets/vallet-logo.png';
-import heroImage from './vallet-web/src/assets/hero-interior.jpg';
+import heroImage from './hero.png';
 import consultationImage from './vallet-web/src/assets/consultation-interior.jpg';
 import contactImage from './vallet-web/src/assets/contact-interior.jpg';
-import miraflores from './vallet-web/src/assets/property-miraflores.jpg';
-import sanIsidro from './vallet-web/src/assets/property-san-isidro.jpg';
-import laMolina from './vallet-web/src/assets/property-la-molina.jpg';
 
-const properties = [
-  { type: 'VENTA', title: 'Departamento en Miraflores', location: 'Miraflores, Lima', bedrooms: 2, bathrooms: 2, area: '90 m²', price: 'S/ 680,000', image: miraflores },
-  { type: 'ALQUILER', title: 'Departamento en San Isidro', location: 'San Isidro, Lima', bedrooms: 3, bathrooms: 2, area: '120 m²', price: 'S/ 4,500 / mes', image: sanIsidro },
-  { type: 'VENTA', title: 'Casa en La Molina', location: 'La Molina, Lima', bedrooms: 4, bathrooms: 3, area: '250 m²', price: 'S/ 1,250,000', image: laMolina },
-];
+function PropertyImageCarousel({ images, alt, type, slug }) {
+  const imageList = Array.isArray(images) && images.length > 0 ? images : [images].filter(Boolean);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % imageList.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [imageList.length, currentIndex]);
+
+  const handlePrev = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev - 1 + imageList.length) % imageList.length);
+  };
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % imageList.length);
+  };
+
+  const handleDotClick = (e, idx) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex(idx);
+  };
+
+  return (
+    <div className="property-image">
+      {imageList.map((img, idx) => (
+        <img
+          key={idx}
+          src={img}
+          alt={`${alt} vista ${idx + 1}`}
+          className={`property-carousel-slide ${idx === currentIndex ? 'active' : ''}`}
+          loading="lazy"
+        />
+      ))}
+      <span className={`tag ${type === 'ALQUILER' ? 'tag-rent' : ''}`}>{type}</span>
+
+      {imageList.length > 1 && (
+        <>
+          <button
+            type="button"
+            className="property-carousel-btn property-carousel-prev"
+            onClick={handlePrev}
+            aria-label="Foto anterior"
+          >
+            <ChevronLeft size={16} strokeWidth={2.4} />
+          </button>
+          <button
+            type="button"
+            className="property-carousel-btn property-carousel-next"
+            onClick={handleNext}
+            aria-label="Siguiente foto"
+          >
+            <ChevronRight size={16} strokeWidth={2.4} />
+          </button>
+          <div className="property-carousel-dots" aria-label="Navegación de fotos">
+            {imageList.map((_, idx) => (
+              <button
+                type="button"
+                key={idx}
+                onClick={(e) => handleDotClick(e, idx)}
+                className={`property-carousel-dot ${idx === currentIndex ? 'active' : ''}`}
+                aria-label={`Ir a foto ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+const properties = valletProperties;
 
 const benefits = [
   { icon: ShieldCheck, title: 'Compra segura', body: 'Te acompañamos en todo el proceso para que inviertas con tranquilidad.' },
@@ -149,17 +222,22 @@ export default function ValletInmobiliariaPage() {
           <div className="container">
             <div className="section-top">
               <h2>Propiedades <strong>destacadas</strong></h2>
-              <a href="#contacto">Ver todas las propiedades <ArrowRight size={17}/></a>
+              <Link to="/proyectos/vallet/propiedades">Ver todas las propiedades <ArrowRight size={17}/></Link>
             </div>
             <div className="property-grid">
               {properties.map((property) => (
                 <article className="property-card" key={property.title}>
-                  <div className="property-image">
-                    <img src={property.image} alt={property.title}/>
-                    <span className={`tag ${property.type === 'ALQUILER' ? 'tag-rent' : ''}`}>{property.type}</span>
-                  </div>
+                  <PropertyImageCarousel
+                    images={property.images || property.image}
+                    alt={property.title}
+                    type={property.type}
+                  />
                   <div className="property-body">
-                    <h3>{property.title}</h3>
+                    <h3>
+                      <Link to={`/proyectos/vallet/propiedad/${property.slug}`}>
+                        {property.title}
+                      </Link>
+                    </h3>
                     <p className="location">⌖ {property.location}</p>
                     <div className="property-meta">
                       <span><BedDouble size={15}/> {property.bedrooms}</span>
@@ -168,7 +246,9 @@ export default function ValletInmobiliariaPage() {
                     </div>
                     <div className="property-bottom">
                       <strong>{property.price}</strong>
-                      <a href="#contacto">Ver detalles <ArrowRight size={16}/></a>
+                      <Link to={`/proyectos/vallet/propiedad/${property.slug}`} className="property-detail-btn">
+                        Ver detalles <ArrowRight size={16}/>
+                      </Link>
                     </div>
                   </div>
                 </article>
