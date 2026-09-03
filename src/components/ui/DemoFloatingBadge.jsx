@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Sparkles, ExternalLink } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export default function DemoFloatingBadge({
   backTo = '/proyectos',
@@ -31,33 +31,33 @@ export default function DemoFloatingBadge({
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
+          initial={{ opacity: 0, x: -35 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -40 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed left-0 top-28 sm:top-36 z-50 pointer-events-auto"
+          exit={{ opacity: 0, x: -35 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed left-0 top-24 sm:top-32 z-50 pointer-events-auto"
         >
-          {/* Banner Lateral Adherido al Margen Izquierdo */}
-          <div className="group relative flex flex-col gap-2 rounded-r-2xl border-y border-r border-white/20 bg-[#051c20]/90 py-3.5 pl-4 pr-5 shadow-[0_18px_45px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all duration-300 hover:border-[#fe6612]/60 hover:bg-[#051c20] hover:shadow-[0_20px_50px_rgba(254,102,18,0.25)]">
+          {/* Banner Lateral en Cristal Blanco Translúcido (Light Frosted Glass) */}
+          <div className="group relative flex flex-col gap-2 rounded-r-2xl border-y border-r border-black/10 bg-white/80 py-3 pl-4 pr-5 shadow-[0_12px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-[#fe6612]/50 hover:bg-white/95 hover:shadow-[0_16px_36px_rgba(254,102,18,0.16)]">
             
-            {/* 1. Cabecera: Marca + Punto Pulsante de Estado */}
-            <div className="flex items-center gap-2.5">
+            {/* 1. Cabecera: Marca + Punto Pulsante */}
+            <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#fe6612] opacity-75"></span>
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[#fe6612]"></span>
               </span>
-              <span className="font-mono text-[10px] font-bold tracking-widest text-[#fe6612] uppercase">
+              <span className="font-mono text-[10.5px] font-bold tracking-wider text-[#fe6612] uppercase">
                 {brand}
               </span>
-              <span className="text-[10px] text-white/40">|</span>
-              <span className="text-[11px] font-medium text-white/70">
+              <span className="text-[10px] text-zinc-300">|</span>
+              <span className="text-[11px] font-medium text-zinc-500">
                 {sublabel}
               </span>
             </div>
 
-            {/* 2. Cuerpo del Banner con Título */}
-            <div className="pr-1">
-              <p className="text-[13px] font-semibold text-white/95 leading-tight">
+            {/* 2. Título de la Maqueta */}
+            <div>
+              <p className="text-[13px] font-semibold text-zinc-900 leading-none">
                 {label}
               </p>
             </div>
@@ -66,14 +66,14 @@ export default function DemoFloatingBadge({
             <Link
               to={backTo}
               aria-label="Volver al catálogo de proyectos de Qaway Lab"
-              className="mt-1 inline-flex items-center gap-2 rounded-lg bg-white/10 px-2.5 py-1.5 text-[11.5px] font-medium text-white transition-all duration-200 hover:bg-[#fe6612] hover:text-white"
+              className="mt-0.5 inline-flex items-center gap-2 rounded-lg bg-zinc-900/[0.05] px-2.5 py-1.5 text-[11.5px] font-semibold text-zinc-700 transition-all duration-200 hover:bg-[#fe6612] hover:text-white"
             >
               <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5" strokeWidth={2.4} />
-              <span>Volver al catálogo</span>
+              <span>Volver a proyectos</span>
             </Link>
 
-            {/* Acento lateral decorativo */}
-            <div className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r bg-[#fe6612]" />
+            {/* Acento lateral naranja en el borde izquierdo */}
+            <div className="absolute left-0 top-2.5 bottom-2.5 w-[3.5px] rounded-r bg-[#fe6612]" />
           </div>
         </motion.div>
       )}
