@@ -35,18 +35,18 @@ export default function DemoFloatingBadge({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -35 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed left-0 top-24 sm:top-32 z-50 pointer-events-auto"
+          className="fixed left-0 top-[86px] sm:top-[90px] z-50 pointer-events-auto"
         >
-          {/* Banner Lateral en Cristal Blanco Translúcido (Light Frosted Glass) */}
-          <div className="group relative flex flex-col gap-2 rounded-r-2xl border-y border-r border-black/10 bg-white/80 py-3 pl-4 pr-5 shadow-[0_12px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl transition-all duration-300 hover:border-[#fe6612]/50 hover:bg-white/95 hover:shadow-[0_16px_36px_rgba(254,102,18,0.16)]">
+          {/* Banner Lateral Minimalista en Escala de Grises y Cristal Blanco */}
+          <div className="group relative flex flex-col gap-2 rounded-r-2xl border-y border-r border-black/10 bg-white/85 py-3 pl-4 pr-5 shadow-[0_10px_28px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-black/20 hover:bg-white/95 hover:shadow-[0_14px_32px_rgba(0,0,0,0.1)]">
             
-            {/* 1. Cabecera: Marca + Punto Pulsante */}
+            {/* 1. Cabecera: Marca + Punto Pulsante en Escala de Grises */}
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#fe6612] opacity-75"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#fe6612]"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-400 opacity-60"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-zinc-600"></span>
               </span>
-              <span className="font-mono text-[10.5px] font-bold tracking-wider text-[#fe6612] uppercase">
+              <span className="font-mono text-[10.5px] font-bold tracking-wider text-zinc-800 uppercase">
                 {brand}
               </span>
               <span className="text-[10px] text-zinc-300">|</span>
@@ -66,14 +66,14 @@ export default function DemoFloatingBadge({
             <Link
               to={backTo}
               aria-label="Volver al catálogo de proyectos de Qaway Lab"
-              className="mt-0.5 inline-flex items-center gap-2 rounded-lg bg-zinc-900/[0.05] px-2.5 py-1.5 text-[11.5px] font-semibold text-zinc-700 transition-all duration-200 hover:bg-[#fe6612] hover:text-white"
+              className="mt-0.5 inline-flex items-center gap-2 rounded-lg bg-zinc-900/[0.06] px-2.5 py-1.5 text-[11.5px] font-semibold text-zinc-700 transition-all duration-200 hover:bg-zinc-900 hover:text-white"
             >
               <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5" strokeWidth={2.4} />
               <span>Volver a proyectos</span>
             </Link>
 
-            {/* Acento lateral naranja en el borde izquierdo */}
-            <div className="absolute left-0 top-2.5 bottom-2.5 w-[3.5px] rounded-r bg-[#fe6612]" />
+            {/* Acento lateral sutil en escala de grises */}
+            <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r bg-zinc-400 group-hover:bg-zinc-700 transition-colors duration-200" />
           </div>
         </motion.div>
       )}
