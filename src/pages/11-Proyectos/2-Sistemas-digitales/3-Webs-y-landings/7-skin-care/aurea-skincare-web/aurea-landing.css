@@ -277,19 +277,20 @@
   .aurea-landing .section{padding:54px 0}
   .aurea-landing .section.section-benefits{padding:24px 0}
   .aurea-landing .nav-inner{min-height:66px}
-  .aurea-landing .nav-actions .signin{display:none}
+  .aurea-landing .nav-actions .signin,
+  .aurea-landing .nav-actions .btn{display:none}
   
-  /* Hero Móvil Optimizado - Réplica fiel a Imagen 2 (BIEN) */
+  /* Hero Móvil: orden flex correcto (Texto arriba -> Foto con Overlay abajo) */
   .aurea-landing .hero{padding:10px 0 16px}
-  .aurea-landing .hero-stage{position:relative;border-radius:20px;overflow:hidden;background:transparent;max-height:none}
-  .aurea-landing .hero-stage-content{position:relative;top:0;left:0;right:0;max-width:100%;margin-bottom:20px;padding:0 4px}
-  .aurea-landing .hero h1{font-size:clamp(28px,7.5vw,36px);line-height:1.06;letter-spacing:-.02em}
+  .aurea-landing .hero-stage{display:flex;flex-direction:column;position:relative;border-radius:20px;background:transparent;max-height:none;overflow:visible}
+  .aurea-landing .hero-stage-content{order:1;position:relative;top:0;left:0;right:0;max-width:100%;margin-bottom:18px;padding:0 2px}
+  .aurea-landing .hero h1{font-size:clamp(30px,8vw,38px);line-height:1.05;letter-spacing:-.025em}
   .aurea-landing .hero-subtext{display:block;font-size:14px;color:var(--muted);margin-top:8px;line-height:1.45;max-width:100%}
-  .aurea-landing .hero-stage-bg{width:100%;height:clamp(420px,118vw,520px);object-fit:cover;object-position:50% 45%;border-radius:20px;margin-top:0;display:block}
+  .aurea-landing .hero-stage-bg{order:2;width:100%;height:clamp(400px,110vw,480px);object-fit:cover;object-position:50% 35%;border-radius:20px;margin-top:0;display:block}
   .aurea-landing .hero-stage .hero-pill{display:none}
-  .aurea-landing .hero-overlay{position:absolute;left:12px;right:12px;bottom:12px;width:auto;padding:14px 16px;gap:10px;border-radius:12px;background:rgba(255,255,255,.55);backdrop-filter:blur(14px)}
-  .aurea-landing .hero-overlay .overlay-desc{font-size:12.5px;line-height:1.45}
-  .aurea-landing .overlay-cta{font-size:12px;padding:7px 14px}
+  .aurea-landing .hero-overlay{position:absolute;left:12px;right:12px;bottom:12px;width:auto;padding:16px 18px;gap:10px;border-radius:14px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px)}
+  .aurea-landing .hero-overlay .overlay-desc{font-size:13px;line-height:1.45;color:var(--ink)}
+  .aurea-landing .overlay-cta{font-size:12.5px;padding:8px 16px}
   .aurea-landing .hero-badge{display:none}
 
   /* Secciones Adaptadas sin desbordes laterales */
