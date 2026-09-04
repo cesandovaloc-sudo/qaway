@@ -5,10 +5,8 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function DemoFloatingBadge({
   backTo = '/proyectos',
-  label = 'Demo interactiva',
-  brand = 'QAWAY LAB',
-  sublabel = 'Proyecto en vivo',
-  threshold = 80
+  label = 'Volver a proyectos',
+  threshold = 140
 }) {
   const [visible, setVisible] = useState(false);
 
@@ -31,50 +29,30 @@ export default function DemoFloatingBadge({
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, x: -35 }}
+          initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -35 }}
+          exit={{ opacity: 0, x: -30 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed left-0 top-[86px] sm:top-[90px] z-50 pointer-events-auto"
+          className="fixed left-0 top-24 sm:top-28 z-50 pointer-events-auto"
         >
-          {/* Banner Lateral Minimalista en Cristal Blanco */}
-          <div className="group relative flex flex-col gap-2 rounded-r-2xl border-y border-r border-black/10 bg-white/85 py-3 pl-4 pr-5 shadow-[0_10px_28px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 hover:border-black/18 hover:bg-white/95 hover:shadow-[0_14px_32px_rgba(0,0,0,0.09)]">
-            
-            {/* 1. Cabecera: Marca + Punto Pulsante */}
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-400 opacity-60"></span>
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-zinc-500"></span>
-              </span>
-              <span className="font-mono text-[10.5px] font-bold tracking-wider text-zinc-700 uppercase">
-                {brand}
-              </span>
-              <span className="text-[10px] text-zinc-300">|</span>
-              <span className="text-[11px] font-medium text-zinc-500">
-                {sublabel}
-              </span>
-            </div>
+          <Link
+            to={backTo}
+            aria-label="Volver al catálogo de proyectos"
+            className="group relative flex items-center gap-2.5 rounded-r-full border-y border-r border-black/10 bg-white/80 py-2.5 pl-3 pr-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] max-w-[42px] hover:max-w-[210px] overflow-hidden hover:bg-[#fffbf8] hover:border-[#fe6612]/30 hover:pr-4 hover:shadow-[0_8px_24px_rgba(254,102,18,0.12)]"
+          >
+            {/* 1. Icono de flecha siempre visible en la pared */}
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center text-zinc-600 transition-colors duration-200 group-hover:text-[#fe6612] group-hover:-translate-x-0.5">
+              <ArrowLeft className="h-4 w-4" strokeWidth={2.4} />
+            </span>
 
-            {/* 2. Título de la Maqueta */}
-            <div>
-              <p className="text-[13px] font-semibold text-zinc-800 leading-none">
-                {label}
-              </p>
-            </div>
+            {/* 2. Texto que se revela suavemente solo en hover */}
+            <span className="whitespace-nowrap text-[12px] font-semibold text-zinc-700 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-[#fe6612]">
+              {label}
+            </span>
 
-            {/* 3. Botón de Retorno con Grises Suaves y Texto Siempre Legible */}
-            <Link
-              to={backTo}
-              aria-label="Volver al catálogo de proyectos de Qaway Lab"
-              className="mt-0.5 inline-flex items-center gap-2 rounded-lg border border-black/[0.06] bg-black/[0.04] px-2.5 py-1.5 text-[11.5px] font-semibold !text-zinc-700 transition-all duration-200 hover:border-black/15 hover:bg-black/[0.09] hover:!text-zinc-950"
-            >
-              <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5 !text-zinc-600 hover:!text-zinc-950" strokeWidth={2.4} />
-              <span className="!text-inherit">Volver a proyectos</span>
-            </Link>
-
-            {/* Acento lateral sutil en escala de grises */}
-            <div className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r bg-zinc-300 group-hover:bg-zinc-500 transition-colors duration-200" />
-          </div>
+            {/* Acento lateral sutil */}
+            <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] rounded-r bg-zinc-300 transition-colors duration-200 group-hover:bg-[#fe6612]" />
+          </Link>
         </motion.div>
       )}
     </AnimatePresence>
