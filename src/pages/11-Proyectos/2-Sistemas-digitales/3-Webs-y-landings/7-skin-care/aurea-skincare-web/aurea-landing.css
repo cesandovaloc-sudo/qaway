@@ -337,49 +337,52 @@
   .aurea-cart-toast{right:16px;left:16px;bottom:16px;justify-content:center}
   
   /* Floating Studio Dock (Mobile) */
-  .aurea-dock-container{left:12px;right:12px;bottom:12px;transform:none;width:auto}
-  .aurea-studio-dock{flex-direction:column;align-items:stretch;gap:12px;padding:14px 16px;border-radius:18px}
+  .aurea-dock-container{left:12px;right:12px;bottom:16px;transform:none;width:auto}
+  .aurea-studio-dock{flex-direction:column;align-items:stretch;gap:14px;padding:16px 18px;border-radius:20px}
+  .aurea-studio-dock .dock-back-pill{width:fit-content}
   .aurea-studio-dock .dock-brand-info{align-items:flex-start}
-  .aurea-studio-dock .dock-actions{width:100%;justify-content:space-between}
-  .aurea-studio-dock .dock-cta-btn{flex:1;justify-content:center}
+  .aurea-studio-dock .dock-text{font-size:14.5px}
+  .aurea-studio-dock .dock-copyright-note{font-size:11.5px}
+  .aurea-studio-dock .dock-actions{width:100%}
+  .aurea-studio-dock .dock-cta-btn{width:100%;justify-content:center;padding:12px 20px;font-size:14px}
 }
 
-/* --- Floating Studio Dock (White Glass Minimal) --- */
+/* --- Floating Studio Dock (White Glass Minimal - Refined & Spacious) --- */
 .aurea-dock-container{
   position:fixed;
-  bottom:22px;
+  bottom:34px;
   left:50%;
   transform:translateX(-50%);
   z-index:990;
   pointer-events:none;
   width:max-content;
-  max-width:calc(100vw - 32px);
+  max-width:calc(100vw - 36px);
 }
 .aurea-studio-dock.glass-white{
   pointer-events:auto;
   display:flex;
   align-items:center;
-  gap:18px;
-  padding:8px 10px 8px 12px;
-  background:rgba(255,255,255,0.84);
+  gap:24px;
+  padding:10px 14px 10px 16px;
+  background:rgba(255,255,255,0.88);
   color:#182219;
-  border:1px solid rgba(24,34,25,0.10);
+  border:1px solid rgba(24,34,25,0.11);
   border-radius:999px;
-  backdrop-filter:blur(24px);
-  -webkit-backdrop-filter:blur(24px);
-  box-shadow:0 16px 40px rgba(24,34,25,0.10), 0 2px 10px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.8) inset;
+  backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+  box-shadow:0 20px 50px rgba(24,34,25,0.12), 0 4px 14px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.85) inset;
 }
 .aurea-studio-dock .dock-back-pill{
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  font-size:12px;
+  gap:8px;
+  font-size:13px;
   font-weight:600;
-  color:#2c382d;
+  color:#273528;
   background:rgba(24,34,25,0.06);
-  padding:7px 14px;
+  padding:9px 18px;
   border-radius:999px;
-  border:1px solid rgba(24,34,25,0.08);
+  border:1px solid rgba(24,34,25,0.09);
   transition:all .22s cubic-bezier(.16,1,.3,1);
   white-space:nowrap;
   text-decoration:none;
@@ -388,24 +391,26 @@
   background:#182219;
   color:#ffffff;
   border-color:#182219;
-  transform:translateX(-2px);
-  box-shadow:0 4px 12px rgba(24,34,25,0.15);
+  transform:translateX(-3px);
+  box-shadow:0 6px 16px rgba(24,34,25,0.18);
 }
 .aurea-studio-dock .dock-brand-info{
   display:flex;
   flex-direction:column;
-  gap:2px;
+  gap:3px;
+  padding-right:6px;
 }
 .aurea-studio-dock .dock-text{
-  font-size:13px;
+  font-size:15px;
   font-weight:500;
-  line-height:1.35;
+  line-height:1.38;
   color:#182219;
   margin:0;
+  letter-spacing:-.01em;
 }
 .aurea-studio-dock .dock-copyright-note{
-  font-size:10.5px;
-  color:#737e74;
+  font-size:11.5px;
+  color:#6c796d;
   letter-spacing:.02em;
 }
 .aurea-studio-dock .dock-actions{
@@ -416,56 +421,20 @@
 .aurea-studio-dock .dock-cta-btn{
   display:inline-flex;
   align-items:center;
-  gap:7px;
+  gap:9px;
   background:#182219;
   color:#ffffff !important;
-  font-size:12.5px;
+  font-size:14px;
   font-weight:600;
-  padding:8px 18px;
+  padding:10px 24px;
   border-radius:999px;
   text-decoration:none;
-  box-shadow:0 4px 14px rgba(24,34,25,0.18);
+  box-shadow:0 6px 18px rgba(24,34,25,0.22);
   transition:all .25s cubic-bezier(.16,1,.3,1);
   white-space:nowrap;
 }
 .aurea-studio-dock .dock-cta-btn:hover{
-  background:#2e4430;
-  transform:translateY(-1px);
-  box-shadow:0 8px 20px rgba(24,34,25,0.25);
-}
-.aurea-studio-dock .dock-icon-btn{
-  display:grid;
-  place-items:center;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  background:rgba(24,34,25,0.05);
-  border:0;
-  color:#637064;
-  cursor:pointer;
-  transition:all .2s ease;
-}
-.aurea-studio-dock .dock-icon-btn:hover{
-  background:rgba(24,34,25,0.12);
-  color:#182219;
-}
-.aurea-dock-pill-trigger.glass-white{
-  pointer-events:auto;
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(255,255,255,0.88);
-  color:#182219;
-  font-size:12px;
-  font-weight:600;
-  padding:8px 16px;
-  border-radius:999px;
-  border:1px solid rgba(24,34,25,0.12);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  box-shadow:0 8px 24px rgba(24,34,25,0.10), 0 0 0 1px rgba(255,255,255,0.8) inset;
-  cursor:pointer;
-}
-.aurea-dock-pill-trigger .dock-sparkle-icon{
-  color:#c49738;
+  background:#29402b;
+  transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(24,34,25,0.30);
 }
