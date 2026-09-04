@@ -177,6 +177,7 @@
   border-radius: 16px;
   overflow: hidden;
   height: 480px;
+  padding: 0;
   margin-bottom: 32px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 }
