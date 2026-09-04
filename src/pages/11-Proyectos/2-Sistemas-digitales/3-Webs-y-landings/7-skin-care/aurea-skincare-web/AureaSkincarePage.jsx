@@ -5,6 +5,7 @@ import {
   Sparkles, Sun, Droplets, Heart, X, ShoppingBag
 } from "lucide-react";
 import SEO from "@/components/seo/SEO";
+import AureaFloatingStudioDock from "@/components/studio/AureaFloatingStudioDock";
 import "./aurea-landing.css";
 
 const InstagramIcon = ({ size = 15, style = {} }) => (
@@ -638,6 +639,9 @@ export default function AureaSkincarePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Studio Floating Dock Qaway Lab */}
+      <AureaFloatingStudioDock />
     </div>
   );
 }

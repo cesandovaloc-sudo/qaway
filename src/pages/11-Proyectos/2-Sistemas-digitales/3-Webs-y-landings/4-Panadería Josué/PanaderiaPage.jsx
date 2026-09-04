@@ -12,6 +12,7 @@ import { Testimonials } from './components/Testimonials.jsx';
 import { SpecialOrder } from './components/SpecialOrder.jsx';
 import { Contact } from './components/Contact.jsx';
 import { Footer } from './components/Footer.jsx';
+import JosueStudioSignature from '@/components/studio/JosueStudioSignature.jsx';
 import { site } from './data/site.js';
 
 const siteUrl = "https://josuepanaderia.pe";
@@ -86,6 +87,7 @@ export default function PanaderiaPage() {
         <Testimonials />
         <SpecialOrder />
         <Contact />
+        <JosueStudioSignature />
       </main>
       <Footer />
     </div>

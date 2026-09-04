@@ -335,4 +335,124 @@
   .aurea-landing .footer-bottom{flex-direction:column;align-items:flex-start;gap:12px;padding:20px 0 28px}
   .aurea-landing .footer-bottom .big-brand{font-size:42px}
   .aurea-cart-toast{right:16px;left:16px;bottom:16px;justify-content:center}
+  
+  /* Floating Studio Dock (Mobile) */
+  .aurea-dock-container{left:14px;right:14px;bottom:14px;transform:none;width:auto}
+  .aurea-studio-dock{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:14px}
+  .aurea-studio-dock .dock-actions{width:100%;justify-content:space-between}
+  .aurea-studio-dock .dock-cta-btn{flex:1;justify-content:center}
+}
+
+/* --- Floating Studio Dock (Desktop & Global) --- */
+.aurea-dock-container{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:990;
+  pointer-events:none;
+  width:max-content;
+  max-width:calc(100vw - 32px);
+}
+.aurea-studio-dock{
+  pointer-events:auto;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:10px 14px 10px 18px;
+  background:rgba(24,34,25,0.92);
+  color:#faf8f2;
+  border:1px solid rgba(255,255,255,0.16);
+  border-radius:999px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-shadow:0 14px 38px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.06);
+}
+.aurea-studio-dock .dock-brand-info{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.aurea-studio-dock .dock-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  background:rgba(223,228,215,0.18);
+  color:#dfe4d7;
+  padding:4px 9px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.aurea-studio-dock .dock-sparkle-icon{
+  color:#e4ba7a;
+}
+.aurea-studio-dock .dock-text{
+  font-size:13px;
+  line-height:1.4;
+  color:rgba(250,248,242,0.9);
+  margin:0;
+}
+.aurea-studio-dock .dock-text strong{
+  color:#ffffff;
+  font-family:"DM Serif Display",serif;
+  letter-spacing:.02em;
+}
+.aurea-studio-dock .dock-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.aurea-studio-dock .dock-cta-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:#dfe4d7;
+  color:#182219;
+  font-size:12.5px;
+  font-weight:600;
+  padding:8px 16px;
+  border-radius:999px;
+  transition:all .25s cubic-bezier(.16,1,.3,1);
+  white-space:nowrap;
+}
+.aurea-studio-dock .dock-cta-btn:hover{
+  background:#ffffff;
+  transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(255,255,255,0.25);
+}
+.aurea-studio-dock .dock-icon-btn{
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  border:0;
+  color:rgba(255,255,255,0.7);
+  cursor:pointer;
+  transition:all .2s ease;
+}
+.aurea-studio-dock .dock-icon-btn:hover{
+  background:rgba(255,255,255,0.2);
+  color:#ffffff;
+}
+.aurea-dock-pill-trigger{
+  pointer-events:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(24,34,25,0.92);
+  color:#dfe4d7;
+  font-size:12px;
+  font-weight:600;
+  padding:8px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(16px);
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  cursor:pointer;
 }
