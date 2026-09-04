@@ -7,29 +7,20 @@ export default function ValletExitIntentModal() {
   const [hasTriggered, setHasTriggered] = useState(false);
 
   useEffect(() => {
-    // Verificar si ya se mostró en esta sesión
-    const alreadyShown = sessionStorage.getItem('vallet_exit_modal_shown');
-    if (alreadyShown) {
-      setHasTriggered(true);
-      return;
-    }
-
-    // 1. Detección de Exit-Intent en Desktop (cursor saliendo por arriba)
+    // 1. Detección de Exit-Intent en Desktop (cursor saliendo por la parte superior hacia las pestañas)
     const handleMouseLeave = (e) => {
-      if (e.clientY <= 12 && !hasTriggered) {
+      if (e.clientY <= 10 && !hasTriggered) {
         setIsOpen(true);
         setHasTriggered(true);
-        sessionStorage.setItem('vallet_exit_modal_shown', 'true');
       }
     };
 
-    // 2. Detección por Scroll Profundo (85% de la página)
+    // 2. Detección por Scroll Profundo (cuando llega al final de la página > 85%)
     const handleScroll = () => {
       const scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
       if (scrollPercent > 0.85 && !hasTriggered) {
         setIsOpen(true);
         setHasTriggered(true);
-        sessionStorage.setItem('vallet_exit_modal_shown', 'true');
       }
     };
 
