@@ -7,6 +7,7 @@ import {
 import SEO from '@/components/seo/SEO';
 import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
 import { valletProperties } from './valletPropertiesData';
+import { useValletReveal } from './useValletReveal';
 import './vallet-inmobiliaria.css';
 
 // Assets locales
@@ -134,6 +135,8 @@ export default function ValletInmobiliariaPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  useValletReveal();
+
   const submit = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -174,7 +177,7 @@ export default function ValletInmobiliariaPage() {
           priceRange: 'S/ 2,000 - S/ 15,000',
         }}
       />
-      <DemoFloatingBadge backTo="/proyectos" brand="Qaway Lab" label="Demo interactiva" threshold={100} />
+      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={100} />
       <header className="site-header">
         <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
@@ -205,8 +208,8 @@ export default function ValletInmobiliariaPage() {
                   ['Propiedades', 'verificadas', 'building'],
                   ['Acompañamiento', 'integral', 'shield'],
                   ['Confidencialidad', 'y confianza', 'user']
-                ].map(([a,b,c]) => (
-                  <div className="hero-point" key={c}>
+                ].map(([a,b,c], idx) => (
+                  <div className={`hero-point vallet-reveal reveal-delay-${idx + 1}`} key={c}>
                     <span className="point-icon">
                       {c === 'building' ? <Building2/> : c === 'shield' ? <ShieldCheck/> : c === 'user' ? <ShieldCheck/> : <MessageCircle/>}
                     </span>
@@ -234,8 +237,8 @@ export default function ValletInmobiliariaPage() {
           <div className="container">
             <SectionHeading title={<>Te ayudamos a tomar las <strong>mejores decisiones</strong></>} />
             <div className="benefit-grid">
-              {benefits.map(({icon: Icon, title, body}) => (
-                <article className="benefit" key={title}>
+              {benefits.map(({icon: Icon, title, body}, idx) => (
+                <article className={`benefit vallet-reveal reveal-delay-${(idx % 4) + 1}`} key={title}>
                   <span className="icon-disc"><Icon/></span>
                   <div>
                     <h3>{title}</h3>
@@ -249,13 +252,13 @@ export default function ValletInmobiliariaPage() {
 
         <section id="propiedades" className="properties section-dark">
           <div className="container">
-            <div className="section-top">
+            <div className="section-top vallet-reveal">
               <h2>Propiedades <strong>destacadas</strong></h2>
               <Link to="/proyectos/vallet/propiedades">Ver todas las propiedades <ArrowRight size={17}/></Link>
             </div>
             <div className="property-grid">
-              {properties.map((property) => (
-                <article className="property-card" key={property.title}>
+              {properties.map((property, idx) => (
+                <article className={`property-card vallet-reveal reveal-delay-${(idx % 3) + 1}`} key={property.title}>
                   <PropertyImageCarousel
                     images={property.images || property.image}
                     alt={property.title}
@@ -290,8 +293,8 @@ export default function ValletInmobiliariaPage() {
           <div className="container">
             <SectionHeading dark title={<>Nuestro proceso es <strong>simple y eficiente</strong></>} />
             <div className="process-grid">
-              {process.map(({number, icon:Icon, title, body}) => (
-                <article className="process-item" key={number}>
+              {process.map(({number, icon:Icon, title, body}, idx) => (
+                <article className={`process-item vallet-reveal reveal-delay-${idx + 1}`} key={number}>
                   <div className="process-marker">
                     <b>{number}</b>
                     <span><Icon/></span>
@@ -308,8 +311,8 @@ export default function ValletInmobiliariaPage() {
           <div className="container">
             <SectionHeading title={<>Resultados que nos respaldan</>} />
             <div className="stats-grid">
-              {stats.map(({icon:Icon,value,label}) => (
-                <article key={label} className="stat">
+              {stats.map(({icon:Icon,value,label}, idx) => (
+                <article key={label} className={`stat vallet-reveal reveal-delay-${idx + 1}`}>
                   <span className="icon-disc"><Icon/></span>
                   <div>
                     <strong>{value}</strong>
@@ -325,8 +328,8 @@ export default function ValletInmobiliariaPage() {
           <div className="container">
             <SectionHeading dark title={<>Lo que dicen <strong>nuestros clientes</strong></>} />
             <div className="testimonial-grid">
-              {testimonials.map((t) => (
-                <article className="testimonial" key={t.name}>
+              {testimonials.map((t, idx) => (
+                <article className={`testimonial vallet-reveal reveal-delay-${idx + 1}`} key={t.name}>
                   <span className="quote">“</span>
                   <p>{t.quote}</p>
                   <strong>— {t.name}</strong>
@@ -338,7 +341,7 @@ export default function ValletInmobiliariaPage() {
         </section>
 
         <section className="contact-cta">
-          <div className="container contact-card">
+          <div className="container contact-card vallet-reveal">
             <div className="contact-copy">
               <span className="eyebrow">¿LISTO PARA DAR EL SIGUIENTE PASO?</span>
               <h2>Hablemos de tu próxima<br/>propiedad o inversión.</h2>
@@ -357,12 +360,12 @@ export default function ValletInmobiliariaPage() {
                 </a>
               </div>
             </div>
-            <img src={contactImage} alt="Interior de una propiedad al atardecer"/>
+            <img src={contactImage} alt="Interior de una propiedad al atardecer" loading="lazy" decoding="async"/>
           </div>
         </section>
 
         <section id="contacto" className="consultation section-light">
-          <div className="container consultation-grid">
+          <div className="container consultation-grid vallet-reveal">
             <div className="consultation-copy">
               <span className="eyebrow">ESTAMOS PARA AYUDARTE</span>
               <h2>Escríbenos y recibe<br/>asesoría personalizada</h2>
