@@ -14,7 +14,6 @@ import primerosFlujosImage from './1-primeros-flujos IA/ChatGPT Image 1 sept 202
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
-  { icon: Sliders, title: 'Herramientas Web', key: 'herramientas', description: 'Aplicaciones interactivas y conversores en tu navegador listos para usar.' },
   { icon: BookMarked, title: 'Ebooks & Guías', key: 'ebooks', description: 'Experiencias de lectura digital, descargables y conectadas con tu ecosistema de recursos.' },
   { icon: Terminal, title: 'Scripts & CLI', key: 'scripts', description: 'Pasos de configuración técnica para workflows de automatización e integraciones IA.' },
   { icon: FileText, title: 'Plantillas', key: 'plantillas', description: 'Materiales editables y organizados listos para estandarizar la operación de tu negocio.' },
@@ -24,25 +23,6 @@ const categories = [
 
 // Recursos base reales y funcionales disponibles en el proyecto
 const baseResources = [
-  {
-    id: 'optimizador-webp',
-    category: 'herramientas',
-    categoryLabel: 'Herramientas Web',
-    title: 'Optimizador de Imágenes a WebP Online',
-    description: 'Herramienta interactiva gratuita para reducir hasta 95% el peso de imágenes PNG y JPG directamente en tu navegador.',
-    type: 'Herramienta Web Gratuita',
-    badge: 'Gratis',
-    publishedAt: '2026-09-04',
-    public: true,
-    homeSection: 'featured',
-    featured: {
-      order: 1,
-      label: 'Herramienta Online',
-      icon: 'star'
-    },
-    path: '/recursos/optimizador-webp',
-    image: qawayScriptBackupImage
-  },
   {
     id: 'primeros-flujos-ia',
     category: 'ebooks',
@@ -55,7 +35,7 @@ const baseResources = [
     public: true,
     homeSection: 'featured',
     featured: {
-      order: 2,
+      order: 1,
       label: 'Nuevo Lanzamiento',
       icon: 'star'
     },
@@ -72,7 +52,12 @@ const baseResources = [
     badge: 'Gratis',
     publishedAt: '2026-09-03',
     public: true,
-    homeSection: 'new',
+    homeSection: 'featured',
+    featured: {
+      order: 2,
+      label: 'Herramienta Técnica',
+      icon: 'trending'
+    },
     path: '/recursos/optimizador-imagenes-webp',
     image: qawayScriptBackupImage
   },

@@ -187,15 +187,17 @@
 .aurea-landing .news-benefit strong{display:block;margin-top:9px;font-size:15.5px;font-weight:600}
 .aurea-landing .news-benefit span{color:var(--muted);font-size:14px;line-height:1.45}
 
-.aurea-landing footer{border-top:1px solid var(--line)}
+.aurea-landing footer{background:var(--accent);color:#ffffff;border-top:1px solid rgba(255,255,255,.1)}
 .aurea-landing .footer-top{padding:55px 0;display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:40px}
-.aurea-landing .footer-brand p{color:var(--muted);font-size:14px;line-height:1.65;max-width:280px;margin-top:15px}
-.aurea-landing .footer-col h4{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px;color:var(--ink)}
-.aurea-landing .footer-col a{display:block;font-size:14px;color:var(--muted);margin:10px 0;transition:color .2s ease}
-.aurea-landing .footer-col a:hover{color:var(--ink)}
-.aurea-landing .footer-bottom{border-top:1px solid var(--line);padding:28px 0 36px;display:flex;justify-content:space-between;gap:20px;align-items:end}
-.aurea-landing .footer-bottom .big-brand{font-family:"DM Serif Display";font-size:72px;line-height:.7;color:rgba(24,34,25,.12);letter-spacing:.06em}
-.aurea-landing .footer-bottom p{font-size:12.5px;color:var(--muted)}
+.aurea-landing .footer-brand .brand{color:#ffffff}
+.aurea-landing .footer-brand .brand-copy small{color:rgba(255,255,255,.7)}
+.aurea-landing .footer-brand p{color:rgba(255,255,255,.78);font-size:14px;line-height:1.65;max-width:280px;margin-top:15px}
+.aurea-landing .footer-col h4{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;margin-bottom:18px;color:#ffffff}
+.aurea-landing .footer-col a{display:block;font-size:14px;color:rgba(255,255,255,.75);margin:10px 0;transition:color .25s cubic-bezier(.16,1,.3,1)}
+.aurea-landing .footer-col a:hover{color:#ffffff}
+.aurea-landing .footer-bottom{border-top:1px solid rgba(255,255,255,.12);padding:28px 0 36px;display:flex;justify-content:space-between;gap:20px;align-items:end}
+.aurea-landing .footer-bottom .big-brand{font-family:"DM Serif Display";font-size:72px;line-height:.7;color:rgba(255,255,255,.08);letter-spacing:.06em}
+.aurea-landing .footer-bottom p{font-size:12.5px;color:rgba(255,255,255,.6)}
 
 /* Accesibilidad: Lector de pantalla */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

@@ -137,6 +137,12 @@ export const hierarchicalRoutes = [
         tag: 'Analítica',
       },
       {
+        title: 'Optimizador de Imágenes WebP',
+        path: '/hub/optimizador-webp',
+        description: 'Herramienta interactiva para comprimir y convertir imágenes PNG y JPG a WebP en el navegador.',
+        tag: 'Herramienta Web',
+      },
+      {
         title: 'Marketing Studio',
         path: '/hub/marketing',
         description: 'Planificación editorial, lanzamientos de productos y campañas de contenido.',
@@ -403,12 +409,6 @@ export const hierarchicalRoutes = [
         path: '/recursos/primeros-flujos-ia',
         description: 'Guía paso a paso para implementar tus primeras automatizaciones con IA.',
         tag: 'Guía Práctica',
-      },
-      {
-        title: 'Herramienta: Optimizador WebP Online',
-        path: '/recursos/optimizador-webp',
-        description: 'Herramienta interactiva gratuita para convertir y comprimir fotos PNG/JPG a WebP en tu navegador.',
-        tag: 'Herramienta Web',
       },
       {
         title: 'Script: Optimizador de Imágenes WebP (CLI)',

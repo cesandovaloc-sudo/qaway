@@ -22,6 +22,8 @@ import {
   FileImage,
   Search,
   ChevronDown,
+  CheckCircle2,
+  RotateCcw,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import '@/pages/11-Proyectos/proyectos.css'
@@ -275,7 +277,7 @@ export default function HubPage() {
   return (
     <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#fe6612] selection:text-white">
       {/* ========================================================================= */}
-      {/* COPIA LITERAL DEL HERO DE PROYECTOS */}
+      {/* HERO DE PROYECTOS (ESTILO LIMPIO Y TECNOLÓGICO) */}
       {/* ========================================================================= */}
       <section className="projects-hero border-b border-black/10">
         <div className="projects-shell">
@@ -290,7 +292,7 @@ export default function HubPage() {
               <span>/ Hub</span>
             </div>
 
-            {/* Título Principal Centrado con misma escala que Desarrollo Web / Proyectos */}
+            {/* Título Principal Centrado */}
             <h1
               className="text-[clamp(2.4rem,4vw,3.4rem)] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4 text-balance"
               style={{ fontWeight: 800 }}
@@ -325,92 +327,89 @@ export default function HubPage() {
                 )}
               </div>
             </div>
+
+            {/* Botonera de Filtros Integrada (Acceso + Temática) */}
+            <div className="mt-8 flex flex-col items-center gap-3.5 w-full max-w-4xl">
+              {/* Fila 1: Acceso */}
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1">
+                  ACCESO:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAccessFilter('all')}
+                  className={`rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
+                    accessFilter === 'all'
+                      ? 'bg-white text-[#191918] shadow-md'
+                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
+                  }`}
+                >
+                  Todos los módulos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccessFilter('free')}
+                  className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
+                    accessFilter === 'free'
+                      ? 'bg-white text-[#191918] shadow-md'
+                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
+                  }`}
+                >
+                  <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
+                  <span>Herramientas Gratuitas</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAccessFilter('pro')}
+                  className={`rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
+                    accessFilter === 'pro'
+                      ? 'bg-white text-[#191918] shadow-md'
+                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
+                  }`}
+                >
+                  Suscripción Pro
+                </button>
+              </div>
+
+              {/* Fila 2: Temática */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1">
+                  TEMÁTICA:
+                </span>
+                {thematicFilters.map((filter) => {
+                  const isActive = categoryFilter === filter
+                  return (
+                    <button
+                      key={filter}
+                      type="button"
+                      onClick={() => setCategoryFilter(filter)}
+                      className={`rounded-full px-4 py-1.5 text-xs sm:text-[13px] font-semibold transition-all ${
+                        isActive
+                          ? 'bg-white text-[#191918] shadow-sm'
+                          : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
+                      }`}
+                    >
+                      {filter}
+                    </button>
+                  )
+                })}
+
+                {(accessFilter !== 'all' || categoryFilter !== 'Todas' || searchQuery) && (
+                  <button
+                    type="button"
+                    onClick={() => { setAccessFilter('all'); setCategoryFilter('Todas'); setSearchQuery('') }}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-black/25 border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black/40 transition-colors"
+                    title="Restablecer filtros"
+                  >
+                    <span>Limpiar</span>
+                    <RotateCcw size={11} className="text-white/80" />
+                  </button>
+                )}
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
-
-      {/* ========================================================================= */}
-      {/* BARRA DE BOTONES / FILTROS (DISEÑO IDÉNTICO A PÁGINA DE PROYECTOS) */}
-      {/* ========================================================================= */}
-      <div id="hub-listado" className="border-b border-black/10 bg-white py-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
-        <div className="projects-shell flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          
-          {/* 1. Botones de Tipo de Acceso (Gratuitos / Suscripción Pro / Todos) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#191918]/60 mr-1 shrink-0">
-              Acceso:
-            </span>
-            <button
-              type="button"
-              onClick={() => setAccessFilter('all')}
-              className={`shrink-0 rounded-[10px] px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
-                accessFilter === 'all'
-                  ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
-                  : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
-              }`}
-            >
-              Todos
-            </button>
-            <button
-              type="button"
-              onClick={() => setAccessFilter('free')}
-              className={`shrink-0 rounded-[10px] px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
-                accessFilter === 'free'
-                  ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
-                  : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
-              }`}
-            >
-              Gratuitos
-            </button>
-            <button
-              type="button"
-              onClick={() => setAccessFilter('pro')}
-              className={`shrink-0 rounded-[10px] px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all ${
-                accessFilter === 'pro'
-                  ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
-                  : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
-              }`}
-            >
-              Suscripción Pro
-            </button>
-          </div>
-
-          {/* 2. Botones de Temática / Categoría */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#191918]/60 mr-1 shrink-0">
-              Temática:
-            </span>
-            {thematicFilters.map((filter) => {
-              const isActive = categoryFilter === filter
-              return (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => setCategoryFilter(filter)}
-                  className={`shrink-0 rounded-[10px] px-3.5 py-2 text-[12px] sm:text-[13px] font-semibold transition-all ${
-                    isActive
-                      ? 'bg-[#191918] text-white shadow-sm'
-                      : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
-                  }`}
-                >
-                  {filter}
-                </button>
-              )
-            })}
-
-            {/* Botón lateral Restablecer */}
-            <button
-              type="button"
-              onClick={() => { setAccessFilter('all'); setCategoryFilter('Todas'); setSearchQuery('') }}
-              className="flex items-center gap-1.5 shrink-0 rounded-[10px] border border-black/10 bg-white px-3 py-2 text-xs font-medium text-[#191918] transition-colors hover:border-[#fe6612]/50 hover:text-[#fe6612]"
-            >
-              <span>Restablecer</span>
-              <ChevronDown className="h-3.5 w-3.5 text-black/50" />
-            </button>
-          </div>
-
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* HERO ORIGINAL DE HUB (PRESERVADO INTACTO) */}

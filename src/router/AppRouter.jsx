@@ -38,7 +38,6 @@ import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
 import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
 import PrimerosFlujosIAPage from '@/pages/6-recursos/1-primeros-flujos IA/PrimerosFlujosIAPage'
 import OptimizadorImagenesWebpPage from '@/pages/6-recursos/2-optimizador-imagenes-webp/OptimizadorImagenesWebpPage'
-import OptimizadorWebpAppPage from '@/pages/6-recursos/3-optimizador-webp-web/OptimizadorWebpAppPage'
 import BlogPage from '@/pages/7-blog/BlogPage'
 import ArticleDetailPage from '@/pages/7-blog/ArticleDetailPage'
 import LandingsPage from '@/pages/8-landings/LandingsPage'
@@ -368,7 +367,7 @@ export default function AppRouter() {
           />
           <Route
             path="recursos/optimizador-webp"
-            element={renderPublicPathRoute('recursos', '/recursos/optimizador-webp', <OptimizadorWebpAppPage />)}
+            element={<Navigate to="/hub/optimizador-webp" replace />}
           />
           <Route
             path="recursos/optimizador-imagenes-webp"

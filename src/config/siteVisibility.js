@@ -26,7 +26,6 @@ const publicPathAllowList = new Set([
   '/recursos',
   '/recursos/primeros-flujos-ia',
   '/recursos/optimizador-imagenes-webp',
-  '/recursos/optimizador-webp',
   '/recursos/ebooks/google-calendar-dominado',
   '/hub',
   '/hub/optimizador-webp',

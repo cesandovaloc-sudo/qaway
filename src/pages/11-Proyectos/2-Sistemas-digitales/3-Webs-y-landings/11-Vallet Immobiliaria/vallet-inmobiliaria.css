@@ -1171,6 +1171,9 @@
     min-height: auto;
     display: block;
   }
+  .vallet-landing .hero .lead-form {
+    display: none;
+  }
   .vallet-landing .hero-grid {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -1202,6 +1205,9 @@
 @media (max-width: 640px) {
   .vallet-landing .site-header {
     height: 70px;
+    background: #fffdf9 !important;
+    border: none !important;
+    box-shadow: none !important;
   }
   .vallet-landing .nav {
     position: fixed;
@@ -1222,8 +1228,78 @@
   .vallet-landing .menu-button {
     display: block;
   }
+  .vallet-landing .hero-copy > p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #f2f5f3;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    max-width: 290px;
+    margin-bottom: 20px;
+  }
   .vallet-landing .hero-points {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px 18px;
+    background: rgba(0, 47, 53, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(242, 201, 143, 0.22);
+    border-radius: 14px;
+    padding: 16px 18px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 0 24px 0 !important;
+  }
+  .vallet-landing .hero-point {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #f2f5f3;
+  }
+  .vallet-landing .hero-point:nth-child(n+3) {
+    display: flex !important;
+  }
+  .vallet-landing .point-icon {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    display: grid;
+    place-items: center;
+    background: rgba(242, 201, 143, 0.14);
+    border-radius: 7px;
+  }
+  .vallet-landing .point-icon svg {
+    width: 17px;
+    height: 17px;
+    color: #f2c98f;
+  }
+  .vallet-landing .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+  .vallet-landing .hero-actions .button {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: center;
+    background: var(--orange);
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .vallet-landing .hero-actions .text-link {
+    text-align: center;
+    justify-content: center;
+    padding-block: 4px;
   }
   .vallet-landing .benefit-grid,
   .vallet-landing .stats-grid,

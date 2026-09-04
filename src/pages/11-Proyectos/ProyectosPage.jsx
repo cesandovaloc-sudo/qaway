@@ -7,8 +7,9 @@ import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
 import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
-import mockupTiendasOnline from '../8-landings/8-desarollo web/assets/Tiendas-Online.webp'
 import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max).png'
+import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.png'
+import showcaseVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.png'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -416,7 +417,7 @@ export default function ProyectosPage() {
                 {/* FILA 1 · FORMATOS WEB Y PROYECTOS TERMINADOS */}
                 <StaticProjectCard
                   to="/proyectos/vallet-inmobiliaria"
-                  image={mockupLandingPages}
+                  image={showcaseVallet}
                   title="Landing Pages de Captación"
                   desc="Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp."
                   delay={0.08}
@@ -566,8 +567,10 @@ export default function ProyectosPage() {
               {
                 title: 'Captación Inmobiliaria',
                 desc: 'Tours inmersivos y contacto directo a WhatsApp en un solo toque.',
-                image: estudioAssets + 'estudio-proyecto-arquitectura.webp',
-                tag: 'Lead Directo'
+                image: mockupVallet,
+                tag: 'Lead Directo',
+                statusBg: '#fffdf9',
+                statusColor: '#111111'
               },
               {
                 title: 'Gastronomía & Reservas',
