@@ -5,7 +5,9 @@ import {
   Home, MapPin, MessageCircle, Ruler, Search, ShieldCheck, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
+import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
 import { valletProperties } from './valletPropertiesData';
+import { useValletReveal } from './useValletReveal';
 import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
 import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
 import './vallet-inmobiliaria.css';
@@ -83,8 +85,16 @@ function PropertyCardCarousel({ images, alt, type }) {
 
 export default function ValletCatalogPage() {
   const [selectedType, setSelectedType] = useState('TODOS'); // 'TODOS' | 'ALQUILER' | 'VENTA'
-  const [selectedLocation, setSelectedLocation] = useState('TODOS'); // 'TODOS' | 'Miraflores' | 'Jesús María' | 'La Molina'
+  const [selectedLocation, setSelectedLocation] = useState('TODOS'); // 'TODOS' | 'Miraflores' | 'Jesús María' | 'Magdalena'
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+  };
+
+  const handleLocationChange = (loc) => {
+    setSelectedLocation(loc);
+  };
 
   const filteredProperties = useMemo(() => {
     return valletProperties.filter((item) => {
@@ -100,6 +110,8 @@ export default function ValletCatalogPage() {
       return matchType && matchLoc && matchSearch;
     });
   }, [selectedType, selectedLocation, searchQuery]);
+
+  useValletReveal();
 
   return (
     <div className="vallet-landing vallet-catalog-page site-shell">
@@ -120,6 +132,7 @@ export default function ValletCatalogPage() {
           }))
         }}
       />
+      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={0} />
 
       {/* Header */}
       <header className="site-header">
@@ -145,7 +158,7 @@ export default function ValletCatalogPage() {
         <div className="container">
           
           {/* Banner de Título */}
-          <div className="catalog-hero-banner">
+          <div className="catalog-hero-banner vallet-reveal">
             <div className="catalog-badge">
               <Sparkles size={14} /> Cartera Inmobiliaria Exclusiva
             </div>
@@ -154,7 +167,7 @@ export default function ValletCatalogPage() {
           </div>
 
           {/* Barra de Filtros Interactiva */}
-          <div className="catalog-filter-bar">
+          <div className="catalog-filter-bar vallet-reveal reveal-delay-1">
             
             {/* Buscador de texto */}
             <div className="filter-search-input">
@@ -177,21 +190,21 @@ export default function ValletCatalogPage() {
               <button
                 type="button"
                 className={`filter-pill ${selectedType === 'TODOS' ? 'active' : ''}`}
-                onClick={() => setSelectedType('TODOS')}
+                onClick={() => handleTypeChange('TODOS')}
               >
                 Todas las modalidades
               </button>
               <button
                 type="button"
                 className={`filter-pill ${selectedType === 'ALQUILER' ? 'active' : ''}`}
-                onClick={() => setSelectedType('ALQUILER')}
+                onClick={() => handleTypeChange('ALQUILER')}
               >
                 Alquiler
               </button>
               <button
                 type="button"
                 className={`filter-pill ${selectedType === 'VENTA' ? 'active' : ''}`}
-                onClick={() => setSelectedType('VENTA')}
+                onClick={() => handleTypeChange('VENTA')}
               >
                 Venta
               </button>
@@ -202,7 +215,7 @@ export default function ValletCatalogPage() {
               <MapPin size={16} />
               <select
                 value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
+                onChange={(e) => handleLocationChange(e.target.value)}
                 aria-label="Filtrar por distrito"
               >
                 <option value="TODOS">Todos los distritos</option>
@@ -222,8 +235,8 @@ export default function ValletCatalogPage() {
                 type="button"
                 className="reset-filters-link"
                 onClick={() => {
-                  setSelectedType('TODOS');
-                  setSelectedLocation('TODOS');
+                  handleTypeChange('TODOS');
+                  handleLocationChange('TODOS');
                   setSearchQuery('');
                 }}
               >
@@ -232,7 +245,7 @@ export default function ValletCatalogPage() {
             )}
           </div>
 
-          {/* Grid de Propiedades (Mismo diseño de tarjetas con carrusel Airbnb) */}
+          {/* Grid de Propiedades */}
           {filteredProperties.length > 0 ? (
             <div className="property-grid catalog-grid">
               {filteredProperties.map((property) => (
@@ -284,7 +297,7 @@ export default function ValletCatalogPage() {
           )}
 
           {/* Banner de Asesoría Personalizada */}
-          <div className="catalog-advisory-banner">
+          <div className="catalog-advisory-banner vallet-reveal">
             <div className="banner-copy">
               <h3>¿No encuentras la propiedad que buscas?</h3>
               <p>Nuestro equipo de asesores rastrea inmuebles fuera de mercado según tus requerimientos específicos.</p>
@@ -306,7 +319,7 @@ export default function ValletCatalogPage() {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
-            <img src={logoWhite} alt="Vallet" />
+            <img src={logo} alt="Vallet" />
             <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
           </div>
           <div className="footer-links">
@@ -319,9 +332,9 @@ export default function ValletCatalogPage() {
           </div>
           <div className="footer-links">
             <h4>Contacto</h4>
-            <p>Av. Jorge Chávez 184, Miraflores</p>
-            <p>+51 987 654 321</p>
-            <p>contacto@valletinmobiliaria.pe</p>
+            <p>Av. Javier Prado Este 951411, San Isidro</p>
+            <p>+51 974 974 9741</p>
+            <p>hola@valletinmobiliaria.com</p>
           </div>
         </div>
       </footer>

@@ -29,6 +29,7 @@ const publicPathAllowList = new Set([
   '/recursos/optimizador-webp',
   '/recursos/ebooks/google-calendar-dominado',
   '/hub',
+  '/hub/optimizador-webp',
   '/hub/marketing',
   '/hub/marketing2',
 ])

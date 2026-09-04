@@ -1,32 +1,48 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import {
   FileText, BookMarked, MessageSquare, ClipboardCheck,
-  Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Search
+  Terminal, ArrowRight, ArrowLeft, Star, TrendingUp, Sparkles, ChevronRight, Search,
+  Sliders, Zap
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import { supabase } from '@/config/supabase'
 import qawayCalendarImage from './assets/qaway-calendar.png'
-import notionSopImage from './assets/notion-sop.png'
-import qawayCalculadoraRoiImage from './assets/qaway-calculadora-roi.png'
-import qawayPromptCopysImage from './assets/qaway-prompt-copys.png'
-import qawayPromptIaImage from './assets/qaway-prompt-ia.png'
-import qawayChecklistAdsImage from './assets/qaway-checklist-ads.png'
-import qawayChecklistSeguridadImage from './assets/qaway-checklist-seguridad.png'
-import qawayScriptWhatsappImage from './assets/qaway-script-whatsapp.png'
 import qawayScriptBackupImage from './assets/qaway-script-backup.png'
 import primerosFlujosImage from './1-primeros-flujos IA/ChatGPT Image 1 sept 2026, 19_04_24.png'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
-  { icon: FileText, title: 'Plantillas', key: 'plantillas', description: 'Materiales editables y organizados listos para estandarizar la operacion de tu negocio.' },
-  { icon: BookMarked, title: 'Ebooks', key: 'ebooks', description: 'Experiencias de lectura digital, descargables y conectadas con tu ecosistema de recursos.' },
+  { icon: Sliders, title: 'Herramientas Web', key: 'herramientas', description: 'Aplicaciones interactivas y conversores en tu navegador listos para usar.' },
+  { icon: BookMarked, title: 'Ebooks & Guías', key: 'ebooks', description: 'Experiencias de lectura digital, descargables y conectadas con tu ecosistema de recursos.' },
+  { icon: Terminal, title: 'Scripts & CLI', key: 'scripts', description: 'Pasos de configuración técnica para workflows de automatización e integraciones IA.' },
+  { icon: FileText, title: 'Plantillas', key: 'plantillas', description: 'Materiales editables y organizados listos para estandarizar la operación de tu negocio.' },
   { icon: MessageSquare, title: 'Prompts', key: 'prompts', description: 'Instrucciones avanzadas para procesos creativos y operativos con Inteligencia Artificial.' },
-  { icon: ClipboardCheck, title: 'Checklists', key: 'checklists', description: 'Listas de control tacticas para ejecutar lanzamientos y flujos de trabajo sin fallas.' },
-  { icon: Terminal, title: 'Scripts', key: 'scripts', description: 'Pasos de configuracion tecnica para workflows de automatizacion e integraciones IA.' },
+  { icon: ClipboardCheck, title: 'Checklists', key: 'checklists', description: 'Listas de control tácticas para ejecutar lanzamientos y flujos de trabajo sin fallas.' },
 ]
 
-const resources = [
+// Recursos base reales y funcionales disponibles en el proyecto
+const baseResources = [
+  {
+    id: 'optimizador-webp',
+    category: 'herramientas',
+    categoryLabel: 'Herramientas Web',
+    title: 'Optimizador de Imágenes a WebP Online',
+    description: 'Herramienta interactiva gratuita para reducir hasta 95% el peso de imágenes PNG y JPG directamente en tu navegador.',
+    type: 'Herramienta Web Gratuita',
+    badge: 'Gratis',
+    publishedAt: '2026-09-04',
+    public: true,
+    homeSection: 'featured',
+    featured: {
+      order: 1,
+      label: 'Herramienta Online',
+      icon: 'star'
+    },
+    path: '/recursos/optimizador-webp',
+    image: qawayScriptBackupImage
+  },
   {
     id: 'primeros-flujos-ia',
     category: 'ebooks',
@@ -39,7 +55,7 @@ const resources = [
     public: true,
     homeSection: 'featured',
     featured: {
-      order: 1,
+      order: 2,
       label: 'Nuevo Lanzamiento',
       icon: 'star'
     },
@@ -50,18 +66,13 @@ const resources = [
     id: 'optimizador-imagenes-webp',
     category: 'scripts',
     categoryLabel: 'Scripts',
-    title: 'Cómo optimizar imágenes web y reducir hasta 95% su peso con WebP',
+    title: 'Cómo optimizar imágenes web y reducir hasta 95% su peso con WebP (CLI)',
     description: 'Script NodeJS con motor Sharp para automatizar la conversión masiva de carpetas enteras de JPG y PNG en WebP ultralivianos.',
     type: 'Script Node.js + Guía CLI',
     badge: 'Gratis',
     publishedAt: '2026-09-03',
     public: true,
-    homeSection: 'featured',
-    featured: {
-      order: 2,
-      label: 'Herramienta Técnica',
-      icon: 'trending'
-    },
+    homeSection: 'new',
     path: '/recursos/optimizador-imagenes-webp',
     image: qawayScriptBackupImage
   },
@@ -70,7 +81,7 @@ const resources = [
     category: 'ebooks',
     categoryLabel: 'Ebooks',
     title: 'Google Calendar Dominado',
-    description: 'Nuestra guia completa y plantilla para integrar Inteligencia Artificial en tu agenda diaria y automatizar flujos semanales.',
+    description: 'Nuestra guía completa y plantilla para integrar Inteligencia Artificial en tu agenda diaria y automatizar flujos semanales.',
     type: 'Ebook Digital Interactivo',
     badge: 'Gratis',
     publishedAt: '2026-07-08',
@@ -79,123 +90,7 @@ const resources = [
     path: '/recursos/ebooks/google-calendar-dominado',
     image: qawayCalendarImage
   },
-  {
-    id: 'notion-manual-sops',
-    category: 'plantillas',
-    categoryLabel: 'Plantillas',
-    title: 'Plantilla Notion: Manual de SOPs',
-    description: 'Estructura lista para documentar procesos y automatizaciones de tu negocio, facilitando la delegacion sin fricciones.',
-    type: 'Plantilla Notion',
-    badge: 'Premium',
-    publishedAt: '2026-07-03',
-    homeSection: 'featured',
-    featured: {
-      order: 1,
-      label: 'Mas Descargada',
-      icon: 'trending'
-    },
-    path: '/recursos/plantillas/notion-manual-sops',
-    image: notionSopImage
-  },
-  {
-    id: 'sheets-calculadora-leads',
-    category: 'plantillas',
-    categoryLabel: 'Plantillas',
-    title: 'Plantilla Google Sheets: Calculadora de ROI',
-    description: 'Calcula el retorno de inversion de tus campanas publicitarias y proyecta el costo de adquisicion de leads de forma sencilla.',
-    type: 'Google Sheets',
-    badge: 'Gratis',
-    publishedAt: '2026-07-10',
-    homeSection: 'featured',
-    featured: {
-      order: 2,
-      label: 'Super Destacada',
-      icon: 'star'
-    },
-    path: '/recursos/plantillas/sheets-calculadora-leads',
-    image: qawayCalculadoraRoiImage
-  },
-  {
-    id: 'prompt-generador-copys',
-    category: 'prompts',
-    categoryLabel: 'Prompts',
-    title: 'Mega-Prompt: Generador de Copys de Venta',
-    description: 'Instruccion avanzada estructurada bajo tecnicas de copywriting (AIDA) para redactar correos y landing pages altamente persuasivas.',
-    type: 'Prompt Claude/ChatGPT',
-    badge: 'Gratis',
-    publishedAt: '2026-06-28',
-    homeSection: 'starter',
-    path: '/recursos/prompts/prompt-generador-copys',
-    image: qawayPromptCopysImage
-  },
-  {
-    id: 'prompt-calibracion-soporte',
-    category: 'prompts',
-    categoryLabel: 'Prompts',
-    title: 'Prompt: Asistente IA de Atencion al Cliente',
-    description: 'Prompt de sistema para entrenar a tus agentes IA de WhatsApp, asegurando respuestas seguras y alineadas al tono del negocio.',
-    type: 'Prompt System',
-    badge: 'Gratis',
-    publishedAt: '2026-06-30',
-    homeSection: 'starter',
-    path: '/recursos/prompts/prompt-calibracion-soporte',
-    image: qawayPromptIaImage
-  },
-  {
-    id: 'checklist-campana-ads',
-    category: 'checklists',
-    categoryLabel: 'Checklists',
-    title: 'Checklist: Configuracion de Campana Meta Ads',
-    description: 'Lista de verificacion obligatoria antes de encender tus anuncios. Evita errores de pixel, presupuestos y segmentaciones.',
-    type: 'PDF / Checklist',
-    badge: 'Gratis',
-    publishedAt: '2026-07-01',
-    homeSection: 'starter',
-    path: '/recursos/checklists/checklist-campana-ads',
-    image: qawayChecklistAdsImage
-  },
-  {
-    id: 'checklist-auditoria-seguridad',
-    category: 'checklists',
-    categoryLabel: 'Checklists',
-    title: 'Checklist: Seguridad en Sitios Web y APIs',
-    description: 'Puntos clave para proteger tu hosting, base de datos de Supabase y tokens de Web3Forms de accesos maliciosos.',
-    type: 'PDF / Checklist',
-    badge: 'Gratis',
-    publishedAt: '2026-07-09',
-    homeSection: 'new',
-    path: '/recursos/checklists/checklist-auditoria-seguridad',
-    image: qawayChecklistSeguridadImage
-  },
-  {
-    id: 'script-whatsapp-notion',
-    category: 'scripts',
-    categoryLabel: 'Scripts',
-    title: 'Script Node.js: WhatsApp a Notion CRM',
-    description: 'Codigo de servidor listo para recibir webhooks de Meta y volcar los contactos y mensajes entrantes a un tablero de Notion.',
-    type: 'Codigo JavaScript',
-    badge: 'Premium',
-    publishedAt: '2026-07-02',
-    homeSection: 'starter',
-    path: '/recursos/scripts/script-whatsapp-notion',
-    image: qawayScriptWhatsappImage
-  },
-  {
-    id: 'script-sheets-backup',
-    category: 'scripts',
-    categoryLabel: 'Scripts',
-    title: 'Google Apps Script: Backup Diario Automatico',
-    description: 'Codigo sencillo de automatizacion para respaldar todas sus hojas de calculo clave en Google Drive en formato CSV diariamente.',
-    type: 'Apps Script',
-    badge: 'Gratis',
-    publishedAt: '2026-07-11',
-    homeSection: 'new',
-    path: '/recursos/scripts/script-sheets-backup',
-    image: qawayScriptBackupImage
-  }
 ]
-
-const visibleResources = resources
 
 const displayFont = {
   fontFamily: "'Oswald', sans-serif",
@@ -207,38 +102,86 @@ export default function RecursosPage() {
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [dbResources, setDbResources] = useState([])
+  const [loadingDb, setLoadingDb] = useState(false)
+
+  // 1. Cargar recursos dinámicos desde Supabase si existen
+  useEffect(() => {
+    async function fetchSupabaseResources() {
+      setLoadingDb(true)
+      try {
+        const { data, error } = await supabase
+          .from('resources')
+          .select('*')
+          .eq('public', true)
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(item => ({
+            id: item.id || item.slug,
+            category: item.category || 'scripts',
+            categoryLabel: item.category_label || item.category || 'General',
+            title: item.title,
+            description: item.description,
+            type: item.type || 'Recurso',
+            badge: item.badge || 'Gratis',
+            publishedAt: item.published_at || item.created_at,
+            public: true,
+            homeSection: item.home_section || 'starter',
+            path: item.path || `/recursos/${item.category}/${item.slug || item.id}`,
+            image: item.image_url || qawayScriptBackupImage
+          }))
+          setDbResources(mapped)
+        }
+      } catch (err) {
+        console.warn('[Supabase Recursos]', err.message)
+      } finally {
+        setLoadingDb(false)
+      }
+    }
+
+    fetchSupabaseResources()
+  }, [])
 
   useEffect(() => {
     setActiveCategory(category || null)
   }, [category])
 
+  // Combinación de recursos locales reales y Supabase sin duplicados
+  const allResources = useMemo(() => {
+    const map = new Map()
+    baseResources.forEach(r => map.set(r.id, r))
+    dbResources.forEach(r => map.set(r.id, r))
+    return Array.from(map.values())
+  }, [dbResources])
+
+  // Categorías que REALMENTE tienen recursos disponibles
+  const availableCategories = useMemo(() => {
+    return categories.filter(cat => {
+      return allResources.some(res => res.category === cat.key)
+    })
+  }, [allResources])
+
   const normalizedSearch = searchQuery.trim().toLowerCase()
   const isSearchActive = normalizedSearch.length > 0
   const shouldExpandSearch = isSearchExpanded || isSearchActive
 
-  const filteredResources = visibleResources.filter((resource) => {
-    const matchesCategory = activeCategory ? resource.category === activeCategory : true
-    const searchableText = [
-      resource.title,
-      resource.description,
-      resource.type,
-      resource.categoryLabel,
-      resource.badge,
-    ]
-      .join(' ')
-      .toLowerCase()
+  const filteredResources = useMemo(() => {
+    return allResources.filter((resource) => {
+      const matchesCategory = activeCategory ? resource.category === activeCategory : true
+      const searchableText = [
+        resource.title,
+        resource.description,
+        resource.type,
+        resource.categoryLabel,
+        resource.badge,
+      ]
+        .join(' ')
+        .toLowerCase()
 
-    const matchesSearch = isSearchActive ? searchableText.includes(normalizedSearch) : true
-    return matchesCategory && matchesSearch
-  })
-
-  const categoriesWithCounts = categories.map(cat => {
-    const count = visibleResources.filter(res => res.category === cat.key).length
-    return { ...cat, count: `${count} recurso${count !== 1 ? 's' : ''}` }
-  })
-
-  const activeCategoryObj = categoriesWithCounts.find(cat => cat.key === activeCategory)
-  const categoryTitle = activeCategoryObj ? activeCategoryObj.title : 'Categoria'
+      const matchesSearch = isSearchActive ? searchableText.includes(normalizedSearch) : true
+      return matchesCategory && matchesSearch
+    })
+  }, [allResources, activeCategory, isSearchActive, normalizedSearch])
 
   const selectCategory = (nextCategory) => {
     setActiveCategory(nextCategory)
@@ -247,17 +190,23 @@ export default function RecursosPage() {
     }
   }
 
-  const featured = visibleResources
-    .filter(resource => resource.featured)
-    .sort((a, b) => a.featured.order - b.featured.order)
-    .slice(0, 2)
+  const featured = useMemo(() => {
+    return allResources
+      .filter(resource => resource.featured)
+      .sort((a, b) => a.featured.order - b.featured.order)
+      .slice(0, 2)
+  }, [allResources])
 
-  const highlighted = visibleResources.filter(resource => resource.homeSection === 'starter')
+  const highlighted = useMemo(() => {
+    return allResources.filter(resource => resource.homeSection === 'starter')
+  }, [allResources])
 
-  const newResources = visibleResources
-    .filter(resource => resource.homeSection === 'new' || resource.featured)
-    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
-    .slice(0, 4)
+  const newResources = useMemo(() => {
+    return allResources
+      .filter(resource => resource.homeSection === 'new' || resource.featured)
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+      .slice(0, 4)
+  }, [allResources])
 
   const featuredStyles = [
     {
@@ -450,15 +399,15 @@ export default function RecursosPage() {
               >
                 <span className={`text-[11px] font-bold uppercase tracking-widest ${activeCategory === null ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>Todos</span>
               </button>
-              {categories.map((cat, i) => {
+              {availableCategories.map((cat, i) => {
                 const Icon = cat.icon
                 const isActive = activeCategory === cat.key
                 return (
                   <button
-                    key={i}
+                    key={cat.key}
                     type="button"
                     onClick={() => selectCategory(cat.key)}
-                    className={`group flex w-[130px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
+                    className={`group flex w-auto min-w-[130px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
                       isActive ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
                     }`}
                   >

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
@@ -18,10 +19,21 @@ import {
   FolderKanban,
   Target,
   Kanban,
+  FileImage,
+  Search,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 
 const routes = [
+  {
+    icon: FileImage,
+    title: 'Optimizador de Imágenes WebP',
+    description: 'Herramienta interactiva para comprimir y convertir imágenes PNG y JPG a WebP con hasta 95% de ahorro en tu navegador.',
+    path: '/hub/optimizador-webp',
+    badge: 'Gratis',
+    category: 'Herramientas',
+    tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+  },
   {
     icon: FolderKanban,
     title: 'Gestor de Proyectos & Entregas',
@@ -144,10 +156,22 @@ const displayFont = {
 }
 
 export default function HubPage() {
-  useSetNavbarVariant('light')
+  useSetNavbarVariant('transparent')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const featured = routes.filter((route) => route.badge)
-  const regularRoutes = routes.filter((route) => !route.badge)
+  const filteredRoutes = routes.filter((route) => {
+    const q = searchQuery.toLowerCase().trim()
+    if (!q) return true
+    return (
+      (route.title && route.title.toLowerCase().includes(q)) ||
+      (route.description && route.description.toLowerCase().includes(q)) ||
+      (route.category && route.category.toLowerCase().includes(q)) ||
+      (route.badge && route.badge.toLowerCase().includes(q))
+    )
+  })
+
+  const featured = filteredRoutes.filter((route) => route.badge)
+  const regularRoutes = filteredRoutes.filter((route) => !route.badge)
 
   const FeaturedCard = ({ route, idx }) => {
     const Icon = route.icon
@@ -196,22 +220,22 @@ export default function HubPage() {
         viewport={{ once: true, margin: '-60px' }}
         transition={{ duration: 0.45, delay: idx * 0.06 }}
       >
-        <Link to={route.path} className="group flex h-full flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
+        <Link to={route.path} className="group flex h-full flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#fe6612]/40 hover:shadow-lg">
           <div>
             <div className="mb-5 flex items-start justify-between gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-[#191918]/55 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-[#191918]/55 transition-colors group-hover:border-[#fe6612]/30 group-hover:bg-[#fe6612]/10 group-hover:text-[#fe6612]">
                 <Icon size={20} />
               </div>
               <span className={`rounded-md px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${route.tone}`}>
                 {route.category}
               </span>
             </div>
-            <h3 className="text-[15px] font-bold leading-snug text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+            <h3 className="text-[15px] font-bold leading-snug text-[#191918] transition-colors group-hover:text-[#fe6612]">
               {route.title}
             </h3>
             <p className="mt-2 text-xs leading-relaxed text-black/60">{route.description}</p>
           </div>
-          <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4 text-xs font-bold uppercase tracking-widest text-[#191918] transition-colors group-hover:text-[#ff4b0b]">
+          <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4 text-xs font-bold uppercase tracking-widest text-[#191918] transition-colors group-hover:text-[#fe6612]">
             <span>Abrir</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -221,60 +245,65 @@ export default function HubPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
-      <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#ffffff] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
-        <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden bg-[#ffffff]">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
-          <div
-            className="absolute bottom-0 right-0 top-0 w-[42%] bg-[#1a1918] shadow-2xl transition-all duration-300 md:w-[34%] lg:w-[28%]"
-            style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)' }}
+    <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#fe6612] selection:text-white">
+      {/* ========================================================================= */}
+      {/* HERO REPLICADO DE /PROYECTOS */}
+      {/* ========================================================================= */}
+      <section
+        className="relative overflow-hidden border-b border-black/10 pt-[148px] pb-[64px] text-white"
+        style={{
+          background: 'radial-gradient(ellipse 110% 90% at 50% 15%, #ff833b 0%, #fe6612 48%, #e85505 80%, #d24600 100%)',
+          transform: 'translateZ(0)',
+        }}
+      >
+        <div className="mx-auto w-[min(100%-72px,1240px)]">
+          <motion.div
+            className="mx-auto flex max-w-[820px] flex-col items-center text-center"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px] opacity-[0.14]" />
-            <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
-            <div className="absolute inset-y-0 left-0 w-px bg-white/10" />
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
-          <div className="min-h-[190px] sm:h-[220px]">
-            <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+            {/* Kicker en Cápsula Blanca translúcida */}
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-white shadow-xs backdrop-blur-xs">
               <span>/ Hub</span>
             </div>
-            <motion.h1
-              className="text-[clamp(3rem,6.5vw,5rem)] font-bold uppercase leading-[0.85] text-[#191918]"
-              style={displayFont}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Qaway Hub<span className="text-[#ff4b0b]">.</span>
-            </motion.h1>
-            <motion.p
-              className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Accede a rutas, paneles y herramientas internas para organizar la operacion digital de Qaway.
-            </motion.p>
-          </div>
 
-          <div className="mt-12 grid max-w-5xl gap-3 sm:grid-cols-3">
-            {areas.map((area) => {
-              const Icon = area.icon
-              return (
-                <div key={area.title} className="flex items-center gap-3 rounded-md border border-black/10 bg-white px-5 py-4">
-                  <Icon size={18} className="shrink-0 text-[#ff4b0b]" />
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#191918]">{area.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#191918]/55">{area.description}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+            {/* Título Principal Centrado con misma escala que Proyectos */}
+            <h1
+              className="mb-4 text-[clamp(2.4rem,4vw,3.4rem)] font-extrabold leading-[1.12] tracking-[-0.03em] text-white text-balance"
+              style={{ fontWeight: 800 }}
+            >
+              Qaway Hub<span className="text-white/70">.</span>
+            </h1>
+
+            {/* Bajada Centrada */}
+            <p className="mb-7 max-w-2xl text-base font-normal leading-relaxed text-white/90 text-balance sm:text-lg">
+              Accede a rutas, paneles y herramientas internas para organizar la operación digital de Qaway.
+            </p>
+
+            {/* Buscador Integrado Centrado */}
+            <div className="w-full max-w-xl">
+              <div className="flex items-center gap-3 rounded-[10px] border border-white/40 bg-white px-4 py-3.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] transition-all focus-within:ring-2 focus-within:ring-white">
+                <Search className="h-5 w-5 text-black/40" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar módulos, paneles o herramientas..."
+                  className="w-full bg-transparent text-sm font-medium text-[#191918] outline-none placeholder:text-black/40"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs font-bold text-black/40 hover:text-[#fe6612]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

@@ -177,7 +177,7 @@ export default function ValletInmobiliariaPage() {
           priceRange: 'S/ 2,000 - S/ 15,000',
         }}
       />
-      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={100} />
+      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={140} />
       <header className="site-header">
         <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
@@ -218,15 +218,12 @@ export default function ValletInmobiliariaPage() {
                 ))}
               </div>
               <div className="hero-actions">
-                <a
-                  className="button button-outline"
-                  href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20estoy%20viendo%20el%20proyecto%20Vallet%20Inmobiliaria%20y%20quiero%20cotizar%20un%20sitio%20web%20para%20mi%20empresa."
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <MessageCircle size={19}/> Habla con un asesor
+                <Link to="/proyectos/vallet/propiedades" className="button button-outline">
+                  <Search size={19}/> Ver catálogo
+                </Link>
+                <a href="#propiedades" className="text-link">
+                  Propiedades destacadas <ArrowRight size={18}/>
                 </a>
-                <a className="text-link" href="#servicios">Conocer más <ArrowRight size={18}/></a>
               </div>
             </div>
             <LeadForm compact submitted={submitted} onSubmit={submit} />
@@ -416,9 +413,9 @@ export default function ValletInmobiliariaPage() {
           <FooterNav title="Servicios" items={['Compra de propiedades','Alquiler de propiedades','Asesoría personalizada','Acompañamiento integral','Gestión legal y documentación']}/>
           <div>
             <h3>Contacto</h3>
-            <p className="contact-line"><Phone size={15}/> +51 987 654 321</p>
+            <p className="contact-line"><Phone size={15}/> +51 974 974 9741</p>
             <p className="contact-line"><Mail size={15}/> hola@valletinmobiliaria.com</p>
-            <p className="contact-line"><Building2 size={15}/> Av. Javier Prado Este 1234, Oficina 501<br/>San Isidro, Lima</p>
+            <p className="contact-line"><Building2 size={15}/> Av. Javier Prado Este 951411<br/>San Isidro, Lima</p>
           </div>
         </div>
         <div className="container footer-bottom">

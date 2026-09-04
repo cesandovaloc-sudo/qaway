@@ -405,7 +405,13 @@ export const hierarchicalRoutes = [
         tag: 'Guía Práctica',
       },
       {
-        title: 'Script: Optimizador de Imágenes WebP',
+        title: 'Herramienta: Optimizador WebP Online',
+        path: '/recursos/optimizador-webp',
+        description: 'Herramienta interactiva gratuita para convertir y comprimir fotos PNG/JPG a WebP en tu navegador.',
+        tag: 'Herramienta Web',
+      },
+      {
+        title: 'Script: Optimizador de Imágenes WebP (CLI)',
         path: '/recursos/optimizador-imagenes-webp',
         description: 'Script Node.js con motor Sharp para reducir hasta 95% el peso de imágenes sin pérdida visual.',
         tag: 'Script CLI',

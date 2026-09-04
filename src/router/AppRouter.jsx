@@ -30,6 +30,7 @@ import WabaCrmConsolePage from '@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'
 import GestorProyectosHubPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'
 import ProjectTimelineViewerPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'
 import AnalyticsStudioPage from '@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'
+import OptimizadorWebpHubPage from '@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'
 import MarketingStudioPage from '@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'
 import MarketingStudioTwentyPage from '@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
@@ -37,6 +38,7 @@ import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
 import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
 import PrimerosFlujosIAPage from '@/pages/6-recursos/1-primeros-flujos IA/PrimerosFlujosIAPage'
 import OptimizadorImagenesWebpPage from '@/pages/6-recursos/2-optimizador-imagenes-webp/OptimizadorImagenesWebpPage'
+import OptimizadorWebpAppPage from '@/pages/6-recursos/3-optimizador-webp-web/OptimizadorWebpAppPage'
 import BlogPage from '@/pages/7-blog/BlogPage'
 import ArticleDetailPage from '@/pages/7-blog/ArticleDetailPage'
 import LandingsPage from '@/pages/8-landings/LandingsPage'
@@ -271,6 +273,10 @@ export default function AppRouter() {
             element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
           />
           <Route
+            path="hub/optimizador-webp"
+            element={renderPublicPathRoute('hub', '/hub/optimizador-webp', <OptimizadorWebpHubPage />)}
+          />
+          <Route
             path="hub/dashboards"
             element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
           />
@@ -361,11 +367,11 @@ export default function AppRouter() {
             element={renderPublicPathRoute('recursos', '/recursos/primeros-flujos-ia', <PrimerosFlujosIAPage />)}
           />
           <Route
-            path="recursos/optimizador-imagenes-webp"
-            element={renderPublicPathRoute('recursos', '/recursos/optimizador-imagenes-webp', <OptimizadorImagenesWebpPage />)}
+            path="recursos/optimizador-webp"
+            element={renderPublicPathRoute('recursos', '/recursos/optimizador-webp', <OptimizadorWebpAppPage />)}
           />
           <Route
-            path="recursos/optimizador-webp"
+            path="recursos/optimizador-imagenes-webp"
             element={renderPublicPathRoute('recursos', '/recursos/optimizador-imagenes-webp', <OptimizadorImagenesWebpPage />)}
           />
           <Route

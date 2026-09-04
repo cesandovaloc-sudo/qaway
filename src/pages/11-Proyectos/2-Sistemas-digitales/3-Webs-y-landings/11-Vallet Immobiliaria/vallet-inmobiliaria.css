@@ -144,6 +144,7 @@
 
 .vallet-landing .hero-copy {
   padding-top: 0;
+  animation: valletHeroCopyIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .vallet-landing .eyebrow {
@@ -279,6 +280,7 @@
   color: var(--ink);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
   padding: 32px 34px 26px;
+  animation: valletHeroFormIn 1.35s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
 }
 
 .vallet-landing .form-rule {
@@ -321,31 +323,51 @@
 .vallet-landing .lead-form select,
 .vallet-landing .lead-form textarea {
   width: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.40);
-  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
   outline: none;
   padding: 13px 16px;
-  font-size: 14.5px;
+  font-size: 15px;
   transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 
-.vallet-landing .lead-form input,
-.vallet-landing .lead-form select {
-  height: 48px;
-}
-
-.vallet-landing .lead-form textarea {
-  resize: vertical;
-  min-height: 110px;
+.vallet-landing .lead-form input::placeholder,
+.vallet-landing .lead-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14.5px;
 }
 
 .vallet-landing .lead-form input:focus,
 .vallet-landing .lead-form select:focus,
 .vallet-landing .lead-form textarea:focus {
-  border-color: var(--orange);
-  box-shadow: 0 0 0 3px rgba(244,81,22,.15);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(244,81,22,.25);
+}
+
+.vallet-landing .lead-form.compact input,
+.vallet-landing .lead-form.compact select,
+.vallet-landing .lead-form.compact textarea {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 47, 53, 0.15);
+  color: var(--ink);
+}
+
+.vallet-landing .lead-form.compact input::placeholder,
+.vallet-landing .lead-form.compact textarea::placeholder {
+  color: #637275;
+}
+
+.vallet-landing .lead-form.compact input:focus,
+.vallet-landing .lead-form.compact select:focus,
+.vallet-landing .lead-form.compact textarea:focus {
+  background: #ffffff;
+  border-color: var(--teal);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(0,47,53,.15);
 }
 
 .vallet-landing .select-like svg {
@@ -480,11 +502,29 @@
   place-items: center;
   flex: none;
   color: var(--teal);
+  transition: background-color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.48s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.vallet-landing .benefit:hover .icon-disc,
+.vallet-landing .consultation-point:hover .icon-disc {
+  background: var(--orange, #f45116);
+  color: #ffffff;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(244, 81, 22, 0.30);
+  transition: background-color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.48s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .vallet-landing .section-dark .icon-disc {
   background: rgba(255,255,255,.1);
   color: #f2c98f;
+}
+
+.vallet-landing .section-dark .benefit:hover .icon-disc,
+.vallet-landing .section-dark .consultation-point:hover .icon-disc {
+  background: var(--orange, #f45116);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(244, 81, 22, 0.40);
+  transition: background-color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), color 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.48s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.48s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .vallet-landing .benefit h3,
@@ -547,11 +587,12 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,.06);
-  transition: box-shadow .3s ease;
+  transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vallet-landing .property-card:hover {
-  box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.10);
 }
 
 .vallet-landing .property-image {
@@ -694,6 +735,17 @@
   color: var(--ink);
 }
 
+.vallet-landing .property-body h3 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vallet-landing .property-body h3 a:hover,
+.vallet-landing .property-card:hover .property-body h3 a {
+  color: #0e6470;
+}
+
 .vallet-landing .location {
   margin: 0 0 16px;
   font-size: 15px;
@@ -758,6 +810,13 @@
   padding: 28px 22px;
   border-radius: 12px;
   text-align: center;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.vallet-landing .process-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .vallet-landing .process-marker {
@@ -770,6 +829,12 @@
   display: grid;
   place-items: center;
   position: relative;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vallet-landing .process-item:hover .process-marker {
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(244, 81, 22, 0.4);
 }
 
 .vallet-landing .process-marker b {
@@ -809,6 +874,13 @@
   border: 1px solid var(--line);
   padding: 22px;
   border-radius: 12px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.vallet-landing .stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .vallet-landing .stat strong {
@@ -840,6 +912,13 @@
   padding: 32px 28px;
   border-radius: 14px;
   position: relative;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.vallet-landing .testimonial:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+  border-color: rgba(255, 255, 255, 0.24);
 }
 
 .vallet-landing .testimonial .quote {
@@ -1157,5 +1236,60 @@
     flex-direction: column;
     gap: 10px;
     text-align: center;
+  }
+}
+
+/* ==========================================================================
+   ANIMACIONES DE ENTRADA & SCROLL REVEAL SUAVE (Estándar V4 / Luxury Motion)
+   ========================================================================== */
+
+@keyframes valletHeroCopyIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes valletHeroFormIn {
+  from {
+    opacity: 0;
+    transform: translateY(68px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Scroll-Reveal Universal para Secciones y Tarjetas */
+.vallet-landing .vallet-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.vallet-landing .vallet-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vallet-landing .reveal-delay-1 { transition-delay: 0.10s; }
+.vallet-landing .reveal-delay-2 { transition-delay: 0.20s; }
+.vallet-landing .reveal-delay-3 { transition-delay: 0.30s; }
+.vallet-landing .reveal-delay-4 { transition-delay: 0.40s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vallet-landing .hero-copy,
+  .vallet-landing .lead-form.compact,
+  .vallet-landing .vallet-reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

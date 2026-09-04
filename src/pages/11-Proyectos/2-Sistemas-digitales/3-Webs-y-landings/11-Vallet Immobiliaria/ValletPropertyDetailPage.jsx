@@ -6,7 +6,9 @@ import {
   Share2, ShieldCheck, Sparkles, Star, Users, Wifi, Car, Tv, Sun, Wind, Dog, Check, X, Eye
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
+import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
 import { valletProperties } from './valletPropertiesData';
+import { useValletReveal } from './useValletReveal';
 import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
 import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
 import './vallet-inmobiliaria.css';
@@ -26,6 +28,8 @@ export default function ValletPropertyDetailPage() {
   const [activeModalPhoto, setActiveModalPhoto] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  useValletReveal(slug);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -108,6 +112,7 @@ export default function ValletPropertyDetailPage() {
           }
         }}
       />
+      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={0} />
 
       {/* Header específico de la ficha */}
       <header className="site-header">
@@ -154,7 +159,7 @@ export default function ValletPropertyDetailPage() {
           </div>
 
           {/* Título y Metadata Superior */}
-          <div className="detail-header-block">
+          <div className="detail-header-block vallet-reveal">
             <div className="detail-badge-row">
               <span className={`tag ${property.type === 'ALQUILER' ? 'tag-rent' : ''}`}>{property.type}</span>
               <span className="verified-pill">
@@ -170,7 +175,7 @@ export default function ValletPropertyDetailPage() {
           </div>
 
           {/* Mosaico de Galería Fotográfica (1 grande + 4 chicas) */}
-          <section className="property-mosaic-grid">
+          <section className="property-mosaic-grid vallet-reveal reveal-delay-1">
             <div className="mosaic-main-photo" onClick={() => { setActiveModalPhoto(0); setGalleryModalOpen(true); }}>
               <img src={property.images[0]} alt={`${property.title} principal`} />
               <div className="photo-overlay">
@@ -205,7 +210,7 @@ export default function ValletPropertyDetailPage() {
             <div className="property-info-column">
               
               {/* Resumen rápido de características */}
-              <div className="property-spec-chips">
+              <div className="property-spec-chips vallet-reveal reveal-delay-2">
                 <div className="spec-chip">
                   <Ruler size={18} />
                   <div>
@@ -237,7 +242,7 @@ export default function ValletPropertyDetailPage() {
               </div>
 
               {/* Ficha del Asesor Vallet Asignado */}
-              <div className="agent-card-banner">
+              <div className="agent-card-banner vallet-reveal">
                 <div className="agent-avatar">
                   <span>{property.agent.name.charAt(0)}</span>
                 </div>
@@ -379,6 +384,13 @@ export default function ValletPropertyDetailPage() {
                 <button type="button" className="schedule-cta-btn" onClick={handleWhatsAppBooking}>
                   <MessageCircle size={18} /> Confirmar horario por WhatsApp
                 </button>
+
+                <div className="schedule-more-properties-box">
+                  <p>¿Deseas comparar con otras opciones disponibles en Lima?</p>
+                  <Link to="/proyectos/vallet/propiedades" className="view-catalog-secondary-btn">
+                    Ver catálogo de propiedades <ArrowRight size={16} />
+                  </Link>
+                </div>
               </div>
 
             </div>
@@ -457,7 +469,7 @@ export default function ValletPropertyDetailPage() {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
-            <img src={logoWhite} alt="Vallet" />
+            <img src={logo} alt="Vallet" />
             <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
           </div>
           <div className="footer-links">
@@ -470,9 +482,9 @@ export default function ValletPropertyDetailPage() {
           </div>
           <div className="footer-links">
             <h4>Contacto</h4>
-            <p>Av. Jorge Chávez 184, Miraflores</p>
-            <p>+51 930 756 781</p>
-            <p>contacto@valletinmobiliaria.pe</p>
+            <p>Av. Javier Prado Este 951411, San Isidro</p>
+            <p>+51 974 974 9741</p>
+            <p>hola@valletinmobiliaria.com</p>
           </div>
         </div>
       </footer>
@@ -533,6 +545,14 @@ export default function ValletPropertyDetailPage() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Toast Flotante de Notificación */}
+      {copiedLink && (
+        <div className="vallet-toast-feedback" role="status" aria-live="polite">
+          <Check size={18} className="toast-icon" />
+          <span>Enlace copiado al portapapeles</span>
         </div>
       )}
 
