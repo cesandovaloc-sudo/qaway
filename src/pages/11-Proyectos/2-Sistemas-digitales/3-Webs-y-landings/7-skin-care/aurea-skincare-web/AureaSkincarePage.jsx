@@ -34,6 +34,7 @@ const IMG = {
   serum_orange: "/aurea-images/serum_orange.webp",
   woman_story: "/aurea-images/woman_story_v2.webp",
   hero_diseno_sin_titulo: "/aurea-images/hero_diseno_sin_titulo.webp",
+  hero_mobile: "/aurea-images/hero_mobile.png",
   signature_1: "/aurea-images/signature_1.webp",
   signature_2: "/aurea-images/signature_2.webp",
   signature_3: "/aurea-images/signature_3.webp",
@@ -192,18 +193,21 @@ export default function AureaSkincarePage() {
           <div className="container">
             <Reveal>
               <div className="hero-stage">
-                {/* 1. Lienzo Maestro PNG de Fondo */}
-                <motion.img
-                  initial={{ opacity: 0, scale: 1.03 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                  className="hero-stage-bg"
-                  src={IMG.hero_diseno_sin_titulo}
-                  alt="Auréa Skincare Sérum y Cítricos"
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                />
+                {/* 1. Lienzo Maestro PNG de Fondo (Desktop) / Vertical (Mobile) */}
+                <picture className="hero-stage-picture">
+                  <source media="(max-width: 640px)" srcSet={IMG.hero_mobile} />
+                  <motion.img
+                    initial={{ opacity: 0, scale: 1.03 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className="hero-stage-bg"
+                    src={IMG.hero_diseno_sin_titulo}
+                    alt="Auréa Skincare Sérum y Cítricos"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </picture>
 
                 {/* 2. Textos montados arriba a la izquierda */}
                 <motion.div
