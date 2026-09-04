@@ -8,6 +8,7 @@ import {
   Globe,
   BookOpen,
   Shield,
+  GraduationCap,
 } from 'lucide-react'
 
 // =========================================================================
@@ -20,7 +21,7 @@ export const hierarchicalRoutes = [
     id: 'blog-publico',
     title: 'Página de Blog',
     path: '/blog',
-    category: 'Blog & Editorial',
+    category: 'Blog',
     icon: Sparkles,
     badge: 'Público',
     badgeType: 'public',
@@ -74,7 +75,7 @@ export const hierarchicalRoutes = [
     id: 'blog-editor',
     title: 'Editor de Blog & Consola Editorial',
     path: '/hub/blog-editor',
-    category: 'Blog & Editorial',
+    category: 'Blog',
     icon: PenTool,
     badge: 'Hub Interno',
     badgeType: 'hub',
@@ -262,7 +263,7 @@ export const hierarchicalRoutes = [
     id: 'proyectos',
     title: 'Catálogo de Proyectos',
     path: '/proyectos',
-    category: 'Proyectos & Demos',
+    category: 'Proyectos',
     icon: FolderKanban,
     badge: 'Portafolio',
     badgeType: 'demo',
@@ -431,7 +432,27 @@ export const hierarchicalRoutes = [
     ],
   },
 
-  // 8. PÁGINAS PRINCIPALES & PORTALES
+  // 8. ACADEMY
+  {
+    id: 'academy',
+    title: 'Qaway Academy',
+    path: '/academy',
+    category: 'Academy',
+    icon: GraduationCap,
+    badge: 'Formación',
+    badgeType: 'area',
+    summary: 'Programas formativos aplicados, workshops prácticos y metodologías de inteligencia artificial.',
+    children: [
+      {
+        title: 'Qaway Academy (Plataforma)',
+        path: '/academy',
+        description: 'Catálogo de cursos y formaciones prácticas para profesionales.',
+        tag: 'Formación',
+      },
+    ],
+  },
+
+  // 9. PÁGINAS PRINCIPALES & PORTALES
   {
     id: 'portales-principales',
     title: 'Portales, Accesos & Variantes',
@@ -473,12 +494,6 @@ export const hierarchicalRoutes = [
         tag: 'Auth',
       },
       {
-        title: 'Qaway Academy',
-        path: '/academy',
-        description: 'Programas formativos y workshops en herramientas digitales e IA.',
-        tag: 'Formación',
-      },
-      {
         title: 'Brief de Branding Digital',
         path: '/brief',
         description: 'Formulario de recopilación de requerimientos para nuevos proyectos.',
@@ -496,12 +511,12 @@ export const hierarchicalRoutes = [
 
 export const categoriesList = [
   'Todos',
-  'Blog & Editorial',
-  'Qaway Hub',
-  'Sistemas Digitales',
   'Estudio',
-  'Proyectos & Demos',
-  'Landings',
+  'Sistemas Digitales',
+  'Proyectos',
+  'Blog',
   'Recursos',
-  'Portales & Principales',
+  'Academy',
+  'Qaway Hub',
+  'Landings',
 ]

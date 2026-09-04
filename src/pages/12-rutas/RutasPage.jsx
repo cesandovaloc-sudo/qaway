@@ -514,7 +514,7 @@ ${pathsFormatted}
       title: 'Proyectos',
       desc: 'Casos reales, demos interactivas y arquitectura digital.',
       count: '12 proyectos',
-      category: 'Proyectos & Demos',
+      category: 'Proyectos',
       icon: FolderKanban,
       gradient: 'from-blue-50 to-blue-100',
     },
@@ -522,7 +522,7 @@ ${pathsFormatted}
       title: 'Blog',
       desc: 'Publicaciones editoriales, artículos y consola de redacción.',
       count: '9 rutas',
-      category: 'Blog & Editorial',
+      category: 'Blog',
       icon: Sparkles,
       gradient: 'from-amber-50 to-amber-100',
     },
@@ -537,8 +537,8 @@ ${pathsFormatted}
     {
       title: 'Academy',
       desc: 'Formación aplicada, metodologías y cursos.',
-      count: '5 rutas',
-      category: 'Portales & Principales',
+      count: '1 plataforma',
+      category: 'Academy',
       icon: GraduationCap,
       gradient: 'from-purple-50 to-purple-100',
     },
@@ -688,8 +688,8 @@ ${pathsFormatted}
             </p>
           </div>
 
-          {/* Grid de 7 Tarjetas Visuales de Áreas */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5">
+          {/* Grid de 7 Tarjetas Visuales de Áreas (2 Filas con Mayor Ancho y Proporción) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {ecosystemAreas.map((area) => {
               const AreaIcon = area.icon
 
@@ -700,27 +700,27 @@ ${pathsFormatted}
                   className={`qw-ecosystem-card group ${area.highlight ? 'border-orange-200 ring-1 ring-[#fe6612]/20' : ''}`}
                 >
                   {/* Encabezado visual de la tarjeta */}
-                  <div className={`qw-ecosystem-card__img bg-gradient-to-br ${area.gradient} flex items-center justify-center p-4 transition-transform duration-500 group-hover:scale-105`}>
-                    <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-900 border border-black/5">
-                      <AreaIcon className="h-6 w-6 text-[#fe6612]" />
+                  <div className={`qw-ecosystem-card__img bg-gradient-to-br ${area.gradient} flex items-center justify-center p-5 transition-transform duration-500 group-hover:scale-105`}>
+                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-900 border border-black/5">
+                      <AreaIcon className="h-7 w-7 text-[#fe6612]" />
                     </div>
                   </div>
 
                   {/* Cuerpo de la tarjeta */}
-                  <div className="qw-ecosystem-card__body p-3.5 flex flex-col justify-between flex-1">
+                  <div className="qw-ecosystem-card__body p-4 flex flex-col justify-between flex-1">
                     <div>
-                      <h3 className="text-sm font-bold text-zinc-950 mb-1 tracking-tight group-hover:text-[#fe6612] transition-colors truncate">
+                      <h3 className="text-base font-bold text-zinc-950 mb-1 tracking-tight group-hover:text-[#fe6612] transition-colors truncate">
                         {area.title}
                       </h3>
-                      <p className="text-[11.5px] text-zinc-500 leading-snug line-clamp-2 mb-3">
+                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-4">
                         {area.desc}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100 text-[11px] font-semibold text-zinc-700">
+                    <div className="flex items-center justify-between pt-3 border-t border-zinc-100 text-xs font-semibold text-zinc-700">
                       <span className="truncate">{area.count}</span>
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 group-hover:bg-[#fe6612] group-hover:text-white transition-colors">
-                        <ArrowRight className="h-3 w-3" />
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 group-hover:bg-[#fe6612] group-hover:text-white transition-colors">
+                        <ArrowRight className="h-3.5 w-3.5" />
                       </span>
                     </div>
                   </div>
@@ -791,8 +791,8 @@ ${pathsFormatted}
             </div>
           </div>
 
-          {/* Barra de Filtros en 2 Filas (Sin solapamientos) */}
-          <div className="space-y-4 mb-8">
+          {/* Barra de Filtros Sticky en 2 Filas (Sin solapamientos) */}
+          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-3.5 pb-4 -mx-4 px-4 border-b border-zinc-200/80 shadow-[0_8px_24px_rgba(0,0,0,0.04)] space-y-3.5 mb-8 rounded-b-2xl transition-all">
             
             {/* FILA 1: Píldoras de Categorías */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
