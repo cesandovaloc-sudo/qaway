@@ -222,6 +222,9 @@ export default function AureaSkincarePage() {
                   <p className="hero-subtext">
                     Fórmulas botánicas que equilibran, protegen y revelan tu mejor versión.
                   </p>
+                  <a href="#coleccion" className="hero-title-cta btn btn-primary" aria-label="Descubre la colección botánica">
+                    Descubre la colección →
+                  </a>
                 </motion.div>
 
                 {/* 3. Cápsula montada arriba a la derecha */}

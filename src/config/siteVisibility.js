@@ -2,7 +2,7 @@ const SITE_MODE = import.meta.env.MODE || 'development'
 
 export const isPublicSiteMode = SITE_MODE === 'public'
 
-const routeVisibility = {
+export const routeVisibility = {
   inicio: true,
   estudio: false,
   proyectos: true,
