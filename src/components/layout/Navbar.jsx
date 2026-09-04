@@ -79,13 +79,10 @@ export default function Navbar({ variant: explicitVariant }) {
   const contextVariant = useContext(NavbarVariantContext)
   const location = useLocation()
   
-  // Resolución síncrona inmediata en el primer render frame (evita destello blanco en /proyectos y /hub)
-  const isTransparentHero =
-    location.pathname === '/proyectos' ||
-    location.pathname === '/proyectos/' ||
-    location.pathname === '/hub' ||
-    location.pathname === '/hub/'
-  const variant = explicitVariant || (isTransparentHero ? 'transparent' : contextVariant)
+  // Resolución síncrona inmediata en el primer render frame
+  const isProyectos = location.pathname === '/proyectos' || location.pathname === '/proyectos/'
+  const isDarkHero = location.pathname === '/hub' || location.pathname === '/hub/'
+  const variant = explicitVariant || (isProyectos ? 'transparent' : isDarkHero ? 'dark' : contextVariant)
   const isMarketingHub = location.pathname.startsWith('/hub/marketing')
   const isLogoOnly = variant === 'logo-only'
 
