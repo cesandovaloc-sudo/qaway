@@ -25,6 +25,8 @@ const publicPathAllowList = new Set([
   '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
   '/recursos',
   '/recursos/primeros-flujos-ia',
+  '/recursos/optimizador-imagenes-webp',
+  '/recursos/optimizador-webp',
   '/recursos/ebooks/google-calendar-dominado',
   '/hub',
   '/hub/marketing',

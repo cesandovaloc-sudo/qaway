@@ -12,9 +12,9 @@ import './vallet-inmobiliaria.css';
 // Assets locales
 import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
 import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
-import heroImage from './hero.png';
-import consultationImage from './vallet-web/src/assets/consultation-interior.jpg';
-import contactImage from './vallet-web/src/assets/contact-interior.jpg';
+import heroImage from './hero.webp';
+import consultationImage from './vallet-web/src/assets/consultation-interior.webp';
+import contactImage from './vallet-web/src/assets/contact-interior.webp';
 
 function PropertyImageCarousel({ images, alt, type, slug }) {
   const imageList = Array.isArray(images) && images.length > 0 ? images : [images].filter(Boolean);
@@ -54,7 +54,8 @@ function PropertyImageCarousel({ images, alt, type, slug }) {
           src={img}
           alt={`${alt} vista ${idx + 1}`}
           className={`property-carousel-slide ${idx === currentIndex ? 'active' : ''}`}
-          loading="lazy"
+          loading={idx === 0 ? 'eager' : 'lazy'}
+          decoding="async"
         />
       ))}
       <span className={`tag ${type === 'ALQUILER' ? 'tag-rent' : ''}`}>{type}</span>
@@ -67,7 +68,7 @@ function PropertyImageCarousel({ images, alt, type, slug }) {
             onClick={handlePrev}
             aria-label="Foto anterior"
           >
-            <ChevronLeft size={16} strokeWidth={2.4} />
+            <ChevronLeft size={16} strokeWidth={2.4} aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -75,7 +76,7 @@ function PropertyImageCarousel({ images, alt, type, slug }) {
             onClick={handleNext}
             aria-label="Siguiente foto"
           >
-            <ChevronRight size={16} strokeWidth={2.4} />
+            <ChevronRight size={16} strokeWidth={2.4} aria-hidden="true" />
           </button>
           <div className="property-carousel-dots" aria-label="Navegación de fotos">
             {imageList.map((_, idx) => (
@@ -160,7 +161,18 @@ export default function ValletInmobiliariaPage() {
       <SEO
         title="Vallet Inmobiliaria | Asesoría Inmobiliaria Personalizada en Lima"
         description="Te acompañamos en la compra, venta o alquiler de propiedades en Lima con total transparencia, seguridad y atención directa."
-        canonical="https://qawaylab.com/proyectos/vallet-inmobiliaria"
+        canonical="https://qawaylab.com/proyectos/vallet"
+        image="https://qawaylab.com/assets/miraflores1.webp"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'RealEstateAgent',
+          name: 'Vallet Asesoría Inmobiliaria',
+          description: 'Asesoría inmobiliaria personalizada para compra, venta y alquiler de inmuebles en Lima.',
+          url: 'https://qawaylab.com/proyectos/vallet',
+          telephone: '+51930756781',
+          areaServed: 'Lima Metropolitana, Perú',
+          priceRange: 'S/ 2,000 - S/ 15,000',
+        }}
       />
       <DemoFloatingBadge backTo="/proyectos" brand="Qaway Lab" label="Demo interactiva" threshold={100} />
       <header className="site-header">

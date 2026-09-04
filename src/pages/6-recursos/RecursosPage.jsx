@@ -47,6 +47,25 @@ const resources = [
     image: primerosFlujosImage
   },
   {
+    id: 'optimizador-imagenes-webp',
+    category: 'scripts',
+    categoryLabel: 'Scripts',
+    title: 'Cómo optimizar imágenes web y reducir hasta 95% su peso con WebP',
+    description: 'Script NodeJS con motor Sharp para automatizar la conversión masiva de carpetas enteras de JPG y PNG en WebP ultralivianos.',
+    type: 'Script Node.js + Guía CLI',
+    badge: 'Gratis',
+    publishedAt: '2026-09-03',
+    public: true,
+    homeSection: 'featured',
+    featured: {
+      order: 2,
+      label: 'Herramienta Técnica',
+      icon: 'trending'
+    },
+    path: '/recursos/optimizador-imagenes-webp',
+    image: qawayScriptBackupImage
+  },
+  {
     id: 'google-calendar-dominado',
     category: 'ebooks',
     categoryLabel: 'Ebooks',

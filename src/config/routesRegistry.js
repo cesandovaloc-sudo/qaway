@@ -405,6 +405,12 @@ export const hierarchicalRoutes = [
         tag: 'Guía Práctica',
       },
       {
+        title: 'Script: Optimizador de Imágenes WebP',
+        path: '/recursos/optimizador-imagenes-webp',
+        description: 'Script Node.js con motor Sharp para reducir hasta 95% el peso de imágenes sin pérdida visual.',
+        tag: 'Script CLI',
+      },
+      {
         title: 'Ebook: Google Calendar Dominado',
         path: '/recursos/ebooks/google-calendar-dominado',
         description: 'Sistema operativo semanal para organizar tu tiempo con bloques y apoyo de IA.',

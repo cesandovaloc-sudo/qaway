@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
 import { valletProperties } from './valletPropertiesData';
-import logo from './vallet-web/src/assets/vallet-logo.png';
+import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
+import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
 import './vallet-inmobiliaria.css';
 import './vallet-property-detail.css';
 
@@ -74,6 +75,38 @@ export default function ValletPropertyDetailPage() {
         title={`${property.title} | Vallet Asesoría Inmobiliaria`}
         description={`${property.tagline} Ubicado en ${property.location}. Precio: ${property.price}.`}
         canonical={`https://qawaylab.com/proyectos/vallet/propiedad/${property.slug}`}
+        image={property.images[0]}
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'Apartment',
+          name: property.title,
+          description: property.tagline,
+          image: property.images,
+          numberOfRooms: property.bedrooms,
+          numberOfBathroomsTotal: property.bathrooms,
+          floorSize: {
+            '@type': 'QuantitativeValue',
+            value: property.area,
+            unitText: 'm²'
+          },
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: property.location,
+            addressRegion: 'Lima',
+            addressCountry: 'PE'
+          },
+          offers: {
+            '@type': 'Offer',
+            price: property.priceNumeric || 3000,
+            priceCurrency: 'PEN',
+            availability: 'https://schema.org/InStock',
+            seller: {
+              '@type': 'RealEstateAgent',
+              name: 'Vallet Asesoría Inmobiliaria',
+              telephone: '+51930756781'
+            }
+          }
+        }}
       />
 
       {/* Header específico de la ficha */}
@@ -419,6 +452,30 @@ export default function ValletPropertyDetailPage() {
 
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="site-footer">
+        <div className="container footer-grid">
+          <div className="footer-brand">
+            <img src={logoWhite} alt="Vallet" />
+            <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
+          </div>
+          <div className="footer-links">
+            <h4>Navegación</h4>
+            <ul>
+              <li><Link to="/proyectos/vallet">Inicio</Link></li>
+              <li><Link to="/proyectos/vallet/propiedades">Catálogo Completo</Link></li>
+              <li><Link to="/proyectos/vallet#contacto">Contacto</Link></li>
+            </ul>
+          </div>
+          <div className="footer-links">
+            <h4>Contacto</h4>
+            <p>Av. Jorge Chávez 184, Miraflores</p>
+            <p>+51 930 756 781</p>
+            <p>contacto@valletinmobiliaria.pe</p>
+          </div>
+        </div>
+      </footer>
 
       {/* Modal Fullscreen de Galería */}
       {galleryModalOpen && (

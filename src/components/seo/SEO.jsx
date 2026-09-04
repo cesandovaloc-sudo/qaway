@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import PropTypes from 'prop-types';
 
-export default function SEO({ title, description, canonical, type = 'website', schema }) {
+export default function SEO({ title, description, canonical, type = 'website', image, schema }) {
   const siteName = 'Qaway Lab';
   
   return (
@@ -17,6 +17,13 @@ export default function SEO({ title, description, canonical, type = 'website', s
       <meta property="og:description" content={description} />
       <meta property="og:site_name" content={siteName} />
       {canonical && <meta property="og:url" content={canonical} />}
+      {image && <meta property="og:image" content={image} />}
+
+      {/* Twitter Cards */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      {image && <meta name="twitter:image" content={image} />}
 
       {/* Structured Data */}
       {schema && (
@@ -33,5 +40,6 @@ SEO.propTypes = {
   description: PropTypes.string.isRequired,
   canonical: PropTypes.string,
   type: PropTypes.string,
+  image: PropTypes.string,
   schema: PropTypes.object,
 };

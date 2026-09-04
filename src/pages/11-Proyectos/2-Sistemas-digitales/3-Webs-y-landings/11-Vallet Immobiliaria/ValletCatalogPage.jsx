@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
 import { valletProperties } from './valletPropertiesData';
-import logo from './vallet-web/src/assets/vallet-logo.png';
+import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
+import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
 import './vallet-inmobiliaria.css';
 import './vallet-catalog.css';
 
@@ -104,8 +105,20 @@ export default function ValletCatalogPage() {
     <div className="vallet-landing vallet-catalog-page site-shell">
       <SEO
         title="Catálogo de Propiedades Exclusivas en Lima | Vallet Asesoría Inmobiliaria"
-        description="Explora nuestra cartera de departamentos y casas en alquiler y venta en Miraflores, Jesús María y La Molina. Propiedades 100% verificadas."
+        description="Explora nuestra cartera de departamentos y casas en alquiler y venta en Miraflores, Jesús María y Magdalena. Propiedades 100% verificadas."
         canonical="https://qawaylab.com/proyectos/vallet/propiedades"
+        image="https://qawaylab.com/assets/miraflores1.webp"
+        schema={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: 'Propiedades Inmobiliarias en Lima - Vallet',
+          itemListElement: valletProperties.map((p, idx) => ({
+            '@type': 'ListItem',
+            position: idx + 1,
+            name: p.title,
+            url: `https://qawaylab.com/proyectos/vallet/propiedad/${p.slug}`
+          }))
+        }}
       />
 
       {/* Header */}
@@ -118,7 +131,12 @@ export default function ValletCatalogPage() {
             <ArrowLeft size={16} /> <span>Volver a la portada</span>
           </Link>
         </div>
-        <a className="header-cta" href="https://wa.me/51987654321" target="_blank" rel="noreferrer">
+        <a
+          className="header-cta"
+          href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20estoy%20viendo%20el%20catálogo%20de%20Vallet%20y%20quiero%20cotizar%20un%20sistema%20inmobiliario%20similar."
+          target="_blank"
+          rel="noreferrer"
+        >
           <MessageCircle size={17} /> Asesoría personalizada
         </a>
       </header>
@@ -272,7 +290,7 @@ export default function ValletCatalogPage() {
               <p>Nuestro equipo de asesores rastrea inmuebles fuera de mercado según tus requerimientos específicos.</p>
             </div>
             <a
-              href="https://wa.me/51987654321?text=Hola%20Vallet,%20busco%20una%20propiedad%20con%20características%20especiales."
+              href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20me%20interesa%20desarrollar%20un%20buscador%20inmobiliario%20como%20el%20de%20Vallet."
               target="_blank"
               rel="noreferrer"
               className="banner-cta"
@@ -288,7 +306,7 @@ export default function ValletCatalogPage() {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
-            <img src={logo} alt="Vallet" />
+            <img src={logoWhite} alt="Vallet" />
             <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
           </div>
           <div className="footer-links">

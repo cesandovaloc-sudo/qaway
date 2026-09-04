@@ -1,19 +1,19 @@
-import miraflores1 from './miraflores1.png';
-import miraflores2 from './miraflores2.png';
-import miraflores3 from './miraflores3.png';
+import miraflores1 from './miraflores1.webp';
+import miraflores2 from './miraflores2.webp';
+import miraflores3 from './miraflores3.webp';
 
 // Imágenes Departamento en Jesús María
-import jesusMaria1 from './jesus-maria1.png';
-import jesusMaria2 from './jesus-maria2.png';
-import jesusMaria3 from './jesus-maria3.png';
+import jesusMaria1 from './jesus-maria1.webp';
+import jesusMaria2 from './jesus-maria2.webp';
+import jesusMaria3 from './jesus-maria3.webp';
 
 // Imágenes Departamento en Magdalena
-import magdalena1 from './magdalena1.png';
-import magdalena2 from './magdalena2.png';
-import magdalena3 from './magdalena3.png';
+import magdalena1 from './magdalena1.webp';
+import magdalena2 from './magdalena2.webp';
+import magdalena3 from './magdalena3.webp';
 
-import sanIsidro from './vallet-web/src/assets/property-san-isidro.jpg';
-import heroImage from './hero.png';
+import sanIsidro from './vallet-web/src/assets/property-san-isidro.webp';
+import heroImage from './hero.webp';
 
 export const valletProperties = [
   {
@@ -39,7 +39,7 @@ export const valletProperties = [
       responseRate: 'Menos de 15 minutos',
       experience: '8 años de experiencia',
       phone: '+51 987 654 321',
-      whatsapp: '51987654321',
+      whatsapp: '51930756781',
     },
     highlights: [
       {
@@ -115,7 +115,7 @@ export const valletProperties = [
       responseRate: 'Menos de 20 minutos',
       experience: '10 años de experiencia',
       phone: '+51 987 654 321',
-      whatsapp: '51987654321',
+      whatsapp: '51930756781',
     },
     highlights: [
       { title: 'Ubicación Residencial', desc: 'Frente a parque, cerca a universidades y avenidas clave.' },
@@ -164,7 +164,7 @@ export const valletProperties = [
       responseRate: 'Menos de 15 minutos',
       experience: '8 años de experiencia',
       phone: '+51 987 654 321',
-      whatsapp: '51987654321',
+      whatsapp: '51930756781',
     },
     highlights: [
       { title: 'Límite con San Isidro', desc: 'Ubicación estratégica con acceso rápido a avenidas principales.' },
