@@ -282,17 +282,17 @@
   .aurea-landing .nav-actions .btn{display:none}
   
   /* Hero Móvil: orden flex correcto (Texto arriba -> Foto con Overlay abajo) */
-  .aurea-landing .hero{padding:10px 0 16px}
+  .aurea-landing .hero{padding:28px 0 20px}
   .aurea-landing .hero-stage{display:flex;flex-direction:column;position:relative;border-radius:20px;background:transparent;max-height:none;overflow:visible}
-  .aurea-landing .hero-stage-content{order:1;position:relative;top:0;left:0;right:0;max-width:100%;margin-bottom:18px;padding:0 2px}
+  .aurea-landing .hero-stage-content{order:1;position:relative;top:0;left:0;right:0;max-width:100%;margin-bottom:22px;padding:0 2px}
   .aurea-landing .hero h1{font-size:clamp(30px,8vw,38px);line-height:1.05;letter-spacing:-.025em}
-  .aurea-landing .hero-subtext{display:block;font-size:14px;color:var(--muted);margin-top:8px;line-height:1.45;max-width:100%}
+  .aurea-landing .hero-subtext{display:block;font-size:14.5px;color:var(--muted);margin-top:10px;line-height:1.48;max-width:100%}
   .aurea-landing .hero-stage-picture{display:block;order:2;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 8px 24px rgba(24,34,25,.06)}
-  .aurea-landing .hero-stage-bg{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:center;border-radius:20px;margin-top:0;display:block}
+  .aurea-landing .hero-stage-bg{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;object-position:center;border-radius:20px;margin-top:0;display:block;transform:scale(1.15);transform-origin:center center}
   .aurea-landing .hero-stage .hero-pill{display:none}
-  .aurea-landing .hero-overlay{position:absolute;left:12px;right:12px;bottom:12px;width:auto;padding:16px 18px;gap:10px;border-radius:14px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px)}
-  .aurea-landing .hero-overlay .overlay-desc{font-size:13px;line-height:1.45;color:var(--ink)}
-  .aurea-landing .overlay-cta{font-size:12.5px;padding:8px 16px}
+  .aurea-landing .hero-overlay{position:absolute;left:12px;right:12px;bottom:12px;width:auto;padding:18px 20px;gap:14px;border-radius:14px;background:rgba(255,255,255,.86);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center}
+  .aurea-landing .hero-overlay .overlay-desc{font-size:14.5px;line-height:1.5;color:var(--ink);text-align:center}
+  .aurea-landing .overlay-cta{font-size:14px;padding:10px 22px;align-self:center;margin-inline:auto;font-weight:600}
   .aurea-landing .hero-badge{display:none}
 
   /* Secciones Adaptadas sin desbordes laterales */
