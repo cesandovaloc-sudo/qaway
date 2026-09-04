@@ -136,47 +136,53 @@ function HierarchicalRouteCard({
           </div>
         </div>
 
-        {/* Lado derecho: Switch de Producción + Abrir + Desplegable */}
-        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 w-full sm:w-auto justify-between sm:justify-end">
+        {/* Lado derecho: Controles en 2 Filas */}
+        <div className="flex flex-col items-end gap-2.5 shrink-0 self-stretch sm:self-center justify-between sm:justify-center pt-3 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
           
-          {/* Switch de Producción */}
-          <div className="flex items-center gap-2 pr-2 sm:border-r border-zinc-200/80">
-            <span className="text-[11px] font-semibold text-zinc-500 hidden md:inline">
-              {isApproved ? 'Dist' : 'Local'}
-            </span>
-            <SwitchToggle
-              isChecked={isApproved}
-              onChange={() => onToggleApproval(item.path)}
-              label={item.title}
-            />
+          {/* Fila Superior: Switch de Producción (Dist) + Botón Desplegable */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-semibold text-zinc-500">
+                {isApproved ? 'Dist' : 'Local'}
+              </span>
+              <SwitchToggle
+                isChecked={isApproved}
+                onChange={() => onToggleApproval(item.path)}
+                label={item.title}
+              />
+            </div>
+
+            {item.children && item.children.length > 0 && (
+              <button
+                type="button"
+                onClick={onToggle}
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  isExpanded
+                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
+                    : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                }`}
+              >
+                <span>{isExpanded ? 'Ocultar' : `${item.children.length}`}</span>
+                {isExpanded ? (
+                  <ChevronUp className="w-3.5 h-3.5" />
+                ) : (
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+                )}
+              </button>
+            )}
           </div>
 
-          <Link
-            to={item.path}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 transition-colors"
-          >
-            <span>Abrir</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#fe6612]" />
-          </Link>
-
-          {item.children && item.children.length > 0 && (
-            <button
-              type="button"
-              onClick={onToggle}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                isExpanded
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
-                  : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
-              }`}
+          {/* Fila Inferior: Botón Abrir */}
+          <div className="w-full flex justify-end">
+            <Link
+              to={item.path}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-950 transition-colors w-full sm:w-auto"
             >
-              <span>{isExpanded ? 'Ocultar' : `${item.children.length}`}</span>
-              {isExpanded ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
-              )}
-            </button>
-          )}
+              <span>Abrir</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#fe6612]" />
+            </Link>
+          </div>
+
         </div>
 
       </div>
