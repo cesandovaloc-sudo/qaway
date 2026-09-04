@@ -7,9 +7,10 @@ import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
 import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
-import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max).png'
+import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.png'
 import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.png'
 import showcaseVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.png'
+import mockupEpc from './2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/epc(iPhone 14 Pro Max).png'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -581,8 +582,10 @@ export default function ProyectosPage() {
               {
                 title: 'Servicios Profesionales',
                 desc: 'Agendamiento de citas y presentación corporativa de alta credibilidad.',
-                image: sistemasAssets + 'content-ops-command-center.webp',
-                tag: 'Agendamiento'
+                image: mockupEpc,
+                tag: 'Agendamiento',
+                statusBg: '#06153a',
+                statusColor: '#ffffff'
               }
             ].map((mockup, i) => (
               <motion.div

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -26,11 +26,17 @@ import {
   RotateCcw,
   CheckCircle2,
   X,
+  Zap,
+  Flame,
+  LayoutGrid,
+  Clock,
+  Briefcase,
+  GraduationCap,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import './rutas.css'
 import { hierarchicalRoutes, categoriesList } from '@/config/routesRegistry'
-import { publicPaths, routeVisibility } from '@/config/siteVisibility'
+import { publicPaths } from '@/config/siteVisibility'
 
 function getBadgeStyle(badgeType) {
   switch (badgeType) {
@@ -77,7 +83,7 @@ function SwitchToggle({ isChecked, onChange, label, size = 'normal' }) {
 }
 
 // =========================================================================
-// TARJETA DESPLEGABLE CON SWITCH DE PRODUCCIÓN
+// TARJETA DE RUTA CON SWITCH DE PRODUCCIÓN Y SUB-RUTAS
 // =========================================================================
 function HierarchicalRouteCard({
   item,
@@ -94,57 +100,49 @@ function HierarchicalRouteCard({
 
   return (
     <div
-      className={`rutas-card rounded-2xl border bg-white transition-all duration-200 ${
+      className={`rounded-2xl border bg-white transition-all duration-200 ${
         isApproved
-          ? 'border-emerald-200/90 shadow-[0_4px_16px_rgba(16,185,129,0.06)]'
-          : 'border-zinc-200 shadow-[0_2px_8px_rgba(0,0,0,0.02)]'
+          ? 'border-emerald-300 shadow-[0_4px_16px_rgba(16,185,129,0.06)] ring-1 ring-emerald-500/15'
+          : 'border-zinc-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:border-zinc-300'
       } ${
-        isExpanded
-          ? 'border-zinc-300 shadow-[0_10px_30px_rgba(0,0,0,0.06)]'
-          : 'hover:border-zinc-300'
+        isExpanded ? 'shadow-[0_10px_30px_rgba(0,0,0,0.06)]' : ''
       }`}
     >
-      {/* CABECERA MINIMALISTA DE LA TARJETA */}
-      <div className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* CABECERA DE LA TARJETA */}
+      <div className="p-5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         
         {/* Lado izquierdo: Ícono + Título + Descripción + Badge */}
-        <div className="flex items-start gap-4 flex-1 min-w-0">
+        <div className="flex items-start gap-3.5 flex-1 min-w-0">
           <div className="shrink-0 mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-900 border border-zinc-200/80">
             <IconComponent className="h-5 w-5 text-[#fe6612]" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap mb-1">
-              <h2 className="text-[17px] sm:text-[18px] font-bold text-zinc-950 tracking-[-0.02em] truncate">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h3 className="text-[16px] sm:text-[17px] font-bold text-zinc-950 tracking-[-0.02em] truncate">
                 {item.title}
-              </h2>
-              <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getBadgeStyle(item.badgeType)}`}>
+              </h3>
+              <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${getBadgeStyle(item.badgeType)}`}>
                 {item.badge}
               </span>
-              <code className="hidden md:inline-block text-[11px] font-mono text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-200/60">
+              <code className="hidden xl:inline-block text-[11px] font-mono text-zinc-500 bg-zinc-50 px-2 py-0.5 rounded border border-zinc-200/60">
                 {item.path}
               </code>
-              {isApproved && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                  <span>En Producción (Dist)</span>
-                </span>
-              )}
             </div>
 
-            <p className="text-[13.5px] leading-relaxed text-zinc-500 line-clamp-2 sm:line-clamp-1">
+            <p className="text-[13px] leading-relaxed text-zinc-500 line-clamp-2 sm:line-clamp-1">
               {item.summary}
             </p>
           </div>
         </div>
 
-        {/* Lado derecho: Switch de Producción + Botón directo + Control Desplegable */}
-        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 w-full sm:w-auto justify-between sm:justify-end">
+        {/* Lado derecho: Switch de Producción + Abrir + Desplegable */}
+        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 w-full sm:w-auto justify-between sm:justify-end">
           
           {/* Switch de Producción */}
           <div className="flex items-center gap-2 pr-2 sm:border-r border-zinc-200/80">
-            <span className="text-[11px] font-semibold text-zinc-600 hidden sm:inline">
-              {isApproved ? 'Dist activo' : 'Solo local'}
+            <span className="text-[11px] font-semibold text-zinc-500 hidden md:inline">
+              {isApproved ? 'Dist' : 'Local'}
             </span>
             <SwitchToggle
               isChecked={isApproved}
@@ -155,7 +153,7 @@ function HierarchicalRouteCard({
 
           <Link
             to={item.path}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 transition-colors"
           >
             <span>Abrir</span>
             <ArrowRight className="w-3.5 h-3.5 text-[#fe6612]" />
@@ -165,13 +163,13 @@ function HierarchicalRouteCard({
             <button
               type="button"
               onClick={onToggle}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                 isExpanded
                   ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
                   : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
               }`}
             >
-              <span>{isExpanded ? 'Ocultar' : `Sub-rutas (${item.children.length})`}</span>
+              <span>{isExpanded ? 'Ocultar' : `${item.children.length}`}</span>
               {isExpanded ? (
                 <ChevronUp className="w-3.5 h-3.5" />
               ) : (
@@ -193,17 +191,17 @@ function HierarchicalRouteCard({
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden border-t border-zinc-100 bg-zinc-50/70 rounded-b-2xl"
           >
-            <div className="p-5 sm:p-6 space-y-3">
+            <div className="p-4 sm:p-5 space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
                   Sub-rutas de {item.title}
                 </span>
                 <span className="text-[11px] font-mono text-zinc-400">
-                  {item.children.length} rutas asociadas
+                  {item.children.length} sub-rutas asociadas
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
                 {item.children.map((child) => {
                   const childApproved = isChildApproved(child.path)
 
@@ -219,11 +217,11 @@ function HierarchicalRouteCard({
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[13.5px] font-bold text-zinc-900 tracking-[-0.01em] truncate">
+                            <span className="text-[13px] font-bold text-zinc-900 tracking-[-0.01em] truncate">
                               {child.title}
                             </span>
                             {child.tag && (
-                              <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded shrink-0">
+                              <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-100 px-1.5 py-0.2 rounded shrink-0">
                                 {child.tag}
                               </span>
                             )}
@@ -243,7 +241,7 @@ function HierarchicalRouteCard({
                           </div>
                         </div>
 
-                        <p className="text-[12px] leading-relaxed text-zinc-500 mb-3">
+                        <p className="text-[12px] leading-relaxed text-zinc-500 mb-2.5">
                           {child.description}
                         </p>
                       </div>
@@ -251,7 +249,7 @@ function HierarchicalRouteCard({
                       {/* Fila de Path y Acciones */}
                       <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-100/80">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <code className="text-[11.5px] font-mono text-zinc-800 truncate">
+                          <code className="text-[11px] font-mono text-zinc-800 truncate">
                             {child.path}
                           </code>
                           <button
@@ -261,16 +259,16 @@ function HierarchicalRouteCard({
                             className="shrink-0 p-1 text-zinc-400 hover:text-[#fe6612] transition-colors"
                           >
                             {copiedPath === child.path ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <Check className="w-3 h-3 text-emerald-600" />
                             ) : (
-                              <Copy className="w-3.5 h-3.5" />
+                              <Copy className="w-3 h-3" />
                             )}
                           </button>
                         </div>
 
                         <Link
                           to={child.path}
-                          className="inline-flex items-center gap-1 text-[12px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors shrink-0"
+                          className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors shrink-0"
                         >
                           <span>Abrir</span>
                           <ArrowRight className="w-3 h-3" />
@@ -289,17 +287,19 @@ function HierarchicalRouteCard({
 }
 
 // =========================================================================
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL REORGANIZADO
 // =========================================================================
 export default function RutasPage() {
   useSetNavbarVariant('transparent')
   const [activeCategory, setActiveCategory] = useState('Todos')
   const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'approved' | 'local'
+  const [sortBy, setSortBy] = useState('default') // 'default' | 'name' | 'routesCount'
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedCards, setExpandedCards] = useState(() => ({}))
   const [copiedPath, setCopiedPath] = useState(null)
   const [copiedAction, setCopiedAction] = useState(null)
   const [showCodeModal, setShowCodeModal] = useState(false)
+  const searchInputRef = useRef(null)
 
   // Estado de rutas aprobadas para producción (Persistente en localStorage)
   const [approvedPaths, setApprovedPaths] = useState(() => {
@@ -313,6 +313,18 @@ export default function RutasPage() {
     }
     return new Set(publicPaths || ['/', '/proyectos', '/landings/desarrollo-web'])
   })
+
+  // Atajo de teclado (Cmd+K o Ctrl+K para enfocar el buscador)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   // Guardar en localStorage ante cualquier cambio
   useEffect(() => {
@@ -348,12 +360,22 @@ export default function RutasPage() {
     setTimeout(() => setCopiedPath(null), 2000)
   }
 
+  // Scroll suave al directorio de rutas
+  const scrollToDirectory = (category = null) => {
+    if (category) {
+      setActiveCategory(category)
+    }
+    const element = document.getElementById('rutas-directorio')
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   // Generar código para siteVisibility.js
   const generatedCode = useMemo(() => {
     const pathsArray = Array.from(approvedPaths).sort()
     const pathsFormatted = pathsArray.map((p) => `  '${p}',`).join('\n')
 
-    // Detectar qué módulos principales están activos
     const hasInicio = approvedPaths.has('/')
     const hasEstudio = Array.from(approvedPaths).some((p) => p.startsWith('/estudio'))
     const hasProyectos = Array.from(approvedPaths).some((p) => p.startsWith('/proyectos'))
@@ -384,7 +406,7 @@ ${pathsFormatted}
 ])`
   }, [approvedPaths])
 
-  // Generar comando PowerShell de una sola línea
+  // Comando PowerShell de 1 línea
   const powershellCommand = useMemo(() => {
     const now = new Date()
     const pad = (n) => String(n).padStart(2, '0')
@@ -404,9 +426,9 @@ ${pathsFormatted}
     setTimeout(() => setCopiedAction(null), 2500)
   }
 
-  // Filtrado jerárquico inteligente (Categoría + Estado + Búsqueda)
+  // Filtrado y ordenamiento de rutas
   const filteredParents = useMemo(() => {
-    return hierarchicalRoutes.filter((parent) => {
+    let result = hierarchicalRoutes.filter((parent) => {
       const matchesCategory = activeCategory === 'Todos' || parent.category === activeCategory
       const isParentApproved = approvedPaths.has(parent.path)
       const hasAnyChildApproved = parent.children && parent.children.some((c) => approvedPaths.has(c.path))
@@ -436,9 +458,16 @@ ${pathsFormatted}
 
       return matchesCategory && matchesStatus && (matchesParent || matchesAnyChild)
     })
-  }, [activeCategory, statusFilter, searchQuery, approvedPaths])
 
-  // Conteo total de sub-rutas
+    if (sortBy === 'name') {
+      result = [...result].sort((a, b) => a.title.localeCompare(b.title))
+    } else if (sortBy === 'routesCount') {
+      result = [...result].sort((a, b) => (b.children?.length || 0) - (a.children?.length || 0))
+    }
+
+    return result
+  }, [activeCategory, statusFilter, sortBy, searchQuery, approvedPaths])
+
   const totalSubRoutes = useMemo(() => {
     return hierarchicalRoutes.reduce((acc, curr) => acc + (curr.children ? curr.children.length : 0) + 1, 0)
   }, [])
@@ -462,185 +491,459 @@ ${pathsFormatted}
     setExpandedCards({})
   }
 
+  // Tarjetas del Ecosistema (Sección 1)
+  const ecosystemAreas = [
+    {
+      title: 'Estudio',
+      desc: 'Estrategia, diseño y construcción digital.',
+      count: '4 rutas',
+      category: 'Estudio Creativo',
+      icon: Palette,
+      gradient: 'from-zinc-100 to-zinc-200',
+    },
+    {
+      title: 'Sistemas Digitales',
+      desc: 'Soluciones para automatizar, organizar y escalar negocios.',
+      count: '6 rutas',
+      category: 'Sistemas Digitales',
+      icon: Cpu,
+      gradient: 'from-orange-50 to-orange-100',
+      highlight: true,
+    },
+    {
+      title: 'Academy',
+      desc: 'Formación aplicada para profesionales.',
+      count: '5 rutas',
+      category: 'Academy',
+      icon: GraduationCap,
+      gradient: 'from-zinc-100 to-zinc-200',
+    },
+    {
+      title: 'Qaway Hub',
+      desc: 'Operaciones y herramientas internas del equipo.',
+      count: '7 rutas',
+      category: 'Qaway Hub',
+      icon: Layers,
+      gradient: 'from-zinc-100 to-zinc-200',
+    },
+    {
+      title: 'Recursos, Blog & Proyectos',
+      desc: 'Contenido, casos, experimentos y recursos del estudio.',
+      count: '18 rutas',
+      category: 'Proyectos & Portafolio',
+      icon: FolderKanban,
+      gradient: 'from-zinc-100 to-zinc-200',
+    },
+  ]
+
   return (
-    <main className="rutas-page pb-32">
+    <main className="rutas-page pb-36">
+      
       {/* ========================================================================= */}
-      {/* HERO SECTION: ENCABEZADO CARBÓN DIFUMINADO ESTÉTICO */}
+      {/* SECCIÓN 1: HERO SOFISTICADO CON DOS COLUMNAS */}
       {/* ========================================================================= */}
       <section className="rutas-hero border-b border-white/10">
         <div className="rutas-shell">
-          <motion.div
-            className="rutas-hero__center"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* Kicker en Cápsula translúcida */}
-            <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-md shadow-sm">
-              <Sliders className="w-3.5 h-3.5 text-[#fe6612]" />
-              <span>/ Consola de Visibilidad & Rutas</span>
-            </div>
-
-            {/* Título Principal */}
-            <h1
-              className="text-[clamp(2.4rem,4.2vw,3.6rem)] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4 text-balance"
-              style={{ fontWeight: 800 }}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+            
+            {/* Columna Izquierda: Mensaje y Buscador */}
+            <motion.div
+              className="lg:col-span-8 flex flex-col items-start"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              Control de Rutas & Producción<span className="text-[#fe6612]">.</span>
-            </h1>
-
-            {/* Bajada */}
-            <p className="text-zinc-300 text-base sm:text-lg max-w-2xl leading-relaxed mb-7 text-balance font-normal">
-              Activa o desactiva con switches qué páginas están aprobadas para salir a producción en Hostinger (<code className="font-mono text-xs text-[#fe6612] bg-black/40 px-2 py-0.5 rounded">dist</code>) sin alterar tu entorno local.
-            </p>
-
-            {/* Buscador Integrado Centrado */}
-            <div className="w-full max-w-xl">
-              <div className="flex items-center gap-3 rounded-[12px] border border-white/20 bg-zinc-900/90 px-4 py-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all focus-within:ring-2 focus-within:ring-[#fe6612] focus-within:border-transparent">
-                <Search className="h-5 w-5 text-zinc-400" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar por módulo, ruta padre o hijo (/blog, /editor, /vallet)..."
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-zinc-500 font-medium"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs font-bold text-zinc-400 hover:text-[#fe6612] transition-colors"
-                  >
-                    ✕
-                  </button>
-                )}
+              {/* Kicker en Cápsula */}
+              <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-md shadow-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#fe6612] animate-pulse"></span>
+                <span>Un ecosistema para crecer</span>
               </div>
-            </div>
 
-            {/* Métricas rápidas */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-400">
-              <span className="inline-flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#fe6612]" />
-                <strong>{hierarchicalRoutes.length}</strong> mandos superiores
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-zinc-400" />
-                <strong>{totalSubRoutes}</strong> rutas mapeadas
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <strong>{approvedPaths.size}</strong> aprobadas para producción (Dist)
-              </span>
-            </div>
-          </motion.div>
+              {/* Título Principal */}
+              <h1 className="text-[clamp(2.5rem,4.8vw,4.2rem)] font-extrabold text-white leading-[1.08] tracking-[-0.035em] mb-4 text-balance">
+                Todo Qaway Lab <br className="hidden sm:inline" />
+                <span className="text-[#fe6612]">en un solo lugar.</span>
+              </h1>
+
+              {/* Subtítulo */}
+              <p className="text-zinc-300 text-base sm:text-[17px] max-w-2xl leading-relaxed mb-8 font-normal text-balance">
+                Explora nuestras soluciones, herramientas, contenidos y proyectos, y encuentra el camino que necesitas.
+              </p>
+
+              {/* Buscador Integrado con Atajo de Teclado */}
+              <div className="w-full max-w-2xl">
+                <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-zinc-900/90 px-4 py-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.4)] backdrop-blur-md transition-all focus-within:ring-2 focus-within:ring-[#fe6612] focus-within:border-transparent">
+                  <Search className="h-5 w-5 text-zinc-400 shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar rutas, herramientas, proyectos o secciones..."
+                    className="w-full bg-transparent text-[14.5px] text-white outline-none placeholder:text-zinc-500 font-medium"
+                  />
+                  {searchQuery ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="text-xs font-bold text-zinc-400 hover:text-[#fe6612] transition-colors p-1"
+                    >
+                      ✕
+                    </button>
+                  ) : (
+                    <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[11px] font-mono text-zinc-400">
+                      <span>⌘</span>
+                      <span>K</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Métricas del Hero */}
+              <div className="mt-7 flex flex-wrap items-center gap-6 text-xs text-zinc-400">
+                <span className="inline-flex items-center gap-2">
+                  <LayoutGrid className="w-4 h-4 text-[#fe6612]" />
+                  <strong className="text-zinc-200">8 áreas activas</strong>
+                </span>
+                <span className="text-zinc-600">•</span>
+                <span className="inline-flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-zinc-400" />
+                  <strong className="text-zinc-200">{totalSubRoutes} rutas totales</strong>
+                </span>
+                <span className="text-zinc-600">•</span>
+                <span className="inline-flex items-center gap-2 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <strong>{approvedPaths.size} en producción (Dist)</strong>
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Columna Derecha: Tarjeta Visual Arquitectónica con Tipografía Editorial */}
+            <motion.div
+              className="lg:col-span-4 hidden lg:flex flex-col justify-between h-[340px] rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/80 to-zinc-950 p-7 shadow-2xl relative overflow-hidden"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="space-y-3 relative z-10">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-[#fe6612] font-mono font-bold">
+                  Manifiesto Editorial
+                </p>
+                <div className="space-y-1 text-2xl font-bold text-white tracking-tight leading-tight">
+                  <p className="text-zinc-400">IDEAS</p>
+                  <p className="text-white">SISTEMAS</p>
+                  <p className="text-zinc-400">PERSONAS</p>
+                  <p className="text-[#fe6612]">RESULTADOS</p>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 relative z-10 flex items-center justify-between">
+                <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">
+                  Tecnología con propósito
+                </span>
+                <span className="h-2 w-2 rounded-full bg-[#fe6612]"></span>
+              </div>
+
+              {/* Sombra de fondo ambiental */}
+              <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-[#fe6612]/15 rounded-full blur-3xl pointer-events-none"></div>
+            </motion.div>
+
+          </div>
         </div>
       </section>
 
       {/* ========================================================================= */}
-      {/* BARRA DE PÍLDORAS Y FILTRO DE ESTADO DE PRODUCCIÓN */}
+      {/* SECCIÓN 2: EXPLORA POR ÁREA (NAVEGA EL ECOSISTEMA) */}
       {/* ========================================================================= */}
-      <div id="rutas-listado" className="sticky top-0 z-30 border-b border-black/10 bg-white/95 backdrop-blur-md py-4 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
-        <div className="rutas-shell flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="py-14 bg-white border-b border-zinc-200/80">
+        <div className="rutas-shell">
           
-          {/* Lista de píldoras horizontal */}
-          <div className="flex flex-1 items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-            {categoriesList.map((category) => {
-              const isActive = activeCategory === category
-              const count = category === 'Todos'
-                ? hierarchicalRoutes.length
-                : hierarchicalRoutes.filter((r) => r.category === category).length
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#fe6612] mb-1.5">
+                Explora por área
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight">
+                Navega el ecosistema<span className="text-[#fe6612]">.</span>
+              </h2>
+            </div>
+            <p className="text-sm text-zinc-500 max-w-md">
+              Cada área reúne secciones, herramientas y contenidos diseñados para ayudarte a avanzar.
+            </p>
+          </div>
+
+          {/* Grid de 5 Tarjetas Visuales de Áreas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {ecosystemAreas.map((area) => {
+              const AreaIcon = area.icon
 
               return (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setActiveCategory(category)}
-                  className={`shrink-0 flex items-center gap-1.5 rounded-[10px] px-3.5 py-2 text-[12.5px] sm:text-[13px] font-semibold transition-all ${
-                    isActive
-                      ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
-                      : 'border border-black/10 bg-white text-[#191918] hover:border-[#fe6612]/40 hover:text-[#fe6612]'
-                  }`}
+                <div
+                  key={area.title}
+                  onClick={() => scrollToDirectory(area.category)}
+                  className={`qw-ecosystem-card group ${area.highlight ? 'border-orange-200 ring-1 ring-[#fe6612]/20' : ''}`}
                 >
-                  <span>{category}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-zinc-100 text-zinc-600'}`}>
-                    {count}
-                  </span>
-                </button>
+                  {/* Encabezado visual de la tarjeta */}
+                  <div className={`qw-ecosystem-card__img bg-gradient-to-br ${area.gradient} flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-105`}>
+                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-900 border border-black/5">
+                      <AreaIcon className="h-7 w-7 text-[#fe6612]" />
+                    </div>
+                  </div>
+
+                  {/* Cuerpo de la tarjeta */}
+                  <div className="qw-ecosystem-card__body">
+                    <div>
+                      <h3 className="text-base font-bold text-zinc-950 mb-1 tracking-tight group-hover:text-[#fe6612] transition-colors">
+                        {area.title}
+                      </h3>
+                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-4">
+                        {area.desc}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-zinc-100 text-xs font-semibold text-zinc-700">
+                      <span>{area.count}</span>
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 group-hover:bg-[#fe6612] group-hover:text-white transition-colors">
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )
             })}
           </div>
 
-          {/* Filtro por estado de Producción + Botones de colapsar */}
-          <div className="flex items-center gap-2 shrink-0 justify-between sm:justify-end">
-            
-            <div className="inline-flex rounded-lg border border-zinc-200 bg-zinc-100 p-0.5 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setStatusFilter('all')}
-                className={`px-2.5 py-1 rounded-md transition-all ${statusFilter === 'all' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-              >
-                Todas
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter('approved')}
-                className={`px-2.5 py-1 rounded-md transition-all ${statusFilter === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-              >
-                En Producción ({approvedPaths.size})
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatusFilter('local')}
-                className={`px-2.5 py-1 rounded-md transition-all ${statusFilter === 'local' ? 'bg-zinc-800 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-              >
-                Solo Local
-              </button>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECCIÓN 3: BANNER INTERACTIVO DE AYUDA (BRÚJULA) */}
+      {/* ========================================================================= */}
+      <section className="py-10 bg-[#fbfbfb]">
+        <div className="rutas-shell">
+          
+          <div className="qw-help-banner flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="max-w-xl space-y-2">
+              <span className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-[#fe6612]">
+                ¿No sabes por dónde empezar?
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                Te ayudamos a encontrar la ruta ideal<span className="text-[#fe6612]">.</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal">
+                Usa el buscador o navega los mandos organizados por área para acceder a las soluciones del laboratorio.
+              </p>
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5">
+            <div className="flex items-center gap-4 shrink-0">
               <button
                 type="button"
-                onClick={expandAll}
-                className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                onClick={() => scrollToDirectory('Todos')}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#fe6612] hover:bg-[#e0550a] text-white text-xs font-bold shadow-lg shadow-[#fe6612]/30 transition-all active:translate-y-px cursor-pointer"
               >
-                Desplegar
+                <span>Explorar todas las rutas</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={collapseAll}
-                className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-              >
-                Colapsar
-              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECCIÓN 4: ACCESOS RÁPIDOS */}
+      {/* ========================================================================= */}
+      <section className="py-8 bg-[#fbfbfb] border-b border-zinc-200/80">
+        <div className="rutas-shell">
+          
+          <div className="mb-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-900">
+              Accesos rápidos
+            </h3>
+            <p className="text-xs text-zinc-500">
+              Enlaces directos a las secciones y portales más visitados.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Link to="/blog" className="qw-quick-pill">
+              <div className="h-9 w-9 rounded-xl bg-orange-50 text-[#fe6612] flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-bold text-zinc-900 truncate">Blog</span>
+                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
+                  Leer artículos <ArrowRight className="w-2.5 h-2.5" />
+                </span>
+              </div>
+            </Link>
+
+            <Link to="/proyectos" className="qw-quick-pill">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <FolderKanban className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-bold text-zinc-900 truncate">Proyectos</span>
+                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
+                  Ver casos <ArrowRight className="w-2.5 h-2.5" />
+                </span>
+              </div>
+            </Link>
+
+            <Link to="/academy" className="qw-quick-pill">
+              <div className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <GraduationCap className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-bold text-zinc-900 truncate">Academy</span>
+                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
+                  Aprender <ArrowRight className="w-2.5 h-2.5" />
+                </span>
+              </div>
+            </Link>
+
+            <Link to="/hub" className="qw-quick-pill">
+              <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <Layers className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-bold text-zinc-900 truncate">Qaway Hub</span>
+                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
+                  Ir al hub <ArrowRight className="w-2.5 h-2.5" />
+                </span>
+              </div>
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECCIÓN 5: TODAS LAS RUTAS & SWITCHES DE PRODUCCIÓN */}
+      {/* ========================================================================= */}
+      <section id="rutas-directorio" className="py-12 bg-white">
+        <div className="rutas-shell">
+          
+          {/* Cabecera del Listado */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-zinc-200/80">
+            <div>
+              <h2 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
+                Todas las rutas
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
+                Listado completo de rutas organizadas por área con switch de producción (<code className="font-mono text-xs text-[#fe6612]">dist</code>).
+              </p>
+            </div>
+
+            {/* Selector de ordenamiento */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
+                <span>Ordenar por:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-[#fe6612]"
+                >
+                  <option value="default">Por defecto</option>
+                  <option value="name">Alfabético</option>
+                  <option value="routesCount">Mayor número de sub-rutas</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Barra de Filtros por Categoría y Estado */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            
+            {/* Píldoras de Categorías */}
+            <div className="flex flex-1 items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
+              {categoriesList.map((category) => {
+                const isActive = activeCategory === category
+                const count = category === 'Todos'
+                  ? hierarchicalRoutes.length
+                  : hierarchicalRoutes.filter((r) => r.category === category).length
+
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setActiveCategory(category)}
+                    className={`shrink-0 flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-[#fe6612] text-white shadow-sm shadow-[#fe6612]/20'
+                        : 'border border-zinc-200 bg-white text-zinc-700 hover:border-[#fe6612]/40 hover:text-[#fe6612]'
+                    }`}
+                  >
+                    <span>{category}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive ? 'bg-white/25 text-white' : 'bg-zinc-100 text-zinc-600'}`}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Filtros de Producción (Todos / En Producción / Solo Local) */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'all' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                >
+                  Todas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('approved')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                >
+                  En Producción ({approvedPaths.size})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('local')}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'local' ? 'bg-zinc-800 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                >
+                  Solo Local
+                </button>
+              </div>
+
+              <div className="hidden sm:flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={expandAll}
+                  className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                >
+                  Desplegar
+                </button>
+                <button
+                  type="button"
+                  onClick={collapseAll}
+                  className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+                >
+                  Colapsar
+                </button>
+              </div>
             </div>
 
           </div>
 
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* LISTADO JERÁRQUICO DE TARJETAS CON SWITCHES */}
-      {/* ========================================================================= */}
-      <section className="rutas-listing py-10 sm:py-12">
-        <div className="rutas-shell">
-          
+          {/* Grid de 2 Columnas de Tarjetas de Rutas */}
           {filteredParents.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="text-lg font-bold text-zinc-900 mb-1">No se encontraron rutas con los filtros aplicados</p>
-              <p className="text-sm text-zinc-500 mb-6">Prueba seleccionando "Todas" o limpiando el término de búsqueda.</p>
+            <div className="py-20 text-center border border-dashed border-zinc-200 rounded-2xl">
+              <p className="text-base font-bold text-zinc-900 mb-1">No se encontraron rutas con los filtros aplicados</p>
+              <p className="text-xs text-zinc-500 mb-5">Prueba seleccionando "Todos" o limpiando el término de búsqueda.</p>
               <button
                 type="button"
                 onClick={() => { setActiveCategory('Todos'); setStatusFilter('all'); setSearchQuery('') }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-[#fe6612] text-white text-xs font-bold hover:bg-[#e0550a] transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#fe6612] text-white text-xs font-bold hover:bg-[#e0550a] transition-all"
               >
                 Restablecer filtros
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {filteredParents.map((parent) => (
                 <HierarchicalRouteCard
                   key={parent.id}
@@ -677,7 +980,7 @@ ${pathsFormatted}
               {approvedPaths.size} rutas aprobadas para Producción (Dist)
             </p>
             <p className="text-[11px] text-zinc-400">
-              Sincronizado con tu almacenamiento local
+              Sincronizado automáticamente en tu navegador
             </p>
           </div>
         </div>
@@ -688,7 +991,7 @@ ${pathsFormatted}
           <button
             type="button"
             onClick={() => setShowCodeModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all cursor-pointer"
           >
             <Code2 className="w-3.5 h-3.5 text-[#fe6612]" />
             <span>Ver Configuración</span>
@@ -697,7 +1000,7 @@ ${pathsFormatted}
           <button
             type="button"
             onClick={copyConfigCode}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#fe6612] hover:bg-[#e0550a] text-white shadow-md shadow-[#fe6612]/25 transition-all active:translate-y-px"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#fe6612] hover:bg-[#e0550a] text-white shadow-md shadow-[#fe6612]/25 transition-all active:translate-y-px cursor-pointer"
           >
             {copiedAction === 'config' ? (
               <>
@@ -716,7 +1019,7 @@ ${pathsFormatted}
             type="button"
             onClick={copyPowerShellCmd}
             title="Copiar comando de terminal de 1 línea"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition-all cursor-pointer"
           >
             {copiedAction === 'ps' ? (
               <>
@@ -734,8 +1037,8 @@ ${pathsFormatted}
           <button
             type="button"
             onClick={resetToDefault}
-            title="Restablecer a la configuración del archivo siteVisibility.js actual"
-            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+            title="Restablecer a la configuración de siteVisibility.js actual"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -807,4 +1110,5 @@ ${pathsFormatted}
     </main>
   )
 }
+
 

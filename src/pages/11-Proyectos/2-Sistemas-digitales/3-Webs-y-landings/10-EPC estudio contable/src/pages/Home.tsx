@@ -10,7 +10,7 @@ import {wa,BASE} from '../config/site';
 export default function Home(){
   return (
     <>
-      <section className="relative min-h-[680px] sm:min-h-[760px] overflow-hidden bg-ecp-navy text-white">
+      <section className="relative min-h-[100dvh] sm:min-h-[760px] overflow-hidden bg-ecp-navy text-white">
         <div 
           className="absolute inset-0 bg-[url('/images/hero-contadora-mobile.png')] bg-cover bg-[center_bottom] sm:bg-[url('/images/hero-contadora-duotono.png')] sm:bg-center opacity-95 sm:opacity-100" 
           aria-hidden="true"
@@ -22,7 +22,7 @@ export default function Home(){
         />
         <div className="absolute inset-x-0 bottom-0 h-24 sm:h-40 bg-gradient-to-t from-ecp-navy to-transparent" aria-hidden="true"/>
         
-        <div className="container-ecp relative flex min-h-[680px] sm:min-h-[760px] flex-col justify-between pt-24 sm:pt-32 pb-6 sm:pb-20">
+        <div className="container-ecp relative flex min-h-[100dvh] sm:min-h-[760px] flex-col justify-between pt-24 sm:pt-32 pb-6 sm:pb-20">
           <div className="w-full max-w-[660px]">
             <Reveal>
               <span className="eyebrow text-blue-400">Estudio Contable Pro</span>
