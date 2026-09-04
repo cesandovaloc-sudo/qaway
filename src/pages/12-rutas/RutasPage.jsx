@@ -497,13 +497,13 @@ ${pathsFormatted}
       title: 'Estudio',
       desc: 'Estrategia, diseño y construcción digital.',
       count: '4 rutas',
-      category: 'Estudio Creativo',
+      category: 'Estudio',
       icon: Palette,
       gradient: 'from-zinc-100 to-zinc-200',
     },
     {
       title: 'Sistemas Digitales',
-      desc: 'Soluciones para automatizar, organizar y escalar negocios.',
+      desc: 'Soluciones para automatizar y escalar negocios.',
       count: '6 rutas',
       category: 'Sistemas Digitales',
       icon: Cpu,
@@ -511,12 +511,36 @@ ${pathsFormatted}
       highlight: true,
     },
     {
+      title: 'Proyectos',
+      desc: 'Casos reales, demos interactivas y arquitectura digital.',
+      count: '12 proyectos',
+      category: 'Proyectos & Demos',
+      icon: FolderKanban,
+      gradient: 'from-blue-50 to-blue-100',
+    },
+    {
+      title: 'Blog',
+      desc: 'Publicaciones editoriales, artículos y consola de redacción.',
+      count: '9 rutas',
+      category: 'Blog & Editorial',
+      icon: Sparkles,
+      gradient: 'from-amber-50 to-amber-100',
+    },
+    {
+      title: 'Recursos',
+      desc: 'Guías PDF, optimizadores y plantillas de diseño.',
+      count: '4 recursos',
+      category: 'Recursos',
+      icon: BookOpen,
+      gradient: 'from-emerald-50 to-emerald-100',
+    },
+    {
       title: 'Academy',
-      desc: 'Formación aplicada para profesionales.',
+      desc: 'Formación aplicada, metodologías y cursos.',
       count: '5 rutas',
-      category: 'Academy',
+      category: 'Portales & Principales',
       icon: GraduationCap,
-      gradient: 'from-zinc-100 to-zinc-200',
+      gradient: 'from-purple-50 to-purple-100',
     },
     {
       title: 'Qaway Hub',
@@ -524,14 +548,6 @@ ${pathsFormatted}
       count: '7 rutas',
       category: 'Qaway Hub',
       icon: Layers,
-      gradient: 'from-zinc-100 to-zinc-200',
-    },
-    {
-      title: 'Recursos, Blog & Proyectos',
-      desc: 'Contenido, casos, experimentos y recursos del estudio.',
-      count: '18 rutas',
-      category: 'Proyectos & Portafolio',
-      icon: FolderKanban,
       gradient: 'from-zinc-100 to-zinc-200',
     },
   ]
@@ -672,8 +688,8 @@ ${pathsFormatted}
             </p>
           </div>
 
-          {/* Grid de 5 Tarjetas Visuales de Áreas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Grid de 7 Tarjetas Visuales de Áreas */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5">
             {ecosystemAreas.map((area) => {
               const AreaIcon = area.icon
 
@@ -684,27 +700,27 @@ ${pathsFormatted}
                   className={`qw-ecosystem-card group ${area.highlight ? 'border-orange-200 ring-1 ring-[#fe6612]/20' : ''}`}
                 >
                   {/* Encabezado visual de la tarjeta */}
-                  <div className={`qw-ecosystem-card__img bg-gradient-to-br ${area.gradient} flex items-center justify-center p-6 transition-transform duration-500 group-hover:scale-105`}>
-                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-900 border border-black/5">
-                      <AreaIcon className="h-7 w-7 text-[#fe6612]" />
+                  <div className={`qw-ecosystem-card__img bg-gradient-to-br ${area.gradient} flex items-center justify-center p-4 transition-transform duration-500 group-hover:scale-105`}>
+                    <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-zinc-900 border border-black/5">
+                      <AreaIcon className="h-6 w-6 text-[#fe6612]" />
                     </div>
                   </div>
 
                   {/* Cuerpo de la tarjeta */}
-                  <div className="qw-ecosystem-card__body">
+                  <div className="qw-ecosystem-card__body p-3.5 flex flex-col justify-between flex-1">
                     <div>
-                      <h3 className="text-base font-bold text-zinc-950 mb-1 tracking-tight group-hover:text-[#fe6612] transition-colors">
+                      <h3 className="text-sm font-bold text-zinc-950 mb-1 tracking-tight group-hover:text-[#fe6612] transition-colors truncate">
                         {area.title}
                       </h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-4">
+                      <p className="text-[11.5px] text-zinc-500 leading-snug line-clamp-2 mb-3">
                         {area.desc}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-zinc-100 text-xs font-semibold text-zinc-700">
-                      <span>{area.count}</span>
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-100 group-hover:bg-[#fe6612] group-hover:text-white transition-colors">
-                        <ArrowRight className="h-3.5 w-3.5" />
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100 text-[11px] font-semibold text-zinc-700">
+                      <span className="truncate">{area.count}</span>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 group-hover:bg-[#fe6612] group-hover:text-white transition-colors">
+                        <ArrowRight className="h-3 w-3" />
                       </span>
                     </div>
                   </div>
@@ -719,7 +735,7 @@ ${pathsFormatted}
       {/* ========================================================================= */}
       {/* SECCIÓN 3: BANNER INTERACTIVO DE AYUDA (BRÚJULA) */}
       {/* ========================================================================= */}
-      <section className="py-10 bg-[#fbfbfb]">
+      <section className="py-10 bg-[#fbfbfb] border-b border-zinc-200/80">
         <div className="rutas-shell">
           
           <div className="qw-help-banner flex flex-col md:flex-row items-center justify-between gap-6">
@@ -751,75 +767,7 @@ ${pathsFormatted}
       </section>
 
       {/* ========================================================================= */}
-      {/* SECCIÓN 4: ACCESOS RÁPIDOS */}
-      {/* ========================================================================= */}
-      <section className="py-8 bg-[#fbfbfb] border-b border-zinc-200/80">
-        <div className="rutas-shell">
-          
-          <div className="mb-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-900">
-              Accesos rápidos
-            </h3>
-            <p className="text-xs text-zinc-500">
-              Enlaces directos a las secciones y portales más visitados.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Link to="/blog" className="qw-quick-pill">
-              <div className="h-9 w-9 rounded-xl bg-orange-50 text-[#fe6612] flex items-center justify-center shrink-0">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="block text-xs font-bold text-zinc-900 truncate">Blog</span>
-                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                  Leer artículos <ArrowRight className="w-2.5 h-2.5" />
-                </span>
-              </div>
-            </Link>
-
-            <Link to="/proyectos" className="qw-quick-pill">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <FolderKanban className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="block text-xs font-bold text-zinc-900 truncate">Proyectos</span>
-                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                  Ver casos <ArrowRight className="w-2.5 h-2.5" />
-                </span>
-              </div>
-            </Link>
-
-            <Link to="/academy" className="qw-quick-pill">
-              <div className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <GraduationCap className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="block text-xs font-bold text-zinc-900 truncate">Academy</span>
-                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                  Aprender <ArrowRight className="w-2.5 h-2.5" />
-                </span>
-              </div>
-            </Link>
-
-            <Link to="/hub" className="qw-quick-pill">
-              <div className="h-9 w-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <Layers className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <span className="block text-xs font-bold text-zinc-900 truncate">Qaway Hub</span>
-                <span className="text-[11px] text-zinc-500 flex items-center gap-1">
-                  Ir al hub <ArrowRight className="w-2.5 h-2.5" />
-                </span>
-              </div>
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* SECCIÓN 5: TODAS LAS RUTAS & SWITCHES DE PRODUCCIÓN */}
+      {/* SECCIÓN 4: TODAS LAS RUTAS & SWITCHES DE PRODUCCIÓN */}
       {/* ========================================================================= */}
       <section id="rutas-directorio" className="py-12 bg-white">
         <div className="rutas-shell">
@@ -835,28 +783,19 @@ ${pathsFormatted}
               </p>
             </div>
 
-            {/* Selector de ordenamiento */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                <span>Ordenar por:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-[#fe6612]"
-                >
-                  <option value="default">Por defecto</option>
-                  <option value="name">Alfabético</option>
-                  <option value="routesCount">Mayor número de sub-rutas</option>
-                </select>
-              </div>
+            {/* Contador / Resumen */}
+            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-500">
+              <span className="px-2.5 py-1 rounded-lg bg-zinc-100 text-zinc-700">
+                {filteredParents.length} secciones mostradas
+              </span>
             </div>
           </div>
 
-          {/* Barra de Filtros por Categoría y Estado */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+          {/* Barra de Filtros en 2 Filas (Sin solapamientos) */}
+          <div className="space-y-4 mb-8">
             
-            {/* Píldoras de Categorías */}
-            <div className="flex flex-1 items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none">
+            {/* FILA 1: Píldoras de Categorías */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               {categoriesList.map((category) => {
                 const isActive = activeCategory === category
                 const count = category === 'Todos'
@@ -883,9 +822,11 @@ ${pathsFormatted}
               })}
             </div>
 
-            {/* Filtros de Producción (Todos / En Producción / Solo Local) */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold">
+            {/* FILA 2: Selector de Estado (Izquierda) + Desplegar/Colapsar y Ordenar (Derecha) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-zinc-100">
+              
+              {/* Selector de Estado de Producción */}
+              <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold self-start sm:self-auto">
                 <button
                   type="button"
                   onClick={() => setStatusFilter('all')}
@@ -909,22 +850,41 @@ ${pathsFormatted}
                 </button>
               </div>
 
-              <div className="hidden sm:flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={expandAll}
-                  className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-                >
-                  Desplegar
-                </button>
-                <button
-                  type="button"
-                  onClick={collapseAll}
-                  className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
-                >
-                  Colapsar
-                </button>
+              {/* Controles de expansión y orden */}
+              <div className="flex items-center gap-3 self-end sm:self-auto">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={expandAll}
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer"
+                  >
+                    Desplegar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={collapseAll}
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors cursor-pointer"
+                  >
+                    Colapsar
+                  </button>
+                </div>
+
+                <div className="h-4 w-px bg-zinc-200 hidden sm:block"></div>
+
+                <div className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
+                  <span>Ordenar:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-800 outline-none focus:border-[#fe6612]"
+                  >
+                    <option value="default">Por defecto</option>
+                    <option value="name">Alfabético</option>
+                    <option value="routesCount">Mayor número de sub-rutas</option>
+                  </select>
+                </div>
               </div>
+
             </div>
 
           </div>
