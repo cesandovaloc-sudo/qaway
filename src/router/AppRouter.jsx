@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
@@ -21,51 +22,57 @@ import { CRMDatosDashboardsPage } from '@/pages/3-sistemas-digitales/4-crm-datos
 import { AgentesIAPage } from '@/pages/3-sistemas-digitales/5-agentes-ia'
 import { HerramientasInternasPage } from '@/pages/3-sistemas-digitales/6-herramientas-internas'
 import { EstrategiaDigitalPage as SistemasEstrategiaDigitalPage } from '@/pages/3-sistemas-digitales/7-estrategia-digital'
-import AcademyPage from '@/pages/4-academy/AcademyPage'
-import HubPage from '@/pages/5-qaway-hub/HubPage'
-import BlogEditorPage from '@/pages/5-qaway-hub/blog-editor/BlogEditorPage'
-import CRMPage from '@/pages/5-qaway-hub/crm/CRMPage'
-import WabaCrmConsolePage from '@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'
-import GestorProyectosHubPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'
-import ProjectTimelineViewerPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'
-import AnalyticsStudioPage from '@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'
-import OptimizadorWebpHubPage from '@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'
-import InstagramExtractorPage from '@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'
-import MarketingStudioPage from '@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'
-import MarketingStudioTwentyPage from '@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
-import EbookDigitalPage from '@/pages/6-recursos/EbookDigitalPage'
-import RecursoVisorPage from '@/pages/6-recursos/RecursoVisorPage'
-import PrimerosFlujosIAPage from '@/pages/6-recursos/1-primeros-flujos IA/PrimerosFlujosIAPage'
-import OptimizadorImagenesWebpPage from '@/pages/6-recursos/2-optimizador-imagenes-webp/OptimizadorImagenesWebpPage'
 import BlogPage from '@/pages/7-blog/BlogPage'
 import ArticleDetailPage from '@/pages/7-blog/ArticleDetailPage'
-import LandingsPage from '@/pages/8-landings/LandingsPage'
-import SistemaContenidosNotionLandingPage from '@/pages/8-landings/1-sistema-contenido-notion/SistemaContenidosNotionLandingPage'
-import IdentidadVisualLandingPage from '@/pages/8-landings/2-identidad-visual/IdentidadVisualLandingPage'
-import ContableLandingPage from '@/pages/8-landings/3-contable/ContableLandingPage'
-import RestauracionFotograficaPage from '@/pages/8-landings/4-restauracion-fotografica/RestauracionFotograficaPage'
-import FotografiaLinkedinPage from '@/pages/8-landings/5-fotografia-linkedin/FotografiaLinkedinPage'
-import RestauracionFotografica2Page from '@/pages/8-landings/6-restauracion-fotografica2/RestauracionFotografica2Page'
-import DesarrolloWebQawayPage from '@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'
-import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
-import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
-import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
-import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
-import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
-import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
-import EpcPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/EpcPage'
-import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'
-import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'
-import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
-import PanaderiaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'
-import SaniclickPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'
-import DentalPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'
-import MesaSelectaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'
-import ValletInmobiliariaPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'
-import ValletPropertyDetailPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletPropertyDetailPage'
-import ValletCatalogPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletCatalogPage'
 import NotFoundPage from '@/pages/NotFoundPage'
+
+// Code-splitting para herramientas administrativas del Hub y páginas secundarias
+const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
+const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
+const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
+const CRMPage = lazy(() => import('@/pages/5-qaway-hub/crm/CRMPage'))
+const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
+const GestorProyectosHubPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'))
+const ProjectTimelineViewerPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'))
+const AnalyticsStudioPage = lazy(() => import('@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'))
+const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'))
+const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'))
+const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
+const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
+
+// Recursos y Landings secundarias
+const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
+const RecursoVisorPage = lazy(() => import('@/pages/6-recursos/RecursoVisorPage'))
+const PrimerosFlujosIAPage = lazy(() => import('@/pages/6-recursos/1-primeros-flujos IA/PrimerosFlujosIAPage'))
+const OptimizadorImagenesWebpPage = lazy(() => import('@/pages/6-recursos/2-optimizador-imagenes-webp/OptimizadorImagenesWebpPage'))
+const LandingsPage = lazy(() => import('@/pages/8-landings/LandingsPage'))
+const SistemaContenidosNotionLandingPage = lazy(() => import('@/pages/8-landings/1-sistema-contenido-notion/SistemaContenidosNotionLandingPage'))
+const IdentidadVisualLandingPage = lazy(() => import('@/pages/8-landings/2-identidad-visual/IdentidadVisualLandingPage'))
+const ContableLandingPage = lazy(() => import('@/pages/8-landings/3-contable/ContableLandingPage'))
+const RestauracionFotograficaPage = lazy(() => import('@/pages/8-landings/4-restauracion-fotografica/RestauracionFotograficaPage'))
+const FotografiaLinkedinPage = lazy(() => import('@/pages/8-landings/5-fotografia-linkedin/FotografiaLinkedinPage'))
+const RestauracionFotografica2Page = lazy(() => import('@/pages/8-landings/6-restauracion-fotografica2/RestauracionFotografica2Page'))
+const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'))
+const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
+const RutasPage = lazy(() => import('@/pages/12-rutas/RutasPage.jsx'))
+
+// Proyectos (aislados en chunks independientes)
+const ProyectosPage = lazy(() => import('@/pages/11-Proyectos/ProyectosPage.jsx'))
+const TemplateDemo = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'))
+const HorizontePage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'))
+const HorizontePageReal = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'))
+const EpcPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/EpcPage'))
+const HorizonteBackupPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'))
+const PlantoraPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'))
+const AureaSkincarePage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'))
+const PanaderiaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/4-Panadería Josué/PanaderiaPage'))
+const SaniclickPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/9-Saniclck/SaniclickPage'))
+const DentalPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/DentalPage'))
+const MesaSelectaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/2-MesaSelecta/MesaSelectaPage'))
+const ValletInmobiliariaPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletInmobiliariaPage'))
+const ValletPropertyDetailPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletPropertyDetailPage'))
+const ValletCatalogPage = lazy(() => import('@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/ValletCatalogPage'))
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
 function ProtectedRoute({ children }) {
@@ -100,7 +107,8 @@ export default function AppRouter() {
   return (
     <>
       <ScrollToTop />
-      <Routes>
+      <Suspense fallback={null}>
+        <Routes>
         <Route
           path="/landings/sistema-contenido-notion"
           element={renderPublicPathRoute('landings', '/landings/sistema-contenido-notion', <SistemaContenidosNotionLandingPage />)}
@@ -400,6 +408,7 @@ export default function AppRouter() {
         <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
+      </Suspense>
     </>
   )
 }

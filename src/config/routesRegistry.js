@@ -104,7 +104,7 @@ export const hierarchicalRoutes = [
     path: '/hub/blog-editor',
     category: 'Blog',
     icon: PenTool,
-    badge: 'Hub Interno',
+    badge: 'Consola Editorial',
     badgeType: 'hub',
     summary: 'Consola editorial WYSIWYG conectada a Supabase para redacción, vista previa y publicación sincronizada 1:1.',
     children: [

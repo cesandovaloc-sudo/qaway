@@ -30,6 +30,10 @@ const seoByPath = {
     title: 'Recursos Qaway | Plantillas, ebooks y herramientas digitales',
     description: 'Descarga recursos practicos de Qaway Lab para productividad, IA, sistemas digitales y organizacion del trabajo.',
   },
+  '/recursos/primeros-flujos-ia': {
+    title: 'Primeros Flujos con IA | Guia practica de automatizacion y productividad',
+    description: 'Guia completa y descargable para implementar tus primeros flujos de automatizacion e inteligencia artificial en tu operacion diaria.',
+  },
   '/recursos/ebooks/google-calendar-dominado': {
     title: 'Google Calendar Dominado | Ebook gratuito de productividad',
     description: 'Aprende a ordenar tu agenda, tareas y calendarios con Google Calendar, IA y un metodo practico de productividad.',
@@ -50,6 +54,10 @@ const seoByPath = {
   '/landings/identidad-visual': {
     title: 'Curso Identidad Visual con IA | Qaway Lab',
     description: 'Aprende a crear logos, paletas y un kit de marca con inteligencia artificial y criterio visual aplicado.',
+  },
+  '/landings/desarrollo-web': {
+    title: 'Desarrollo Web de Alto Impacto | Qaway Lab',
+    description: 'Sitios web, plataformas y landings de conversion rapida, optimizadas con IA, SEO tecnico y arquitectura moderna.',
   },
   '/proyectos/horizonte': {
     title: 'Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab',

@@ -67,8 +67,8 @@ const routes = [
   },
   {
     icon: PenSquare,
-    title: 'Editor Interno de Blog',
-    description: 'Herramienta interna para crear articulos con categoria real, portada, bloques y snippet listo para integracion.',
+    title: 'Editor de Blog',
+    description: 'Plataforma editorial para crear, estructurar y publicar artículos con categorías, portadas y CTAs en tiempo real.',
     path: '/hub/blog-editor',
     access: 'pro',
     badge: 'Listo',
