@@ -83,6 +83,170 @@ function SwitchToggle({ isChecked, onChange, label, size = 'normal' }) {
 }
 
 // =========================================================================
+// TARJETA DE SUITE MULTI-PÁGINA (ANIDADA CON SUB-PÁGINAS)
+// =========================================================================
+function SuiteProjectItem({
+  child,
+  isChildApproved,
+  onToggleChildApproval,
+  onToggleMultiApproval,
+  onCopy,
+  copiedPath,
+}) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const subPages = child.subPages || []
+  const allApproved = subPages.length > 0 && subPages.every((sp) => isChildApproved(sp.path))
+  const someApproved = subPages.some((sp) => isChildApproved(sp.path))
+
+  return (
+    <div
+      className={`md:col-span-2 rounded-xl border bg-gradient-to-b from-white to-zinc-50/50 p-4 transition-all ${
+        allApproved
+          ? 'border-emerald-300 shadow-xs ring-1 ring-emerald-500/15'
+          : someApproved
+          ? 'border-amber-300 shadow-xs'
+          : 'border-zinc-200/90 hover:border-[#fe6612]/40 hover:shadow-xs'
+      }`}
+    >
+      {/* Encabezado de la Suite */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200/70">
+        <div className="flex items-start gap-2.5 flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="text-[14px] font-bold text-zinc-950 tracking-[-0.01em]">
+                {child.title}
+              </span>
+              <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border bg-orange-50 text-[#fe6612] border-orange-200">
+                {child.suiteBadge || `Suite ${subPages.length} páginas`}
+              </span>
+              {child.tag && (
+                <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-100 px-1.5 py-0.2 rounded shrink-0">
+                  {child.tag}
+                </span>
+              )}
+            </div>
+            <p className="text-[12px] leading-relaxed text-zinc-500 line-clamp-2">
+              {child.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Controles de la Suite: Master Switch + Accordion Toggle */}
+        <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-center">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-semibold text-zinc-400">
+              {allApproved ? 'Toda la Suite en Dist' : someApproved ? 'Parcial' : 'Local'}
+            </span>
+            <SwitchToggle
+              size="small"
+              isChecked={allApproved}
+              onChange={() => onToggleMultiApproval(subPages.map((sp) => sp.path))}
+              label={`Toda la suite ${child.title}`}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+              isExpanded
+                ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
+                : 'bg-white text-zinc-700 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+            }`}
+          >
+            <span>{isExpanded ? 'Ocultar páginas' : `Ver páginas (${subPages.length})`}</span>
+            {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Lista de Páginas Anidadas de la Suite */}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden pt-3 space-y-2"
+          >
+            {subPages.map((sub) => {
+              const isSubApproved = isChildApproved(sub.path)
+              return (
+                <div
+                  key={sub.path + sub.title}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-lg border bg-white p-2.5 sm:px-3.5 sm:py-2 transition-all ${
+                    isSubApproved
+                      ? 'border-emerald-300 ring-1 ring-emerald-500/10'
+                      : 'border-zinc-200/80 hover:border-zinc-300'
+                  }`}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[12.5px] font-bold text-zinc-900 truncate">
+                        {sub.title}
+                      </span>
+                      {sub.tag && (
+                        <span className="text-[9.5px] font-semibold text-zinc-500 bg-zinc-100 px-1.5 py-0.2 rounded">
+                          {sub.tag}
+                        </span>
+                      )}
+                      <code className="text-[10.5px] font-mono text-zinc-500 hidden md:inline">
+                        {sub.path}
+                      </code>
+                    </div>
+                    {sub.description && (
+                      <p className="text-[11.5px] text-zinc-500 line-clamp-1 mt-0.5">
+                        {sub.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100">
+                    <button
+                      type="button"
+                      onClick={(e) => onCopy(sub.path, e)}
+                      title="Copiar URL"
+                      className="p-1 text-zinc-400 hover:text-[#fe6612] transition-colors"
+                    >
+                      {copiedPath === sub.path ? (
+                        <Check className="w-3 h-3 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
+                    </button>
+
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9.5px] font-semibold text-zinc-400">
+                        {isSubApproved ? 'Dist' : 'Local'}
+                      </span>
+                      <SwitchToggle
+                        size="small"
+                        isChecked={isSubApproved}
+                        onChange={() => onToggleChildApproval(sub.path)}
+                        label={sub.title}
+                      />
+                    </div>
+
+                    <Link
+                      to={sub.path}
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors px-2 py-0.5 rounded-md hover:bg-orange-50"
+                    >
+                      <span>Abrir</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// =========================================================================
 // TARJETA DE RUTA CON SWITCH DE PRODUCCIÓN Y SUB-RUTAS
 // =========================================================================
 function HierarchicalRouteCard({
@@ -95,6 +259,7 @@ function HierarchicalRouteCard({
   onToggleApproval,
   isChildApproved,
   onToggleChildApproval,
+  onToggleMultiApproval,
 }) {
   const IconComponent = item.icon || Sparkles
 
@@ -203,12 +368,26 @@ function HierarchicalRouteCard({
                   Sub-rutas de {item.title}
                 </span>
                 <span className="text-[11px] font-mono text-zinc-400">
-                  {item.children.length} sub-rutas asociadas
+                  {item.children.length} elementos asociados
                 </span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
                 {item.children.map((child) => {
+                  if (child.isSuite || (child.subPages && child.subPages.length > 0)) {
+                    return (
+                      <SuiteProjectItem
+                        key={child.path + child.title}
+                        child={child}
+                        isChildApproved={isChildApproved}
+                        onToggleChildApproval={onToggleChildApproval}
+                        onToggleMultiApproval={onToggleMultiApproval}
+                        onCopy={onCopy}
+                        copiedPath={copiedPath}
+                      />
+                    )
+                  }
+
                   const childApproved = isChildApproved(child.path)
 
                   return (
@@ -353,6 +532,22 @@ export default function RutasPage() {
     })
   }
 
+  const toggleMultiPathsApproval = (paths, forceState = null) => {
+    setApprovedPaths((prev) => {
+      const next = new Set(prev)
+      const allEnabled = paths.every((p) => next.has(p))
+      const targetState = forceState !== null ? forceState : !allEnabled
+      paths.forEach((p) => {
+        if (targetState) {
+          next.add(p)
+        } else {
+          next.delete(p)
+        }
+      })
+      return next
+    })
+  }
+
   const resetToDefault = () => {
     setApprovedPaths(new Set(publicPaths || ['/', '/proyectos', '/landings/desarrollo-web']))
   }
@@ -364,6 +559,9 @@ export default function RutasPage() {
       if (parent.children) {
         parent.children.forEach((child) => {
           all.add(child.path)
+          if (child.subPages) {
+            child.subPages.forEach((sub) => all.add(sub.path))
+          }
         })
       }
     })
@@ -454,7 +652,13 @@ ${pathsFormatted}
     let result = hierarchicalRoutes.filter((parent) => {
       const matchesCategory = activeCategory === 'Todos' || parent.category === activeCategory
       const isParentApproved = approvedPaths.has(parent.path)
-      const hasAnyChildApproved = parent.children && parent.children.some((c) => approvedPaths.has(c.path))
+      const hasAnyChildApproved =
+        parent.children &&
+        parent.children.some((c) => {
+          if (approvedPaths.has(c.path)) return true
+          if (c.subPages && c.subPages.some((sub) => approvedPaths.has(sub.path))) return true
+          return false
+        })
       const isCardApproved = isParentApproved || hasAnyChildApproved
 
       const matchesStatus =
@@ -471,13 +675,23 @@ ${pathsFormatted}
         parent.summary.toLowerCase().includes(q) ||
         parent.category.toLowerCase().includes(q)
 
-      const matchesAnyChild = parent.children && parent.children.some(
-        (child) =>
-          child.title.toLowerCase().includes(q) ||
-          child.path.toLowerCase().includes(q) ||
-          child.description.toLowerCase().includes(q) ||
-          (child.tag && child.tag.toLowerCase().includes(q))
-      )
+      const matchesAnyChild =
+        parent.children &&
+        parent.children.some(
+          (child) =>
+            child.title.toLowerCase().includes(q) ||
+            child.path.toLowerCase().includes(q) ||
+            child.description.toLowerCase().includes(q) ||
+            (child.tag && child.tag.toLowerCase().includes(q)) ||
+            (child.subPages &&
+              child.subPages.some(
+                (sub) =>
+                  sub.title.toLowerCase().includes(q) ||
+                  sub.path.toLowerCase().includes(q) ||
+                  sub.description.toLowerCase().includes(q) ||
+                  (sub.tag && sub.tag.toLowerCase().includes(q))
+              ))
+        )
 
       return matchesCategory && matchesStatus && (matchesParent || matchesAnyChild)
     })
@@ -492,7 +706,19 @@ ${pathsFormatted}
   }, [activeCategory, statusFilter, sortBy, searchQuery, approvedPaths])
 
   const totalSubRoutes = useMemo(() => {
-    return hierarchicalRoutes.reduce((acc, curr) => acc + (curr.children ? curr.children.length : 0) + 1, 0)
+    return hierarchicalRoutes.reduce((acc, curr) => {
+      let count = 1 // parent
+      if (curr.children) {
+        curr.children.forEach((c) => {
+          if (c.subPages && c.subPages.length > 0) {
+            count += c.subPages.length
+          } else {
+            count += 1
+          }
+        })
+      }
+      return acc + count
+    }, 0)
   }, [])
 
   const toggleCard = (id) => {
@@ -518,8 +744,8 @@ ${pathsFormatted}
   const ecosystemAreas = [
     {
       title: 'Estudio',
-      desc: 'Estrategia, diseño y construcción digital.',
-      count: '4 rutas',
+      desc: 'Estrategia, diseño, brief y construcción digital.',
+      count: '7 rutas',
       category: 'Estudio',
       icon: Palette,
       gradient: 'from-zinc-100 to-zinc-200',
@@ -527,7 +753,7 @@ ${pathsFormatted}
     {
       title: 'Sistemas Digitales',
       desc: 'Soluciones para automatizar y escalar negocios.',
-      count: '6 rutas',
+      count: '7 rutas',
       category: 'Sistemas Digitales',
       icon: Cpu,
       gradient: 'from-orange-50 to-orange-100',
@@ -535,8 +761,8 @@ ${pathsFormatted}
     },
     {
       title: 'Proyectos',
-      desc: 'Casos reales, demos interactivas y arquitectura digital.',
-      count: '12 proyectos',
+      desc: 'Casos reales, suites inmobiliarias y arquitectura web.',
+      count: '9 proyectos',
       category: 'Proyectos',
       icon: FolderKanban,
       gradient: 'from-blue-50 to-blue-100',
@@ -567,11 +793,19 @@ ${pathsFormatted}
     },
     {
       title: 'Qaway Hub',
-      desc: 'Operaciones y herramientas internas del equipo.',
-      count: '7 rutas',
+      desc: 'Operaciones, portal de cliente y herramientas internas.',
+      count: '10 rutas',
       category: 'Qaway Hub',
       icon: Layers,
       gradient: 'from-zinc-100 to-zinc-200',
+    },
+    {
+      title: 'Landings',
+      desc: 'Embudos de captación publicitaria y ventas directas.',
+      count: '6 landings',
+      category: 'Landings',
+      icon: Globe,
+      gradient: 'from-purple-50 to-purple-100',
     },
   ]
 
@@ -962,6 +1196,7 @@ ${pathsFormatted}
                   onToggleApproval={togglePathApproval}
                   isChildApproved={(childPath) => approvedPaths.has(childPath)}
                   onToggleChildApproval={togglePathApproval}
+                  onToggleMultiApproval={toggleMultiPathsApproval}
                 />
               ))}
             </div>

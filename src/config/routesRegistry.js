@@ -114,6 +114,12 @@ export const hierarchicalRoutes = [
     summary: 'Consola central de operaciones y accesos a herramientas de gestión del equipo.',
     children: [
       {
+        title: 'Portal de Acceso (Login de Hub)',
+        path: '/login',
+        description: 'Autenticación y puerta de acceso a la consola administrativa de Qaway Hub.',
+        tag: 'Auth',
+      },
+      {
         title: 'CRM de Ventas & Leads',
         path: '/hub/crm',
         description: 'Bandeja de prospectos comerciales, estados de seguimiento y trazabilidad.',
@@ -130,6 +136,18 @@ export const hierarchicalRoutes = [
         path: '/hub/gestor-proyectos',
         description: 'Panel de control de hitos, fases operativas y cronogramas de entrega.',
         tag: 'Gestión',
+      },
+      {
+        title: 'Portal de Cliente (Dinámico)',
+        path: '/portal/:slug',
+        description: 'Visualizador de estado de proyecto y cronograma en vivo para clientes.',
+        tag: 'Portal Cliente',
+      },
+      {
+        title: 'Recorrido de Proyecto (Hitos Ágiles)',
+        path: '/proyectos/recorrido/:slug',
+        description: 'Visualizador interactivo de hitos, entregables y avances del proyecto.',
+        tag: 'Recorrido',
       },
       {
         title: 'Analytics Studio & Dashboards',
@@ -255,6 +273,18 @@ export const hierarchicalRoutes = [
         description: 'Diagnóstico 1 a 1 y hoja de ruta para elevar la percepción comercial de la marca.',
         tag: 'Consultoría',
       },
+      {
+        title: 'Portada Oficial Qaway Lab',
+        path: '/',
+        description: 'Portada institucional principal con hero interactivo, servicios y manifiesto.',
+        tag: 'Home',
+      },
+      {
+        title: 'Brief de Onboarding & Requerimientos',
+        path: '/brief',
+        description: 'Formulario interactivo de captura de requerimientos de marca y sistemas para nuevos clientes.',
+        tag: 'Onboarding',
+      },
     ],
   },
 
@@ -272,32 +302,52 @@ export const hierarchicalRoutes = [
       {
         title: 'Vallet Asesoría Inmobiliaria',
         path: '/proyectos/vallet',
-        description: 'Asesoría inmobiliaria integral para compra, venta y alquiler en Lima.',
+        description: 'Suite inmobiliaria completa con portada, buscador de propiedades y ficha de detalle.',
         tag: 'Inmobiliaria',
-      },
-      {
-        title: 'Vallet — Catálogo Completo de Propiedades',
-        path: '/proyectos/vallet/propiedades',
-        description: 'Buscador y catálogo de cartera inmobiliaria con filtros por modalidad y distrito.',
-        tag: 'Inmobiliaria',
-      },
-      {
-        title: 'Vallet — Ficha de Inmueble (Miraflores)',
-        path: '/proyectos/vallet/propiedad/departamento-miraflores',
-        description: 'Secuencia interactiva de detalle de propiedad, mosaico de fotos y agendamiento de visitas.',
-        tag: 'Inmobiliaria',
+        isSuite: true,
+        suiteBadge: 'Suite 3 páginas',
+        subPages: [
+          {
+            title: 'Portada Inmobiliaria',
+            path: '/proyectos/vallet',
+            description: 'Portada principal con hero interactivo y servicios de asesoría.',
+            tag: 'Home',
+          },
+          {
+            title: 'Catálogo de Propiedades',
+            path: '/proyectos/vallet/propiedades',
+            description: 'Buscador y catálogo de cartera con filtros por modalidad y distrito.',
+            tag: 'Catálogo',
+          },
+          {
+            title: 'Ficha de Propiedad (Miraflores)',
+            path: '/proyectos/vallet/propiedad/departamento-miraflores',
+            description: 'Secuencia interactiva de detalle de propiedad, fotos y agendamiento.',
+            tag: 'Ficha Detalle',
+          },
+        ],
       },
       {
         title: 'Horizonte Inmobiliaria',
         path: '/proyectos/horizonte',
         description: 'Ecosistema web con recorridos 3D y captación automatizada a WhatsApp.',
         tag: 'Inmobiliaria',
-      },
-      {
-        title: 'Horizonte (Versión Producción)',
-        path: '/proyectos/horizonte-real',
-        description: 'Entorno de despliegue real del portal inmobiliario.',
-        tag: 'Live Demo',
+        isSuite: true,
+        suiteBadge: 'Suite 2 versiones',
+        subPages: [
+          {
+            title: 'Horizonte (Vista Interactiva)',
+            path: '/proyectos/horizonte',
+            description: 'Recorrido interactivo y catálogo visual 3D.',
+            tag: 'Live Demo',
+          },
+          {
+            title: 'Horizonte (Versión Producción)',
+            path: '/proyectos/horizonte-real',
+            description: 'Entorno de despliegue real optimizado.',
+            tag: 'Producción',
+          },
+        ],
       },
       {
         title: 'Mesa Selecta',
@@ -448,50 +498,6 @@ export const hierarchicalRoutes = [
         path: '/academy',
         description: 'Catálogo de cursos y formaciones prácticas para profesionales.',
         tag: 'Formación',
-      },
-    ],
-  },
-
-  // 9. PÁGINAS PRINCIPALES & PORTALES
-  {
-    id: 'portales-principales',
-    title: 'Portales, Accesos & Variantes',
-    path: '/',
-    category: 'Portales & Principales',
-    icon: Shield,
-    badge: 'Core',
-    badgeType: 'area',
-    summary: 'Portadas institucionales, acceso administrativo y portal privado para clientes.',
-    children: [
-      {
-        title: 'Inicio Principal (V1)',
-        path: '/',
-        description: 'Portada oficial con hero interactivo, servicios y manifiesto.',
-        tag: 'Producción',
-      },
-      {
-        title: 'Portal de Cliente (Dinámico)',
-        path: '/portal/:slug',
-        description: 'Visualizador de estado de proyecto y cronograma en vivo para clientes.',
-        tag: 'Privado',
-      },
-      {
-        title: 'Recorrido de Proyecto',
-        path: '/proyectos/recorrido/:slug',
-        description: 'Visualizador interactivo de hitos y avances de entregables.',
-        tag: 'Privado',
-      },
-      {
-        title: 'Portal de Acceso (Login)',
-        path: '/login',
-        description: 'Autenticación para administradores y equipo de Qaway Lab.',
-        tag: 'Auth',
-      },
-      {
-        title: 'Brief de Branding Digital',
-        path: '/brief',
-        description: 'Formulario de recopilación de requerimientos para nuevos proyectos.',
-        tag: 'Onboarding',
       },
     ],
   },

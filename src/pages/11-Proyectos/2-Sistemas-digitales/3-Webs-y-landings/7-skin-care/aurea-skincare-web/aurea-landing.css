@@ -364,13 +364,13 @@
   align-items:center;
   gap:26px;
   padding:11px 16px 11px 18px;
-  background:rgba(255,255,255,0.90);
-  color:#182219;
-  border:1px solid rgba(24,34,25,0.11);
+  background:rgba(255,255,255,0.92);
+  color:#0f172a;
+  border:1px solid rgba(0,0,0,0.08);
   border-radius:999px;
   backdrop-filter:blur(28px);
   -webkit-backdrop-filter:blur(28px);
-  box-shadow:0 22px 55px rgba(24,34,25,0.13), 0 4px 16px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.9) inset;
+  box-shadow:0 20px 50px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.03), 0 0 0 1px rgba(255,255,255,0.9) inset;
 }
 .aurea-studio-dock .dock-back-pill{
   display:inline-flex;
@@ -378,21 +378,21 @@
   gap:8px;
   font-size:14px;
   font-weight:600;
-  color:#273528;
-  background:rgba(24,34,25,0.06);
+  color:#334155;
+  background:rgba(0,0,0,0.04);
   padding:10px 20px;
   border-radius:999px;
-  border:1px solid rgba(24,34,25,0.09);
+  border:1px solid rgba(0,0,0,0.07);
   transition:all .22s cubic-bezier(.16,1,.3,1);
   white-space:nowrap;
   text-decoration:none;
 }
 .aurea-studio-dock .dock-back-pill:hover{
-  background:#182219;
+  background:#eb7434;
   color:#ffffff;
-  border-color:#182219;
+  border-color:#eb7434;
   transform:translateX(-3px);
-  box-shadow:0 6px 16px rgba(24,34,25,0.18);
+  box-shadow:0 6px 18px rgba(235,116,52,0.28);
 }
 .aurea-studio-dock .dock-brand-info{
   display:flex;
@@ -406,14 +406,14 @@
   font-size:16px;
   font-weight:500;
   line-height:1.38;
-  color:#182219;
+  color:#0f172a;
   margin:0;
   letter-spacing:-.01em;
   text-align:center;
 }
 .aurea-studio-dock .dock-copyright-note{
   font-size:12.5px;
-  color:#6c796d;
+  color:#64748b;
   letter-spacing:.02em;
   text-align:center;
 }
