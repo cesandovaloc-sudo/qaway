@@ -141,7 +141,7 @@ export default function AureaSkincarePage() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => setScrolled(window.scrollY > 90);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive:true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -168,10 +168,7 @@ export default function AureaSkincarePage() {
         schema={schemaData}
       />
       
-      {/* Navbar inteligente de Qaway Lab: Emerge solo al hacer scroll con botón Volver a Proyectos */}
-      <Navbar variant="project-dock" />
-
-      {/* Header Original de la marca Auréa */}
+      {/* Header de la marca Auréa: Solo emerge al hacer scroll */}
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio">
