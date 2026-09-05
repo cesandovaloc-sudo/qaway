@@ -9,6 +9,7 @@ import {
   BookOpen,
   BarChart3,
   Globe,
+  LogOut,
 } from 'lucide-react'
 import { useBlog } from '../context/BlogContext'
 import BlogSidebar from '../components/workspace/BlogSidebar'
@@ -65,6 +66,21 @@ export default function DashboardPage() {
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Nuevo Artículo</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sessionStorage.removeItem('qaway_auth_token')
+              sessionStorage.removeItem('qaway_auth_email')
+              localStorage.removeItem('qaway_auth_token')
+              navigate('/login')
+            }}
+            className="inline-flex items-center gap-1.5 border border-line hover:bg-surface-muted text-muted hover:text-danger px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            title="Cerrar sesión de administrador"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Cerrar Sesión</span>
           </button>
         </div>
       </header>

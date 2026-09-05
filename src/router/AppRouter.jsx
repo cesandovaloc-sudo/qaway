@@ -69,6 +69,12 @@ import NotFoundPage from '@/pages/NotFoundPage'
 import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/siteVisibility'
 
 function ProtectedRoute({ children }) {
+  const location = useLocation()
+  const token = sessionStorage.getItem('qaway_auth_token') || localStorage.getItem('qaway_auth_token')
+
+  if (!token) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
+  }
   return children
 }
 

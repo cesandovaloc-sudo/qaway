@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react'
+import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { isSuperAdmin } from '@/config/auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -8,32 +10,71 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTarget = searchParams.get('redirect') || '/hub'
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
+    const cleanEmail = email.trim()
+
     try {
-      const response = await fetch('http://localhost:4000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      })
+      // 1. Intentar autenticación directa en Supabase Auth (Producción / Cloud)
+      const supabase = getSupabaseClient()
+      if (supabase) {
+        const { data: supaData, error: supaError } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: password,
+        })
 
-      const data = await response.json()
-
-      if (response.ok) {
-        sessionStorage.setItem('qaway_auth_token', data.token)
-        navigate('/hub/crm')
-      } else {
-        setError(data.error || 'Credenciales incorrectas.')
-        setLoading(false)
+        if (!supaError && supaData?.session) {
+          const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'admin')
+          sessionStorage.setItem('qaway_auth_token', supaData.session.access_token)
+          sessionStorage.setItem('qaway_auth_email', cleanEmail)
+          sessionStorage.setItem('qaway_auth_role', role)
+          localStorage.setItem('qaway_auth_token', supaData.session.access_token)
+          localStorage.setItem('qaway_auth_email', cleanEmail)
+          localStorage.setItem('qaway_auth_role', role)
+          navigate(redirectTarget, { replace: true })
+          return
+        }
       }
+
+      // 2. Fallback a Backend local (si estuviera en desarrollo con server Express)
+      try {
+        const response = await fetch('http://localhost:4000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: cleanEmail, password })
+        })
+
+        const data = await response.json()
+
+        if (response.ok && data.token) {
+          const role = isSuperAdmin(cleanEmail) ? 'admin' : 'user'
+          sessionStorage.setItem('qaway_auth_token', data.token)
+          sessionStorage.setItem('qaway_auth_email', cleanEmail)
+          sessionStorage.setItem('qaway_auth_role', role)
+          localStorage.setItem('qaway_auth_token', data.token)
+          localStorage.setItem('qaway_auth_email', cleanEmail)
+          localStorage.setItem('qaway_auth_role', role)
+          navigate(redirectTarget, { replace: true })
+          return
+        }
+      } catch (backendErr) {
+        // Backend local no disponible
+      }
+
+      // 3. Si ambos fallaron, mostrar error claro
+      setError('Credenciales incorrectas o usuario no registrado.')
+      setLoading(false)
     } catch (err) {
-      setError('Error de conexión con el servidor. Verifica que el backend esté corriendo.')
+      console.error('[Auth Error]', err)
+      setError('Error al procesar la autenticación. Verifica tus datos.')
       setLoading(false)
     }
   }

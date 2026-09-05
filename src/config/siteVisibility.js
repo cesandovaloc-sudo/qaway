@@ -4,33 +4,41 @@ export const isPublicSiteMode = SITE_MODE === 'public'
 
 export const routeVisibility = {
   inicio: true,
-  estudio: false,
+  estudio: true,
   proyectos: true,
   brief: false,
-  sistemasDigitales: false,
+  sistemasDigitales: true,
   academy: false,
   hub: true,
   recursos: true,
   blog: true,
-  landings: true,
+  landings: false,
   auth: false,
   pruebas: false,
 }
 
 const publicPathAllowList = new Set([
   '/',
-  '/proyectos',
-  '/landings/desarrollo-web',
   '/blog',
   '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
-  '/recursos',
-  '/recursos/primeros-flujos-ia',
-  '/recursos/optimizador-imagenes-webp',
-  '/recursos/ebooks/google-calendar-dominado',
+  '/editor/:id',
+  '/editor/new',
+  '/estudio',
   '/hub',
+  '/hub/blog-editor',
+  '/hub/blog-editor/editor/:id',
   '/hub/optimizador-webp',
-  '/hub/marketing',
-  '/hub/marketing2',
+  '/login',
+  '/portal/:slug',
+  '/proyectos',
+  '/proyectos/aurea-skincare',
+  '/proyectos/panaderia-josue',
+  '/proyectos/vallet',
+  '/proyectos/vallet/propiedad/departamento-miraflores',
+  '/proyectos/vallet/propiedades',
+  '/recursos/optimizador-imagenes-webp',
+  '/recursos/primeros-flujos-ia',
+  '/sistemas-digitales',
 ])
 
 const navigationRegistry = [
@@ -93,7 +101,15 @@ export function isRouteEnabled(routeKey) {
 export function isPublicPathAllowed(pathname) {
   if (!isPublicSiteMode) return true
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
-  return publicPathAllowList.has(normalizedPath) || normalizedPath.startsWith('/recursos')
+  if (publicPathAllowList.has(normalizedPath) || normalizedPath.startsWith('/recursos')) return true
+
+  for (const allowed of publicPathAllowList) {
+    if (allowed.includes(':')) {
+      const pattern = '^' + allowed.replace(/:[a-zA-Z0-9_]+/g, '[^/]+') + '$'
+      if (new RegExp(pattern).test(normalizedPath)) return true
+    }
+  }
+  return false
 }
 
 function isLinkVisible(link) {
