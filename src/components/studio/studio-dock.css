@@ -133,78 +133,67 @@
   }
 }
 
-/* Responsive Mobile (< 768px) - Tarjeta Flotante Rectangular Limpia (Estilo Card Glass Premium) */
+/* Responsive Mobile (< 768px) - Barra Dock Flotante Ultra-Glass Compacta & Dinámica */
 @media (max-width: 768px) {
   .qw-studio-dock-container {
-    left: 14px;
-    right: 14px;
-    bottom: 16px;
-    transform: none;
-    width: auto;
-    max-width: 100%;
+    left: 50%;
+    right: auto;
+    bottom: 18px;
+    transform: translateX(-50%);
+    width: calc(100vw - 28px);
+    max-width: 420px;
   }
   .qw-studio-dock.glass-white {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 14px 16px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 14px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.68) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
   }
   .qw-studio-dock .dock-back-pill {
-    align-self: flex-start;
-    padding: 6px 14px;
-    font-size: 12.5px;
+    padding: 8px 12px;
+    font-size: 13px;
     font-weight: 600;
     gap: 6px;
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 999px;
-    color: #334155;
+    color: #1e293b;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
   }
-  .qw-studio-dock .dock-back-pill:hover {
+  .qw-studio-dock .dock-back-pill:hover,
+  .qw-studio-dock .dock-back-pill:active {
     background: #eb7434;
     color: #ffffff;
     border-color: #eb7434;
     transform: none;
-    box-shadow: none;
+    box-shadow: 0 4px 12px rgba(235, 116, 52, 0.25);
   }
   .qw-studio-dock .dock-brand-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    gap: 2px;
-    padding: 0;
-  }
-  .qw-studio-dock .dock-text {
-    font-size: 14.5px;
-    font-weight: 600;
-    line-height: 1.35;
-    color: #0f172a;
-    text-align: left;
-  }
-  .qw-studio-dock .dock-copyright-note {
-    font-size: 11px;
-    color: #64748b;
-    letter-spacing: 0.01em;
-    text-align: left;
+    display: none;
   }
   .qw-studio-dock .dock-actions {
-    width: 100%;
-    margin-top: 2px;
+    width: auto;
+    margin: 0;
   }
   .qw-studio-dock .dock-cta-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 20px;
-    font-size: 14.5px;
+    width: auto;
+    padding: 9px 18px;
+    font-size: 13.5px;
     font-weight: 600;
-    gap: 8px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(254, 102, 18, 0.32);
+    gap: 7px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(254, 102, 18, 0.38);
   }
 }
+
 
 
