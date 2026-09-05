@@ -38,7 +38,6 @@ const publicPathAllowList = new Set([
   '/proyectos/vallet/propiedad/departamento-miraflores',
   '/proyectos/vallet/propiedades',
   '/recursos',
-  '/recursos/optimizador-imagenes-webp',
   '/recursos/primeros-flujos-ia',
   '/sistemas-digitales',
 ])
@@ -103,7 +102,7 @@ export function isRouteEnabled(routeKey) {
 export function isPublicPathAllowed(pathname) {
   if (!isPublicSiteMode) return true
   const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '')
-  if (publicPathAllowList.has(normalizedPath) || normalizedPath.startsWith('/recursos')) return true
+  if (publicPathAllowList.has(normalizedPath)) return true
 
   for (const allowed of publicPathAllowList) {
     if (allowed.includes(':')) {

@@ -51,7 +51,7 @@ const baseResources = [
     type: 'Script Node.js + Guía CLI',
     badge: 'Gratis',
     publishedAt: '2026-09-03',
-    public: true,
+    public: false,
     homeSection: 'featured',
     featured: {
       order: 2,
@@ -134,7 +134,9 @@ export default function RecursosPage() {
   // Combinación de recursos locales reales y Supabase sin duplicados
   const allResources = useMemo(() => {
     const map = new Map()
-    baseResources.forEach(r => map.set(r.id, r))
+    baseResources
+      .filter(r => !isPublicSiteMode || r.public !== false)
+      .forEach(r => map.set(r.id, r))
     dbResources.forEach(r => map.set(r.id, r))
     return Array.from(map.values())
   }, [dbResources])

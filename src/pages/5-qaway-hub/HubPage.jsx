@@ -24,6 +24,7 @@ import {
   ChevronDown,
   CheckCircle2,
   RotateCcw,
+  Instagram,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import '@/pages/11-Proyectos/proyectos.css'
@@ -38,6 +39,16 @@ const routes = [
     badge: 'Gratis',
     category: 'Herramientas',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+  },
+  {
+    icon: Instagram,
+    title: 'Descargador & Extractor de Instagram',
+    description: 'Extractor y descargador multimedia de publicaciones, carruseles y reels de Instagram en alta calidad.',
+    path: '/hub/descargador-ig',
+    access: 'free',
+    badge: 'Borrador',
+    category: 'Herramientas',
+    tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
   },
   {
     icon: FolderKanban,
@@ -161,12 +172,6 @@ const routes = [
   },
 ]
 
-const areas = [
-  { icon: Route, title: 'Rutas de Marca', description: 'Construye y lanza tu presencia digital desde cero.' },
-  { icon: Briefcase, title: 'Ruta Profesional', description: 'Organiza y optimiza tu operacion diaria.' },
-  { icon: Layers, title: 'Herramientas y Paneles', description: 'Soluciones modulares y dashboards de control.' },
-]
-
 const displayFont = {
   fontFamily: "'Oswald', sans-serif",
   fontStretch: 'condensed',
@@ -200,77 +205,70 @@ export default function HubPage() {
     return matchAccess && matchCat && matchSearch
   })
 
-  const featured = filteredRoutes.filter((route) => route.badge)
-  const regularRoutes = filteredRoutes.filter((route) => !route.badge)
+  const cardGradients = [
+    'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]', // Lavender
+    'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]', // Cyan
+    'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]', // Amber
+    'bg-[linear-gradient(135deg,#e0e7ff_0%,#c7d2fe_42%,#a5b4fc_100%)]', // Indigo
+    'bg-[linear-gradient(135deg,#dcfce7_0%,#bbf7d0_42%,#86efac_100%)]', // Mint
+    'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]', // Rose
+    'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]', // Peach
+  ]
 
   const FeaturedCard = ({ route, idx }) => {
     const Icon = route.icon
-    const isPrimary = idx === 0
+    const gradient = cardGradients[idx % cardGradients.length]
 
     return (
-      <Link to={route.path} className="block">
+      <Link to={route.path} className="group block">
         <motion.article
-          className={`group relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-2xl p-10 transition-all ${
-            isPrimary
-              ? 'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]'
-              : 'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]'
-          }`}
-          initial={{ opacity: 0, x: isPrimary ? -30 : 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
+          className={`relative flex min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 transition-all ${gradient}`}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.45, delay: (idx % 6) * 0.04 }}
           whileHover={{ y: -6, boxShadow: '0 20px 50px rgba(0,0,0,0.12)' }}
         >
+          {/* Marca de agua translúcida con icono grande */}
           <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-3 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-500 group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-105">
             <Icon className="h-24 w-24" strokeWidth={1.4} />
           </div>
-          <div className="relative z-10 max-w-[68%]">
-            <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#191918]/10 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest text-[#191918]">
-              {isPrimary ? <TrendingUp size={12} strokeWidth={3} /> : <Star size={12} strokeWidth={3} />}
-              {route.badge}
-            </span>
-            <p className="mb-1 text-[13px] font-medium text-[#191918]/60">{route.category}</p>
-            <h3 className="text-[clamp(1.4rem,3vw,1.8rem)] font-bold leading-[1.15] text-[#191918]">
-              {route.title}
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-[#191918]/65">{route.description}</p>
-          </div>
-        </motion.article>
-      </Link>
-    )
-  }
 
-  const ModuleCard = ({ route, idx }) => {
-    const Icon = route.icon
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 0.45, delay: idx * 0.06 }}
-      >
-        <Link to={route.path} className="group flex h-full flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#fe6612]/40 hover:shadow-lg">
-          <div>
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-[#191918]/55 transition-colors group-hover:border-[#fe6612]/30 group-hover:bg-[#fe6612]/10 group-hover:text-[#fe6612]">
-                <Icon size={20} />
-              </div>
-              <span className={`rounded-md px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest ${route.tone}`}>
+          {/* Contenido */}
+          <div className="relative z-10 max-w-[74%]">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#191918]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#191918]">
+                {route.access === 'free' ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                    <span>Gratis</span>
+                  </>
+                ) : (
+                  <>
+                    <Star size={11} strokeWidth={3} />
+                    <span>{route.badge || 'Pro'}</span>
+                  </>
+                )}
+              </span>
+              <span className="text-[12px] font-semibold text-[#191918]/65">
                 {route.category}
               </span>
             </div>
-            <h3 className="text-[15px] font-bold leading-snug text-[#191918] transition-colors group-hover:text-[#fe6612]">
+
+            <h3 className="text-[clamp(1.3rem,2.4vw,1.65rem)] font-bold leading-[1.2] text-[#191918]">
               {route.title}
             </h3>
-            <p className="mt-2 text-xs leading-relaxed text-black/60">{route.description}</p>
+            <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-[#191918]/70">
+              {route.description}
+            </p>
+
+            <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#191918] transition-transform group-hover:translate-x-1">
+              <span>Explorar</span>
+              <ArrowRight size={14} />
+            </div>
           </div>
-          <div className="mt-5 flex items-center justify-between border-t border-black/10 pt-4 text-xs font-bold uppercase tracking-widest text-[#191918] transition-colors group-hover:text-[#fe6612]">
-            <span>Abrir</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </div>
-        </Link>
-      </motion.div>
+        </motion.article>
+      </Link>
     )
   }
 
@@ -329,10 +327,10 @@ export default function HubPage() {
             </div>
 
             {/* Botonera de Filtros Integrada (Acceso + Temática) */}
-            <div className="mt-8 flex flex-col items-center gap-3.5 w-full max-w-4xl">
+            <div className="mt-8 flex flex-col items-start sm:items-center gap-3.5 w-full max-w-4xl text-left sm:text-center">
               {/* Fila 1: Acceso */}
-              <div className="flex flex-wrap items-center justify-center gap-2.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1">
+              <div className="flex flex-wrap items-center justify-start sm:justify-center gap-2.5 w-full">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1 shrink-0">
                   ACCESO:
                 </span>
                 <button
@@ -372,8 +370,8 @@ export default function HubPage() {
               </div>
 
               {/* Fila 2: Temática */}
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1">
+              <div className="flex flex-wrap items-center justify-start sm:justify-center gap-2 w-full">
+                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1 shrink-0">
                   TEMÁTICA:
                 </span>
                 {thematicFilters.map((filter) => {
@@ -411,94 +409,27 @@ export default function HubPage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* HERO ORIGINAL DE HUB (PRESERVADO INTACTO) */}
-      {/* ========================================================================= */}
-      <section className="relative z-20 overflow-hidden border-b border-black/10 bg-[#ffffff] pb-16 pt-28 text-[#191918] sm:pb-24 sm:pt-36">
-        <div className="pointer-events-none absolute inset-0 z-0 select-none overflow-hidden bg-[#ffffff]">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
-          <div
-            className="absolute bottom-0 right-0 top-0 w-[42%] bg-[#1a1918] shadow-2xl transition-all duration-300 md:w-[34%] lg:w-[28%]"
-            style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)' }}
-          >
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px] opacity-[0.14]" />
-            <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
-            <div className="absolute inset-y-0 left-0 w-px bg-white/10" />
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
-          <div className="min-h-[190px] sm:h-[220px]">
-            <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
-              <span>/ Hub</span>
-            </div>
-            <motion.h1
-              className="text-[clamp(3rem,6.5vw,5rem)] font-bold uppercase leading-[0.85] text-[#191918]"
-              style={displayFont}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Qaway Hub<span className="text-[#ff4b0b]">.</span>
-            </motion.h1>
-            <motion.p
-              className="mt-6 max-w-xl text-[15px] leading-relaxed text-[#191918]/70 sm:text-base"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Accede a rutas, paneles y herramientas internas para organizar la operacion digital de Qaway.
-            </motion.p>
-          </div>
-
-          <div className="mt-12 grid max-w-5xl gap-3 sm:grid-cols-3">
-            {areas.map((area) => {
-              const Icon = area.icon
-              return (
-                <div key={area.title} className="flex items-center gap-3 rounded-md border border-black/10 bg-white px-5 py-4">
-                  <Icon size={18} className="shrink-0 text-[#ff4b0b]" />
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#191918]">{area.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-[#191918]/55">{area.description}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="pb-12 pt-10 lg:pb-24 lg:pt-16">
+      <section className="pb-12 pt-6 sm:pt-8 lg:pb-20 lg:pt-10">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
-          <div className="mb-8 border-b border-black/10 pb-4">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-black/40">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ff4b0b]" />
-              Bloques destacados
+          {filteredRoutes.length === 0 ? (
+            <div className="my-16 flex flex-col items-center justify-center text-center">
+              <p className="text-base font-bold text-[#191918]">No se encontraron herramientas</p>
+              <p className="mt-1 text-sm text-[#191918]/60">Intenta con otro término de búsqueda o limpia los filtros.</p>
+              <button
+                type="button"
+                onClick={() => { setAccessFilter('all'); setCategoryFilter('Todas'); setSearchQuery('') }}
+                className="mt-4 rounded-full bg-[#fe6612] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#e05508] transition-colors"
+              >
+                Restablecer filtros
+              </button>
             </div>
-          </div>
-
-          <div className="mb-16 grid gap-6 md:grid-cols-2">
-            {featured.map((route, idx) => (
-              <FeaturedCard key={route.title} route={route} idx={idx} />
-            ))}
-          </div>
-
-          <div className="mb-8 flex items-center justify-between border-b border-black/10 pb-4">
-            <h2 className="qw-section-title--sm uppercase text-[#191918]" style={displayFont}>
-              Rutas y herramientas
-            </h2>
-            <span className="flex items-center gap-2 text-sm font-bold text-[#191918]/60">
-              {filteredRoutes.length} modulos <ArrowRight size={16} />
-            </span>
-          </div>
-
-          <div className="mb-16 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {regularRoutes.map((route, idx) => (
-              <ModuleCard key={route.title} route={route} idx={idx} />
-            ))}
-          </div>
+          ) : (
+            <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {filteredRoutes.map((route, idx) => (
+                <FeaturedCard key={route.title} route={route} idx={idx} />
+              ))}
+            </div>
+          )}
 
           <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
             <div className="min-w-[300px] flex-1">
