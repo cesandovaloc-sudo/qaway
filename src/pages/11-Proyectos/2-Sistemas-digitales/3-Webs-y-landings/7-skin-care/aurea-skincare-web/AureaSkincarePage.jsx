@@ -167,7 +167,35 @@ export default function AureaSkincarePage() {
         canonical="https://qawaylab.com/proyectos/aurea-skincare"
         schema={schemaData}
       />
-      <Navbar variant="project-scroll" />
+      
+      {/* 1. Barra Superior de Retorno & Contexto de Estudio (Sticky estilo Recursos) */}
+      <div className="border-b border-[#20201f]/10 bg-white/95 backdrop-blur-md sticky top-0 z-50">
+        <div className="mx-auto max-w-[1240px] px-6 py-3 flex items-center justify-between sm:px-10 lg:px-14">
+          <a
+            href="/proyectos"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#20201f]/75 hover:text-[#fe6612] transition-colors"
+          >
+            <ArrowDownRight className="h-3.5 w-3.5 rotate-[135deg]" />
+            <span>Volver a Proyectos</span>
+          </a>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-block text-[11px] font-semibold text-[#64748b] tracking-wider uppercase">
+              Demo de Portafolio · Qaway Lab
+            </span>
+            <a
+              href="https://wa.me/51953282216?text=Hola%20Qaway%20Lab%2C%20estuve%20viendo%20el%20proyecto%20Aur%C3%A9a%20Skincare%20y%20me%20gustar%C3%ADa%20cotizar%20un%20proyecto%20similar."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-[9px] bg-[#fe6612] px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-[0_8px_20px_rgba(254,102,18,0.25)] hover:bg-[#e05508] transition-all"
+            >
+              <span>Conversemos</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Header Original de la marca Auréa */}
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio">
