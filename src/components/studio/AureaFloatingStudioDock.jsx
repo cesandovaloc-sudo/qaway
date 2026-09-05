@@ -70,6 +70,7 @@ export default function AureaFloatingStudioDock({
                 className="dock-cta-btn"
                 aria-label="Conversar con Qaway Lab por WhatsApp"
               >
+                <span className="dock-online-dot" aria-hidden="true" />
                 <MessageCircle size={16} />
                 <span>Conversemos</span>
               </a>
