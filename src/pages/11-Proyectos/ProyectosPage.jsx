@@ -554,8 +554,8 @@ export default function ProyectosPage() {
             </p>
           </motion.div>
 
-          {/* Grilla de 4 Columnas: Mockups de Teléfono Celular Vertical */}
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 justify-items-center">
+          {/* Grilla de 3 Columnas: Mockups de Teléfono Celular Vertical */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 justify-items-center max-w-5xl mx-auto">
             {[
               {
                 title: 'E-commerce & Catálogo',
@@ -572,12 +572,6 @@ export default function ProyectosPage() {
                 tag: 'Lead Directo',
                 statusBg: '#fffdf9',
                 statusColor: '#111111'
-              },
-              {
-                title: 'Gastronomía & Reservas',
-                desc: 'Menús digitales y reserva de mesas optimizados para carga ultra rápida.',
-                image: estudioAssets + 'estudio-proyecto-cafe.webp',
-                tag: 'Experiencia'
               },
               {
                 title: 'Servicios Profesionales',

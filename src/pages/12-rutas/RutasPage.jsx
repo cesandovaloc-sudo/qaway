@@ -357,6 +357,23 @@ export default function RutasPage() {
     setApprovedPaths(new Set(publicPaths || ['/', '/proyectos', '/landings/desarrollo-web']))
   }
 
+  const selectAllPaths = () => {
+    const all = new Set()
+    hierarchicalRoutes.forEach((parent) => {
+      all.add(parent.path)
+      if (parent.children) {
+        parent.children.forEach((child) => {
+          all.add(child.path)
+        })
+      }
+    })
+    setApprovedPaths(all)
+  }
+
+  const deselectAllPaths = () => {
+    setApprovedPaths(new Set(['/']))
+  }
+
   const handleCopy = (path, e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -575,20 +592,22 @@ ${pathsFormatted}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
-              {/* Kicker en Cápsula */}
-              <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-md shadow-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#fe6612] animate-pulse"></span>
-                <span>Un ecosistema para crecer</span>
+              {/* Kicker en Cápsula Blanca translúcida idéntica a Proyectos */}
+              <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs shadow-xs">
+                <span>/ Directorio & Control</span>
               </div>
 
-              {/* Título Principal */}
-              <h1 className="text-[clamp(2.5rem,4.8vw,4.2rem)] font-extrabold text-white leading-[1.08] tracking-[-0.035em] mb-4 text-balance">
+              {/* Título Principal con escala y peso idéntico a Proyectos */}
+              <h1
+                className="text-[clamp(2.4rem,4vw,3.4rem)] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4 text-balance"
+                style={{ fontWeight: 800 }}
+              >
                 Todo Qaway Lab <br className="hidden sm:inline" />
                 <span className="text-[#fe6612]">en un solo lugar.</span>
               </h1>
 
-              {/* Subtítulo */}
-              <p className="text-zinc-300 text-base sm:text-[17px] max-w-2xl leading-relaxed mb-8 font-normal text-balance">
+              {/* Subtítulo idéntico a Proyectos */}
+              <p className="text-white/90 text-base sm:text-lg max-w-2xl leading-relaxed mb-7 text-balance font-normal">
                 Explora nuestras soluciones, herramientas, contenidos y proyectos, y encuentra el camino que necesitas.
               </p>
 
@@ -831,29 +850,50 @@ ${pathsFormatted}
             {/* FILA 2: Selector de Estado (Izquierda) + Desplegar/Colapsar y Ordenar (Derecha) */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-zinc-100">
               
-              {/* Selector de Estado de Producción */}
-              <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'all' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-                >
-                  Todas
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('approved')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-                >
-                  En Producción ({approvedPaths.size})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('local')}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'local' ? 'bg-zinc-800 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
-                >
-                  Solo Local
-                </button>
+              {/* Selector de Estado de Producción + Master Toggles */}
+              <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+                <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'all' ? 'bg-white text-zinc-900 shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    Todas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('approved')}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    En Producción ({approvedPaths.size})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusFilter('local')}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${statusFilter === 'local' ? 'bg-zinc-800 text-white shadow-xs' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >
+                    Solo Local
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={selectAllPaths}
+                    title="Aprobar todas las rutas para Producción (Dist)"
+                    className="px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer"
+                  >
+                    Activar todos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={deselectAllPaths}
+                    title="Desactivar todas las rutas (Solo Local)"
+                    className="px-2.5 py-1.5 rounded-lg border border-zinc-200 bg-zinc-50 text-[11px] font-bold text-zinc-600 hover:bg-zinc-100 transition-colors cursor-pointer"
+                  >
+                    Desactivar todos
+                  </button>
+                </div>
               </div>
 
               {/* Controles de expansión y orden */}
@@ -954,6 +994,24 @@ ${pathsFormatted}
         {/* Botones de acción rápida */}
         <div className="flex items-center gap-2 flex-wrap">
           
+          <button
+            type="button"
+            onClick={selectAllPaths}
+            title="Aprobar todas las rutas del laboratorio para Producción"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-950/70 hover:bg-emerald-900/90 border border-emerald-500/30 transition-all cursor-pointer"
+          >
+            <span>Activar todos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={deselectAllPaths}
+            title="Desactivar todas las rutas (Solo Local)"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-300 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700 transition-all cursor-pointer"
+          >
+            <span>Desactivar todos</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setShowCodeModal(true)}
