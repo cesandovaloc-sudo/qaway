@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
-import { ArrowLeft, Send, Save, Eye, Edit3, Maximize, Minimize, BookOpen, Sparkles, Link2, Type, Undo2, Redo2, PanelRightOpen } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Send, Save, Eye, Edit3, Maximize, Minimize, BookOpen, Sparkles, Link2, Type, Undo2, Redo2, PanelRightOpen } from 'lucide-react'
 import { useBlog, slugify } from '../context/BlogContext'
 import type { PostStatus } from '../types'
 import CoverDropzone from '../components/CoverDropzone'
