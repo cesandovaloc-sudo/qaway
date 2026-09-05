@@ -1474,7 +1474,6 @@ export default function InicioPageV3() {
             </div>
             <div className="flex items-center gap-6">
               <Link to="/" className="hover:text-slate-300 transition-colors">Inicio V1</Link>
-              <Link to="/inicio-v2" className="hover:text-slate-300 transition-colors">Inicio V2</Link>
               <Link to="/inicio-v3" className="text-blue-400 font-semibold">Inicio V3 (Cloudways Clone)</Link>
             </div>
           </div>

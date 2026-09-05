@@ -2,7 +2,6 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
-import InicioPageV2 from '@/pages/1-inicio/InicioPageV2.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
 import {
