@@ -1,4 +1,4 @@
-﻿/* --- Qaway Lab Studio Floating Dock (Universal Component) --- */
+/* --- Qaway Lab Studio Floating Dock (Universal Component) --- */
 .qw-studio-dock-container {
   position: fixed;
   bottom: 36px;
@@ -133,44 +133,51 @@
   }
 }
 
-/* Responsive Mobile (< 768px) */
+/* Responsive Mobile (< 768px) - Opción A: Barra Dock Horizontal Compacta Estilo iOS */
 @media (max-width: 768px) {
   .qw-studio-dock-container {
-    left: 12px;
-    right: 12px;
-    bottom: 16px;
-    transform: none;
-    width: auto;
+    left: 50%;
+    right: auto;
+    bottom: 20px;
+    transform: translateX(-50%);
+    width: calc(100vw - 32px);
+    max-width: 440px;
   }
-  .qw-studio-dock {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-    padding: 16px 18px;
-    border-radius: 20px;
+  .qw-studio-dock.glass-white {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 8px 7px 14px;
+    border-radius: 999px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   }
   .qw-studio-dock .dock-back-pill {
-    width: fit-content;
-    margin-inline: auto;
-    font-size: 13.5px;
+    padding: 8px 12px;
+    font-size: 13px;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: #475569;
+  }
+  .qw-studio-dock .dock-back-pill:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: #0f172a;
+    border-color: transparent;
+    transform: none;
+    box-shadow: none;
   }
   .qw-studio-dock .dock-brand-info {
-    align-items: center;
-    text-align: center;
-  }
-  .qw-studio-dock .dock-text {
-    font-size: 15.5px;
-  }
-  .qw-studio-dock .dock-copyright-note {
-    font-size: 12.5px;
+    display: none;
   }
   .qw-studio-dock .dock-actions {
-    width: 100%;
+    width: auto;
   }
   .qw-studio-dock .dock-cta-btn {
-    width: 100%;
-    justify-content: center;
-    padding: 13px 22px;
-    font-size: 15px;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    gap: 7px;
+    border-radius: 999px;
   }
 }
+
