@@ -39,6 +39,7 @@ const routes = [
     badge: 'Gratis',
     category: 'Herramientas',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    published: false,
   },
   {
     icon: Instagram,
@@ -49,6 +50,7 @@ const routes = [
     badge: 'Borrador',
     category: 'Herramientas',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    published: false,
   },
   {
     icon: FolderKanban,
@@ -59,6 +61,7 @@ const routes = [
     badge: 'Pro',
     category: 'Product Management',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    published: false,
   },
   {
     icon: PenSquare,
@@ -66,9 +69,10 @@ const routes = [
     description: 'Herramienta interna para crear articulos con categoria real, portada, bloques y snippet listo para integracion.',
     path: '/hub/blog-editor',
     access: 'pro',
-    badge: null,
+    badge: 'Listo',
     category: 'Herramientas',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    published: true,
   },
   {
     icon: Calendar,
@@ -79,6 +83,7 @@ const routes = [
     badge: 'Destacado',
     category: 'Panel de control',
     tone: 'bg-[#191918] text-white',
+    published: false,
   },
   {
     icon: MessageSquare,
@@ -89,6 +94,7 @@ const routes = [
     badge: 'Nuevo',
     category: 'Panel de control',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    published: false,
   },
   {
     icon: Route,
@@ -99,6 +105,7 @@ const routes = [
     badge: null,
     category: 'Rutas de Marca',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    published: false,
   },
   {
     icon: Briefcase,
@@ -109,6 +116,7 @@ const routes = [
     badge: null,
     category: 'Ruta Profesional',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    published: false,
   },
   {
     icon: FlaskConical,
@@ -119,6 +127,7 @@ const routes = [
     badge: null,
     category: 'Rutas de Marca',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    published: false,
   },
   {
     icon: Wrench,
@@ -129,6 +138,7 @@ const routes = [
     badge: null,
     category: 'Herramientas',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    published: false,
   },
   {
     icon: BarChart3,
@@ -139,6 +149,7 @@ const routes = [
     badge: 'Pro',
     category: 'Herramientas',
     tone: 'bg-[#0080FF]/10 text-[#0080FF]',
+    published: false,
   },
   {
     icon: Target,
@@ -149,6 +160,7 @@ const routes = [
     badge: 'v1.0',
     category: 'Herramientas',
     tone: 'bg-[#0075FF]/10 text-[#0075FF]',
+    published: false,
   },
   {
     icon: Kanban,
@@ -159,6 +171,7 @@ const routes = [
     badge: 'Twenty UI',
     category: 'Herramientas',
     tone: 'bg-slate-900 text-white',
+    published: false,
   },
   {
     icon: Zap,
@@ -169,6 +182,7 @@ const routes = [
     badge: null,
     category: 'Herramientas',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    published: false,
   },
 ]
 
@@ -192,7 +206,9 @@ export default function HubPage() {
     'Ruta Profesional',
   ]
 
-  const filteredRoutes = routes.filter((route) => {
+  const activeRoutes = routes.filter((route) => route.published)
+
+  const filteredRoutes = activeRoutes.filter((route) => {
     const matchAccess = accessFilter === 'all' || route.access === accessFilter
     const matchCat = categoryFilter === 'Todas' || route.category === categoryFilter
     const q = searchQuery.toLowerCase().trim()
