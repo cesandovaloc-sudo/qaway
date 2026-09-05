@@ -5,6 +5,7 @@ import {
   Sparkles, Sun, Droplets, Heart, X, ShoppingBag
 } from "lucide-react";
 import SEO from "@/components/seo/SEO";
+import Navbar from "@/components/layout/Navbar";
 import StudioFloatingDock from "@/components/studio/StudioFloatingDock";
 import "./aurea-landing.css";
 
@@ -166,6 +167,7 @@ export default function AureaSkincarePage() {
         canonical="https://qawaylab.com/proyectos/aurea-skincare"
         schema={schemaData}
       />
+      <Navbar variant="project-scroll" />
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio">

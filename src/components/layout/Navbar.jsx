@@ -90,7 +90,8 @@ export default function Navbar({ variant: explicitVariant }) {
   // Visor / reader pages hide the global Navbar for immersive experience
   if (variant === 'hidden') return null
 
-  const styles = variantStyles[variant] || variantStyles.light
+  const isProjectScroll = variant === 'project-scroll'
+  const styles = (variantStyles[variant] || variantStyles.light)
   
   const visibleLinks = getNavbarLinks()
   const navLinks = visibleLinks.map(vLink => {
@@ -114,12 +115,17 @@ export default function Navbar({ variant: explicitVariant }) {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentY = window.scrollY
-          setScrolled(currentY > 20)
+          const isPastThreshold = currentY > (isProjectScroll ? 80 : 20)
+          setScrolled(isPastThreshold)
 
-          if (currentY > lastScrollY.current && currentY > 50) {
-            setHeaderVisible(false) // Ocultar al bajar
+          if (isProjectScroll) {
+            setHeaderVisible(currentY > 80)
           } else {
-            setHeaderVisible(true)  // Mostrar al subir
+            if (currentY > lastScrollY.current && currentY > 50) {
+              setHeaderVisible(false) // Ocultar al bajar
+            } else {
+              setHeaderVisible(true)  // Mostrar al subir
+            }
           }
 
           lastScrollY.current = currentY
@@ -129,8 +135,9 @@ export default function Navbar({ variant: explicitVariant }) {
       }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [isProjectScroll])
 
   useEffect(() => {
     setMenuOpen(false)
@@ -163,11 +170,13 @@ export default function Navbar({ variant: explicitVariant }) {
   const ctaClass = isTransparentInitial ? 'bg-white text-[#fe6612] shadow-[0_12px_28px_rgba(0,0,0,0.14)] hover:bg-zinc-100' : styles.cta
   const menuBtnClass = isTransparentInitial ? 'text-white' : styles.menuBtn
 
+  const isHeaderShown = isProjectScroll ? (scrolled && headerVisible) : headerVisible
+
   return (
     <>
       <header
         ref={menuContainerRef}
-        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform,background-color,border-color] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform,background-color,border-color] duration-300 ${isHeaderShown ? 'translate-y-0' : '-translate-y-full'
           } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
           }`}
       >
