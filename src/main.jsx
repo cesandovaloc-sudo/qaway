@@ -25,7 +25,7 @@ class RootErrorBoundary extends React.Component {
         <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'system-ui, sans-serif' }}>
           <h1 style={{ color: '#dc2626', marginBottom: '1rem' }}>Algo salió mal</h1>
           <p style={{ color: '#52525b', marginBottom: '1rem' }}>No se pudo cargar la aplicación.</p>
-          {this.state.error && (
+          {import.meta.env.DEV && this.state.error && (
             <pre style={{ textAlign: 'left', background: '#f4f4f5', padding: '1rem', borderRadius: '8px', color: '#b91c1c', fontSize: '13px', overflowX: 'auto', maxWidth: '800px', margin: '0 auto 1.5rem' }}>
               {this.state.error.toString()}
               {'\n'}

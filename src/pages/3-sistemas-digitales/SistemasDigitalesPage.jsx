@@ -592,7 +592,7 @@ const profileCards = [
   {
     title: "Marcas personales y creadores",
     tag: "Contenido sostenido",
-    image: "/assets/pages/3-sistemas-digitales/content-ops-creator-studio.png",
+    image: "/assets/pages/3-sistemas-digitales/content-ops-creator-studio.webp",
     points: [
       "Ideas, guiones, tomas y publicaciones bajo una misma lógica.",
       "Menos desgaste mental para sostener presencia y campañas.",
@@ -601,7 +601,7 @@ const profileCards = [
   {
     title: "Equipos comerciales y marketing",
     tag: "Operación visible",
-    image: "/assets/pages/3-sistemas-digitales/content-ops-team-dashboard.png",
+    image: "/assets/pages/3-sistemas-digitales/content-ops-team-dashboard.webp",
     points: [
       "Seguimiento conjunto entre contenido, leads y performance.",
       "Handoffs más limpios entre campañas, ventas y atención.",
@@ -611,7 +611,7 @@ const profileCards = [
     title: "Fundadores, consultores y proyectos",
     tag: "Criterio y estructura",
     image:
-      "/assets/pages/3-sistemas-digitales/content-ops-consulting-session.png",
+      "/assets/pages/3-sistemas-digitales/content-ops-consulting-session.webp",
     points: [
       "Prioridad clara sobre qué digitalizar y qué automatizar primero.",
       "Un sistema que ayuda a vender, enseñar y operar mejor.",
@@ -1073,7 +1073,7 @@ export default function SistemasDigitalesPage() {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,75,11,0.18),transparent_34%)]" />
             <img
-              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.png"
+              src="/assets/pages/3-sistemas-digitales/content-ops-command-center.webp"
               alt="Centro de control CRM y operaciones digitales"
               className="relative z-10 h-full min-h-[25rem] w-full object-cover object-center"
               loading="lazy"
@@ -1243,7 +1243,7 @@ export default function SistemasDigitalesPage() {
 
               <div className="mt-8 overflow-hidden border border-white/10 bg-white/[0.03] p-3 shadow-[0_28px_80px_rgba(0,0,0,0.28)]">
                 <img
-                  src="/assets/pages/3-sistemas-digitales/content-ops-team-dashboard.png"
+                  src="/assets/pages/3-sistemas-digitales/content-ops-team-dashboard.webp"
                   alt="Equipo revisando dashboards, CRM y flujos digitales"
                   className="h-full min-h-[24rem] w-full object-cover"
                   loading="lazy"
@@ -1381,7 +1381,7 @@ export default function SistemasDigitalesPage() {
             <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
               <div className="relative overflow-hidden border-b border-black/8 lg:border-b-0 lg:border-r">
                 <img
-                  src="/assets/pages/3-sistemas-digitales/content-ops-consulting-session.png"
+                  src="/assets/pages/3-sistemas-digitales/content-ops-consulting-session.webp"
                   alt="Sesión de consultoría para diseñar un sistema digital y de contenido"
                   className="h-full min-h-[22rem] w-full object-cover"
                   loading="lazy"

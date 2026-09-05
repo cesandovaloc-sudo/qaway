@@ -30,6 +30,8 @@ const publicPathAllowList = new Set([
   '/hub/blog-editor/editor/:id',
   '/hub/optimizador-webp',
   '/landings/desarrollo-web',
+  '/landings/identidad-visual',
+  '/landings/sistema-contenido-notion',
   '/login',
   '/portal/:slug',
   '/proyectos',
@@ -39,6 +41,7 @@ const publicPathAllowList = new Set([
   '/proyectos/vallet/propiedad/departamento-miraflores',
   '/proyectos/vallet/propiedades',
   '/recursos',
+  '/recursos/ebooks/google-calendar-dominado',
   '/recursos/primeros-flujos-ia',
   '/sistemas-digitales',
 ])

@@ -78,15 +78,14 @@ const baseResources = [
 ]
 
 const displayFont = {
-  fontFamily: "'Oswald', sans-serif",
-  fontStretch: 'condensed',
+  fontFamily: '"Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif',
+  letterSpacing: '-0.03em',
 }
 
 export default function RecursosPage() {
   const { category } = useParams()
   const [activeCategory, setActiveCategory] = useState(category || null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [dbResources, setDbResources] = useState([])
   const [loadingDb, setLoadingDb] = useState(false)
 
@@ -135,7 +134,7 @@ export default function RecursosPage() {
   const allResources = useMemo(() => {
     const map = new Map()
     baseResources
-      .filter(r => !isPublicSiteMode || r.public !== false)
+      .filter(r => r.public === true)
       .forEach(r => map.set(r.id, r))
     dbResources.forEach(r => map.set(r.id, r))
     return Array.from(map.values())
@@ -150,7 +149,6 @@ export default function RecursosPage() {
 
   const normalizedSearch = searchQuery.trim().toLowerCase()
   const isSearchActive = normalizedSearch.length > 0
-  const shouldExpandSearch = isSearchExpanded || isSearchActive
 
   const filteredResources = useMemo(() => {
     return allResources.filter((resource) => {
@@ -227,7 +225,7 @@ export default function RecursosPage() {
     return (
       <Link to={res.path || '#'} className="block">
         <motion.div
-          className="group relative flex min-h-[300px] flex-col justify-end overflow-hidden rounded-2xl p-10 transition-all cursor-pointer"
+          className="group relative flex flex-col-reverse sm:flex-col justify-between sm:justify-end overflow-hidden rounded-2xl p-6 sm:p-8 md:p-10 transition-all cursor-pointer min-h-[auto] sm:min-h-[300px]"
           style={{ background: style.background }}
           initial={{ opacity: 0, x: idx === 0 ? -30 : 30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -237,15 +235,15 @@ export default function RecursosPage() {
         >
           <img 
             src={res.image} 
-            alt="" 
-            className="absolute -right-2 top-1/2 w-[52%] max-w-[320px] -translate-y-1/2 rotate-3 rounded-xl object-cover shadow-2xl transition-transform duration-500 group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-105" 
+            alt={res.title || 'Recurso destacado'} 
+            className="relative sm:absolute sm:-right-2 sm:top-1/2 sm:-translate-y-1/2 w-full max-w-[220px] sm:max-w-[320px] sm:w-[52%] mx-auto sm:mx-0 mt-4 sm:mt-0 rotate-1 sm:rotate-3 rounded-xl object-cover shadow-xl sm:shadow-2xl transition-transform duration-500 group-hover:rotate-0 group-hover:scale-105" 
           />
-          <div className="relative z-10 w-[60%]">
+          <div className="relative z-10 w-full sm:w-[58%]">
             <span className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ background: style.badgeBackground, color: style.badgeColor }}>
               <FeaturedIcon size={12} strokeWidth={3} /> {res.featured?.label || 'Destacado'}
             </span>
             <p className="mb-1 text-[13px] font-medium" style={{ color: style.typeColor }}>{res.type}</p>
-            <h3 className="text-[clamp(1.4rem,3vw,1.8rem)] font-bold leading-[1.15]" style={{ color: style.titleColor }}>
+            <h3 className="text-[clamp(1.3rem,3vw,1.8rem)] font-bold leading-[1.15]" style={{ color: style.titleColor }}>
               {res.title}
             </h3>
           </div>
@@ -334,92 +332,112 @@ export default function RecursosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#ff4b0b] selection:text-white">
-      
-      <section className="relative overflow-hidden bg-[#ffffff] pt-24 pb-10 text-[#191918] sm:pt-32 sm:pb-12 border-b border-black/10">
-        <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden bg-[#ffffff]">
-          <div className="absolute inset-0 opacity-[0.02] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(255,255,255,0.7),transparent_70%)]" />
-          <div 
-            className="absolute right-0 top-0 bottom-0 w-[42%] md:w-[34%] lg:w-[28%] bg-[#1a1918] transition-all duration-300 shadow-2xl"
-            style={{
-              clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)'
-            }}
-          >
-            <div className="absolute inset-0 opacity-[0.14] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:55px_75px]" />
-            <div className="absolute inset-0 bg-linear-to-r from-black/40 via-transparent to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(0,0,0,0.5),transparent_70%)]" />
-            <div className="absolute inset-0 bg-linear-to-l from-black/30 via-transparent to-transparent" />
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10" />
-          </div>
-        </div>
-        <div className="relative z-10 mx-auto max-w-[94rem] px-6 text-left sm:px-10 lg:px-14">
-          <div>
-            <div className="mb-6 flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
-              <span>/ Recursos</span>
-            </div>
-            <motion.h1
-              className="qw-hero-title font-bold uppercase text-[#191918]"
-              style={displayFont}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Recursos<span className="text-[#ff4b0b]">.</span>
-            </motion.h1>
-            <motion.p
-              className="mt-4 max-w-xl text-[15px] sm:text-base leading-relaxed text-[#191918]/70"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Explora herramientas, plantillas, ebooks y recursos practicos sobre IA, sistemas y productividad aplicada.
-            </motion.p>
-          </div>
-          <div className="mt-7 flex flex-nowrap items-center gap-3 max-w-[78rem] relative">
-              <button
-                type="button"
-                onClick={() => selectCategory(null)}
-                className={`group flex w-[110px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
-                  activeCategory === null ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
-                }`}
+    <div className="flex min-h-screen flex-col justify-between bg-white selection:bg-[#ff4b0b] selection:text-white">
+      <div>
+        {/* ========================================================================= */}
+        {/* HERO WORDPRESS STYLE: DEGRADADO SUAVE CON CONTROLES INTEGRADOS            */}
+        {/* ========================================================================= */}
+        <section className="relative z-20 overflow-hidden border-b border-black/5 bg-gradient-to-b from-white via-[#ffe6d8] to-[#ffd0b5] pb-8 pt-20 sm:pb-10 sm:pt-28">
+          <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
+            
+            {/* Cabecera del Hero */}
+            <div className="max-w-3xl">
+              <div className="mb-3 inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+                <span>/ Recursos</span>
+              </div>
+
+              <motion.h1
+                className="text-4xl font-bold tracking-tight text-[#191918] sm:text-5xl lg:text-6xl"
+                style={displayFont}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
               >
-                <span className={`text-[11px] font-bold uppercase tracking-widest ${activeCategory === null ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>Todos</span>
-              </button>
-              {availableCategories.map((cat, i) => {
-                const Icon = cat.icon
-                const isActive = activeCategory === cat.key
-                return (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => selectCategory(cat.key)}
-                    className={`group flex w-auto min-w-[130px] shrink-0 items-center justify-center gap-2 rounded-md border border-black/10 px-5 py-3 transition-all hover:border-[#ff4b0b]/40 hover:shadow-xs ${
-                      isActive ? 'bg-[#191918] text-[#ff4b0b]' : 'bg-white text-[#191918]'
-                    }`}
-                  >
-                    <Icon size={16} className={`transition-colors ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]/40 group-hover:text-[#ff4b0b]'}`} />
-                    <span className={`text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-[#ff4b0b]' : 'text-[#191918]'}`}>{cat.title}</span>
-                  </button>
-                )
-              })}
-            <label className={`group flex items-center gap-3 rounded-md border border-black/10 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(0,0,0,0.04)] transition-all duration-300 focus-within:border-[#ff4b0b]/50 focus-within:shadow-[0_18px_44px_rgba(0,0,0,0.08)] ${shouldExpandSearch ? 'w-[300px] flex-none' : 'w-[132px] flex-none'}`}> 
-              <Search className="h-4 w-4 text-[#191918]/40 transition-colors group-focus-within:text-[#ff4b0b]" />
-              <input
-                type="search"
-                value={searchQuery}
-                onFocus={() => setIsSearchExpanded(true)}
-                onBlur={() => setIsSearchExpanded(false)}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder={shouldExpandSearch ? 'Buscar recurso' : 'Buscar'}
-                className={`w-full bg-transparent text-sm text-[#191918] outline-none transition-opacity duration-200 placeholder:text-[#191918]/45 ${shouldExpandSearch ? 'opacity-100' : 'opacity-0'}`}
-              />
-            </label>
+                Recursos<span className="text-[#ff4b0b]">.</span>
+              </motion.h1>
+
+              <motion.p
+                className="mt-4 max-w-2xl text-base leading-relaxed text-black/70 sm:text-lg"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                Explora herramientas, plantillas, ebooks y recursos prácticos sobre IA, sistemas y productividad aplicada.
+              </motion.p>
+            </div>
+
+            {/* Fila Integrada de Control (Filtros a la izquierda + Buscador a la derecha) */}
+            <motion.div
+              className="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {/* 1. Lista de píldoras horizontal (Izquierda) */}
+              <div className="flex flex-wrap items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                {/* Botón Todos */}
+                <button
+                  type="button"
+                  onClick={() => selectCategory(null)}
+                  className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all shadow-xs ${
+                    activeCategory === null
+                      ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/25'
+                      : 'border border-black/10 bg-white/85 backdrop-blur-xs text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
+                  }`}
+                >
+                  Todos
+                </button>
+
+                {/* Categorías (SOLO LAS QUE TIENEN RECURSOS) */}
+                {availableCategories.map((cat) => {
+                  const isActive = activeCategory === cat.key
+                  return (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => selectCategory(cat.key)}
+                      className={`shrink-0 rounded-lg px-4 py-2.5 text-[13px] sm:text-sm font-semibold transition-all shadow-xs ${
+                        isActive
+                          ? 'bg-gradient-to-r from-[#ff703d] via-[#ff5a22] to-[#ff4b0b] text-white shadow-sm shadow-[#ff4b0b]/25'
+                          : 'border border-black/10 bg-white/85 backdrop-blur-xs text-[#191918] hover:border-[#ff4b0b]/40 hover:text-[#ff4b0b]'
+                      }`}
+                    >
+                      {cat.title}
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* 2. Buscador Compacto en la misma fila (Derecha) */}
+              <div className="w-full sm:w-80 md:w-96 shrink-0">
+                <div className="flex items-center gap-3 rounded-lg border border-black/10 bg-white/90 px-3.5 py-2.5 shadow-xs backdrop-blur-xs transition-all focus-within:border-[#ff4b0b] focus-within:bg-white focus-within:shadow-[0_6px_24px_rgba(255,75,11,0.14)]">
+                  <Search className="h-4 w-4 text-black/40 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar temas o recursos..."
+                    aria-label="Buscar temas o recursos"
+                    className="w-full bg-transparent text-xs sm:text-sm text-[#191918] outline-none placeholder:text-black/40"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      aria-label="Limpiar búsqueda"
+                      className="text-xs font-bold text-black/40 hover:text-[#ff4b0b]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </section>
-      <section className="pb-12 pt-8 lg:pb-24 lg:pt-10">
-        <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
+        </section>
+
+        <section className="bg-white pb-16 pt-8 sm:pt-10 lg:pb-24">
+          <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
           {!activeCategory && !isSearchActive ? (
             /* VIEW: NO FILTER SELECTED */
             <motion.div key="all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
@@ -504,6 +522,7 @@ export default function RecursosPage() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   )
 }
