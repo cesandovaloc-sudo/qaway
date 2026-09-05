@@ -168,7 +168,10 @@ export default function AureaSkincarePage() {
         schema={schemaData}
       />
       
-      {/* Header de la marca Auréa: Solo emerge al hacer scroll */}
+      {/* Navbar de Qaway Lab: Emerge y se superpone únicamente al hacer scroll */}
+      <Navbar variant="project-dock" />
+
+      {/* Header oficial de la marca Auréa: Visible al inicio */}
       <header className={`nav ${scrolled ? "scrolled" : ""}`}>
         <div className="container nav-inner">
           <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Auréa inicio">
