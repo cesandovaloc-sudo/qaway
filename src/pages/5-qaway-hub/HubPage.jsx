@@ -27,6 +27,8 @@ import {
   Instagram,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { WHATSAPP_LINK } from '@/data/navigation'
+import { isPublicSiteMode } from '@/config/siteVisibility'
 import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
@@ -197,16 +199,12 @@ export default function HubPage() {
   const [categoryFilter, setCategoryFilter] = useState('Todas')
   const [searchQuery, setSearchQuery] = useState('')
 
+  const activeRoutes = routes.filter((route) => route.published)
+
   const thematicFilters = [
     'Todas',
-    'Herramientas',
-    'Product Management',
-    'Panel de control',
-    'Rutas de Marca',
-    'Ruta Profesional',
+    ...Array.from(new Set(activeRoutes.map((r) => r.category).filter(Boolean))),
   ]
-
-  const activeRoutes = routes.filter((route) => route.published)
 
   const filteredRoutes = activeRoutes.filter((route) => {
     const matchAccess = accessFilter === 'all' || route.access === accessFilter
@@ -455,9 +453,15 @@ export default function HubPage() {
               <p className="mb-6 text-sm leading-relaxed text-[#191918]/70">
                 Aprende a usar cada herramienta, ruta y dashboard con tutoriales guiados. De basico a avanzado, paso a paso.
               </p>
-              <Link to="/academy" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
-                Ir a Academy <ArrowRight size={16} />
-              </Link>
+              {isPublicSiteMode ? (
+                <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
+                  Consultar Academy <ArrowRight size={16} />
+                </a>
+              ) : (
+                <Link to="/academy" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
+                  Ir a Academy <ArrowRight size={16} />
+                </Link>
+              )}
             </div>
             <div className="flex h-36 w-36 shrink-0 items-center justify-center rounded-md border border-[#ff4b0b]/20 bg-white/70 text-[#ff4b0b]">
               <Sparkles className="h-16 w-16" strokeWidth={1.5} />

@@ -490,9 +490,15 @@ export default function RecursosPage() {
               <p className="mb-6 text-sm leading-relaxed text-[#191918]/70">
                 Aprende a integrar herramientas de automatizacion, IA y marketing en flujos reales. Menos teoria suelta, mas capacidad instalada.
               </p>
-              <Link to="/academy" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
-                Explorar Programas <ArrowRight size={16} />
-              </Link>
+              {isPublicSiteMode ? (
+                <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
+                  Consultar Programas <ArrowRight size={16} />
+                </a>
+              ) : (
+                <Link to="/academy" className="inline-flex items-center gap-2 rounded-md bg-[#ff4b0b] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#dc3d00]">
+                  Explorar Programas <ArrowRight size={16} />
+                </Link>
+              )}
             </div>
             <img src="/assets/pages/9-pruebas/academy/curso-productividad-ia.png" alt="Academy" className="w-[320px] max-w-full rounded-md object-contain" />
           </div>

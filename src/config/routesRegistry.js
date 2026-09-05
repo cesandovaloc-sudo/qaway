@@ -85,10 +85,10 @@ export const hierarchicalRoutes = [
         tag: 'Pilar',
       },
       {
-        title: 'Artículo: Habilidades Clave con IA',
-        path: '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
-        description: 'Guía práctica de capacidades fundamentales para el trabajo con IA.',
-        tag: 'Post Producción',
+        title: 'Artículo: Google Calendar Dominado',
+        path: '/blog/articulo/google-calendar-dominado-guia-productividad',
+        description: 'Guía práctica para ordenar tu semana con bloques de tiempo y apoyo de IA.',
+        tag: 'Artículo',
       },
       {
         title: 'Render Dinámico de Artículo',

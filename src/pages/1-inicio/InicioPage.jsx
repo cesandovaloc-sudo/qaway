@@ -40,6 +40,7 @@ import { getLocalFallbackCourseImage } from '@/integrations/academy'
 import '@/pages/4-academy/academy.css'
 import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
+import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const base = '/assets/pages/1-inicio/'
 const displayFont = {
@@ -81,13 +82,21 @@ const primaryAreas = [
     ctaLabel: 'Ver sistemas digitales',
     icon: Workflow,
   },
-  {
-    title: 'Academy',
-    description: 'Aprende a usar IA, sistemas y herramientas digitales de forma práctica.',
-    link: '/academy',
-    ctaLabel: 'Ver Academy',
-    icon: GraduationCap,
-  },
+  isPublicSiteMode
+    ? {
+        title: 'Proyectos',
+        description: 'Casos reales de branding, desarrollo web y sistemas tecnológicos aplicados.',
+        link: '/proyectos',
+        ctaLabel: 'Ver proyectos',
+        icon: Boxes,
+      }
+    : {
+        title: 'Academy',
+        description: 'Aprende a usar IA, sistemas y herramientas digitales de forma práctica.',
+        link: '/academy',
+        ctaLabel: 'Ver Academy',
+        icon: GraduationCap,
+      },
 ]
 
 const ecosystemAreas = [
@@ -864,9 +873,11 @@ function AcademyFeature() {
           custom={0.3}
           className="mt-6 flex flex-wrap gap-7"
         >
-          <ArrowLink to="/academy">Ver Academy</ArrowLink>
-          <ArrowLink to={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} newTab>
-            Ver todos los cursos
+          <ArrowLink to={isPublicSiteMode ? '#formulario' : '/academy'}>
+            {isPublicSiteMode ? 'Consultar formación' : 'Ver Academy'}
+          </ArrowLink>
+          <ArrowLink to={isPublicSiteMode ? WHATSAPP_LINK : `${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} newTab>
+            {isPublicSiteMode ? 'Consultar por WhatsApp' : 'Ver todos los cursos'}
           </ArrowLink>
         </motion.div>
       </div>
@@ -1117,7 +1128,7 @@ function CoursesLandings() {
   const landingIdx = tick % carouselLandings.length
   const landing = carouselLandings[landingIdx]
   const academyHref = (import.meta.env.VITE_ACADEMY_URL || '').replace(/\/+$/, '')
-  const cursosHref = academyHref ? `${academyHref}/cursos` : '/academy'
+  const cursosHref = academyHref ? `${academyHref}/cursos` : (isPublicSiteMode ? '#formulario' : '/academy')
 
   return (
     <section className="bg-[#ffffff] px-6 py-10 sm:py-14 text-[#20201f] sm:px-10 lg:px-14 min-h-[100dvh] flex flex-col justify-center">

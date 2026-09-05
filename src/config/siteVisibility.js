@@ -20,7 +20,8 @@ export const routeVisibility = {
 const publicPathAllowList = new Set([
   '/',
   '/blog',
-  '/blog/articulo/habilidades-clave-para-trabajar-con-ia-guia-practica',
+  '/blog/articulo/:id',
+  '/blog/articulo/google-calendar-dominado-guia-productividad',
   '/editor/:id',
   '/editor/new',
   '/estudio',

@@ -769,14 +769,14 @@
   border-radius: 6px;
 }
 
-.estudio-page .vl-content-showcase video {
+.estudio-page .vl-content-showcase video,
+.estudio-page .vl-content-showcase iframe {
   width: 100%;
   height: 100%;
   position: absolute;
   inset: 0;
   object-fit: cover;
   border-radius: 6px;
-  filter: contrast(1.16) brightness(0.90) saturate(1.28);
 }
 
 .estudio-page .vl-content-showcase__veil {

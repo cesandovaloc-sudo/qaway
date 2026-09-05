@@ -599,16 +599,6 @@ function TransformacionVisualCarousel() {
           </div>
         </motion.div>
       </div>
-
-      {/* Preload images to avoid delay on click */}
-      <div style={{ display: 'none' }}>
-        {slides.map(slide => (
-          <div key={slide.id}>
-            <img src={slide.beforeImage} alt="" loading="eager" />
-            <img src={slide.afterImage} alt="" loading="eager" />
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
@@ -667,15 +657,15 @@ function ContentSystem() {
             event.currentTarget.style.setProperty('--showcase-y', `${((event.clientY - rect.top) / rect.height) * 100}%`)
           }}
         >
-          <video
-            src="/assets/pages/2-estudio/estudio-social-media-reel.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            aria-label="Proceso de concepto, producción y edición de contenido para redes sociales"
+          <iframe
+            src="https://www.youtube.com/embed/Z-7YMKJKF74?autoplay=1&mute=1&loop=1&playlist=Z-7YMKJKF74&controls=0&modestbranding=1&rel=0&playsinline=1"
+            title="Proceso de concepto, producción y edición de contenido para redes sociales"
+            className="w-full h-full absolute inset-0 object-cover rounded-[6px] border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            loading="lazy"
           />
-          <div className="vl-content-showcase__veil" />
+          <div className="vl-content-showcase__veil pointer-events-none" />
         </motion.div>
       </div>
     </section>
