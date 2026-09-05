@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
 import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
-import ValletExitIntentModal from '@/components/studio/ValletExitIntentModal';
+import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
 import './vallet-inmobiliaria.css';
@@ -425,8 +425,8 @@ export default function ValletInmobiliariaPage() {
         </div>
       </footer>
 
-      {/* Exit Intent Modal Qaway Lab */}
-      <ValletExitIntentModal />
+      {/* Studio Floating Dock Qaway Lab */}
+      <StudioFloatingDock projectName="Vallet Inmobiliaria" />
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
+import './studio-dock.css';
 
-export default function AureaFloatingStudioDock({
-  projectName = "Auréa Skincare",
+export default function StudioFloatingDock({
+  projectName = "Proyecto Qaway",
   backUrl = "/proyectos",
   scrollThreshold = 140
 }) {
@@ -31,7 +32,7 @@ export default function AureaFloatingStudioDock({
   const whatsappUrl = `https://wa.me/51953282216?text=${whatsappMessage}`;
 
   return (
-    <div className="aurea-dock-container" role="region" aria-label="Barra de información y contacto de Qaway Lab">
+    <div className="qw-studio-dock-container" role="region" aria-label="Barra de información y contacto de Qaway Lab">
       <AnimatePresence>
         {isVisible && (
           <motion.div
@@ -39,7 +40,7 @@ export default function AureaFloatingStudioDock({
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 }}
             exit={{ opacity: 0, y: 32, filter: 'blur(10px)', scale: 0.96 }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="aurea-studio-dock glass-white"
+            className="qw-studio-dock glass-white"
           >
             {/* 1. Botón Volver a Proyectos */}
             <Link

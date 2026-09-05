@@ -12,6 +12,7 @@ import { Testimonials } from './components/Testimonials.jsx';
 import { SpecialOrder } from './components/SpecialOrder.jsx';
 import { Contact } from './components/Contact.jsx';
 import { Footer } from './components/Footer.jsx';
+import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { site } from './data/site.js';
 
 const siteUrl = "https://josuepanaderia.pe";
@@ -88,6 +89,7 @@ export default function PanaderiaPage() {
         <Contact />
       </main>
       <Footer />
+      <StudioFloatingDock projectName="Panadería Josué" />
     </div>
   );
 }
