@@ -49,7 +49,6 @@ import RestauracionFotografica2Page from '@/pages/8-landings/6-restauracion-foto
 import DesarrolloWebQawayPage from '@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'
 import BriefBrandingPage from '@/pages/10-briefs/BriefBrandingPage.jsx'
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
-import DiscardedInicioPage from '@/pages/9-pruebas/1-paginas_descartadas/1-inicio/InicioPage.jsx'
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
 import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
@@ -140,10 +139,6 @@ export default function AppRouter() {
           element={renderPublicPathRoute('landings', '/landings/desarrollo-web-qaway', <DesarrolloWebQawayPage />)}
         />
         <Route
-          path="/inicio-v2"
-          element={<InicioPageV2 />}
-        />
-        <Route
           path="/inicio-v3"
           element={<InicioPageV3 />}
         />
@@ -206,10 +201,6 @@ export default function AppRouter() {
         <Route
           path="/proyectos/epc/*"
           element={<EpcPage />}
-        />
-        <Route
-          path="/pruebas/inicio-descartado"
-          element={renderRoute('pruebas', <DiscardedInicioPage />)}
         />
         <Route
           path="/hub/blog-editor"

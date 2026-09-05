@@ -470,12 +470,6 @@ export const hierarchicalRoutes = [
         tag: 'Producción',
       },
       {
-        title: 'Inicio V2 & V3 (Variantes)',
-        path: '/inicio-v2',
-        description: 'Versiones de experimentación y prueba de conversión.',
-        tag: 'Variantes',
-      },
-      {
         title: 'Portal de Cliente (Dinámico)',
         path: '/portal/:slug',
         description: 'Visualizador de estado de proyecto y cronograma en vivo para clientes.',
@@ -498,12 +492,6 @@ export const hierarchicalRoutes = [
         path: '/brief',
         description: 'Formulario de recopilación de requerimientos para nuevos proyectos.',
         tag: 'Onboarding',
-      },
-      {
-        title: 'Pruebas Archivadas',
-        path: '/pruebas/inicio-descartado',
-        description: 'Bocetos y exploraciones conceptuales previas.',
-        tag: 'Archivo',
       },
     ],
   },
