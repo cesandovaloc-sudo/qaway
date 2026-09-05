@@ -631,7 +631,7 @@ export default function RutasPage() {
   recursos: ${hasRecursos},
   blog: ${hasBlog},
   landings: ${hasLandings},
-  auth: false,
+  auth: true,
   pruebas: false,
 }
 

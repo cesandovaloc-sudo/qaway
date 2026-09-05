@@ -13,7 +13,7 @@ export const routeVisibility = {
   recursos: true,
   blog: true,
   landings: true,
-  auth: false,
+  auth: true,
   pruebas: false,
 }
 

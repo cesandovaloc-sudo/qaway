@@ -246,7 +246,7 @@ export default function AppRouter() {
         <Route element={<Layout />}>
           <Route
             path="hub"
-            element={renderRoute('hub', <ProtectedRoute><HubPage /></ProtectedRoute>)}
+            element={renderRoute('hub', <HubPage />)}
           />
           <Route
             path="hub/crm"
