@@ -339,18 +339,18 @@
   /* Floating Studio Dock (Mobile) */
   .aurea-dock-container{left:12px;right:12px;bottom:16px;transform:none;width:auto}
   .aurea-studio-dock{flex-direction:column;align-items:stretch;gap:14px;padding:16px 18px;border-radius:20px}
-  .aurea-studio-dock .dock-back-pill{width:fit-content}
-  .aurea-studio-dock .dock-brand-info{align-items:flex-start}
-  .aurea-studio-dock .dock-text{font-size:14.5px}
-  .aurea-studio-dock .dock-copyright-note{font-size:11.5px}
+  .aurea-studio-dock .dock-back-pill{width:fit-content;margin-inline:auto;font-size:13.5px}
+  .aurea-studio-dock .dock-brand-info{align-items:center;text-align:center}
+  .aurea-studio-dock .dock-text{font-size:15.5px}
+  .aurea-studio-dock .dock-copyright-note{font-size:12.5px}
   .aurea-studio-dock .dock-actions{width:100%}
-  .aurea-studio-dock .dock-cta-btn{width:100%;justify-content:center;padding:12px 20px;font-size:14px}
+  .aurea-studio-dock .dock-cta-btn{width:100%;justify-content:center;padding:13px 22px;font-size:15px}
 }
 
 /* --- Floating Studio Dock (White Glass Minimal - Refined & Spacious) --- */
 .aurea-dock-container{
   position:fixed;
-  bottom:34px;
+  bottom:36px;
   left:50%;
   transform:translateX(-50%);
   z-index:990;
@@ -362,25 +362,25 @@
   pointer-events:auto;
   display:flex;
   align-items:center;
-  gap:24px;
-  padding:10px 14px 10px 16px;
-  background:rgba(255,255,255,0.88);
+  gap:26px;
+  padding:11px 16px 11px 18px;
+  background:rgba(255,255,255,0.90);
   color:#182219;
   border:1px solid rgba(24,34,25,0.11);
   border-radius:999px;
   backdrop-filter:blur(28px);
   -webkit-backdrop-filter:blur(28px);
-  box-shadow:0 20px 50px rgba(24,34,25,0.12), 0 4px 14px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.85) inset;
+  box-shadow:0 22px 55px rgba(24,34,25,0.13), 0 4px 16px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.9) inset;
 }
 .aurea-studio-dock .dock-back-pill{
   display:inline-flex;
   align-items:center;
   gap:8px;
-  font-size:13px;
+  font-size:14px;
   font-weight:600;
   color:#273528;
   background:rgba(24,34,25,0.06);
-  padding:9px 18px;
+  padding:10px 20px;
   border-radius:999px;
   border:1px solid rgba(24,34,25,0.09);
   transition:all .22s cubic-bezier(.16,1,.3,1);
@@ -397,21 +397,25 @@
 .aurea-studio-dock .dock-brand-info{
   display:flex;
   flex-direction:column;
+  align-items:center;
+  text-align:center;
   gap:3px;
-  padding-right:6px;
+  padding:0 8px;
 }
 .aurea-studio-dock .dock-text{
-  font-size:15px;
+  font-size:16px;
   font-weight:500;
   line-height:1.38;
   color:#182219;
   margin:0;
   letter-spacing:-.01em;
+  text-align:center;
 }
 .aurea-studio-dock .dock-copyright-note{
-  font-size:11.5px;
+  font-size:12.5px;
   color:#6c796d;
   letter-spacing:.02em;
+  text-align:center;
 }
 .aurea-studio-dock .dock-actions{
   display:flex;
@@ -424,17 +428,31 @@
   gap:9px;
   background:#182219;
   color:#ffffff !important;
-  font-size:14px;
+  font-size:15px;
   font-weight:600;
-  padding:10px 24px;
+  padding:11px 26px;
   border-radius:999px;
   text-decoration:none;
   box-shadow:0 6px 18px rgba(24,34,25,0.22);
   transition:all .25s cubic-bezier(.16,1,.3,1);
   white-space:nowrap;
+  animation:cta-subtle-breathe 3.6s ease-in-out infinite;
 }
 .aurea-studio-dock .dock-cta-btn:hover{
   background:#29402b;
-  transform:translateY(-2px);
-  box-shadow:0 10px 26px rgba(24,34,25,0.30);
+  animation:none;
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 12px 28px rgba(24,34,25,0.32);
+}
+
+/* Efecto sutil de respiración y luz para guiar la atención */
+@keyframes cta-subtle-breathe {
+  0%, 100% {
+    box-shadow: 0 6px 18px rgba(24,34,25,0.22), 0 0 0 0 rgba(30,50,31,0.35);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 10px 26px rgba(24,34,25,0.28), 0 0 0 5px rgba(46,68,48,0.13);
+    transform: scale(1.022);
+  }
 }
