@@ -405,21 +405,26 @@ function HierarchicalRouteCard({
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[13px] font-bold text-zinc-900 tracking-[-0.01em] truncate">
-                              {child.title}
-                            </span>
-                            {child.tag && (
-                              <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-100 px-1.5 py-0.2 rounded shrink-0">
-                                {child.tag}
-                              </span>
-                            )}
-                          </div>
+                        {/* Fila 1: Título completo al 100% de ancho en 1 sola línea */}
+                        <div className="mb-2">
+                          <h4
+                            className="text-[13.5px] font-bold text-zinc-950 tracking-[-0.01em] truncate block"
+                            title={child.title}
+                          >
+                            {child.title}
+                          </h4>
+                        </div>
 
-                          {/* Switch individual para la sub-ruta */}
+                        {/* Fila 2: Tag + Switch de Producción en su propia fila */}
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
+                          {child.tag ? (
+                            <span className="text-[10px] font-semibold text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-md shrink-0">
+                              {child.tag}
+                            </span>
+                          ) : <div />}
+
                           <div className="shrink-0 flex items-center gap-1.5">
-                            <span className="text-[10px] font-semibold text-zinc-400 hidden sm:inline">
+                            <span className="text-[10px] font-semibold text-zinc-400">
                               {childApproved ? 'Dist' : 'Local'}
                             </span>
                             <SwitchToggle
@@ -431,7 +436,8 @@ function HierarchicalRouteCard({
                           </div>
                         </div>
 
-                        <p className="text-[12px] leading-relaxed text-zinc-500 mb-2.5">
+                        {/* Fila 3: Descripción */}
+                        <p className="text-[12px] leading-relaxed text-zinc-500 mb-3 line-clamp-2">
                           {child.description}
                         </p>
                       </div>

@@ -34,6 +34,12 @@ export const hierarchicalRoutes = [
         description: 'Página de aterrizaje principal del laboratorio con arquitectura modular.',
         tag: 'Home',
       },
+      {
+        title: 'Inicio Alternativo (V3 Cloud)',
+        path: '/inicio-v3',
+        description: 'Propuesta alternativa con diseño tecnológico para servicios cloud y hosting.',
+        tag: 'Borrador V3',
+      },
     ],
   },
 
@@ -181,6 +187,12 @@ export const hierarchicalRoutes = [
         path: '/hub/optimizador-webp',
         description: 'Herramienta interactiva para comprimir y convertir imágenes PNG y JPG a WebP en el navegador.',
         tag: 'Herramienta Web',
+      },
+      {
+        title: 'Descargador & Extractor de Instagram',
+        path: '/hub/descargador-ig',
+        description: 'Extractor y descargador multimedia de publicaciones y reels de Instagram.',
+        tag: 'Herramienta IG',
       },
       {
         title: 'Marketing Studio',
@@ -449,6 +461,12 @@ export const hierarchicalRoutes = [
         path: '/landings/restauracion-fotografica',
         description: 'Servicio de restauración y remasterización digital de fotos familiares con IA.',
         tag: 'Servicios',
+      },
+      {
+        title: 'Landing: Restauración Fotográfica (V2)',
+        path: '/landings/restauracion-fotografica2',
+        description: 'Segunda versión experimental de la landing de restauración de fotos con IA.',
+        tag: 'Variante 2',
       },
       {
         title: 'Landing: Fotografía para LinkedIn',

@@ -30,6 +30,7 @@ import GestorProyectosHubPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/Ge
 import ProjectTimelineViewerPage from '@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'
 import AnalyticsStudioPage from '@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'
 import OptimizadorWebpHubPage from '@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'
+import InstagramExtractorPage from '@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'
 import MarketingStudioPage from '@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'
 import MarketingStudioTwentyPage from '@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'
 import RecursosPage from '@/pages/6-recursos/RecursosPage'
@@ -264,6 +265,10 @@ export default function AppRouter() {
           <Route
             path="hub/optimizador-webp"
             element={renderPublicPathRoute('hub', '/hub/optimizador-webp', <OptimizadorWebpHubPage />)}
+          />
+          <Route
+            path="hub/descargador-ig"
+            element={renderRoute('hub', <ProtectedRoute><InstagramExtractorPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/dashboards"
