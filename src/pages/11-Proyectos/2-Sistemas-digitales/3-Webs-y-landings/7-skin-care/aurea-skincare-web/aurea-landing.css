@@ -448,27 +448,6 @@
   transform:translateY(0) scale(0.99);
 }
 
-/* Indicador de estado en línea */
-.aurea-studio-dock .dock-online-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#4ade80;
-  box-shadow:0 0 0 2px rgba(255,255,255,0.4), 0 0 8px #4ade80;
-  animation:online-pulse 2.2s infinite ease-in-out;
-  flex:0 0 auto;
-}
-@keyframes online-pulse {
-  0%, 100% {
-    opacity:1;
-    transform:scale(1);
-  }
-  50% {
-    opacity:0.6;
-    transform:scale(1.2);
-  }
-}
-
 /* Shimmer elegante que recorre el botón cada 4.5s */
 .aurea-studio-dock .dock-cta-btn::after{
   content:'';

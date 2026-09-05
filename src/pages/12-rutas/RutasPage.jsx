@@ -18,6 +18,7 @@ import {
   BookOpen,
   Globe,
   Shield,
+  Home,
   ExternalLink,
   Sliders,
   ChevronRight,
@@ -230,6 +231,8 @@ function SuiteProjectItem({
 
                     <Link
                       to={sub.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-[11px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors px-2 py-0.5 rounded-md hover:bg-orange-50"
                     >
                       <span>Abrir</span>
@@ -341,6 +344,8 @@ function HierarchicalRouteCard({
           <div className="w-full flex justify-end">
             <Link
               to={item.path}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-950 transition-colors w-full sm:w-auto"
             >
               <span>Abrir</span>
@@ -453,6 +458,8 @@ function HierarchicalRouteCard({
 
                         <Link
                           to={child.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors shrink-0"
                         >
                           <span>Abrir</span>
@@ -743,9 +750,17 @@ ${pathsFormatted}
   // Tarjetas del Ecosistema (Sección 1)
   const ecosystemAreas = [
     {
+      title: 'Inicio',
+      desc: 'Portada institucional, propuesta de valor y manifiesto oficial.',
+      count: '1 portada',
+      category: 'Inicio',
+      icon: Home,
+      gradient: 'from-zinc-100 to-zinc-200',
+    },
+    {
       title: 'Estudio',
-      desc: 'Estrategia, diseño, brief y construcción digital.',
-      count: '7 rutas',
+      desc: 'Estrategia, diseño, brief y consultoría digital.',
+      count: '6 rutas',
       category: 'Estudio',
       icon: Palette,
       gradient: 'from-zinc-100 to-zinc-200',
@@ -878,7 +893,7 @@ ${pathsFormatted}
               <div className="mt-7 flex flex-wrap items-center gap-6 text-xs text-zinc-400">
                 <span className="inline-flex items-center gap-2">
                   <LayoutGrid className="w-4 h-4 text-[#fe6612]" />
-                  <strong className="text-zinc-200">8 áreas activas</strong>
+                  <strong className="text-zinc-200">{hierarchicalRoutes.length} áreas activas</strong>
                 </span>
                 <span className="text-zinc-600">•</span>
                 <span className="inline-flex items-center gap-2">

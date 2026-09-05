@@ -1,4 +1,5 @@
 import {
+  Home,
   Sparkles,
   PenTool,
   Layers,
@@ -16,6 +17,26 @@ import {
 // Fuente única de verdad para el sistema de rutas del portal.
 // =========================================================================
 export const hierarchicalRoutes = [
+  // 0. PORTADA & PÁGINA DE INICIO
+  {
+    id: 'inicio',
+    title: 'Página de Inicio Principal',
+    path: '/',
+    category: 'Inicio',
+    icon: Home,
+    badge: 'Producción',
+    badgeType: 'public',
+    summary: 'Portada institucional oficial con hero interactivo, servicios clave, propuesta de valor y manifiesto.',
+    children: [
+      {
+        title: 'Portada Oficial Qaway Lab',
+        path: '/',
+        description: 'Página de aterrizaje principal del laboratorio con arquitectura modular.',
+        tag: 'Home',
+      },
+    ],
+  },
+
   // 1. BLOG & SISTEMA EDITORIAL
   {
     id: 'blog-publico',
@@ -274,12 +295,6 @@ export const hierarchicalRoutes = [
         tag: 'Consultoría',
       },
       {
-        title: 'Portada Oficial Qaway Lab',
-        path: '/',
-        description: 'Portada institucional principal con hero interactivo, servicios y manifiesto.',
-        tag: 'Home',
-      },
-      {
         title: 'Brief de Onboarding & Requerimientos',
         path: '/brief',
         description: 'Formulario interactivo de captura de requerimientos de marca y sistemas para nuevos clientes.',
@@ -505,6 +520,7 @@ export const hierarchicalRoutes = [
 
 export const categoriesList = [
   'Todos',
+  'Inicio',
   'Estudio',
   'Sistemas Digitales',
   'Proyectos',
