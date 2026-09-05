@@ -90,6 +90,7 @@ export default function Navbar({ variant: explicitVariant }) {
   // Visor / reader pages hide the global Navbar for immersive experience
   if (variant === 'hidden') return null
 
+  const isProjectDock = variant === 'project-dock'
   const styles = variantStyles[variant] || variantStyles.light
   
   const visibleLinks = getNavbarLinks()
@@ -114,12 +115,17 @@ export default function Navbar({ variant: explicitVariant }) {
       if (!ticking) {
         window.requestAnimationFrame(() => {
           const currentY = window.scrollY
-          setScrolled(currentY > 20)
+          const threshold = isProjectDock ? 80 : 20
+          setScrolled(currentY > threshold)
 
-          if (currentY > lastScrollY.current && currentY > 50) {
-            setHeaderVisible(false) // Ocultar al bajar
+          if (isProjectDock) {
+            setHeaderVisible(currentY > 80)
           } else {
-            setHeaderVisible(true)  // Mostrar al subir
+            if (currentY > lastScrollY.current && currentY > 50) {
+              setHeaderVisible(false) // Ocultar al bajar
+            } else {
+              setHeaderVisible(true)  // Mostrar al subir
+            }
           }
 
           lastScrollY.current = currentY
@@ -129,8 +135,9 @@ export default function Navbar({ variant: explicitVariant }) {
       }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [isProjectDock])
 
   useEffect(() => {
     setMenuOpen(false)
@@ -163,18 +170,30 @@ export default function Navbar({ variant: explicitVariant }) {
   const ctaClass = isTransparentInitial ? 'bg-white text-[#fe6612] shadow-[0_12px_28px_rgba(0,0,0,0.14)] hover:bg-zinc-100' : styles.cta
   const menuBtnClass = isTransparentInitial ? 'text-white' : styles.menuBtn
 
+  const isHeaderShown = isProjectDock ? (scrolled && headerVisible) : headerVisible
+
   return (
     <>
       <header
         ref={menuContainerRef}
-        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform,background-color,border-color] duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'
+        className={`fixed inset-x-0 top-0 z-50 h-20 border-b transition-[transform,background-color,border-color] duration-300 ${isHeaderShown ? 'translate-y-0' : '-translate-y-full'
           } ${scrolled ? styles.headerScrolled : styles.headerInitial} ${scrolled ? 'backdrop-blur-md' : 'backdrop-blur-none'
           }`}
       >
         <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
-          <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] transition-colors duration-200 ${logoClass}`}>
-            Qaway <span className={`transition-colors duration-200 ${logoAccentClass}`}>Lab</span>
-          </Link>
+          <div className="flex items-center gap-4 sm:gap-6">
+            {isProjectDock && (
+              <Link
+                to="/proyectos"
+                className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/5 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-[#20201f] transition-all hover:bg-[#eb7434] hover:border-[#eb7434] hover:text-white"
+              >
+                <span>← Volver a Proyectos</span>
+              </Link>
+            )}
+            <Link to="/" className={`text-xl font-semibold tracking-[-0.055em] transition-colors duration-200 ${logoClass}`}>
+              Qaway <span className={`transition-colors duration-200 ${logoAccentClass}`}>Lab</span>
+            </Link>
+          </div>
 
           <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 lg:flex xl:gap-10">
             {navLinks.map((link) => (
