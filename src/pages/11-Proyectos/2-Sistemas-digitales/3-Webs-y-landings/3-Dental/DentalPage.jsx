@@ -7,10 +7,32 @@ const dentalSchema = {
   "@context": "https://schema.org",
   "@type": "Dentist",
   "name": "Sonrisa Clínica Dental",
+  "image": "/src/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/src/assets/generated/hero-clean.webp",
+  "telephone": "+51 987 654 321",
+  "email": "citas@sonrisadental.pe",
+  "url": "https://qawaylab.com/proyectos/dental",
   "description": "Especialistas en ortodoncia personalizada, alineadores invisibles y estética dental con tecnología avanzada.",
   "openingHours": "Mo-Fr 09:00-19:00, Sa 09:00-14:00",
   "priceRange": "$$",
   "medicalSpecialty": "Dentistry",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Av. Principal 123",
+    "addressLocality": "San Isidro",
+    "addressRegion": "Lima",
+    "addressCountry": "PE"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "-12.0970",
+    "longitude": "-77.0360"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1200",
+    "bestRating": "5"
+  },
   "hasOfferCatalog": {
     "@type": "OfferCatalog",
     "name": "Tratamientos Odontológicos",

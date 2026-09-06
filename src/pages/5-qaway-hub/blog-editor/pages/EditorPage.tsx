@@ -223,6 +223,9 @@ export default function EditorPage() {
         setContentJson(p.contentJson || '')
         setPlainText(p.body)
         setStatus(p.status)
+        if (editorRef.current?.getEditor() && (p.contentHtml || p.body)) {
+          editorRef.current.getEditor()?.commands.setContent(p.contentHtml || p.body)
+        }
       }
     }
   }, [id, getPost])
@@ -236,8 +239,13 @@ export default function EditorPage() {
 
       setIsSaving(true)
       try {
+        const liveHtml = editorRef.current?.getEditor()?.getHTML() || contentHtml
+        const liveJsonObj = editorRef.current?.getEditor()?.getJSON()
+        const liveJson = liveJsonObj ? JSON.stringify(liveJsonObj) : contentJson
+        const targetId = id || existing?.id || postId
+
         const savedPost = await savePost({
-          id: existing?.id,
+          id: targetId,
           title: title.trim(),
           slug: slug || slugify(title),
           excerpt: excerpt.trim(),
@@ -251,8 +259,8 @@ export default function EditorPage() {
           headerCtaBtnText,
           headerCtaUrl,
           body: plainText,
-          contentHtml,
-          contentJson,
+          contentHtml: liveHtml,
+          contentJson: liveJson,
           status: targetStatus,
         })
 
@@ -260,9 +268,9 @@ export default function EditorPage() {
         setIsSaved(true)
         setTimeout(() => setIsSaved(false), 2500)
 
-        if (!existing && targetStatus === 'publicado') {
+        if (!targetId && targetStatus === 'publicado') {
           navigate('/')
-        } else if (!existing && savedPost.id) {
+        } else if (!targetId && savedPost.id) {
           navigate(`/editor/${savedPost.id}`, { replace: true })
         }
       } catch (err) {
@@ -273,6 +281,8 @@ export default function EditorPage() {
       }
     },
     [
+      id,
+      postId,
       title,
       slug,
       excerpt,
@@ -282,6 +292,12 @@ export default function EditorPage() {
       plainText,
       contentHtml,
       contentJson,
+      headerLayout,
+      headerCtaTag,
+      headerCtaTitle,
+      headerCtaDesc,
+      headerCtaBtnText,
+      headerCtaUrl,
       existing,
       savePost,
       navigate,

@@ -401,6 +401,11 @@ export function BlogProvider({ children }: { children: ReactNode }) {
         }
       }
 
+      // Invalidar caché de catálogo para sincronización inmediata en la web
+      try {
+        localStorage.removeItem('qaway_blog_articles_cache')
+      } catch (e) {}
+
       return resultPost
     },
     [posts]
@@ -409,6 +414,9 @@ export function BlogProvider({ children }: { children: ReactNode }) {
   const deletePost = useCallback(
     async (id: string): Promise<void> => {
       setPosts(prev => prev.filter(p => p.id !== id))
+      try {
+        localStorage.removeItem('qaway_blog_articles_cache')
+      } catch (e) {}
       const supabase = getSupabaseClient()
       if (supabase) {
         try {

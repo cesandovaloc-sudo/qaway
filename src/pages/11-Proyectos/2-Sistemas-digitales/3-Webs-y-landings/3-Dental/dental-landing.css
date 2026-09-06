@@ -56,6 +56,11 @@
   transform: translateY(-2px);
 }
 
+.dental-landing .island-btn:focus-visible {
+  outline: 2px solid #cb2d62;
+  outline-offset: 2px;
+}
+
 .dental-landing .island-btn__icon {
   display: inline-flex;
   align-items: center;
@@ -65,11 +70,20 @@
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(8px);
-  transition: transform 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dental-landing .island-btn:hover .island-btn__icon {
-  transform: scale(1.08);
+  transform: scale(1.05);
+}
+
+.dental-landing .card-hover-image {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.dental-landing .group:hover .card-hover-image {
+  transform: scale(1.025);
 }
 
 /* Rendering performance */

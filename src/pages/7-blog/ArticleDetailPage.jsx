@@ -143,15 +143,9 @@ export default function ArticleDetailPage() {
     }
   }
 
-  // Cargar artículo si no está en memoria local
+  // Cargar artículo dinámicamente desde Supabase primero, con fallback a datos locales
   useEffect(() => {
     async function loadArticle() {
-      const local = visibleArticles.find((art) => art.id === id)
-      if (local) {
-        setArticle(local)
-        return
-      }
-
       setLoadingArticle(true)
       try {
         let { data, error } = await supabase
@@ -195,11 +189,18 @@ export default function ArticleDetailPage() {
             headerCtaUrl: data.header_cta_url || data.headerCtaUrl || (data.relatedCta ? data.relatedCta.link : '/recursos/primeros-flujos-ia'),
             audioUrl: data.audio_url || null,
           })
+          return
         }
       } catch (err) {
         console.warn('[Article] Error cargando artículo de Supabase:', err)
       } finally {
         setLoadingArticle(false)
+      }
+
+      // Si no existe en Supabase o falló la conexión, usar la versión local
+      const local = visibleArticles.find((art) => art.id === id)
+      if (local) {
+        setArticle(local)
       }
     }
 
