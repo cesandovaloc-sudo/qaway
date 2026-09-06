@@ -13,6 +13,7 @@ import { SpecialOrder } from './components/SpecialOrder.jsx';
 import { Contact } from './components/Contact.jsx';
 import { Footer } from './components/Footer.jsx';
 import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
+import Navbar from '@/components/layout/Navbar';
 import { site } from './data/site.js';
 
 const siteUrl = "https://josuepanaderia.pe";
@@ -75,6 +76,7 @@ export default function PanaderiaPage() {
   return (
     <div className="josue-panaderia-root josue-landing">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <Navbar variant="project-dock" />
       <Header />
       <main>
         <Hero />

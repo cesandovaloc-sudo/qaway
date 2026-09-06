@@ -679,3 +679,56 @@
   background-repeat: repeat;
   background-size: 256px 256px;
 }
+
+/* Botón Proyectos con Shimmer Naranja idéntico a Conversemos */
+.qw-dock-shimmer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fe6612 0%, #ea580c 100%);
+  color: #ffffff !important;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(254, 102, 18, 0.36);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.qw-dock-shimmer-btn:hover {
+  background: linear-gradient(135deg, #ff7626 0%, #d94e02 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(254, 102, 18, 0.48);
+}
+
+.qw-dock-shimmer-btn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.qw-dock-shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.42), transparent);
+  transform: rotate(25deg);
+  animation: qw-btn-shimmer-sweep 4.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes qw-btn-shimmer-sweep {
+  0%, 70% {
+    left: -60%;
+  }
+  100% {
+    left: 140%;
+  }
+}

@@ -190,7 +190,8 @@ export default function Navbar({ variant: explicitVariant }) {
           <div className="mx-auto flex h-full max-w-[96rem] items-center justify-between px-6 sm:px-10 lg:px-14">
             <Link
               to="/proyectos"
-              className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/90 shadow-[0_2px_8px_rgba(0,0,0,0.06)] px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#20201f] transition-all hover:bg-[#eb7434] hover:border-[#eb7434] hover:text-white"
+              className="qw-dock-shimmer-btn"
+              aria-label="Volver a Proyectos"
             >
               <span>← Volver a Proyectos</span>
             </Link>

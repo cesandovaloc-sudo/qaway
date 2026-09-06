@@ -5,7 +5,7 @@ import {
   Phone, Ruler, ShieldCheck, X, BadgeCheck, CalendarDays, FileText, Handshake, House, KeyRound, MapPin, Search, Users, WalletCards
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
-import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
+import Navbar from '@/components/layout/Navbar';
 import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
@@ -178,7 +178,7 @@ export default function ValletInmobiliariaPage() {
           priceRange: 'S/ 2,000 - S/ 15,000',
         }}
       />
-      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={140} />
+      <Navbar variant="project-dock" />
       <header className="site-header">
         <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
