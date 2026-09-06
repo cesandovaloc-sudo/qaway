@@ -5,7 +5,8 @@ import {
   Home, MapPin, MessageCircle, Ruler, Search, ShieldCheck, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
-import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
+import Navbar from '@/components/layout/Navbar';
+import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
 import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
@@ -132,7 +133,7 @@ export default function ValletCatalogPage() {
           }))
         }}
       />
-      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={0} />
+      <Navbar variant="project-dock" />
 
       {/* Header */}
       <header className="site-header">
@@ -338,7 +339,7 @@ export default function ValletCatalogPage() {
           </div>
         </div>
       </footer>
-
+      <StudioFloatingDock projectName="Vallet Inmobiliaria" />
     </div>
   );
 }

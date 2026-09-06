@@ -104,10 +104,25 @@ export default function Navbar({ variant: explicitVariant }) {
   })
 
   const [menuOpen, setMenuOpen] = useState(false)
-  const [headerVisible, setHeaderVisible] = useState(true)
+  const [headerVisible, setHeaderVisible] = useState(!isProjectDock)
   const [scrolled, setScrolled] = useState(false)
   const menuContainerRef = useRef(null)
   const lastScrollY = useRef(0)
+  const isNavigatingRef = useRef(isProjectDock)
+
+  useEffect(() => {
+    if (isProjectDock) {
+      isNavigatingRef.current = true
+      setHeaderVisible(false)
+      setScrolled(false)
+      lastScrollY.current = 0
+      const timer = setTimeout(() => {
+        isNavigatingRef.current = false
+        lastScrollY.current = window.scrollY
+      }, 120)
+      return () => clearTimeout(timer)
+    }
+  }, [location.pathname, isProjectDock])
 
   useEffect(() => {
     let ticking = false
@@ -119,6 +134,13 @@ export default function Navbar({ variant: explicitVariant }) {
           setScrolled(currentY > threshold)
 
           if (isProjectDock) {
+            if (isNavigatingRef.current) {
+              setHeaderVisible(false)
+              setScrolled(false)
+              lastScrollY.current = window.scrollY
+              ticking = false
+              return
+            }
             // Solo se muestra al hacer scroll HACIA ABAJO y superando el threshold
             // Al hacer scroll hacia arriba o al retornar al inicio, se oculta inmediatamente
             if (currentY > lastScrollY.current && currentY > threshold) {

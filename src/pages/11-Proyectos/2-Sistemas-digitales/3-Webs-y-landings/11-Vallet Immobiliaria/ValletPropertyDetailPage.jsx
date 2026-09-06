@@ -6,7 +6,8 @@ import {
   Share2, ShieldCheck, Sparkles, Star, Users, Wifi, Car, Tv, Sun, Wind, Dog, Check, X, Eye
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
-import DemoFloatingBadge from '@/components/ui/DemoFloatingBadge';
+import Navbar from '@/components/layout/Navbar';
+import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
 import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
@@ -112,7 +113,7 @@ export default function ValletPropertyDetailPage() {
           }
         }}
       />
-      <DemoFloatingBadge backTo="/proyectos" label="Volver a proyectos" threshold={0} />
+      <Navbar variant="project-dock" />
 
       {/* Header específico de la ficha */}
       <header className="site-header">
@@ -556,6 +557,8 @@ export default function ValletPropertyDetailPage() {
         </div>
       )}
 
+      {/* Studio Floating Dock Qaway Lab */}
+      <StudioFloatingDock projectName="Vallet Inmobiliaria" />
     </div>
   );
 }
