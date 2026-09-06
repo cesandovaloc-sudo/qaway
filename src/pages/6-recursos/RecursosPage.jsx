@@ -257,13 +257,7 @@ export default function RecursosPage() {
 
     return (
       <CardWrapper {...wrapperProps} className="group flex flex-col justify-between overflow-hidden rounded-md border border-black/10 bg-white transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.45, delay: idx * 0.07 }}
-          className="flex h-full flex-col"
-        >
+        <div className="flex h-full flex-col">
           <div className="relative w-full overflow-hidden bg-[#f8f9fc] pt-[65%]">
             <img 
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" 
@@ -280,7 +274,7 @@ export default function RecursosPage() {
               {res.badge}
             </span>
           </div>
-        </motion.div>
+        </div>
       </CardWrapper>
     )
   }
@@ -295,36 +289,29 @@ export default function RecursosPage() {
     const Icon = catObj ? catObj.icon : FileText
 
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.35, delay: idx * 0.05 }}
-      >
-        <CardWrapper {...wrapperProps} className="group mb-3 flex items-center justify-between gap-6 rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
-          <div className="flex flex-1 items-center gap-5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-black/60 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
-              <Icon size={20} />
-            </div>
-            <div>
-              <div className="mb-2 flex flex-wrap gap-2">
-                <span className="rounded-md bg-[#191918]/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-[#191918]/70">
-                  {res.categoryLabel}
-                </span>
-                <span className="rounded-md bg-[#ff4b0b]/10 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-[#ff4b0b]">
-                  {res.type}
-                </span>
-              </div>
-              <p className="text-[15px] font-bold leading-snug text-[#191918]">{res.title}</p>
-              <p className="mt-1 max-w-xl text-xs leading-relaxed text-black/60">{res.description}</p>
-            </div>
+      <CardWrapper {...wrapperProps} className="group mb-3 flex items-center justify-between gap-6 rounded-md border border-black/10 bg-white p-5 transition-all hover:border-[#ff4b0b]/40 hover:shadow-lg">
+        <div className="flex flex-1 items-center gap-5">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-black/10 bg-[#f8f9fc] text-black/60 transition-colors group-hover:border-[#ff4b0b]/30 group-hover:bg-[#ff4b0b]/10 group-hover:text-[#ff4b0b]">
+            <Icon size={20} />
           </div>
-          <div className="flex shrink-0 items-center gap-2 rounded-md bg-[#191918] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors group-hover:bg-[#ff4b0b]">
-            <span>Abrir</span>
-            <ArrowRight size={14} />
+          <div>
+            <div className="mb-2 flex flex-wrap gap-2">
+              <span className="rounded-md bg-[#191918]/5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-[#191918]/70">
+                {res.categoryLabel}
+              </span>
+              <span className="rounded-md bg-[#ff4b0b]/10 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-widest text-[#ff4b0b]">
+                {res.type}
+              </span>
+            </div>
+            <p className="text-[15px] font-bold leading-snug text-[#191918]">{res.title}</p>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-black/60">{res.description}</p>
           </div>
-        </CardWrapper>
-      </motion.div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2 rounded-md bg-[#191918] px-6 py-3 text-xs font-bold uppercase tracking-widest text-white transition-colors group-hover:bg-[#ff4b0b]">
+          <span>Abrir</span>
+          <ArrowRight size={14} />
+        </div>
+      </CardWrapper>
     )
   }
 

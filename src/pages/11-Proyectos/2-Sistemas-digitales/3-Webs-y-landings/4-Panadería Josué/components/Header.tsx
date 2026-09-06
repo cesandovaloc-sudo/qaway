@@ -11,7 +11,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   return <header className="siteHeader">
     <div className="container headerInner">
-      <a href="#inicio" aria-label="Ir al inicio"><Image src="/assets/logo/logo-primary.svg" alt="Josué Panadería" width={170} height={52} priority /></a>
+      <a href="#inicio" aria-label="Ir al inicio"><Image src="/josue-images/logo/logo-primary.svg" alt="Josué Panadería" width={170} height={52} priority /></a>
       <button className="menuButton" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(v=>!v)}><span/><span/><span/><span className="srOnly">Abrir menú</span></button>
       <nav id="main-navigation" className={open ? "nav navOpen" : "nav"} aria-label="Navegación principal">
         {links.map(([label, href]) => <a key={href} href={href} onClick={()=>setOpen(false)}>{label}</a>)}

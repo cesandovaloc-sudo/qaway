@@ -23,7 +23,7 @@ export function Header() {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
         >
-          <img src="/assets/logo/logo-primary.svg" alt="Josué Panadería" width={170} height={52} />
+          <img src="/josue-images/logo/logo-primary.svg" alt="Josué Panadería" width={170} height={52} />
         </a>
         <button className="menuButton" aria-expanded={open} aria-controls="main-navigation" onClick={() => setOpen(v => !v)}>
           <span /><span /><span /><span className="srOnly">Abrir menú</span>

@@ -236,15 +236,12 @@ export default function HubPage() {
     return (
       <Link to={route.path} className="group block">
         <motion.article
-          className={`relative flex min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 transition-all ${gradient}`}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.45, delay: (idx % 6) * 0.04 }}
-          whileHover={{ y: -6, boxShadow: '0 20px 50px rgba(0,0,0,0.12)' }}
+          className={`relative flex min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 ${gradient}`}
+          initial={false}
+          whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.10)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
           {/* Marca de agua translúcida con icono grande */}
-          <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-3 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-500 group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-105">
+          <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
             <Icon className="h-24 w-24" strokeWidth={1.4} />
           </div>
 
