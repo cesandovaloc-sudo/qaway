@@ -5,7 +5,7 @@ import { ArrowRight, Search, ChevronDown } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
-import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
+import mockupGelato from '../8-landings/8-desarollo web/assets/Hero-2.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
 import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.webp'
 import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.webp'
@@ -476,7 +476,7 @@ export default function ProyectosPage() {
                 />
 
                 <StaticProjectCard
-                  image={mockupLandingPages}
+                  image={mockupGelato}
                   title="Landing Pages de Captación"
                   desc="Páginas de una sola sección optimizadas para tráfico publicitario, catálogo de productos y conversión directa a WhatsApp."
                   delay={0.40}
