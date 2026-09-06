@@ -1320,7 +1320,7 @@ export default function InicioPage() {
         <EstudioSection />
         <SistemasDigitalesSection />
         <AcademyFeature />
-        <CoursesLandings />
+        {false && <CoursesLandings />}
       </main>
       <AcademyContactSection
         submitted={submitted}
