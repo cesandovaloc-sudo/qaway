@@ -219,10 +219,10 @@ export default function ValletInmobiliariaPage() {
                 ))}
               </div>
               <div className="hero-actions">
-                <Link to="/proyectos/vallet/propiedades" className="button button-outline">
+                <Link to="/proyectos/vallet/propiedades" className="button button-orange">
                   <Search size={19}/> Ver catálogo
                 </Link>
-                <a href="#propiedades" className="text-link">
+                <a href="#propiedades" className="button button-outline">
                   Propiedades destacadas <ArrowRight size={18}/>
                 </a>
               </div>

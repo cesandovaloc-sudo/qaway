@@ -221,14 +221,30 @@
   border-radius: 8px;
 }
 
+.vallet-landing .button-orange {
+  background: linear-gradient(135deg, #f45116 0%, #de3c04 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 20px rgba(244, 81, 22, 0.35);
+}
+
+.vallet-landing .button-orange:hover {
+  background: linear-gradient(135deg, #ff5e24 0%, #e8430a 100%);
+  box-shadow: 0 10px 28px rgba(244, 81, 22, 0.45);
+  transform: translateY(-2px);
+}
+
 .vallet-landing .button-outline {
-  border: 1px solid rgba(255,255,255,.5);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   color: #fff;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
 }
 
 .vallet-landing .button-outline:hover {
-  background: rgba(255,255,255,.1);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .vallet-landing .button-dark {
@@ -1291,15 +1307,18 @@
     width: 100% !important;
     box-sizing: border-box !important;
     justify-content: center;
-    background: var(--orange);
-    border: none;
+  }
+  .vallet-landing .hero-actions .button.button-orange {
+    background: linear-gradient(135deg, #f45116 0%, #de3c04 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .vallet-landing .hero-actions .button.button-outline {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     color: #ffffff;
     font-weight: 600;
-  }
-  .vallet-landing .hero-actions .text-link {
-    text-align: center;
-    justify-content: center;
-    padding-block: 4px;
   }
   .vallet-landing .benefit-grid,
   .vallet-landing .stats-grid,
