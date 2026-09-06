@@ -476,11 +476,11 @@ export default function ProyectosPage() {
                 />
 
                 <StaticProjectCard
-                  image="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85"
-                  tag="Servicios & Catálogo"
-                  title="Saniclick Servicios"
-                  desc="Plataforma de servicios de mantenimiento, cotizaciones inmediatas y gestión de citas directas."
+                  image={mockupLandingPages}
+                  title="Landing Pages de Captación"
+                  desc="Páginas de una sola sección optimizadas para tráfico publicitario, catálogo de productos y conversión directa a WhatsApp."
                   delay={0.40}
+                  isMockup={true}
                 />
 
               </div>
