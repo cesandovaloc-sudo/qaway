@@ -23,13 +23,13 @@ export interface AcademyCourseRow {
 const VALID_LEVELS = ['Principiante', 'Intermedio', 'Avanzado'] as const
 
 const LOCAL_COURSE_FALLBACK_IMAGES: Record<string, string> = {
-  'identidad-visual-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
-  'whatsapp-business-para-negocios': '/assets/pages/4-academy/curso-whatsapp-business2.png',
-  'antigravity-desde-cero': '/assets/pages/4-academy/curso-antigravity-youtube2.png',
-  'ia-para-equipos-pequenos': '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
-  'sistema-de-contenido-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
-  'workflows-sin-codigo': '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
-  'presencia-digital-para-emprender': '/assets/pages/4-academy/curso-whatsapp-business2.png',
+  'identidad-visual-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.webp',
+  'whatsapp-business-para-negocios': '/assets/pages/4-academy/curso-whatsapp-business2.webp',
+  'antigravity-desde-cero': '/assets/pages/4-academy/curso-antigravity-youtube2.webp',
+  'ia-para-equipos-pequenos': '/assets/pages/4-academy/curso-productividad-ia.webp',
+  'sistema-de-contenido-con-ia': '/assets/pages/4-academy/curso-identidad-visual-ia2.webp',
+  'workflows-sin-codigo': '/assets/pages/4-academy/curso-productividad-ia.webp',
+  'presencia-digital-para-emprender': '/assets/pages/4-academy/curso-whatsapp-business2.webp',
 }
 
 /** Obtiene la ruta de imagen local empaquetada como contingencia pasiva. */
@@ -40,18 +40,18 @@ export function getLocalFallbackCourseImage(slug?: string | null, title?: string
   const clean = `${slug || ''} ${title || ''}`.toLowerCase()
   
   if (clean.includes('whatsapp')) {
-    return '/assets/pages/4-academy/curso-whatsapp-business2.png'
+    return '/assets/pages/4-academy/curso-whatsapp-business2.webp'
   }
   if (clean.includes('identidad') || clean.includes('visual') || clean.includes('marca')) {
-    return '/assets/pages/4-academy/curso-identidad-visual-ia2.png'
+    return '/assets/pages/4-academy/curso-identidad-visual-ia2.webp'
   }
   if (clean.includes('antigravity') || clean.includes('youtube')) {
-    return '/assets/pages/4-academy/curso-antigravity-youtube2.png'
+    return '/assets/pages/4-academy/curso-antigravity-youtube2.webp'
   }
   if (clean.includes('productividad') || clean.includes('equipo') || clean.includes('workflow')) {
-    return '/assets/pages/4-academy/curso-productividad-ia.png'
+    return '/assets/pages/4-academy/curso-productividad-ia.webp'
   }
-  return '/assets/pages/4-academy/curso-whatsapp-business2.png'
+  return '/assets/pages/4-academy/curso-whatsapp-business2.webp'
 }
 
 /** Resuelve rutas relativas de imagen a URLs públicas estables de Academy. */

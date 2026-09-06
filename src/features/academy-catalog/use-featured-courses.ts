@@ -27,8 +27,10 @@ export interface UseFeaturedCoursesResult {
  * Una respuesta VÁLIDA sin destacados NO muestra caché antigua.
  */
 export function useFeaturedCourses(limit = 4): UseFeaturedCoursesResult {
-  const [status, setStatus] = useState<FeaturedCoursesStatus>('loading')
-  const [courses, setCourses] = useState<PublicCourseV1[]>([])
+  const initialCache = typeof window !== 'undefined' ? readAcademyCatalogCache() : null
+  const hasFreshCache = Boolean(initialCache && isAcademyCatalogCacheFresh(initialCache) && initialCache.courses.length > 0)
+  const [status, setStatus] = useState<FeaturedCoursesStatus>(hasFreshCache ? 'cached' : 'loading')
+  const [courses, setCourses] = useState<PublicCourseV1[]>(hasFreshCache && initialCache ? initialCache.courses : [])
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
   const active = useRef(true)

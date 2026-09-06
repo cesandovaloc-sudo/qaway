@@ -1038,7 +1038,7 @@ function useCarouselTick(intervalMs = 7000) {
 
 function AcademyCoursesInner({ tick }) {
   const { status, courses, fallbackCards, error } = useFeaturedCourses(4)
-  const course = status === 'success' && courses.length > 0 ? courses[tick % courses.length] : null
+  const course = (status === 'success' || status === 'cached') && courses.length > 0 ? courses[tick % courses.length] : null
   const neutral = fallbackCards[0]
 
   if (status === 'loading') {
@@ -1068,12 +1068,14 @@ function AcademyCoursesInner({ tick }) {
             <div style={{ minHeight: '14rem' }} className="academy-course-image">
               {(() => {
                 const fallback = getLocalFallbackCourseImage(course.slug, course.title)
-                const imgSource = course.imageUrl || fallback
+                const isDeadHost = course.imageUrl && (course.imageUrl.includes('academy.qawaylab.com') || course.imageUrl.includes('localhost:7000'))
+                const rawSource = (!course.imageUrl || isDeadHost) ? fallback : course.imageUrl
+                const imgSource = rawSource ? rawSource.replace(/\.png$/i, '.webp') : fallback
                 return imgSource ? (
                   <img
                     src={imgSource}
                     alt={course.title}
-                    loading="lazy"
+                    loading="eager"
                     decoding="async"
                     onError={(e) => {
                       if (!e.currentTarget.dataset.hasFallback && fallback) {

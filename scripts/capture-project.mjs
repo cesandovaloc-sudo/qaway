@@ -144,33 +144,9 @@ async function captureWebAndMobile({
   `;
 
   // -------------------------------------------------------------
-  // 1. CAPTURE MOBILE: iPhone 14 Pro Max (430x932 @ 3x = 1290x2796)
+  // CAPTURE ONLY: 1/3 SUPERIOR SHOWCASE (Desktop 1440px)
   // -------------------------------------------------------------
-  console.log('Capturing Mobile (iPhone 14 Pro Max)...');
-  await sendCDP(ws, 'Emulation.setDeviceMetricsOverride', {
-    width: 430,
-    height: 932,
-    deviceScaleFactor: 3,
-    mobile: true,
-    screenOrientation: { angle: 0, type: 'portraitPrimary' }
-  });
-  await sendCDP(ws, 'Page.navigate', { url });
-  await new Promise(r => setTimeout(r, 1500));
-  await sendCDP(ws, 'Runtime.evaluate', { expression: prepareDOMScript, awaitPromise: true });
-  await new Promise(r => setTimeout(r, 800));
-
-  const mobileScreenshot = await sendCDP(ws, 'Page.captureScreenshot', {
-    format: 'png',
-    captureBeyondViewport: false
-  });
-  const mobileFile = path.join(absOutputDir, `${projectPrefix}(iPhone 14 Pro Max).png`);
-  await safeWriteFile(mobileFile, Buffer.from(mobileScreenshot.data, 'base64'));
-  console.log('Saved mobile image:', mobileFile);
-
-  // -------------------------------------------------------------
-  // 2. CAPTURE FULL-PAGE WEB (Lossless Original Quality 1440px)
-  // -------------------------------------------------------------
-  console.log('Capturing Full-Page Web (Total)...');
+  console.log('Capturing Desktop 1/3 Superior Showcase...');
   await sendCDP(ws, 'Emulation.setDeviceMetricsOverride', {
     width: 1440,
     height: 900,
@@ -182,18 +158,6 @@ async function captureWebAndMobile({
   await sendCDP(ws, 'Runtime.evaluate', { expression: prepareDOMScript, awaitPromise: true });
   await new Promise(r => setTimeout(r, 1000));
 
-  const fullpageScreenshot = await sendCDP(ws, 'Page.captureScreenshot', {
-    format: 'png',
-    captureBeyondViewport: true
-  });
-  const fullpageFile = path.join(absOutputDir, `${projectPrefix}-web-fullpage.png`);
-  await safeWriteFile(fullpageFile, Buffer.from(fullpageScreenshot.data, 'base64'));
-  console.log('Saved full-page image:', fullpageFile);
-
-  // -------------------------------------------------------------
-  // 3. CAPTURE 1/3 SUPERIOR (Hero + Beneficios Completos)
-  // -------------------------------------------------------------
-  console.log('Capturing 1/3 Superior Showcase (Hero + Beneficios)...');
   const s1EndRes = await sendCDP(ws, 'Runtime.evaluate', {
     expression: `
       (() => {
@@ -207,7 +171,7 @@ async function captureWebAndMobile({
     `,
     returnByValue: true
   });
-  const s1Height = s1EndRes.result.value || 1250;
+  const s1Height = s1EndRes.result.value || 1400;
 
   const showcase1Screenshot = await sendCDP(ws, 'Page.captureScreenshot', {
     format: 'png',
@@ -224,21 +188,13 @@ async function captureWebAndMobile({
   await safeWriteFile(showcase1File, Buffer.from(showcase1Screenshot.data, 'base64'));
   console.log(`Saved 1/3 Superior showcase (${s1Height}px):`, showcase1File);
 
-  // Clean unneeded extra slices if present
-  ['2', '3', '4'].forEach(n => {
-    const oldFile = path.join(absOutputDir, `${n}-${projectPrefix}-showcase.png`);
-    try {
-      if (fs.existsSync(oldFile)) fs.unlinkSync(oldFile);
-    } catch(e) {}
-  });
-
   ws.close();
   chromeProcess.kill();
-  console.log('Process completed successfully with all images and cards 100% loaded!');
+  console.log('Process completed successfully!');
 }
 
 captureWebAndMobile({
-  url: 'http://localhost:4100/hub/blog-editor/editor/new',
-  outputDir: 'src/pages/5-qaway-hub/blog-editor',
-  projectPrefix: 'blog-editor-articulo'
+  url: 'http://localhost:4100/proyectos/dental',
+  outputDir: 'src/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental',
+  projectPrefix: 'dental'
 }).catch(console.error);

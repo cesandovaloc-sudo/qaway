@@ -221,30 +221,18 @@ export function DentalLandingPage() {
           </div>
 
           <section className="space-y-6" id="servicios">
-            {/* Cabecera abierta e integrada a sangre derecha como la imagen de referencia */}
-            <div className="relative min-h-[380px] sm:min-h-[440px] lg:min-h-[480px] flex items-center overflow-hidden rounded-3xl">
-              {/* Imagen de fondo a sangre en el costado derecho */}
-              <div
-                className="pointer-events-none absolute inset-y-0 right-0 w-full sm:w-[65%] lg:w-[52%] bg-cover bg-no-repeat bg-right"
-                style={{
-                  backgroundImage: `url(${benefitsSource})`,
-                }}
-              />
-              {/* Fundido suave hacia el texto sin cortes duros */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#fff7f9] via-[#fff7f9]/95 via-45% to-transparent lg:via-[#fff7f9]/90" />
-
-              {/* Texto directo sobre el lienzo */}
-              <div className="relative z-10 max-w-[620px] py-8 sm:py-12 px-2 sm:px-4">
+            {/* Cabecera centrada sin imagen (Opción A) */}
+            <div className="mx-auto max-w-[800px] text-center py-6 sm:py-10 px-2 sm:px-4">
+              <div className="flex justify-center">
                 <SectionEyebrow>Tu sonrisa, nuestro compromiso</SectionEyebrow>
-                <h2 className="mt-5 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-[3.3rem] lg:leading-[1.08]">
-                  Más que brackets, <br className="hidden sm:inline" />
-                  creamos <span className="text-blush-600">sonrisas</span> que <br className="hidden sm:inline" />
-                  <span className="text-blush-600">transforman</span>
-                </h2>
-                <p className="mt-5 max-w-[48ch] text-base leading-relaxed text-ink/75 sm:text-lg">
-                  Combinamos experiencia, tecnología y un enfoque personalizado para brindarte una sonrisa alineada, saludable y llena de confianza.
-                </p>
               </div>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+                Más que brackets, creamos <span className="text-blush-600">sonrisas</span> que{" "}
+                <span className="text-blush-600">transforman</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-[56ch] text-base leading-relaxed text-ink/75 sm:text-lg">
+                Combinamos experiencia, tecnología y un enfoque personalizado para brindarte una sonrisa alineada, saludable y llena de confianza.
+              </p>
             </div>
 
             {/* Fila horizontal de 4 tarjetas de beneficios centradas */}
@@ -279,7 +267,7 @@ export function DentalLandingPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-start lg:items-end gap-2 shrink-0 w-full sm:w-auto">
+              <div className="flex flex-col items-center gap-2.5 shrink-0 w-full sm:w-auto">
                 <a
                   className="inline-flex min-h-[54px] w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blush-500 to-blush-600 px-7 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 active:scale-[0.98]"
                   href="#contacto"
@@ -287,7 +275,7 @@ export function DentalLandingPage() {
                   <ArrowRight className="h-4 w-4" strokeWidth={2} />
                   Quiero mi evaluación gratis
                 </a>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-ink/60 self-center lg:self-end">
+                <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-ink/60">
                   <ShieldCheck className="h-3.5 w-3.5 text-blush-600" strokeWidth={2} />
                   <span>100% seguro y confidencial</span>
                 </div>
@@ -295,20 +283,18 @@ export function DentalLandingPage() {
             </article>
           </section>
 
-          <section className="rounded-[38px] border border-white/85 bg-white/78 p-7 shadow-soft backdrop-blur-xl sm:p-8" id="tratamientos">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <SectionEyebrow>Más opciones para tu sonrisa</SectionEyebrow>
-                <h2 className="mt-6 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
-                  Explora otros <span className="text-blush-700">tratamientos</span>
-                </h2>
-              </div>
-              <p className="max-w-[36ch] text-base leading-relaxed text-ink/75">
+          <section className="space-y-8 py-8 sm:py-12" id="tratamientos">
+            <div className="max-w-[720px] px-2 sm:px-4">
+              <SectionEyebrow>Más opciones para tu sonrisa</SectionEyebrow>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
+                Explora otros <span className="text-blush-700">tratamientos</span>
+              </h2>
+              <p className="mt-4 max-w-[50ch] text-base leading-relaxed text-ink/75 sm:text-lg">
                 Soluciones diseñadas para cada etapa de tu sonrisa, con opciones funcionales y estéticas según tu necesidad.
               </p>
             </div>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6 lg:grid-cols-3">
               {treatments.map((item) => (
                 <article className="group overflow-hidden rounded-[32px] border border-white/90 bg-white/88 shadow-double-bezel transition duration-300 hover:-translate-y-1 hover:border-blush-200" key={item.title}>
                   <div className="h-[240px] bg-[#f9dbe4] card-hover-image" style={{ backgroundImage: `url(${treatmentsSource})`, backgroundPosition: item.position, backgroundSize: "cover" }} />
