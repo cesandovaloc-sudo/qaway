@@ -7,10 +7,11 @@ import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
 import mockupLandingPages from '../8-landings/8-desarollo web/assets/Landing-Pages.webp'
 import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.webp'
-import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.png'
-import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.png'
-import showcaseVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.png'
-import mockupEpc from './2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/epc(iPhone 14 Pro Max).png'
+import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.webp'
+import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.webp'
+import showcaseVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.webp'
+import showcaseDental from './2-Sistemas-digitales/3-Webs-y-landings/3-Dental/1-dental-showcase.png'
+import mockupEpc from './2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/epc(iPhone 14 Pro Max).webp'
 import './proyectos.css'
 
 const estudioAssets = '/assets/pages/2-estudio/'
@@ -215,57 +216,71 @@ function ProjectCard({ project, index }) {
 }
 
 function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = false }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="group flex flex-col overflow-hidden rounded-[12px] border border-[#e4e4e7] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] cursor-pointer"
-    >
-      <Link to={to} className="flex flex-col h-full">
-        {isMockup ? (
-          <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
-            <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-              <img
-                src={image}
-                alt={title}
-                className="h-full w-full object-cover object-top transition-transform duration-300 ease-out"
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="relative h-[260px] sm:h-[300px] overflow-hidden bg-zinc-100">
+  const CardContent = (
+    <>
+      {isMockup ? (
+        <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+          <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
             <img
               src={image}
               alt={title}
               className="h-full w-full object-cover object-top transition-transform duration-300 ease-out"
             />
-            {tag && (
-              <div className="absolute top-3.5 right-3.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
-                {tag}
-              </div>
-            )}
           </div>
-        )}
-        <div className="flex flex-1 flex-col justify-between p-[24px] sm:p-[26px]">
-          <div>
-            <h3 className="mb-2.5 text-[19px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] transition-colors group-hover:text-[#fe6612]">
-              {title}
-            </h3>
-            <p className="text-[14px] leading-[1.55] text-[#71717a]">
-              {desc}
-            </p>
-          </div>
+        </div>
+      ) : (
+        <div className="relative h-[260px] sm:h-[300px] overflow-hidden bg-zinc-100">
+          <img
+            src={image}
+            alt={title}
+            className="h-full w-full object-cover object-top transition-transform duration-300 ease-out"
+          />
+          {tag && (
+            <div className="absolute top-3.5 right-3.5 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-xs">
+              {tag}
+            </div>
+          )}
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-between p-[24px] sm:p-[26px]">
+        <div>
+          <h3 className="mb-2.5 text-[19px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] transition-colors group-hover:text-[#fe6612]">
+            {title}
+          </h3>
+          <p className="text-[14px] leading-[1.55] text-[#71717a]">
+            {desc}
+          </p>
+        </div>
+        {to && (
           <div className="pt-4 flex items-center">
             <span className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#fe6612] transition-colors">
               <span>Ver proyecto</span>
               <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
             </span>
           </div>
+        )}
+      </div>
+    </>
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={to ? { y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } } : undefined}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className={`group flex flex-col overflow-hidden rounded-[12px] border border-[#e4e4e7] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${to ? 'cursor-pointer' : ''}`}
+    >
+      {to ? (
+        <Link to={to} className="flex flex-col h-full">
+          {CardContent}
+        </Link>
+      ) : (
+        <div className="flex flex-col h-full">
+          {CardContent}
         </div>
-      </Link>
+      )}
     </motion.div>
   )
 }
@@ -427,7 +442,7 @@ export default function ProyectosPage() {
 
                 <StaticProjectCard
                   to="/proyectos/aurea-skincare"
-                  image="/aurea-images/showcase/1-aurea-skincare-showcase.png"
+                  image="/aurea-images/showcase/1-aurea-skincare-showcase.webp"
                   title="Tiendas Online (E-commerce)"
                   desc="E-commerce con catálogo interactivo de productos, carrito de compras integrado y diseño editorial de alta conversión."
                   delay={0.24}
@@ -436,7 +451,7 @@ export default function ProyectosPage() {
 
                 <StaticProjectCard
                   to="/proyectos/panaderia-josue"
-                  image="/josue-images/showcase/1-josue-panaderia-hero-productos.png"
+                  image="/josue-images/showcase/1-josue-panaderia-hero-productos.webp"
                   title="Sitios Web One Page"
                   desc="Sitios web de una sola página, pedidos directos por WhatsApp y presencia local."
                   delay={0.40}
@@ -445,7 +460,6 @@ export default function ProyectosPage() {
 
                 {/* FILA 2 · OTROS FORMATOS Y PROYECTOS EN PRODUCCIÓN */}
                 <StaticProjectCard
-                  to="/landings/desarrollo-web"
                   image={mockupSitiosWeb}
                   title="Sitios Web Corporativos"
                   desc="Estructura multipágina con secciones de servicios, nosotros, blog y formularios para empresas, marcas y profesionales."
@@ -454,16 +468,14 @@ export default function ProyectosPage() {
                 />
 
                 <StaticProjectCard
-                  to="/proyectos/plantora"
-                  image="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=85"
-                  tag="Landing Page"
-                  title="Plantora Paisajismo"
-                  desc="Landing page de alta conversión para proyectos botánicos, arquitectura de paisaje y captación de clientes."
+                  image={showcaseDental}
+                  title="Sitios Web Odontología & Salud"
+                  desc="Estructura One Page de alta conversión para clínicas dentales, presentación de tratamientos y captación directa de citas a WhatsApp."
                   delay={0.24}
+                  isMockup={true}
                 />
 
                 <StaticProjectCard
-                  to="/proyectos/saniclick"
                   image="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=85"
                   tag="Servicios & Catálogo"
                   title="Saniclick Servicios"
