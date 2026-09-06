@@ -1,6 +1,6 @@
 export const featuredCourses = [
   {
-    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
+    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.webp',
     category: 'Diseño',
     title: 'Identidad Visual con IA',
     text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
@@ -10,7 +10,7 @@ export const featuredCourses = [
     href: '/landings/identidad-visual',
   },
   {
-    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
+    image: '/assets/pages/4-academy/curso-whatsapp-business2.webp',
     category: 'Marketing',
     title: 'WhatsApp Business para negocios',
     text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
@@ -20,7 +20,7 @@ export const featuredCourses = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/4-academy/curso-antigravity-youtube2.png',
+    image: '/assets/pages/4-academy/curso-antigravity-youtube2.webp',
     category: 'Inteligencia artificial',
     title: 'Antigravity desde cero',
     text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
@@ -35,7 +35,7 @@ export const featuredCourses = [
 export const courseCatalog = [
   ...featuredCourses,
   {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
+    image: '/assets/pages/4-academy/curso-productividad-ia.webp',
     category: 'Productividad',
     title: 'IA para equipos pequeños',
     text: 'Organiza tareas, reuniones e información con un sistema sencillo y colaborativo.',
@@ -44,7 +44,7 @@ export const courseCatalog = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
+    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.webp',
     category: 'Inteligencia artificial',
     title: 'Sistema de contenido con IA',
     text: 'Diseña una ruta sostenible para investigar, crear y adaptar contenido sin improvisar.',
@@ -53,7 +53,7 @@ export const courseCatalog = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
+    image: '/assets/pages/4-academy/curso-productividad-ia.webp',
     category: 'Automatización',
     title: 'Workflows sin código',
     text: 'Conecta herramientas y construye automatizaciones útiles sin depender de desarrollo complejo.',
@@ -62,7 +62,7 @@ export const courseCatalog = [
     href: '#formulario',
   },
   {
-    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
+    image: '/assets/pages/4-academy/curso-whatsapp-business2.webp',
     category: 'Marketing',
     title: 'Presencia digital para emprender',
     text: 'Ordena tu propuesta, tus canales y tu comunicación para presentarte con claridad.',
@@ -74,7 +74,7 @@ export const courseCatalog = [
 
 export const carouselCourses = [
   {
-    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.png',
+    image: '/assets/pages/4-academy/curso-identidad-visual-ia2.webp',
     category: 'Diseño e IA',
     title: 'Identidad visual con IA',
     text: 'Construye una identidad coherente usando criterio visual, herramientas de IA y un sistema que puedas seguir aplicando.',
@@ -83,7 +83,7 @@ export const carouselCourses = [
     featured: 'Más solicitado',
   },
   {
-    image: '/assets/pages/4-academy/curso-whatsapp-business2.png',
+    image: '/assets/pages/4-academy/curso-whatsapp-business2.webp',
     category: 'Ventas y atención',
     title: 'WhatsApp B. para Negocios',
     text: 'Organiza consultas, respuestas, catálogo y seguimiento para convertir conversaciones en una mejor experiencia comercial.',
@@ -92,7 +92,7 @@ export const carouselCourses = [
     featured: 'Aplicación inmediata',
   },
   {
-    image: '/assets/pages/4-academy/curso-antigravity-youtube2.png',
+    image: '/assets/pages/4-academy/curso-antigravity-youtube2.webp',
     category: 'YouTube',
     title: 'Antigravity desde cero',
     text: 'Una ruta audiovisual para comprender la herramienta, experimentar con ella y llevarla a proyectos creativos reales.',
@@ -101,7 +101,7 @@ export const carouselCourses = [
     featured: 'Nuevo',
   },
   {
-    image: '/assets/pages/9-pruebas/academy/curso-productividad-ia.png',
+    image: '/assets/pages/4-academy/curso-productividad-ia.webp',
     category: 'Productividad',
     title: 'IA para equipos pequeños',
     text: 'Organiza tareas, reuniones e información con un sistema sencillo y colaborativo.',

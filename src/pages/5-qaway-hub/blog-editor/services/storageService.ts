@@ -9,14 +9,17 @@ export interface UploadResult {
 /**
  * Comprime y convierte un archivo local File en DataURL base64 optimizada (máx 1280px)
  */
-export function compressAndReadFile(file: File): Promise<string> {
+/**
+ * Comprime y convierte un archivo local File en WebP (máx 1440px)
+ */
+export function compressImageToWebpBlob(file: File, quality = 0.85): Promise<{ blob: Blob; dataUrl: string }> {
   return new Promise((resolve) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const img = new Image()
       img.onload = () => {
-        const maxWidth = 1280
-        const maxHeight = 1280
+        const maxWidth = 1440
+        const maxHeight = 1440
         let width = img.width
         let height = img.height
 
@@ -38,41 +41,55 @@ export function compressAndReadFile(file: File): Promise<string> {
         const ctx = canvas.getContext('2d')
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height)
-          // Comprimir a JPEG calidad 0.82
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82)
-          resolve(compressedDataUrl)
+          const dataUrl = canvas.toDataURL('image/webp', quality)
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve({ blob, dataUrl })
+              } else {
+                resolve({ blob: file, dataUrl })
+              }
+            },
+            'image/webp',
+            quality
+          )
         } else {
-          resolve(e.target?.result as string)
+          resolve({ blob: file, dataUrl: e.target?.result as string })
         }
       }
-      img.onerror = () => resolve(e.target?.result as string)
+      img.onerror = () => resolve({ blob: file, dataUrl: e.target?.result as string })
       img.src = e.target?.result as string
     }
     reader.onerror = () => {
-      // Fallback
-      resolve(URL.createObjectURL(file))
+      resolve({ blob: file, dataUrl: URL.createObjectURL(file) })
     }
     reader.readAsDataURL(file)
   })
 }
 
+export async function compressAndReadFile(file: File): Promise<string> {
+  const { dataUrl } = await compressImageToWebpBlob(file)
+  return dataUrl
+}
+
 /**
- * Sube una imagen a Supabase Storage bucket 'blog-media' si está disponible,
- * con compresión local garantizada para que nunca sature la memoria.
+ * Sube una imagen a Supabase Storage bucket 'blog-media' convertida nativamente a WebP
+ * con compresión garantizada.
  */
 export async function uploadImage(file: File): Promise<UploadResult> {
   try {
+    const { blob: webpBlob, dataUrl } = await compressImageToWebpBlob(file)
     const supabase = getSupabaseClient()
 
     if (supabase) {
       try {
-        const fileExt = file.name.split('.').pop() || 'jpg'
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.webp`
         const filePath = `posts/${fileName}`
 
         const { data, error } = await supabase.storage
           .from('blog-media')
-          .upload(filePath, file, {
+          .upload(filePath, webpBlob, {
+            contentType: 'image/webp',
             cacheControl: '3600',
             upsert: false,
           })
@@ -86,7 +103,7 @@ export async function uploadImage(file: File): Promise<UploadResult> {
             return {
               url: publicUrlData.publicUrl,
               source: 'supabase',
-              filename: file.name,
+              filename: file.name.replace(/\.[^/.]+$/, '') + '.webp',
             }
           }
         } else if (error) {
@@ -97,12 +114,11 @@ export async function uploadImage(file: File): Promise<UploadResult> {
       }
     }
 
-    // Fallback local con compresión optimizada
-    const compressedUrl = await compressAndReadFile(file)
+    // Fallback local con compresión WebP optimizada
     return {
-      url: compressedUrl,
+      url: dataUrl,
       source: 'local_blob',
-      filename: file.name,
+      filename: file.name.replace(/\.[^/.]+$/, '') + '.webp',
     }
   } catch (err) {
     console.error('Error procesando imagen:', err)

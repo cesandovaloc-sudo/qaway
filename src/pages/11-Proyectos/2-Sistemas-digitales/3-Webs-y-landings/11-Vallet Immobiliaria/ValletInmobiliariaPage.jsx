@@ -12,8 +12,8 @@ import { useValletReveal } from './useValletReveal';
 import './vallet-inmobiliaria.css';
 
 // Assets locales
-import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
-import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
+import logo from './ChatGPT Image 3 sept 2026, 11_47_38.webp';
+import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.webp';
 import heroImage from './hero.webp';
 import consultationImage from './vallet-web/src/assets/consultation-interior.webp';
 import contactImage from './vallet-web/src/assets/contact-interior.webp';

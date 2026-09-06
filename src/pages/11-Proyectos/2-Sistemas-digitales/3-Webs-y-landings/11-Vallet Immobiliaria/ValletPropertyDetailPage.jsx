@@ -10,8 +10,8 @@ import Navbar from '@/components/layout/Navbar';
 import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
-import logo from './ChatGPT Image 3 sept 2026, 11_47_38.png';
-import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.png';
+import logo from './ChatGPT Image 3 sept 2026, 11_47_38.webp';
+import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.webp';
 import './vallet-inmobiliaria.css';
 import './vallet-property-detail.css';
 

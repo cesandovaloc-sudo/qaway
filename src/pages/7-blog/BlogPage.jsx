@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Link, useParams } from 'react-router-dom'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 import { supabase } from '@/config/supabase'
-import qawayCalendarImage from '../6-recursos/assets/qaway-calendar.png'
+import qawayCalendarImage from '../6-recursos/assets/qaway-calendar.webp'
 import {
   Newspaper,
   TrendingUp,

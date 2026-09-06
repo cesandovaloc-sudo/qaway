@@ -8,9 +8,9 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
-import qawayCalendarImage from './assets/qaway-calendar.png'
-import qawayScriptBackupImage from './assets/qaway-script-backup.png'
-import primerosFlujosImage from './1-primeros-flujos IA/ChatGPT Image 1 sept 2026, 19_04_24.png'
+import qawayCalendarImage from './assets/qaway-calendar.webp'
+import qawayScriptBackupImage from './assets/qaway-script-backup.webp'
+import primerosFlujosImage from './1-primeros-flujos IA/ChatGPT Image 1 sept 2026, 19_04_24.webp'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const categories = [
@@ -225,18 +225,15 @@ export default function RecursosPage() {
     return (
       <Link to={res.path || '#'} className="block">
         <motion.div
-          className="group relative flex flex-col-reverse sm:flex-col justify-between sm:justify-end overflow-hidden rounded-2xl p-6 sm:p-8 md:p-10 transition-all cursor-pointer min-h-[auto] sm:min-h-[300px]"
+          className="group relative flex flex-col-reverse sm:flex-col justify-between sm:justify-end overflow-hidden rounded-2xl p-6 sm:p-8 md:p-10 cursor-pointer min-h-[auto] sm:min-h-[300px]"
           style={{ background: style.background }}
-          initial={{ opacity: 0, x: idx === 0 ? -30 : 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.55 }}
-          whileHover={{ y: -6, boxShadow: style.shadow }}
+          initial={false}
+          whileHover={{ y: -4, boxShadow: style.shadow, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
           <img 
             src={res.image} 
             alt={res.title || 'Recurso destacado'} 
-            className="relative sm:absolute sm:-right-2 sm:top-1/2 sm:-translate-y-1/2 w-full max-w-[220px] sm:max-w-[320px] sm:w-[52%] mx-auto sm:mx-0 mt-4 sm:mt-0 rotate-1 sm:rotate-3 rounded-xl object-cover shadow-xl sm:shadow-2xl transition-transform duration-500 group-hover:rotate-0 group-hover:scale-105" 
+            className="relative sm:absolute sm:-right-2 sm:top-1/2 sm:-translate-y-1/2 w-full max-w-[220px] sm:max-w-[320px] sm:w-[52%] mx-auto sm:mx-0 mt-4 sm:mt-0 rotate-1 sm:rotate-2 rounded-xl object-cover shadow-xl sm:shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-0 group-hover:scale-[1.02]" 
           />
           <div className="relative z-10 w-full sm:w-[58%]">
             <span className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-widest" style={{ background: style.badgeBackground, color: style.badgeColor }}>
@@ -440,7 +437,7 @@ export default function RecursosPage() {
           <div className="mx-auto max-w-[1240px] px-6 sm:px-9">
           {!activeCategory && !isSearchActive ? (
             /* VIEW: NO FILTER SELECTED */
-            <motion.div key="all" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <>
               {featured.length > 0 && (
                 <div className="mb-14 grid gap-6 md:grid-cols-2">
                   {featured.map((res, idx) => (
@@ -475,9 +472,9 @@ export default function RecursosPage() {
                   </div>
                 </>
               )}
-            </motion.div>
+            </>
           ) : (
-            <motion.div key="filtered" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <>
               {filteredResources.length > 0 ? (
                 <>
                   <div className="mb-4 flex items-center justify-between gap-4">
@@ -499,7 +496,7 @@ export default function RecursosPage() {
                   <p className="text-[#191918]/50 font-bold uppercase tracking-widest text-sm">No encontramos recursos con ese criterio.</p>
                 </div>
               )}
-            </motion.div>
+            </>
           )}          <div className="flex flex-wrap items-center gap-10 rounded-md border border-[#ff4b0b]/20 bg-[#ff4b0b]/5 px-10 py-12">
             <div className="flex-1 min-w-[300px]">
               <h2 className="qw-section-title--sm mb-3 uppercase text-[#ff4b0b]" style={{ ...displayFont }}>
@@ -518,7 +515,7 @@ export default function RecursosPage() {
                 </Link>
               )}
             </div>
-            <img src="/assets/pages/9-pruebas/academy/curso-productividad-ia.png" alt="Academy" className="w-[320px] max-w-full rounded-md object-contain" />
+            <img src="/assets/pages/4-academy/curso-productividad-ia.webp" alt="Academy" className="w-[320px] max-w-full rounded-md object-contain" />
           </div>
         </div>
       </section>

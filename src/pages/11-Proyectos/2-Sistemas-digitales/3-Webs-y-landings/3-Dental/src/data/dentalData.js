@@ -50,17 +50,17 @@ export const treatments = [
   {
     title: "Alineadores invisibles",
     body: "Alternativa discreta y removible para corregir tu sonrisa sin alterar tu rutina diaria ni tu imagen.",
-    position: "8% center",
+    imageKey: "alineadores",
   },
   {
     title: "Brackets estéticos",
     body: "Una opción equilibrada entre máxima precisión clínica y una presencia visual suave y sutil.",
-    position: "50% center",
+    imageKey: "bracketsEsteticos",
   },
   {
     title: "Brackets metálicos",
     body: "Solución versátil, resistente y de alta eficacia para casos que demandan control biomecánico continuo.",
-    position: "88% center",
+    imageKey: "bracketsMetalicos",
   },
 ];
 

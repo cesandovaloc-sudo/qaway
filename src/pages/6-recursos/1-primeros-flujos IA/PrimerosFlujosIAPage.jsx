@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
-import heroImage from './ChatGPT Image 1 sept 2026, 19_04_24.png'
+import heroImage from './ChatGPT Image 1 sept 2026, 19_04_24.webp'
 import pdfFile from './Guia_Qaway Lab_Primeros_Flujos_IA.pdf'
 
 const pipelineSteps = [

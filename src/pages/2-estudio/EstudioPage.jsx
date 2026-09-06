@@ -657,13 +657,14 @@ function ContentSystem() {
             event.currentTarget.style.setProperty('--showcase-y', `${((event.clientY - rect.top) / rect.height) * 100}%`)
           }}
         >
-          <iframe
-            src="https://www.youtube.com/embed/Z-7YMKJKF74?autoplay=1&mute=1&loop=1&playlist=Z-7YMKJKF74&controls=0&modestbranding=1&rel=0&playsinline=1"
-            title="Proceso de concepto, producción y edición de contenido para redes sociales"
-            className="w-full h-full absolute inset-0 object-cover rounded-[6px] border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
+          <video
+            src="/assets/pages/2-estudio/estudio-social-media-reel.mp4"
+            className="w-full h-full absolute inset-0 object-cover rounded-[6px]"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
           />
           <div className="vl-content-showcase__veil pointer-events-none" />
         </motion.div>

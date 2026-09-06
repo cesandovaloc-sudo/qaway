@@ -21,7 +21,10 @@ import {
   WalletCards,
 } from "lucide-react";
 import {
+  alineadoresSource,
   benefitsSource,
+  bracketsEsteticosSource,
+  bracketsMetalicosSource,
   contactSource,
   heroSource,
   specialistsSource,
@@ -285,29 +288,41 @@ export function DentalLandingPage() {
 
           <section className="space-y-8 py-8 sm:py-12" id="tratamientos">
             <div className="max-w-[720px] px-2 sm:px-4">
-              <SectionEyebrow>Más opciones para tu sonrisa</SectionEyebrow>
+              <SectionEyebrow>Tratamientos de ortodoncia especializada</SectionEyebrow>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl lg:text-5xl">
-                Explora otros <span className="text-blush-700">tratamientos</span>
+                Elige el tratamiento ideal para <span className="text-blush-700">tu sonrisa</span>
               </h2>
-              <p className="mt-4 max-w-[50ch] text-base leading-relaxed text-ink/75 sm:text-lg">
-                Soluciones diseñadas para cada etapa de tu sonrisa, con opciones funcionales y estéticas según tu necesidad.
+              <p className="mt-4 max-w-[52ch] text-base leading-relaxed text-ink/75 sm:text-lg">
+                Opciones diseñadas para adaptarse a tu estilo de vida, desde alineadores invisibles hasta brackets de alta precisión.
               </p>
             </div>
 
             <div className="grid gap-6 lg:grid-cols-3">
-              {treatments.map((item) => (
-                <article className="group overflow-hidden rounded-[32px] border border-white/90 bg-white/88 shadow-double-bezel transition duration-300 hover:-translate-y-1 hover:border-blush-200" key={item.title}>
-                  <div className="h-[240px] bg-[#f9dbe4] card-hover-image" style={{ backgroundImage: `url(${treatmentsSource})`, backgroundPosition: item.position, backgroundSize: "cover" }} />
-                  <div className="p-7">
-                    <h3 className="text-2xl font-semibold tracking-tight text-ink">{item.title}</h3>
-                    <p className="mt-3 text-base leading-relaxed text-ink/75">{item.body}</p>
-                    <a className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blush-700 transition group-hover:gap-3" href="#contacto">
-                      Ver tratamiento
-                      <ChevronRight className="h-4 w-4" strokeWidth={2} />
-                    </a>
-                  </div>
-                </article>
-              ))}
+              {treatments.map((item) => {
+                const imageSrc =
+                  item.imageKey === "alineadores"
+                    ? alineadoresSource
+                    : item.imageKey === "bracketsEsteticos"
+                    ? bracketsEsteticosSource
+                    : bracketsMetalicosSource;
+
+                return (
+                  <article className="group overflow-hidden rounded-[32px] border border-white/90 bg-white/88 shadow-double-bezel transition duration-300 hover:-translate-y-1 hover:border-blush-200" key={item.title}>
+                    <div
+                      className="h-[240px] bg-[#f9dbe4] bg-cover bg-center card-hover-image transition duration-500 group-hover:scale-[1.02]"
+                      style={{ backgroundImage: `url(${imageSrc})` }}
+                    />
+                    <div className="p-7">
+                      <h3 className="text-2xl font-semibold tracking-tight text-ink">{item.title}</h3>
+                      <p className="mt-3 text-base leading-relaxed text-ink/75">{item.body}</p>
+                      <a className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blush-700 transition group-hover:gap-3" href="#contacto">
+                        Ver tratamiento
+                        <ChevronRight className="h-4 w-4" strokeWidth={2} />
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
 
