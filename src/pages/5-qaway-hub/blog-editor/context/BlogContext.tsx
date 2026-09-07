@@ -170,29 +170,34 @@ export function BlogProvider({ children }: { children: ReactNode }) {
 
         if (postsError) throw postsError
         if (postsData && postsData.length > 0 && isMounted) {
-          const remotePosts: Post[] = postsData.map((d: any) => ({
-            id: d.id,
-            title: d.title,
-            slug: d.slug,
-            excerpt: d.excerpt || '',
-            category: d.category || 'General',
-            coverUrl: d.cover_url || '',
-            coverAlt: d.cover_alt || '',
-            headerLayout: d.header_layout || 'editorial-cta',
-            headerCtaTag: d.header_cta_tag || '',
-            headerCtaTitle: d.header_cta_title || '',
-            headerCtaDesc: d.header_cta_desc || '',
-            headerCtaBtnText: d.header_cta_btn_text || '',
-            headerCtaUrl: d.header_cta_url || '',
-            body: d.body || '',
-            contentHtml: d.content_html || '',
-            contentJson: d.content_json || '',
-            readingTime: d.reading_time || 2,
-            status: d.status || 'borrador',
-            createdAt: d.created_at,
-            updatedAt: d.updated_at,
-            publishedAt: d.published_at,
-          }))
+          const remotePosts: Post[] = postsData.map((d: any) => {
+            const meta = (typeof d.content_json === 'object' && d.content_json !== null)
+              ? d.content_json.metadata || {}
+              : {}
+            return {
+              id: d.id,
+              title: d.title,
+              slug: d.slug,
+              excerpt: d.excerpt || '',
+              category: d.category || 'General',
+              coverUrl: d.cover_url || '',
+              coverAlt: d.cover_alt || '',
+              headerLayout: meta.headerLayout || d.header_layout || 'editorial-cta',
+              headerCtaTag: meta.headerCtaTag || d.header_cta_tag || '',
+              headerCtaTitle: meta.headerCtaTitle || d.header_cta_title || '',
+              headerCtaDesc: meta.headerCtaDesc || d.header_cta_desc || '',
+              headerCtaBtnText: meta.headerCtaBtnText || d.header_cta_btn_text || '',
+              headerCtaUrl: meta.headerCtaUrl || d.header_cta_url || '',
+              body: d.body || '',
+              contentHtml: d.content_html || '',
+              contentJson: d.content_json ? (typeof d.content_json === 'string' ? d.content_json : JSON.stringify(d.content_json)) : '',
+              readingTime: d.reading_time || 2,
+              status: d.status || 'borrador',
+              createdAt: d.created_at,
+              updatedAt: d.updated_at,
+              publishedAt: d.published_at,
+            }
+          })
 
           setPosts(prev => {
             const postMap = new Map<string, Post>()
@@ -366,6 +371,25 @@ export function BlogProvider({ children }: { children: ReactNode }) {
       const supabase = getSupabaseClient()
       if (supabase) {
         try {
+          let parsedJson: any = null
+          if (resultPost.contentJson) {
+            parsedJson = typeof resultPost.contentJson === 'string'
+              ? JSON.parse(resultPost.contentJson)
+              : resultPost.contentJson
+          } else {
+            parsedJson = { type: 'doc', content: [] }
+          }
+          if (typeof parsedJson === 'object' && parsedJson !== null) {
+            parsedJson.metadata = {
+              headerLayout: resultPost.headerLayout || 'editorial-cta',
+              headerCtaTag: resultPost.headerCtaTag || '',
+              headerCtaTitle: resultPost.headerCtaTitle || '',
+              headerCtaDesc: resultPost.headerCtaDesc || '',
+              headerCtaBtnText: resultPost.headerCtaBtnText || '',
+              headerCtaUrl: resultPost.headerCtaUrl || '',
+            }
+          }
+
           const dbPayload = {
             id: resultPost.id,
             title: resultPost.title,
@@ -374,19 +398,9 @@ export function BlogProvider({ children }: { children: ReactNode }) {
             category: resultPost.category,
             cover_url: resultPost.coverUrl,
             cover_alt: resultPost.coverAlt,
-            header_layout: resultPost.headerLayout || 'editorial-cta',
-            header_cta_tag: resultPost.headerCtaTag || null,
-            header_cta_title: resultPost.headerCtaTitle || null,
-            header_cta_desc: resultPost.headerCtaDesc || null,
-            header_cta_btn_text: resultPost.headerCtaBtnText || null,
-            header_cta_url: resultPost.headerCtaUrl || null,
             body: resultPost.body,
             content_html: resultPost.contentHtml,
-            content_json: resultPost.contentJson
-              ? (typeof resultPost.contentJson === 'string'
-                  ? JSON.parse(resultPost.contentJson)
-                  : resultPost.contentJson)
-              : null,
+            content_json: parsedJson,
             reading_time: resultPost.readingTime,
             status: resultPost.status,
             updated_at: resultPost.updatedAt,
@@ -394,10 +408,16 @@ export function BlogProvider({ children }: { children: ReactNode }) {
           }
           const { error } = await supabase.from('posts').upsert(dbPayload)
           if (error) {
-            console.warn('Supabase upsert warning:', error.message)
+            console.error('[BlogContext] Error sincronizando post en Supabase:', error)
+            setSyncState('error')
+            throw error
+          } else {
+            setSyncState('synced')
           }
         } catch (e) {
-          console.warn('Error sincronizando post con Supabase:', e)
+          console.error('Error sincronizando post con Supabase:', e)
+          setSyncState('error')
+          throw e
         }
       }
 

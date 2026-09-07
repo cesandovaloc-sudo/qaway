@@ -39,6 +39,7 @@ export interface VisualEditorRef {
   insertFaq: (faqs: FaqItem[]) => void
   generateToc: () => void
   getEditor: () => Editor | null
+  setContent: (content: string) => void
   undo: () => void
   redo: () => void
   canUndo: () => boolean
@@ -476,6 +477,11 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
         return { total: matches.length, current: validIndex + 1 }
       },
       getEditor: () => editor,
+      setContent: (content: string) => {
+        if (editor && !editor.isDestroyed) {
+          editor.commands.setContent(content, { emitUpdate: false })
+        }
+      },
     }),
     [editor]
   )

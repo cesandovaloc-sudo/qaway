@@ -192,7 +192,7 @@ export default function EditorPage() {
         if (parsed.headerLayout) setHeaderLayout(parsed.headerLayout)
         if (parsed.contentHtml) {
           setContentHtml(parsed.contentHtml)
-          editorRef.current?.getEditor()?.commands.setContent(parsed.contentHtml)
+          editorRef.current?.setContent(parsed.contentHtml)
         }
         if (parsed.contentJson) setContentJson(parsed.contentJson)
         if (parsed.plainText) setPlainText(parsed.plainText)
@@ -223,8 +223,8 @@ export default function EditorPage() {
         setContentJson(p.contentJson || '')
         setPlainText(p.body)
         setStatus(p.status)
-        if (editorRef.current?.getEditor() && (p.contentHtml || p.body)) {
-          editorRef.current.getEditor()?.commands.setContent(p.contentHtml || p.body)
+        if (p.contentHtml || p.body) {
+          editorRef.current?.setContent(p.contentHtml || p.body)
         }
       }
     }
@@ -313,9 +313,7 @@ export default function EditorPage() {
 
   const handleSelectHubSpotTemplate = (template: HubSpotTemplate) => {
     setContentHtml(template.contentHtml)
-    if (editorRef.current?.getEditor()) {
-      editorRef.current.getEditor()?.commands.setContent(template.contentHtml)
-    }
+    editorRef.current?.setContent(template.contentHtml)
   }
 
   const words = (plainText || contentHtml.replace(/<[^>]*>/g, ' ')).trim().split(/\s+/).filter(Boolean).length

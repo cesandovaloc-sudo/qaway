@@ -167,6 +167,9 @@ export default function ArticleDetailPage() {
         }
 
         if (!error && data) {
+          const meta = (typeof data.content_json === 'object' && data.content_json !== null)
+            ? data.content_json.metadata || {}
+            : {}
           setArticle({
             id: data.slug || data.id,
             category: data.category,
@@ -181,12 +184,12 @@ export default function ArticleDetailPage() {
             public: data.status === 'publicado' || data.public !== false,
             featured: data.featured ? { order: data.featured_order || 1, label: data.featured_label || 'Destacado' } : null,
             image: data.cover_url || data.image || data.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
-            headerLayout: data.header_layout || data.headerLayout || 'editorial-cta',
-            headerCtaTag: data.header_cta_tag || data.headerCtaTag || (data.relatedCta ? data.relatedCta.tag : 'Recurso Destacado'),
-            headerCtaTitle: data.header_cta_title || data.headerCtaTitle || (data.relatedCta ? data.relatedCta.title : 'Guía y Prompts de IA para Negocios'),
-            headerCtaDesc: data.header_cta_desc || data.headerCtaDesc || (data.relatedCta ? data.relatedCta.description : 'Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.'),
-            headerCtaBtnText: data.header_cta_btn_text || data.headerCtaBtnText || (data.relatedCta ? data.relatedCta.buttonText : 'Descargar Guía Gratis'),
-            headerCtaUrl: data.header_cta_url || data.headerCtaUrl || (data.relatedCta ? data.relatedCta.link : '/recursos/primeros-flujos-ia'),
+            headerLayout: meta.headerLayout || data.header_layout || data.headerLayout || 'editorial-cta',
+            headerCtaTag: meta.headerCtaTag || data.header_cta_tag || data.headerCtaTag || (data.relatedCta ? data.relatedCta.tag : 'Recurso Destacado'),
+            headerCtaTitle: meta.headerCtaTitle || data.header_cta_title || data.headerCtaTitle || (data.relatedCta ? data.relatedCta.title : 'Guía y Prompts de IA para Negocios'),
+            headerCtaDesc: meta.headerCtaDesc || data.header_cta_desc || data.headerCtaDesc || (data.relatedCta ? data.relatedCta.description : 'Maximiza la productividad de tu equipo y automatiza tareas repetitivas con nuestras plantillas listas para usar.'),
+            headerCtaBtnText: meta.headerCtaBtnText || data.header_cta_btn_text || data.headerCtaBtnText || (data.relatedCta ? data.relatedCta.buttonText : 'Descargar Guía Gratis'),
+            headerCtaUrl: meta.headerCtaUrl || data.header_cta_url || data.headerCtaUrl || (data.relatedCta ? data.relatedCta.link : '/recursos/primeros-flujos-ia'),
             audioUrl: data.audio_url || null,
           })
           return
