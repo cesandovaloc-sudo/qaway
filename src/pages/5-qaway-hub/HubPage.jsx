@@ -33,6 +33,17 @@ import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
   {
+    icon: Sparkles,
+    title: 'Creador de Contenido Modular (5 Skills)',
+    description: 'Fábrica de contenidos con IA: Radar viral, Guiones con retención medida, Matriz de hooks, Calendario 30 días, Diseñador de Carruseles, Blog y Posts.',
+    path: '/hub/creador-contenido',
+    access: 'pro',
+    badge: 'Nuevo',
+    category: 'Marketing & Creación',
+    tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    published: true,
+  },
+  {
     icon: FileImage,
     title: 'Optimizador de Imágenes WebP',
     description: 'Herramienta interactiva para comprimir y convertir imágenes PNG y JPG a WebP con hasta 95% de ahorro en tu navegador.',

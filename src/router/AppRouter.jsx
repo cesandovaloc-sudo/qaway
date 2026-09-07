@@ -40,6 +40,7 @@ const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizado
 const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'))
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
+const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -246,8 +247,12 @@ export default function AppRouter() {
           element={<MarketingStudioTwentyPage />}
         />
         <Route
-          path="hub/marketing2"
-          element={<MarketingStudioTwentyPage />}
+          path="/hub/creador-contenido"
+          element={<CreadorContenidoPage />}
+        />
+        <Route
+          path="hub/creador-contenido"
+          element={<CreadorContenidoPage />}
         />
         <Route index element={<InicioPage />} />
 
