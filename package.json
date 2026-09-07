@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --mode public && node scripts/prerender-articles.mjs",
-    "build:dev": "vite build --mode development && node scripts/prerender-articles.mjs",
+    "build": "vite build --mode public",
+    "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

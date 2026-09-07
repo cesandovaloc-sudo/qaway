@@ -19,20 +19,13 @@ RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
 RewriteRule ^(.*)$ dist/$1 [L]
 
 # ==============================================================================
-# 3. ARTICULOS PRERENDERIZADOS: Servir su index.html directamente (como ARCHIVO -f)
-# ==============================================================================
-# Esto evita que mod_dir emita redirecciones 301 o inyecte /dist/ en la URL.
-RewriteCond %{DOCUMENT_ROOT}/dist/$1/index.html -f
-RewriteRule ^(.*)$ dist/$1/index.html [L]
-
-# ==============================================================================
-# 4. FALLBACK SPA: Rutas virtuales de React Router y nuevos articulos de Supabase
+# 3. FALLBACK SPA: Rutas virtuales de React Router y articulos de Supabase
 # ==============================================================================
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . dist/index.html [L]
 
 # ==============================================================================
-# 5. RENDIMIENTO: Compresion gzip y encabezados de cache
+# 4. RENDIMIENTO: Compresion gzip y encabezados de cache
 # ==============================================================================
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
