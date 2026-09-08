@@ -85,6 +85,19 @@ export const FORM_MODELS = [
     icon: LayoutGrid,
     highlights: ['Grid de Iconografía Rica', 'Hover Micro-Scale 1.02', 'Floating Action Footer', 'Resumen Instantáneo'],
   },
+  {
+    id: 'diagnostico-gamificado',
+    number: '07',
+    title: 'Diagnóstico Gamificado Reactivo',
+    subtitle: 'Canvas Visual con Gradientes Dinámicos en Tiempo Real',
+    category: 'Gamificación & Mood Canvas',
+    badge: 'Nuevo Modelo Reactivo',
+    badgeColor: 'bg-orange-50 text-[#ff4b0b] border-orange-200',
+    description: 'El panel izquierdo se transforma dinámicamente según tus respuestas: pasa de un tono de auditoría suave a gradientes vibrantes y dorados si acumulas alto rendimiento.',
+    route: '/formularios/diagnostico-gamificado',
+    icon: Sparkles,
+    highlights: ['Canvas Reactivo en Vivo', 'Gradientes Energéticos', 'Score Dinámico', 'Efecto de Pulso Háptico'],
+  },
 ]
 
 export default function FormulariosShowcasePage() {
