@@ -1,0 +1,14 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
+
+# Chats y sesiones de agentes de IA (no versionar)
+.claude/sessions/
+.codex/
+.opencode/
+.aider*
+.agents/cache/

@@ -1,0 +1,34 @@
+{
+  "name": "@qawaylab/pago",
+  "version": "0.4.0",
+  "description": "Módulo de pagos multi-método de Qaway Lab — Stripe, Yape, Tarjeta, PagoEfectivo, Pago Directo + storefront reutilizable",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm --prefix demo run dev"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./*": "./*",
+    "./components/*": "./components/*",
+    "./admin/*": "./admin/*",
+    "./styles/*": "./styles/*"
+  },
+  "files": [
+    "index.js",
+    "lib/",
+    "components/",
+    "admin/",
+    "styles/",
+    "supabase/"
+  ],
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
+    "react-router-dom": "^7.0.0",
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "author": "Qaway Lab",
+  "license": "UNLICENSED"
+}

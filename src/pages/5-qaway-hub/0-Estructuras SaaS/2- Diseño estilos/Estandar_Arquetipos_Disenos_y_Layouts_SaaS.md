@@ -1,180 +1,289 @@
-# Estándar de Arquetipos de Diseño, Disposiciones de Layout y Estructura Home SaaS
+# Estándar Maestro de Arquitectura, Paneles, Encabezados y Estilos SaaS
 
-**Versión:** 1.0  
+**Versión:** 2.0 (Auditoría Profunda de Portadas y UX Comparativa)  
 **Ubicación:** `src/pages/5-qaway-hub/0-Estructuras SaaS/2- Diseño estilos/`  
-**Objetivo:** Establecer la matriz de arquetipos visuales, layouts intercambiables y el protocolo de bienvenida/Home para aplicaciones web y SaaS desarrolladas en Qaway Lab.
+**Objetivo:** Establecer la especificación canónica y exhaustiva de diseño, interacción, anatomía de paneles, encabezados multiusuario y estilos visuales para cualquier aplicación web o SaaS de Qaway Lab.
 
 ---
 
-## 1. Principio Fundamental: Desacoplamiento de Lógica y Presentación
+## 1. Principio Fundamental: Desacoplamiento Lógica vs. Presentación
 
-> **Regla de oro:** La lógica de negocio, modelos de datos, estados y módulos operativos (CRM, tareas, posts, leads, Supabase) son completamente independientes del arquetipo visual y de la disposición del layout.
+> **Regla inviolable:** El núcleo funcional (modelos de datos, autenticación, Supabase, estados globales, CRUD y lógica de negocio) es completamente agnóstico de la piel visual (*Skin*) y del chasis de navegación (*Layout Shell*).
 
-### ¿Por qué esta arquitectura?
-1. **Adaptabilidad inmediata al cliente:** Si un cliente solicita un CRM o gestor de tareas pero lo percibe "demasiado tosco", "demasiado oscuro" o "muy denso", el sistema debe permitir cambiar el arquetipo visual o la disposición de barra (lateral vs. superior) sin reprogramar la lógica ni los componentes de datos.
-2. **Cero pantallas huérfanas o desiertas:** Ninguna aplicación o proyecto debe arrancar con una tabla vacía, una pantalla básica sin navegación o una landing genérica descontextualizada.
-3. **Escalabilidad modular:** Al estandarizar los "shells" (envoltorios de layout) y los tokens de diseño, cualquier aplicación nueva puede nacer directamente con un acabado premium de alta gama.
+* **Intercambiabilidad de estilo (*Theme/Skin Swap*):** Si un cliente considera un módulo "demasiado tosco", "demasiado oscuro" o "muy denso", debe ser posible conmutar entre los arquetipos visuales aprobados sin rehacer la lógica de la aplicación.
+* **Flexibilidad de disposición (*Layout Swap*):** Capacidad de alternar entre navegación lateral (Sidebar) y navegación superior (TopNav) reutilizando los mismos componentes de datos.
+* **Cero pantallas huérfanas:** Ninguna aplicación puede iniciarse como una pantalla vacía, una tabla cruda o una landing básica descontextualizada. La aplicación nace con su chasis de navegación, cabecera de usuario y portada modular activa.
 
 ---
 
-## 2. Fase 0: Cuestionario Guiado Obligatorio (Discovery Pre-Código)
+## 2. Fase 0: Cuestionario de Arranque (Discovery Pre-Código)
 
-Antes de escribir código o crear rutas para una nueva aplicación web o SaaS, la IA o el desarrollador debe plantear y resolver estas cuatro preguntas fundamentales:
+Antes de crear rutas o componentes, la IA o el desarrollador debe definir:
 
 ```text
-1. ¿Cuál es el dominio y propósito central de la aplicación?
-   ├── Productividad / Tareas / Proyectos (ej. Plane, Asana)
+1. DOMINIO Y PROPÓSITO:
+   ├── Productividad / Tareas / Proyectos (ej. Plane.so, Asana)
    ├── Creadores / Media / Audio / IA (ej. Fish Audio, Content Studio)
-   ├── Analítica Comercial / Ventas / Métricas (ej. CRM Qaway)
-   └── Estrategia / Dossier / Formación por Etapas (ej. Studio OS)
+   ├── Analítica Comercial / CRM / Ventas (ej. CRM Qaway)
+   └── Estrategia / Dossier / Flujo por Etapas (ej. Studio OS)
 
-2. ¿Cuál es la Acción Primaria (Core Loop) del usuario tras iniciar sesión?
-   ├── ¿Crear un nuevo ítem (post, tarea, lead, guión)?
-   ├── ¿Consultar un resumen o gráfica ejecutiva de métricas?
-   └── ¿Continuar un flujo guiado paso a paso?
+2. CORE LOOP Y ACCIÓN PRIMARIA:
+   ├── ¿Qué acción núcleo realiza el usuario al entrar? (+ Tarea, + Lead, + Audio, + Post)
+   └── ¿Qué vista necesita primero? (Home modular, Tablero Kanban, Métricas o Lista)
 
-3. ¿Qué disposición de layout requiere el producto?
-   ├── Preset A: Sidebar Lateral (Recomendado para apps con muchas vistas y módulos)
-   └── Preset B: TopNav Superior (Recomendado para lienzos anchos, analítica densa o tablas)
+3. DISPOSICIÓN Y COMPLEJIDAD DE PANELES:
+   ├── Sidebar Simple Colapsable (Menú único con iconos y textos)
+   ├── Doble Panel / Dual-Rail (Rail primario estrecho + panel secundario de proyectos/filtros)
+   └── TopNav Superior (Lienzo ancho completo para tablas masivas o dashboards horizontales)
 
-4. ¿Qué arquetipo de diseño visual es el más adecuado para el perfil del usuario?
+4. ARQUETIPO DE DISEÑO VISUAL:
    ├── 1. Minimal Utilitarian (Linear / Plane.so Style)
-   ├── 2. Vibrant Creative SaaS (Content Studio / Fish Audio Style)
+   ├── 2. Vibrant Creative SaaS (Fish Audio / Content Studio Style)
    ├── 3. Executive High-Contrast (CRM Dark/Light Hybrid)
    └── 4. Structured Dossier & Stepper (Studio OS Style)
 ```
 
 ---
 
-## 3. Disposiciones de Layout Intercambiables (Layout Shells)
+## 3. Anatomía y Mecánica Obligatoria del Panel Izquierdo (Sidebar)
 
-La disposición de la navegación estructural se encapsula en dos envoltorios reutilizables:
+> **Requisito de arquitectura:** La aplicación **debe estar preparada desde el inicio para contar con panel izquierdo**. No es una adición opcional posterior; el chasis base de la aplicación se programa para soportarlo.
 
 ```text
-        OPCIÓN A: SIDEBAR LAYOUT                      OPCIÓN B: TOPNAV LAYOUT
-┌─────────┬───────────────────────────────┐   ┌───────────────────────────────────────────┐
-│         │ TopBar (Búsqueda, Perfil, CTA)│   │ TopBar (Logo | Menú Horizontal | Perfil)  │
-│         ├───────────────────────────────┤   ├───────────────────────────────────────────┤
-│ Sidebar │                               │   │                                           │
-│ Lateral │       Lienzo Principal        │   │             Lienzo Principal              │
-│ (Fijo/  │       de Trabajo              │   │             de Ancho Completo             │
-│ Colaps) │                               │   │                                           │
-│         │                               │   │                                           │
-└─────────┴───────────────────────────────┘   └───────────────────────────────────────────┘
+      [MODO EXPANDIDO]               [MODO COLAPSADO]                [DOBLE PANEL (DUAL-RAIL)]
+┌───────────────────────────┐       ┌──────┐              ┌──────┬───────────────────────┐
+│ [Logo]         [Toggle <] │       │ [Logo│              │ Rail │ Subpanel Secundario   │
+├───────────────────────────┤       ├──────┤              │ Prim.│ (Proyectos/Carpetas)  │
+│ [Selector de Workspace v] │       │ [W]  │              ├──────┼───────────────────────┤
+├───────────────────────────┤       ├──────┤              │ [H]  │ • Proyecto Alfa       │
+│ • Inicio                  │       │  🏠  │  (Hover →    │ [T]  │ • Proyecto Beta       │
+│ • Mis Tareas          [3] │  ──>  │  ✓   │   Tooltip    │ [P]  │ • Campaña Setiembre   │
+│ • Proyectos               │       │  📁  │   Flotante)  │ [M]  │                       │
+│ • Analítica               │       │  📊  │              │      │ [ + Crear Proyecto ]  │
+├───────────────────────────┤       ├──────┤              ├──────┴───────────────────────┤
+│ [Perfil / Trial / Info]   │       │ [👤] │              │ [Configuración / Soporte]     │
+└───────────────────────────┘       └──────┘              └──────────────────────────────┘
 ```
 
-### 3.1. Preset A: Sidebar Layout (Vertical - Izquierda)
-* **Estructura:**
-  * **Barra lateral fija/colapsable (izquierda):** Logo corporativo, selector de espacio de trabajo o marca activa, navegación por módulos, proyectos pineados y panel de perfil/configuración en la base.
-  * **Header superior (Top bar):** Migas de pan (breadcrumbs), buscador global rápido (`Cmd/Ctrl + K`), notificaciones y botón de acción principal (`+ Crear`).
-* **Ideal para:** Aplicaciones con jerarquías profundas, múltiples herramientas, gestión de proyectos y flujos multifacéticos.
+### 3.1. Fijación de Pantalla y Scroll Independiente (Viewport Locking)
+* **Contenedor raíz fijo:** La estructura general del aplicativo implementa `h-screen overflow-hidden`.
+* **Prohibido el scroll global de la barra:** El panel izquierdo jamás se desplaza verticalmente junto al cuerpo de la página. Permanece anclado a la izquierda.
+* **Scroll local (`overflow-y: auto`):** Si la lista de proyectos, canales o carpetas excede la altura de la pantalla, el panel activa su propio scroll interno con scrollbar estilizado y discreto (`scrollbar-thin`).
 
-### 3.2. Preset B: TopNav Layout (Horizontal - Superior)
-* **Estructura:**
-  * **Barra superior única integrada:** Agrupa el logo a la izquierda, los enlaces de navegación principales centrados horizontalmente, y el buscador junto al perfil de usuario a la derecha.
-  * **Lienzo principal libre:** Ocupa el 100% del ancho del viewport sin obstrucción lateral.
-* **Ideal para:** Portales corporativos, tableros analíticos con gráficos panorámicos, tablas de datos masivas (data tables con muchas columnas) o vistas Kanban expandidas.
+### 3.2. Estados del Panel Izquierdo:
+1. **Estado Expandido (~240px - 280px):** Muestra el logo, conmutador de marca/espacio, nombres de módulos con contadores numéricos (badges) y subsecciones jerárquicas con flechas desplegables.
+2. **Estado Colapsado (~64px - 72px):** Se activa mediante botón toggle (`<` o hamburguesa `=`). Se compacta mostrando únicamente la columna vertical de iconos.
+   * **Interacción Hover / Flyout:** Al posicionar el cursor sobre un icono colapsado, se despliega un **tooltip o flyout flotante** con el nombre del módulo, atajo de teclado y opciones secundarias directas.
+3. **Variante Doble Panel (Dual-Rail / Multi-Pane):**
+   * **Rail Primario (Fino, ~64px):** Iconos de navegación global (*Inicio, Proyectos, Agentes, Estrategia, Ajustes*).
+   * **Rail Secundario (Contextual, ~200px):** Árbol de trabajo del módulo activo (ej. lista de tableros de Trello, proyectos en curso en Asana o categorías del Blog).
+   * El rail secundario puede replegarse independientemente dejando visible únicamente el rail primario.
+4. **Comportamiento en Móvil (`< 768px`):** Se transforma en un *drawer* flotante superpuesto con desenfoque de fondo (`backdrop-blur-sm bg-black/40`), cerrándose al pulsar fuera o seleccionar una ruta.
 
 ---
 
-## 4. Catálogo de los 4 Arquetipos de Diseño (Design Skins)
+## 4. Anatomía y Funciones del Encabezado Global (TopBar / Header)
 
-Basado en las implementaciones validadas y el banco de capturas de Qaway Lab:
+El encabezado superior orquesta la identidad del usuario, la búsqueda transversal y las acciones globales del sistema:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              CATÁLOGO DE ARQUETIPOS SAAS                                │
+│ [≡] [Logo] [Espacio de Trabajo v]   |   [🔍 Buscar (Ctrl+K)]   |  [+ Crear] [🔔] [⚙] [👤▾]│
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 4.1. Zona Izquierda: Contexto y Multiusuario
+* **Botón Toggle de Menú:** Disparador para colapsar o expandir el panel lateral.
+* **Selector Multi-Tenant / Marca / Espacio de Trabajo:** Dropdown que permite alternar entre empresas, clientes o marcas activas (ej. *"Qaway Lab (Digital Studio)"* vs. *"Marca Cliente SAC"* con botón `+ Nuevo Espacio`).
+* **Selector de Aplicaciones (App Grid 3x3):** Icono de matriz de 9 puntos (estilo Atlassian/Google) para brincar entre aplicaciones del ecosistema (CRM, Editor de Blog, Academy, Pagos).
+
+### 4.2. Zona Central: Búsqueda Global Omnibox
+* Campo de búsqueda estilizado con icono de lupa y atajo visible (`Cmd+K` o `Ctrl+K`).
+* Permite buscar transversalmente tareas, proyectos, contactos, posts y comandos rápidos desde cualquier pantalla.
+
+### 4.3. Zona Derecha: Acciones del Sistema y Perfil de Usuario
+* **Botón Primario de Acción Rápida (`+ Crear`):**
+  * Botón de alto contraste (píldora o rectángulo redondeado).
+  * Admite clic directo o menú desplegable para elegir qué crear (*Nueva Tarea, Nuevo Proyecto, Nuevo Lead, Nuevo Post*).
+* **Centro de Notificaciones (Campana `🔔`):**
+  * Icono con badge numérico en tiempo real.
+  * Al hacer clic, abre un panel lateral o flotante con menciones, avisos del sistema y cambios de estado.
+* **Configuración Rápida y Soporte (`⚙` / `?`):** Enlaces directos a documentación, atajos de teclado y ayuda.
+* **Ficha y Dropdown de Perfil de Usuario (`[👤▾]`):**
+  * Muestra el avatar del usuario (foto o iniciales con color identificador) + Nombre completo + Rol corporativo (ej. *"Andrés Valencia — Director Comercial"* o *"Leo Sandoval — Director Creativo"*).
+  * **Menú desplegable de cuenta:**
+    * Resumen del usuario y correo corporativo.
+    * Estado de la cuenta o suscripción (ej. *"Prueba gratuita: 14 días restantes"*).
+    * Mi perfil / Datos personales.
+    * Conmutador de tema visual (Claro / Oscuro / Sistema).
+    * Configuración de la organización / Facturación.
+    * Enlace destructivo: **Cerrar sesión** (`text-red-500`).
+
+---
+
+## 5. Anatomía del Lienzo Central (Main Canvas) y Vistas de Trabajo
+
+El panel central es el área operativa donde se despliegan los datos. Cuenta con una barra de contexto y control antes de renderizar los contenidos:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ Migas de pan: Qaway Lab / Hub Central / Studio Blog                                     │
+│                                                                                         │
+│ TÍTULO DE LA VISTA (H1)  [Badge Estado]                           [Acción Contextual]   │
+│                                                                                         │
+│ [Lista]  [Tablero Kanban]  [Calendario]  [Métricas]  [Archivos]                         │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│ Barra de Filtros: [Todas] [Próximas] [Retrasadas] | [Ordenar por v] [Filtrar] [🔍 Buscar]│
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│ ● EN PROGRESO (2)                                                                       │
+│   [ ] QW-104  Maquetación Hero + Catálogo 60 FPS      [URGENTE]  [Antigravity]  [27 Ago] │
+│   [ ] QW-105  Integración Checkout WhatsApp            [ALTA]     [Antigravity]  [28 Ago] │
+│                                                                                         │
+│ ● COMPLETADO (3)                                                                        │
+│   [✓] QW-101  Discovery y Requerimientos Comerciales   [URGENTE]  [Leo S.]       [19 Ago] │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 5.1. Subheader de Navegación y Contexto
+* **Breadcrumbs (Migas de Pan):** Indican la ubicación jerárquica exacta para no perder el contexto.
+* **Título de la sección con metadatos:** Título descriptivo acompañado de contadores (`Mostrando 6 de 6 artículos`), badges de entorno o estado del proyecto.
+* **Switcher de Vistas (View Tabs):** Pestañas que permiten conmutar la forma de ver la misma información sin recargar la página:
+  * *Vista Lista (Table/List)*: Para edición rápida y alta densidad.
+  * *Vista Tablero (Kanban)*: Para mover tarjetas entre columnas de estado.
+  * *Vista Calendario / Cronograma*: Para seguimiento temporal de fechas de entrega.
+  * *Vista Métricas / Dashboard*: Para gráficas y analítica agregada.
+
+### 5.2. Barra de Filtros y Segmentación Secundaria
+* Filtros de segmento rápido: Botones tipo pill (`Próximas | Con retraso | Finalizadas` o `Borradores | Publicados`).
+* Controles de ordenamiento y agrupación: Dropdowns para ordenar por fecha, prioridad o agrupar por responsable.
+* Buscador local reactivo: Filtrado instantáneo por texto en el listado visible.
+
+### 5.3. Densidad de Datos y Estados
+* Las filas o tarjetas combinan: Checkbox de selección, identificador único de ticket (`QW-104`, `POST-01`), thumbnail/icono, título legible, etiquetas de categoría/prioridad (`URGENTE`, `ALTA`), responsable asignado, fecha de vencimiento y menú contextual de acciones (`Editar`, `Eliminar`, `Duplicar`).
+
+---
+
+## 6. Catálogo de los 4 Arquetipos Visuales (Design Skins)
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                               CATÁLOGO DE ESTILOS SAAS                                  │
 ├──────────────────────────────┬──────────────────────────────────────────────────────────┤
-│ 1. Minimal Utilitarian       │ Inspirado en Plane.so / Linear                           │
-│    (Studio Blog / Gelato)    │ Fondo neutro, bordes sutiles 1px, alta densidad y foco.  │
+│ 1. Minimal Utilitarian       │ Plane.so / Linear Style                                  │
+│    (Studio Blog / Gelato)    │ Blanco/gris neutro, bordes 1px, tipografía sobria y foco.│
 ├──────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 2. Vibrant Creative SaaS     │ Inspirado en Fish Audio / Content Studio                 │
-│    (Content Studio)          │ Sidebar saturado, tarjetas rounded-2xl, visual y ágil.   │
+│ 2. Vibrant Creative SaaS     │ Fish Audio / Content Studio Style                        │
+│    (Content Studio)          │ Sidebar saturado, tarjetas rounded-2xl, badges vivos.    │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 3. Executive High-Contrast   │ Dark Sidebar + Light Canvas (CRM Qaway)                  │
-│    (CRM Analítica)           │ Sidebar oscuro, KPIs vivos, métricas comerciales C-Level.│
+│ 3. Executive High-Contrast   │ CRM Qaway (Dark/Light Hybrid)                            │
+│    (CRM Analítica)           │ Sidebar negro profundo, lienzo claro, acentos naranja.   │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────┤
-│ 4. Structured Dossier        │ Stepper por etapas y fichas técnicas (Studio OS)         │
-│    (Studio OS Buyer Personas)│ Badges numerados, hero oscuro, tarjetas con edición lápiz│
+│ 4. Structured Dossier        │ Studio OS (Buyer Personas / Atlassian)                   │
+│    (Studio OS)               │ Stepper con badges de color, banner hero oscuro y fichas.│
 └──────────────────────────────┴──────────────────────────────────────────────────────────┘
 ```
 
 ### Arquetipo 1: Minimal Utilitarian (Linear / Plane.so Style)
-* **Referencias en el proyecto:** `Studio Blog`, `Gelato Gourmet SAC (Work Items)`.
-* **Inspiración externa:** [Plane.so](https://plane.so/), Linear, Notion.
-* **Características visuales:**
-  * Paleta de fondos: Blancos puros (`#ffffff`) combinados con grises neutros de fondo (`#f8fafc` o `#f1f5f9`).
-  * Delimitación: Bordes ultradelgados de 1px (`border-slate-200 / border-zinc-200`) sin sombras pesadas.
-  * Tipografía y densidad: Jerarquías tipográficas sobrias, etiquetas compactas con estados (Borrador, En Progreso, Completado), avatares limpios y fechas relativas (`~5m`, `8 set`).
-  * Botones: Estilo flat o contorno minimalista (`border border-slate-300 hover:bg-slate-100`).
-* **Casos de uso recomendados:** Gestores de tareas técnicas, desarrollo de software, editores de blog/markdown, herramientas donde el contenido debe primar sobre el adorno.
-
----
+* **Referencias:** `Studio Blog`, `Gelato Gourmet SAC (Work Items)`.
+* **Inspiración:** [Plane.so](https://plane.so/), Linear.
+* **Claves visuales:** Bordes precisos de 1px (`border-slate-200`), fondo blanco limpio, tipografía compacta, densidad alta, ausencia de sombras pesadas, botones de contorno discreto.
+* **Aplicación ideal:** Herramientas para desarrolladores, gestores de tareas técnicas, repositorios y editores editoriales.
 
 ### Arquetipo 2: Vibrant Creative SaaS (Fish Audio / Content Studio Style)
-* **Referencias en el proyecto:** `Qaway Content Studio`.
-* **Inspiración externa:** Fish Audio, Canva, plataformas creativas Web3/AI.
-* **Características visuales:**
-  * Sidebar protagónica: Color de marca vibrante y saturado en la barra lateral (ej. azul/violeta eléctrico `#4f46e5` o gradientes).
-  * Geometría: Tarjetas de contenido con radios pronunciados (`rounded-2xl` o `rounded-3xl`).
-  * Micro-interacciones y badges: Pills de estado con colores llamativos, barras de progreso circulares (`10% Tasks Done`), contadores y botones de acción tipo pastilla (`+ Nuevo Guión`).
-* **Casos de uso recomendados:** Estudios de generación de contenido, herramientas de voz/audio con IA, suites de marketing y redes sociales, software B2C.
-
----
+* **Referencias:** `Qaway Content Studio`.
+* **Inspiración:** Fish Audio, Canva.
+* **Claves visuales:** Barra lateral con color de marca sólido y saturado (azul/violeta eléctrico), tarjetas con bordes generosos (`rounded-2xl` o `rounded-3xl`), gráficos circulares de progreso, badges de estado en tonos pastel luminosos.
+* **Aplicación ideal:** Estudios de creación de contenido, suites de marketing, plataformas de IA generativa de audio o video.
 
 ### Arquetipo 3: Executive High-Contrast (Dark/Light Hybrid)
-* **Referencias en el proyecto:** `Qaway CRM Analítica Comercial`.
-* **Inspiración externa:** Stripe Dashboard, Datadog, Salesforce moderno.
-* **Características visuales:**
-  * Contraste cromático: Sidebar lateral negro profundo (`#09090b` o `#0f172a`) contrastado con un lienzo de trabajo principal claro y diáfano.
-  * Color de acento de marca: Naranja de alta energía (`#ff5722` / `#f97316`) reservado exclusivamente para métricas activas, llamadas a la acción primarias e indicadores clave.
-  * Tarjetas de métricas (KPIs): Números en gran escala, comparativas de variación (`+14.2% vs. mes anterior`) y micro-gráficos sparkline lineales integrados en la tarjeta.
-* **Casos de uso recomendados:** CRMs de ventas, paneles financieros, tableros de rendimiento comercial, analítica de embudos ManyChat y directivos.
-
----
+* **Referencias:** `Qaway CRM Analítica Comercial`.
+* **Inspiración:** Stripe Dashboard, Datadog.
+* **Claves visuales:** Sidebar lateral en negro o grafito profundo (`#09090b`), lienzo de trabajo en gris muy claro (`#f8fafc`), y naranja corporativo Qaway (`#ff5722`) como único acento en botones clave, indicadores y sparklines de rendimiento.
+* **Aplicación ideal:** CRMs de ventas, paneles financieros, tableros de control directivo.
 
 ### Arquetipo 4: Structured Dossier & Stepper (Studio OS Style)
-* **Referencias en el proyecto:** `Studio OS (Buyer Personas & Slides Ejecutivos)`.
-* **Inspiración externa:** Atlassian Confluence/Jira Discovery, sistemas de diagnóstico y consultoría técnica.
-* **Características visuales:**
-  * Sidebar con flujo secuencial: Elementos numerados con badges de colores específicos por etapa (`0. ADN Empresa`, `1. Buyer Personas`, `2. Objetivos SMART`, `3. Content Mapping`, etc.).
-  * Banner Hero Contrastado: Encabezado oscuro en la parte superior del lienzo para enmarcar el módulo activo (`Resumen de tu buyer persona`), integrando acciones de exportación (`Ver Slide`, `Descargar / Exportar`).
-  * Fichas de datos estructurados: Tarjetas en rejilla tipo "dossier" con campos editables en línea mediante iconos de lápiz (`edit in-place`), avatares circulares y listas de dolores/soluciones.
-* **Casos de uso recomendados:** Herramientas de consultoría, generadores de estrategia, configuración guiada de empresas, asistentes de compliance o auditorías paso a paso.
+* **Referencias:** `Studio OS (Buyer Personas & Slides Ejecutivos)`.
+* **Inspiración:** Atlassian Confluence, Jira Discovery.
+* **Claves visuales:** Barra lateral con pasos numerados (`0. ADN Empresa`, `1. Buyer Personas`, `2. Objetivos SMART`) con badges de colores individuales; encabezado hero de contraste oscuro para delimitar la sección activa; fichas de datos con botones de edición directa in-place (icono lápiz).
+* **Aplicación ideal:** Generadores de estrategia comercial, diagnóstico de empresas, asistentes de onboarding y configuración guiada.
 
 ---
 
-## 5. Estructura Canónica Obligatoria de la Portada (Home Workspace)
+## 7. Estructura Canónica de Portada (Home Workspace) y Onboarding
 
-Toda portada o pantalla de bienvenida inicial de una aplicación SaaS en Qaway Lab (inspirada en las mejores prácticas de **Asana, Fish Audio y Atlassian Home**) debe estructurarse obligatoriamente con estos 5 bloques funcionales:
+Toda pantalla inicial o Home post-login implementa obligatoriamente la arquitectura de 5 zonas observada en **Asana, Fish Audio y Atlassian**:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│ 1. BANNER DE BIENVENIDA Y SALUDO CONTEXTUAL                                            │
-│    "Martes, 8 de Septiembre — Buenos días, Carlos"  |  KPIs rápidos de la semana       │
+│ 1. BANNER DE BIENVENIDA CONTEXTUAL                                                      │
+│    "Martes, 8 de Septiembre — Buenos días, Carlos"  |  KPIs rápidos: 0 tareas / 0 colab.│
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
-│ 2. ACCESOS RÁPIDOS A CREACIÓN (Quick Actions / Core Loop)                               │
+│ 2. ACCESOS DIRECTOS DE CREACIÓN (Quick Launch / Core Loop)                              │
 │    [ + Nuevo Proyecto ]      [ + Subir Audio / Crear ]      [ + Nueva Tarea / Lead ]    │
 ├─────────────────────────────────────────────────────────────┬───────────────────────────┤
-│ 3. TRABAJO ACTIVO / RECIENTE                                │ 4. ONBOARDING & TUTORIALES│
-│    • Proyecto Alfa (75% avance)                             │    • Guía de inicio (3m)  │
-│    • Post "Automatizar WhatsApp..." (En redacción)          │    • Video tutorial       │
-│    *(Si está vacío: Empty state guiado con botón de inicio)*│    • Soporte y comunidad  │
+│ 3. TRABAJO ACTIVO / RECIENTE                                │ 4. RECURSOS Y ONBOARDING  │
+│    • Proyecto Gelato Gourmet (75% avance)                   │    • Primeros pasos (3m)  │
+│    • Borrador Post WhatsApp (En redacción)                  │    • Automatización (15m) │
+│    *(Si está vacío: Empty State ilustrado con botón CTA)*   │    • Soporte y comunidad  │
 └─────────────────────────────────────────────────────────────┴───────────────────────────┘
 ```
 
-### Los 5 Bloques Explicados:
-1. **Saludo y Contexto Temporal:** Fecha del día + saludo personalizado con el nombre del usuario logueado. Humaniza la interfaz y orienta al usuario en el tiempo.
-2. **Acciones Primarias Inmediatas:** Las 2 o 3 operaciones más frecuentes del producto colocadas a 1 solo clic en tarjetas destacadas en la parte superior.
-3. **Contenedor de Actividad Reciente / Pendientes:** Resumen de los últimos ítems en los que el usuario trabajó (tareas, proyectos, borradores).
-4. **Manejo Proactivo de Estados Vacíos (Empty States):** Si el usuario es nuevo y no tiene datos, **nunca dejar el área en blanco**. Mostrar ilustración, mensaje inspirador y botón directo de acción (*"Comienza tu viaje creando tu primer proyecto"*).
-5. **Módulo de Autoservicio y Aprendizaje:** Carrusel o lista lateral de guías breves (*"Primeros pasos"*, *"Atajos de teclado"*, *"Tutoriales"*), reduciendo la curva de fricción de la aplicación.
+1. **Saludo y Contexto Temporal:** Fecha dinámica + saludo humano personalizado con el nombre del usuario.
+2. **Acciones Rápidas de Creación:** Los 2 o 3 botones principales de creación inmediata para que el usuario empiece a producir sin navegar por menús.
+3. **Trabajo Activo / Reciente:** Contenedores modulares que resumen los últimos proyectos, tareas o contenidos abordados.
+4. **Empty States Proactivos:** Si no hay datos, **jamás mostrar un área vacía o desértica**. Presentar un contenedor con ilustración, texto de acompañamiento y botón de acción (*"Aún no tienes proyectos creados. Comienza creando el primero"*).
+5. **Autoservicio y Aprendizaje:** Carrusel o cuadrícula de guías de inicio (*"Aprende a usar la herramienta"*, *"Tutoriales"* con indicadores de duración como `3 min` o `15 min`), reduciendo a cero la frustración de nuevos usuarios.
 
 ---
 
-## 6. Referencia a los Recursos y Capturas de Estudio
+## 8. Catálogo de Recursos Visuales de Referencia (Carpetas Locales)
 
-Para consultar las capturas de pantalla reales que respaldan este estándar, revisar los subdirectorios locales en `src/pages/5-qaway-hub/0-Estructuras SaaS/2- Diseño estilos/`:
-* `Assana/`: Referencias completas de paneles de tareas, calendarios, planificación de lanzamientos y estructura de dashboards de productividad.
-* `Fish Studio/`: Referencias de plataformas de creación multimedia e IA, herramientas de voz y navegación creativa.
-* `Treelo/`: Referencias del portal Atlassian Home, cards de aplicaciones integradas y flujos de espacios de trabajo.
+Las capturas y pantallas reales que sustentan este documento se encuentran en este mismo directorio:
+* `src/pages/5-qaway-hub/0-Estructuras SaaS/2- Diseño estilos/Assana/`: Paneles de tareas, tableros Kanban, planificador de lanzamientos, vistas de calendario y estructura de navegación lateral.
+* `src/pages/5-qaway-hub/0-Estructuras SaaS/2- Diseño estilos/Fish Studio/`: Plataformas de creación multimedia con IA, accesos rápidos de herramientas y reproductores.
+* `src/pages/5-qaway-hub/0-Estructuras SaaS/2- Diseño estilos/Treelo/`: Portal de bienvenida Atlassian Home, tableros Trello con mapas y vistas multi-pantalla.
+
+---
+
+## 9. Anatomía Canónica del Portal de Ingreso / Login SaaS
+
+Todo login de aplicaciones Qaway Lab debe incluir estas funcionalidades obligatorias:
+
+### 9.1. Funcionalidades Obligatorias (En orden de prioridad)
+
+1. **Autenticación Social (OAuth):** Botones de acceso rápido a 1 clic con proveedores externos (`Google`, `Microsoft`). Elimina fricción y contraseñas débiles.
+
+2. **Ver / Ocultar Contraseña:** Botón toggle con icono de ojo (`Eye` / `EyeOff`) integrado al campo de contraseña. Permite al usuario verificar lo que escribe y evitar errores de tipeo silenciosos.
+
+3. **Recuperación de Contraseña:** Enlace `¿Olvidaste tu contraseña?` que dispara flujo de reseteo por correo (Supabase `resetPasswordForEmail`). Sin esto el usuario queda bloqueado sin salida propia.
+
+4. **Persistencia de Sesión ("Recordarme"):** Checkbox que controla si la sesión se mantiene activa al cerrar el navegador. Da control al usuario sobre privacidad en equipos compartidos.
+
+5. **Switcher de modo (Login / Solicitar Acceso):** Enlace inferior que informa al usuario qué hacer si no tiene cuenta aún (`Solicita acceso a tu administrador` o `Regístrate`).
+
+6. **Prueba Social / Logos de Clientes:** Sección de logos de empresas o proyectos que usa la plataforma. Genera confianza y percepción de valor antes de ingresar.
+
+### 9.2. Estructura de Layout del Login (Dos Columnas en Desktop)
+
+```text
+┌──────────────────────────┬─────────────────────────────────────────┐
+│   PANEL IZQUIERDO        │   PANEL DERECHO                         │
+│   Branding & Propuesta   │   Formulario de Acceso                  │
+│                          │                                         │
+│   • Logo                 │   [ G  Continuar con Google ]           │
+│   • Titular de valor     │   [ 🪟 Continuar con Microsoft ]        │
+│   • Descripción          │   ────────── o con correo ──────────    │
+│   • Sello de seguridad   │   Email (con validación en tiempo real) │
+│                          │   Contraseña         [ 👁 Ver/Ocultar ] │
+│                          │   [✓ Recordarme]  [¿Olvidaste tu clave?]│
+│                          │   [ → Ingresar al Hub ]                 │
+│                          │   [¿No tienes cuenta? Solicita acceso]  │
+│                          │   ── Logos de proyectos / confianza ──  │
+└──────────────────────────┴─────────────────────────────────────────┘
+```
+
+### 9.3. Referencia de Implementación
+* Archivo de implementación: `src/pages/auth/LoginPage.jsx`
+* Proveedor de Auth: Supabase Auth (con soporte OAuth Google/Microsoft configurado en el proyecto Supabase)

@@ -1,0 +1,657 @@
+/* ─────────────────────────────────────────────────────────────
+   @qawaylab/pago · storefront.css — Piel "papel y tinta" del storefront
+   Única fuente de verdad de la skin: demo e inventario la consumen
+   desde el módulo (sin copias locales).
+
+   Todo queda scoped bajo `.qawa-storefront` para no contaminar el
+   sistema de estilos del host (Tailwind, tokens propios, etc.).
+   Variables definidas localmente (--paper, --ink, --red…) — también
+   en variante --qawa-* — para que los componentes del módulo que las
+   usan inline funcionen en cualquier host.
+   ───────────────────────────────────────────────────────────── */
+
+.qawa-storefront {
+  --paper: #f4f3f0;
+  --paper-2: #ebe7df;
+  --white: #fbfaf8;
+  --ink: #20201f;
+  --muted: #6d6b68;
+  --line: #d8d2c8;
+  --red: #ff4b0b;
+  --red-dark: #df3900;
+  --green: #2e5b4a;
+  --shadow: 0 18px 50px rgba(34, 28, 22, 0.08);
+  --font-inter: 'Inter', sans-serif;
+
+  /* Fondo transparente a propósito: el host decide el fondo de su página
+     (el demo lo pone en el body). El wrapper solo define tokens y tipografía. */
+  color: var(--ink);
+  font-family: var(--font-inter), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.qawa-storefront *,
+.qawa-storefront *::before,
+.qawa-storefront *::after {
+  box-sizing: border-box;
+}
+
+.qawa-storefront a {
+  color: inherit;
+  text-decoration: none;
+}
+.qawa-storefront button,
+.qawa-storefront input,
+.qawa-storefront select,
+.qawa-storefront textarea {
+  font: inherit;
+}
+.qawa-storefront button {
+  cursor: pointer;
+}
+.qawa-storefront img {
+  max-width: 100%;
+}
+
+.qawa-storefront .container {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.qawa-storefront .eyebrow {
+  color: var(--red);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.qawa-storefront .muted {
+  color: var(--muted);
+}
+.qawa-storefront .section {
+  padding: 56px 0;
+}
+.qawa-storefront .section-compact {
+  padding: 36px 0;
+}
+.qawa-storefront .section-title {
+  margin: 8px 0 14px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.qawa-storefront .section-copy {
+  max-width: 680px;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+/* ── Header del storefront ─────────────────────────────────── */
+.qawa-storefront .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(244, 243, 240, 0.94);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+.qawa-storefront .header-inner {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.qawa-storefront .brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.qawa-storefront .brand span {
+  color: var(--red);
+}
+.qawa-storefront .main-nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.qawa-storefront .main-nav a {
+  color: #373431;
+  transition: color 0.2s ease;
+}
+.qawa-storefront .main-nav a:hover,
+.qawa-storefront .main-nav a.active {
+  color: var(--red);
+}
+.qawa-storefront .header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.qawa-storefront .cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 11px 16px;
+  border: 1px solid var(--ink);
+  background: var(--white);
+}
+.qawa-storefront .cart-count {
+  min-width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: white;
+  font-size: 0.68rem;
+}
+
+/* ── Botones ───────────────────────────────────────────────── */
+.qawa-storefront .button {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--ink);
+  padding: 0 20px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  transition: 0.2s ease;
+  text-decoration: none;
+}
+.qawa-storefront .button-primary {
+  background: var(--ink);
+  color: white;
+}
+.qawa-storefront .button-primary:hover {
+  background: var(--red-dark);
+  border-color: var(--red-dark);
+}
+.qawa-storefront .button-secondary {
+  background: transparent;
+  color: var(--ink);
+}
+.qawa-storefront .button-secondary:hover {
+  background: var(--white);
+}
+.qawa-storefront .button-red {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
+}
+.qawa-storefront .button-red:hover {
+  background: var(--red-dark);
+  border-color: var(--red-dark);
+}
+.qawa-storefront .button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ── Catálogo: grid y tarjetas ─────────────────────────────── */
+.qawa-storefront .product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.qawa-storefront .product-card {
+  border: 1px solid var(--line);
+  background: var(--white);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.qawa-storefront .product-media {
+  position: relative;
+  aspect-ratio: 1.2 / 1;
+  display: grid;
+  place-items: center;
+  background: var(--paper-2);
+  overflow: hidden;
+}
+.qawa-storefront .product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.qawa-storefront .product-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.qawa-storefront .product-brand {
+  color: var(--red);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.qawa-storefront .product-name {
+  margin: 7px 0 9px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.qawa-storefront .product-desc {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  min-height: 3em;
+}
+.qawa-storefront .product-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+}
+.qawa-storefront .product-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Ficha de detalle de producto ──────────────────────────── */
+.qawa-storefront .detail-grid {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 40px;
+  align-items: start;
+  padding: 40px 0;
+}
+.qawa-storefront .detail-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.qawa-storefront .detail-gallery .product-media:first-child {
+  grid-column: 1 / -1;
+  aspect-ratio: 1.25 / 1;
+}
+.qawa-storefront .detail-gallery .product-media:not(:first-child) {
+  aspect-ratio: 1 / 1;
+}
+.qawa-storefront .breadcrumb {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.qawa-storefront .detail-info {
+  position: sticky;
+  top: 118px;
+}
+.qawa-storefront .detail-info h1 {
+  margin: 8px 0 15px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.05;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.qawa-storefront .detail-lead {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+.qawa-storefront .detail-price {
+  margin: 20px 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-weight: 700;
+  font-size: 1.3rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+.qawa-storefront .detail-actions {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.qawa-storefront .quantity {
+  border: 1px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+}
+.qawa-storefront .quantity select {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+.qawa-storefront .facts {
+  margin-top: 30px;
+  border-top: 1px solid var(--line);
+}
+.qawa-storefront .fact {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 20px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.8rem;
+}
+.qawa-storefront .fact dt {
+  color: var(--muted);
+}
+.qawa-storefront .fact dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* ── Carrito / Mi pedido ───────────────────────────────────── */
+.qawa-storefront .cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 34px;
+  align-items: start;
+  padding: 30px 0;
+}
+.qawa-storefront .cart-items {
+  border-top: 2px solid var(--ink);
+}
+.qawa-storefront .cart-item {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+}
+.qawa-storefront .cart-item-actions {
+  text-align: right;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+.qawa-storefront .quantity-control {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+.qawa-storefront .quantity-control button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  font-weight: 800;
+  cursor: pointer;
+}
+.qawa-storefront .quantity-control span {
+  min-width: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.qawa-storefront .remove-link {
+  border: 0;
+  background: transparent;
+  color: var(--red);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.qawa-storefront .text-link {
+  color: var(--red);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ── Checkout ──────────────────────────────────────────────── */
+.qawa-storefront .checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 40px;
+  align-items: start;
+  padding: 40px 0;
+}
+.qawa-storefront .checkout-form {
+  display: grid;
+  gap: 28px;
+}
+.qawa-storefront .form-section {
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 28px;
+}
+.qawa-storefront .form-section h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.qawa-storefront .form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.qawa-storefront .field {
+  display: grid;
+  gap: 7px;
+}
+.qawa-storefront .field-full {
+  grid-column: 1 / -1;
+}
+.qawa-storefront .field label,
+.qawa-storefront .label-field {
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 4px;
+  display: block;
+}
+.qawa-storefront .field input,
+.qawa-storefront .field select,
+.qawa-storefront .field textarea,
+.qawa-storefront .input-field {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+.qawa-storefront .field input:focus,
+.qawa-storefront .field select:focus,
+.qawa-storefront .field textarea:focus,
+.qawa-storefront .input-field:focus {
+  outline: none;
+  border-color: var(--red);
+}
+.qawa-storefront .choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.qawa-storefront .choice {
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  cursor: pointer;
+  background: var(--paper);
+  text-align: left;
+  width: 100%;
+}
+.qawa-storefront .choice input {
+  accent-color: var(--red);
+  margin-top: 3px;
+}
+.qawa-storefront .choice.selected {
+  border-color: var(--red);
+  background: var(--white);
+}
+.qawa-storefront .form-status {
+  padding: 13px 15px;
+  background: #f0e2e0;
+  color: var(--red-dark);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ── Resumen de pedido ─────────────────────────────────────── */
+.qawa-storefront .order-summary {
+  position: sticky;
+  top: var(--qawa-sticky-top, 112px);
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 26px;
+}
+.qawa-storefront .order-summary h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.qawa-storefront .summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.84rem;
+}
+.qawa-storefront .summary-note {
+  margin: 16px 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+/* ── Datos bancarios / voucher ─────────────────────────────── */
+.qawa-storefront .bank-info {
+  background: #fdf5f2;
+  border: 1px solid var(--red);
+  padding: 16px;
+  margin-top: 14px;
+  font-size: 0.82rem;
+}
+.qawa-storefront .bank-info p {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  margin: 0;
+}
+
+/* ── Utilidades de panel / admin (consumidas por admin/*) ──── */
+.qawa-storefront .card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.qawa-storefront .card-hover {
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+}
+.qawa-storefront .card-hover:hover {
+  border-color: var(--red);
+}
+.qawa-storefront .space-y-4 > * + * {
+  margin-top: 16px;
+}
+.qawa-storefront .grid {
+  display: grid;
+}
+.qawa-storefront .grid-cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+.qawa-storefront .gap-3 {
+  gap: 12px;
+}
+.qawa-storefront .gap-4 {
+  gap: 16px;
+}
+.qawa-storefront .gap-6 {
+  gap: 24px;
+}
+.qawa-storefront .flex {
+  display: flex;
+}
+.qawa-storefront .items-center {
+  align-items: center;
+}
+.qawa-storefront .justify-between {
+  justify-content: space-between;
+}
+.qawa-storefront .btn-primary {
+  background: var(--red);
+  color: white;
+  padding: 10px 20px;
+  border: 1px solid var(--red);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.qawa-storefront .btn-primary:hover {
+  background: var(--red-dark);
+}
+.qawa-storefront .btn-ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+/* ── Estados vacíos ────────────────────────────────────────── */
+.qawa-storefront .empty-state {
+  border: 1px solid var(--line);
+  background: var(--white);
+  padding: 60px;
+  text-align: center;
+}
+.qawa-storefront .empty-state h3 {
+  margin: 0 0 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .qawa-storefront .checkout-layout,
+  .qawa-storefront .cart-layout,
+  .qawa-storefront .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .qawa-storefront .product-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .qawa-storefront .form-grid,
+  .qawa-storefront .choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
