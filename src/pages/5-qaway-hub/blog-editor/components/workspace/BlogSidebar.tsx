@@ -29,14 +29,14 @@ export default function BlogSidebar({
 }: BlogSidebarProps) {
   const { posts, categories, isCloudConnected } = useBlog()
   const navigate = useNavigate()
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(true)
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
 
   const publishedCount = posts.filter(p => p.status === 'publicado').length
   const draftCount = posts.filter(p => p.status === 'borrador').length
 
   return (
-    <aside className="w-64 shrink-0 bg-[#fafafc] border-r border-line flex flex-col justify-between p-4 min-h-[calc(100vh-60px)] font-sans select-none">
-      <div className="space-y-4">
+    <aside className="w-64 shrink-0 bg-[#fafafc] border-r border-line flex flex-col justify-between p-4 sticky top-14 h-[calc(100vh-3.5rem)] font-sans select-none overflow-hidden">
+      <div className="space-y-4 flex-1 overflow-y-auto pr-1">
         {/* 1. Header del Workspace - Navegación de retorno */}
         <div className="flex items-center justify-between pb-3 border-b border-line px-1">
           <Link
@@ -218,7 +218,7 @@ export default function BlogSidebar({
       </div>
 
       {/* 5. Footer del Sidebar */}
-      <div className="pt-3 border-t border-line space-y-1.5">
+      <div className="pt-3 border-t border-line space-y-1.5 shrink-0">
         <div className="flex items-center justify-between text-xs px-2 text-muted">
           <span className="flex items-center gap-1.5 font-medium">
             <span
