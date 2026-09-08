@@ -15,13 +15,19 @@ import {
   ExternalLink,
   Home,
   LayoutGrid,
+  FileText,
+  Target,
+  MousePointerClick,
+  Link2,
+  Type,
+  Filter,
 } from 'lucide-react'
 import { useBlog } from '../context/BlogContext'
 import BlogSidebar from '../components/workspace/BlogSidebar'
 import BlogWorkItemsList from '../components/workspace/BlogWorkItemsList'
 import BlogKanbanBoard from '../components/workspace/BlogKanbanBoard'
 import BlogCategoriesManager from '../components/workspace/BlogCategoriesManager'
-import HubSpotGuideSection from '../components/workspace/HubSpotGuideSection'
+import HubSpotGuideSection, { GuideTab } from '../components/workspace/HubSpotGuideSection'
 import UmamiAnalyticsSuite from '../components/workspace/UmamiAnalyticsSuite'
 import BlogAnalyticsDashboard from '../components/workspace/BlogAnalyticsDashboard'
 
@@ -31,6 +37,7 @@ export default function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState<'work-items' | 'kanban' | 'categories' | 'hubspot-guide' | 'analytics'>('work-items')
   const [analyticsSubView, setAnalyticsSubView] = useState<'umami' | 'editorial'>('umami')
+  const [guideSubTab, setGuideSubTab] = useState<GuideTab>('keywords')
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
@@ -179,105 +186,102 @@ export default function DashboardPage() {
 
         {/* Área de Trabajo Principal */}
         <main className="flex-1 flex flex-col bg-white overflow-x-hidden">
-          {/* Barra Superior de Pestañas y Búsqueda */}
-          <div className="border-b border-line px-6 py-3 flex flex-wrap items-center justify-between gap-4 bg-[#fafafc]">
-            {/* Pestañas de Vista */}
-            <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-lg border border-line flex-wrap">
-              <button
-                type="button"
-                onClick={() => setActiveTab('work-items')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === 'work-items'
-                    ? 'bg-white text-primary shadow-xs font-bold'
-                    : 'text-muted hover:text-primary'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" />
-                <span>Lista ({posts.length})</span>
-              </button>
+          {/* Barra Superior de Herramientas Contextuales (Nivel 2 de Navegación) */}
+          <div className="border-b border-line px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 bg-[#fafafc] min-h-[52px]">
+            {/* Controles Contextuales según la Vista Activa */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Contexto 1: Guía Editorial & SEO -> Módulos Temáticos de la Guía */}
+              {activeTab === 'hubspot-guide' && (
+                <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-xl border border-line flex-wrap">
+                  {[
+                    { id: 'estructura' as GuideTab, label: '1. Estructura', icon: FileText },
+                    { id: 'titulos' as GuideTab, label: '2. Títulos & CTR', icon: Target },
+                    { id: 'keywords' as GuideTab, label: '3. Keywords & Saturación', icon: Search },
+                    { id: 'ctas' as GuideTab, label: '4. Estrategia de CTAs', icon: MousePointerClick },
+                    { id: 'seo' as GuideTab, label: '5. SEO On-Page', icon: Link2 },
+                    { id: 'reglas' as GuideTab, label: '6. 11 Normas de Estilo', icon: Type },
+                  ].map(tab => {
+                    const Icon = tab.icon
+                    const isSelected = guideSubTab === tab.id
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setGuideSubTab(tab.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-white text-accent shadow-xs font-bold'
+                            : 'text-muted hover:text-primary'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{tab.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('kanban')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === 'kanban'
-                    ? 'bg-white text-primary shadow-xs font-bold'
-                    : 'text-muted hover:text-primary'
-                }`}
-              >
-                <FolderKanban className="w-3.5 h-3.5" />
-                <span>Tablero Kanban</span>
-              </button>
+              {/* Contexto 2: Métricas & Rendimiento -> Selector Módulo 1 (Embudo) vs Módulo 2 (Umami) */}
+              {activeTab === 'analytics' && (
+                <div className="flex items-center bg-surface-muted p-1 rounded-xl border border-line text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setAnalyticsSubView('umami')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      analyticsSubView === 'umami'
+                        ? 'bg-white text-primary shadow-xs font-bold'
+                        : 'text-muted hover:text-primary'
+                    }`}
+                  >
+                    <Globe className="w-3.5 h-3.5 text-accent" />
+                    <span>Módulo 2: Umami (Telemetría & Atribución Real)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAnalyticsSubView('editorial')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                      analyticsSubView === 'editorial'
+                        ? 'bg-white text-primary shadow-xs font-bold'
+                        : 'text-muted hover:text-primary'
+                    }`}
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Módulo 1: Rendimiento & Embudo</span>
+                  </button>
+                </div>
+              )}
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('analytics')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === 'analytics'
-                    ? 'bg-white text-primary shadow-xs font-bold'
-                    : 'text-muted hover:text-primary'
-                }`}
-              >
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span>Métricas & Rendimiento</span>
-              </button>
+              {/* Contexto 3: Lista de Posts o Kanban -> Indicador contextual de ámbito */}
+              {(activeTab === 'work-items' || activeTab === 'kanban') && (
+                <div className="flex items-center gap-2 text-xs text-muted">
+                  <span className="font-semibold text-primary">
+                    {activeTab === 'work-items' ? 'Lista Editorial' : 'Tablero Kanban'}
+                  </span>
+                  {selectedCategoryFilter && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent/10 text-accent font-bold text-[11px] border border-accent/20">
+                      <Filter className="w-3 h-3" />
+                      {selectedCategoryFilter}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryFilter(null)}
+                        className="ml-1 hover:text-red-700 cursor-pointer"
+                        title="Quitar filtro de categoría"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
 
-              <button
-                type="button"
-                onClick={() => setActiveTab('categories')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === 'categories'
-                    ? 'bg-white text-primary shadow-xs font-bold'
-                    : 'text-muted hover:text-primary'
-                }`}
-              >
-                <Tag className="w-3.5 h-3.5" />
-                <span>Categorías</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('hubspot-guide')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  activeTab === 'hubspot-guide'
-                    ? 'bg-white text-primary shadow-xs font-bold'
-                    : 'text-muted hover:text-primary'
-                }`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>Guía Editorial & SEO</span>
-              </button>
+              {/* Contexto 4: Categorías */}
+              {activeTab === 'categories' && (
+                <div className="text-xs font-semibold text-primary">
+                  Taxonomías & Estructura del Blog
+                </div>
+              )}
             </div>
-
-            {/* Selector de Comparación de Métricas: Módulo 1 (Editorial) vs Módulo 2 (Umami) */}
-            {activeTab === 'analytics' && (
-              <div className="flex items-center bg-surface-muted p-1 rounded-xl border border-line text-xs font-semibold">
-                <button
-                  type="button"
-                  onClick={() => setAnalyticsSubView('umami')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    analyticsSubView === 'umami'
-                      ? 'bg-white text-primary shadow-xs font-bold'
-                      : 'text-muted hover:text-primary'
-                  }`}
-                >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Módulo 2: Umami (Tráfico & Atribución)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAnalyticsSubView('editorial')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                    analyticsSubView === 'editorial'
-                      ? 'bg-white text-primary shadow-xs font-bold'
-                      : 'text-muted hover:text-primary'
-                  }`}
-                >
-                  <BarChart3 className="w-3.5 h-3.5" />
-                  <span>Módulo 1: Rendimiento & Embudo</span>
-                </button>
-              </div>
-            )}
 
             {/* Buscador Integrado (visible en vistas de lista/kanban) */}
             {activeTab !== 'hubspot-guide' && activeTab !== 'categories' && activeTab !== 'analytics' && (
@@ -328,7 +332,11 @@ export default function DashboardPage() {
 
             {activeTab === 'hubspot-guide' && (
               <div className="p-6 flex-1">
-                <HubSpotGuideSection />
+                <HubSpotGuideSection
+                  activeSubTab={guideSubTab}
+                  onSelectSubTab={setGuideSubTab}
+                  hideInternalTabs={true}
+                />
               </div>
             )}
           </div>

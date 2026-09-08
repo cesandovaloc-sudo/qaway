@@ -14,8 +14,22 @@ import {
   ExternalLink,
 } from 'lucide-react'
 
-export default function HubSpotGuideSection() {
-  const [activeTab, setActiveTab] = useState<'estructura' | 'titulos' | 'keywords' | 'ctas' | 'seo' | 'reglas'>('keywords')
+export type GuideTab = 'estructura' | 'titulos' | 'keywords' | 'ctas' | 'seo' | 'reglas'
+
+interface HubSpotGuideSectionProps {
+  activeSubTab?: GuideTab
+  onSelectSubTab?: (tab: GuideTab) => void
+  hideInternalTabs?: boolean
+}
+
+export default function HubSpotGuideSection({
+  activeSubTab,
+  onSelectSubTab,
+  hideInternalTabs = false,
+}: HubSpotGuideSectionProps = {}) {
+  const [internalTab, setInternalTab] = useState<GuideTab>('keywords')
+  const currentTab = activeSubTab || internalTab
+  const setCurrentTab = onSelectSubTab || setInternalTab
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-8 font-sans animate-in fade-in duration-150">
@@ -34,91 +48,93 @@ export default function HubSpotGuideSection() {
         </div>
       </div>
 
-      {/* 2. Selector de Módulos */}
-      <div className="flex bg-surface-muted p-1.5 rounded-xl border border-line overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => setActiveTab('estructura')}
-          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'estructura'
-              ? 'bg-white text-primary shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <FileText className="w-4 h-4 text-accent" />
-          <span>1. Estructura</span>
-        </button>
+      {/* 2. Selector de Módulos (Oculto si se muestra arriba en la barra de herramientas principal) */}
+      {!hideInternalTabs && (
+        <div className="flex bg-surface-muted p-1.5 rounded-xl border border-line overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setCurrentTab('estructura')}
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'estructura'
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <FileText className="w-4 h-4 text-accent" />
+            <span>1. Estructura</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('titulos')}
-          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'titulos'
-              ? 'bg-white text-primary shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <Target className="w-4 h-4 text-accent" />
-          <span>2. Títulos & CTR</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('titulos')}
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'titulos'
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <Target className="w-4 h-4 text-accent" />
+            <span>2. Títulos & CTR</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('keywords')}
-          className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'keywords'
-              ? 'bg-white text-accent shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <Search className="w-4 h-4 text-accent" />
-          <span>3. Keywords & Saturación</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('keywords')}
+            className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'keywords'
+                ? 'bg-white text-accent shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <Search className="w-4 h-4 text-accent" />
+            <span>3. Keywords & Saturación</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('ctas')}
-          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'ctas'
-              ? 'bg-white text-primary shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <MousePointerClick className="w-4 h-4 text-accent" />
-          <span>4. Estrategia de CTAs</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('ctas')}
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'ctas'
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <MousePointerClick className="w-4 h-4 text-accent" />
+            <span>4. Estrategia de CTAs</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('seo')}
-          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'seo'
-              ? 'bg-white text-primary shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <Link2 className="w-4 h-4 text-accent" />
-          <span>5. SEO On-Page</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('seo')}
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'seo'
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <Link2 className="w-4 h-4 text-accent" />
+            <span>5. SEO On-Page</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('reglas')}
-          className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-            activeTab === 'reglas'
-              ? 'bg-white text-primary shadow-xs'
-              : 'text-muted hover:text-primary'
-          }`}
-        >
-          <Type className="w-4 h-4 text-accent" />
-          <span>6. 11 Normas de Estilo</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => setCurrentTab('reglas')}
+            className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              currentTab === 'reglas'
+                ? 'bg-white text-primary shadow-xs'
+                : 'text-muted hover:text-primary'
+            }`}
+          >
+            <Type className="w-4 h-4 text-accent" />
+            <span>6. 11 Normas de Estilo</span>
+          </button>
+        </div>
+      )}
 
       {/* 3. Contenido de las Pestañas */}
 
       {/* Módulo 3: Keywords & Saturación (Keyword Stuffing) */}
-      {activeTab === 'keywords' && (
+      {currentTab === 'keywords' && (
         <div className="space-y-6">
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-line">
@@ -241,7 +257,7 @@ export default function HubSpotGuideSection() {
       )}
 
       {/* Pestaña 1: Estructura & Esquema */}
-      {activeTab === 'estructura' && (
+      {currentTab === 'estructura' && (
         <div className="space-y-6">
           {/* 1. Las 3 Fases de la Estructura */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -360,7 +376,7 @@ export default function HubSpotGuideSection() {
       )}
 
       {/* Pestaña 2: Títulos & Long-Tail */}
-      {activeTab === 'titulos' && (
+      {currentTab === 'titulos' && (
         <div className="space-y-6">
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
@@ -455,7 +471,7 @@ export default function HubSpotGuideSection() {
       )}
 
       {/* Pestaña 4: Estrategia de CTAs */}
-      {activeTab === 'ctas' && (
+      {currentTab === 'ctas' && (
         <div className="space-y-6">
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
@@ -512,7 +528,7 @@ export default function HubSpotGuideSection() {
       )}
 
       {/* Pestaña 5: SEO On-Page */}
-      {activeTab === 'seo' && (
+      {currentTab === 'seo' && (
         <div className="space-y-6">
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
@@ -562,7 +578,7 @@ export default function HubSpotGuideSection() {
       )}
 
       {/* Pestaña 6: Las 11 Normas de Redacción */}
-      {activeTab === 'reglas' && (
+      {currentTab === 'reglas' && (
         <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-line">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
