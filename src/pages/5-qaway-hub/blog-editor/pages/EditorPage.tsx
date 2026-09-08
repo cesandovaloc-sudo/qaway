@@ -828,6 +828,7 @@ export default function EditorPage() {
               {/* 2. Editor Visual */}
               <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
                 <VisualEditor
+                  key={postId || 'new'}
                   ref={editorRef}
                   initialContent={contentHtml}
                   onChange={res => {

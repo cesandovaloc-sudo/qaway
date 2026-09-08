@@ -479,7 +479,7 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
       getEditor: () => editor,
       setContent: (content: string) => {
         if (editor && !editor.isDestroyed) {
-          editor.commands.setContent(content, { emitUpdate: false })
+          editor.commands.setContent(content, false)
         }
       },
     }),
@@ -487,12 +487,6 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
   )
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (editor && initialContent && editor.getHTML() !== initialContent) {
-      editor.commands.setContent(initialContent, { emitUpdate: false })
-    }
-  }, [initialContent, editor])
 
   if (!editor) return null
 

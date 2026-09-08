@@ -82,6 +82,54 @@ export const LeadFormBlock = Node.create({
 
     const fieldsJson = JSON.stringify(fields)
 
+    const headerChildren: any[] = [
+      ['h4', { class: 'text-base font-display font-bold text-[#18181b] m-0' }, title],
+    ]
+    if (description) {
+      headerChildren.push(['p', { class: 'text-xs text-[#71717a] mt-1 m-0 leading-relaxed' }, description])
+    }
+
+    const formChildren: any[] = []
+    if (fields.name) {
+      formChildren.push([
+        'input',
+        {
+          type: 'text',
+          placeholder: 'Tu nombre completo',
+          required: 'true',
+          class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
+        },
+      ])
+    }
+    formChildren.push([
+      'input',
+      {
+        type: 'email',
+        placeholder: 'tu.correo@empresa.com',
+        required: 'true',
+        class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
+      },
+    ])
+    if (fields.phone) {
+      formChildren.push([
+        'input',
+        {
+          type: 'tel',
+          placeholder: '+51 999 999 999 (WhatsApp)',
+          class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
+        },
+      ])
+    }
+    formChildren.push([
+      'button',
+      {
+        type: 'button',
+        class: 'w-full font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-transform cursor-pointer',
+        style: `background-color: ${themeColor}; color: ${textColor};`,
+      },
+      buttonText || 'Enviar',
+    ])
+
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
@@ -102,55 +150,8 @@ export const LeadFormBlock = Node.create({
       [
         'div',
         { class: 'max-w-xl mx-auto space-y-3' },
-        [
-          'div',
-          { class: 'text-left' },
-          ['h4', { class: 'text-base font-display font-bold text-[#18181b] m-0' }, title],
-          description ? ['p', { class: 'text-xs text-[#71717a] mt-1 m-0 leading-relaxed' }, description] : '',
-        ],
-        [
-          'form',
-          { class: 'space-y-2 pt-1', onsubmit: 'return false;' },
-          fields.name
-            ? [
-                'input',
-                {
-                  type: 'text',
-                  placeholder: 'Tu nombre completo',
-                  required: 'true',
-                  class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
-                },
-              ]
-            : '',
-          [
-            'input',
-            {
-              type: 'email',
-              placeholder: 'tu.correo@empresa.com',
-              required: 'true',
-              class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
-            },
-          ],
-          fields.phone
-            ? [
-                'input',
-                {
-                  type: 'tel',
-                  placeholder: '+51 999 999 999 (WhatsApp)',
-                  class: 'w-full bg-white border border-line rounded-xl px-3.5 py-2 text-xs text-[#18181b] focus:outline-none',
-                },
-              ]
-            : '',
-          [
-            'button',
-            {
-              type: 'button',
-              class: 'w-full font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs transition-transform cursor-pointer',
-              style: `background-color: ${themeColor}; color: ${textColor};`,
-            },
-            buttonText || 'Enviar',
-          ],
-        ],
+        ['div', { class: 'text-left' }, ...headerChildren],
+        ['form', { class: 'space-y-2 pt-1', onsubmit: 'return false;' }, ...formChildren],
       ],
     ]
   },
