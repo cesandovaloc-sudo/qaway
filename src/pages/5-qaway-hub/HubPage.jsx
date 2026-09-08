@@ -214,7 +214,7 @@ export default function HubPage() {
     if (isPublicSiteMode) {
       return route.path === '/hub/blog-editor'
     }
-    return route.published
+    return true // En localhost se visualizan todas las aplicaciones del Hub
   })
 
   const thematicFilters = [
@@ -250,9 +250,9 @@ export default function HubPage() {
     const gradient = cardGradients[idx % cardGradients.length]
 
     return (
-      <Link to={route.path} className="group block">
+      <Link to={route.path} className="group block h-full">
         <motion.article
-          className={`relative flex min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 ${gradient}`}
+          className={`relative flex h-full min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 ${gradient}`}
           initial={false}
           whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.10)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
@@ -285,7 +285,7 @@ export default function HubPage() {
             <h3 className="text-[clamp(1.3rem,2.4vw,1.65rem)] font-bold leading-[1.2] text-[#191918]">
               {route.title}
             </h3>
-            <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-[#191918]/70">
+            <p className="mt-2.5 line-clamp-2 text-xs sm:text-sm leading-relaxed text-[#191918]/70">
               {route.description}
             </p>
 
