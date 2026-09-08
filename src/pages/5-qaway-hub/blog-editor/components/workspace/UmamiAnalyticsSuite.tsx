@@ -17,6 +17,7 @@ import {
   FileText,
   MousePointerClick,
   BarChart3,
+  LineChart as LineChartIcon,
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
 import { fetchRealBlogAnalytics } from '@/services/analyticsTracker'
