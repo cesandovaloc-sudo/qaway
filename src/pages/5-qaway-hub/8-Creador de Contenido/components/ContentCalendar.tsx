@@ -15,44 +15,42 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
 }) => {
   const [viewMode, setViewMode] = useState<'mes' | 'kanban' | 'tabla'>('mes')
   const [filterChannel, setFilterChannel] = useState<string>('all')
-  const [filterStatus, setFilterStatus] = useState<string>('all')
 
   const filteredScripts = scripts.filter(s => {
     const matchesChannel = filterChannel === 'all' || s.format === filterChannel
-    const matchesStatus = filterStatus === 'all' || s.status === filterStatus
-    return matchesChannel && matchesStatus
+    return matchesChannel
   })
 
-  // Format badge colors
+  // Format badge colors (Muted Pastels per Minimalist UI Protocol)
   const getFormatBadge = (format: ContentFormat) => {
     switch (format) {
       case 'reel':
-        return 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+        return 'bg-rose-50 text-rose-700 border-rose-200'
       case 'carrusel':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+        return 'bg-purple-50 text-purple-700 border-purple-200'
       case 'story':
-        return 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+        return 'bg-amber-50 text-amber-800 border-amber-200'
       case 'post':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+        return 'bg-blue-50 text-blue-700 border-blue-200'
       case 'blog':
-        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
     }
   }
 
   const getStatusBadge = (status: ContentStatus) => {
     switch (status) {
       case 'idea':
-        return { label: 'Idea', color: 'bg-white/10 text-white/70' }
+        return { label: 'Idea', color: 'bg-slate-100 text-slate-600' }
       case 'guion_aprobado':
-        return { label: 'Guión OK', color: 'bg-blue-500/20 text-blue-400' }
+        return { label: 'Guión OK', color: 'bg-indigo-50 text-indigo-700' }
       case 'listo_grabar':
-        return { label: 'Listo Grabar', color: 'bg-amber-500/20 text-amber-400' }
+        return { label: 'Por Grabar', color: 'bg-amber-50 text-amber-700' }
       case 'en_edicion':
-        return { label: 'En Edición', color: 'bg-purple-500/20 text-purple-400' }
+        return { label: 'En Edición', color: 'bg-purple-50 text-purple-700' }
       case 'programado':
-        return { label: 'Programado', color: 'bg-[#fe6612]/20 text-[#fe6612]' }
+        return { label: 'Programado', color: 'bg-orange-50 text-[#ff4b0b]' }
       case 'publicado':
-        return { label: 'Publicado', color: 'bg-emerald-500/20 text-emerald-400' }
+        return { label: 'Publicado', color: 'bg-emerald-50 text-emerald-700' }
     }
   }
 
@@ -62,101 +60,95 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
   const postsCount = scripts.filter(s => s.format === 'post').length
   const blogsCount = scripts.filter(s => s.format === 'blog').length
 
-  // Days of month mock grid (30 days)
   const daysInMonth = Array.from({ length: 30 }, (_, i) => i + 1)
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="bg-[#191918]/80 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                Skill 04 · Content Manager
-              </span>
-              <span className="text-xs text-white/50">Planificación 30 Días</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              Calendario Editorial & Gestión de Producción
-            </h2>
-            <p className="text-sm text-white/60 mt-1">
-              Visualiza y equilibra tu parrilla mensual combinando Reels, Carruseles, Stories, Posts individuales y Artículos de Blog.
-            </p>
+    <div className="space-y-6 text-slate-800">
+      {/* Top Banner (Clean Minimalist White) */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+              Skill 04 · Content Manager
+            </span>
+            <span className="text-xs text-slate-400 font-medium">Planificación 30 Días</span>
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            Calendario Editorial & Gestión de Producción
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+            Visualiza y equilibra tu parrilla mensual combinando Reels, Carruseles, Stories, Posts individuales y Artículos de Blog.
+          </p>
+        </div>
 
-          {/* Quick Metrics */}
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-center">
-              <span className="text-xs text-rose-400 font-semibold block">{reelsCount} Reels</span>
-            </div>
-            <div className="px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-center">
-              <span className="text-xs text-purple-400 font-semibold block">{carruselesCount} Carruseles</span>
-            </div>
-            <div className="px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-center">
-              <span className="text-xs text-blue-400 font-semibold block">{postsCount} Posts</span>
-            </div>
-            <div className="px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-center">
-              <span className="text-xs text-emerald-400 font-semibold block">{blogsCount} Blogs</span>
-            </div>
+        {/* Quick format counts */}
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1.5 bg-rose-50 border border-rose-100 rounded-xl text-center">
+            <span className="text-xs text-rose-700 font-bold block">{reelsCount} Reels</span>
+          </div>
+          <div className="px-3 py-1.5 bg-purple-50 border border-purple-100 rounded-xl text-center">
+            <span className="text-xs text-purple-700 font-bold block">{carruselesCount} Carruseles</span>
+          </div>
+          <div className="px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl text-center">
+            <span className="text-xs text-blue-700 font-bold block">{postsCount} Posts</span>
+          </div>
+          <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl text-center">
+            <span className="text-xs text-emerald-700 font-bold block">{blogsCount} Blogs</span>
           </div>
         </div>
       </div>
 
-      {/* Controls: View Switcher & Filters */}
+      {/* Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        {/* Switchers */}
-        <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl">
+        <div className="flex items-center gap-1 p-1 bg-slate-100 border border-slate-200 rounded-xl">
           <button
             onClick={() => setViewMode('mes')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-              viewMode === 'mes' ? 'bg-[#fe6612] text-white' : 'text-white/60 hover:text-white'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              viewMode === 'mes' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Vista Mes (30 Días)
           </button>
           <button
             onClick={() => setViewMode('kanban')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-              viewMode === 'kanban' ? 'bg-[#fe6612] text-white' : 'text-white/60 hover:text-white'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              viewMode === 'kanban' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Kanban de Producción
           </button>
           <button
             onClick={() => setViewMode('tabla')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
-              viewMode === 'tabla' ? 'bg-[#fe6612] text-white' : 'text-white/60 hover:text-white'
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
+              viewMode === 'tabla' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Tabla Detallada
           </button>
         </div>
 
-        {/* Filter by format */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-white/40">Filtrar Canal:</span>
+          <span className="text-xs text-slate-500 font-medium">Filtrar Canal:</span>
           <select
             value={filterChannel}
             onChange={e => setFilterChannel(e.target.value)}
-            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#fe6612]"
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b] shadow-2xs"
           >
-            <option value="all" className="bg-[#1e1e1d]">Todos los Canales</option>
-            <option value="reel" className="bg-[#1e1e1d]">Reels / Shorts</option>
-            <option value="carrusel" className="bg-[#1e1e1d]">Carruseles</option>
-            <option value="post" className="bg-[#1e1e1d]">Posts</option>
-            <option value="blog" className="bg-[#1e1e1d]">Blog Qaway</option>
-            <option value="story" className="bg-[#1e1e1d]">Stories</option>
+            <option value="all">Todos los Canales</option>
+            <option value="reel">Reels / Shorts</option>
+            <option value="carrusel">Carruseles</option>
+            <option value="post">Posts</option>
+            <option value="blog">Blog Qaway</option>
+            <option value="story">Stories</option>
           </select>
         </div>
       </div>
 
-      {/* VIEW 1: 30 DAYS MONTHLY GRID */}
+      {/* VIEW 1: 30 DAYS MONTHLY GRID (CLEAN WHITE CELLS) */}
       {viewMode === 'mes' && (
-        <div className="bg-[#191918] border border-white/10 rounded-2xl p-6 overflow-x-auto">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 overflow-x-auto shadow-xs">
           <div className="min-w-[760px]">
-            {/* Days of week header */}
-            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-semibold text-white/40 uppercase tracking-wider">
+            <div className="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
               <div>Lun</div>
               <div>Mar</div>
               <div>Mié</div>
@@ -166,10 +158,8 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
               <div>Dom</div>
             </div>
 
-            {/* 30 Days Grid */}
             <div className="grid grid-cols-7 gap-2">
               {daysInMonth.map(day => {
-                // Find scripts scheduled for this day
                 const dayScripts = filteredScripts.filter(s => {
                   const dayNum = s.scheduledDate ? parseInt(s.scheduledDate.split('-')[2]) : 0
                   return dayNum === day
@@ -178,12 +168,12 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                 return (
                   <div
                     key={day}
-                    className="min-h-[110px] bg-black/40 border border-white/5 rounded-xl p-2 flex flex-col justify-between hover:border-white/20 transition"
+                    className="min-h-[115px] bg-slate-50/60 border border-slate-200/80 rounded-xl p-2 flex flex-col justify-between hover:border-slate-300 transition"
                   >
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono font-bold text-white/50">{day}</span>
+                      <span className="font-mono font-bold text-slate-400">{day}</span>
                       {dayScripts.length > 0 && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#fe6612]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b]" />
                       )}
                     </div>
 
@@ -194,7 +184,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                           <div
                             key={script.id}
                             onClick={() => onSelectScript(script.id)}
-                            className="p-1.5 rounded-lg bg-[#242423] border border-white/10 hover:border-[#fe6612] text-left cursor-pointer transition"
+                            className="p-1.5 rounded-lg bg-white border border-slate-200 hover:border-[#ff4b0b] text-left cursor-pointer transition shadow-2xs"
                           >
                             <div className="flex items-center justify-between gap-1 mb-0.5">
                               <span
@@ -204,11 +194,11 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                               >
                                 {script.format}
                               </span>
-                              <span className="text-[9px] text-white/40 truncate">
+                              <span className="text-[9px] text-slate-400 truncate">
                                 {status.label}
                               </span>
                             </div>
-                            <p className="text-[10px] text-white font-medium truncate">
+                            <p className="text-[10px] text-slate-800 font-semibold truncate">
                               {script.title}
                             </p>
                           </div>
@@ -223,7 +213,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
         </div>
       )}
 
-      {/* VIEW 2: KANBAN PRODUCTION PIPELINE */}
+      {/* VIEW 2: KANBAN PRODUCTION PIPELINE (CLEAN SLATE COLUMNS) */}
       {viewMode === 'kanban' && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {(
@@ -240,14 +230,14 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
             return (
               <div
                 key={column.key}
-                className="bg-[#191918] border border-white/10 rounded-2xl p-3 flex flex-col justify-between min-h-[450px]"
+                className="bg-slate-100/70 border border-slate-200 rounded-2xl p-3 flex flex-col justify-between min-h-[450px]"
               >
                 <div>
-                  <div className="flex items-center justify-between pb-2 mb-3 border-b border-white/10">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                  <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                       {column.label}
                     </h4>
-                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/70 font-mono">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-white border border-slate-200 text-slate-700 font-mono font-bold">
                       {colScripts.length}
                     </span>
                   </div>
@@ -257,7 +247,7 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                       <div
                         key={script.id}
                         onClick={() => onSelectScript(script.id)}
-                        className="p-3 rounded-xl bg-black/40 border border-white/5 hover:border-[#fe6612] text-left cursor-pointer transition space-y-2 group"
+                        className="p-3 rounded-xl bg-white border border-slate-200 hover:border-[#ff4b0b] text-left cursor-pointer transition space-y-2 shadow-2xs group"
                       >
                         <div className="flex items-center justify-between">
                           <span
@@ -267,14 +257,14 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                           >
                             {script.format}
                           </span>
-                          <span className="text-[10px] text-white/40 font-mono">
-                            {script.scheduledDate || 'Sin fecha'}
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {script.scheduledDate ? script.scheduledDate.slice(5) : ''}
                           </span>
                         </div>
-                        <h5 className="text-xs font-semibold text-white group-hover:text-[#fe6612] transition line-clamp-2">
+                        <h5 className="text-xs font-bold text-slate-900 group-hover:text-[#ff4b0b] transition line-clamp-2">
                           {script.title}
                         </h5>
-                        <p className="text-[11px] text-white/60 italic truncate">
+                        <p className="text-[11px] text-slate-500 italic truncate">
                           "{script.hook.text}"
                         </p>
                       </div>
@@ -287,11 +277,11 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
         </div>
       )}
 
-      {/* VIEW 3: TABLE */}
+      {/* VIEW 3: TABLE (CLEAN WHITE TABLE) */}
       {viewMode === 'tabla' && (
-        <div className="bg-[#191918] border border-white/10 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs">
           <table className="w-full text-left text-xs">
-            <thead className="bg-black/60 text-white/50 font-semibold uppercase tracking-wider border-b border-white/10">
+            <thead className="bg-slate-50 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-100">
               <tr>
                 <th className="p-3.5">Título</th>
                 <th className="p-3.5">Formato</th>
@@ -302,12 +292,12 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                 <th className="p-3.5 text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {filteredScripts.map(script => {
                 const status = getStatusBadge(script.status)
                 return (
-                  <tr key={script.id} className="hover:bg-white/[0.02] transition">
-                    <td className="p-3.5 font-semibold text-white">{script.title}</td>
+                  <tr key={script.id} className="hover:bg-slate-50/70 transition">
+                    <td className="p-3.5 font-bold text-slate-900">{script.title}</td>
                     <td className="p-3.5">
                       <span
                         className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${getFormatBadge(
@@ -317,22 +307,22 @@ export const ContentCalendar: React.FC<ContentCalendarProps> = ({
                         {script.format}
                       </span>
                     </td>
-                    <td className="p-3.5 text-white/70 capitalize">{script.platform}</td>
-                    <td className="p-3.5 text-white/80 max-w-xs truncate italic">
+                    <td className="p-3.5 text-slate-600 capitalize">{script.platform}</td>
+                    <td className="p-3.5 text-slate-700 max-w-xs truncate italic">
                       "{script.hook.text}"
                     </td>
-                    <td className="p-3.5 font-mono font-bold text-emerald-400">
+                    <td className="p-3.5 font-mono font-bold text-emerald-600">
                       {script.cta.triggerKeyword}
                     </td>
                     <td className="p-3.5">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${status.color}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${status.color}`}>
                         {status.label}
                       </span>
                     </td>
                     <td className="p-3.5 text-right">
                       <button
                         onClick={() => onSelectScript(script.id)}
-                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#fe6612] text-white transition text-[11px] cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#ff4b0b] hover:text-white text-slate-700 transition text-[11px] font-semibold cursor-pointer"
                       >
                         Editar
                       </button>

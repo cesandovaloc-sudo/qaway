@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import {
+  DEFAULT_TENANTS,
   INITIAL_COMPETITORS,
   INITIAL_SCRIPTS,
   INITIAL_CAROUSELS,
-  INITIAL_LEAD_MAGNETS
+  INITIAL_LEAD_MAGNETS,
+  INITIAL_TASKS
 } from './data/defaultContent'
 import {
+  TenantWorkspace,
   CompetitorVideo,
   ScriptItem,
   CarouselDeck,
   LeadMagnetResource,
+  CreatorTask,
   ContentFormat,
   ContentStatus
 } from './types/content.types'
+import { ExecutiveDashboard } from './components/ExecutiveDashboard'
 import { RadarIdeas } from './components/RadarIdeas'
 import { ScriptStudio } from './components/ScriptStudio'
 import { MatrixDistribution } from './components/MatrixDistribution'
@@ -26,18 +31,49 @@ import {
   PenTool,
   BookOpen,
   Plus,
-  Zap,
-  TrendingUp,
-  Share2,
-  FileText
+  LayoutDashboard,
+  Building2,
+  ChevronDown,
+  Bell,
+  Search,
+  User,
+  LogOut,
+  Settings,
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react'
 
-const STORAGE_KEY_SCRIPTS = 'qaway_creator_scripts_v1'
-const STORAGE_KEY_COMPETITORS = 'qaway_creator_competitors_v1'
+const STORAGE_KEY_TENANTS = 'qaway_creator_tenants_v3'
+const STORAGE_KEY_SCRIPTS = 'qaway_creator_scripts_v3'
+const STORAGE_KEY_COMPETITORS = 'qaway_creator_competitors_v3'
+const STORAGE_KEY_TASKS = 'qaway_creator_tasks_v3'
 
 export default function CreadorContenidoPage() {
-  // Load state with fallback to seed data
-  const [competitors, setCompetitors] = useState<CompetitorVideo[]>(() => {
+  // 1. Marcas / Espacios de trabajo (Tenants)
+  const [tenants, setTenants] = useState<TenantWorkspace[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_TENANTS)
+      return saved ? JSON.parse(saved) : DEFAULT_TENANTS
+    } catch {
+      return DEFAULT_TENANTS
+    }
+  })
+  const [activeTenantId, setActiveTenantId] = useState<string>(tenants[0]?.id || 'tenant-qaway')
+
+  const currentTenant = tenants.find(t => t.id === activeTenantId) || tenants[0]
+
+  // 2. Estado de Usuario & Sesión
+  const [userProfile] = useState({
+    name: 'Leo Sandoval',
+    email: 'leo@qawaylab.com',
+    role: 'Director Creativo',
+    avatarInitials: 'LS'
+  })
+  const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [hasUnreadAlerts, setHasUnreadAlerts] = useState(true)
+
+  // 3. Datos del creador
+  const [allCompetitors, setAllCompetitors] = useState<CompetitorVideo[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_COMPETITORS)
       return saved ? JSON.parse(saved) : INITIAL_COMPETITORS
@@ -46,7 +82,7 @@ export default function CreadorContenidoPage() {
     }
   })
 
-  const [scripts, setScripts] = useState<ScriptItem[]>(() => {
+  const [allScripts, setAllScripts] = useState<ScriptItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_SCRIPTS)
       return saved ? JSON.parse(saved) : INITIAL_SCRIPTS
@@ -55,39 +91,66 @@ export default function CreadorContenidoPage() {
     }
   })
 
+  const [allTasks, setAllTasks] = useState<CreatorTask[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_TASKS)
+      return saved ? JSON.parse(saved) : INITIAL_TASKS
+    } catch {
+      return INITIAL_TASKS
+    }
+  })
+
   const [carousels] = useState<CarouselDeck[]>(INITIAL_CAROUSELS)
   const [leadMagnets] = useState<LeadMagnetResource[]>(INITIAL_LEAD_MAGNETS)
 
-  // Navigation tabs
-  type ActiveTab = 'radar' | 'script' | 'matrix' | 'calendar' | 'assets'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('radar')
-  const [activeScriptId, setActiveScriptId] = useState<string>(scripts[0]?.id || '')
+  // 4. Navegación
+  type ActiveTab = 'dashboard' | 'radar' | 'script' | 'matrix' | 'calendar' | 'assets'
+  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard')
+  const [activeScriptId, setActiveScriptId] = useState<string>('')
 
-  // Save to localStorage when updated
+  // Modal para agregar otra marca/cliente
+  const [showNewBrandModal, setShowNewBrandModal] = useState(false)
+  const [newBrandName, setNewBrandName] = useState('')
+  const [newBrandNiche, setNewBrandNiche] = useState('')
+
+  // Filtrar según marca activa
+  const tenantCompetitors = allCompetitors.filter(c => c.tenantId === activeTenantId)
+  const tenantScripts = allScripts.filter(s => s.tenantId === activeTenantId)
+  const tenantTasks = allTasks.filter(t => t.tenantId === activeTenantId)
+
+  useEffect(() => {
+    if (tenantScripts.length > 0 && !tenantScripts.some(s => s.id === activeScriptId)) {
+      setActiveScriptId(tenantScripts[0].id)
+    }
+  }, [activeTenantId, tenantScripts, activeScriptId])
+
+  // Persistir en localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_SCRIPTS, JSON.stringify(scripts))
+      localStorage.setItem(STORAGE_KEY_TENANTS, JSON.stringify(tenants))
+      localStorage.setItem(STORAGE_KEY_SCRIPTS, JSON.stringify(allScripts))
+      localStorage.setItem(STORAGE_KEY_COMPETITORS, JSON.stringify(allCompetitors))
+      localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(allTasks))
     } catch (e) {
-      console.error('Error saving scripts to localStorage', e)
+      console.error('Error saving data', e)
     }
-  }, [scripts])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_COMPETITORS, JSON.stringify(competitors))
-    } catch (e) {
-      console.error('Error saving competitors to localStorage', e)
-    }
-  }, [competitors])
+  }, [tenants, allScripts, allCompetitors, allTasks])
 
   // Handlers
+  const handleToggleTask = (taskId: string) => {
+    setAllTasks(prev =>
+      prev.map(t => (t.id === taskId ? { ...t, completed: !t.completed } : t))
+    )
+  }
+
   const handleAddCompetitor = (newComp: CompetitorVideo) => {
-    setCompetitors(prev => [newComp, ...prev])
+    setAllCompetitors(prev => [{ ...newComp, tenantId: activeTenantId }, ...prev])
   }
 
   const handleSendToScript = (idea: { title: string; hook: string; thesis: string; format: ContentFormat }) => {
     const newScript: ScriptItem = {
       id: `script-${Date.now()}`,
+      tenantId: activeTenantId,
       title: idea.title,
       format: idea.format,
       platform: 'instagram',
@@ -97,25 +160,27 @@ export default function CreadorContenidoPage() {
         durationSec: 3.5,
         wordCount: idea.hook.split(' ').length
       },
-      retentionBridge: 'El 90% de personas comete un error clave en este punto. Aquí te enseño cómo resolverlo.',
+      retentionBridge: 'El 90% comete un error clave en este punto. Aquí te enseño cómo resolverlo.',
       coreBody: idea.thesis,
       cta: {
         text: 'Comenta la palabra SKILL y te paso el sistema completo por DM.',
         triggerKeyword: 'SKILL',
         leadMagnetName: 'Guía de Creación Modular'
       },
-      descriptionCopy: `Nuevo video: ${idea.title}. Comenta SKILL para enviarte los recursos completos.`,
+      descriptionCopy: `Nuevo video: ${idea.title}. Comenta SKILL para enviarte los recursos.`,
       status: 'guion_aprobado',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
-    setScripts(prev => [newScript, ...prev])
+    setAllScripts(prev => [newScript, ...prev])
     setActiveScriptId(newScript.id)
     setActiveTab('script')
   }
 
   const handleSaveScript = (updatedScript: ScriptItem) => {
-    setScripts(prev => prev.map(s => (s.id === updatedScript.id ? updatedScript : s)))
+    setAllScripts(prev =>
+      prev.map(s => (s.id === updatedScript.id ? { ...updatedScript, tenantId: activeTenantId } : s))
+    )
   }
 
   const handleSendToMatrix = (script: ScriptItem) => {
@@ -126,6 +191,7 @@ export default function CreadorContenidoPage() {
   const handleAddToCalendar = (item: { title: string; hook: string; format: any }) => {
     const newScript: ScriptItem = {
       id: `script-var-${Date.now()}`,
+      tenantId: activeTenantId,
       title: item.title,
       format: item.format || 'reel',
       platform: 'instagram',
@@ -148,12 +214,12 @@ export default function CreadorContenidoPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
-    setScripts(prev => [newScript, ...prev])
+    setAllScripts(prev => [newScript, ...prev])
     setActiveTab('calendar')
   }
 
   const handleUpdateStatus = (id: string, newStatus: ContentStatus) => {
-    setScripts(prev => prev.map(s => (s.id === id ? { ...s, status: newStatus } : s)))
+    setAllScripts(prev => prev.map(s => (s.id === id ? { ...s, status: newStatus } : s)))
   }
 
   const handleSelectScriptFromCalendar = (id: string) => {
@@ -161,63 +227,214 @@ export default function CreadorContenidoPage() {
     setActiveTab('script')
   }
 
+  const handleCreateBrand = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newBrandName) return
+    const newBrand: TenantWorkspace = {
+      id: `tenant-${Date.now()}`,
+      name: newBrandName,
+      slug: newBrandName.toLowerCase().replace(/\s+/g, '-'),
+      niche: newBrandNiche || 'General',
+      brandVoice: 'Profesional, directo y educativo.',
+      tier: 'creator_pro',
+      limits: {
+        maxMonthlyPieces: 30,
+        maxCompetitors: 10,
+        maxLeadMagnets: 5,
+        manyChatEnabled: true
+      },
+      currentMonthProgress: {
+        planned: 30,
+        recorded: 0,
+        published: 0,
+        targetMonth: 'Septiembre 2026'
+      }
+    }
+    setTenants(prev => [...prev, newBrand])
+    setActiveTenantId(newBrand.id)
+    setShowNewBrandModal(false)
+    setNewBrandName('')
+    setNewBrandNiche('')
+  }
+
+  const handleLogout = () => {
+    if (confirm('¿Cerrar sesión de Qaway Content Studio?')) {
+      sessionStorage.removeItem('qaway_auth_token')
+      localStorage.removeItem('qaway_auth_token')
+      window.location.href = '/hub'
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-[#0f0f0e] text-white selection:bg-[#fe6612] selection:text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Hub Header Badge & Title */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-white/10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#fe6612]/20 text-[#fe6612] border border-[#fe6612]/30">
-                Qaway Hub · Creator Suite
-              </span>
-              <span className="text-xs text-white/40">v4.0 Impeccable Architecture</span>
+    <div className="min-h-screen bg-[#fbfbfa] text-slate-800 selection:bg-[#ff4b0b] selection:text-white pt-24 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* TOP BAR: IDENTIDAD DE MARCA + SESIÓN DE USUARIO + SELECTOR DE MARCA */}
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Logo & Marca */}
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#ff4b0b] flex items-center justify-center text-white font-black text-lg shadow-sm shadow-[#ff4b0b]/20">
+              Q
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Creador de Contenido Modular
-            </h1>
-            <p className="text-sm sm:text-base text-white/60 mt-1 max-w-2xl">
-              Fábrica de contenidos de 5 fases: investiga referentes virales, redacta con retención medida, multiplica ganchos, calendariza y diseña carruseles y lead magnets.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Qaway Hub
+                </span>
+                <span className="text-slate-300">/</span>
+                <span className="text-[11px] font-bold text-[#ff4b0b] uppercase tracking-wider">
+                  Suite de Contenidos
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Creador de Contenido
+              </h1>
+            </div>
           </div>
 
-          {/* Global Quick Stats */}
-          <div className="flex items-center gap-2 sm:gap-4 bg-[#191918] border border-white/10 rounded-2xl p-3">
-            <div className="text-center px-3 border-r border-white/10">
-              <span className="text-[10px] text-white/40 uppercase block font-semibold">Piezas Activas</span>
-              <span className="text-base font-bold text-white font-mono">{scripts.length}</span>
+          {/* Selector de Marca/Cliente + Controles de Usuario */}
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+            {/* Selector de Marca (Cliente activo) */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <Building2 className="w-3.5 h-3.5 text-[#ff4b0b]" />
+              <span className="text-slate-500 font-medium">Marca:</span>
+              <select
+                value={activeTenantId}
+                onChange={e => setActiveTenantId(e.target.value)}
+                className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer pr-1"
+              >
+                {tenants.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="text-center px-3 border-r border-white/10">
-              <span className="text-[10px] text-white/40 uppercase block font-semibold">Referentes</span>
-              <span className="text-base font-bold text-[#fe6612] font-mono">{competitors.length}</span>
-            </div>
-            <div className="text-center px-3">
-              <span className="text-[10px] text-white/40 uppercase block font-semibold">Lead Magnets</span>
-              <span className="text-base font-bold text-emerald-400 font-mono">{leadMagnets.length}</span>
+
+            <button
+              onClick={() => setShowNewBrandModal(true)}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+              title="Añadir una marca o cliente adicional"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#ff4b0b]" />
+              <span>+ Nueva Marca</span>
+            </button>
+
+            {/* Separador vertical */}
+            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+
+            {/* Notificaciones */}
+            <button
+              onClick={() => setHasUnreadAlerts(false)}
+              className="relative p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+              title="Notificaciones de producción"
+            >
+              <Bell className="w-4 h-4" />
+              {hasUnreadAlerts && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#ff4b0b]" />
+              )}
+            </button>
+
+            {/* Perfil de Usuario con Menú */}
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
+              >
+                <div className="w-7 h-7 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center">
+                  {userProfile.avatarInitials}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <span className="text-xs font-bold text-slate-800 block leading-tight">
+                    {userProfile.name}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium block">
+                    {userProfile.role}
+                  </span>
+                </div>
+                <ChevronDown className="w-3 h-3 text-slate-400 ml-0.5" />
+              </button>
+
+              {/* Menú desplegable de usuario */}
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl p-2 shadow-xl z-50 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="p-2.5 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-900">{userProfile.name}</p>
+                    <p className="text-[11px] text-slate-400">{userProfile.email}</p>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-orange-50 text-[#ff4b0b] border border-orange-200">
+                      Cuenta Master Pro
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      alert('Ajustes de perfil: Cuenta sincronizada con Qaway Lab.')
+                      setShowProfileMenu(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+                  >
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Mi Perfil</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      alert('Ajustes de IA: Conectores OpenAI/Claude configurados.')
+                      setShowProfileMenu(false)
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Preferencias & LLMs</span>
+                  </button>
+
+                  <div className="border-t border-slate-100 pt-1">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-500" />
+                      <span>Cerrar Sesión</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* 5 Skills Navigation Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-white/5 scrollbar-none">
+        {/* PESTAÑAS HORIZONTALES (DISEÑO EDITORIAL MINIMALISTA) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200/80">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+              activeTab === 'dashboard'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            <span>0. Dashboard Ejecutivo</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('radar')}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'radar'
-                ? 'bg-[#fe6612] text-white shadow-lg shadow-[#fe6612]/25'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Eye className="w-4 h-4" />
-            <span>1. Radar & Virales</span>
+            <span>1. Radar Virales ({tenantCompetitors.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('script')}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'script'
-                ? 'bg-[#fe6612] text-white shadow-lg shadow-[#fe6612]/25'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <PenTool className="w-4 h-4" />
@@ -226,34 +443,34 @@ export default function CreadorContenidoPage() {
 
           <button
             onClick={() => setActiveTab('matrix')}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'matrix'
-                ? 'bg-[#fe6612] text-white shadow-lg shadow-[#fe6612]/25'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>3. Matriz Combinatoria</span>
+            <span>3. Matriz 5x1x3</span>
           </button>
 
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'calendar'
-                ? 'bg-[#fe6612] text-white shadow-lg shadow-[#fe6612]/25'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>4. Calendario 30 Días</span>
+            <span>4. Calendario ({tenantScripts.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('assets')}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap cursor-pointer ${
               activeTab === 'assets'
-                ? 'bg-[#fe6612] text-white shadow-lg shadow-[#fe6612]/25'
-                : 'bg-white/5 hover:bg-white/10 text-white/70 hover:text-white'
+                ? 'bg-slate-900 text-white shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
             }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -261,11 +478,21 @@ export default function CreadorContenidoPage() {
           </button>
         </div>
 
-        {/* Tab Content Display */}
+        {/* VISTA ACTIVA */}
         <div className="transition-all duration-300">
+          {activeTab === 'dashboard' && (
+            <ExecutiveDashboard
+              currentTenant={currentTenant}
+              scripts={tenantScripts}
+              tasks={tenantTasks}
+              onToggleTask={handleToggleTask}
+              onNavigateToTab={setActiveTab}
+            />
+          )}
+
           {activeTab === 'radar' && (
             <RadarIdeas
-              competitors={competitors}
+              competitors={tenantCompetitors}
               onAddCompetitor={handleAddCompetitor}
               onSendToScript={handleSendToScript}
             />
@@ -273,7 +500,7 @@ export default function CreadorContenidoPage() {
 
           {activeTab === 'script' && (
             <ScriptStudio
-              scripts={scripts}
+              scripts={tenantScripts}
               activeScriptId={activeScriptId}
               onSaveScript={handleSaveScript}
               onSendToMatrix={handleSendToMatrix}
@@ -282,7 +509,7 @@ export default function CreadorContenidoPage() {
 
           {activeTab === 'matrix' && (
             <MatrixDistribution
-              scripts={scripts}
+              scripts={tenantScripts}
               selectedScriptId={activeScriptId}
               onAddToCalendar={handleAddToCalendar}
             />
@@ -290,7 +517,7 @@ export default function CreadorContenidoPage() {
 
           {activeTab === 'calendar' && (
             <ContentCalendar
-              scripts={scripts}
+              scripts={tenantScripts}
               onUpdateStatus={handleUpdateStatus}
               onSelectScript={handleSelectScriptFromCalendar}
             />
@@ -304,6 +531,59 @@ export default function CreadorContenidoPage() {
           )}
         </div>
       </div>
+
+      {/* MODAL PARA AGREGAR NUEVA MARCA / CLIENTE */}
+      {showNewBrandModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900">Añadir Nueva Marca / Cliente</h3>
+            <p className="text-xs text-slate-500">
+              Crea un espacio independiente para gestionar el contenido de otra empresa o cliente sin mezclar guiones ni calendarios.
+            </p>
+
+            <form onSubmit={handleCreateBrand} className="space-y-3">
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Nombre de la Marca o Cliente</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej. Restaurante Mesa Selecta"
+                  value={newBrandName}
+                  onChange={e => setNewBrandName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-700 block mb-1">Nicho o Sector</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Gastronomía & Eventos"
+                  value={newBrandNiche}
+                  onChange={e => setNewBrandNiche(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowNewBrandModal(false)}
+                  className="px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#ff4b0b] hover:bg-[#ff7a45] text-white rounded-xl text-xs font-semibold transition shadow-2xs"
+                >
+                  Crear Espacio de Marca
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

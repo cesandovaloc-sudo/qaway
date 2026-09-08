@@ -43,62 +43,60 @@ export const MatrixDistribution: React.FC<MatrixDistributionProps> = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="bg-[#191918]/80 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                Skill 03 · Combinatorial Distribution
-              </span>
-              <span className="text-xs text-white/50">Matriz Modular 5x1x3</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              Matriz de Multiplicación de Contenido
-            </h2>
-            <p className="text-sm text-white/60 mt-1 max-w-2xl">
-              Reutiliza el mismo cuerpo de video grabado y combínalo con 5 ganchos verbales distintos para probar diferentes ángulos algorítmicos sin volver a grabar todo.
-            </p>
+    <div className="space-y-6 text-slate-800">
+      {/* Top Banner (Clean Minimalist White) */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Skill 03 · Combinatorial Matrix
+            </span>
+            <span className="text-xs text-slate-400 font-medium">Multiplicación 5x1x3</span>
           </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            Matriz de Multiplicación de Contenido
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+            Reutiliza el mismo cuerpo de video grabado y combínalo con 5 ganchos verbales distintos para probar diferentes ángulos algorítmicos sin volver a grabar todo.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-white/50">Guión Base:</span>
-            <select
-              value={activeBaseId}
-              onChange={e => setActiveBaseId(e.target.value)}
-              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-[#fe6612] max-w-xs"
-            >
-              {scripts.map(s => (
-                <option key={s.id} value={s.id} className="bg-[#1e1e1d]">
-                  {s.title}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 font-medium">Guión Base:</span>
+          <select
+            value={activeBaseId}
+            onChange={e => setActiveBaseId(e.target.value)}
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#ff4b0b] max-w-xs"
+          >
+            {scripts.map(s => (
+              <option key={s.id} value={s.id}>
+                {s.title}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
       {/* The Combinatorial Pipeline View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Col: 5 Hooks List */}
+        {/* Left Col: 5 Hooks List (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#fe6612]" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#ff4b0b]" />
               5 Hooks Alternativos (0 a 3s)
             </h3>
-            <span className="text-xs text-white/40">5 Grabaciones de 5s</span>
+            <span className="text-[11px] text-slate-400 font-mono">5 Tomas de 5s</span>
           </div>
 
           <div className="space-y-3">
             {hooks.map((h, idx) => (
               <div
                 key={idx}
-                className="bg-[#191918] border border-white/10 rounded-xl p-3.5 space-y-2 focus-within:border-[#fe6612] transition"
+                className="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-2 shadow-2xs hover:border-slate-300 transition"
               >
-                <div className="flex items-center justify-between text-xs text-white/50 font-mono">
-                  <span className="font-bold text-[#fe6612]">HOOK #{idx + 1}</span>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                  <span className="font-bold text-[#ff4b0b]">HOOK #{idx + 1}</span>
                   <span>Variante {['Curiosidad', 'Resultado', 'Contrarian', 'Error', 'Urgencia'][idx]}</span>
                 </div>
                 <textarea
@@ -109,53 +107,53 @@ export const MatrixDistribution: React.FC<MatrixDistributionProps> = ({
                     newH[idx] = e.target.value
                     setHooks(newH)
                   }}
-                  className="w-full bg-white/5 border border-white/5 rounded-lg p-2 text-xs text-white font-mono focus:outline-none focus:border-[#fe6612]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 font-mono focus:outline-none focus:border-[#ff4b0b]"
                 />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Center Col: The Single Core Body */}
+        {/* Center Col: The Single Core Body (3 cols) */}
         <div className="lg:col-span-3 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
               1 Solo Cuerpo Grabado
             </h3>
-            <span className="text-xs text-emerald-400 font-mono font-semibold">1 Sola Toma</span>
+            <span className="text-[11px] text-indigo-600 font-mono font-bold">1 Sola Toma</span>
           </div>
 
-          <div className="bg-[#191918] border border-blue-500/30 rounded-2xl p-5 space-y-3 h-[calc(100%-2rem)] flex flex-col justify-between">
+          <div className="bg-white border border-indigo-100 rounded-2xl p-5 space-y-3 h-[calc(100%-2rem)] flex flex-col justify-between shadow-2xs">
             <div>
-              <div className="flex items-center gap-2 mb-2 text-xs text-blue-400 font-semibold">
+              <div className="flex items-center gap-2 mb-2 text-xs text-indigo-700 font-semibold">
                 <Video className="w-4 h-4" />
                 <span>Base Reutilizable (35 a 45s)</span>
               </div>
-              <p className="text-xs text-white/80 font-mono leading-relaxed line-clamp-12 bg-black/40 p-3 rounded-xl border border-white/5">
+              <p className="text-xs text-slate-700 font-mono leading-relaxed line-clamp-12 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 {baseScript?.coreBody || 'Cuerpo no definido.'}
               </p>
             </div>
 
-            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
-              <span className="text-xs text-blue-300 font-medium block">
+            <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl text-center">
+              <span className="text-xs text-indigo-800 font-semibold block">
                 ⚡ Ahorro del 80% de tiempo
               </span>
-              <span className="text-[11px] text-white/50 block mt-0.5">
+              <span className="text-[11px] text-slate-500 block mt-0.5">
                 Grabas el cuerpo una vez y lo montas con los 5 ganchos.
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right Col: 3 CTAs & Final Combinations */}
+        {/* Right Col: 3 CTAs & Final Combinations (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
               Combinaciones Listas para Grabar
             </h3>
-            <span className="text-xs text-white/40">{hooks.length * ctas.length} variantes</span>
+            <span className="text-[11px] text-slate-400 font-mono">{hooks.length * ctas.length} variantes</span>
           </div>
 
           <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
@@ -167,23 +165,23 @@ export const MatrixDistribution: React.FC<MatrixDistributionProps> = ({
               return (
                 <div
                   key={hIdx}
-                  className="bg-[#191918] border border-white/10 rounded-xl p-3 flex items-center justify-between gap-3 hover:border-white/20 transition"
+                  className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between gap-3 hover:border-slate-300 shadow-2xs transition"
                 >
                   <div className="space-y-1 text-xs">
                     <div className="flex items-center gap-2 font-mono">
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#fe6612]/20 text-[#fe6612]">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-[#ff4b0b] border border-orange-200">
                         H{hIdx + 1}
                       </span>
-                      <span className="text-white/40">+</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400">
+                      <span className="text-slate-300">+</span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                         Cuerpo
                       </span>
-                      <span className="text-white/40">+</span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">
+                      <span className="text-slate-300">+</span>
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         CTA {cIdx + 1}
                       </span>
                     </div>
-                    <p className="text-[11px] text-white/70 truncate max-w-[200px]">
+                    <p className="text-[11px] text-slate-600 truncate max-w-[200px]">
                       "{h}"
                     </p>
                   </div>
@@ -191,11 +189,11 @@ export const MatrixDistribution: React.FC<MatrixDistributionProps> = ({
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleCopyCombo(hIdx, cIdx)}
-                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition cursor-pointer"
+                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition cursor-pointer"
                       title="Copiar combinación completa"
                     >
                       {isCopied ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       ) : (
                         <Copy className="w-4 h-4" />
                       )}
@@ -208,7 +206,7 @@ export const MatrixDistribution: React.FC<MatrixDistributionProps> = ({
                           format: baseScript.format
                         })
                       }
-                      className="px-2.5 py-1.5 rounded-lg bg-[#fe6612]/20 hover:bg-[#fe6612] text-[#fe6612] hover:text-white text-[11px] font-semibold transition cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-[#ff4b0b] hover:text-white text-slate-700 text-[11px] font-semibold transition cursor-pointer"
                     >
                       + Agenda
                     </button>

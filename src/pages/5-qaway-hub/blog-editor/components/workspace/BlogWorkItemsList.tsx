@@ -110,7 +110,7 @@ export default function BlogWorkItemsList({
 
         <button
           type="button"
-          onClick={() => navigate('/editor')}
+          onClick={() => navigate('/hub/blog-editor?mode=editor')}
           className="inline-flex items-center gap-1.5 bg-[#24262e] hover:bg-[#2f323c] text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold shadow-xs transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />

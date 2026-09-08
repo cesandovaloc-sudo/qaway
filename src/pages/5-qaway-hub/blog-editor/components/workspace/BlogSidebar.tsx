@@ -10,6 +10,7 @@ import {
   ExternalLink,
   BookOpen,
   BarChart3,
+  ArrowLeft,
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
 
@@ -36,15 +37,15 @@ export default function BlogSidebar({
   return (
     <aside className="w-64 shrink-0 bg-[#fafafc] border-r border-line flex flex-col justify-between p-4 min-h-[calc(100vh-60px)] font-sans select-none">
       <div className="space-y-4">
-        {/* 1. Header del Workspace */}
+        {/* 1. Header del Workspace - Navegación de retorno */}
         <div className="flex items-center justify-between pb-3 border-b border-line px-1">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg text-primary tracking-tight">
-              Qaway Lab
-            </span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted px-2 py-0.5 rounded bg-surface-muted border border-line">
-              Studio Blog
-            </span>
+          <Link
+            to="/hub"
+            className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-line rounded-lg px-2.5 py-1.5 transition-colors w-full justify-center shadow-2xs"
+            title="Volver al Panel Central Hub"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Volver al Hub Central</span>
           </Link>
         </div>
 
@@ -52,7 +53,7 @@ export default function BlogSidebar({
         <div>
           <button
             type="button"
-            onClick={() => navigate('/editor')}
+            onClick={() => navigate('/hub/blog-editor?mode=editor')}
             className="w-full flex items-center justify-center gap-2 bg-[#24262e] hover:bg-[#2f323c] text-white py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
