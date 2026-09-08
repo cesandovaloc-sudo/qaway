@@ -62,11 +62,11 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
 
   return (
     <div className="space-y-6 text-slate-800">
-      {/* Top Banner (Clean Minimalist White) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Banner (Purple / Indigo Reference Theme) */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-orange-50 text-[#ff4b0b] border border-orange-200/80">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-[#4f46e5] border border-indigo-100">
               Skill 01 · Benchmarking
             </span>
             <span className="text-xs text-slate-400 font-medium">Radar de Outliers Virales</span>
@@ -81,14 +81,14 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#ff4b0b] hover:bg-[#ff7a45] text-white font-semibold text-xs transition shadow-sm hover:shadow cursor-pointer whitespace-nowrap"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-xs transition shadow-sm shadow-[#4f46e5]/20 cursor-pointer whitespace-nowrap"
         >
           <Plus className="w-4 h-4" />
           Añadir Referente / Post
         </button>
       </div>
 
-      {/* Filter and Search Bar (Clean Light Surfaces) */}
+      {/* Filter and Search Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -98,7 +98,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
               placeholder="Buscar por creador, gancho o tema..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:border-[#ff4b0b] w-64 md:w-80 shadow-2xs"
+              className="pl-9 pr-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:border-[#4f46e5] w-64 md:w-80 shadow-2xs"
             />
           </div>
         </div>
@@ -108,7 +108,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
           <button
             onClick={() => setFilterFormat('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              filterFormat === 'all' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              filterFormat === 'all' ? 'bg-white text-[#4f46e5] font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Todos ({competitors.length})
@@ -116,7 +116,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
           <button
             onClick={() => setFilterFormat('reel')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              filterFormat === 'reel' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              filterFormat === 'reel' ? 'bg-white text-[#4f46e5] font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Reels
@@ -124,7 +124,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
           <button
             onClick={() => setFilterFormat('carrusel')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              filterFormat === 'carrusel' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              filterFormat === 'carrusel' ? 'bg-white text-[#4f46e5] font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Carruseles
@@ -132,7 +132,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
           <button
             onClick={() => setFilterFormat('post')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              filterFormat === 'post' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              filterFormat === 'post' ? 'bg-white text-[#4f46e5] font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Posts
@@ -140,7 +140,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
           <button
             onClick={() => setFilterFormat('blog')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-              filterFormat === 'blog' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+              filterFormat === 'blog' ? 'bg-white text-[#4f46e5] font-bold shadow-2xs' : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             Blog
@@ -148,22 +148,22 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
         </div>
       </div>
 
-      {/* Grid of Viral Reference Cards (Clean White Cards) */}
+      {/* Grid of Viral Reference Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map(comp => (
           <div
             key={comp.id}
-            className="group relative bg-white border border-slate-200/90 rounded-2xl p-5 flex flex-col justify-between shadow-xs hover:shadow-md hover:border-slate-300 transition duration-200"
+            className="group relative bg-white border border-slate-100 rounded-2xl p-5 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-indigo-100 transition duration-200"
           >
             <div>
               {/* Creator header */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45] flex items-center justify-center text-white font-bold text-xs shadow-xs">
+                  <div className="w-8 h-8 rounded-full bg-[#4f46e5] flex items-center justify-center text-white font-bold text-xs shadow-xs">
                     {comp.creatorName.substring(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#ff4b0b] transition">
+                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#4f46e5] transition">
                       {comp.creatorName}
                     </h4>
                     <span className="text-xs text-slate-400 font-mono">{comp.handle}</span>
@@ -180,8 +180,8 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                 {comp.title}
               </h3>
 
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/70 mb-3">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[#ff4b0b] block mb-1">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 mb-3">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[#4f46e5] block mb-1">
                   Gancho Verbal / Hook:
                 </span>
                 <p className="text-xs text-slate-700 italic font-mono leading-relaxed">
@@ -198,7 +198,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
 
             <div>
               {/* Performance Metrics */}
-              <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-slate-50 border border-slate-200/70 mb-3 text-center">
+              <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50/80 border border-slate-100 text-center mb-4">
                 <div className="flex flex-col items-center">
                   <span className="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
                     <Eye className="w-3 h-3 text-slate-400" /> Views
@@ -208,10 +208,10 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                   </span>
                 </div>
                 <div className="flex flex-col items-center border-x border-slate-200">
-                  <span className="flex items-center gap-1 text-[10px] text-[#ff4b0b] mb-0.5 font-semibold">
-                    <Bookmark className="w-3 h-3 text-[#ff4b0b]" /> Saves
+                  <span className="flex items-center gap-1 text-[10px] text-[#4f46e5] mb-0.5 font-semibold">
+                    <Bookmark className="w-3 h-3 text-[#4f46e5]" /> Saves
                   </span>
-                  <span className="text-xs font-bold text-[#ff4b0b] font-mono">
+                  <span className="text-xs font-bold text-[#4f46e5] font-mono">
                     {(comp.saves / 1000).toFixed(1)}k
                   </span>
                 </div>
@@ -235,7 +235,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                     format: comp.format
                   })
                 }
-                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900 hover:bg-[#ff4b0b] text-white text-xs font-semibold transition cursor-pointer shadow-2xs"
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900 hover:bg-[#4f46e5] text-white text-xs font-semibold transition cursor-pointer shadow-2xs"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Adaptar & Escribir Guión</span>
@@ -261,7 +261,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                     placeholder="Ej. Nate Herk"
                     value={newCreator}
                     onChange={e => setNewCreator(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                   />
                 </div>
                 <div>
@@ -271,7 +271,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                     placeholder="@nateherk"
                     value={newHandle}
                     onChange={e => setNewHandle(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                   placeholder="Ej. 5 Trucos para clonar tu voz gratis"
                   value={newTitle}
                   onChange={e => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
 
@@ -295,60 +295,59 @@ export const RadarIdeas: React.FC<RadarIdeasProps> = ({
                   placeholder="Quédate porque hoy te enseño un truco superfácil..."
                   value={newHook}
                   onChange={e => setNewHook(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-600 block mb-1 font-medium">Tesis o Lección Principal</label>
-                <input
-                  type="text"
-                  placeholder="Ej. Usar herramientas gratuitas de menos de 3 min vs ElevenLabs"
+                <label className="text-xs text-slate-600 block mb-1 font-medium">Tesis o Solución Propuesta</label>
+                <textarea
+                  rows={2}
+                  placeholder="La clave está en no usar el micrófono del celular, sino..."
                   value={newThesis}
                   onChange={e => setNewThesis(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-slate-600 block mb-1 font-medium">Formato</label>
-                  <select
-                    value={newFormat}
-                    onChange={e => setNewFormat(e.target.value as ContentFormat)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
-                  >
-                    <option value="reel">Reel / Short</option>
-                    <option value="carrusel">Carrusel</option>
-                    <option value="post">Post Individual</option>
-                    <option value="blog">Artículo Blog</option>
-                    <option value="story">Historia</option>
-                  </select>
-                </div>
                 <div>
                   <label className="text-xs text-slate-600 block mb-1 font-medium">Visualizaciones Aprox.</label>
                   <input
                     type="number"
                     value={newViews}
                     onChange={e => setNewViews(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                   />
+                </div>
+                <div>
+                  <label className="text-xs text-slate-600 block mb-1 font-medium">Formato</label>
+                  <select
+                    value={newFormat}
+                    onChange={e => setNewFormat(e.target.value as ContentFormat)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
+                  >
+                    <option value="reel">Reel / TikTok</option>
+                    <option value="carrusel">Carrusel</option>
+                    <option value="post">Post Individual</option>
+                    <option value="blog">Blog</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-xs text-slate-500 hover:text-slate-800"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#ff4b0b] hover:bg-[#ff7a45] text-white rounded-xl text-xs font-semibold transition shadow-2xs"
+                  className="px-4 py-2 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold transition shadow-xs cursor-pointer"
                 >
-                  Guardar en Radar
+                  Guardar Referente
                 </button>
               </div>
             </form>

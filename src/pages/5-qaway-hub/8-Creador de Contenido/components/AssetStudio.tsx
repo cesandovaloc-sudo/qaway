@@ -38,11 +38,11 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
 
   return (
     <div className="space-y-6 text-slate-800">
-      {/* Top Banner (Clean Minimalist White) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Banner (Purple/Indigo Theme) */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-[#4f46e5] border border-indigo-100">
               Skill 05 · Design & Assets
             </span>
             <span className="text-xs text-slate-400 font-medium">Carruseles & Recursos ManyChat</span>
@@ -62,7 +62,7 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
         <div className="lg:col-span-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#ff4b0b]" />
+              <Layers className="w-4 h-4 text-[#4f46e5]" />
               Simulador de Carrusel (Instagram / LinkedIn)
             </h3>
             <span className="text-[11px] text-slate-400 font-mono">
@@ -70,12 +70,12 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
             </span>
           </div>
 
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 flex flex-col items-center justify-center space-y-4 shadow-xs">
-            {/* Visual Canvas (Clean high-contrast editorial slide) */}
-            <div className="w-full max-w-[340px] aspect-[4/5] bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-2xl p-6 flex flex-col justify-between relative shadow-xl overflow-hidden border border-slate-800">
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 flex flex-col items-center justify-center space-y-4 shadow-sm">
+            {/* Visual Canvas */}
+            <div className="w-full max-w-[340px] aspect-[4/5] bg-gradient-to-br from-slate-900 to-[#1e1b4b] text-white rounded-2xl p-6 flex flex-col justify-between relative shadow-xl overflow-hidden border border-slate-800">
               {/* Top bar on slide */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono tracking-wider uppercase text-[#ff7a45] font-bold">
+                <span className="text-[10px] font-mono tracking-wider uppercase text-indigo-300 font-bold">
                   QAWAY CONTENT SUITE
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">
@@ -103,7 +103,7 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
                   <ul className="space-y-2 pt-1">
                     {currentSlide.bullets.map((b, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-slate-200">
-                        <span className="text-[#ff4b0b] font-bold">›</span>
+                        <span className="text-[#4f46e5] font-bold">›</span>
                         <span>{b}</span>
                       </li>
                     ))}
@@ -134,7 +134,7 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
                     key={i}
                     onClick={() => setCurrentSlideIndex(i)}
                     className={`w-2 h-2 rounded-full transition cursor-pointer ${
-                      currentSlideIndex === i ? 'bg-[#ff4b0b] w-5' : 'bg-slate-200 hover:bg-slate-300'
+                      currentSlideIndex === i ? 'bg-[#4f46e5] w-5' : 'bg-slate-200 hover:bg-slate-300'
                     }`}
                   />
                 ))}
@@ -155,26 +155,26 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
         <div className="lg:col-span-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-emerald-600" />
+              <BookOpen className="w-4 h-4 text-[#4f46e5]" />
               Recursos Gratuitos (Lead Magnets ManyChat)
             </h3>
             <button
               onClick={handleCopyLeadMagnet}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-[#4f46e5] text-slate-700 text-xs font-semibold transition cursor-pointer"
             >
               {copiedResource ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedResource ? 'Copiado' : 'Copiar Markdown'}</span>
             </button>
           </div>
 
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-xs flex flex-col justify-between min-h-[480px]">
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-4 shadow-sm flex flex-col justify-between min-h-[480px]">
             <div className="space-y-3">
               {/* Lead Magnet selector */}
               <div>
                 <select
                   value={activeLeadMagnetIndex}
                   onChange={e => setActiveLeadMagnetIndex(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 >
                   {leadMagnets.map((lm, idx) => (
                     <option key={lm.id} value={idx}>
@@ -185,21 +185,21 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
               </div>
 
               {/* Meta Tag: Trigger Keyword */}
-              <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 border border-indigo-100">
                 <div>
-                  <span className="text-[10px] text-emerald-700 uppercase font-bold block">
+                  <span className="text-[10px] text-[#4f46e5] uppercase font-bold block">
                     Palabra Clave para ManyChat:
                   </span>
-                  <span className="text-sm font-mono font-extrabold text-emerald-800">
+                  <span className="text-sm font-mono font-extrabold text-[#4f46e5]">
                     "{activeLM.triggerKeyword}"
                   </span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-white border border-emerald-200 text-emerald-700">
+                <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-white border border-indigo-200 text-[#4f46e5]">
                   {activeLM.category}
                 </span>
               </div>
 
-              {/* Resource Content Preview (Clean Paper Document View) */}
+              {/* Resource Content Preview */}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 max-h-[290px] overflow-y-auto text-xs text-slate-700 font-mono leading-relaxed whitespace-pre-wrap">
                 {activeLM.contentMarkdown}
               </div>
@@ -208,7 +208,7 @@ export const AssetStudio: React.FC<AssetStudioProps> = ({
             {/* Bottom info */}
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between text-xs text-slate-500">
               <span>Formato: <strong className="text-slate-700">{activeLM.targetFormat}</strong></span>
-              <span className="text-emerald-700 font-semibold">Listo para disparar en DMs de Instagram</span>
+              <span className="text-[#4f46e5] font-semibold">Listo para disparar en DMs de Instagram</span>
             </div>
           </div>
         </div>

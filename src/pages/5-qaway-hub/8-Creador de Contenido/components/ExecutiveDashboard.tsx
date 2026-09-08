@@ -43,258 +43,286 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   const totalWords = scripts.reduce((acc, s) => acc + (s.hook.wordCount || 15) + (s.coreBody.split(' ').length || 50), 0)
   const totalRecordingMinutes = Math.max(15, Math.round((totalWords / 150) * 1.5))
 
-  // Donut SVG parameters (Generous scale for clarity)
+  // Donut SVG parameters (matching reference circular graph)
   const radius = 64
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (completionPercent / 100) * circumference
 
   return (
-    <div className="space-y-8 text-slate-800">
-      {/* SaaS Workspace & Tier Banner */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-7 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#fe6612] to-[#ff4b0b] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#fe6612]/20 shrink-0">
-            {currentTenant.name.substring(0, 2).toUpperCase()}
+    <div className="space-y-6 text-slate-800">
+      {/* TOP GREETING & CONTEXT HEADER */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-[#4f46e5] border border-indigo-100">
+              Panel Ejecutivo · {currentTenant.currentMonthProgress.targetMonth}
+            </span>
+            <span className="text-xs text-slate-400 font-medium">Espacio: {currentTenant.name}</span>
           </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="text-xl font-bold text-slate-900">{currentTenant.name}</h2>
-              <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
-                Plan {currentTenant.tier.replace('_', ' ')}
-              </span>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Multi-Marca Activo
-              </span>
-            </div>
-            <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">
-              Nicho: <strong className="text-slate-800">{currentTenant.niche}</strong> · {currentTenant.brandVoice}
-            </p>
-          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            Resumen de Producción de Contenidos
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+            Monitoreo en tiempo real del progreso editorial, tiempo de cámara estimado y ejecución de ganchos virales para <strong className="text-slate-700">{currentTenant.niche}</strong>.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => onNavigateToTab('script')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#fe6612] to-[#ff4b0b] text-white text-sm font-semibold rounded-xl shadow-sm hover:brightness-105 transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold rounded-xl shadow-sm shadow-[#4f46e5]/20 transition cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
             <span>Nuevo Guión</span>
           </button>
           <button
             onClick={() => onNavigateToTab('matrix')}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer"
           >
             <Layers className="w-4 h-4" />
-            <span>Matriz 5x1x3</span>
+            <span>Árbol de Nodos</span>
           </button>
         </div>
       </div>
 
-      {/* TOP ROW: 4 EXECUTIVE KPI CARDS (GENEROUS PADDING & LEGIBLE TYPOGRAPHY) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* 4 EXECUTIVE KPI CARDS (Crisp Minimal White with Indigo Icon Accents) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1 */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition">
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between text-slate-500 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Plan Mensual ({currentTenant.currentMonthProgress.targetMonth})</span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Plan Mensual</span>
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
               <Calendar className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-extrabold text-slate-900 font-mono tracking-tight">{scripts.length}</span>
-            <span className="text-sm font-medium text-slate-500">/ {totalPlanned} meta</span>
+            <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">{scripts.length}</span>
+            <span className="text-xs font-medium text-slate-500">/ {totalPlanned} meta</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-emerald-700 font-semibold">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>+14.2% vs. mes anterior</span>
+          <div className="flex items-center gap-1.5 mt-2.5 text-xs text-indigo-700 font-semibold">
+            <TrendingUp className="w-3.5 h-3.5 text-[#4f46e5]" />
+            <span>Ritmo: +14.2% vs. mes anterior</span>
           </div>
         </div>
 
         {/* KPI 2 */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition">
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between text-slate-500 mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Avance de Producción</span>
-            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
               <CheckCircle2 className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-extrabold text-purple-700 font-mono tracking-tight">{completionPercent}%</span>
-            <span className="text-sm font-medium text-slate-500">completado</span>
+            <span className="text-3xl font-black text-[#4f46e5] font-mono tracking-tight">{completionPercent}%</span>
+            <span className="text-xs font-medium text-slate-500">completado</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-slate-600 font-medium">
-            <span>{recorded} piezas listas para publicar</span>
+          <div className="flex items-center gap-1.5 mt-2.5 text-xs text-slate-600 font-medium">
+            <span>{recorded} piezas listas para rodar</span>
           </div>
         </div>
 
         {/* KPI 3 */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition">
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between text-slate-500 mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Tiempo en Cámara</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
               <Clock className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-extrabold text-slate-900 font-mono tracking-tight">{totalRecordingMinutes}</span>
-            <span className="text-sm font-medium text-slate-500">minutos totales</span>
+            <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">{totalRecordingMinutes}</span>
+            <span className="text-xs font-medium text-slate-500">minutos totales</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-amber-800 font-semibold">
-            <Video className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 mt-2.5 text-xs text-slate-600 font-medium">
+            <Video className="w-3.5 h-3.5 text-[#4f46e5]" />
             <span>1 sola sesión semanal de grabación</span>
           </div>
         </div>
 
         {/* KPI 4 */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition">
+        <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
           <div className="flex items-center justify-between text-slate-500 mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Embudo ManyChat</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-[#4f46e5] flex items-center justify-center">
               <MessageSquare className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-extrabold text-emerald-700 font-mono tracking-tight">100%</span>
-            <span className="text-sm font-medium text-slate-500">activo</span>
+            <span className="text-3xl font-black text-slate-900 font-mono tracking-tight">100%</span>
+            <span className="text-xs font-medium text-slate-500">activo</span>
           </div>
-          <div className="flex items-center gap-1.5 mt-3 text-xs text-slate-600 font-medium">
-            <span>Triggers: SKILL, AUDITORIA, HOOKS</span>
+          <div className="flex items-center gap-1.5 mt-2.5 text-xs text-slate-600 font-medium">
+            <span>Triggers: SKILL, AUDITORIA</span>
           </div>
         </div>
       </div>
 
-      {/* MIDDLE ROW: PROGRESS DONUT + PRODUCTION ACTIVITY CHECKLIST */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Donut Progress Card (4 cols) */}
-        <div className="lg:col-span-4 bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Cumplimiento del Mes</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Progreso global de piezas grabadas</p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                Meta: {totalPlanned}
-              </span>
+      {/* MIDDLE ROW: 3 CARDS MATCHING EXACTLY THE REFERENCE media_1788864698245.jpg */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        {/* CARD 1: OVERVIEW WITH PURPLE HIGHLIGHTED ROW (3 cols) */}
+        <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900">Resumen de Canales</h3>
+              <span className="text-xs text-[#4f46e5] font-semibold">Septiembre</span>
             </div>
 
-            {/* Circular Donut Visual (Enlarged and Clear) */}
-            <div className="flex flex-col items-center justify-center my-4 relative">
-              <svg className="w-44 h-44 transform -rotate-90">
-                <circle
-                  cx="88"
-                  cy="88"
-                  r={radius}
-                  stroke="#f1f5f9"
-                  strokeWidth="14"
-                  fill="transparent"
-                />
-                <circle
-                  cx="88"
-                  cy="88"
-                  r={radius}
-                  stroke="url(#progressGradient)"
-                  strokeWidth="14"
-                  fill="transparent"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
-                />
-                <defs>
-                  <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fe6612" />
-                    <stop offset="100%" stopColor="#5643ff" />
-                  </linearGradient>
-                </defs>
-              </svg>
+            {/* List with top item highlighted in solid purple as in the reference image */}
+            <div className="space-y-2">
+              <div className="p-3 bg-[#4f46e5] text-white rounded-xl flex items-center justify-between shadow-sm">
+                <div>
+                  <p className="text-xs font-bold">Reels de Instagram</p>
+                  <span className="text-[10px] text-indigo-100">Alto impacto algorítmico</span>
+                </div>
+                <span className="text-sm font-black font-mono">18 piezas</span>
+              </div>
 
-              {/* Centered label */}
-              <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-3xl font-black text-slate-900 font-mono">{completionPercent}%</span>
-                <span className="text-xs text-slate-400 uppercase font-bold tracking-wider mt-0.5">Listo</span>
+              <div className="p-3 bg-slate-50 border border-slate-100 text-slate-800 rounded-xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800">Carruseles Educativos</p>
+                  <span className="text-[10px] text-slate-400">Retención & Guardados</span>
+                </div>
+                <span className="text-sm font-bold font-mono text-slate-700">6 piezas</span>
               </div>
-            </div>
 
-            {/* Sub breakdown (Legible numbers and labels) */}
-            <div className="grid grid-cols-3 gap-3 text-center mt-5 pt-4 border-t border-slate-100">
-              <div className="p-2">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Grabados</span>
-                <span className="text-lg font-black text-slate-900 font-mono">{recorded}</span>
-              </div>
-              <div className="p-2 border-x border-slate-100">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Publicados</span>
-                <span className="text-lg font-black text-emerald-600 font-mono">{published}</span>
-              </div>
-              <div className="p-2">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Restantes</span>
-                <span className="text-lg font-black text-amber-600 font-mono">{Math.max(0, totalPlanned - recorded)}</span>
+              <div className="p-3 bg-slate-50 border border-slate-100 text-slate-800 rounded-xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-bold text-slate-800">Blog Qaway & SEO</p>
+                  <span className="text-[10px] text-slate-400">Tráfico orgánico B2B</span>
+                </div>
+                <span className="text-sm font-bold font-mono text-slate-700">4 artículos</span>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => onNavigateToTab('calendar')}
-            className="w-full mt-6 py-2.5 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl border border-slate-200 transition text-center cursor-pointer"
+            className="w-full mt-4 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition text-center cursor-pointer"
           >
-            Ver Calendario 30 Días →
+            Ver Canales Editoriales →
           </button>
         </div>
 
-        {/* Activity & Action Checklist (8 cols) */}
-        <div className="lg:col-span-8 bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xs flex flex-col justify-between">
+        {/* CARD 2: TOTAL TASKS CIRCULAR DONUT (4 cols - EXACTLY AS IN media_1788864698245.jpg) */}
+        <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Checklist de Producción Diaria</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Prioridades activas para mantener la consistencia del mes</p>
-              </div>
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                {tasks.filter(t => t.completed).length} de {tasks.length} tareas completadas
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold text-slate-900">Total Tasks</h3>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-[#4f46e5]">
+                Meta: {totalPlanned}
               </span>
             </div>
 
-            {/* Task list with generous vertical rhythm and structure */}
-            <div className="space-y-3">
-              {tasks.map(task => (
+            {/* Circular Donut in Purple Stroke */}
+            <div className="flex flex-col items-center justify-center my-3 relative">
+              <svg className="w-40 h-40 transform -rotate-90">
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#e0e7ff"
+                  strokeWidth="12"
+                  fill="transparent"
+                />
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={radius}
+                  stroke="#4f46e5"
+                  strokeWidth="12"
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="transition-all duration-700 ease-out"
+                />
+              </svg>
+
+              {/* Centered label */}
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-3xl font-black text-slate-900 font-mono">{completionPercent}%</span>
+                <span className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Tasks Done</span>
+              </div>
+            </div>
+
+            {/* Sub breakdown */}
+            <div className="grid grid-cols-3 gap-2 text-center mt-3 pt-3 border-t border-slate-100 text-xs">
+              <div className="p-1">
+                <span className="font-bold text-slate-400 uppercase tracking-wider block mb-0.5 text-[10px]">Grabados</span>
+                <span className="text-base font-black text-slate-900 font-mono">{recorded}</span>
+              </div>
+              <div className="p-1 border-x border-slate-100">
+                <span className="font-bold text-slate-400 uppercase tracking-wider block mb-0.5 text-[10px]">Publicados</span>
+                <span className="text-base font-black text-[#4f46e5] font-mono">{published}</span>
+              </div>
+              <div className="p-1">
+                <span className="font-bold text-slate-400 uppercase tracking-wider block mb-0.5 text-[10px]">Restantes</span>
+                <span className="text-base font-black text-slate-600 font-mono">{Math.max(0, totalPlanned - recorded)}</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => onNavigateToTab('calendar')}
+            className="w-full mt-4 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition text-center cursor-pointer"
+          >
+            Ver Calendario Editorial →
+          </button>
+        </div>
+
+        {/* CARD 3: TASK LIST / CHECKLIST (4 cols - EXACTLY AS IN media_1788864698245.jpg) */}
+        <div className="lg:col-span-4 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-slate-900">Task List</h3>
+              <span className="text-xs font-bold text-[#4f46e5]">
+                {tasks.filter(t => t.completed).length} de {tasks.length} listas
+              </span>
+            </div>
+
+            {/* Tasks with indigo checks */}
+            <div className="space-y-2.5">
+              {tasks.slice(0, 4).map(task => (
                 <div
                   key={task.id}
                   onClick={() => onToggleTask(task.id)}
-                  className={`p-4 rounded-xl border transition flex items-center justify-between gap-4 cursor-pointer ${
+                  className={`group p-3 rounded-xl border transition flex items-center justify-between gap-3 cursor-pointer ${
                     task.completed
-                      ? 'bg-slate-50/70 border-slate-200 opacity-60'
-                      : 'bg-white border-slate-200 hover:border-[#fe6612]/50 shadow-2xs'
+                      ? 'bg-slate-50 border-slate-100 text-slate-400'
+                      : 'bg-white border-slate-100 text-slate-800 hover:border-indigo-200 shadow-2xs'
                   }`}
                 >
-                  <div className="flex items-center gap-3.5">
-                    <button className="text-slate-400 hover:text-[#fe6612] transition">
-                      {task.completed ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                      ) : (
-                        <Circle className="w-5 h-5 text-slate-300" />
-                      )}
-                    </button>
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`w-4.5 h-4.5 rounded-md border flex items-center justify-center transition shrink-0 ${
+                        task.completed
+                          ? 'bg-[#4f46e5] border-[#4f46e5] text-white'
+                          : 'border-slate-300 group-hover:border-[#4f46e5] bg-white'
+                      }`}
+                    >
+                      {task.completed && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                    </div>
                     <div>
-                      <h4
-                        className={`text-sm font-semibold leading-snug ${
+                      <p
+                        className={`text-xs font-medium leading-tight ${
                           task.completed ? 'line-through text-slate-400' : 'text-slate-800'
                         }`}
                       >
                         {task.title}
-                      </h4>
-                      <div className="flex items-center gap-2.5 mt-1 text-xs text-slate-500">
-                        <span className="capitalize font-medium">{task.type.replace('_', ' ')}</span>
-                        <span>·</span>
-                        <span>Vence: <strong className="text-slate-700">{task.dueDate}</strong></span>
-                      </div>
+                      </p>
+                      <span className="text-[10px] text-slate-400 block mt-0.5">
+                        Vence: {task.dueDate}
+                      </span>
                     </div>
                   </div>
 
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                    className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
                       task.priority === 'alta'
-                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                        : 'bg-slate-100 text-slate-700 border border-slate-200'
+                        ? 'bg-indigo-50 text-[#4f46e5] border border-indigo-100'
+                        : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {task.priority}
@@ -304,63 +332,75 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             </div>
           </div>
 
-          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-            <span>¿Listo para la sesión de grabación?</span>
+          <div className="mt-4 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <span>Sincronización activa</span>
             <button
               onClick={() => onNavigateToTab('script')}
-              className="text-[#fe6612] font-bold hover:underline inline-flex items-center gap-1.5 cursor-pointer text-xs"
+              className="text-[#4f46e5] font-bold hover:underline cursor-pointer"
             >
-              Abrir Teleprompter de Guiones <ArrowUpRight className="w-3.5 h-3.5" />
+              Comenzar a escribir →
             </button>
           </div>
         </div>
       </div>
 
-      {/* BOTTOM ROW: TOP SCHEDULED PROJECTS TABLE (GENEROUS PADDING & FORMATTING) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-7 shadow-xs">
-        <div className="flex items-center justify-between mb-5">
+      {/* TOP SELLING / SCHEDULED PIECES TABLE (Idéntica a la tabla inferior de la referencia) */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Parrilla Activa de Publicación</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Piezas registradas para este tenant ordenadas por fecha</p>
+            <h3 className="text-sm font-bold text-slate-900">
+              Top Selling & Línea de Producción
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Estado de aprobación de guiones y tomas modulares preparadas
+            </p>
           </div>
+
           <button
             onClick={() => onNavigateToTab('calendar')}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-[#4f46e5] text-xs font-bold transition cursor-pointer self-start sm:self-auto"
           >
-            Ver Calendario Completo
+            See All →
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs tracking-wider border-b border-slate-200">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-slate-50/80 border-b border-slate-100 text-slate-400 uppercase font-mono text-[10px] tracking-wider">
               <tr>
-                <th className="py-3.5 px-4">Título / Concepto</th>
-                <th className="py-3.5 px-4">Formato</th>
-                <th className="py-3.5 px-4">Canal</th>
-                <th className="py-3.5 px-4">Trigger ManyChat</th>
-                <th className="py-3.5 px-4">Fecha</th>
-                <th className="py-3.5 px-4 text-right">Estado</th>
+                <th className="py-3 px-4">Pieza / Título</th>
+                <th className="py-3 px-4">Formato</th>
+                <th className="py-3 px-4">Gancho (Hook)</th>
+                <th className="py-3 px-4">Estado</th>
+                <th className="py-3 px-4 text-right">Acción</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {scripts.slice(0, 5).map(script => (
-                <tr key={script.id} className="hover:bg-slate-50/70 transition">
-                  <td className="py-4 px-4 font-bold text-slate-900 text-sm">{script.title}</td>
-                  <td className="py-4 px-4">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                <tr key={script.id} className="hover:bg-slate-50/80 transition">
+                  <td className="py-3.5 px-4 font-semibold text-slate-900">
+                    {script.title}
+                  </td>
+                  <td className="py-3.5 px-4 uppercase font-mono text-[10px] text-slate-500">
+                    <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700">
                       {script.format}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-slate-600 capitalize text-sm">{script.platform}</td>
-                  <td className="py-4 px-4 font-mono font-bold text-emerald-700 text-sm">
-                    {script.cta.triggerKeyword}
+                  <td className="py-3.5 px-4 text-slate-500 italic max-w-xs truncate">
+                    "{script.hook.text}"
                   </td>
-                  <td className="py-4 px-4 text-slate-600 font-mono text-xs">{script.scheduledDate || 'Pendiente'}</td>
-                  <td className="py-4 px-4 text-right">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 capitalize">
+                  <td className="py-3.5 px-4">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-[#4f46e5] border border-indigo-100">
                       {script.status.replace('_', ' ')}
                     </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right">
+                    <button
+                      onClick={() => onNavigateToTab('script')}
+                      className="text-[#4f46e5] font-bold hover:underline cursor-pointer"
+                    >
+                      Editar →
+                    </button>
                   </td>
                 </tr>
               ))}

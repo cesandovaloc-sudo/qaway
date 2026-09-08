@@ -25,23 +25,23 @@ import { ContentCalendar } from './components/ContentCalendar'
 import { AssetStudio } from './components/AssetStudio'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import {
-  Sparkles,
-  Layers,
-  Calendar,
+  LayoutDashboard,
   Eye,
   PenTool,
+  Layers,
+  Calendar,
   BookOpen,
   Plus,
-  LayoutDashboard,
   Building2,
-  ChevronDown,
   Bell,
   Search,
   User,
   LogOut,
   Settings,
   CheckCircle2,
-  ShieldCheck
+  ChevronDown,
+  Workflow,
+  Sparkles
 } from 'lucide-react'
 
 const STORAGE_KEY_TENANTS = 'qaway_creator_tenants_v4'
@@ -222,15 +222,6 @@ export default function CreadorContenidoPage() {
     setActiveTab('calendar')
   }
 
-  const handleUpdateStatus = (id: string, newStatus: ContentStatus) => {
-    setAllScripts(prev => prev.map(s => (s.id === id ? { ...s, status: newStatus } : s)))
-  }
-
-  const handleSelectScriptFromCalendar = (id: string) => {
-    setActiveScriptId(id)
-    setActiveTab('script')
-  }
-
   const handleCreateBrand = (e: React.FormEvent) => {
     e.preventDefault()
     if (!newBrandName) return
@@ -269,136 +260,211 @@ export default function CreadorContenidoPage() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-[#fbfbfa] text-slate-800 selection:bg-[#ff4b0b] selection:text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="max-w-7xl mx-auto space-y-7">
-        
-        {/* TOP BAR: IDENTIDAD DE MARCA + SESIÓN DE USUARIO + SELECTOR DE MARCA */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
-          {/* Logo & Título */}
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-[#ff4b0b] flex items-center justify-center text-white font-black text-xl shadow-md shadow-[#ff4b0b]/20 shrink-0">
-              Q
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Qaway Hub
-                </span>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-[#ff4b0b] uppercase tracking-wider">
-                  Suite de Contenidos
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Creador de Contenido Modular
-              </h1>
-            </div>
-          </div>
+  // Elementos de navegación del Panel Izquierdo
+  const navItems = [
+    {
+      key: 'dashboard' as ActiveTab,
+      label: 'Dashboard Ejecutivo',
+      icon: LayoutDashboard,
+      badge: undefined
+    },
+    {
+      key: 'radar' as ActiveTab,
+      label: 'Radar de Virales',
+      icon: Eye,
+      badge: tenantCompetitors.length
+    },
+    {
+      key: 'script' as ActiveTab,
+      label: 'Script Studio & Blog',
+      icon: PenTool,
+      badge: undefined
+    },
+    {
+      key: 'matrix' as ActiveTab,
+      label: 'Matriz de Nodos',
+      icon: Workflow,
+      badge: '5x1x3'
+    },
+    {
+      key: 'calendar' as ActiveTab,
+      label: 'Calendario 30 Días',
+      icon: Calendar,
+      badge: tenantScripts.length
+    },
+    {
+      key: 'assets' as ActiveTab,
+      label: 'Carruseles & Assets',
+      icon: BookOpen,
+      badge: undefined
+    }
+  ]
 
-          {/* Selector de Marca/Cliente + Controles de Usuario */}
-          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
-            {/* Selector de Marca (Cliente activo) */}
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-              <Building2 className="w-4 h-4 text-[#ff4b0b]" />
-              <span className="text-slate-500 font-semibold">Marca:</span>
+  return (
+    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 selection:bg-[#4f46e5] selection:text-white pt-20 font-sans flex flex-col">
+      <div className="flex-1 flex flex-col lg:flex-row w-full">
+        
+        {/* PANEL IZQUIERDO PURPURA/INDIGO (ESTRUCTURA EXACTA DE LA REFERENCIA media_1788864698245.jpg) */}
+        <aside className="w-full lg:w-64 xl:w-72 shrink-0 bg-[#4f46e5] text-white lg:min-h-[calc(100vh-5rem)] lg:sticky lg:top-20 self-start flex flex-col justify-between p-4 sm:p-5 z-20 shadow-xl">
+          <div className="space-y-6">
+            
+            {/* Cabecera del Sidebar con Logo Blanco */}
+            <div className="flex items-center gap-3 pb-4 border-b border-white/15">
+              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center text-white font-black text-lg shadow-sm border border-white/20 shrink-0">
+                Q
+              </div>
+              <div>
+                <span className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest block">
+                  QAWAY LAB
+                </span>
+                <h1 className="text-base font-black text-white leading-tight tracking-tight">
+                  Content Studio
+                </h1>
+              </div>
+            </div>
+
+            {/* Selector de Marca / Cliente (Tenant Workspace) */}
+            <div className="space-y-2 p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-indigo-200 uppercase tracking-wider text-[10px]">
+                  Marca Activa
+                </span>
+                <button
+                  onClick={() => setShowNewBrandModal(true)}
+                  className="text-[11px] font-bold text-white hover:text-indigo-100 flex items-center gap-0.5 cursor-pointer"
+                  title="Añadir una marca o cliente adicional"
+                >
+                  <Plus className="w-3 h-3" />
+                  Nueva
+                </button>
+              </div>
+
               <select
                 value={activeTenantId}
                 onChange={e => setActiveTenantId(e.target.value)}
-                className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer pr-1 text-xs"
+                className="w-full bg-[#4338ca] text-white border border-white/20 rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer shadow-2xs"
               >
                 {tenants.map(t => (
-                  <option key={t.id} value={t.id}>
+                  <option key={t.id} value={t.id} className="bg-slate-900 text-white">
                     {t.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Botón Nueva Marca (Sin símbolo duplicado ++) */}
-            <button
-              onClick={() => setShowNewBrandModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
-              title="Añadir una marca o cliente adicional"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#ff4b0b]" />
-              <span>Nueva Marca</span>
-            </button>
+            {/* Menú de Navegación Vertical */}
+            <nav className="space-y-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-200/80 px-3 block mb-2">
+                Menú de Navegación
+              </span>
 
-            {/* Separador vertical */}
-            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+              {navItems.map(item => {
+                const isActive = activeTab === item.key
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => setActiveTab(item.key)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-[#4f46e5] shadow-lg shadow-black/10'
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className={`w-4 h-4 ${isActive ? 'text-[#4f46e5]' : 'text-indigo-200'}`} />
+                      <span>{item.label}</span>
+                    </div>
 
-            {/* Notificaciones */}
-            <button
-              onClick={() => setHasUnreadAlerts(false)}
-              className="relative p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
-              title="Notificaciones de producción"
-            >
-              <Bell className="w-4 h-4" />
-              {hasUnreadAlerts && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#ff4b0b]" />
-              )}
-            </button>
+                    {item.badge !== undefined && (
+                      <span
+                        className={`text-[10px] font-mono px-2 py-0.5 rounded-md font-bold ${
+                          isActive
+                            ? 'bg-indigo-50 text-[#4f46e5]'
+                            : 'bg-white/20 text-white'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </nav>
+          </div>
+
+          {/* Pie del Sidebar: Plan + Usuario */}
+          <div className="pt-4 border-t border-white/15 space-y-3 mt-6">
+            {/* Tarjeta de Plan */}
+            <div className="p-3 rounded-xl bg-white/10 border border-white/15 text-xs text-white">
+              <div className="flex items-center justify-between text-[11px] mb-1">
+                <span className="font-bold text-white">Plan Agency Scale</span>
+                <span className="px-1.5 py-0.5 rounded bg-white text-[#4f46e5] font-mono text-[9px] font-extrabold">
+                  ACTIVO
+                </span>
+              </div>
+              <p className="text-[10px] text-indigo-200">
+                {currentTenant.limits.maxMonthlyPieces} piezas/mes · Multi-Tenant
+              </p>
+            </div>
 
             {/* Perfil de Usuario con Menú */}
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-3 p-1.5 pr-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
+                className="w-full flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition cursor-pointer text-white"
               >
-                <div className="w-8 h-8 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                  {userProfile.avatarInitials}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-white text-[#4f46e5] font-black text-xs flex items-center justify-center shadow-xs">
+                    {userProfile.avatarInitials}
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs font-bold text-white block leading-tight">
+                      {userProfile.name}
+                    </span>
+                    <span className="text-[10px] text-indigo-200 font-medium block">
+                      {userProfile.role}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-left hidden sm:block">
-                  <span className="text-xs font-bold text-slate-800 block leading-tight">
-                    {userProfile.name}
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-medium block">
-                    {userProfile.role}
-                  </span>
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+                <ChevronDown className="w-3.5 h-3.5 text-indigo-200" />
               </button>
 
-              {/* Menú desplegable de usuario */}
+              {/* Menú desplegable */}
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-60 bg-white border border-slate-200 rounded-2xl p-2.5 shadow-xl z-50 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="p-3 border-b border-slate-100">
-                    <p className="text-sm font-bold text-slate-900">{userProfile.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{userProfile.email}</p>
-                    <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-50 text-[#ff4b0b] border border-orange-200">
-                      Cuenta Master Pro
-                    </span>
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white text-slate-800 border border-slate-200 rounded-2xl p-2.5 shadow-2xl z-50 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                  <div className="p-2 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-900">{userProfile.name}</p>
+                    <p className="text-[11px] text-slate-400">{userProfile.email}</p>
                   </div>
 
                   <button
                     onClick={() => {
-                      alert('Ajustes de perfil: Cuenta sincronizada con Qaway Lab.')
+                      alert('Ajustes de perfil: Conexión con Qaway Lab activa.')
                       setShowProfileMenu(false)
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs text-slate-700 hover:bg-indigo-50 hover:text-[#4f46e5] rounded-xl transition cursor-pointer"
                   >
-                    <User className="w-4 h-4 text-slate-400" />
+                    <User className="w-3.5 h-3.5 text-slate-400" />
                     <span>Mi Perfil</span>
                   </button>
 
                   <button
                     onClick={() => {
-                      alert('Ajustes de IA: Conectores OpenAI/Claude configurados.')
+                      alert('LLMs: Modelos Gemini & Claude configurados.')
                       setShowProfileMenu(false)
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition cursor-pointer"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-xs text-slate-700 hover:bg-indigo-50 hover:text-[#4f46e5] rounded-xl transition cursor-pointer"
                   >
-                    <Settings className="w-4 h-4 text-slate-400" />
-                    <span>Preferencias & LLMs</span>
+                    <Settings className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Ajustes & IA</span>
                   </button>
 
-                  <div className="border-t border-slate-100 pt-1.5">
+                  <div className="border-t border-slate-100 pt-1">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer"
                     >
-                      <LogOut className="w-4 h-4 text-rose-500" />
+                      <LogOut className="w-3.5 h-3.5 text-rose-500" />
                       <span>Cerrar Sesión</span>
                     </button>
                   </div>
@@ -406,167 +472,148 @@ export default function CreadorContenidoPage() {
               )}
             </div>
           </div>
-        </div>
+        </aside>
 
-        {/* PESTAÑAS HORIZONTALES (DISEÑO EDITORIAL MINIMALISTA, ESPACIOSO Y CONFORTABLE) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'dashboard'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <LayoutDashboard className="w-4 h-4" />
-            <span>0. Dashboard Ejecutivo</span>
-          </button>
+        {/* ÁREA DE CONTENIDO PRINCIPAL (Fondo suave #f4f6fa como en la referencia) */}
+        <main className="flex-1 min-w-0 flex flex-col bg-[#f4f6fa]">
+          {/* BARRA SUPERIOR DE UTILIDADES */}
+          <header className="h-16 px-6 lg:px-8 border-b border-slate-200/80 bg-white/90 backdrop-blur-sm flex items-center justify-between gap-4 sticky top-20 z-10">
+            {/* Buscador Rápido idéntico a la referencia */}
+            <div className="relative w-72 max-w-sm hidden sm:block">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search here..."
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#4f46e5] focus:ring-1 focus:ring-[#4f46e5]"
+              />
+            </div>
 
-          <button
-            onClick={() => setActiveTab('radar')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'radar'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <Eye className="w-4 h-4" />
-            <span>1. Radar Virales ({tenantCompetitors.length})</span>
-          </button>
+            {/* Acciones Rápidas con Botón Índigo */}
+            <div className="flex items-center gap-3 ml-auto">
+              <button
+                onClick={() => setActiveTab('script')}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold shadow-sm shadow-[#4f46e5]/20 transition cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Nuevo Guión</span>
+              </button>
 
-          <button
-            onClick={() => setActiveTab('script')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'script'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <PenTool className="w-4 h-4" />
-            <span>2. Script Studio & Blog</span>
-          </button>
+              <button
+                onClick={() => setHasUnreadAlerts(false)}
+                className="relative p-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 transition cursor-pointer"
+                title="Notificaciones"
+              >
+                <Bell className="w-4 h-4" />
+                {hasUnreadAlerts && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#4f46e5]" />
+                )}
+              </button>
+            </div>
+          </header>
 
-          <button
-            onClick={() => setActiveTab('matrix')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'matrix'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>3. Matriz 5x1x3</span>
-          </button>
+          {/* LIENZO DEL MÓDULO ACTIVO */}
+          <div className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto">
+            {activeTab === 'dashboard' && (
+              <ExecutiveDashboard
+                currentTenant={currentTenant}
+                scripts={tenantScripts}
+                tasks={tenantTasks}
+                onToggleTask={handleToggleTask}
+                onNavigateToTab={setActiveTab}
+              />
+            )}
 
-          <button
-            onClick={() => setActiveTab('calendar')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'calendar'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>4. Calendario ({tenantScripts.length})</span>
-          </button>
+            {activeTab === 'radar' && (
+              <RadarIdeas
+                competitors={tenantCompetitors}
+                onAddCompetitor={handleAddCompetitor}
+                onSendToScript={handleSendToScript}
+              />
+            )}
 
-          <button
-            onClick={() => setActiveTab('assets')}
-            className={`flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-bold transition whitespace-nowrap cursor-pointer ${
-              activeTab === 'assets'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>5. Carruseles & Lead Magnets</span>
-          </button>
-        </div>
+            {activeTab === 'script' && (
+              <ScriptStudio
+                scripts={tenantScripts}
+                activeScriptId={activeScriptId}
+                onSaveScript={handleSaveScript}
+                onSendToMatrix={handleSendToMatrix}
+              />
+            )}
 
-        {/* VISTA ACTIVA */}
-        <div className="transition-all duration-300">
-          {activeTab === 'dashboard' && (
-            <ExecutiveDashboard
-              currentTenant={currentTenant}
-              scripts={tenantScripts}
-              tasks={tenantTasks}
-              onToggleTask={handleToggleTask}
-              onNavigateToTab={setActiveTab}
-            />
-          )}
+            {activeTab === 'matrix' && (
+              <MatrixDistribution
+                scripts={tenantScripts}
+                selectedScriptId={activeScriptId}
+                onAddToCalendar={handleAddToCalendar}
+              />
+            )}
 
-          {activeTab === 'radar' && (
-            <RadarIdeas
-              competitors={tenantCompetitors}
-              onAddCompetitor={handleAddCompetitor}
-              onSendToScript={handleSendToScript}
-            />
-          )}
+            {activeTab === 'calendar' && (
+              <ContentCalendar
+                scripts={tenantScripts}
+                onUpdateStatus={(id, st) =>
+                  setAllScripts(prev => prev.map(s => (s.id === id ? { ...s, status: st } : s)))
+                }
+                onSelectScript={id => {
+                  setActiveScriptId(id)
+                  setActiveTab('script')
+                }}
+              />
+            )}
 
-          {activeTab === 'script' && (
-            <ScriptStudio
-              scripts={tenantScripts}
-              activeScriptId={activeScriptId}
-              onSaveScript={handleSaveScript}
-              onSendToMatrix={handleSendToMatrix}
-            />
-          )}
+            {activeTab === 'assets' && (
+              <AssetStudio
+                carousels={carousels}
+                leadMagnets={leadMagnets}
+              />
+            )}
+          </div>
+        </main>
 
-          {activeTab === 'matrix' && (
-            <MatrixDistribution
-              scripts={tenantScripts}
-              selectedScriptId={activeScriptId}
-              onAddToCalendar={handleAddToCalendar}
-            />
-          )}
-
-          {activeTab === 'calendar' && (
-            <ContentCalendar
-              scripts={tenantScripts}
-              onUpdateStatus={handleUpdateStatus}
-              onSelectScript={handleSelectScriptFromCalendar}
-            />
-          )}
-
-          {activeTab === 'assets' && (
-            <AssetStudio
-              carousels={carousels}
-              leadMagnets={leadMagnets}
-            />
-          )}
-        </div>
       </div>
 
-      {/* MODAL PARA AGREGAR NUEVA MARCA / CLIENTE */}
+      {/* MODAL PARA CREAR NUEVA MARCA / CLIENTE */}
       {showNewBrandModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-slate-900">Añadir Nueva Marca / Cliente</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Crea un espacio independiente para gestionar el contenido de otra empresa o cliente sin mezclar guiones ni calendarios.
-            </p>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-[#4f46e5]" />
+                <h3 className="text-base font-bold text-slate-900">Añadir Nueva Marca / Cliente</h3>
+              </div>
+              <button
+                onClick={() => setShowNewBrandModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-mono text-xs cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
 
-            <form onSubmit={handleCreateBrand} className="space-y-3">
+            <form onSubmit={handleCreateBrand} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">Nombre de la Marca o Cliente</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Nombre de la Marca o Empresa
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej. Restaurante Mesa Selecta"
+                  placeholder="Ej: Clínica Dental Arequipa"
                   value={newBrandName}
                   onChange={e => setNewBrandName(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">Nicho o Sector</label>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Nicho de Mercado
+                </label>
                 <input
                   type="text"
-                  placeholder="Ej. Gastronomía & Eventos"
+                  placeholder="Ej: Odontología Estética, Software B2B..."
                   value={newBrandNiche}
                   onChange={e => setNewBrandNiche(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
 
@@ -574,15 +621,15 @@ export default function CreadorContenidoPage() {
                 <button
                   type="button"
                   onClick={() => setShowNewBrandModal(false)}
-                  className="px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-800"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#ff4b0b] hover:bg-[#ff7a45] text-white rounded-xl text-xs font-semibold transition shadow-2xs"
+                  className="px-4 py-2 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold transition shadow-xs cursor-pointer"
                 >
-                  Crear Espacio de Marca
+                  Guardar Marca
                 </button>
               </div>
             </form>

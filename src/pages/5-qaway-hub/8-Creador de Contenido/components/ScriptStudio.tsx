@@ -56,11 +56,11 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
 
   return (
     <div className="space-y-6 text-slate-800">
-      {/* Top Header (Clean Minimalist White) */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Top Header */}
+      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-orange-50 text-[#ff4b0b] border border-orange-200/80">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-indigo-50 text-[#4f46e5] border border-indigo-100">
               Skill 02 · Retention Copy
             </span>
             <span className="text-xs text-slate-400 font-medium">Script Studio & Artículos</span>
@@ -81,7 +81,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
               const found = scripts.find(s => s.id === e.target.value)
               if (found) setCurrent(found)
             }}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#ff4b0b] max-w-xs"
+            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#4f46e5] max-w-xs"
           >
             {scripts.map(s => (
               <option key={s.id} value={s.id}>
@@ -100,7 +100,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
 
           <button
             onClick={handleSave}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#ff4b0b] hover:bg-[#ff7a45] text-white text-xs font-semibold transition shadow-2xs cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white text-xs font-bold transition shadow-sm shadow-[#4f46e5]/20 cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
             <span>Guardar</span>
@@ -112,7 +112,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Editor Form (8 cols) */}
         <div className="lg:col-span-8 space-y-5">
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs space-y-5">
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-5">
             {/* Metadata bar */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-slate-100">
               <div className="md:col-span-6">
@@ -121,7 +121,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                   type="text"
                   value={current.title}
                   onChange={e => setCurrent({ ...current, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-[#4f46e5]"
                 />
               </div>
               <div className="md:col-span-3">
@@ -129,7 +129,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                 <select
                   value={current.format}
                   onChange={e => setCurrent({ ...current, format: e.target.value as ContentFormat })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 >
                   <option value="reel">Reel / Short</option>
                   <option value="carrusel">Carrusel</option>
@@ -143,7 +143,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                 <select
                   value={current.platform}
                   onChange={e => setCurrent({ ...current, platform: e.target.value as PlatformTarget })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                 >
                   <option value="instagram">Instagram</option>
                   <option value="linkedin">LinkedIn</option>
@@ -159,7 +159,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
               <button
                 onClick={() => setActiveTab('guion')}
                 className={`pb-2.5 text-xs font-semibold border-b-2 transition cursor-pointer ${
-                  activeTab === 'guion' ? 'border-[#ff4b0b] text-[#ff4b0b]' : 'border-transparent text-slate-400 hover:text-slate-700'
+                  activeTab === 'guion' ? 'border-[#4f46e5] text-[#4f46e5]' : 'border-transparent text-slate-400 hover:text-slate-700'
                 }`}
               >
                 Guión Modular (Hook/Cuerpo/CTA)
@@ -167,7 +167,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
               <button
                 onClick={() => setActiveTab('descripcion')}
                 className={`pb-2.5 text-xs font-semibold border-b-2 transition cursor-pointer ${
-                  activeTab === 'descripcion' ? 'border-[#ff4b0b] text-[#ff4b0b]' : 'border-transparent text-slate-400 hover:text-slate-700'
+                  activeTab === 'descripcion' ? 'border-[#4f46e5] text-[#4f46e5]' : 'border-transparent text-slate-400 hover:text-slate-700'
                 }`}
               >
                 Descripción & Copy de Redes
@@ -176,7 +176,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                 <button
                   onClick={() => setActiveTab('blog')}
                   className={`pb-2.5 text-xs font-semibold border-b-2 transition cursor-pointer flex items-center gap-1.5 ${
-                    activeTab === 'blog' ? 'border-[#ff4b0b] text-[#ff4b0b]' : 'border-transparent text-slate-400 hover:text-slate-700'
+                    activeTab === 'blog' ? 'border-[#4f46e5] text-[#4f46e5]' : 'border-transparent text-slate-400 hover:text-slate-700'
                   }`}
                 >
                   <Globe className="w-3.5 h-3.5" />
@@ -189,16 +189,16 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
             {activeTab === 'guion' && (
               <div className="space-y-4 pt-1">
                 {/* 1. Hook Section */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#ff4b0b]">
-                      <span className="w-2 h-2 rounded-full bg-[#ff4b0b]" />
+                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#4f46e5]">
+                      <span className="w-2 h-2 rounded-full bg-[#4f46e5]" />
                       1. Hook Verbal (0 a 3 Segundos)
                     </span>
                     <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
                       <span>{hookWords} palabras</span>
                       <span>·</span>
-                      <span className="text-[#ff4b0b] font-bold">~{hookEstimatedSec}s</span>
+                      <span className="text-[#4f46e5] font-bold">~{hookEstimatedSec}s</span>
                     </div>
                   </div>
 
@@ -212,7 +212,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                       })
                     }
                     placeholder="Escribe la frase exacta que detiene el scroll..."
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-[#ff4b0b] shadow-2xs leading-relaxed"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-[#4f46e5] shadow-2xs leading-relaxed"
                   />
 
                   <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -240,9 +240,9 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                 </div>
 
                 {/* 2. Retention Bridge */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-700">
+                    <span className="w-2 h-2 rounded-full bg-slate-500" />
                     2. Puente de Retención (3 a 15s)
                   </span>
                   <p className="text-[11px] text-slate-500">Plantea el conflicto o por qué el 90% lo hace mal.</p>
@@ -250,15 +250,15 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                     rows={2}
                     value={current.retentionBridge}
                     onChange={e => setCurrent({ ...current, retentionBridge: e.target.value })}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#ff4b0b] shadow-2xs leading-relaxed"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5] shadow-2xs leading-relaxed"
                   />
                 </div>
 
                 {/* 3. Core Body */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-700">
-                      <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                    <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#4f46e5]">
+                      <span className="w-2 h-2 rounded-full bg-[#4f46e5]" />
                       3. Cuerpo de Alto Valor (15 a 45s)
                     </span>
                     <span className="text-xs text-slate-400 font-mono">~{bodyEstimatedSec}s</span>
@@ -268,14 +268,14 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                     rows={4}
                     value={current.coreBody}
                     onChange={e => setCurrent({ ...current, coreBody: e.target.value })}
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#ff4b0b] shadow-2xs leading-relaxed"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5] shadow-2xs leading-relaxed"
                   />
                 </div>
 
                 {/* 4. CTA + ManyChat */}
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
-                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-700">
-                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3">
+                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#4f46e5]">
+                    <span className="w-2 h-2 rounded-full bg-[#4f46e5]" />
                     4. Call to Action & Trigger de Conversión (ManyChat)
                   </span>
 
@@ -289,7 +289,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                       })
                     }
                     placeholder="Ej. Comenta la palabra SKILL y te envío las 5 por privado..."
-                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#ff4b0b] shadow-2xs"
+                    className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5] shadow-2xs"
                   />
 
                   <div className="grid grid-cols-2 gap-3">
@@ -304,7 +304,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                             cta: { ...current.cta, triggerKeyword: e.target.value.toUpperCase() }
                           })
                         }
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-emerald-600 uppercase"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono font-bold text-[#4f46e5] uppercase"
                       />
                     </div>
                     <div>
@@ -340,7 +340,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                     rows={8}
                     value={current.descriptionCopy}
                     onChange={e => setCurrent({ ...current, descriptionCopy: e.target.value })}
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#ff4b0b] font-mono leading-relaxed"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5] font-mono leading-relaxed"
                   />
                 </div>
               </div>
@@ -369,7 +369,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                               }
                             })
                           }
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                         />
                       </div>
                       <div>
@@ -389,7 +389,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                               }
                             })
                           }
-                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#ff4b0b]"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#4f46e5]"
                         />
                       </div>
                     </div>
@@ -411,7 +411,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                             }
                           })
                         }
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:border-[#ff4b0b]"
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-900 focus:outline-none focus:border-[#4f46e5]"
                       />
                     </div>
                   </>
@@ -423,7 +423,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
                       value={current.postVisualText || ''}
                       onChange={e => setCurrent({ ...current, postVisualText: e.target.value })}
                       placeholder="Texto que irá incrustado dentro de la imagen o gráfica..."
-                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#ff4b0b]"
+                      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#4f46e5]"
                     />
                   </div>
                 )}
@@ -434,20 +434,20 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
 
         {/* Teleprompter / Diagnostics Panel (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#ff4b0b]" />
+              <Clock className="w-4 h-4 text-[#4f46e5]" />
               Diagnóstico de Ritmo
             </h3>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-3">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500">Duración Estimada:</span>
                 <span className="text-base font-bold text-slate-900 font-mono">{totalEstimatedSec}s</span>
               </div>
               <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-[#ff4b0b] to-[#5643ff] h-full"
+                  className="bg-[#4f46e5] h-full"
                   style={{ width: `${Math.min(100, (parseInt(totalEstimatedSec) / 60) * 100)}%` }}
                 />
               </div>
@@ -462,13 +462,13 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
             <div>
               <span className="text-xs font-semibold text-slate-700 block mb-2">Teleprompter de Grabación:</span>
               <div className="p-4 rounded-xl bg-slate-900 text-white font-mono text-xs leading-relaxed space-y-2 max-h-56 overflow-y-auto shadow-inner">
-                <div className="text-[#ff7a45] font-bold">1. [{current.hook.variant.toUpperCase()}]</div>
+                <div className="text-indigo-300 font-bold">1. [{current.hook.variant.toUpperCase()}]</div>
                 <div className="text-slate-100">{current.hook.text}</div>
-                <div className="text-amber-400 font-bold mt-2">2. [PUENTE]</div>
+                <div className="text-slate-400 font-bold mt-2">2. [PUENTE]</div>
                 <div className="text-slate-200">{current.retentionBridge}</div>
-                <div className="text-indigo-400 font-bold mt-2">3. [CUERPO]</div>
+                <div className="text-indigo-300 font-bold mt-2">3. [CUERPO]</div>
                 <div className="text-slate-200">{current.coreBody}</div>
-                <div className="text-emerald-400 font-bold mt-2">4. [CTA: {current.cta.triggerKeyword}]</div>
+                <div className="text-indigo-300 font-bold mt-2">4. [CTA: {current.cta.triggerKeyword}]</div>
                 <div className="text-slate-200">{current.cta.text}</div>
               </div>
             </div>
@@ -476,7 +476,7 @@ export const ScriptStudio: React.FC<ScriptStudioProps> = ({
             {/* Direct button: Send to Matrix */}
             <button
               onClick={() => onSendToMatrix(current)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-[#ff4b0b] to-[#5643ff] text-white font-semibold text-xs transition shadow-sm hover:brightness-105 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold text-xs transition shadow-sm shadow-[#4f46e5]/20 cursor-pointer"
             >
               <Layers className="w-4 h-4" />
               <span>Multiplicar en Matriz (Skill 3)</span>
