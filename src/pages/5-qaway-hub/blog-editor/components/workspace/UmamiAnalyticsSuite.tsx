@@ -15,112 +15,170 @@ import {
   Check,
   Activity,
   FileText,
-  MousePointerClick,
   BarChart3,
   LineChart as LineChartIcon,
+  ShieldAlert,
+  Flame,
+  Layers,
+  MapPin,
+  ExternalLink,
+  Info,
+  Sparkles,
+  PieChart as PieChartIcon
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
-import { fetchRealBlogAnalytics } from '@/services/analyticsTracker'
+import { supabase } from '@/config/supabase'
+import AreaChartPro from '@/components/analytics/charts/AreaChartPro'
+import DonutChartPro from '@/components/analytics/charts/DonutChartPro'
+import BarChartPro from '@/components/analytics/charts/BarChartPro'
 
-type TimeRange = '24h' | '7d' | '30d' | '90d' | '1y' | 'all'
+type TimeRange = '24h' | '7d' | '30d' | '90d' | 'all'
 type ChartType = 'area' | 'bar'
-type ActiveTabDetail = 'pages' | 'referrers' | 'browsers' | 'os' | 'devices' | 'countries' | 'events'
+type ActiveTabDetail = 'pages' | 'referrers' | 'devices' | 'browsers' | 'os' | 'countries' | 'engagement'
 
 export interface ColorTheme {
   id: string
   name: string
   desc: string
-  viewsColor: string // Primario (Vistas)
-  visitorsColor: string // Secundario (Visitantes)
-  leadsColor: string // Conversión / Eventos
+  primaryColor: string
+  secondaryColor: string
   gradientFrom: string
   gradientTo: string
 }
 
-export const UMAMI_THEMES: ColorTheme[] = [
+export const ANALYTICS_THEMES: ColorTheme[] = [
   {
     id: 'monochrome',
-    name: 'Monocromático Grafito (Default)',
-    desc: 'Sobrio, ultra-limpio, estilo Linear & Vercel',
-    viewsColor: '#18181b', // Zinc 900
-    visitorsColor: '#71717a', // Zinc 500
-    leadsColor: '#52525b', // Zinc 600
+    name: 'Grafito Monocromo',
+    desc: 'Sobrio, minimalista, estilo Linear & Vercel',
+    primaryColor: '#18181b', // Zinc 900
+    secondaryColor: '#71717a', // Zinc 500
     gradientFrom: 'rgba(24, 24, 27, 0.15)',
     gradientTo: 'rgba(24, 24, 27, 0.0)',
   },
   {
+    id: 'brand',
+    name: 'Qaway Néctar Brand',
+    desc: 'Naranja identitario Qaway con contraste grafito',
+    primaryColor: '#ff4b0b', // Accent Qaway
+    secondaryColor: '#24262e', // Charcoal Qaway
+    gradientFrom: 'rgba(255, 75, 11, 0.18)',
+    gradientTo: 'rgba(255, 75, 11, 0.0)',
+  },
+  {
     id: 'indigo',
     name: 'Índigo Corporativo',
-    desc: 'Estándar SaaS, elegante y armónico',
-    viewsColor: '#2563eb', // Blue 600
-    visitorsColor: '#60a5fa', // Blue 400
-    leadsColor: '#3b82f6',
+    desc: 'Estándar SaaS tecnológico y analítico',
+    primaryColor: '#2563eb', // Blue 600
+    secondaryColor: '#60a5fa', // Blue 400
     gradientFrom: 'rgba(37, 99, 235, 0.18)',
     gradientTo: 'rgba(37, 99, 235, 0.0)',
   },
   {
-    id: 'slate',
-    name: 'Pizarra & Acero (Slate)',
-    desc: 'Tonos fríos y descansados para la vista',
-    viewsColor: '#334155', // Slate 700
-    visitorsColor: '#94a3b8', // Slate 400
-    leadsColor: '#475569',
-    gradientFrom: 'rgba(51, 65, 85, 0.15)',
-    gradientTo: 'rgba(51, 65, 85, 0.0)',
-  },
-  {
     id: 'emerald',
-    name: 'Esmeralda & Menta (Growth)',
-    desc: 'Armonía de crecimiento y frescura',
-    viewsColor: '#059669', // Emerald 600
-    visitorsColor: '#34d399', // Emerald 400
-    leadsColor: '#10b981',
+    name: 'Esmeralda Crecimiento',
+    desc: 'Enfoque de métricas de crecimiento y conversión',
+    primaryColor: '#059669', // Emerald 600
+    secondaryColor: '#34d399', // Emerald 400
     gradientFrom: 'rgba(5, 150, 105, 0.18)',
     gradientTo: 'rgba(5, 150, 105, 0.0)',
   },
   {
-    id: 'brand',
-    name: 'Qaway Néctar Calibrado',
-    desc: 'Naranja suave de marca con fondo carbón',
-    viewsColor: '#ea580c', // Orange 600
-    visitorsColor: '#71717a', // Zinc 500
-    leadsColor: '#c2410c',
-    gradientFrom: 'rgba(234, 88, 12, 0.15)',
-    gradientTo: 'rgba(234, 88, 12, 0.0)',
+    id: 'slate',
+    name: 'Pizarra & Acero',
+    desc: 'Tonos fríos y descansados para lectura prolongada',
+    primaryColor: '#334155', // Slate 700
+    secondaryColor: '#94a3b8', // Slate 400
+    gradientFrom: 'rgba(51, 65, 85, 0.15)',
+    gradientTo: 'rgba(51, 65, 85, 0.0)',
   },
 ]
+
+interface RawTelemetryEvent {
+  id?: string
+  visitor_id?: string
+  session_id?: string
+  slug: string
+  title?: string
+  category?: string
+  referrer?: string
+  raw_referrer?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  fbclid?: string
+  device?: string
+  browser?: string
+  os?: string
+  created_at?: string
+}
 
 export default function UmamiAnalyticsSuite() {
   const { posts } = useBlog()
 
   const [timeRange, setTimeRange] = useState<TimeRange>('30d')
   const [chartType, setChartType] = useState<ChartType>('area')
-  const [activeMetricSeries, setActiveMetricSeries] = useState<'both' | 'views' | 'visitors'>('both')
   const [activeTabDetail, setActiveTabDetail] = useState<ActiveTabDetail>('pages')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
 
   // Selector de Temas Visuales
   const [selectedThemeId, setSelectedThemeId] = useState<string>(() => {
-    return localStorage.getItem('qaway_umami_theme_id') || 'monochrome'
-  })
-  const [customViewsColor, setCustomViewsColor] = useState<string>(() => {
-    return localStorage.getItem('qaway_umami_custom_views') || '#18181b'
-  })
-  const [customVisitorsColor, setCustomVisitorsColor] = useState<string>(() => {
-    return localStorage.getItem('qaway_umami_custom_visitors') || '#71717a'
+    return localStorage.getItem('qaway_umami_theme_id') || 'brand'
   })
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
-  // Carga de telemetría real (Facebook Ads, UTMs, Visitas en vivo)
-  const [realStats, setRealStats] = useState<any>(null)
+  // Lista de eventos de telemetría reales (de Supabase o buffer local)
+  const [events, setEvents] = useState<RawTelemetryEvent[]>([])
 
+  // Carga de telemetría real
   useEffect(() => {
-    let active = true
-    fetchRealBlogAnalytics().then(res => {
-      if (active) setRealStats(res)
-    })
-    return () => { active = false }
+    let isMounted = true
+    setIsLoading(true)
+
+    async function loadTelemetry() {
+      let realEvents: RawTelemetryEvent[] = []
+
+      // 1. Intentar cargar desde Supabase si la tabla existe
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('blog_pageviews')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(2000)
+
+          if (!error && data && Array.isArray(data)) {
+            realEvents = data as RawTelemetryEvent[]
+          }
+        } catch {
+          // Si no existe la tabla o hay error, continua al fallback
+        }
+      }
+
+      // 2. Si Supabase no tiene datos o aún no está creada la tabla, consultar buffer local
+      if (realEvents.length === 0 && typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('qaway_blog_real_events_v1')
+          if (saved) {
+            const parsed = JSON.parse(saved)
+            if (Array.isArray(parsed)) realEvents = parsed
+          }
+        } catch {}
+      }
+
+      if (isMounted) {
+        setEvents(realEvents)
+        setIsLoading(false)
+      }
+    }
+
+    loadTelemetry()
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   // Cerrar menú al hacer clic fuera
@@ -136,20 +194,8 @@ export default function UmamiAnalyticsSuite() {
 
   // Tema activo
   const activeTheme = useMemo(() => {
-    if (selectedThemeId === 'custom') {
-      return {
-        id: 'custom',
-        name: 'Personalizado',
-        desc: 'Colores elegidos a mano',
-        viewsColor: customViewsColor,
-        visitorsColor: customVisitorsColor,
-        leadsColor: customViewsColor,
-        gradientFrom: `${customViewsColor}25`,
-        gradientTo: `${customViewsColor}00`,
-      }
-    }
-    return UMAMI_THEMES.find(t => t.id === selectedThemeId) || UMAMI_THEMES[0]
-  }, [selectedThemeId, customViewsColor, customVisitorsColor])
+    return ANALYTICS_THEMES.find(t => t.id === selectedThemeId) || ANALYTICS_THEMES[1] // Brand default
+  }, [selectedThemeId])
 
   const handleSelectTheme = (themeId: string) => {
     setSelectedThemeId(themeId)
@@ -157,342 +203,306 @@ export default function UmamiAnalyticsSuite() {
     setIsThemeMenuOpen(false)
   }
 
-  const handleCustomTheme = (viewsColor: string, visitorsColor: string) => {
-    setSelectedThemeId('custom')
-    setCustomViewsColor(viewsColor)
-    setCustomVisitorsColor(visitorsColor)
-    localStorage.setItem('qaway_umami_theme_id', 'custom')
-    localStorage.setItem('qaway_umami_custom_views', viewsColor)
-    localStorage.setItem('qaway_umami_custom_visitors', visitorsColor)
-  }
+  // Filtrado temporal estricto de eventos reales
+  const filteredEvents = useMemo(() => {
+    if (events.length === 0) return []
+    const now = Date.now()
 
-  // Generador de Métricas Multidimensionales Determinísticas Umami + Telemetría Real
-  const analyticsData = useMemo(() => {
-    const pubPosts = posts.filter(p => p.status === 'publicado')
-    const rangeMultiplier =
-      timeRange === '24h' ? 0.3 : timeRange === '7d' ? 1 : timeRange === '30d' ? 4.2 : timeRange === '90d' ? 11.5 : 22
+    let cutoff = 0
+    if (timeRange === '24h') cutoff = now - 24 * 60 * 60 * 1000
+    else if (timeRange === '7d') cutoff = now - 7 * 24 * 60 * 60 * 1000
+    else if (timeRange === '30d') cutoff = now - 30 * 24 * 60 * 60 * 1000
+    else if (timeRange === '90d') cutoff = now - 90 * 24 * 60 * 60 * 1000
 
-    const realTotal = realStats?.totalViews || 0
-    // 1. Métricas Totales
-    const baseViews = realTotal > 0 ? realTotal : Math.round(pubPosts.length * 680 * rangeMultiplier) + 1420
-    const uniqueVisitors = realStats?.uniqueVisitors || Math.round(baseViews * 0.68)
-    const bounceRate = 34.2
-    const avgDurationSeconds = 194 // 3 min 14s
-    const totalLeads = Math.round(baseViews * 0.034)
-    const liveUsers = Math.max(3, (pubPosts.length * 2) + Math.round(Math.random() * 4))
+    if (cutoff === 0) return events // 'all'
 
-    // 2. Desglose de Páginas / Artículos
-    const pages = posts.map(post => {
-      const words = (post.body || post.contentHtml || '').replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length
-      const seed = (post.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 40) + 60
-      const isPub = post.status === 'publicado'
-      const realPostViews = realStats?.postViewsMap?.[post.slug] || realStats?.postViewsMap?.[post.id]
-      const views = realTotal > 0 && realPostViews !== undefined
-        ? realPostViews
-        : isPub ? Math.round(seed * 45 * rangeMultiplier) : Math.round(seed * 2)
-      const visitors = Math.max(1, Math.round(views * 0.72))
-      const leads = Math.round(views * 0.038)
-      const avgDuration = `${Math.max(1, Math.round(words / 180))}m ${Math.round((words % 180) / 3)}s`
+    return events.filter(ev => {
+      if (!ev.created_at) return true
+      return new Date(ev.created_at).getTime() >= cutoff
+    })
+  }, [events, timeRange])
 
+  // Cálculo de Métricas Reales (CERO DATOS SINTÉTICOS)
+  const metrics = useMemo(() => {
+    const totalViews = filteredEvents.length
+
+    // Conteo estricto de identificadores únicos de navegador
+    const uniqueVisitorSet = new Set<string>()
+    filteredEvents.forEach(ev => {
+      if (ev.visitor_id) uniqueVisitorSet.add(ev.visitor_id)
+    })
+    const uniqueVisitors = uniqueVisitorSet.size
+
+    // Visitas recientes en las últimas 24 horas (sobre todo el histórico)
+    const now = Date.now()
+    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000
+    const recentViews24h = events.filter(ev => {
+      if (!ev.created_at) return false
+      return new Date(ev.created_at).getTime() >= twentyFourHoursAgo
+    }).length
+
+    // Mapeo por artículo
+    const postViewsMap: Record<string, number> = {}
+    const postVisitorsMap: Record<string, Set<string>> = {}
+
+    filteredEvents.forEach(ev => {
+      const s = ev.slug || 'articulo'
+      postViewsMap[s] = (postViewsMap[s] || 0) + 1
+      if (!postVisitorsMap[s]) postVisitorsMap[s] = new Set()
+      if (ev.visitor_id) postVisitorsMap[s].add(ev.visitor_id)
+    })
+
+    // Lista de artículos con métricas reales
+    const articlesPerformance = posts.map(post => {
+      const views = postViewsMap[post.slug] || postViewsMap[post.id] || 0
+      const visitors = (postVisitorsMap[post.slug] || postVisitorsMap[post.id])?.size || 0
+      const percent = totalViews > 0 ? Math.round((views / totalViews) * 100) : 0
       return {
         id: post.id,
         title: post.title,
-        slug: `/blog/${post.slug || 'articulo'}`,
+        slug: post.slug || post.id,
         category: post.category,
+        status: post.status,
         views,
         visitors,
-        leads,
-        avgDuration,
-        bounce: `${(28 + (seed % 15))}%`,
+        percent,
       }
     }).sort((a, b) => b.views - a.views)
 
-    // 3. Fuentes de Tráfico (Referrers) - Con soporte prioritario para Facebook Ads
-    let referrers = [
-      { name: 'Facebook (Anuncios / Feed)', icon: '📢', views: Math.round(baseViews * 0.45), visitors: Math.round(uniqueVisitors * 0.44), percent: 45 },
-      { name: 'Google (Orgánico)', icon: '🔍', views: Math.round(baseViews * 0.30), visitors: Math.round(uniqueVisitors * 0.32), percent: 30 },
-      { name: 'Directo / Marcadores', icon: '🔗', views: Math.round(baseViews * 0.15), visitors: Math.round(uniqueVisitors * 0.14), percent: 15 },
-      { name: 'LinkedIn', icon: '💼', views: Math.round(baseViews * 0.05), visitors: Math.round(uniqueVisitors * 0.05), percent: 5 },
-      { name: 'WhatsApp & Telegram', icon: '💬', views: Math.round(baseViews * 0.03), visitors: Math.round(uniqueVisitors * 0.03), percent: 3 },
-      { name: 'ChatGPT / Perplexity AI', icon: '🤖', views: Math.round(baseViews * 0.02), visitors: Math.round(uniqueVisitors * 0.02), percent: 2 },
-    ]
-    if (realStats?.referrers && realStats.referrers.length > 0) {
-      referrers = realStats.referrers.map((r: any) => ({
-        name: r.name,
-        icon: r.name.toLowerCase().includes('facebook') ? '📢' : r.name.toLowerCase().includes('google') ? '🔍' : '🌐',
-        views: r.views,
-        visitors: r.visitors,
-        percent: r.percent,
-      }))
-    }
+    const postsWithTrafficCount = articlesPerformance.filter(a => a.views > 0).length
 
-    // 4. Navegadores (Browsers)
-    const browsers = [
-      { name: 'Chrome', icon: '🌐', views: Math.round(baseViews * 0.64), percent: 64 },
-      { name: 'Safari', icon: '🧭', views: Math.round(baseViews * 0.21), percent: 21 },
-      { name: 'Edge', icon: '🌊', views: Math.round(baseViews * 0.08), percent: 8 },
-      { name: 'Firefox', icon: '🦊', views: Math.round(baseViews * 0.05), percent: 5 },
-      { name: 'Opera', icon: '⭕', views: Math.round(baseViews * 0.02), percent: 2 },
-    ]
+    // Agrupación de Referrers (Canales de tráfico)
+    const referrerMap: Record<string, number> = {}
+    const deviceMap: Record<string, number> = {}
+    const browserMap: Record<string, number> = {}
+    const osMap: Record<string, number> = {}
 
-    // 5. Sistemas Operativos (OS)
-    const osList = [
-      { name: 'Windows', icon: '🪟', views: Math.round(baseViews * 0.48), percent: 48 },
-      { name: 'Android', icon: '🤖', views: Math.round(baseViews * 0.26), percent: 26 },
-      { name: 'iOS (iPhone/iPad)', icon: '🍎', views: Math.round(baseViews * 0.16), percent: 16 },
-      { name: 'macOS', icon: '💻', views: Math.round(baseViews * 0.08), percent: 8 },
-      { name: 'Linux', icon: '🐧', views: Math.round(baseViews * 0.02), percent: 2 },
-    ]
+    filteredEvents.forEach(ev => {
+      const ref = ev.referrer || 'Directo / Marcadores'
+      referrerMap[ref] = (referrerMap[ref] || 0) + 1
 
-    // 6. Dispositivos (Devices)
-    const devices = [
-      { name: 'Desktop (Computadora)', icon: Monitor, views: Math.round(baseViews * 0.58), percent: 58 },
-      { name: 'Mobile (Smartphones)', icon: Smartphone, views: Math.round(baseViews * 0.38), percent: 38 },
-      { name: 'Tablet', icon: Tablet, views: Math.round(baseViews * 0.04), percent: 4 },
-    ]
+      const dev = ev.device || 'Desktop'
+      deviceMap[dev] = (deviceMap[dev] || 0) + 1
 
-    // 7. Países (Countries)
-    const countries = [
-      { code: 'PE', name: 'Perú', flag: '🇵🇪', views: Math.round(baseViews * 0.46), percent: 46 },
-      { code: 'MX', name: 'México', flag: '🇲🇽', views: Math.round(baseViews * 0.22), percent: 22 },
-      { code: 'CO', name: 'Colombia', flag: '🇨🇴', views: Math.round(baseViews * 0.12), percent: 12 },
-      { code: 'ES', name: 'España', flag: '🇪🇸', views: Math.round(baseViews * 0.09), percent: 9 },
-      { code: 'AR', name: 'Argentina', flag: '🇦🇷', views: Math.round(baseViews * 0.06), percent: 6 },
-      { code: 'US', name: 'Estados Unidos', flag: '🇺🇸', views: Math.round(baseViews * 0.05), percent: 5 },
-    ]
+      const br = ev.browser || 'Chrome'
+      browserMap[br] = (browserMap[br] || 0) + 1
 
-    // 8. Eventos de Conversión (Custom Events / Goals)
-    const events = [
-      { name: 'lead_form_submitted', label: 'Formulario de Leads Enviado', count: totalLeads, category: 'Conversión' },
-      { name: 'cta_button_click', label: 'Clic en Botón CTA Hero', count: Math.round(baseViews * 0.072), category: 'Interacción' },
-      { name: 'passive_cta_click', label: 'Clic en CTA Pasivo (Texto)', count: Math.round(baseViews * 0.045), category: 'Interacción' },
-      { name: 'pdf_guide_download', label: 'Descarga de Guía PDF', count: Math.round(totalLeads * 0.88), category: 'Descarga' },
-      { name: 'social_share_click', label: 'Compartido en Redes Sociales', count: Math.round(baseViews * 0.018), category: 'Social' },
-    ]
+      const os = ev.os || 'Otro'
+      osMap[os] = (osMap[os] || 0) + 1
+    })
 
-    // 9. Serie de Datos Temporales para el Gráfico
-    const intervals = timeRange === '24h' ? 24 : timeRange === '7d' ? 7 : timeRange === '30d' ? 15 : 20
-    const timeSeries = []
-    const baseInterval = Math.round(baseViews / intervals)
+    const formatBreakdown = (map: Record<string, number>) =>
+      Object.entries(map)
+        .map(([name, count]) => ({
+          name,
+          views: count,
+          percent: totalViews > 0 ? Math.round((count / totalViews) * 100) : 0,
+        }))
+        .sort((a, b) => b.views - a.views)
 
-    for (let i = intervals - 1; i >= 0; i--) {
-      let label = ''
-      if (timeRange === '24h') {
-        const hour = (24 + new Date().getHours() - i) % 24
-        label = `${hour}:00`
-      } else {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        label = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' })
+    const referrers = formatBreakdown(referrerMap)
+    const devices = formatBreakdown(deviceMap)
+    const browsers = formatBreakdown(browserMap)
+    const osList = formatBreakdown(osMap)
+
+    // Construcción de la Serie Temporal Real para Recharts
+    // Genera buckets según el rango de fechas seleccionado
+    const timeSeriesData: { date: string; visitas: number; visitantes: number }[] = []
+
+    if (timeRange === '24h') {
+      // 24 intervalos de 1 hora
+      const buckets: Record<string, { views: number; visitors: Set<string> }> = {}
+      for (let i = 23; i >= 0; i--) {
+        const d = new Date(now - i * 60 * 60 * 1000)
+        const key = `${String(d.getHours()).padStart(2, '0')}:00`
+        buckets[key] = { views: 0, visitors: new Set() }
       }
 
-      const variance = 0.75 + ((i * 23) % 45) / 100
-      const pointViews = Math.round(baseInterval * variance)
-      const pointVisitors = Math.round(pointViews * 0.68)
-      const pointLeads = Math.round(pointViews * 0.035)
+      filteredEvents.forEach(ev => {
+        if (!ev.created_at) return
+        const d = new Date(ev.created_at)
+        const key = `${String(d.getHours()).padStart(2, '0')}:00`
+        if (buckets[key]) {
+          buckets[key].views += 1
+          if (ev.visitor_id) buckets[key].visitors.add(ev.visitor_id)
+        }
+      })
 
-      timeSeries.push({
-        label,
-        views: pointViews,
-        visitors: pointVisitors,
-        leads: pointLeads,
+      Object.entries(buckets).forEach(([date, data]) => {
+        timeSeriesData.push({
+          date,
+          visitas: data.views,
+          visitantes: data.visitors.size,
+        })
+      })
+    } else {
+      // Días (7d, 30d, 90d o all)
+      const daysCount = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 30
+      const buckets: Record<string, { views: number; visitors: Set<string> }> = {}
+
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date(now - i * 24 * 60 * 60 * 1000)
+        const key = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+        buckets[key] = { views: 0, visitors: new Set() }
+      }
+
+      filteredEvents.forEach(ev => {
+        if (!ev.created_at) return
+        const d = new Date(ev.created_at)
+        const key = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
+        if (buckets[key]) {
+          buckets[key].views += 1
+          if (ev.visitor_id) buckets[key].visitors.add(ev.visitor_id)
+        }
+      })
+
+      Object.entries(buckets).forEach(([date, data]) => {
+        timeSeriesData.push({
+          date,
+          visitas: data.views,
+          visitantes: data.visitors.size,
+        })
       })
     }
 
     return {
-      baseViews,
+      totalViews,
       uniqueVisitors,
-      bounceRate,
-      avgDurationSeconds,
-      totalLeads,
-      liveUsers,
-      pages,
+      recentViews24h,
+      postsWithTrafficCount,
+      articlesPerformance,
       referrers,
+      devices,
       browsers,
       osList,
-      devices,
-      countries,
-      events,
-      timeSeries,
+      timeSeriesData,
     }
-  }, [posts, timeRange])
+  }, [filteredEvents, events, posts, timeRange])
 
-  const maxPointViews = Math.max(...analyticsData.timeSeries.map(p => p.views), 1)
-
-  // Generador de SVG Path para el gráfico de Área Suave (Spline)
-  const splineAreaPath = useMemo(() => {
-    const pts = analyticsData.timeSeries
-    if (pts.length < 2) return { line: '', area: '', coords: [] as { x: number; y: number }[] }
-
-    const width = 1000
-    const height = 220
-    const paddingBottom = 20
-    const paddingTop = 20
-    const usableHeight = height - paddingTop - paddingBottom
-
-    const coords = pts.map((p, i) => {
-      const x = (i / (pts.length - 1)) * width
-      const y = height - paddingBottom - (p.views / maxPointViews) * usableHeight
-      return { x, y }
-    })
-
-    // Construcción de curva Bezier suave
-    let lineD = `M ${coords[0].x} ${coords[0].y}`
-    for (let i = 0; i < coords.length - 1; i++) {
-      const curr = coords[i]
-      const next = coords[i + 1]
-      const cpX = (curr.x + next.x) / 2
-      lineD += ` C ${cpX} ${curr.y}, ${cpX} ${next.y}, ${next.x} ${next.y}`
-    }
-
-    const areaD = `${lineD} L ${width} ${height} L 0 ${height} Z`
-
-    return { line: lineD, area: areaD, coords }
-  }, [analyticsData.timeSeries, maxPointViews])
-
-  // Exportar métricas completas a CSV
+  // Exportar reporte real en CSV
   const handleExportCsv = () => {
-    const headers = 'Tipo,Etiqueta / Slug,Vistas / Eventos,Visitantes / Porcentaje\n'
-    const rows = analyticsData.pages
-      .map(p => `"Pagina","${p.title} (${p.slug})",${p.views},${p.visitors}`)
-      .concat(analyticsData.referrers.map(r => `"Referrer","${r.name}",${r.views},"${r.percent}%"`))
-      .concat(analyticsData.countries.map(c => `"Pais","${c.name}",${c.views},"${c.percent}%"`))
-      .concat(analyticsData.events.map(e => `"Evento","${e.label}",${e.count},"${e.category}"`))
-      .join('\n')
-
-    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `qaway_umami_analytics_${timeRange}.csv`
-    a.click()
+    const rows = [
+      ['Título', 'Slug', 'Vistas Reales', 'Visitantes Únicos', 'Porcentaje del Total'],
+      ...metrics.articlesPerformance.map(a => [
+        `"${a.title.replace(/"/g, '""')}"`,
+        a.slug,
+        a.views,
+        a.visitors,
+        `${a.percent}%`
+      ])
+    ]
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + rows.map(e => e.join(',')).join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `qaway_telemetria_blog_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
+  // Filtrar artículos en la pestaña de páginas por búsqueda
+  const filteredArticles = useMemo(() => {
+    if (!searchQuery.trim()) return metrics.articlesPerformance
+    const q = searchQuery.toLowerCase()
+    return metrics.articlesPerformance.filter(
+      a => a.title.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q) || a.category.toLowerCase().includes(q)
+    )
+  }, [metrics.articlesPerformance, searchQuery])
+
   return (
-    <div className="flex-1 overflow-y-auto bg-[#fafafc] p-6 lg:p-8 space-y-6 font-sans">
-      {/* 1. Header Umami: Título, Filtro Activo y Controles de Rango */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-line shadow-xs">
+    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto font-sans">
+      {/* 1. Encabezado Global de Métricas & Controles */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Motor Analítico Umami (MIT) · Privacidad & Precisión</span>
-          </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h2 className="text-xl font-display font-extrabold text-primary tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-display font-extrabold text-primary tracking-tight">
               Analítica Web & Tráfico Editorial
             </h2>
 
-            {/* Contador en Vivo Umami */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-bold font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>{analyticsData.liveUsers} en vivo</span>
+            {/* Estado de la Conexión de Telemetría */}
+            <div
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono border ${
+                metrics.totalViews > 0
+                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700'
+                  : 'bg-surface-muted border-line text-muted'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  metrics.totalViews > 0 ? 'bg-emerald-500 animate-ping' : 'bg-muted-light'
+                }`}
+              />
+              <span>{metrics.totalViews > 0 ? 'Telemetría en Vivo' : 'Esperando Lecturas'}</span>
             </div>
           </div>
+          <p className="text-xs sm:text-sm text-muted mt-1">
+            Datos reales de lectura, campañas de adquisición y comportamiento de usuarios sin valores sintéticos.
+          </p>
         </div>
 
-        {/* Barra de Herramientas Superior: Paleta, Tipos de Gráfico y Rango Temporal */}
+        {/* Barra de Herramientas: Paleta, Alternador de Gráfica, Rango de Fecha y Exportación */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Selector de Paleta de Color Armónica */}
+          {/* Selector de Paleta de Color */}
           <div className="relative" ref={themeMenuRef}>
             <button
               type="button"
               onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-line bg-white hover:bg-surface-muted text-xs font-semibold text-primary shadow-2xs transition-colors cursor-pointer"
-              title="Personalizar colores armónicos del gráfico"
+              title="Personalizar color del gráfico"
             >
               <div className="flex items-center gap-1">
                 <span
-                  style={{ backgroundColor: activeTheme.viewsColor }}
+                  style={{ backgroundColor: activeTheme.primaryColor }}
                   className="w-3 h-3 rounded-full border border-black/10"
                 />
                 <span
-                  style={{ backgroundColor: activeTheme.visitorsColor }}
+                  style={{ backgroundColor: activeTheme.secondaryColor }}
                   className="w-3 h-3 rounded-full border border-black/10 -ml-1.5"
                 />
               </div>
-              <span className="hidden md:inline text-xs">{activeTheme.name.split(' ')[0]}</span>
+              <span className="hidden sm:inline text-xs">{activeTheme.name.split(' ')[0]}</span>
               <ChevronDown className="w-3.5 h-3.5 text-muted" />
             </button>
 
-            {/* Dropdown de Temas */}
             {isThemeMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl border border-line shadow-xl z-40 p-3 space-y-2.5 animate-in fade-in duration-150">
-                <div>
-                  <span className="text-xs font-bold text-primary block">Paleta de Color Armónica</span>
-                  <span className="text-[11px] text-muted block">Diseños descansados para la vista</span>
+              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-line shadow-xl z-40 p-3 space-y-1.5 animate-in fade-in duration-150">
+                <div className="px-2 py-1">
+                  <span className="text-xs font-bold text-primary block">Paleta de Color Recharts</span>
+                  <span className="text-[11px] text-muted block">Gradientes armónicos del panel</span>
                 </div>
-
-                <div className="space-y-1">
-                  {UMAMI_THEMES.map(theme => {
-                    const isSelected = selectedThemeId === theme.id
-                    return (
-                      <button
-                        key={theme.id}
-                        type="button"
-                        onClick={() => handleSelectTheme(theme.id)}
-                        className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-surface-muted border border-line font-bold text-primary shadow-2xs'
-                            : 'hover:bg-surface-subtle text-muted hover:text-primary'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex items-center gap-1 shrink-0">
-                            <span
-                              style={{ backgroundColor: theme.viewsColor }}
-                              className="w-4 h-4 rounded-full border border-black/10"
-                            />
-                            <span
-                              style={{ backgroundColor: theme.visitorsColor }}
-                              className="w-4 h-4 rounded-full border border-black/10 -ml-2"
-                            />
-                          </div>
-                          <div>
-                            <span className="text-xs block font-semibold text-primary">{theme.name}</span>
-                            <span className="text-[10px] text-muted-light block leading-tight">{theme.desc}</span>
-                          </div>
+                {ANALYTICS_THEMES.map(theme => {
+                  const isSelected = selectedThemeId === theme.id
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => handleSelectTheme(theme.id)}
+                      className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-surface-muted border border-line font-bold text-primary shadow-2xs'
+                          : 'hover:bg-surface-subtle text-muted hover:text-primary'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <span
+                          style={{ backgroundColor: theme.primaryColor }}
+                          className="w-4 h-4 rounded-full border border-black/10 shrink-0"
+                        />
+                        <div>
+                          <span className="text-xs block font-semibold text-primary">{theme.name}</span>
+                          <span className="text-[10px] text-muted block leading-tight">{theme.desc}</span>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {/* Personalizador Manual */}
-                <div className="pt-2 border-t border-line space-y-2">
-                  <span className="text-[11px] font-bold text-primary block">Manual:</span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <span className="text-[10px] text-muted block mb-0.5">Vistas:</span>
-                      <div className="flex items-center gap-1.5 bg-surface-muted p-1 rounded-lg border border-line">
-                        <input
-                          type="color"
-                          value={customViewsColor}
-                          onChange={e => handleCustomTheme(e.target.value, customVisitorsColor)}
-                          className="w-5 h-5 rounded cursor-pointer border-0 p-0"
-                        />
-                        <span className="text-[10px] font-mono font-semibold">{customViewsColor}</span>
                       </div>
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-muted block mb-0.5">Visitantes:</span>
-                      <div className="flex items-center gap-1.5 bg-surface-muted p-1 rounded-lg border border-line">
-                        <input
-                          type="color"
-                          value={customVisitorsColor}
-                          onChange={e => handleCustomTheme(customViewsColor, e.target.value)}
-                          className="w-5 h-5 rounded cursor-pointer border-0 p-0"
-                        />
-                        <span className="text-[10px] font-mono font-semibold">{customVisitorsColor}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
 
-          {/* Alternador de Tipo de Gráfico (Área vs Barras) */}
+          {/* Alternador de Tipo de Gráfica */}
           <div className="flex items-center bg-surface-muted p-1 rounded-xl border border-line">
             <button
               type="button"
@@ -500,7 +510,7 @@ export default function UmamiAnalyticsSuite() {
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 chartType === 'area' ? 'bg-white text-primary shadow-2xs' : 'text-muted hover:text-primary'
               }`}
-              title="Gráfico de Área Suave (Spline Area)"
+              title="Gráfico de Área Suave Recharts"
             >
               <LineChartIcon className="w-3.5 h-3.5" />
             </button>
@@ -510,13 +520,13 @@ export default function UmamiAnalyticsSuite() {
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 chartType === 'bar' ? 'bg-white text-primary shadow-2xs' : 'text-muted hover:text-primary'
               }`}
-              title="Gráfico de Barras Agrupadas"
+              title="Gráfico de Barras Recharts"
             >
               <BarChart3 className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Selector de Rango Temporal Umami */}
+          {/* Selector de Rango Temporal */}
           <div className="flex items-center bg-surface-muted p-1 rounded-xl border border-line text-xs font-semibold">
             {[
               { id: '24h', label: '24h' },
@@ -545,14 +555,14 @@ export default function UmamiAnalyticsSuite() {
             type="button"
             onClick={handleExportCsv}
             className="p-2 rounded-xl border border-line bg-white hover:bg-surface-muted text-muted hover:text-primary shadow-2xs transition-colors cursor-pointer"
-            title="Exportar reporte completo en CSV"
+            title="Descargar reporte real en CSV"
           >
             <Download className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 2. Banner de 4 KPIs Maestros Estilo Umami */}
+      {/* 2. Banner de 4 Tarjetas KPI Reales (Cero porcentajes o números inventados) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Vistas Totales */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
@@ -560,217 +570,160 @@ export default function UmamiAnalyticsSuite() {
             <span className="flex items-center gap-1.5">
               <Eye className="w-4 h-4 text-muted" /> Vistas Totales
             </span>
-            <span className="text-[11px] font-bold text-success bg-success/10 px-1.5 py-0.2 rounded flex items-center">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> +16.2%
+            <span
+              className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
+                metrics.totalViews > 0
+                  ? 'bg-emerald-500/10 text-emerald-600'
+                  : 'bg-surface-muted text-muted'
+              }`}
+            >
+              {metrics.totalViews > 0 ? `${metrics.totalViews} hits` : 'Sin registros'}
             </span>
           </div>
           <div className="font-display font-extrabold text-2xl lg:text-3xl text-primary tracking-tight">
-            {analyticsData.baseViews.toLocaleString()}
+            {metrics.totalViews.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-light">
+          <p className="text-[11px] text-muted">
             En {posts.length} artículos del blog
           </p>
         </div>
 
-        {/* KPI 2: Visitantes Únicos */}
+        {/* KPI 2: Navegadores Únicos (visitor_id anónimo) */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-muted" /> Visitantes Únicos
+              <Users className="w-4 h-4 text-muted" /> Navegadores Únicos
             </span>
-            <span className="text-[11px] font-bold text-success bg-success/10 px-1.5 py-0.2 rounded flex items-center">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> +14.8%
+            <span className="text-[11px] font-mono font-bold text-primary bg-surface-muted px-2 py-0.5 rounded border border-line">
+              Anónimo
             </span>
           </div>
           <div className="font-display font-extrabold text-2xl lg:text-3xl text-primary tracking-tight">
-            {analyticsData.uniqueVisitors.toLocaleString()}
+            {metrics.uniqueVisitors.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-light">
-            Usuarios sin duplicidad de sesión
+          <p className="text-[11px] text-muted">
+            Identificadores técnicos por dispositivo
           </p>
         </div>
 
-        {/* KPI 3: Tasa de Rebote */}
+        {/* KPI 3: Visitas Recientes (24 horas) */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <Activity className="w-4 h-4 text-muted" /> Tasa de Rebote
+              <Flame className="w-4 h-4 text-muted" /> Visitas Recientes (24h)
             </span>
-            <span className="text-[11px] font-mono font-bold text-primary bg-surface-muted px-1.5 py-0.2 rounded border border-line">
-              Baja
-            </span>
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                metrics.recentViews24h > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-muted-light'
+              }`}
+            />
           </div>
           <div className="font-display font-extrabold text-2xl lg:text-3xl text-primary tracking-tight">
-            {analyticsData.bounceRate}%
+            {metrics.recentViews24h.toLocaleString()}
           </div>
-          <p className="text-[11px] text-muted-light">
-            65.8% interactúa con más de 1 post
+          <p className="text-[11px] text-muted">
+            Páginas vistas en las últimas 24 horas
           </p>
         </div>
 
-        {/* KPI 4: Tiempo Promedio de Visita */}
+        {/* KPI 4: Artículos con Lecturas */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-muted" /> Tiempo Promedio
+              <FileText className="w-4 h-4 text-muted" /> Con Tráfico
             </span>
-            <span className="text-[11px] font-bold text-success bg-success/10 px-1.5 py-0.2 rounded flex items-center">
-              <ArrowUpRight className="w-3 h-3 mr-0.5" /> +19.4%
+            <span className="text-[11px] font-mono font-bold text-primary bg-surface-muted px-2 py-0.5 rounded border border-line">
+              {posts.length > 0 ? `${Math.round((metrics.postsWithTrafficCount / posts.length) * 100)}%` : '0%'}
             </span>
           </div>
           <div className="font-display font-extrabold text-2xl lg:text-3xl text-primary tracking-tight">
-            3m 14s
+            {metrics.postsWithTrafficCount} <span className="text-sm font-normal text-muted">/ {posts.length}</span>
           </div>
-          <p className="text-[11px] text-muted-light">
-            Alta permanencia de lectura en móvil y PC
+          <p className="text-[11px] text-muted">
+            Artículos con al menos 1 visita real
           </p>
         </div>
       </div>
 
-      {/* 3. Gráfico Principal Umami (Área Spline o Barras con Selector de Series) */}
+      {/* 3. Gráfica Principal de Tendencia con Recharts */}
       <div className="bg-white p-5 lg:p-6 rounded-2xl border border-line shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="font-display font-bold text-base text-primary">
-              Tendencia de Visitas & Audiencia
+              Tendencia Temporal de Tráfico
             </h3>
-            <p className="text-xs text-muted">Comportamiento temporal de tráfico orgánico y directo</p>
+            <p className="text-xs text-muted">
+              Páginas vistas y navegadores únicos registrados en el período ({timeRange})
+            </p>
           </div>
 
-          {/* Selector de Series Activas */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setActiveMetricSeries(activeMetricSeries === 'views' ? 'both' : 'views')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                activeMetricSeries === 'views' || activeMetricSeries === 'both'
-                  ? 'bg-surface-muted border-line text-primary font-bold'
-                  : 'text-muted border-transparent opacity-50'
-              }`}
-            >
-              <span style={{ backgroundColor: activeTheme.viewsColor }} className="w-2.5 h-2.5 rounded-full" />
-              <span>Vistas</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveMetricSeries(activeMetricSeries === 'visitors' ? 'both' : 'visitors')}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                activeMetricSeries === 'visitors' || activeMetricSeries === 'both'
-                  ? 'bg-surface-muted border-line text-primary font-bold'
-                  : 'text-muted border-transparent opacity-50'
-              }`}
-            >
-              <span style={{ backgroundColor: activeTheme.visitorsColor }} className="w-2.5 h-2.5 rounded-full" />
-              <span>Visitantes</span>
-            </button>
+          <div className="flex items-center gap-4 text-xs font-semibold">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: activeTheme.primaryColor }} />
+              <span className="text-primary font-bold">Vistas</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: activeTheme.secondaryColor }} />
+              <span className="text-muted">Navegadores</span>
+            </div>
           </div>
         </div>
 
-        {/* Renderizado de Gráficos */}
-        {chartType === 'area' ? (
-          /* Gráfico de Área Suave SVG */
-          <div className="relative h-56 pt-4">
-            <svg
-              viewBox="0 0 1000 220"
-              preserveAspectRatio="none"
-              className="w-full h-44 overflow-visible"
-            >
-              <defs>
-                <linearGradient id="umamiGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={activeTheme.viewsColor} stopOpacity="0.22" />
-                  <stop offset="100%" stopColor={activeTheme.viewsColor} stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-
-              {/* Relleno de Área Suave */}
-              <path d={splineAreaPath.area} fill="url(#umamiGradient)" />
-
-              {/* Línea del Gráfico */}
-              <path
-                d={splineAreaPath.line}
-                fill="none"
-                stroke={activeTheme.viewsColor}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Puntos Interactivos */}
-              {splineAreaPath.coords.map((c, i) => (
-                <circle
-                  key={i}
-                  cx={c.x}
-                  cy={c.y}
-                  r="3.5"
-                  fill="#ffffff"
-                  stroke={activeTheme.viewsColor}
-                  strokeWidth="2"
-                  className="hover:r-6 transition-all cursor-pointer"
-                />
-              ))}
-            </svg>
-
-            {/* Eje X de Fechas / Horas */}
-            <div className="flex items-center justify-between text-[10px] font-mono text-muted pt-3 border-t border-line">
-              {analyticsData.timeSeries.filter((_, i) => i % (timeRange === '30d' ? 3 : 1) === 0).map((p, i) => (
-                <span key={i}>{p.label}</span>
-              ))}
+        {/* Contenedor del Gráfico */}
+        <div className="relative w-full h-[280px]">
+          {metrics.totalViews === 0 && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[1px] rounded-xl text-center p-4">
+              <Info className="w-6 h-6 text-muted mb-2" />
+              <p className="text-sm font-semibold text-primary">Aún no hay visitas registradas en este período</p>
+              <p className="text-xs text-muted max-w-md mt-0.5">
+                La gráfica comenzará a dibujar curvas automáticamente en cuanto tus lectores visiten los artículos en el blog.
+              </p>
             </div>
-          </div>
-        ) : (
-          /* Gráfico de Barras Agrupadas */
-          <div className="h-52 flex items-end gap-1.5 sm:gap-3 pt-6 border-b border-line pb-2">
-            {analyticsData.timeSeries.map((p, idx) => {
-              const heightViews = Math.max(12, Math.round((p.views / maxPointViews) * 100))
-              const heightVisitors = Math.max(8, Math.round((p.visitors / maxPointViews) * 100))
+          )}
 
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative">
-                  {/* Tooltip */}
-                  <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center bg-[#18181b] text-white text-[10px] p-2 rounded-lg shadow-xl z-30 whitespace-nowrap pointer-events-none">
-                    <span className="font-bold">{p.label}</span>
-                    <span>{p.views.toLocaleString()} vistas</span>
-                    <span className="text-muted-light">{p.visitors.toLocaleString()} visitantes</span>
-                  </div>
-
-                  <div className="w-full flex items-end justify-center gap-0.5 h-full">
-                    {(activeMetricSeries === 'views' || activeMetricSeries === 'both') && (
-                      <div
-                        style={{ height: `${heightViews}%`, backgroundColor: activeTheme.viewsColor }}
-                        className="w-full rounded-t-sm transition-all hover:opacity-90 shadow-2xs"
-                      />
-                    )}
-                    {(activeMetricSeries === 'visitors' || activeMetricSeries === 'both') && (
-                      <div
-                        style={{ height: `${heightVisitors}%`, backgroundColor: activeTheme.visitorsColor }}
-                        className="w-full rounded-t-sm transition-all hover:opacity-90 shadow-2xs"
-                      />
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono text-muted truncate max-w-full block">
-                    {p.label.split(' ')[0]}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        )}
+          {chartType === 'area' ? (
+            <AreaChartPro
+              data={metrics.timeSeriesData}
+              xAxisKey="date"
+              height={280}
+              showGrid={true}
+              showLegend={false}
+              series={[
+                { key: 'visitas', name: 'Vistas', color: activeTheme.primaryColor },
+                { key: 'visitantes', name: 'Navegadores Únicos', color: activeTheme.secondaryColor },
+              ]}
+              valueFormatter={(val: number) => `${val} visitas`}
+            />
+          ) : (
+            <BarChartPro
+              data={metrics.timeSeriesData}
+              xAxisKey="date"
+              height={280}
+              showGrid={true}
+              showLegend={false}
+              series={[
+                { key: 'visitas', name: 'Vistas', color: activeTheme.primaryColor },
+                { key: 'visitantes', name: 'Navegadores Únicos', color: activeTheme.secondaryColor },
+              ]}
+              valueFormatter={(val: number) => `${val} visitas`}
+            />
+          )}
+        </div>
       </div>
 
-      {/* 4. Matriz Multidimensional Umami (Desglose por Pestañas) */}
+      {/* 4. Desglose Multidimensional de Métricas Reales */}
       <div className="bg-white rounded-2xl border border-line shadow-xs overflow-hidden">
-        {/* Pestañas de Dimensiones de Datos */}
+        {/* Pestañas de Dimensiones */}
         <div className="flex items-center justify-between border-b border-line px-5 py-3 bg-[#fafafc] flex-wrap gap-3">
           <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-xl border border-line flex-wrap">
             {[
               { id: 'pages', label: 'Artículos & URLs', icon: FileText },
               { id: 'referrers', label: 'Fuentes de Tráfico', icon: Globe },
-              { id: 'countries', label: 'Países', icon: Compass },
               { id: 'devices', label: 'Dispositivos', icon: Monitor },
               { id: 'browsers', label: 'Navegadores', icon: Compass },
-              { id: 'os', label: 'Sistemas Operativos', icon: Monitor },
-              { id: 'events', label: 'Eventos & Leads', icon: MousePointerClick },
+              { id: 'os', label: 'Sistemas Operativos', icon: Activity },
+              { id: 'countries', label: 'Países', icon: MapPin },
+              { id: 'engagement', label: 'Permanencia & Rebote', icon: Clock },
             ].map(tab => {
               const Icon = tab.icon
               const isActive = activeTabDetail === tab.id
@@ -792,258 +745,246 @@ export default function UmamiAnalyticsSuite() {
             })}
           </div>
 
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Buscar en tabla..."
-              className="pl-8 pr-3 py-1 text-xs bg-white border border-line rounded-lg focus:outline-none focus:border-primary w-40"
-            />
-          </div>
+          {activeTabDetail === 'pages' && (
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Buscar artículo..."
+                className="pl-8 pr-3 py-1 text-xs bg-white border border-line rounded-lg focus:outline-none focus:border-primary w-44"
+              />
+            </div>
+          )}
         </div>
 
-        {/* Cuerpo de la Dimensión Seleccionada */}
+        {/* Contenido de la Dimensión Seleccionada */}
         <div className="p-5 lg:p-6">
-          {/* Dimensión: Páginas / Artículos */}
+          {/* Dimensión 1: Artículos & URLs */}
           {activeTabDetail === 'pages' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-6 sm:col-span-7">Artículo / URL</span>
-                <span className="col-span-2 text-right">Vistas</span>
-                <span className="col-span-2 text-right">Visitantes</span>
-                <span className="col-span-2 sm:col-span-1 text-right">Leads</span>
-              </div>
-              <div className="divide-y divide-line">
-                {analyticsData.pages
-                  .filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()) || p.slug.includes(searchQuery.toLowerCase()))
-                  .map(page => {
-                    const barWidth = Math.round((page.views / (analyticsData.pages[0]?.views || 1)) * 100)
-                    return (
-                      <div key={page.id} className="py-2.5 px-2 hover:bg-surface-subtle transition-colors rounded-lg relative group">
-                        {/* Barra de progreso de fondo discreta */}
-                        <div
-                          style={{
-                            width: `${barWidth}%`,
-                            backgroundColor: activeTheme.viewsColor,
-                          }}
-                          className="absolute inset-y-1 left-0 opacity-[0.04] rounded-md pointer-events-none"
-                        />
-                        <div className="grid grid-cols-12 items-center relative z-10 text-xs">
-                          <div className="col-span-6 sm:col-span-7 pr-2">
-                            <span className="font-bold text-primary block truncate group-hover:text-primary/70">
-                              {page.title}
-                            </span>
-                            <span className="text-[11px] font-mono text-muted-light block truncate">
-                              {page.slug}
-                            </span>
+            <div className="space-y-3">
+              {filteredArticles.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted">
+                  No hay artículos que coincidan con la búsqueda.
+                </div>
+              ) : (
+                <div className="divide-y divide-line">
+                  {filteredArticles.map(art => (
+                    <div
+                      key={art.id}
+                      className="py-3 flex items-center justify-between gap-4 hover:bg-surface-subtle px-2 rounded-xl transition-colors"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-primary truncate max-w-md">
+                            {art.title}
+                          </span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-muted text-muted font-medium border border-line shrink-0">
+                            {art.category}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-mono text-muted truncate mt-0.5">
+                          /blog/{art.slug}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6 shrink-0">
+                        {/* Barra de Proporción */}
+                        <div className="hidden sm:block w-28 bg-surface-muted h-2 rounded-full overflow-hidden border border-line">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${art.percent}%`,
+                              backgroundColor: activeTheme.primaryColor,
+                            }}
+                          />
+                        </div>
+
+                        <div className="text-right min-w-[70px]">
+                          <div className="text-xs font-bold font-mono text-primary">
+                            {art.views} <span className="text-[10px] font-normal text-muted">vistas</span>
                           </div>
-                          <span className="col-span-2 text-right font-mono font-bold text-primary">
-                            {page.views.toLocaleString()}
-                          </span>
-                          <span className="col-span-2 text-right font-mono text-muted">
-                            {page.visitors.toLocaleString()}
-                          </span>
-                          <span className="col-span-2 sm:col-span-1 text-right font-mono font-bold text-primary">
-                            {page.leads}
+                          <div className="text-[10px] text-muted font-mono">
+                            {art.visitors} nav. ({art.percent}%)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Dimensión 2: Fuentes de Tráfico (Referrers) */}
+          {activeTabDetail === 'referrers' && (
+            <div>
+              {metrics.referrers.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted space-y-1">
+                  <Globe className="w-6 h-6 text-muted mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-primary">Aún no hay fuentes de tráfico registradas</p>
+                  <p className="text-[11px] text-muted">
+                    Los canales (Google, Facebook Ads, Directo, LinkedIn) aparecerán cuando los lectores ingresen al blog.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                  <div className="space-y-2.5">
+                    {metrics.referrers.map(ref => (
+                      <div key={ref.name} className="flex items-center justify-between p-2.5 rounded-xl border border-line bg-surface-subtle">
+                        <span className="text-xs font-semibold text-primary">{ref.name}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold font-mono text-primary">{ref.views}</span>
+                          <span className="text-[10px] font-mono text-muted bg-white px-1.5 py-0.5 rounded border border-line">
+                            {ref.percent}%
                           </span>
                         </div>
                       </div>
-                    )
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Dimensión: Fuentes de Tráfico (Referrers) */}
-          {activeTabDetail === 'referrers' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-7">Canal de Atribución</span>
-                <span className="col-span-3 text-right">Vistas</span>
-                <span className="col-span-2 text-right">Porcentaje</span>
-              </div>
-              <div className="divide-y divide-line">
-                {analyticsData.referrers.map((ref, idx) => (
-                  <div key={idx} className="py-3 px-2 hover:bg-surface-subtle transition-colors rounded-lg relative">
-                    <div
-                      style={{ width: `${ref.percent}%`, backgroundColor: activeTheme.viewsColor }}
-                      className="absolute inset-y-1 left-0 opacity-[0.04] rounded-md pointer-events-none"
-                    />
-                    <div className="grid grid-cols-12 items-center relative z-10 text-xs">
-                      <div className="col-span-7 flex items-center gap-2">
-                        <span className="text-base">{ref.icon}</span>
-                        <span className="font-bold text-primary">{ref.name}</span>
-                      </div>
-                      <span className="col-span-3 text-right font-mono font-bold text-primary">
-                        {ref.views.toLocaleString()}
-                      </span>
-                      <span className="col-span-2 text-right font-mono font-semibold text-muted">
-                        {ref.percent}%
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Dimensión: Países */}
-          {activeTabDetail === 'countries' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-7">País</span>
-                <span className="col-span-3 text-right">Vistas</span>
-                <span className="col-span-2 text-right">Porcentaje</span>
-              </div>
-              <div className="divide-y divide-line">
-                {analyticsData.countries.map((c, idx) => (
-                  <div key={idx} className="py-3 px-2 hover:bg-surface-subtle transition-colors rounded-lg relative">
-                    <div
-                      style={{ width: `${c.percent}%`, backgroundColor: activeTheme.viewsColor }}
-                      className="absolute inset-y-1 left-0 opacity-[0.04] rounded-md pointer-events-none"
+                  <div className="h-64 flex items-center justify-center">
+                    <DonutChartPro
+                      data={metrics.referrers.map(r => ({ name: r.name, value: r.views }))}
+                      height={240}
+                      centerLabel="Total Fuentes"
                     />
-                    <div className="grid grid-cols-12 items-center relative z-10 text-xs">
-                      <div className="col-span-7 flex items-center gap-2">
-                        <span className="text-base">{c.flag}</span>
-                        <span className="font-bold text-primary">{c.name}</span>
-                        <span className="text-[10px] font-mono text-muted-light">({c.code})</span>
-                      </div>
-                      <span className="col-span-3 text-right font-mono font-bold text-primary">
-                        {c.views.toLocaleString()}
-                      </span>
-                      <span className="col-span-2 text-right font-mono font-semibold text-muted">
-                        {c.percent}%
-                      </span>
-                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Dimensión: Dispositivos */}
+          {/* Dimensión 3: Dispositivos */}
           {activeTabDetail === 'devices' && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {analyticsData.devices.map((dev, idx) => {
-                const Icon = dev.icon
-                return (
-                  <div key={idx} className="p-4 rounded-2xl border border-line bg-[#fafafc] space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Icon className="w-5 h-5 text-muted" />
-                      <span className="text-xs font-mono font-bold text-primary">{dev.percent}%</span>
-                    </div>
-                    <div className="font-bold text-primary text-sm">{dev.name}</div>
-                    <div className="font-mono text-xs text-muted">
-                      {dev.views.toLocaleString()} vistas
-                    </div>
-                    <div className="w-full h-1.5 rounded-full bg-surface-muted overflow-hidden">
-                      <div
-                        style={{ width: `${dev.percent}%`, backgroundColor: activeTheme.viewsColor }}
-                        className="h-full rounded-full"
-                      />
-                    </div>
+            <div>
+              {metrics.devices.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted space-y-1">
+                  <Monitor className="w-6 h-6 text-muted mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-primary">Aún no hay datos de dispositivos registrados</p>
+                  <p className="text-[11px] text-muted">
+                    El desglose (Desktop, Mobile, Tablet) se calculará a partir de los user agents de tus lectores.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                  <div className="space-y-2.5">
+                    {metrics.devices.map(dev => (
+                      <div key={dev.name} className="flex items-center justify-between p-2.5 rounded-xl border border-line bg-surface-subtle">
+                        <div className="flex items-center gap-2">
+                          {dev.name === 'Mobile' ? <Smartphone className="w-4 h-4 text-muted" /> : dev.name === 'Tablet' ? <Tablet className="w-4 h-4 text-muted" /> : <Monitor className="w-4 h-4 text-muted" />}
+                          <span className="text-xs font-semibold text-primary">{dev.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold font-mono text-primary">{dev.views}</span>
+                          <span className="text-[10px] font-mono text-muted bg-white px-1.5 py-0.5 rounded border border-line">
+                            {dev.percent}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                )
-              })}
+
+                  <div className="h-64 flex items-center justify-center">
+                    <DonutChartPro
+                      data={metrics.devices.map(d => ({ name: d.name, value: d.views }))}
+                      height={240}
+                      centerLabel="Dispositivos"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Dimensión: Navegadores */}
+          {/* Dimensión 4: Navegadores */}
           {activeTabDetail === 'browsers' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-7">Navegador</span>
-                <span className="col-span-3 text-right">Vistas</span>
-                <span className="col-span-2 text-right">Porcentaje</span>
-              </div>
-              <div className="divide-y divide-line">
-                {analyticsData.browsers.map((b, idx) => (
-                  <div key={idx} className="py-3 px-2 hover:bg-surface-subtle transition-colors rounded-lg relative">
-                    <div
-                      style={{ width: `${b.percent}%`, backgroundColor: activeTheme.viewsColor }}
-                      className="absolute inset-y-1 left-0 opacity-[0.04] rounded-md pointer-events-none"
-                    />
-                    <div className="grid grid-cols-12 items-center relative z-10 text-xs">
-                      <div className="col-span-7 flex items-center gap-2">
-                        <span className="text-base">{b.icon}</span>
-                        <span className="font-bold text-primary">{b.name}</span>
+            <div>
+              {metrics.browsers.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted space-y-1">
+                  <Compass className="w-6 h-6 text-muted mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-primary">Aún no hay datos de navegadores registrados</p>
+                  <p className="text-[11px] text-muted">
+                    Se detectarán automáticamente (Chrome, Safari, Edge, Firefox, etc.).
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {metrics.browsers.map(br => (
+                    <div key={br.name} className="p-3.5 rounded-xl border border-line bg-surface-subtle flex items-center justify-between">
+                      <span className="text-xs font-semibold text-primary">{br.name}</span>
+                      <div className="text-right">
+                        <span className="text-xs font-bold font-mono block text-primary">{br.views}</span>
+                        <span className="text-[10px] text-muted font-mono">{br.percent}%</span>
                       </div>
-                      <span className="col-span-3 text-right font-mono font-bold text-primary">
-                        {b.views.toLocaleString()}
-                      </span>
-                      <span className="col-span-2 text-right font-mono font-semibold text-muted">
-                        {b.percent}%
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Dimensión: Sistemas Operativos */}
+          {/* Dimensión 5: Sistemas Operativos */}
           {activeTabDetail === 'os' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-7">Sistema Operativo</span>
-                <span className="col-span-3 text-right">Vistas</span>
-                <span className="col-span-2 text-right">Porcentaje</span>
-              </div>
-              <div className="divide-y divide-line">
-                {analyticsData.osList.map((os, idx) => (
-                  <div key={idx} className="py-3 px-2 hover:bg-surface-subtle transition-colors rounded-lg relative">
-                    <div
-                      style={{ width: `${os.percent}%`, backgroundColor: activeTheme.viewsColor }}
-                      className="absolute inset-y-1 left-0 opacity-[0.04] rounded-md pointer-events-none"
-                    />
-                    <div className="grid grid-cols-12 items-center relative z-10 text-xs">
-                      <div className="col-span-7 flex items-center gap-2">
-                        <span className="text-base">{os.icon}</span>
-                        <span className="font-bold text-primary">{os.name}</span>
+            <div>
+              {metrics.osList.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted space-y-1">
+                  <Activity className="w-6 h-6 text-muted mx-auto mb-2 opacity-50" />
+                  <p className="font-semibold text-primary">Aún no hay datos de sistemas operativos registrados</p>
+                  <p className="text-[11px] text-muted">
+                    Se clasificarán según el sistema del lector (Windows, Android, iOS, macOS, Linux).
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {metrics.osList.map(os => (
+                    <div key={os.name} className="p-3.5 rounded-xl border border-line bg-surface-subtle flex items-center justify-between">
+                      <span className="text-xs font-semibold text-primary">{os.name}</span>
+                      <div className="text-right">
+                        <span className="text-xs font-bold font-mono block text-primary">{os.views}</span>
+                        <span className="text-[10px] text-muted font-mono">{os.percent}%</span>
                       </div>
-                      <span className="col-span-3 text-right font-mono font-bold text-primary">
-                        {os.views.toLocaleString()}
-                      </span>
-                      <span className="col-span-2 text-right font-mono font-semibold text-muted">
-                        {os.percent}%
-                      </span>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Dimensión: Eventos Personalizados (Goals & Conversiones) */}
-          {activeTabDetail === 'events' && (
-            <div className="space-y-2">
-              <div className="grid grid-cols-12 text-[10px] font-bold uppercase tracking-wider text-muted pb-2 border-b border-line px-2">
-                <span className="col-span-7">Evento / Objetivo</span>
-                <span className="col-span-3 text-right">Disparos</span>
-                <span className="col-span-2 text-right">Categoría</span>
+          {/* Dimensión 6: Países (Honestidad: Requiere GeoIP) */}
+          {activeTabDetail === 'countries' && (
+            <div className="py-10 text-center max-w-lg mx-auto space-y-2.5">
+              <div className="w-10 h-10 rounded-full bg-surface-muted border border-line flex items-center justify-center mx-auto text-muted">
+                <MapPin className="w-5 h-5" />
               </div>
-              <div className="divide-y divide-line">
-                {analyticsData.events.map((ev, idx) => (
-                  <div key={idx} className="py-3 px-2 hover:bg-surface-subtle transition-colors rounded-lg">
-                    <div className="grid grid-cols-12 items-center text-xs">
-                      <div className="col-span-7">
-                        <span className="font-bold text-primary block">{ev.label}</span>
-                        <span className="text-[10px] font-mono text-muted-light block">{ev.name}</span>
-                      </div>
-                      <span className="col-span-3 text-right font-mono font-bold text-primary">
-                        {ev.count.toLocaleString()}
-                      </span>
-                      <div className="col-span-2 text-right">
-                        <span className="text-[10px] font-semibold text-muted bg-surface-muted px-2 py-0.5 rounded border border-line">
-                          {ev.category}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <h4 className="text-sm font-bold text-primary">
+                Aún no hay datos de ubicación geográfica
+              </h4>
+              <p className="text-xs text-muted leading-relaxed">
+                El navegador del cliente no tiene acceso directo a la ubicación del lector sin un servicio externo de resolución de IP (GeoIP) o encabezados CDN (como Cloudflare). Esta dimensión se activará en la siguiente fase de infraestructura.
+              </p>
+              <span className="inline-block text-[11px] font-mono text-muted bg-surface-muted px-2.5 py-1 rounded-lg border border-line">
+                Estado: Reservado para Fase GeoIP
+              </span>
+            </div>
+          )}
+
+          {/* Dimensión 7: Permanencia & Rebote (Honestidad: Requiere Balizas) */}
+          {activeTabDetail === 'engagement' && (
+            <div className="py-10 text-center max-w-lg mx-auto space-y-2.5">
+              <div className="w-10 h-10 rounded-full bg-surface-muted border border-line flex items-center justify-center mx-auto text-muted">
+                <Clock className="w-5 h-5" />
               </div>
+              <h4 className="text-sm font-bold text-primary">
+                Aún no hay datos suficientes de permanencia
+              </h4>
+              <p className="text-xs text-muted leading-relaxed">
+                El cálculo exacto del tiempo promedio de lectura y la tasa de rebote requiere balizas de salida (heartbeat de presencia o <code>navigator.sendBeacon</code> al cerrar la pestaña). Para no inventar datos, esta métrica se mantiene en espera de telemetría de sesión prolongada.
+              </p>
+              <span className="inline-block text-[11px] font-mono text-muted bg-surface-muted px-2.5 py-1 rounded-lg border border-line">
+                Estado: Reservado para Fase Balizas de Permanencia
+              </span>
             </div>
           )}
         </div>
