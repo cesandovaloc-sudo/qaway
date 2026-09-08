@@ -210,7 +210,12 @@ export default function HubPage() {
   const [categoryFilter, setCategoryFilter] = useState('Todas')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const activeRoutes = routes.filter((route) => route.published)
+  const activeRoutes = routes.filter((route) => {
+    if (isPublicSiteMode) {
+      return route.path === '/hub/blog-editor'
+    }
+    return route.published
+  })
 
   const thematicFilters = [
     'Todas',
