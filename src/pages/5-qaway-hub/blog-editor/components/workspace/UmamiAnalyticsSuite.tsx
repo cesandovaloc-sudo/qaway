@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react'
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
   Eye,
   Users,
   Clock,
-  ArrowUpRight,
   Download,
   Search,
   Globe,
@@ -17,14 +16,13 @@ import {
   FileText,
   BarChart3,
   LineChart as LineChartIcon,
-  ShieldAlert,
   Flame,
-  Layers,
   MapPin,
-  ExternalLink,
   Info,
-  Sparkles,
-  PieChart as PieChartIcon
+  RotateCw,
+  X,
+  Filter,
+  CheckCircle2
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
 import { supabase } from '@/config/supabase'
@@ -42,55 +40,43 @@ export interface ColorTheme {
   desc: string
   primaryColor: string
   secondaryColor: string
-  gradientFrom: string
-  gradientTo: string
 }
 
 export const ANALYTICS_THEMES: ColorTheme[] = [
   {
-    id: 'monochrome',
-    name: 'Grafito Monocromo',
-    desc: 'Sobrio, minimalista, estilo Linear & Vercel',
-    primaryColor: '#18181b', // Zinc 900
-    secondaryColor: '#71717a', // Zinc 500
-    gradientFrom: 'rgba(24, 24, 27, 0.15)',
-    gradientTo: 'rgba(24, 24, 27, 0.0)',
-  },
-  {
     id: 'brand',
     name: 'Qaway Néctar Brand',
     desc: 'Naranja identitario Qaway con contraste grafito',
-    primaryColor: '#ff4b0b', // Accent Qaway
-    secondaryColor: '#24262e', // Charcoal Qaway
-    gradientFrom: 'rgba(255, 75, 11, 0.18)',
-    gradientTo: 'rgba(255, 75, 11, 0.0)',
+    primaryColor: '#ff4b0b',
+    secondaryColor: '#24262e',
+  },
+  {
+    id: 'monochrome',
+    name: 'Grafito Monocromo',
+    desc: 'Sobrio, minimalista, estilo Linear & Vercel',
+    primaryColor: '#18181b',
+    secondaryColor: '#71717a',
   },
   {
     id: 'indigo',
     name: 'Índigo Corporativo',
     desc: 'Estándar SaaS tecnológico y analítico',
-    primaryColor: '#2563eb', // Blue 600
-    secondaryColor: '#60a5fa', // Blue 400
-    gradientFrom: 'rgba(37, 99, 235, 0.18)',
-    gradientTo: 'rgba(37, 99, 235, 0.0)',
+    primaryColor: '#2563eb',
+    secondaryColor: '#60a5fa',
   },
   {
     id: 'emerald',
     name: 'Esmeralda Crecimiento',
     desc: 'Enfoque de métricas de crecimiento y conversión',
-    primaryColor: '#059669', // Emerald 600
-    secondaryColor: '#34d399', // Emerald 400
-    gradientFrom: 'rgba(5, 150, 105, 0.18)',
-    gradientTo: 'rgba(5, 150, 105, 0.0)',
+    primaryColor: '#059669',
+    secondaryColor: '#34d399',
   },
   {
     id: 'slate',
     name: 'Pizarra & Acero',
     desc: 'Tonos fríos y descansados para lectura prolongada',
-    primaryColor: '#334155', // Slate 700
-    secondaryColor: '#94a3b8', // Slate 400
-    gradientFrom: 'rgba(51, 65, 85, 0.15)',
-    gradientTo: 'rgba(51, 65, 85, 0.0)',
+    primaryColor: '#334155',
+    secondaryColor: '#94a3b8',
   },
 ]
 
@@ -120,7 +106,10 @@ export default function UmamiAnalyticsSuite() {
   const [chartType, setChartType] = useState<ChartType>('area')
   const [activeTabDetail, setActiveTabDetail] = useState<ActiveTabDetail>('pages')
   const [searchQuery, setSearchQuery] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Segmentación por Artículo Específico (null = vista global del blog)
+  const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null)
 
   // Selector de Temas Visuales
   const [selectedThemeId, setSelectedThemeId] = useState<string>(() => {
@@ -132,56 +121,59 @@ export default function UmamiAnalyticsSuite() {
   // Lista de eventos de telemetría reales (de Supabase o buffer local)
   const [events, setEvents] = useState<RawTelemetryEvent[]>([])
 
-  // Carga de telemetría real
-  useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
+  // Función de carga de telemetría real (reutilizable para polling y refresco manual)
+  const loadTelemetry = useCallback(async (isSilent = false) => {
+    if (!isSilent) setIsRefreshing(true)
 
-    async function loadTelemetry() {
-      let realEvents: RawTelemetryEvent[] = []
+    let realEvents: RawTelemetryEvent[] = []
 
-      // 1. Intentar cargar desde Supabase si la tabla existe
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('blog_pageviews')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(2000)
+    // 1. Intentar cargar desde Supabase si está disponible
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('blog_pageviews')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(2500)
 
-          if (!error && data && Array.isArray(data)) {
-            realEvents = data as RawTelemetryEvent[]
-          }
-        } catch {
-          // Si no existe la tabla o hay error, continua al fallback
+        if (!error && data && Array.isArray(data)) {
+          realEvents = data as RawTelemetryEvent[]
         }
-      }
-
-      // 2. Si Supabase no tiene datos o aún no está creada la tabla, consultar buffer local
-      if (realEvents.length === 0 && typeof window !== 'undefined') {
-        try {
-          const saved = localStorage.getItem('qaway_blog_real_events_v1')
-          if (saved) {
-            const parsed = JSON.parse(saved)
-            if (Array.isArray(parsed)) realEvents = parsed
-          }
-        } catch {}
-      }
-
-      if (isMounted) {
-        setEvents(realEvents)
-        setIsLoading(false)
+      } catch {
+        // Fallo silencioso no bloqueante
       }
     }
 
-    loadTelemetry()
+    // 2. Si Supabase no tiene datos o aún no existe la tabla, consultar buffer local
+    if (realEvents.length === 0 && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('qaway_blog_real_events_v1')
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          if (Array.isArray(parsed)) realEvents = parsed
+        }
+      } catch {}
+    }
 
-    return () => {
-      isMounted = false
+    setEvents(realEvents)
+    if (!isSilent) {
+      setTimeout(() => setIsRefreshing(false), 350)
     }
   }, [])
 
-  // Cerrar menú al hacer clic fuera
+  // Carga inicial y sondeo periódico cada 15 segundos (Live Polling)
+  useEffect(() => {
+    loadTelemetry(false)
+
+    // Polling silencioso en segundo plano cada 15 segundos
+    const pollInterval = setInterval(() => {
+      loadTelemetry(true)
+    }, 15000)
+
+    return () => clearInterval(pollInterval)
+  }, [loadTelemetry])
+
+  // Cerrar menú de temas al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
@@ -194,7 +186,7 @@ export default function UmamiAnalyticsSuite() {
 
   // Tema activo
   const activeTheme = useMemo(() => {
-    return ANALYTICS_THEMES.find(t => t.id === selectedThemeId) || ANALYTICS_THEMES[1] // Brand default
+    return ANALYTICS_THEMES.find(t => t.id === selectedThemeId) || ANALYTICS_THEMES[0]
   }, [selectedThemeId])
 
   const handleSelectTheme = (themeId: string) => {
@@ -203,8 +195,14 @@ export default function UmamiAnalyticsSuite() {
     setIsThemeMenuOpen(false)
   }
 
-  // Filtrado temporal estricto de eventos reales
-  const filteredEvents = useMemo(() => {
+  // Artículo actualmente seleccionado para segmentación (si existe)
+  const selectedArticle = useMemo(() => {
+    if (!selectedArticleSlug) return null
+    return posts.find(p => p.slug === selectedArticleSlug || p.id === selectedArticleSlug) || null
+  }, [selectedArticleSlug, posts])
+
+  // 1. Filtrado temporal estricto
+  const timeFilteredEvents = useMemo(() => {
     if (events.length === 0) return []
     const now = Date.now()
 
@@ -222,41 +220,56 @@ export default function UmamiAnalyticsSuite() {
     })
   }, [events, timeRange])
 
-  // Cálculo de Métricas Reales (CERO DATOS SINTÉTICOS)
-  const metrics = useMemo(() => {
-    const totalViews = filteredEvents.length
-
-    // Conteo estricto de identificadores únicos de navegador
-    const uniqueVisitorSet = new Set<string>()
-    filteredEvents.forEach(ev => {
-      if (ev.visitor_id) uniqueVisitorSet.add(ev.visitor_id)
+  // 2. Filtrado por artículo (Segmentación)
+  const scopedEvents = useMemo(() => {
+    if (!selectedArticleSlug) return timeFilteredEvents
+    return timeFilteredEvents.filter(ev => {
+      const matchSlug = ev.slug === selectedArticleSlug
+      const matchId = selectedArticle && (ev.slug === selectedArticle.id || ev.slug === selectedArticle.slug)
+      return matchSlug || matchId
     })
-    const uniqueVisitors = uniqueVisitorSet.size
+  }, [timeFilteredEvents, selectedArticleSlug, selectedArticle])
 
-    // Visitas recientes en las últimas 24 horas (sobre todo el histórico)
+  // 3. Cálculo de Métricas (100% Real, Cero Datos Sintéticos)
+  const metrics = useMemo(() => {
+    const totalViews = scopedEvents.length
+
+    // Conteo de identificadores únicos (con fallback a session_id para eventos previos sin visitor_id)
+    const uniqueVisitorSet = new Set<string>()
+    scopedEvents.forEach(ev => {
+      const vid = ev.visitor_id || ev.session_id || 'vis_local'
+      uniqueVisitorSet.add(vid)
+    })
+    const uniqueVisitors = totalViews > 0 ? Math.max(1, uniqueVisitorSet.size) : 0
+
+    // Visitas recientes en las últimas 24 horas dentro del ámbito actual
     const now = Date.now()
     const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000
-    const recentViews24h = events.filter(ev => {
+    const recentViews24h = scopedEvents.filter(ev => {
       if (!ev.created_at) return false
       return new Date(ev.created_at).getTime() >= twentyFourHoursAgo
     }).length
 
-    // Mapeo por artículo
-    const postViewsMap: Record<string, number> = {}
-    const postVisitorsMap: Record<string, Set<string>> = {}
+    // Mapeo general de vistas por artículo (usando eventos de todo el blog para el desglose)
+    const globalViewsMap: Record<string, number> = {}
+    const globalVisitorsMap: Record<string, Set<string>> = {}
 
-    filteredEvents.forEach(ev => {
+    timeFilteredEvents.forEach(ev => {
       const s = ev.slug || 'articulo'
-      postViewsMap[s] = (postViewsMap[s] || 0) + 1
-      if (!postVisitorsMap[s]) postVisitorsMap[s] = new Set()
-      if (ev.visitor_id) postVisitorsMap[s].add(ev.visitor_id)
+      globalViewsMap[s] = (globalViewsMap[s] || 0) + 1
+      if (!globalVisitorsMap[s]) globalVisitorsMap[s] = new Set()
+      const vid = ev.visitor_id || ev.session_id || 'vis_local'
+      globalVisitorsMap[s].add(vid)
     })
 
-    // Lista de artículos con métricas reales
+    const globalTotalViews = timeFilteredEvents.length
+
+    // Desglose de rendimiento de artículos
     const articlesPerformance = posts.map(post => {
-      const views = postViewsMap[post.slug] || postViewsMap[post.id] || 0
-      const visitors = (postVisitorsMap[post.slug] || postVisitorsMap[post.id])?.size || 0
-      const percent = totalViews > 0 ? Math.round((views / totalViews) * 100) : 0
+      const views = globalViewsMap[post.slug] || globalViewsMap[post.id] || 0
+      const visitors = (globalVisitorsMap[post.slug] || globalVisitorsMap[post.id])?.size || 0
+      const percent = globalTotalViews > 0 ? Math.round((views / globalTotalViews) * 100) : 0
+      const isSelected = selectedArticleSlug === post.slug || selectedArticleSlug === post.id
       return {
         id: post.id,
         title: post.title,
@@ -266,18 +279,19 @@ export default function UmamiAnalyticsSuite() {
         views,
         visitors,
         percent,
+        isSelected,
       }
     }).sort((a, b) => b.views - a.views)
 
     const postsWithTrafficCount = articlesPerformance.filter(a => a.views > 0).length
 
-    // Agrupación de Referrers (Canales de tráfico)
+    // Agrupación de Referrers (Canales de adquisición del ámbito activo)
     const referrerMap: Record<string, number> = {}
     const deviceMap: Record<string, number> = {}
     const browserMap: Record<string, number> = {}
     const osMap: Record<string, number> = {}
 
-    filteredEvents.forEach(ev => {
+    scopedEvents.forEach(ev => {
       const ref = ev.referrer || 'Directo / Marcadores'
       referrerMap[ref] = (referrerMap[ref] || 0) + 1
 
@@ -305,12 +319,10 @@ export default function UmamiAnalyticsSuite() {
     const browsers = formatBreakdown(browserMap)
     const osList = formatBreakdown(osMap)
 
-    // Construcción de la Serie Temporal Real para Recharts
-    // Genera buckets según el rango de fechas seleccionado
+    // Serie Temporal Real para Recharts
     const timeSeriesData: { date: string; visitas: number; visitantes: number }[] = []
 
     if (timeRange === '24h') {
-      // 24 intervalos de 1 hora
       const buckets: Record<string, { views: number; visitors: Set<string> }> = {}
       for (let i = 23; i >= 0; i--) {
         const d = new Date(now - i * 60 * 60 * 1000)
@@ -318,13 +330,14 @@ export default function UmamiAnalyticsSuite() {
         buckets[key] = { views: 0, visitors: new Set() }
       }
 
-      filteredEvents.forEach(ev => {
+      scopedEvents.forEach(ev => {
         if (!ev.created_at) return
         const d = new Date(ev.created_at)
         const key = `${String(d.getHours()).padStart(2, '0')}:00`
         if (buckets[key]) {
           buckets[key].views += 1
-          if (ev.visitor_id) buckets[key].visitors.add(ev.visitor_id)
+          const vid = ev.visitor_id || ev.session_id || 'vis_local'
+          buckets[key].visitors.add(vid)
         }
       })
 
@@ -336,7 +349,6 @@ export default function UmamiAnalyticsSuite() {
         })
       })
     } else {
-      // Días (7d, 30d, 90d o all)
       const daysCount = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 30
       const buckets: Record<string, { views: number; visitors: Set<string> }> = {}
 
@@ -346,13 +358,14 @@ export default function UmamiAnalyticsSuite() {
         buckets[key] = { views: 0, visitors: new Set() }
       }
 
-      filteredEvents.forEach(ev => {
+      scopedEvents.forEach(ev => {
         if (!ev.created_at) return
         const d = new Date(ev.created_at)
         const key = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
         if (buckets[key]) {
           buckets[key].views += 1
-          if (ev.visitor_id) buckets[key].visitors.add(ev.visitor_id)
+          const vid = ev.visitor_id || ev.session_id || 'vis_local'
+          buckets[key].visitors.add(vid)
         }
       })
 
@@ -377,7 +390,7 @@ export default function UmamiAnalyticsSuite() {
       osList,
       timeSeriesData,
     }
-  }, [filteredEvents, events, posts, timeRange])
+  }, [scopedEvents, timeFilteredEvents, posts, timeRange, selectedArticleSlug, selectedArticle])
 
   // Exportar reporte real en CSV
   const handleExportCsv = () => {
@@ -395,13 +408,13 @@ export default function UmamiAnalyticsSuite() {
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement('a')
     link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `qaway_telemetria_blog_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`)
+    link.setAttribute('download', `qaway_telemetria_${selectedArticleSlug ? `post_${selectedArticleSlug}` : 'blog'}_${timeRange}_${new Date().toISOString().slice(0, 10)}.csv`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
 
-  // Filtrar artículos en la pestaña de páginas por búsqueda
+  // Filtrar artículos por búsqueda en la pestaña
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return metrics.articlesPerformance
     const q = searchQuery.toLowerCase()
@@ -409,6 +422,15 @@ export default function UmamiAnalyticsSuite() {
       a => a.title.toLowerCase().includes(q) || a.slug.toLowerCase().includes(q) || a.category.toLowerCase().includes(q)
     )
   }, [metrics.articlesPerformance, searchQuery])
+
+  // Toggle de selección de artículo
+  const handleToggleArticleFilter = (slug: string) => {
+    if (selectedArticleSlug === slug) {
+      setSelectedArticleSlug(null) // Quitar filtro
+    } else {
+      setSelectedArticleSlug(slug) // Filtrar por este artículo
+    }
+  }
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto font-sans">
@@ -420,20 +442,32 @@ export default function UmamiAnalyticsSuite() {
               Analítica Web & Tráfico Editorial
             </h2>
 
-            {/* Estado de la Conexión de Telemetría */}
-            <div
-              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono border ${
-                metrics.totalViews > 0
-                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700'
-                  : 'bg-surface-muted border-line text-muted'
-              }`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  metrics.totalViews > 0 ? 'bg-emerald-500 animate-ping' : 'bg-muted-light'
+            {/* Badge de Telemetría en Vivo con Botón de Refresco Manual */}
+            <div className="flex items-center gap-1.5">
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono border ${
+                  metrics.totalViews > 0
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700'
+                    : 'bg-surface-muted border-line text-muted'
                 }`}
-              />
-              <span>{metrics.totalViews > 0 ? 'Telemetría en Vivo' : 'Esperando Lecturas'}</span>
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    metrics.totalViews > 0 ? 'bg-emerald-500 animate-ping' : 'bg-muted-light'
+                  }`}
+                />
+                <span>{metrics.totalViews > 0 ? 'Telemetría en Vivo' : 'Esperando Lecturas'}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => loadTelemetry(false)}
+                disabled={isRefreshing}
+                className="p-1.5 rounded-lg border border-line bg-white hover:bg-surface-muted text-muted hover:text-primary transition-all cursor-pointer shadow-2xs"
+                title="Actualizar datos ahora (Sondeo automático activo cada 15s)"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-accent' : ''}`} />
+              </button>
             </div>
           </div>
           <p className="text-xs sm:text-sm text-muted mt-1">
@@ -562,13 +596,46 @@ export default function UmamiAnalyticsSuite() {
         </div>
       </div>
 
-      {/* 2. Banner de 4 Tarjetas KPI Reales (Cero porcentajes o números inventados) */}
+      {/* Banner Contextual de Segmentación por Artículo */}
+      {selectedArticle && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="p-1.5 bg-amber-500 text-white rounded-lg shrink-0">
+              <Filter className="w-4 h-4" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                  Métricas Segmentadas de Artículo
+                </span>
+                <span className="text-[10px] bg-white px-2 py-0.5 rounded-full border border-amber-500/20 font-mono text-amber-800 font-bold">
+                  {metrics.totalViews} vistas
+                </span>
+              </div>
+              <h3 className="text-sm font-extrabold text-primary truncate max-w-2xl mt-0.5">
+                {selectedArticle.title}
+              </h3>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSelectedArticleSlug(null)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-amber-50 border border-amber-500/30 text-amber-900 rounded-xl text-xs font-bold shadow-2xs transition-all cursor-pointer shrink-0"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Ver todo el blog</span>
+          </button>
+        </div>
+      )}
+
+      {/* 2. Banner de 4 Tarjetas KPI Reales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Vistas Totales */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <Eye className="w-4 h-4 text-muted" /> Vistas Totales
+              <Eye className="w-4 h-4 text-muted" /> Vistas {selectedArticle ? 'del Artículo' : 'Totales'}
             </span>
             <span
               className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded ${
@@ -584,11 +651,11 @@ export default function UmamiAnalyticsSuite() {
             {metrics.totalViews.toLocaleString()}
           </div>
           <p className="text-[11px] text-muted">
-            En {posts.length} artículos del blog
+            {selectedArticle ? `En /blog/${selectedArticle.slug}` : `En ${posts.length} artículos del blog`}
           </p>
         </div>
 
-        {/* KPI 2: Navegadores Únicos (visitor_id anónimo) */}
+        {/* KPI 2: Navegadores Únicos */}
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
@@ -630,17 +697,19 @@ export default function UmamiAnalyticsSuite() {
         <div className="bg-white p-5 rounded-2xl border border-line shadow-xs space-y-1.5 hover:border-line/80 transition-all">
           <div className="flex items-center justify-between text-xs font-semibold text-muted uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-muted" /> Con Tráfico
+              <FileText className="w-4 h-4 text-muted" /> {selectedArticle ? 'Participación' : 'Con Tráfico'}
             </span>
             <span className="text-[11px] font-mono font-bold text-primary bg-surface-muted px-2 py-0.5 rounded border border-line">
-              {posts.length > 0 ? `${Math.round((metrics.postsWithTrafficCount / posts.length) * 100)}%` : '0%'}
+              {selectedArticle ? 'Segmentado' : `${posts.length > 0 ? `${Math.round((metrics.postsWithTrafficCount / posts.length) * 100)}%` : '0%'}`}
             </span>
           </div>
           <div className="font-display font-extrabold text-2xl lg:text-3xl text-primary tracking-tight">
-            {metrics.postsWithTrafficCount} <span className="text-sm font-normal text-muted">/ {posts.length}</span>
+            {selectedArticle
+              ? `${metrics.articlesPerformance.find(a => a.id === selectedArticle.id || a.slug === selectedArticle.slug)?.percent || 0}%`
+              : `${metrics.postsWithTrafficCount} / ${posts.length}`}
           </div>
           <p className="text-[11px] text-muted">
-            Artículos con al menos 1 visita real
+            {selectedArticle ? 'Del tráfico total del blog' : 'Artículos con al menos 1 visita real'}
           </p>
         </div>
       </div>
@@ -650,7 +719,7 @@ export default function UmamiAnalyticsSuite() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="font-display font-bold text-base text-primary">
-              Tendencia Temporal de Tráfico
+              {selectedArticle ? `Tendencia de Lectura: ${selectedArticle.title}` : 'Tendencia Temporal de Tráfico'}
             </h3>
             <p className="text-xs text-muted">
               Páginas vistas y navegadores únicos registrados en el período ({timeRange})
@@ -761,57 +830,87 @@ export default function UmamiAnalyticsSuite() {
 
         {/* Contenido de la Dimensión Seleccionada */}
         <div className="p-5 lg:p-6">
-          {/* Dimensión 1: Artículos & URLs */}
+          {/* Dimensión 1: Artículos & URLs con Segmentación Interactiva al Clic */}
           {activeTabDetail === 'pages' && (
             <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-muted pb-1">
+                <span>Haz clic en cualquier artículo para segmentar el panel completo:</span>
+                {selectedArticleSlug && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArticleSlug(null)}
+                    className="text-accent font-bold hover:underline"
+                  >
+                    Restablecer a todo el blog
+                  </button>
+                )}
+              </div>
+
               {filteredArticles.length === 0 ? (
                 <div className="py-12 text-center text-xs text-muted">
                   No hay artículos que coincidan con la búsqueda.
                 </div>
               ) : (
                 <div className="divide-y divide-line">
-                  {filteredArticles.map(art => (
-                    <div
-                      key={art.id}
-                      className="py-3 flex items-center justify-between gap-4 hover:bg-surface-subtle px-2 rounded-xl transition-colors"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-primary truncate max-w-md">
-                            {art.title}
-                          </span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-muted text-muted font-medium border border-line shrink-0">
-                            {art.category}
-                          </span>
-                        </div>
-                        <div className="text-[11px] font-mono text-muted truncate mt-0.5">
-                          /blog/{art.slug}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-6 shrink-0">
-                        {/* Barra de Proporción */}
-                        <div className="hidden sm:block w-28 bg-surface-muted h-2 rounded-full overflow-hidden border border-line">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${art.percent}%`,
-                              backgroundColor: activeTheme.primaryColor,
-                            }}
-                          />
-                        </div>
-
-                        <div className="text-right min-w-[70px]">
-                          <div className="text-xs font-bold font-mono text-primary">
-                            {art.views} <span className="text-[10px] font-normal text-muted">vistas</span>
+                  {filteredArticles.map(art => {
+                    const isSelected = selectedArticleSlug === art.slug || selectedArticleSlug === art.id
+                    return (
+                      <div
+                        key={art.id}
+                        onClick={() => handleToggleArticleFilter(art.slug)}
+                        className={`py-3 flex items-center justify-between gap-4 px-3 rounded-xl transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-amber-500/10 border border-amber-500/30 shadow-xs'
+                            : 'hover:bg-surface-subtle'
+                        }`}
+                        title={isSelected ? 'Clic para quitar filtro' : 'Clic para ver métricas exclusivas de este artículo'}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            {isSelected && (
+                              <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
+                            )}
+                            <span className={`text-xs font-bold truncate max-w-md ${isSelected ? 'text-amber-900' : 'text-primary'}`}>
+                              {art.title}
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-muted text-muted font-medium border border-line shrink-0">
+                              {art.category}
+                            </span>
+                            {isSelected && (
+                              <span className="text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.2 rounded shrink-0">
+                                Filtrado
+                              </span>
+                            )}
                           </div>
-                          <div className="text-[10px] text-muted font-mono">
-                            {art.visitors} nav. ({art.percent}%)
+                          <div className="text-[11px] font-mono text-muted truncate mt-0.5">
+                            /blog/{art.slug}
                           </div>
                         </div>
+
+                        <div className="flex items-center gap-6 shrink-0">
+                          {/* Barra de Proporción */}
+                          <div className="hidden sm:block w-28 bg-surface-muted h-2 rounded-full overflow-hidden border border-line">
+                            <div
+                              className="h-full rounded-full transition-all duration-500"
+                              style={{
+                                width: `${art.percent}%`,
+                                backgroundColor: isSelected ? '#f59e0b' : activeTheme.primaryColor,
+                              }}
+                            />
+                          </div>
+
+                          <div className="text-right min-w-[70px]">
+                            <div className="text-xs font-bold font-mono text-primary">
+                              {art.views} <span className="text-[10px] font-normal text-muted">vistas</span>
+                            </div>
+                            <div className="text-[10px] text-muted font-mono">
+                              {art.visitors} nav. ({art.percent}%)
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -823,7 +922,9 @@ export default function UmamiAnalyticsSuite() {
               {metrics.referrers.length === 0 ? (
                 <div className="py-12 text-center text-xs text-muted space-y-1">
                   <Globe className="w-6 h-6 text-muted mx-auto mb-2 opacity-50" />
-                  <p className="font-semibold text-primary">Aún no hay fuentes de tráfico registradas</p>
+                  <p className="font-semibold text-primary">
+                    {selectedArticle ? `Aún no hay fuentes registradas para "${selectedArticle.title}"` : 'Aún no hay fuentes de tráfico registradas'}
+                  </p>
                   <p className="text-[11px] text-muted">
                     Los canales (Google, Facebook Ads, Directo, LinkedIn) aparecerán cuando los lectores ingresen al blog.
                   </p>
