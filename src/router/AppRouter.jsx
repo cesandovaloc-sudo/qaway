@@ -43,7 +43,7 @@ const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descarga
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
-const PagosHubPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosHubPage'))
+const PagosAppPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosAppPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 
 // Recursos y Landings secundarias
@@ -269,6 +269,14 @@ export default function AppRouter() {
           element={<AcademyRealAppPage />}
         />
         <Route
+          path="hub/pagos/*"
+          element={<PagosAppPage />}
+        />
+        <Route
+          path="hub/pagos"
+          element={<PagosAppPage />}
+        />
+        <Route
           path="hub/agenda/*"
           element={<AgendaAppPage />}
         />
@@ -282,14 +290,6 @@ export default function AppRouter() {
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
-          />
-          <Route
-            path="hub/pagos"
-            element={renderRoute('hub', <PagosHubPage />)}
-          />
-          <Route
-            path="hub/pagos/*"
-            element={renderRoute('hub', <PagosHubPage />)}
           />
           <Route
             path="hub/creador-contenido"
