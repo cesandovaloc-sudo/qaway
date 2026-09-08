@@ -59,6 +59,15 @@ const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
 const RutasPage = lazy(() => import('@/pages/12-rutas/RutasPage.jsx'))
 
+// Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
+const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
+const DiagnosticoSplitStudio = lazy(() => import('@/pages/10-briefs/1- Formularios/1-DiagnosticoSplitStudio.jsx'))
+const AsistenteConversacionalHub = lazy(() => import('@/pages/10-briefs/1- Formularios/2-AsistenteConversacionalHub.jsx'))
+const TypeformFluidExperience = lazy(() => import('@/pages/10-briefs/1- Formularios/3-TypeformFluidExperience.jsx'))
+const TrelloInteractiveBoardForm = lazy(() => import('@/pages/10-briefs/1- Formularios/4-TrelloInteractiveBoardForm.jsx'))
+const NotionInteractiveWorkspaceForm = lazy(() => import('@/pages/10-briefs/1- Formularios/5-NotionInteractiveWorkspaceForm.jsx'))
+const AirbnbWizardCardDeck = lazy(() => import('@/pages/10-briefs/1- Formularios/6-AirbnbWizardCardDeck.jsx'))
+
 // Proyectos (importación estática directa para máxima estabilidad y cero riesgo de carga diferida)
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
 import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
@@ -321,6 +330,14 @@ export default function AppRouter() {
           </Route>
 
           <Route path="brief" element={renderRoute('brief', <BriefBrandingPage />)} />
+          <Route path="formularios" element={<FormulariosShowcasePage />} />
+          <Route path="formularios/diagnostico-split" element={<DiagnosticoSplitStudio />} />
+          <Route path="formularios/asistente-conversacional" element={<AsistenteConversacionalHub />} />
+          <Route path="formularios/typeform-fluid" element={<TypeformFluidExperience />} />
+          <Route path="formularios/trello-board" element={<TrelloInteractiveBoardForm />} />
+          <Route path="formularios/notion-workspace" element={<NotionInteractiveWorkspaceForm />} />
+          <Route path="formularios/airbnb-card-deck" element={<AirbnbWizardCardDeck />} />
+          <Route path="diagnostico" element={<DiagnosticoSplitStudio />} />
           <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
