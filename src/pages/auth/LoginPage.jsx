@@ -250,6 +250,7 @@ export default function LoginPage() {
                   Continuar con Google
                 </button>
 
+                {/* Botón Microsoft OAuth oculto temporalmente
                 <button
                   onClick={() => handleOAuth('azure')}
                   disabled={!!oauthLoading}
@@ -268,6 +269,7 @@ export default function LoginPage() {
                   )}
                   Continuar con Microsoft
                 </button>
+                */}
               </div>
 
               {/* Divisor */}

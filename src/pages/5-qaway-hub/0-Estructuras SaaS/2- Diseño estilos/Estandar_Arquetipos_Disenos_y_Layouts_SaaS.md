@@ -287,3 +287,120 @@ Todo login de aplicaciones Qaway Lab debe incluir estas funcionalidades obligato
 ### 9.3. Referencia de Implementación
 * Archivo de implementación: `src/pages/auth/LoginPage.jsx`
 * Proveedor de Auth: Supabase Auth (con soporte OAuth Google/Microsoft configurado en el proyecto Supabase)
+
+---
+
+## 10. Anatomía Canónica del Menú de Perfil y Cuenta (Profile & Account Dropdown)
+
+Inspirado en el estándar de oro de **Atlassian / Trello**, el menú de perfil desplegable al hacer clic en el avatar del usuario debe organizarse en **6 bloques lógicos obligatorios**:
+
+### 10.1. Diagrama de Arquitectura del Menú
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ 1. IDENTIDAD DE CUENTA                                      │
+│    [Avatar CO]  Carlos Enrique Sandoval Ocaña               │
+│                 ce.sandovaloc@gmail.com                     │
+│    • Cambiar cuentas (Soporte multi-cuenta)                 │
+│    • Gestionar cuenta [↗] (Seguridad global / 2FA)          │
+├─────────────────────────────────────────────────────────────┤
+│ 2. PREFERENCIAS DEL PRODUCTO Y CONFIGURACIÓN                │
+│    • Perfil y visibilidad pública                           │
+│    • Actividad (Historial propio y registro de cambios)     │
+│    • Mis elementos asignados (Tareas / Proyectos / Leads)   │
+│    • Ajustes locales de la herramienta                      │
+│    • Configuración de IA (Copilot / Automatizaciones)       │
+│    • Laboratorios [Badge Beta] (Funciones experimentales)   │
+├─────────────────────────────────────────────────────────────┤
+│ 3. CONMUTADOR DE TEMA VISUAL (Submenú con Mini-Previews)    │
+│    • Tema ▸  ┌──────────────────────────────────────────┐   │
+│              │ (•) [Miniatura UI] Luz                   │   │
+│              │ ( ) [Miniatura UI] Oscuro                │   │
+│              │ ( ) [Miniatura UI] Equivalente al sistema│   │
+│              └──────────────────────────────────────────┘   │
+├─────────────────────────────────────────────────────────────┤
+│ 4. ACCIÓN DE ORGANIZACIÓN / ESPACIOS                        │
+│    • [👥] Crear Espacio de trabajo                          │
+├─────────────────────────────────────────────────────────────┤
+│ 5. RECURSOS Y PRODUCTIVIDAD                                 │
+│    • Ayuda / Documentación y soporte                        │
+│    • Accesos directos de teclado (Modal de atajos / Hotkeys)│
+├─────────────────────────────────────────────────────────────┤
+│ 6. SALIDA DEL SISTEMA                                       │
+│    • Cerrar sesión (Enlace destructivo con confirmación)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 10.2. Los 6 Bloques Explicados
+
+1. **Cabecera de Identidad:**
+   * Avatar con foto o iniciales de alto contraste (`CO`) + indicador de estado activo.
+   * Nombre completo y correo electrónico corporativo visible.
+   * **Multi-cuenta ("Cambiar cuentas"):** Permite conmutar entre diferentes perfiles autorizados sin tener que salir y volver a escribir credenciales.
+   * **Gestionar cuenta [↗]:** Enlace externo para administrar contraseñas, doble factor (2FA) y facturación global.
+
+2. **Preferencias del Producto & Configuración:**
+   * **Perfil y visibilidad:** Controla cómo otros miembros del equipo ven tu usuario.
+   * **Actividad:** Log de acciones recientes realizadas por el usuario.
+   * **Configuración de IA:** Panel de control para llaves de API de modelos, tono del asistente y permisos de automatizaciones.
+   * **Laboratorios [Badge Beta]:** Interruptor (*Feature Flags*) para probar características en fase experimental.
+
+3. **Conmutador de Tema con Mini-Ilustraciones:**
+   * Submenú desplegable en cascada (*Flyout*) que muestra miniaturas visuales de la interfaz en los 3 modos: **Luz**, **Oscuro** y **Equivalente al sistema**.
+
+4. **Acción de Organización:**
+   * Botón directo para crear una nueva organización, cliente o espacio de trabajo compartido.
+
+5. **Recursos de Productividad:**
+   * Centro de ayuda y soporte.
+   * **Accesos directos de teclado:** Disparador del modal interactivo con la lista de atajos (`Ctrl+K`, `Shift+?`, etc.).
+
+6. **Salida del Sistema:**
+   * Botón inferior aislado con divisor, tipografía en tono neutro o destructivo (`text-red-400 hover:bg-red-500/10`), que limpia tokens de sesión y redirige al login.
+
+---
+
+## 11. Orquestación del Ecosistema: App Switcher ("Waffle"), Retorno a Web y Espacios de Trabajo
+
+Para que el usuario pueda transitar libremente entre el sitio público de Qaway Lab y las diferentes aplicaciones del Hub sin perder el estado de su trabajo, se establece el siguiente estándar de orquestación:
+
+### 11.1. El Lanzador de Aplicaciones Híbrido (App Switcher de Alta Usabilidad)
+* **El estándar de la industria (Waffle Icon):** El icono de 9 puntos (`[:::]`) es el estándar global en Google Workspace, Microsoft 365 y Atlassian.
+* **Solución de descubribilidad de Qaway Lab:** Para no depender exclusivamente del icono de 9 puntos (que puede ser desconocido para usuarios novatos), la cabecera combina:
+  1. **Icono Waffle con texto / tooltip explícito:** `[::: Apps]` o `[::: Ecosistema]`.
+  2. **Logo Qaway Lab como enlace de retorno:** Clic en el logo permite volver a la web pública (`qaway.pe`) o abrirla en pestaña nueva.
+  3. **Migas de Pan conmutables:** `Qaway Lab / Hub Central / [App Activa]`, permitiendo retroceder al nivel anterior con 1 clic.
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ [::: Apps] [Qaway Lab] / [Hub Central] / Studio Blog   ... [🔍] [👤 Perfil] │
+└──────┬───────────┬──────────────────────────────────────────────────────────┘
+       │           │
+       │           └──► Retorno a Web Pública o Hub General
+       │
+       └──► Menú Flotante del Ecosistema:
+            ┌──────────────────────────────────────────┐
+            │ ECOSISTEMA QAWAY LAB                     │
+            │ • 🏠 Web Pública (qaway.pe) [↗]          │
+            │ • 🗂 Hub Central de Aplicaciones        │
+            ├──────────────────────────────────────────┤
+            │ APLICACIONES ACTIVAS                     │
+            │ • ✍️ Editor de Blog                      │
+            │ • 📊 CRM Comercial                       │
+            │ • 🚀 Gestor de Proyectos                 │
+            │ • 🎬 Content Studio                      │
+            │ • 🎓 Academy                             │
+            │ • 💳 Pagos & Facturación                 │
+            └──────────────────────────────────────────┘
+```
+
+### 11.2. Módulo de Plantillas Interactivas (Interactive Template Hero)
+* En lugar de banners estáticos, la portada de cada herramienta puede incorporar un carrusel o fila de **plantillas listas para usar** con mini-previews visuales (ej.: *Plantilla Kanban, Plantilla Scrum, Plantilla Calendario Editorial*).
+* Permite al usuario clonar una estructura base en 1 segundo.
+* Incluye botón de descarte (`[x]`) para no saturar a usuarios avanzados.
+
+### 11.3. Grid de Espacios de Trabajo con Quick-Create Card Integrada
+* Las tarjetas de proyectos o tableros utilizan portadas con degradados visuales o miniaturas de contenido.
+* **Tarjeta de creación en el mismo flujo:** El botón **`[ + Crear nuevo... ]`** se renderiza como la última tarjeta de la cuadrícula con un borde interactivo destacado (`border-dashed border-2 hover:border-solid`), garantizando fricción cero al añadir trabajo.
+
+
