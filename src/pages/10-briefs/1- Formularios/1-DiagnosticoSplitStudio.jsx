@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Clock, Award, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2,
-  Sparkles, RotateCcw, Send, ShieldCheck, HelpCircle, BarChart3,
-  TrendingUp, Layers, Check, Zap, HeartHandshake, FileText
+  Sparkles, RotateCcw, Send, ShieldCheck, TrendingUp, Check,
+  ChevronRight, Compass, Target
 } from 'lucide-react'
 
 const PILLARS = {
@@ -21,10 +21,10 @@ const QUESTIONS = [
     question: '¿Tu oferta se entiende fácilmente?',
     subtitle: 'Una persona que no te conoce debería poder entender en pocos segundos qué ofreces, para quién es y qué problema resuelve.',
     options: [
-      { text: 'Sí, se entiende claramente.', score: 10, note: 'Excelente claridad inicial.' },
-      { text: 'Se entiende, pero a veces genera dudas.', score: 6, note: 'Requiere afinación de mensaje.' },
-      { text: 'No del todo, suele generar muchas preguntas.', score: 3, note: 'Fuga de prospectos por confusión.' },
-      { text: 'No estoy seguro(a).', score: 1, note: 'Oportunidad de validación con clientes.' },
+      { text: 'Sí, se entiende claramente.', score: 10 },
+      { text: 'Se entiende, pero a veces genera dudas.', score: 6 },
+      { text: 'No del todo, suele generar muchas preguntas.', score: 3 },
+      { text: 'No estoy seguro(a).', score: 1 },
     ],
     tip: 'Piensa en alguien que no te conoce. ¿Comprendería tu oferta solo viendo tu web o redes sociales en 5 segundos?',
   },
@@ -34,10 +34,10 @@ const QUESTIONS = [
     question: '¿Tienes definido el perfil exacto de tu cliente ideal (ICP)?',
     subtitle: 'Saber a quién le hablas y a quién descartar te permite invertir tu tiempo solo en prospectos que valoran y pagan tus servicios.',
     options: [
-      { text: 'Sí, tenemos perfiles claros y sabemos a quién decir que no.', score: 10, note: 'Foco comercial definido.' },
-      { text: 'Tenemos una idea general, pero atendemos a casi cualquiera.', score: 6, note: 'Dispersión de esfuerzos comerciales.' },
-      { text: 'Nos cuesta filtrar y solemos cotizar a clientes poco rentables.', score: 3, note: 'Desgaste en propuestas no cerradas.' },
-      { text: 'Aún no lo tenemos documentado.', score: 1, note: 'Paso prioritario para estructurar.' },
+      { text: 'Sí, tenemos perfiles documentados y sabemos a quién decir que no.', score: 10 },
+      { text: 'Tenemos una idea general, pero atendemos a casi cualquier cliente.', score: 6 },
+      { text: 'Nos cuesta filtrar y solemos cotizar a clientes poco rentables.', score: 3 },
+      { text: 'Aún no lo tenemos documentado.', score: 1 },
     ],
     tip: 'Cuando le vendes a todos, no le hablas a nadie con fuerza. Especializar tu mensaje atrae clientes de mayor presupuesto.',
   },
@@ -47,10 +47,10 @@ const QUESTIONS = [
     question: '¿Tu canal digital principal está diseñado para convertir?',
     subtitle: 'Tu sitio web o landing page debe funcionar como un asesor comercial 24/7 que educa, califica y guía al visitante a contactar.',
     options: [
-      { text: 'Sí, contamos con una web moderna que recibe y califica prospectos.', score: 10, note: 'Activo digital productivo.' },
-      { text: 'Tenemos web, pero es más informativa y genera pocas consultas.', score: 6, note: 'Web estática sin embudo de conversión.' },
-      { text: 'Solo dependemos de redes sociales y mensajes directos por chat.', score: 3, note: 'Dependencia de algoritmos externos.' },
-      { text: 'No contamos con presencia web estructurada actualmente.', score: 0, note: 'Falta de canal propio oficial.' },
+      { text: 'Sí, contamos con una web moderna que recibe y califica prospectos.', score: 10 },
+      { text: 'Tenemos web, pero es más informativa y genera pocas consultas.', score: 6 },
+      { text: 'Solo dependemos de redes sociales y mensajes directos por chat.', score: 3 },
+      { text: 'No contamos con presencia web estructurada actualmente.', score: 0 },
     ],
     tip: 'Un sitio web profesional no es un folleto digital: es la sede de tu empresa donde el prospecto toma la decisión de confiar en ti.',
   },
@@ -60,10 +60,10 @@ const QUESTIONS = [
     question: '¿Tu identidad visual transmite el verdadero nivel de tus servicios?',
     subtitle: 'La percepción estética de tu marca define cuánto está dispuesto a pagar un cliente antes de pedir su primera cotización.',
     options: [
-      { text: 'Totalmente: nuestra imagen proyecta autoridad, solidez y calidad.', score: 10, note: 'Branding de alta confianza.' },
-      { text: 'Es aceptable, pero sentimos que nuestros servicios son superiores a como nos vemos.', score: 6, note: 'Brecha entre calidad real y percepción.' },
-      { text: 'Está desactualizada o armada con plantillas improvisadas.', score: 3, note: 'Riesgo de objeción por precio.' },
-      { text: 'No tenemos una línea gráfica profesional definida.', score: 0, note: 'Oportunidad de rediseño de marca.' },
+      { text: 'Totalmente: nuestra imagen proyecta autoridad, solidez y calidad.', score: 10 },
+      { text: 'Es aceptable, pero sentimos que nuestros servicios son superiores a como nos vemos.', score: 6 },
+      { text: 'Está desactualizada o armada con plantillas improvisadas.', score: 3 },
+      { text: 'No tenemos una línea gráfica profesional definida.', score: 0 },
     ],
     tip: 'Un buen diseño reduce las objeciones de precio: cuando te ves como un referente, cobrar como uno resulta natural.',
   },
@@ -73,10 +73,10 @@ const QUESTIONS = [
     question: '¿Cómo gestionas el seguimiento de las personas interesadas?',
     subtitle: 'El tiempo de respuesta y la constancia de contacto son los factores que más impactan en la tasa de cierre de ventas.',
     options: [
-      { text: 'Usamos un CRM centralizado con recordatorios y etapas claras.', score: 10, note: 'Seguimiento sistemático y medible.' },
-      { text: 'Anotamos en Excel, Notion o notas personales.', score: 6, note: 'Gestión manual vulnerable a olvidos.' },
-      { text: 'Todo queda en chats de WhatsApp y la memoria del equipo.', score: 2, note: 'Fuga constante de cotizaciones frías.' },
-      { text: 'No hacemos seguimiento estructurado a quienes no compran al instante.', score: 0, note: 'Pérdida de más del 70% de ventas potenciales.' },
+      { text: 'Usamos un CRM centralizado con recordatorios y etapas claras.', score: 10 },
+      { text: 'Anotamos en Excel, Notion o notas personales.', score: 6 },
+      { text: 'Todo queda en chats de WhatsApp y la memoria del equipo.', score: 2 },
+      { text: 'No hacemos seguimiento estructurado a quienes no compran al instante.', score: 0 },
     ],
     tip: 'Más del 80% de las ventas ocurren entre el 5to y el 12vo contacto. Sin un CRM, esos clientes simplemente se olvidan.',
   },
@@ -86,10 +86,10 @@ const QUESTIONS = [
     question: '¿Cuentas con automatizaciones en tu proceso de atención?',
     subtitle: 'Respuestas automáticas inteligentes, calificación de prospectos o agendamiento sin intervención manual.',
     options: [
-      { text: 'Sí, el prospecto agenda y califica de forma automatizada.', score: 10, note: 'Flujo sin fricción 24/7.' },
-      { text: 'Tenemos algunas respuestas rápidas básicas en WhatsApp o correo.', score: 6, note: 'Automatización parcial.' },
-      { text: 'Todo el proceso de agendamiento y respuesta es 100% manual.', score: 2, note: 'Sobrecarga operativa del equipo.' },
-      { text: 'No tenemos automatizaciones configuradas.', score: 0, note: 'Oportunidad de ahorro de tiempo.' },
+      { text: 'Sí, el prospecto agenda y califica de forma automatizada.', score: 10 },
+      { text: 'Tenemos algunas respuestas rápidas básicas en WhatsApp o correo.', score: 6 },
+      { text: 'Todo el proceso de agendamiento y respuesta es 100% manual.', score: 2 },
+      { text: 'No tenemos automatizaciones configuradas.', score: 0 },
     ],
     tip: 'Responder a un prospecto en menos de 5 minutos multiplica por 7 las probabilidades de convertirlo en cliente.',
   },
@@ -99,10 +99,10 @@ const QUESTIONS = [
     question: '¿Tu equipo cuenta con herramientas conectadas entre sí?',
     subtitle: 'Sistemas que enlazan formularios web, base de datos, facturación y entrega de proyectos sin duplicar trabajo.',
     options: [
-      { text: 'Sí, tenemos un ecosistema integrado donde la información fluye sola.', score: 10, note: 'Operación ágil y sincronizada.' },
-      { text: 'Usamos varias herramientas, pero no están conectadas entre sí.', score: 6, note: 'Doble digitación y datos dispersos.' },
-      { text: 'Dependemos de mensajes constantes y llamadas para coordinar.', score: 2, note: 'Cuellos de botella en la entrega.' },
-      { text: 'Todo se gestiona de forma aislada y manual.', score: 0, note: 'Urgencia de centralización de flujos.' },
+      { text: 'Sí, tenemos un ecosistema integrado donde la información fluye sola.', score: 10 },
+      { text: 'Usamos varias herramientas, pero no están conectadas entre sí.', score: 6 },
+      { text: 'Dependemos de mensajes constantes y llamadas para coordinar.', score: 2 },
+      { text: 'Todo se gestiona de forma aislada y manual.', score: 0 },
     ],
     tip: 'Un negocio ordenado por dentro transmite calma y profesionalismo hacia afuera.',
   },
@@ -112,10 +112,10 @@ const QUESTIONS = [
     question: '¿Generas contenido de autoridad que eduque antes de la venta?',
     subtitle: 'Casos de éxito documentados, explicaciones de tu método de trabajo o artículos que resuelvan dudas frecuentes.',
     options: [
-      { text: 'Sí, nuestros prospectos llegan educados y convencidos de nuestro método.', score: 10, note: 'Venta consultiva facilitada.' },
-      { text: 'Publicamos contenido en redes, pero sin una estrategia de ventas clara.', score: 6, note: 'Tráfico sin conversión predecible.' },
-      { text: 'Publicamos esporádicamente cuando tenemos tiempo libre.', score: 2, note: 'Presencia inconsistente.' },
-      { text: 'No generamos contenido educativo ni mostramos casos de estudio.', score: 0, note: 'Falta de activos de autoridad.' },
+      { text: 'Sí, nuestros prospectos llegan educados y convencidos de nuestro método.', score: 10 },
+      { text: 'Publicamos contenido en redes, pero sin una estrategia de ventas clara.', score: 6 },
+      { text: 'Publicamos esporádicamente cuando tenemos tiempo libre.', score: 2 },
+      { text: 'No generamos contenido educativo ni mostramos casos de estudio.', score: 0 },
     ],
     tip: 'El contenido educativo acorta a la mitad las reuniones comerciales, porque el cliente ya conoce cómo trabajas.',
   },
@@ -125,10 +125,10 @@ const QUESTIONS = [
     question: '¿Mides tus números comerciales y de conversión mensualmente?',
     subtitle: 'Saber de dónde vienen tus prospectos, cuántos cierran y cuánto te cuesta adquirir cada cliente.',
     options: [
-      { text: 'Sí, revisamos métricas y conversiones periódicamente.', score: 10, note: 'Toma de decisiones basada en datos.' },
-      { text: 'Miramos métricas de redes sociales (likes, alcance, seguidores).', score: 5, note: 'Métricas de vanidad vs. métricas de venta.' },
-      { text: 'Solo revisamos los ingresos totales en la cuenta a fin de mes.', score: 2, note: 'Falta de visibilidad del embudo.' },
-      { text: 'No medimos datos de captación digital.', score: 0, note: 'Oportunidad de implementar analítica comercial.' },
+      { text: 'Sí, revisamos métricas y conversiones periódicamente.', score: 10 },
+      { text: 'Miramos métricas de redes sociales (likes, alcance, seguidores).', score: 5 },
+      { text: 'Solo revisamos los ingresos totales en la cuenta a fin de mes.', score: 2 },
+      { text: 'No medimos datos de captación digital.', score: 0 },
     ],
     tip: 'Lo que no se mide no se puede optimizar. Saber tu tasa de conversión te da la tranquilidad para invertir con seguridad.',
   },
@@ -138,14 +138,74 @@ const QUESTIONS = [
     question: '¿Tu negocio podría recibir el doble de clientes hoy sin colapsar?',
     subtitle: 'Capacidad operativa, infraestructura digital y procesos listos para escalar la demanda.',
     options: [
-      { text: 'Sí, nuestros sistemas y procesos soportan duplicar la demanda.', score: 10, note: 'Listo para acelerar adquisición.' },
-      { text: 'Podríamos atenderlos, pero requeriría trabajar horas extra y estrés.', score: 6, note: 'Crecimiento con fricción operativa.' },
-      { text: 'No, colapsaríamos operativamente o bajaría la calidad del servicio.', score: 2, note: 'Priorizar sistemas antes de acelerar pauta.' },
-      { text: 'No tenemos capacidad ni procesos listos para crecer.', score: 0, note: 'Momento ideal para construir cimientos sólidos.' },
+      { text: 'Sí, nuestros sistemas y procesos soportan duplicar la demanda.', score: 10 },
+      { text: 'Podríamos atenderlos, pero requeriría trabajar horas extra y estrés.', score: 6 },
+      { text: 'No, colapsaríamos operativamente o bajaría la calidad del servicio.', score: 2 },
+      { text: 'No tenemos capacidad ni procesos listos para crecer.', score: 0 },
     ],
     tip: 'Poner más publicidad sobre un proceso desordenado solo acelera el caos. Primero asegura tus sistemas, luego escala la captación.',
   },
 ]
+
+// Animated Counter with Smooth Easing
+function AnimatedScore({ value }) {
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    let start = 0
+    const duration = 1200
+    const stepTime = 20
+    const totalSteps = duration / stepTime
+    const increment = value / totalSteps
+
+    const timer = setInterval(() => {
+      start += increment
+      if (start >= value) {
+        setDisplayValue(value)
+        clearInterval(timer)
+      } else {
+        setDisplayValue(Math.round(start))
+      }
+    }, stepTime)
+
+    return () => clearInterval(timer)
+  }, [value])
+
+  return <span>{displayValue}</span>
+}
+
+// Ambient Floating Sparkles Component
+function AmbientSparkles() {
+  const sparkles = [
+    { top: '15%', left: '10%', delay: 0, size: 'w-2 h-2' },
+    { top: '25%', right: '12%', delay: 0.8, size: 'w-3 h-3' },
+    { top: '65%', left: '8%', delay: 0.4, size: 'w-2.5 h-2.5' },
+    { top: '80%', right: '15%', delay: 1.2, size: 'w-2 h-2' },
+  ]
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {sparkles.map((s, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            y: [-6, 6, -6],
+            opacity: [0.3, 0.8, 0.3],
+            scale: [0.9, 1.15, 0.9],
+          }}
+          transition={{
+            duration: 3 + i,
+            repeat: Infinity,
+            delay: s.delay,
+            ease: 'easeInOut',
+          }}
+          style={{ top: s.top, left: s.left, right: s.right }}
+          className={`absolute ${s.size} bg-[#ff4b0b] rounded-full blur-[1px] opacity-40`}
+        />
+      ))}
+    </div>
+  )
+}
 
 export default function DiagnosticoSplitStudio() {
   const [currentStep, setCurrentStep] = useState(0)
@@ -213,19 +273,19 @@ export default function DiagnosticoSplitStudio() {
   const getDiagnosticsResult = (score) => {
     if (score >= 80) {
       return {
-        level: 'Nivel Avanzado • Infraestructura de Alto Rendimiento',
+        level: 'Nivel Avanzado • Infraestructura Comercial de Alto Rendimiento',
         tone: 'celebrate',
-        badgeBg: 'bg-emerald-50 text-emerald-800 border-emerald-300',
-        title: '¡Felicitaciones! Tu negocio cuenta con cimientos comerciales sólidos',
+        badgeClass: 'bg-slate-950 text-white border-slate-950',
+        title: '¡Excelente! Tu negocio cuenta con bases sólidas para escalar',
         summary: 'Tu propuesta de valor es clara, cuentas con canales activos y tus procesos están estructurados para operar con fluidez. Cuentas con la madurez necesaria para acelerar tu crecimiento.',
         priorityAction: 'Implementar agentes de IA conversacionales y optimización avanzada de conversión para multiplicar tu captación sin incrementar la carga de tu equipo.',
       }
     }
     if (score >= 50) {
       return {
-        level: 'Nivel Intermedio • Gran Tracción con Oportunidad de Sistematización',
+        level: 'Nivel Intermedio • Tracción con Oportunidad de Sistematización',
         tone: 'constructive',
-        badgeBg: 'bg-amber-50 text-amber-800 border-amber-300',
+        badgeClass: 'bg-orange-50 text-[#ff4b0b] border-orange-200',
         title: 'Tu negocio tiene potencial y ventas: el siguiente paso es ordenar los flujos',
         summary: 'Estás generando clientes y movimiento comercial, pero gran parte del esfuerzo depende de la memoria o de tareas manuales. Existe una fuga silenciosa de prospectos que se resolvería al automatizar el seguimiento.',
         priorityAction: 'Conectar un CRM comercial automatizado, actualizar tu sitio web a una máquina de captación y estandarizar tus secuencias de cotización.',
@@ -234,7 +294,7 @@ export default function DiagnosticoSplitStudio() {
     return {
       level: 'Nivel Inicial • Momento Ideal para Construir tus Cimientos',
       tone: 'supportive',
-      badgeBg: 'bg-orange-50 text-[#ff4b0b] border-orange-300',
+      badgeClass: 'bg-slate-100 text-slate-800 border-slate-300',
       title: 'Punto de partida estratégico: diseña tu sistema antes de acelerar',
       summary: 'Tu negocio opera de forma artesanal, lo cual es muy común en etapas de crecimiento. La gran ventaja de este diagnóstico es que identifica con claridad qué construir primero para evitar desgastes.',
       priorityAction: 'Definir con precisión tu mensaje de oferta, lanzar un canal digital profesional de confianza y crear tu primer flujo básico de seguimiento.',
@@ -246,7 +306,7 @@ export default function DiagnosticoSplitStudio() {
   return (
     <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans selection:bg-[#ff4b0b] selection:text-white flex flex-col justify-between">
       {/* Top Header Bar */}
-      <header className="w-full border-b border-slate-200/90 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+      <header className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-xl font-black tracking-tight text-slate-950">QAWAY</span>
@@ -272,89 +332,90 @@ export default function DiagnosticoSplitStudio() {
 
       {/* Main Split-Screen Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-130px)]">
-        {/* Left Side: Amigable y Profesional Workspace Image & Editorial Context */}
-        <aside className="lg:col-span-5 bg-slate-950 text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle Background Image with Gradient Overlay */}
+        {/* Left Side: Real Studio Image with Clean Natural Light & High-Contrast Typography */}
+        <aside className="lg:col-span-5 relative flex flex-col justify-between p-8 sm:p-12 lg:p-14 overflow-hidden border-r border-slate-200/80 bg-white">
+          {/* Real Studio Photo Background */}
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-luminosity pointer-events-none scale-105"
+            className="absolute inset-0 bg-cover bg-center pointer-events-none"
             style={{
-              backgroundImage: `url('/assets/blog-covers/tu-negocio-esta-preparado-para-recibir-clientes.webp')`,
+              backgroundImage: `url('/assets/diagnostico/workspace-real.jpg')`,
+              backgroundPosition: 'left center',
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-slate-950/70" />
-          <div className="absolute top-0 right-0 w-80 h-80 bg-[#ff4b0b]/15 rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle clean gradient mask to guarantee razor-sharp contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-white/95 via-white/85 to-white/60 backdrop-blur-[0.5px]" />
 
           {/* Top Brand Context */}
           <div className="relative z-10 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-orange-400 text-xs font-bold tracking-wide backdrop-blur-md border border-white/10 shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Diagnóstico Rápido</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-bold tracking-wide shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+              <span>Diagnóstico rápido</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-black tracking-tight leading-[1.12]">
+            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-black tracking-tight text-slate-950 leading-[1.14]">
               ¿Qué tan preparado está tu negocio para{' '}
-              <span className="text-[#ff4b0b] block mt-1.5">RECIBIR CLIENTES?</span>
+              <span className="text-[#ff4b0b] block mt-1">RECIBIR CLIENTES?</span>
             </h1>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-normal">
+            <p className="text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
               Responde unas preguntas y descubre en qué punto se encuentra tu negocio, y cuál es tu principal oportunidad de mejora.
             </p>
 
-            {/* 3 Core Value Badges */}
-            <div className="pt-3 space-y-3">
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <div className="w-9 h-9 rounded-xl bg-orange-500/20 text-[#ff4b0b] flex items-center justify-center shrink-0">
+            {/* 3 Value Badges in Minimal Clean Style */}
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/90 border border-slate-200/90 shadow-2xs backdrop-blur-md">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 text-[#ff4b0b] flex items-center justify-center shrink-0 border border-orange-200/60">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Toma solo 3 minutos</h4>
-                  <p className="text-[11px] text-slate-400">10 preguntas directas con opciones de 1 clic.</p>
+                  <h4 className="text-xs font-bold text-slate-900">Toma solo 3 minutos</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">10 preguntas directas con opciones de 1 clic.</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/90 border border-slate-200/90 shadow-2xs backdrop-blur-md">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 text-[#ff4b0b] flex items-center justify-center shrink-0 border border-orange-200/60">
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Recibe un resultado personalizado</h4>
-                  <p className="text-[11px] text-slate-400">Puntaje y desglose de 4 pilares en tiempo real.</p>
+                  <h4 className="text-xs font-bold text-slate-900">Recibe un resultado personalizado</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Puntaje y desglose de 4 pilares en tiempo real.</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/90 border border-slate-200/90 shadow-2xs backdrop-blur-md">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 text-[#ff4b0b] flex items-center justify-center shrink-0 border border-orange-200/60">
                   <Lightbulb className="w-4 h-4" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-white">Consejos prácticos para avanzar</h4>
-                  <p className="text-[11px] text-slate-400">Paso a paso constructivo alineado con nuestro artículo.</p>
+                  <h4 className="text-xs font-bold text-slate-900">Consejos prácticos para avanzar</h4>
+                  <p className="text-[11px] text-slate-500 font-medium">Paso a paso constructivo y accionable.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Bottom Trust Note */}
-          <div className="relative z-10 pt-8 mt-6 border-t border-white/10">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          {/* Bottom Trust Badge */}
+          <div className="relative z-10 pt-8 mt-6 border-t border-slate-200/80">
+            <div className="flex items-center justify-between text-xs text-slate-600 font-semibold">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
                 <span>100% Confidencial • Metodología Qaway Lab</span>
               </div>
-              <span className="text-[11px] font-mono text-orange-400 font-bold">4 PILARES</span>
+              <span className="text-[11px] font-mono text-slate-950 font-extrabold">4 PILARES</span>
             </div>
           </div>
         </aside>
 
         {/* Right Side: Interactive Stepper & Assessment Engine */}
-        <section className="lg:col-span-7 bg-white p-6 sm:p-10 lg:p-14 flex flex-col justify-between">
+        <section className="lg:col-span-7 bg-white p-6 sm:p-10 lg:p-14 flex flex-col justify-between relative">
           {!isCompleted ? (
             <>
               {/* Stepper Header */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#ff4b0b] bg-orange-50 px-2 py-0.5 rounded border border-orange-200/70">
+                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#ff4b0b] bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200/70">
                       {currentQuestion.pilar}
                     </span>
                   </div>
@@ -376,7 +437,7 @@ export default function DiagnosticoSplitStudio() {
                             ? 'bg-[#ff4b0b] ring-2 ring-orange-200'
                             : isPassed
                             ? 'bg-slate-900'
-                            : 'bg-slate-200'
+                            : 'bg-slate-100'
                         }`}
                       />
                     )
@@ -405,7 +466,7 @@ export default function DiagnosticoSplitStudio() {
                       </p>
                     </div>
 
-                    {/* Radio Cards with High-End Feedback */}
+                    {/* Radio Cards with Minimalist High-End Feedback */}
                     <div className="space-y-3 pt-1">
                       {currentQuestion.options.map((opt, optIndex) => {
                         const isSelected = selectedOptionIndex === optIndex
@@ -421,7 +482,7 @@ export default function DiagnosticoSplitStudio() {
                             }`}
                           >
                             <div className="flex items-center gap-3.5">
-                              {/* Custom Radio Button */}
+                              {/* Custom Radio Dot */}
                               <div
                                 className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                                   isSelected
@@ -433,15 +494,13 @@ export default function DiagnosticoSplitStudio() {
                                   <div className="w-2.5 h-2.5 rounded-full bg-[#ff4b0b]" />
                                 )}
                               </div>
-                              <div>
-                                <span
-                                  className={`text-sm sm:text-base font-semibold block ${
-                                    isSelected ? 'text-slate-950 font-bold' : 'text-slate-700'
-                                  }`}
-                                >
-                                  {opt.text}
-                                </span>
-                              </div>
+                              <span
+                                className={`text-sm sm:text-base font-semibold block ${
+                                  isSelected ? 'text-slate-950 font-bold' : 'text-slate-700'
+                                }`}
+                              >
+                                {opt.text}
+                              </span>
                             </div>
 
                             {isSelected && (
@@ -460,7 +519,7 @@ export default function DiagnosticoSplitStudio() {
               {/* Dynamic Bottom Tip & Navigation */}
               <div className="pt-8 space-y-6">
                 {/* Dynamic Inline Pedagogical Tip */}
-                <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3">
+                <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex items-start gap-3">
                   <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-700 shrink-0">
                     <Lightbulb className="w-4 h-4" />
                   </div>
@@ -503,79 +562,88 @@ export default function DiagnosticoSplitStudio() {
               </div>
             </>
           ) : (
-            /* Results Screen: Encouraging, High Authority & 4 Pillars Breakdown */
+            /* =============================================================
+               REDESIGNED RESULTS SCREEN: ULTRA-MINIMALIST & HIGH-END MOTION
+               (Zero Toxic Colors • Single Cohesive Aesthetic • Clean Typography)
+               ============================================================= */
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-7 my-auto"
+              className="space-y-8 my-auto relative"
             >
-              {/* Top Result Banner with Celebratory / Encouraging Tone */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold ${result.badgeBg}`}>
-                    {result.tone === 'celebrate' ? <Sparkles className="w-4 h-4 text-emerald-600" /> : <TrendingUp className="w-4 h-4 text-orange-600" />}
-                    <span>{result.level}</span>
-                  </div>
+              {/* Floating Ambient Sparkles */}
+              <AmbientSparkles />
+
+              {/* Top Result Banner */}
+              <div className="space-y-4 relative z-10">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold tracking-wide shadow-2xs bg-white text-slate-900 border-slate-300">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ff4b0b]" />
+                  <span>{result.level}</span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-950 tracking-tight leading-snug">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-950 tracking-tight leading-tight">
                   {result.title}
                 </h2>
 
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl sm:text-5xl font-black text-[#ff4b0b]">
-                    {scorePercentage}
+                {/* Score Number with Smooth Counter */}
+                <div className="flex items-baseline gap-3 pt-1">
+                  <span className="text-5xl sm:text-6xl font-black text-[#ff4b0b] tracking-tighter">
+                    <AnimatedScore value={scorePercentage} />
                   </span>
-                  <span className="text-base font-bold text-slate-400">/ 100 Puntos de Madurez Digital</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-400">
+                    / 100 Puntos de Madurez Digital
+                  </span>
                 </div>
               </div>
 
-              {/* Main Progress Bar */}
-              <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200">
-                <div
-                  className="bg-gradient-to-r from-orange-500 to-[#ff4b0b] h-full rounded-full transition-all duration-1000"
-                  style={{ width: `${scorePercentage}%` }}
+              {/* Minimalist Progress Meter */}
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-200/80 relative z-10">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${scorePercentage}%` }}
+                  transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="bg-[#ff4b0b] h-full rounded-full"
                 />
               </div>
 
-              {/* Breakdown of the 4 Pillars */}
-              <div className="p-5 sm:p-6 rounded-3xl bg-slate-50 border border-slate-200 space-y-4">
-                <div className="flex items-center justify-between">
+              {/* 4 Pillars Breakdown (Monochrome & Precision Minimalist) */}
+              <div className="p-6 rounded-3xl bg-slate-50/90 border border-slate-200/80 space-y-5 relative z-10">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/60">
                   <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
                     Desglose por los 4 Pilares Comerciales
                   </h4>
-                  <span className="text-[11px] font-bold text-slate-400">Puntaje individual</span>
+                  <span className="text-[11px] font-bold text-slate-400">Evaluación individual</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Pilar 1 */}
-                  <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/70 shadow-2xs space-y-2">
                     <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">1. Oferta & Mensaje</span>
-                      <span className="text-slate-900">{pillarScores.oferta}%</span>
+                      <span className="text-slate-800">1. Oferta & Mensaje</span>
+                      <span className="text-slate-950 font-mono">{pillarScores.oferta}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-indigo-500 h-full rounded-full" style={{ width: `${pillarScores.oferta}%` }} />
+                      <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.oferta}%` }} />
                     </div>
                   </div>
 
                   {/* Pilar 2 */}
-                  <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/70 shadow-2xs space-y-2">
                     <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">2. Canal Web & Branding</span>
-                      <span className="text-slate-900">{pillarScores.canal}%</span>
+                      <span className="text-slate-800">2. Canal Web & Branding</span>
+                      <span className="text-slate-950 font-mono">{pillarScores.canal}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-blue-500 h-full rounded-full" style={{ width: `${pillarScores.canal}%` }} />
+                      <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.canal}%` }} />
                     </div>
                   </div>
 
                   {/* Pilar 3 */}
-                  <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/70 shadow-2xs space-y-2">
                     <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">3. Automatización & CRM</span>
-                      <span className="text-slate-900">{pillarScores.sistemas}%</span>
+                      <span className="text-slate-800">3. Automatización & CRM</span>
+                      <span className="text-slate-950 font-mono">{pillarScores.sistemas}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div className="bg-[#ff4b0b] h-full rounded-full" style={{ width: `${pillarScores.sistemas}%` }} />
@@ -583,42 +651,42 @@ export default function DiagnosticoSplitStudio() {
                   </div>
 
                   {/* Pilar 4 */}
-                  <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/70 shadow-2xs space-y-2">
                     <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">4. Capacidad de Escala</span>
-                      <span className="text-slate-900">{pillarScores.escala}%</span>
+                      <span className="text-slate-800">4. Capacidad de Escala</span>
+                      <span className="text-slate-950 font-mono">{pillarScores.escala}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${pillarScores.escala}%` }} />
+                      <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.escala}%` }} />
                     </div>
                   </div>
                 </div>
 
-                {/* Diagnostic Summary */}
-                <div className="pt-3 border-t border-slate-200 space-y-2">
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                {/* Summary & Priority Action */}
+                <div className="pt-2 space-y-3">
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                     {result.summary}
                   </p>
-                  <div className="p-3 rounded-xl bg-orange-50/70 border border-orange-200/60">
-                    <span className="text-[11px] font-extrabold uppercase text-[#ff4b0b] block mb-0.5">
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-1">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#ff4b0b] block">
                       Paso Prioritario Recomendado:
                     </span>
-                    <p className="text-xs font-semibold text-slate-800 leading-relaxed">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-900 leading-relaxed">
                       {result.priorityAction}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Lead Capture Form */}
+              {/* Minimalist Executive Lead Capture Box */}
               {!emailSubmitted ? (
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-slate-900/10 shadow-sm space-y-4">
+                <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-4 relative z-10">
                   <div>
                     <h4 className="text-sm sm:text-base font-extrabold text-slate-950">
                       ¿Deseas recibir tu reporte detallado con la hoja de ruta en PDF?
                     </h4>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Te enviaremos el análisis completo y las recomendaciones para tu empresa.
+                      Te enviaremos el análisis completo y las recomendaciones paso a paso para tu empresa.
                     </p>
                   </div>
                   <form
@@ -633,7 +701,7 @@ export default function DiagnosticoSplitStudio() {
                       placeholder="Tu nombre o empresa"
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
-                      className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-[#ff4b0b] flex-1"
+                      className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-slate-950 focus:ring-2 focus:ring-slate-900/5 flex-1"
                     />
                     <input
                       type="email"
@@ -641,7 +709,7 @@ export default function DiagnosticoSplitStudio() {
                       placeholder="correo@tuempresa.com"
                       value={userEmail}
                       onChange={(e) => setUserEmail(e.target.value)}
-                      className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-[#ff4b0b] flex-1"
+                      className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-slate-950 focus:ring-2 focus:ring-slate-900/5 flex-1"
                     />
                     <button
                       type="submit"
@@ -653,19 +721,19 @@ export default function DiagnosticoSplitStudio() {
                   </form>
                 </div>
               ) : (
-                <div className="p-5 rounded-3xl bg-emerald-50 border border-emerald-200 text-center space-y-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                  <h4 className="text-sm font-extrabold text-emerald-950">
+                <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200 text-center space-y-2 relative z-10">
+                  <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
+                  <h4 className="text-sm font-extrabold text-slate-950">
                     ¡Reporte enviado exitosamente a {userEmail}!
                   </h4>
-                  <p className="text-xs text-emerald-700">
+                  <p className="text-xs text-slate-600">
                     Revisa tu bandeja de entrada para explorar tu hoja de ruta personalizada.
                   </p>
                 </div>
               )}
 
               {/* Bottom Actions */}
-              <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-200">
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-200/80 relative z-10">
                 <button
                   type="button"
                   onClick={handleRestart}
@@ -678,7 +746,7 @@ export default function DiagnosticoSplitStudio() {
                 <div className="flex items-center gap-3">
                   <Link
                     to="/estudio/consultoria"
-                    className="px-6 py-3 rounded-xl bg-[#ff4b0b] text-white font-bold text-xs sm:text-sm hover:bg-[#e04008] transition-colors shadow-sm"
+                    className="px-6 py-3 rounded-xl bg-slate-950 hover:bg-[#ff4b0b] text-white font-bold text-xs sm:text-sm transition-colors shadow-sm"
                   >
                     Agendar Sesión Estratégica Gratuita →
                   </Link>
