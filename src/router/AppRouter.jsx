@@ -42,6 +42,7 @@ const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descarga
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
+const PagosHubPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosHubPage'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -270,6 +271,14 @@ export default function AppRouter() {
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
+          />
+          <Route
+            path="hub/pagos"
+            element={renderRoute('hub', <PagosHubPage />)}
+          />
+          <Route
+            path="hub/pagos/*"
+            element={renderRoute('hub', <PagosHubPage />)}
           />
           <Route
             path="hub/creador-contenido"

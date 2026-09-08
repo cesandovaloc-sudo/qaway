@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   RotateCcw,
   Instagram,
+  CreditCard,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -32,6 +33,17 @@ import { isPublicSiteMode } from '@/config/siteVisibility'
 import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
+  {
+    icon: CreditCard,
+    title: 'Qaway Pagos & Checkout Multi-método',
+    description: 'Pasarela de pagos multi-método: Tarjeta Stripe, Yape, Plin, PagoEfectivo, transferencias, catálogo de productos y gestión de órdenes.',
+    path: '/hub/pagos',
+    access: 'pro',
+    badge: 'Módulo Pagos',
+    category: 'Comercio & Finanzas',
+    tone: 'bg-emerald-500/10 text-emerald-500',
+    published: true,
+  },
   {
     icon: Star,
     title: 'Qaway Academy (LMS Cursos & Certificaciones)',
