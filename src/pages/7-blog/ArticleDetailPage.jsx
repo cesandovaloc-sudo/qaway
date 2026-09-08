@@ -28,6 +28,7 @@ import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { trackBlogVisit } from '@/services/analyticsTracker'
 
 function sanitizeAndDecodeContent(htmlContent) {
   if (!htmlContent) return ''
@@ -233,6 +234,17 @@ export default function ArticleDetailPage() {
     setMeta('og:url', typeof window !== 'undefined' ? window.location.href : '')
     setMeta('og:type', 'article')
   }, [article])
+
+  // Registrar telemetría y visita real (incluyendo Facebook Ads, UTMs, referrer)
+  useEffect(() => {
+    if (article) {
+      trackBlogVisit({
+        slug: article.slug || id,
+        title: article.title,
+        category: article.category,
+      })
+    }
+  }, [article?.slug, article?.id, article?.title, id])
 
   // Precargar lista de voces del navegador al montar el componente
   useEffect(() => {

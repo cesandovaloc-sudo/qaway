@@ -17,9 +17,9 @@ import {
   FileText,
   MousePointerClick,
   BarChart3,
-  LineChart as LineChartIcon,
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
+import { fetchRealBlogAnalytics } from '@/services/analyticsTracker'
 
 type TimeRange = '24h' | '7d' | '30d' | '90d' | '1y' | 'all'
 type ChartType = 'area' | 'bar'
@@ -111,6 +111,17 @@ export default function UmamiAnalyticsSuite() {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
+  // Carga de telemetría real (Facebook Ads, UTMs, Visitas en vivo)
+  const [realStats, setRealStats] = useState<any>(null)
+
+  useEffect(() => {
+    let active = true
+    fetchRealBlogAnalytics().then(res => {
+      if (active) setRealStats(res)
+    })
+    return () => { active = false }
+  }, [])
+
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -154,15 +165,16 @@ export default function UmamiAnalyticsSuite() {
     localStorage.setItem('qaway_umami_custom_visitors', visitorsColor)
   }
 
-  // Generador de Métricas Multidimensionales Determinísticas Umami
+  // Generador de Métricas Multidimensionales Determinísticas Umami + Telemetría Real
   const analyticsData = useMemo(() => {
     const pubPosts = posts.filter(p => p.status === 'publicado')
     const rangeMultiplier =
       timeRange === '24h' ? 0.3 : timeRange === '7d' ? 1 : timeRange === '30d' ? 4.2 : timeRange === '90d' ? 11.5 : 22
 
+    const realTotal = realStats?.totalViews || 0
     // 1. Métricas Totales
-    const baseViews = Math.round(pubPosts.length * 680 * rangeMultiplier) + 1420
-    const uniqueVisitors = Math.round(baseViews * 0.68)
+    const baseViews = realTotal > 0 ? realTotal : Math.round(pubPosts.length * 680 * rangeMultiplier) + 1420
+    const uniqueVisitors = realStats?.uniqueVisitors || Math.round(baseViews * 0.68)
     const bounceRate = 34.2
     const avgDurationSeconds = 194 // 3 min 14s
     const totalLeads = Math.round(baseViews * 0.034)
@@ -173,8 +185,11 @@ export default function UmamiAnalyticsSuite() {
       const words = (post.body || post.contentHtml || '').replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length
       const seed = (post.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 40) + 60
       const isPub = post.status === 'publicado'
-      const views = isPub ? Math.round(seed * 45 * rangeMultiplier) : Math.round(seed * 2)
-      const visitors = Math.round(views * 0.72)
+      const realPostViews = realStats?.postViewsMap?.[post.slug] || realStats?.postViewsMap?.[post.id]
+      const views = realTotal > 0 && realPostViews !== undefined
+        ? realPostViews
+        : isPub ? Math.round(seed * 45 * rangeMultiplier) : Math.round(seed * 2)
+      const visitors = Math.max(1, Math.round(views * 0.72))
       const leads = Math.round(views * 0.038)
       const avgDuration = `${Math.max(1, Math.round(words / 180))}m ${Math.round((words % 180) / 3)}s`
 
@@ -191,15 +206,24 @@ export default function UmamiAnalyticsSuite() {
       }
     }).sort((a, b) => b.views - a.views)
 
-    // 3. Fuentes de Tráfico (Referrers)
-    const referrers = [
-      { name: 'Google (Orgánico)', icon: '🔍', views: Math.round(baseViews * 0.52), visitors: Math.round(uniqueVisitors * 0.54), percent: 52 },
-      { name: 'Directo / Marcadores', icon: '🔗', views: Math.round(baseViews * 0.22), visitors: Math.round(uniqueVisitors * 0.20), percent: 22 },
-      { name: 'LinkedIn', icon: '💼', views: Math.round(baseViews * 0.12), visitors: Math.round(uniqueVisitors * 0.13), percent: 12 },
-      { name: 'WhatsApp & Telegram', icon: '💬', views: Math.round(baseViews * 0.08), visitors: Math.round(uniqueVisitors * 0.07), percent: 8 },
-      { name: 'ChatGPT / Perplexity AI', icon: '🤖', views: Math.round(baseViews * 0.04), visitors: Math.round(uniqueVisitors * 0.04), percent: 4 },
-      { name: 'Twitter / X', icon: '🐦', views: Math.round(baseViews * 0.02), visitors: Math.round(uniqueVisitors * 0.02), percent: 2 },
+    // 3. Fuentes de Tráfico (Referrers) - Con soporte prioritario para Facebook Ads
+    let referrers = [
+      { name: 'Facebook (Anuncios / Feed)', icon: '📢', views: Math.round(baseViews * 0.45), visitors: Math.round(uniqueVisitors * 0.44), percent: 45 },
+      { name: 'Google (Orgánico)', icon: '🔍', views: Math.round(baseViews * 0.30), visitors: Math.round(uniqueVisitors * 0.32), percent: 30 },
+      { name: 'Directo / Marcadores', icon: '🔗', views: Math.round(baseViews * 0.15), visitors: Math.round(uniqueVisitors * 0.14), percent: 15 },
+      { name: 'LinkedIn', icon: '💼', views: Math.round(baseViews * 0.05), visitors: Math.round(uniqueVisitors * 0.05), percent: 5 },
+      { name: 'WhatsApp & Telegram', icon: '💬', views: Math.round(baseViews * 0.03), visitors: Math.round(uniqueVisitors * 0.03), percent: 3 },
+      { name: 'ChatGPT / Perplexity AI', icon: '🤖', views: Math.round(baseViews * 0.02), visitors: Math.round(uniqueVisitors * 0.02), percent: 2 },
     ]
+    if (realStats?.referrers && realStats.referrers.length > 0) {
+      referrers = realStats.referrers.map((r: any) => ({
+        name: r.name,
+        icon: r.name.toLowerCase().includes('facebook') ? '📢' : r.name.toLowerCase().includes('google') ? '🔍' : '🌐',
+        views: r.views,
+        visitors: r.visitors,
+        percent: r.percent,
+      }))
+    }
 
     // 4. Navegadores (Browsers)
     const browsers = [

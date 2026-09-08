@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
 import { useNavigate } from 'react-router-dom'
+import { fetchRealBlogAnalytics } from '@/services/analyticsTracker'
 
 type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all'
 
@@ -93,6 +94,17 @@ export default function BlogAnalyticsDashboard() {
   const [isPaletteMenuOpen, setIsPaletteMenuOpen] = useState(false)
   const paletteMenuRef = useRef<HTMLDivElement>(null)
 
+  // Carga de telemetría real (Facebook Ads, UTMs, Visitas en vivo)
+  const [realStats, setRealStats] = useState<any>(null)
+
+  useEffect(() => {
+    let active = true
+    fetchRealBlogAnalytics().then(res => {
+      if (active) setRealStats(res)
+    })
+    return () => { active = false }
+  }, [])
+
   // Cerrar menú al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -134,8 +146,9 @@ export default function BlogAnalyticsDashboard() {
     localStorage.setItem('qaway_analytics_custom_secondary', secondary)
   }
 
-  // Generador determinístico de métricas realistas basado en la longitud, fecha y calidad de cada post
+  // Generador determinístico de métricas realistas basado en la longitud, fecha y calidad de cada post + Telemetría Real
   const postsWithMetrics = useMemo(() => {
+    const realTotal = realStats?.totalViews || 0
     return posts.map(post => {
       const words = (post.body || post.contentHtml || '').replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length
       const charCount = post.title.length
@@ -156,7 +169,10 @@ export default function BlogAnalyticsDashboard() {
       const isPub = post.status === 'publicado'
       const baseMultiplier = isPub ? (timeRange === '7d' ? 1 : timeRange === '30d' ? 3.8 : timeRange === '90d' ? 9.5 : 18) : 0.05
       const seed = (post.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % 50) + 50
-      const views = Math.round(seed * 32 * baseMultiplier * (qualityScore / 75))
+      const realPostViews = realStats?.postViewsMap?.[post.slug] || realStats?.postViewsMap?.[post.id]
+      const views = realTotal > 0 && realPostViews !== undefined
+        ? realPostViews
+        : Math.round(seed * 32 * baseMultiplier * (qualityScore / 75))
       const avgTimeMinutes = Math.max(1.5, Math.min(6.2, Number((words / 190).toFixed(1))))
       const readRate = Math.min(88, Math.round(55 + (qualityScore / 4)))
 

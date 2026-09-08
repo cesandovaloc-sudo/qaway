@@ -246,20 +246,16 @@ export default function AppRouter() {
           path="/hub/marketing2"
           element={<MarketingStudioTwentyPage />}
         />
-        <Route
-          path="/hub/creador-contenido"
-          element={<CreadorContenidoPage />}
-        />
-        <Route
-          path="hub/creador-contenido"
-          element={<CreadorContenidoPage />}
-        />
         <Route index element={<InicioPage />} />
 
         <Route element={<Layout />}>
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
+          />
+          <Route
+            path="hub/creador-contenido"
+            element={renderRoute('hub', <CreadorContenidoPage />)}
           />
           <Route
             path="hub/crm"

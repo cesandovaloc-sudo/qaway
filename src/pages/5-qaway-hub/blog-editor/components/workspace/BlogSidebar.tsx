@@ -138,9 +138,9 @@ export default function BlogSidebar({
                 : 'text-muted hover:bg-black/5 hover:text-primary font-medium'
             }`}
           >
-            <div className="flex items-center gap-2.5">
-              <BarChart3 className="w-4 h-4 text-muted" />
-              <span>Métricas & Rendimiento</span>
+            <div className="flex items-center gap-2.5 text-left">
+              <BarChart3 className="w-4 h-4 text-muted shrink-0" />
+              <span className="text-left leading-tight">Métricas & Rendimiento</span>
             </div>
             <span className="text-xs font-mono text-muted">KPIs</span>
           </button>

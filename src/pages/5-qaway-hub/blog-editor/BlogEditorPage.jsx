@@ -1,5 +1,6 @@
 import React from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
+import Navbar, { NavbarProvider } from '@/components/layout/Navbar'
 import { BlogProvider } from './context/BlogContext'
 import DashboardPage from './pages/DashboardPage'
 import EditorPage from './pages/EditorPage'
@@ -11,9 +12,14 @@ function BlogHubStudio() {
   const isEditing = Boolean(id) || searchParams.get('mode') === 'editor' || searchParams.has('id')
 
   return (
-    <div className="blog-editor-root w-full min-h-screen bg-white text-primary">
-      {isEditing ? <EditorPage /> : <DashboardPage />}
-    </div>
+    <NavbarProvider>
+      <div className="blog-editor-root w-full min-h-screen bg-white text-primary flex flex-col">
+        <Navbar />
+        <div className="flex-1 pt-20">
+          {isEditing ? <EditorPage /> : <DashboardPage />}
+        </div>
+      </div>
+    </NavbarProvider>
   )
 }
 
