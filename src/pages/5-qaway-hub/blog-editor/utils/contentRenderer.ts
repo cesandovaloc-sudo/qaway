@@ -206,6 +206,21 @@ export function processBlogHtml(html: string): string {
       el.innerHTML = renderLeadFormHtml(data)
     })
 
+    // Limpieza de anclas internas y borradores para el público exterior:
+    // 1. Eliminar fragmentos ocultos privados
+    doc.querySelectorAll('[data-hidden-draft="true"]').forEach(el => {
+      el.remove()
+    })
+
+    // 2. Desenvolver anclas de enlaces pendientes (dejando solo el texto limpio sin atributos ni marcas)
+    doc.querySelectorAll('[data-pending-link="true"]').forEach(el => {
+      const parent = el.parentNode
+      while (el.firstChild) {
+        parent?.insertBefore(el.firstChild, el)
+      }
+      el.remove()
+    })
+
     return doc.body.innerHTML
   } catch (err) {
     console.error('Error procesando HTML de blog:', err)

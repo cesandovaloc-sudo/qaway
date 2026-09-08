@@ -9,9 +9,11 @@ import {
   Plus,
   Archive,
   Image as ImageIcon,
+  Pin,
 } from 'lucide-react'
 import type { Post, PostStatus } from '../../types'
 import { useBlog } from '../../context/BlogContext'
+import { extractPendingAnchors } from '../../utils/pendingAnchors'
 
 interface BlogWorkItemsListProps {
   posts: Post[]
@@ -222,6 +224,21 @@ export default function BlogWorkItemsList({
                         <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-surface-muted text-primary/80 border border-line shrink-0">
                           {post.category}
                         </span>
+
+                        {/* Vínculos pendientes */}
+                        {(() => {
+                          const count = post.contentHtml ? extractPendingAnchors(post.contentHtml).length : 0
+                          if (count === 0) return null
+                          return (
+                            <span
+                              className="text-xs font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1 shrink-0"
+                              title={`${count} enlaces pendientes de vincular`}
+                            >
+                              <Pin className="w-3 h-3 text-amber-600" />
+                              <span>{count} {count === 1 ? 'pendiente' : 'pendientes'}</span>
+                            </span>
+                          )
+                        })()}
 
                         {/* Tiempo de Lectura */}
                         <span className="text-xs font-mono text-muted flex items-center gap-1 shrink-0">

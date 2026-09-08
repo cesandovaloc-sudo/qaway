@@ -15,6 +15,8 @@ import { CalloutBlock } from './tiptap-extensions/CalloutBlock'
 import { CustomBulletList, CustomOrderedList, CustomBlockquote } from './tiptap-extensions/CustomStructures'
 import { InfographicBlock } from './tiptap-extensions/InfographicBlock'
 import { LeadFormBlock } from './tiptap-extensions/LeadFormBlock'
+import { PendingLinkMark, HiddenDraftMark } from './tiptap-extensions/PendingLinkMarks'
+import { convertAnchorToLinkInHtml, removeAnchorFromHtml, toggleHiddenDraftInHtml } from '../utils/pendingAnchors'
 import FixedToolbar from './FixedToolbar'
 import type { ImageInsertData } from './modals/ImageAdvancedModal'
 import type { CtaData } from './modals/CtaModal'
@@ -47,6 +49,9 @@ export interface VisualEditorRef {
   getScrollTop: () => number
   setScrollTop: (top: number) => void
   findAndHighlightKeyword: (keyword: string, targetIndex: number) => { total: number; current: number }
+  convertPendingAnchorToLink: (text: string, url: string) => void
+  removePendingAnchor: (text: string) => void
+  toggleHiddenDraftOnAnchor: (text: string) => void
 }
 
 interface VisualEditorProps {
@@ -105,6 +110,8 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
       CalloutBlock,
       InfographicBlock,
       LeadFormBlock,
+      PendingLinkMark,
+      HiddenDraftMark,
       Image.configure({
         inline: false,
         allowBase64: true,
@@ -481,6 +488,24 @@ const VisualEditor = forwardRef<VisualEditorRef, VisualEditorProps>(function Vis
         if (editor && !editor.isDestroyed) {
           editor.commands.setContent(content, false)
         }
+      },
+      convertPendingAnchorToLink: (text: string, url: string) => {
+        if (!editor) return
+        const currentHtml = editor.getHTML()
+        const updatedHtml = convertAnchorToLinkInHtml(currentHtml, text, url)
+        editor.commands.setContent(updatedHtml, false)
+      },
+      removePendingAnchor: (text: string) => {
+        if (!editor) return
+        const currentHtml = editor.getHTML()
+        const updatedHtml = removeAnchorFromHtml(currentHtml, text)
+        editor.commands.setContent(updatedHtml, false)
+      },
+      toggleHiddenDraftOnAnchor: (text: string) => {
+        if (!editor) return
+        const currentHtml = editor.getHTML()
+        const updatedHtml = toggleHiddenDraftInHtml(currentHtml, text)
+        editor.commands.setContent(updatedHtml, false)
       },
     }),
     [editor]

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   Send,
   Save,
@@ -19,10 +19,16 @@ import {
   PanelRightClose,
   BookOpen,
   ExternalLink,
+  Pin,
+  EyeOff,
+  Eye,
+  Trash2,
+  Link as LinkIcon,
 } from 'lucide-react'
 import type { PostStatus } from '../types'
 import CategoryPicker from './CategoryPicker'
 import { useBlog, slugify } from '../context/BlogContext'
+import { extractPendingAnchors, extractHiddenDrafts } from '../utils/pendingAnchors'
 
 interface PostSettingsSidebarProps {
   title: string
@@ -56,6 +62,10 @@ interface PostSettingsSidebarProps {
   onHeaderCtaUrlChange?: (url: string) => void
   onOpenQuickRules?: () => void
   onNavigateKeywordMatch?: (keyword: string, targetIndex: number) => { total: number; current: number }
+  onJumpToText?: (text: string) => void
+  onConvertPendingAnchor?: (text: string, url: string) => void
+  onRemovePendingAnchor?: (text: string) => void
+  onToggleHiddenDraft?: (text: string) => void
   onCloseSidebar?: () => void
   onPublish: () => void
   onSaveDraft: () => void
@@ -96,15 +106,24 @@ export default function PostSettingsSidebar({
   onHeaderCtaUrlChange,
   onOpenQuickRules,
   onNavigateKeywordMatch,
+  onJumpToText,
+  onConvertPendingAnchor,
+  onRemovePendingAnchor,
+  onToggleHiddenDraft,
   onCloseSidebar,
   onPublish,
   onSaveDraft,
   onArchive,
 }: PostSettingsSidebarProps) {
-  const { isCloudConnected } = useBlog()
+  const { isCloudConnected, posts } = useBlog()
   const [activeSidebarTab, setActiveSidebarTab] = useState<'settings' | 'seo' | 'notes'>('settings')
   const [localKeyword, setLocalKeyword] = useState(focusKeyword)
   const [matchNav, setMatchNav] = useState<{ total: number; current: number }>({ total: 0, current: 0 })
+
+  const pendingAnchors = useMemo(() => extractPendingAnchors(contentHtml), [contentHtml])
+  const hiddenDrafts = useMemo(() => extractHiddenDrafts(contentHtml), [contentHtml])
+  const [linkingAnchorId, setLinkingAnchorId] = useState<string | null>(null)
+  const [selectedSlugOrUrl, setSelectedSlugOrUrl] = useState('')
 
   const currentSlug = slug || slugify(title) || 'nuevo-post'
 
@@ -321,6 +340,11 @@ export default function PostSettingsSidebar({
           >
             <Users className="w-3.5 h-3.5" />
             <span>Notas</span>
+            {pendingAnchors.length > 0 && (
+              <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center shadow-2xs">
+                {pendingAnchors.length}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -838,27 +862,244 @@ export default function PostSettingsSidebar({
       )}
 
       {activeSidebarTab === 'notes' && (
-        <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-accent" /> Notas Editoriales Internas
-            </span>
-            <span className="text-[10px] font-semibold text-muted-light bg-surface-muted px-2 py-0.5 rounded border border-line">
-              Privado
-            </span>
+        <div className="space-y-4">
+          {/* 1. Módulo de Vínculos Pendientes & Anclas de Redacción */}
+          <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                <Pin className="w-3.5 h-3.5 text-amber-500" /> Vínculos Pendientes
+              </span>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30">
+                {pendingAnchors.length} {pendingAnchors.length === 1 ? 'ancla' : 'anclas'}
+              </span>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              Términos o conceptos anclados para vincular más adelante. En la web pública se muestran como texto limpio sin marcas rotas.
+            </p>
+
+            {pendingAnchors.length === 0 ? (
+              <div className="p-3.5 rounded-xl border border-dashed border-line bg-surface-subtle text-center space-y-1.5">
+                <p className="text-xs text-muted font-medium">No hay anclas de enlace pendientes.</p>
+                <p className="text-[11px] text-muted-light leading-snug">
+                  Selecciona una palabra en el editor y pulsa <strong className="text-primary font-semibold">📌</strong> en la barra superior para marcarla.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {pendingAnchors.map(anchor => {
+                  const isLinking = linkingAnchorId === anchor.id
+
+                  return (
+                    <div
+                      key={anchor.id}
+                      className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2.5 transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-amber-950 bg-amber-200/70 px-1.5 py-0.5 rounded">
+                              "{anchor.text}"
+                            </span>
+                            {anchor.topic && (
+                              <span className="text-[10px] font-semibold text-amber-800 bg-white px-2 py-0.5 rounded border border-amber-300">
+                                Tema: {anchor.topic}
+                              </span>
+                            )}
+                          </div>
+                          {anchor.note && (
+                            <p className="text-[11px] text-amber-900/80 italic leading-snug">
+                              Nota: {anchor.note}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          {onJumpToText && (
+                            <button
+                              type="button"
+                              onClick={() => onJumpToText(anchor.text)}
+                              className="p-1 text-muted hover:text-primary hover:bg-white rounded transition-colors cursor-pointer"
+                              title="Enfocar y ver en el editor"
+                            >
+                              <Search className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {onRemovePendingAnchor && (
+                            <button
+                              type="button"
+                              onClick={() => onRemovePendingAnchor(anchor.text)}
+                              className="p-1 text-muted hover:text-danger hover:bg-white rounded transition-colors cursor-pointer"
+                              title="Quitar marca y dejar como texto normal"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Botón o Formulario de Vinculación Directa */}
+                      {isLinking ? (
+                        <div className="pt-2 border-t border-amber-500/20 space-y-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-muted block">
+                            Selecciona post o ingresa URL:
+                          </span>
+                          <select
+                            value={selectedSlugOrUrl}
+                            onChange={e => setSelectedSlugOrUrl(e.target.value)}
+                            className="w-full bg-white border border-line rounded-lg p-2 text-xs text-primary focus:outline-none focus:border-accent"
+                          >
+                            <option value="">-- Elige un artículo existente --</option>
+                            {posts
+                              .filter(p => p.slug !== currentSlug)
+                              .map(p => (
+                                <option key={p.id} value={`/blog/${p.slug}`}>
+                                  {p.title} (/blog/{p.slug})
+                                </option>
+                              ))}
+                          </select>
+
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={selectedSlugOrUrl}
+                              onChange={e => setSelectedSlugOrUrl(e.target.value)}
+                              placeholder="O escribe URL manual (ej: /blog/... o https://...)"
+                              className="w-full bg-white border border-line rounded-lg px-2.5 py-1.5 text-xs text-primary focus:outline-none focus:border-accent"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (selectedSlugOrUrl && onConvertPendingAnchor) {
+                                  onConvertPendingAnchor(anchor.text, selectedSlugOrUrl)
+                                  setLinkingAnchorId(null)
+                                  setSelectedSlugOrUrl('')
+                                }
+                              }}
+                              disabled={!selectedSlugOrUrl}
+                              className="px-2.5 py-1.5 bg-accent hover:bg-accent-dark disabled:opacity-40 text-white rounded-lg text-xs font-semibold cursor-pointer shrink-0 transition-colors"
+                            >
+                              Vincular
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLinkingAnchorId(null)
+                                setSelectedSlugOrUrl('')
+                              }}
+                              className="p-1.5 text-muted hover:text-primary rounded-lg text-xs cursor-pointer shrink-0"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="pt-1 flex items-center justify-between border-t border-amber-500/20">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLinkingAnchorId(anchor.id)
+                              setSelectedSlugOrUrl('')
+                            }}
+                            className="text-xs font-semibold text-accent hover:underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <LinkIcon className="w-3.5 h-3.5" />
+                            <span>Convertir en enlace ahora</span>
+                          </button>
+                          {onJumpToText && (
+                            <button
+                              type="button"
+                              onClick={() => onJumpToText(anchor.text)}
+                              className="text-[11px] text-muted hover:text-primary font-medium cursor-pointer"
+                            >
+                              Saltar al texto →
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
-          <p className="text-xs text-muted leading-relaxed">
-            Anotaciones visibles solo para el equipo de redactores y editores de Qaway Lab (no se publican en la web).
-          </p>
+          {/* 2. Fragmentos Ocultos (Borradores privados dentro del post) */}
+          {hiddenDrafts.length > 0 && (
+            <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+                  <EyeOff className="w-3.5 h-3.5 text-muted" /> Texto Oculto al Público
+                </span>
+                <span className="text-[10px] font-semibold text-muted bg-surface-muted px-2 py-0.5 rounded border border-line">
+                  {hiddenDrafts.length} {hiddenDrafts.length === 1 ? 'fragmento' : 'fragmentos'}
+                </span>
+              </div>
+              <p className="text-xs text-muted leading-relaxed">
+                Párrafos o frases en borrador que no encajan aún. No son visibles para los visitantes del blog.
+              </p>
 
-          <textarea
-            rows={8}
-            value={internalNotes}
-            onChange={e => onNotesChange && onNotesChange(e.target.value)}
-            placeholder="Ej: Revisado por Marketing. Falta agregar el link de descarga del PDF..."
-            className="w-full bg-surface-muted border border-line rounded-lg p-3 text-xs text-primary leading-relaxed focus:outline-none focus:border-accent resize-none font-sans"
-          />
+              <div className="space-y-2">
+                {hiddenDrafts.map(draft => (
+                  <div
+                    key={draft.id}
+                    className="p-2.5 rounded-lg border border-dashed border-line bg-surface-subtle flex items-center justify-between gap-2"
+                  >
+                    <span className="text-xs text-muted italic truncate flex-1 font-mono">
+                      "{draft.text.slice(0, 45)}..."
+                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {onJumpToText && (
+                        <button
+                          type="button"
+                          onClick={() => onJumpToText(draft.text)}
+                          className="p-1 text-muted hover:text-primary hover:bg-white rounded transition-colors cursor-pointer"
+                          title="Ver en editor"
+                        >
+                          <Search className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onToggleHiddenDraft && (
+                        <button
+                          type="button"
+                          onClick={() => onToggleHiddenDraft(draft.text)}
+                          className="px-2 py-1 text-[11px] font-semibold text-primary hover:bg-white rounded border border-line transition-colors cursor-pointer flex items-center gap-1"
+                          title="Hacer visible al público"
+                        >
+                          <Eye className="w-3 h-3 text-success" />
+                          <span>Hacer público</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Notas Editoriales Generales */}
+          <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-accent" /> Notas Editoriales Internas
+              </span>
+              <span className="text-[10px] font-semibold text-muted-light bg-surface-muted px-2 py-0.5 rounded border border-line">
+                Privado
+              </span>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              Anotaciones visibles solo para el equipo de redactores y editores de Qaway Lab (no se publican en la web).
+            </p>
+
+            <textarea
+              rows={6}
+              value={internalNotes}
+              onChange={e => onNotesChange && onNotesChange(e.target.value)}
+              placeholder="Ej: Revisado por Marketing. Falta agregar el link de descarga del PDF..."
+              className="w-full bg-surface-muted border border-line rounded-lg p-3 text-xs text-primary leading-relaxed focus:outline-none focus:border-accent resize-none font-sans"
+            />
+          </div>
         </div>
       )}
     </aside>

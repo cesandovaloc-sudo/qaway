@@ -1047,6 +1047,18 @@ export default function EditorPage() {
                 }
                 return { total: 0, current: 0 }
               }}
+              onJumpToText={text => {
+                editorRef.current?.findAndHighlightKeyword(text, 0)
+              }}
+              onConvertPendingAnchor={(text, url) => {
+                editorRef.current?.convertPendingAnchorToLink(text, url)
+              }}
+              onRemovePendingAnchor={text => {
+                editorRef.current?.removePendingAnchor(text)
+              }}
+              onToggleHiddenDraft={text => {
+                editorRef.current?.toggleHiddenDraftOnAnchor(text)
+              }}
               onCloseSidebar={() => setIsSidebarOpen(false)}
               onPublish={() => handleSave('publicado')}
               onSaveDraft={() => handleSave('borrador')}

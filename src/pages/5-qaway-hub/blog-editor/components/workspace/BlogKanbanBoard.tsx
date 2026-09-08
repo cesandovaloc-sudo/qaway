@@ -5,9 +5,11 @@ import {
   Archive,
   Plus,
   RotateCcw,
+  Pin,
 } from 'lucide-react'
 import type { Post, PostStatus } from '../../types'
 import { useBlog } from '../../context/BlogContext'
+import { extractPendingAnchors } from '../../utils/pendingAnchors'
 
 interface BlogKanbanBoardProps {
   posts: Post[]
@@ -111,9 +113,24 @@ export default function BlogKanbanBoard({
                         className="cursor-pointer space-y-1.5"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium px-2 py-0.5 rounded bg-surface-muted text-primary/80 border border-line">
-                            {post.category}
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded bg-surface-muted text-primary/80 border border-line">
+                              {post.category}
+                            </span>
+                            {(() => {
+                              const count = post.contentHtml ? extractPendingAnchors(post.contentHtml).length : 0
+                              if (count === 0) return null
+                              return (
+                                <span
+                                  className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center gap-1"
+                                  title={`${count} enlaces pendientes`}
+                                >
+                                  <Pin className="w-2.5 h-2.5 text-amber-600" />
+                                  <span>{count}</span>
+                                </span>
+                              )
+                            })()}
+                          </div>
                           <span className="text-xs font-mono text-muted flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5 text-muted-light" /> ~{post.readingTime || 2}m
                           </span>

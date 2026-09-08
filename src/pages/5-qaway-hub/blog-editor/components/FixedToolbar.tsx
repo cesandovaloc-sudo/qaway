@@ -27,6 +27,8 @@ import {
   ChevronDown,
   Workflow,
   Mail,
+  Pin,
+  EyeOff,
 } from 'lucide-react'
 
 interface FixedToolbarProps {
@@ -117,6 +119,37 @@ export default function FixedToolbar({
     }
 
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+  }
+
+  const togglePendingAnchor = () => {
+    if (editor.isActive('pendingLink')) {
+      editor.chain().focus().extendMarkRange('pendingLink').unsetMark('pendingLink').run()
+      return
+    }
+
+    const { from, to } = editor.state.selection
+    const selectedText = editor.state.doc.textBetween(from, to, ' ').trim()
+
+    const topic = window.prompt(
+      '📌 Enlace Pendiente - Tema o Artículo futuro:',
+      selectedText || ''
+    )
+    if (topic === null) return
+
+    const note = window.prompt(
+      'Nota o recordatorio interno (opcional):',
+      ''
+    ) || ''
+
+    editor.chain().focus().setMark('pendingLink', { topic: topic.trim(), note: note.trim() }).run()
+  }
+
+  const toggleHiddenDraft = () => {
+    if (editor.isActive('hiddenDraft')) {
+      editor.chain().focus().extendMarkRange('hiddenDraft').unsetMark('hiddenDraft').run()
+    } else {
+      editor.chain().focus().setMark('hiddenDraft').run()
+    }
   }
 
   const btnClass = (isActive: boolean) =>
@@ -264,6 +297,30 @@ export default function FixedToolbar({
           title="Insertar enlace"
         >
           <LinkIcon className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={togglePendingAnchor}
+          className={
+            editor.isActive('pendingLink')
+              ? 'w-8 h-8 rounded-md text-xs bg-amber-500 text-white font-bold shadow-xs flex items-center justify-center cursor-pointer select-none'
+              : btnClass(false)
+          }
+          title="Marcar como Enlace Pendiente / Nota de Vinculación Futura"
+        >
+          <Pin className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={toggleHiddenDraft}
+          className={
+            editor.isActive('hiddenDraft')
+              ? 'w-8 h-8 rounded-md text-xs bg-zinc-700 text-white font-bold shadow-xs flex items-center justify-center cursor-pointer select-none'
+              : btnClass(false)
+          }
+          title="Ocultar selección para lectores (Borrador interno solo visible en editor)"
+        >
+          <EyeOff className="w-4 h-4" />
         </button>
 
         {/* Selector de Color de Texto y Resaltador */}
