@@ -257,7 +257,7 @@ export default function AppRouter() {
           element={<MarketingStudioTwentyPage />}
         />
         <Route
-          path="academy/*"
+          path="academy/app/*"
           element={<AcademyRealAppPage />}
         />
         <Route
@@ -392,6 +392,7 @@ export default function AppRouter() {
             element={<Navigate to="/sistemas-digitales/automatizacion" replace />}
           />
 
+          <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
           <Route path="academy-legacy" element={renderRoute('academy', <AcademyPage />)} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
