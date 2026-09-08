@@ -377,21 +377,18 @@ export default function BlogPage() {
               className="h-full w-full object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-100"
               loading="lazy"
             />
-            <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/20 bg-[#191918]/85 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-md shadow-xs">
-                {article.categoryLabel}
-              </span>
-              <span className="rounded-full border border-white/20 bg-gradient-to-r from-[#ea580c] to-[#c2410c] px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-xs">
-                {article.formatLabel}
-              </span>
-            </div>
           </div>
           <div className="flex flex-1 flex-col justify-between p-6">
             <div>
-              <div className="mb-3 flex items-center gap-4 font-mono text-xs text-zinc-500">
+              <div className="mb-3 flex flex-wrap items-center gap-2 font-mono text-[11px] text-zinc-500">
+                <span className="font-bold uppercase tracking-wider text-[#ff4b0b]">
+                  {article.categoryLabel}
+                </span>
+                <span>•</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-[#ea580c]" /> {article.date}
                 </span>
+                <span>•</span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5 text-[#ea580c]" /> {article.readTime}
                 </span>
