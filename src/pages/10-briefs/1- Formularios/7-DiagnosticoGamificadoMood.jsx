@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import {
   Clock, Award, Lightbulb, ArrowRight, ArrowLeft, CheckCircle2,
   Sparkles, RotateCcw, Send, ShieldCheck, Zap, TrendingUp,
-  Check, Flame, Trophy, Compass, Star, ChevronRight
+  Compass, Flame, Trophy, Star, Target
 } from 'lucide-react'
 
 const PILLARS = {
@@ -181,7 +181,7 @@ export default function DiagnosticoGamificadoMood() {
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
-  const [pulseActive, setPulseActive] = useState(false)
+  const [iconPulse, setIconPulse] = useState(false)
 
   const currentQuestion = QUESTIONS[currentStep]
   const selectedOptionIndex = answers[currentQuestion?.id]
@@ -200,11 +200,11 @@ export default function DiagnosticoGamificadoMood() {
 
   const finalScorePercentage = Math.round((currentTotalScore / maxScore) * 100)
 
-  // Trigger real-time pulse when an option is clicked
+  // Trigger pulse ONLY on the central icon when option is chosen
   const handleSelectOption = (optionIndex) => {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionIndex }))
-    setPulseActive(true)
-    setTimeout(() => setPulseActive(false), 500)
+    setIconPulse(true)
+    setTimeout(() => setIconPulse(false), 450)
   }
 
   const handleNext = () => {
@@ -228,61 +228,55 @@ export default function DiagnosticoGamificadoMood() {
     setEmailSubmitted(false)
   }
 
-  // Determine current Visual Mood State
-  const getVisualMoodState = () => {
+  // Dynamic stages for the central icon (the background stays ONE continuous warm gradient)
+  const getIconStageData = () => {
     if (answeredCount === 0) {
       return {
-        stage: 'init',
-        badge: 'Auditoría en Progreso 🔍',
-        gradient: 'from-slate-900 via-indigo-950 to-slate-900',
-        textColor: 'text-white',
-        statusTitle: 'Calibrando Infraestructura',
-        statusDesc: 'Responde las 10 preguntas para revelar el mapa de madurez de tu negocio.',
-        energyLevel: '01 / 03',
+        stageId: 'start',
         icon: Compass,
-        accentBg: 'bg-white/10 text-white',
+        badgeText: 'Auditoría en Curso',
+        subText: 'Comienza a responder',
+        rotation: 0,
       }
     }
-    if (currentScorePercentage >= 75) {
+    if (currentScorePercentage >= 80) {
       return {
-        stage: 'elite',
-        badge: '¡Nivel Alto Rendimiento! 🏆',
-        gradient: 'from-[#ff4b0b] via-amber-500 to-yellow-400',
-        textColor: 'text-slate-950',
-        statusTitle: 'Excelente Criterio Comercial',
-        statusDesc: 'Tus respuestas reflejan una empresa con sistemas sólidos y visión de escala.',
-        energyLevel: 'Nivel Élite 🔥',
+        stageId: 'trophy',
         icon: Trophy,
-        accentBg: 'bg-slate-950 text-white',
+        badgeText: '¡Nivel Élite! 🏆',
+        subText: 'Rendimiento sobresaliente',
+        rotation: 0,
       }
     }
-    if (currentScorePercentage >= 45) {
+    if (currentScorePercentage >= 60) {
       return {
-        stage: 'growth',
-        badge: '¡Tracción & Oportunidad! ⚡',
-        gradient: 'from-[#ff4b0b] via-[#e04008] to-amber-600',
-        textColor: 'text-white',
-        statusTitle: 'Potencial de Sistematización',
-        statusDesc: 'Detectando áreas clave para automatizar y duplicar tu capacidad de cierre.',
-        energyLevel: 'Nivel Crecimiento ⚡',
+        stageId: 'flame',
+        icon: Flame,
+        badgeText: '¡Alta Tracción! 🔥',
+        subText: 'Crecimiento acelerado',
+        rotation: 0,
+      }
+    }
+    if (currentScorePercentage >= 40) {
+      return {
+        stageId: 'zap',
         icon: Zap,
-        accentBg: 'bg-white/20 text-white',
+        badgeText: 'Potencial Activo ⚡',
+        subText: 'Optimizando flujos',
+        rotation: 0,
       }
     }
     return {
-      stage: 'foundation',
-      badge: 'Construyendo Cimientos 🛠️',
-      gradient: 'from-slate-800 via-slate-900 to-indigo-950',
-      textColor: 'text-white',
-      statusTitle: 'Fase de Estructuración',
-      statusDesc: 'Identificando cuellos de botella manuales antes de acelerar inversión.',
-      energyLevel: 'Nivel Inicial 🌱',
+      stageId: 'trend',
       icon: TrendingUp,
-      accentBg: 'bg-white/10 text-orange-300',
+      badgeText: 'Cimientos Iniciales 🌱',
+      subText: 'Detectando mejoras',
+      rotation: 0,
     }
   }
 
-  const visualMood = getVisualMoodState()
+  const iconData = getIconStageData()
+  const CurrentIcon = iconData.icon
 
   // Pillar calculations
   const calculatePillarScore = (pillarName) => {
@@ -303,7 +297,7 @@ export default function DiagnosticoGamificadoMood() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] text-slate-900 font-sans selection:bg-[#ff4b0b] selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 font-sans selection:bg-[#ff4b0b] selection:text-white flex flex-col justify-between">
       {/* Header */}
       <header className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
         <div className="flex items-center gap-3">
@@ -315,7 +309,7 @@ export default function DiagnosticoGamificadoMood() {
           </Link>
           <span className="hidden sm:inline-block text-slate-300">|</span>
           <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
-            Formulario 07: Diagnóstico Reactivo con Canvas Visual Animado
+            Formulario 07: Diagnóstico Cuadrado con Icono Animado
           </span>
         </div>
 
@@ -324,94 +318,92 @@ export default function DiagnosticoGamificadoMood() {
             to="/formularios"
             className="text-xs font-bold text-slate-600 hover:text-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
           >
-            ← Ver los 6 Modelos
+            ← Ver los 7 Modelos
           </Link>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-10 flex items-center justify-center">
-        <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[680px]">
+      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+        <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[640px]">
           
           {/* =============================================================
-              LEFT PANEL: DYNAMIC VISUAL MOOD CANVAS (REACTS IN REAL TIME)
-              (Changes gradients, glowing pulses, and badge status on answers)
+              LEFT PANEL: BALANCED SQUARISH CARD WITH SOLID CONTINUOUS GRADIENT
+              (The background color stays solid & elegant, only the icon animates)
              ============================================================= */}
-          <aside className="lg:col-span-5 p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden bg-slate-100/60">
-            {/* Animated Dynamic Mood Card */}
-            <motion.div
-              layout
-              animate={{ scale: pulseActive ? 1.02 : 1 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className={`w-full h-full rounded-3xl p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden shadow-xl transition-all duration-700 bg-gradient-to-br ${visualMood.gradient} ${visualMood.textColor}`}
-            >
-              {/* Subtle ambient lighting flares */}
-              <div className="absolute top-0 right-0 w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-              <div className="absolute bottom-0 left-0 w-72 h-72 bg-black/10 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
+          <aside className="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex items-center justify-center bg-slate-50/70 border-r border-slate-100">
+            {/* Proportioned Squarish Card (Single Continuous Warm Gradient) */}
+            <div className="w-full max-w-[360px] aspect-square rounded-[32px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-orange-500/20 bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white">
+              
+              {/* Subtle ambient lighting flares inside the square */}
+              <div className="absolute top-0 right-0 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none -mr-12 -mt-12" />
+              <div className="absolute bottom-0 left-0 w-44 h-44 bg-black/10 rounded-full blur-2xl pointer-events-none -ml-12 -mb-12" />
 
-              {/* Top Tag & Energy Status */}
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-sm backdrop-blur-md ${visualMood.accentBg}`}>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{visualMood.badge}</span>
-                  </div>
-                  <span className="text-xs font-mono font-bold opacity-80">
-                    {visualMood.energyLevel}
-                  </span>
+              {/* Top Dynamic Tag inside the Square */}
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-sm">
+                  <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+                  <span>{iconData.badgeText}</span>
                 </div>
-
-                <div className="space-y-2 pt-2">
-                  <span className="text-[11px] font-extrabold uppercase tracking-widest opacity-70 block">
-                    MONITOR DE MADUREZ COMERCIAL
-                  </span>
-                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
-                    {visualMood.statusTitle}
-                  </h2>
-                  <p className="text-xs sm:text-sm font-medium leading-relaxed opacity-90">
-                    {visualMood.statusDesc}
-                  </p>
-                </div>
+                <span className="text-[11px] font-mono font-bold text-white/90 bg-black/10 px-2 py-0.5 rounded-md">
+                  {answeredCount}/10
+                </span>
               </div>
 
-              {/* Center Interactive 3D Visual Mood Orb */}
-              <div className="relative z-10 my-8 py-6 flex flex-col items-center justify-center text-center space-y-4">
+              {/* CENTER: ANIMATED 3D ICON / ILLUSTRATION ORB */}
+              <div className="relative z-10 flex flex-col items-center justify-center text-center my-auto">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={iconData.stageId}
+                    initial={{ scale: 0.7, opacity: 0, rotate: -15 }}
+                    animate={{
+                      scale: iconPulse ? 1.18 : 1,
+                      opacity: 1,
+                      rotate: 0,
+                      y: [-4, 4, -4],
+                    }}
+                    exit={{ scale: 0.7, opacity: 0, rotate: 15 }}
+                    transition={{
+                      scale: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+                      opacity: { duration: 0.25 },
+                      y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+                    }}
+                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white/25 backdrop-blur-md border-2 border-white/40 flex items-center justify-center shadow-xl shadow-black/10"
+                  >
+                    <CurrentIcon className="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-md" />
+                  </motion.div>
+                </AnimatePresence>
+
                 <motion.div
-                  key={visualMood.stage}
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-white/25 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-lg shadow-black/5"
+                  animate={{ scale: iconPulse ? 1.08 : 1 }}
+                  className="mt-3 text-center"
                 >
-                  <visualMood.icon className="w-14 h-14" />
-                </motion.div>
-
-                {/* Real-time score indicator */}
-                <div className="space-y-1">
-                  <div className="text-3xl sm:text-4xl font-black tracking-tighter">
-                    {answeredCount > 0 ? `${currentScorePercentage}%` : '—'}
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider opacity-80 block">
-                    Puntaje en Vivo ({answeredCount}/10 Respondidas)
+                  <span className="text-2xl sm:text-3xl font-black tracking-tight text-white block">
+                    {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
                   </span>
-                </div>
+                  <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider block">
+                    {iconData.subText}
+                  </span>
+                </motion.div>
               </div>
 
-              {/* Bottom Card Footer */}
-              <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs font-medium opacity-90">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4" />
+              {/* Bottom Card Note */}
+              <div className="relative z-10 pt-2 border-t border-white/20 flex items-center justify-between text-[11px] font-semibold text-white/90">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Qaway Lab Engine</span>
                 </div>
-                <span className="font-mono text-[11px] font-bold">4 PILARES</span>
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-white/15 px-2 py-0.5 rounded">
+                  4 Pilares
+                </span>
               </div>
-            </motion.div>
+            </div>
           </aside>
 
           {/* =============================================================
-              RIGHT PANEL: INTERACTIVE QUESTION & FORM CONTROLS
+              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW
              ============================================================= */}
-          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-14 flex flex-col justify-between bg-white">
+          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
             {!isCompleted ? (
               <>
                 {/* Stepper Header */}
