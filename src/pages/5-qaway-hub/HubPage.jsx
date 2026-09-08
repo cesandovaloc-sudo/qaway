@@ -167,7 +167,7 @@ const routes = [
   {
     icon: Target,
     title: 'Marketing Studio OS (Revolut UI)',
-    description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping HubSpot, Auditoría POEM y Simulador de Funnel.',
+    description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping Editorial, Auditoría POEM y Simulador de Funnel.',
     path: '/hub/marketing',
     access: 'pro',
     badge: 'v1.0',
@@ -178,7 +178,7 @@ const routes = [
   {
     icon: Kanban,
     title: 'Twenty Revenue OS (Pipeline CRM)',
-    description: 'CRM y Pipeline visual estilo Twenty CRM: Vista Kanban, Tablas Relacionales, Atribución HubSpot y Drawer Lateral.',
+    description: 'CRM y Pipeline visual estilo Twenty CRM: Vista Kanban, Tablas Relacionales, Atribución Multicanal y Drawer Lateral.',
     path: '/hub/marketing2',
     access: 'pro',
     badge: 'Twenty UI',

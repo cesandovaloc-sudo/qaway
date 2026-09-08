@@ -37,11 +37,11 @@ import {
 const STORAGE_KEY = 'qaway_twenty_crm_os_v1'
 
 const PIPELINE_STAGES = [
-  { id: 'lead', name: '1. Nuevo Lead', color: 'bg-blue-50 text-blue-700 border-blue-200', dotColor: 'bg-blue-500', hubspotStage: 'TOFU' },
-  { id: 'contacted', name: '2. Contactado', color: 'bg-amber-50 text-amber-700 border-amber-200', dotColor: 'bg-amber-500', hubspotStage: 'TOFU' },
-  { id: 'qualified', name: '3. Calificado (MQL)', color: 'bg-purple-50 text-purple-700 border-purple-200', dotColor: 'bg-purple-500', hubspotStage: 'MOFU' },
-  { id: 'proposal', name: '4. Propuesta / Demo', color: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotColor: 'bg-indigo-500', hubspotStage: 'MOFU' },
-  { id: 'won', name: '5. Cerrado Ganado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', dotColor: 'bg-emerald-500', hubspotStage: 'BOFU' }
+  { id: 'lead', name: '1. Nuevo Lead', color: 'bg-blue-50 text-blue-700 border-blue-200', dotColor: 'bg-blue-500', stageType: 'TOFU' },
+  { id: 'contacted', name: '2. Contactado', color: 'bg-amber-50 text-amber-700 border-amber-200', dotColor: 'bg-amber-500', stageType: 'TOFU' },
+  { id: 'qualified', name: '3. Calificado (MQL)', color: 'bg-purple-50 text-purple-700 border-purple-200', dotColor: 'bg-purple-500', stageType: 'MOFU' },
+  { id: 'proposal', name: '4. Propuesta / Demo', color: 'bg-indigo-50 text-indigo-700 border-indigo-200', dotColor: 'bg-indigo-500', stageType: 'MOFU' },
+  { id: 'won', name: '5. Cerrado Ganado', color: 'bg-emerald-50 text-emerald-700 border-emerald-200', dotColor: 'bg-emerald-500', stageType: 'BOFU' }
 ]
 
 const INITIAL_DEALS = [
@@ -56,7 +56,7 @@ const INITIAL_DEALS = [
     priority: 'Alta',
     email: 'carlos@andinalogistics.com',
     phone: '+51 987 654 321',
-    formatOrigin: 'Ebook / Guía de Automatización (HubSpot MOFU)',
+    formatOrigin: 'Ebook / Guía de Automatización (Funnel MOFU)',
     channel: 'LinkedIn Inbound',
     jtbd: 'Automatizar captura y trazabilidad de pedidos para no perder clientes en WhatsApp.',
     nextAction: 'Presentar demo técnica de integración el viernes a las 10:00 AM.',
@@ -74,7 +74,7 @@ const INITIAL_DEALS = [
     priority: 'Alta',
     email: 'valeria@beautyconcept.pe',
     phone: '+51 991 223 344',
-    formatOrigin: 'Webinar / Masterclass de Conversión (HubSpot MOFU)',
+    formatOrigin: 'Webinar / Masterclass de Conversión (Funnel MOFU)',
     channel: 'Instagram Ads',
     jtbd: 'Tienda online con pasarela de pagos integrada y WhatsApp automatizado.',
     nextAction: 'Enviar propuesta económica de desarrollo web acelerado.',
@@ -92,7 +92,7 @@ const INITIAL_DEALS = [
     priority: 'Media',
     email: 'mparedes@horizonte.com',
     phone: '+51 977 889 900',
-    formatOrigin: 'Infografía: 5 Errores en Landing Pages (HubSpot TOFU)',
+    formatOrigin: 'Infografía: 5 Errores en Landing Pages (Funnel TOFU)',
     channel: 'Google Search SEO',
     jtbd: 'Captar leads calificados para venta de departamentos en Miraflores.',
     nextAction: 'Llamada de prospección y diagnóstico de funnel.',
@@ -110,7 +110,7 @@ const INITIAL_DEALS = [
     priority: 'Alta',
     email: 'elena@consultoresqa.com',
     phone: '+51 944 332 211',
-    formatOrigin: 'Caso de Éxito: Empresa B2B x3 Ventas (HubSpot BOFU)',
+    formatOrigin: 'Caso de Éxito: Empresa B2B x3 Ventas (Funnel BOFU)',
     channel: 'Referido Directo',
     jtbd: 'Web corporativa con portal de clientes y panel de reportes mensuales.',
     nextAction: 'Kick-off de proyecto y levantamiento de requerimientos.',
@@ -141,7 +141,7 @@ export default function MarketingStudioTwentyPage() {
     priority: 'Media',
     email: '',
     phone: '',
-    formatOrigin: 'Ebook / Guía (HubSpot)',
+    formatOrigin: 'Ebook / Guía (Funnel)',
     channel: 'LinkedIn',
     jtbd: '',
     nextAction: ''
@@ -224,7 +224,7 @@ export default function MarketingStudioTwentyPage() {
       priority: 'Media',
       email: '',
       phone: '',
-      formatOrigin: 'Ebook / Guía (HubSpot)',
+      formatOrigin: 'Ebook / Guía (Funnel)',
       channel: 'LinkedIn',
       jtbd: '',
       nextAction: ''
@@ -377,96 +377,84 @@ export default function MarketingStudioTwentyPage() {
           </div>
         </div>
 
-        {/* 2. PIPELINE CONTAINER (KANBAN OR TABLE) */}
-        {viewMode === 'kanban' ? (
-          
-          /* KANBAN BOARD VIEW */
+        {/* 1. KANBAN VIEW (Twenty Style) */}
+        {viewMode === 'kanban' && (
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5 items-start">
             {PIPELINE_STAGES.map((stage) => {
               const stageDeals = filteredDeals.filter(d => d.stage === stage.id)
-              const stageTotal = stageDeals.reduce((sum, d) => sum + (Number(d.value) || 0), 0)
+              const stageValue = stageDeals.reduce((sum, d) => sum + d.value, 0)
 
               return (
-                <div key={stage.id} className="bg-slate-100/70 border border-slate-200/80 rounded-xl p-2.5 space-y-2.5 min-h-[500px]">
-                  
-                  {/* Stage Header */}
-                  <div className="flex items-center justify-between px-1 py-0.5">
+                <div key={stage.id} className="bg-slate-100/70 border border-slate-200/70 rounded-xl p-2.5 space-y-2.5 min-h-[500px] flex flex-col">
+                  {/* Column Header */}
+                  <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-1.5">
                       <span className={`w-2 h-2 rounded-full ${stage.dotColor}`} />
-                      <span className="font-bold text-slate-800 text-[11px]">{stage.name}</span>
-                      <span className="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600 font-bold text-[9px]">
+                      <span className="font-bold text-slate-800 text-xs">{stage.name}</span>
+                      <span className="text-[10px] font-mono font-bold text-slate-400 bg-white px-1.5 py-0.2 rounded border border-slate-200">
                         {stageDeals.length}
                       </span>
                     </div>
-                    <span className="font-mono font-bold text-[10px] text-slate-500">
-                      ${stageTotal.toLocaleString()}
-                    </span>
+                    <span className="text-[10px] font-mono text-slate-500 font-semibold">${stageValue.toLocaleString()}</span>
                   </div>
 
-                  {/* Deals Cards List */}
-                  <div className="space-y-2">
+                  {/* Deals Cards in Column */}
+                  <div className="space-y-2 flex-1">
                     {stageDeals.map((deal) => (
-                      <div
+                      <motion.div
                         key={deal.id}
+                        layoutId={deal.id}
                         onClick={() => setSelectedDeal(deal)}
-                        className={`group p-3 rounded-xl bg-white border border-slate-200/90 shadow-xs hover:border-slate-400/80 hover:shadow-sm cursor-pointer transition-all space-y-2 ${
-                          selectedDeal?.id === deal.id ? 'ring-2 ring-slate-900 border-transparent' : ''
-                        }`}
+                        className="p-3 bg-white rounded-lg border border-slate-200/90 shadow-2xs hover:border-slate-400 hover:shadow-xs transition-all cursor-pointer space-y-2 group"
                       >
-                        {/* Company & Model Badge */}
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-900 text-xs truncate max-w-[120px]">
-                            {deal.company}
-                          </span>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                            deal.type === 'B2B' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <span className="font-bold text-slate-900 text-xs block group-hover:text-purple-600 transition-colors">
+                              {deal.name}
+                            </span>
+                            <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                              <Building2 className="w-3 h-3 text-slate-300" />
+                              {deal.company}
+                            </span>
+                          </div>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                            deal.type === 'B2B' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
                           }`}>
                             {deal.type}
                           </span>
                         </div>
 
-                        {/* Contact Name & Title */}
-                        <div>
-                          <div className="text-[11px] font-medium text-slate-700">{deal.name}</div>
-                          <div className="text-[10px] text-slate-400 truncate">{deal.title}</div>
+                        {/* Format & Origin Tag */}
+                        <div className="text-[10px] text-slate-500 bg-slate-50 p-1.5 rounded border border-slate-100 flex items-center gap-1">
+                          <Tag className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate">{deal.formatOrigin}</span>
                         </div>
 
-                        {/* Format & Value Footer */}
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                          <span className="font-mono font-bold text-slate-900 text-xs">
-                            ${deal.value.toLocaleString()}
-                          </span>
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
-                            deal.priority === 'Alta' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
-                          }`}>
-                            {deal.priority}
-                          </span>
+                        {/* Card Bottom Meta */}
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                          <span className="font-mono font-bold text-slate-900">${deal.value.toLocaleString()}</span>
+                          <span className="text-[10px] text-slate-400">{deal.updatedAt}</span>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
 
-                    {/* Quick Add Placeholder */}
-                    <button
-                      onClick={() => {
-                        setNewDeal(prev => ({ ...prev, stage: stage.id }))
-                        setShowNewDealModal(true)
-                      }}
-                      className="w-full py-2 rounded-lg border border-dashed border-slate-300 hover:border-slate-400 text-slate-400 hover:text-slate-600 font-semibold text-[11px] flex items-center justify-center gap-1 transition-all"
-                    >
-                      <Plus className="w-3 h-3" /> Añadir
-                    </button>
+                    {stageDeals.length === 0 && (
+                      <div className="h-24 border border-dashed border-slate-300 rounded-lg flex items-center justify-center text-[11px] text-slate-400 font-medium">
+                        Sin oportunidades
+                      </div>
+                    )}
                   </div>
                 </div>
               )
             })}
           </div>
+        )}
 
-        ) : (
-
-          /* TABLE VIEW (RELATIONAL SPREADSHEET STYLE) */
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        {/* 2. TABLE VIEW (Twenty Relational Table Style) */}
+        {viewMode === 'table' && (
+          <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
                   <tr>
                     <th className="py-3 px-4">Contacto / Cuenta</th>
@@ -474,7 +462,7 @@ export default function MarketingStudioTwentyPage() {
                     <th className="py-3 px-4">Etapa Pipeline</th>
                     <th className="py-3 px-4">Valor ($)</th>
                     <th className="py-3 px-4">Prioridad</th>
-                    <th className="py-3 px-4">Origen HubSpot</th>
+                    <th className="py-3 px-4">Origen Embudo</th>
                     <th className="py-3 px-4">Última Actividad</th>
                     <th className="py-3 px-4 text-right">Acciones</th>
                   </tr>
@@ -489,18 +477,18 @@ export default function MarketingStudioTwentyPage() {
                         className="hover:bg-slate-50/80 cursor-pointer transition-colors"
                       >
                         <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900">{deal.company}</div>
-                          <div className="text-[11px] text-slate-500">{deal.name} • {deal.title}</div>
+                          <div className="font-bold text-slate-900">{deal.name}</div>
+                          <div className="text-[11px] text-slate-400">{deal.company} • {deal.title}</div>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            deal.type === 'B2B' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            deal.type === 'B2B' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'
                           }`}>
                             {deal.type}
                           </span>
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${currentStageObj?.color}`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${currentStageObj?.color}`}>
                             {currentStageObj?.name}
                           </span>
                         </td>
@@ -508,27 +496,27 @@ export default function MarketingStudioTwentyPage() {
                           ${deal.value.toLocaleString()}
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                            deal.priority === 'Alta' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-600'
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                            deal.priority === 'Alta' ? 'bg-rose-50 text-rose-700' : 'bg-slate-100 text-slate-600'
                           }`}>
                             {deal.priority}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-[11px] text-slate-500 max-w-[180px] truncate">
+                        <td className="py-3 px-4 text-[11px] text-slate-500 max-w-[200px] truncate">
                           {deal.formatOrigin}
                         </td>
-                        <td className="py-3 px-4 text-[10px] text-slate-400">
+                        <td className="py-3 px-4 text-slate-400 text-[11px]">
                           {deal.updatedAt}
                         </td>
                         <td className="py-3 px-4 text-right">
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              handleDeleteDeal(deal.id)
+                              setSelectedDeal(deal)
                             }}
-                            className="p-1 rounded text-slate-400 hover:text-red-600 transition-colors"
+                            className="p-1 text-slate-400 hover:text-slate-800"
                           >
-                            ✕
+                            <ChevronRight className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
@@ -542,77 +530,77 @@ export default function MarketingStudioTwentyPage() {
 
       </main>
 
-      {/* 3. TWENTY SIDE DRAWER (INSPECTOR PANEL) */}
+      {/* 3. TWENTY SIDE DRAWER (Detail Inspector View) */}
       <AnimatePresence>
         {selectedDeal && (
-          <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-xs">
+          <div className="fixed inset-0 z-40 flex justify-end bg-slate-900/20 backdrop-blur-2xs">
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-w-md bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between overflow-y-auto"
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="w-full max-w-md bg-white h-full shadow-2xl border-l border-slate-200 flex flex-col justify-between"
             >
-              <div className="p-6 space-y-6">
-                
-                {/* Header with Close */}
-                <div className="flex items-start justify-between pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={selectedDeal.avatar}
-                      alt={selectedDeal.name}
-                      className="w-11 h-11 rounded-full object-cover ring-2 ring-slate-100"
-                    />
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 leading-tight">{selectedDeal.company}</h3>
-                      <p className="text-xs text-slate-500">{selectedDeal.name} • {selectedDeal.title}</p>
-                    </div>
+              
+              {/* Drawer Header */}
+              <div className="p-5 border-b border-slate-100 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={selectedDeal.avatar}
+                    alt={selectedDeal.name}
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  />
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900">{selectedDeal.name}</h3>
+                    <p className="text-[11px] text-slate-400">{selectedDeal.company} • {selectedDeal.title}</p>
                   </div>
-                  <button
-                    onClick={() => setSelectedDeal(null)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
                 </div>
+                <button
+                  onClick={() => setSelectedDeal(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-                {/* Pipeline Stage Quick Shift */}
-                <div className="space-y-2">
-                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    Fase en el Pipeline
-                  </label>
-                  <div className="grid grid-cols-2 gap-1.5">
+              {/* Drawer Body Details */}
+              <div className="p-5 space-y-5 flex-1 overflow-y-auto">
+                
+                {/* Stage Progress Selector */}
+                <div className="space-y-1.5">
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Etapa del Deal</div>
+                  <div className="grid grid-cols-5 gap-1">
                     {PIPELINE_STAGES.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => handleMoveStage(selectedDeal.id, s.id)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-left border transition-all ${
+                        onClick={() => handleUpdateStage(selectedDeal.id, s.id)}
+                        className={`py-1.5 text-[10px] font-bold rounded border text-center transition-all ${
                           selectedDeal.stage === s.id
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                            ? `${s.color} ring-1 ring-slate-900/20 shadow-2xs`
+                            : 'bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100'
                         }`}
                       >
-                        {s.name}
+                        {s.name.split('.')[0]}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Financial Value & Model */}
-                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+                {/* Deal Value & Priority */}
+                <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">Valor del Trato</div>
-                    <div className="text-base font-bold font-mono text-slate-900">${selectedDeal.value.toLocaleString()} USD</div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold">Valor Estimado</span>
+                    <div className="text-base font-bold font-mono text-slate-900">${selectedDeal.value.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">Modelo</div>
-                    <div className="text-xs font-bold text-indigo-600">{selectedDeal.type} (Mercado)</div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold">Prioridad</span>
+                    <div className="text-xs font-bold text-rose-600 pt-0.5">{selectedDeal.priority}</div>
                   </div>
                 </div>
 
-                {/* Contact Information */}
+                {/* Contact Data */}
                 <div className="space-y-2">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Contacto</div>
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Información de Contacto</div>
                   <div className="space-y-1.5 text-xs text-slate-700">
                     <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100">
                       <Mail className="w-3.5 h-3.5 text-slate-400" />
@@ -625,9 +613,9 @@ export default function MarketingStudioTwentyPage() {
                   </div>
                 </div>
 
-                {/* HubSpot Methodology Attribution */}
+                {/* Attribution */}
                 <div className="space-y-2">
-                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Atribución HubSpot (Pág. 6)</div>
+                  <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Atribución de Embudo</div>
                   <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-100 text-xs text-purple-900 space-y-1">
                     <div className="font-bold flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-purple-600" />
@@ -689,7 +677,7 @@ export default function MarketingStudioTwentyPage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-sm font-bold text-slate-900">Crear Nueva Oportunidad</h3>
-                <p className="text-[11px] text-slate-400">Twenty Revenue OS & HubSpot Attribution</p>
+                <p className="text-[11px] text-slate-400">Twenty Revenue OS & Atribución Multicanal</p>
               </div>
               <button onClick={() => setShowNewDealModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
@@ -792,19 +780,19 @@ export default function MarketingStudioTwentyPage() {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">Formato de Conversión HubSpot (Pág. 6)</label>
+                <label className="block text-slate-700 font-bold mb-1">Formato de Conversión</label>
                 <select
                   value={newDeal.formatOrigin}
                   onChange={(e) => setNewDeal(d => ({ ...d, formatOrigin: e.target.value }))}
                   className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-slate-400 font-semibold"
                 >
-                  <option value="Infografía (HubSpot TOFU)">Infografía (HubSpot TOFU)</option>
-                  <option value="Video Corto (HubSpot TOFU)">Video Corto (HubSpot TOFU)</option>
-                  <option value="Ebook / Guía (HubSpot MOFU)">Ebook / Guía (HubSpot MOFU)</option>
-                  <option value="Muestra Gratis / Demo (HubSpot MOFU)">Muestra Gratis / Demo (HubSpot MOFU)</option>
-                  <option value="Webinar / Masterclass (HubSpot MOFU)">Webinar / Masterclass (HubSpot MOFU)</option>
-                  <option value="Caso de Éxito (HubSpot BOFU)">Caso de Éxito (HubSpot BOFU)</option>
-                  <option value="Testimonio Directo (HubSpot BOFU)">Testimonio Directo (HubSpot BOFU)</option>
+                  <option value="Infografía (TOFU)">Infografía (TOFU)</option>
+                  <option value="Video Corto (TOFU)">Video Corto (TOFU)</option>
+                  <option value="Ebook / Guía (MOFU)">Ebook / Guía (MOFU)</option>
+                  <option value="Muestra Gratis / Demo (MOFU)">Muestra Gratis / Demo (MOFU)</option>
+                  <option value="Webinar / Masterclass (MOFU)">Webinar / Masterclass (MOFU)</option>
+                  <option value="Caso de Éxito (BOFU)">Caso de Éxito (BOFU)</option>
+                  <option value="Testimonio Directo (BOFU)">Testimonio Directo (BOFU)</option>
                 </select>
               </div>
 

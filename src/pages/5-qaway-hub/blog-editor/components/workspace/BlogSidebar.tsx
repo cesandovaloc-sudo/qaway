@@ -158,7 +158,7 @@ export default function BlogSidebar({
           >
             <div className="flex items-center gap-2.5">
               <BookOpen className="w-4 h-4 text-muted" />
-              <span>Metodología HubSpot</span>
+              <span>Guía Editorial & SEO</span>
             </div>
             <span className="text-xs font-mono text-muted">Guía</span>
           </button>

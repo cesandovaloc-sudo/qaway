@@ -23,7 +23,7 @@ export default function HubSpotGuideSection() {
       <div className="bg-linear-to-r from-[#18181b] to-[#24262e] text-white p-6 sm:p-8 rounded-2xl shadow-lg border border-line/10 relative overflow-hidden">
         <div className="relative z-10 max-w-2xl space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs font-bold uppercase tracking-wider">
-            <BookOpen className="w-3.5 h-3.5" /> Metodología Oficial HubSpot Academy
+            <BookOpen className="w-3.5 h-3.5" /> Metodología de Calidad Editorial & SEO
           </div>
           <h2 className="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight">
             Manual Editorial: Contenido que Atrapa, Posiciona y Convierte
@@ -124,7 +124,7 @@ export default function HubSpotGuideSection() {
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
                 <Search className="w-5 h-5 text-accent" />
-                Estrategia de Palabras Clave y Prevención de Saturación (HubSpot)
+                Estrategia de Palabras Clave y Prevención de Saturación
               </h4>
               <span className="text-xs font-mono font-bold bg-accent/10 text-accent px-2.5 py-1 rounded">
                 1 Long-Tail Keyword / Post
@@ -157,10 +157,10 @@ export default function HubSpotGuideSection() {
               </div>
             </div>
 
-            {/* Solución de HubSpot: Uso de Sinónimos */}
+            {/* Solución Editorial: Uso de Sinónimos */}
             <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2">
               <h5 className="font-bold text-xs text-amber-700 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4" /> Consejo de HubSpot: Usa Sinónimos y Variaciones Semánticas
+                <AlertTriangle className="w-4 h-4" /> Consejo Editorial: Usa Sinónimos y Variaciones Semánticas
               </h5>
               <p className="text-xs text-muted leading-relaxed">
                 Si tu palabra clave es <em>"nómada digital"</em>, alternarla con <em>"trabajador a distancia"</em>, <em>"teletrabajo"</em> o <em>"empleo remoto"</em>. Así evitas la saturación y amplías tu alcance semántico en Google.
@@ -281,7 +281,7 @@ export default function HubSpotGuideSection() {
             <div className="flex items-center justify-between pb-2 border-b border-line">
               <h4 className="font-display font-bold text-base text-primary flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent" />
-                Los 4 Tipos de Gancho para la Introducción (HubSpot Academy)
+                Los 4 Tipos de Gancho para la Introducción
               </h4>
               <span className="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded">
                 Primeras 2-3 Frases
@@ -289,7 +289,7 @@ export default function HubSpotGuideSection() {
             </div>
 
             <p className="text-xs text-muted leading-relaxed">
-              Si no logras captar la atención del lector en las primeras frases, abandonará la lectura. HubSpot recomienda iniciar siempre con uno de estos 4 disparadores:
+              Si no logras captar la atención del lector en las primeras frases, abandonará la lectura. Se recomienda iniciar siempre con uno de estos 4 disparadores:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
@@ -327,7 +327,7 @@ export default function HubSpotGuideSection() {
               <span className="text-lg">💡</span>
               <div className="space-y-0.5 text-xs">
                 <strong className="text-amber-800 font-bold block">
-                  Regla de Productividad HubSpot: Redacta la Introducción y Conclusión al final
+                  Regla de Productividad Editorial: Redacta la Introducción y Conclusión al final
                 </strong>
                 <p className="text-muted leading-relaxed">
                   Puede ser abrumador escribir la introducción sin saber qué dirección exacta tomará el contenido. Empieza redactando los puntos principales del cuerpo (Paso 1 al 5) y deja la introducción y la conclusión para cuando la estructura ya esté terminada.
@@ -339,7 +339,7 @@ export default function HubSpotGuideSection() {
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <h4 className="font-display font-bold text-base text-primary flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-accent" />
-              Los 2 Formatos Oficiales Recomendados por HubSpot:
+              Los 2 Formatos Oficiales de Estructura:
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="bg-surface-muted p-4 rounded-xl border border-line space-y-2">
@@ -365,7 +365,7 @@ export default function HubSpotGuideSection() {
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
               <Target className="w-5 h-5 text-accent" />
-              Reglas de Oro de HubSpot para Títulos de Alto Rendimiento
+              Reglas de Oro para Títulos de Alto Rendimiento
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -395,12 +395,12 @@ export default function HubSpotGuideSection() {
             </div>
           </div>
 
-          {/* Principio HubSpot: Fijar Expectativas en el Título */}
+          {/* Principio Editorial: Fijar Expectativas en el Título */}
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-4">
             <div className="space-y-1">
               <h4 className="font-display font-bold text-base text-primary flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-accent" />
-                El Principio de Fijar Expectativas Concretas (HubSpot Academy)
+                El Principio de Fijar Expectativas Concretas
               </h4>
               <p className="text-xs text-muted leading-relaxed">
                 El lector y los motores de búsqueda deben entender con total claridad qué van a ganar antes de hacer clic. Todo título de alto rendimiento debe responder estas 3 preguntas:
@@ -433,7 +433,7 @@ export default function HubSpotGuideSection() {
 
           {/* Ejemplos Prácticos */}
           <div className="bg-white border border-line rounded-xl p-6 shadow-xs space-y-3">
-            <h4 className="font-bold text-sm text-primary">Ejemplos Reales del Manual de HubSpot:</h4>
+            <h4 className="font-bold text-sm text-primary">Ejemplos de Rendimiento Editorial:</h4>
             <div className="space-y-2 text-xs">
               <div className="p-3 rounded-lg bg-danger/5 border border-danger/20 flex items-start gap-2">
                 <span className="text-danger font-bold text-sm">✕</span>
@@ -445,7 +445,7 @@ export default function HubSpotGuideSection() {
               <div className="p-3 rounded-lg bg-success/5 border border-success/20 flex items-start gap-2">
                 <span className="text-success font-bold text-sm">✓</span>
                 <div>
-                  <strong className="text-success">Título que Fija Expectativas (HubSpot):</strong> "Cómo crear una infografía en 1 hora [15 Plantillas Gratis]"
+                  <strong className="text-success">Título que Fija Expectativas:</strong> "Cómo crear una infografía en 1 hora [15 Plantillas Gratis]"
                   <p className="text-muted text-[11px]">El lector ya sabe el tema (infografía), el tiempo (1 hora) y el recurso que se lleva ([15 Plantillas Gratis]).</p>
                 </div>
               </div>
@@ -463,7 +463,7 @@ export default function HubSpotGuideSection() {
               Los 4 Puntos Estratégicos para Llamados a la Acción (CTAs)
             </h4>
             <p className="text-xs text-muted leading-relaxed">
-              HubSpot descubrió que <strong>los CTAs de texto ubicados en la parte superior tienen la tasa de clics más alta</strong> porque muchos usuarios no leen el 100% del post.
+              Estudios de conversión demuestran que <strong>los CTAs de texto ubicados en la parte superior tienen la tasa de clics más alta</strong> porque muchos usuarios no leen el 100% del post.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -567,7 +567,7 @@ export default function HubSpotGuideSection() {
           <div className="flex items-center justify-between pb-3 border-b border-line">
             <h4 className="font-display font-bold text-lg text-primary flex items-center gap-2">
               <Type className="w-5 h-5 text-accent" />
-              Las 11 Normas Gramaticales y de Estilo (HubSpot Academy)
+              Las 11 Normas Gramaticales y de Estilo Editorial
             </h4>
             <span className="text-xs font-mono font-bold bg-surface-muted text-muted px-2.5 py-1 rounded border border-line">
               Guía de Estilo Oficial

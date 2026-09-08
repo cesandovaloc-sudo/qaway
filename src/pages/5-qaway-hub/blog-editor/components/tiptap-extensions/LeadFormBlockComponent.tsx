@@ -69,7 +69,7 @@ export default function LeadFormBlockComponent(props: any) {
           <div className="flex items-center justify-between border-b border-line pb-2">
             <span className="font-bold text-primary flex items-center gap-1.5">
               <Pencil className="w-3.5 h-3.5 text-accent" />
-              <span>Editar Formulario de Leads (HubSpot Video 5)</span>
+              <span>Editar Formulario de Leads</span>
             </span>
             <span className="text-[10px] font-mono text-muted bg-surface-muted px-2 py-0.5 rounded">
               Tipo: {type.toUpperCase()}

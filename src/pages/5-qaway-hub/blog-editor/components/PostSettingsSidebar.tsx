@@ -195,7 +195,7 @@ export default function PostSettingsSidebar({
     }
   }, [kw, activeSidebarTab])
 
-  // Auditoría HubSpot 360° en tiempo real
+  // Auditoría Editorial 360° en tiempo real
   const hasGoodTitleLength = title.trim().length >= 20 && title.trim().length <= 60
   const hasBracketsInTitle = /\[.*\]/.test(title)
   const hasUrlNoNumbers = !/\d/.test(currentSlug)
@@ -227,7 +227,7 @@ export default function PostSettingsSidebar({
       passed: hasUrlNoNumbers,
       weight: 15,
       badge: hasUrlNoNumbers ? '✓ Correcta' : 'Tiene números',
-      alert: 'HubSpot recomienda no poner números en URLs.',
+      alert: 'Recomendación editorial: evitar números en URLs.',
     },
     {
       label: 'Metadescripción (120-160 car.)',
@@ -266,7 +266,7 @@ export default function PostSettingsSidebar({
     },
   ]
 
-  const hubSpotScore = checks.reduce((acc, c) => acc + (c.passed ? c.weight : 0), 0)
+  const auditScore = checks.reduce((acc, c) => acc + (c.passed ? c.weight : 0), 0)
 
   return (
     <aside className="w-full space-y-3.5 font-sans shrink-0">
@@ -307,7 +307,7 @@ export default function PostSettingsSidebar({
             }`}
           >
             <Target className="w-3.5 h-3.5 text-muted" />
-            <span>HubSpot ({hubSpotScore}%)</span>
+            <span>Auditoría ({auditScore}%)</span>
           </button>
 
           <button
@@ -472,7 +472,7 @@ export default function PostSettingsSidebar({
                 }`}
               >
                 <span className="text-xs block">◫ 2 Columnas</span>
-                <span className="text-[10px] font-normal text-muted-light block">HubSpot Hero</span>
+                <span className="text-[10px] font-normal text-muted-light block">Portada Hero</span>
               </button>
 
               <button
@@ -618,7 +618,7 @@ export default function PostSettingsSidebar({
             </div>
             {!hasUrlNoNumbers && (
               <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> HubSpot recomienda quitar números de la URL.
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Recomendación editorial: evitar números en la URL.
               </p>
             )}
           </div>
@@ -627,36 +627,36 @@ export default function PostSettingsSidebar({
 
       {activeSidebarTab === 'seo' && (
         <div className="bg-white border border-line rounded-xl p-4 shadow-xs space-y-4">
-          {/* Tarjeta de Score HubSpot */}
+          {/* Tarjeta de Score Editorial */}
           <div className="p-3.5 rounded-xl bg-[#fafafc] border border-line space-y-2">
             <div className="flex items-center justify-between">
               <button
                 type="button"
                 onClick={onOpenQuickRules}
                 className="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5 hover:text-accent cursor-pointer transition-colors"
-                title="Ver guía de las 11 normas de HubSpot"
+                title="Ver guía de las 11 normas de calidad editorial"
               >
                 <Sparkles className="w-4 h-4 text-accent" />
-                <span>Score HubSpot</span>
+                <span>Score Editorial</span>
               </button>
               <span
                 className={`font-mono font-bold text-xs px-2.5 py-0.5 rounded-full ${
-                  hubSpotScore >= 80
+                  auditScore >= 80
                     ? 'bg-success text-white'
-                    : hubSpotScore >= 50
+                    : auditScore >= 50
                     ? 'bg-warning text-white'
                     : 'bg-danger text-white'
                 }`}
               >
-                {hubSpotScore} / 100
+                {auditScore} / 100
               </span>
             </div>
             <div className="w-full h-2 rounded-full bg-surface-muted overflow-hidden">
               <div
                 className={`h-full transition-all duration-300 ${
-                  hubSpotScore >= 80 ? 'bg-success' : hubSpotScore >= 50 ? 'bg-warning' : 'bg-danger'
+                  auditScore >= 80 ? 'bg-success' : auditScore >= 50 ? 'bg-warning' : 'bg-danger'
                 }`}
-                style={{ width: `${hubSpotScore}%` }}
+                style={{ width: `${auditScore}%` }}
               />
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function PostSettingsSidebar({
 
                 {isKwOptimal && (
                   <p className="text-[11px] text-success font-medium flex items-center gap-1 leading-tight">
-                    <Check className="w-3.5 h-3.5 shrink-0" /> Densidad óptima recomendada por HubSpot (1% a 2.5%).
+                    <Check className="w-3.5 h-3.5 shrink-0" /> Densidad óptima recomendada (1% a 2.5%).
                   </p>
                 )}
 
@@ -784,7 +784,7 @@ export default function PostSettingsSidebar({
             )}
           </div>
 
-          {/* Checklist de Criterios Oficiales HubSpot */}
+          {/* Checklist de Criterios Editoriales */}
           <div className="space-y-2">
             {checks.map((c, idx) => (
               <div
@@ -818,7 +818,7 @@ export default function PostSettingsSidebar({
             ))}
           </div>
 
-          {/* Botón Integrado: 11 Normas Oficiales HubSpot */}
+          {/* Botón Integrado: 11 Normas de Calidad Editorial */}
           {onOpenQuickRules && (
             <button
               type="button"
@@ -827,7 +827,7 @@ export default function PostSettingsSidebar({
             >
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-muted group-hover:text-primary transition-colors" />
-                <span>Ver las 11 Normas Oficiales HubSpot</span>
+                <span>Ver las 11 Normas de Calidad Editorial</span>
               </div>
               <span className="text-[10px] font-semibold text-muted bg-white px-2 py-0.5 rounded border border-line">
                 Guía

@@ -121,7 +121,7 @@ export default function HubSpotTemplatesModal({
         <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
           <h3 className="font-display font-bold text-base text-primary flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-accent" />
-            Plantillas de Estructura Oficiales (HubSpot Academy)
+            Plantillas de Estructura de Contenido de Alta Conversión
           </h3>
           <button
             onClick={onClose}
@@ -132,7 +132,7 @@ export default function HubSpotTemplatesModal({
         </div>
 
         <p className="text-xs text-muted leading-relaxed mb-4">
-          Selecciona una plantilla pre-diseñada basada en los 2 esquemas oficiales de HubSpot Academy. Incluye gancho inicial, subtítulos H2 estructurados, CTA de texto y bloque final de conversión.
+          Selecciona una plantilla pre-diseñada basada en los esquemas probados de calidad editorial. Incluye gancho inicial, subtítulos H2 estructurados, CTA de texto y bloque final de conversión.
         </p>
 
         <div className="space-y-3.5">

@@ -260,7 +260,7 @@ export default function BlogAnalyticsDashboard() {
 
   // Exportar métricas a CSV
   const handleExportCsv = () => {
-    const headers = 'ID,Título,Slug,Categoría,Estado,Palabras,Score HubSpot,Vistas,Tiempo Lectura (min),Tasa Lectura (%),Clics CTA,CTR (%),Leads,Tasa Conversión (%)\n'
+    const headers = 'ID,Título,Slug,Categoría,Estado,Palabras,Score Editorial,Vistas,Tiempo Lectura (min),Tasa Lectura (%),Clics CTA,CTR (%),Leads,Tasa Conversión (%)\n'
     const rows = filteredPosts
       .map(p =>
         `"${p.id}","${p.title.replace(/"/g, '""')}","${p.slug}","${p.category}","${p.status}",${p.words},${p.qualityScore},${p.views},${p.avgTimeMinutes},${p.readRate},${p.ctaClicks},${p.ctr},${p.leads},${p.conversionRate}`
@@ -610,7 +610,7 @@ export default function BlogAnalyticsDashboard() {
           <div className="p-3 bg-surface-muted rounded-xl border border-line text-[11px] text-muted flex items-start gap-2">
             <Zap className="w-4 h-4 text-muted shrink-0 mt-0.5" />
             <span>
-              <strong>Tip de HubSpot:</strong> Ubicar un <em>CTA Pasivo</em> en el 50% duplica la conversión respecto a ponerlo solo al final.
+              <strong>Tip Editorial:</strong> Ubicar un <em>CTA Pasivo</em> en el 50% duplica la conversión respecto a ponerlo solo al final.
             </span>
           </div>
         </div>
@@ -673,7 +673,7 @@ export default function BlogAnalyticsDashboard() {
                   }}
                   className="py-3 px-3 cursor-pointer hover:text-primary text-center"
                 >
-                  Score HubSpot {sortBy === 'score' && (sortOrder === 'desc' ? '↓' : '↑')}
+                  Score Editorial {sortBy === 'score' && (sortOrder === 'desc' ? '↓' : '↑')}
                 </th>
                 <th
                   onClick={() => {

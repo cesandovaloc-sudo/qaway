@@ -989,7 +989,7 @@ export default function MarketingStudioPage() {
         </div>
         <div style="text-align: right;">
           <div style="background: #0f172a; color: white; padding: 6px 14px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">
-            Ficha Ejecutiva HubSpot
+            Ficha Ejecutiva ICP
           </div>
           <div style="color: #94a3b8; font-size: 11px; margin-top: 4px; font-weight: 600;">Qaway Lab • Studio OS</div>
         </div>
@@ -1186,7 +1186,7 @@ export default function MarketingStudioPage() {
       case 'personas':
         return {
           title: '1. Buyer Personas & Slides Ejecutivos',
-          subtitle: 'Perfiles ICP, Dimensiones Psicológicas y Resumen Modular HubSpot',
+          subtitle: 'Perfiles ICP, Dimensiones Psicológicas y Resumen Modular Ejecutivo',
           icon: Users,
           iconColor: 'bg-purple-500',
           actionText: personaCanvasMode === 'wizard' ? 'Volver a Fichas' : '+ Generar mi buyer persona',
@@ -1880,7 +1880,7 @@ export default function MarketingStudioPage() {
                     <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                       <div>
                         <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Asistente Conversacional HubSpot
+                          Asistente Conversacional de Creación
                         </span>
                         <h3 className="text-xl font-black text-slate-900">
                           Paso {wizardStep} de {wizardQuestions.length}
@@ -2742,7 +2742,7 @@ export default function MarketingStudioPage() {
                     <div className="space-y-1">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-50 text-cyan-800 text-xs font-bold uppercase tracking-wider">
                         <Target className="w-3.5 h-3.5 text-cyan-600" />
-                        <span>Módulo 2 • Metodología Oficial HubSpot</span>
+                        <span>Módulo 2 • Metodología Oficial SMART</span>
                       </div>
                       <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                         Objetivos SMART & Crecimiento MoM
@@ -2873,7 +2873,7 @@ export default function MarketingStudioPage() {
                           <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
                             Declaración Oficial de Objetivo SMART
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">Formato HubSpot</span>
+                          <span className="text-[10px] text-slate-400 font-mono">Formato SMART</span>
                         </div>
                         <p className="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed italic">
                           "{smartSpecific} {smartMeasurable} {smartRelevant} {smartTimeBound}"
@@ -3345,7 +3345,7 @@ export default function MarketingStudioPage() {
                   <h3 className="text-base font-bold text-slate-900 leading-tight">
                     Mapear Pieza de Contenido
                   </h3>
-                  <p className="text-xs text-slate-500">Validador de Formatos & Propósito (Página 6 HubSpot)</p>
+                  <p className="text-xs text-slate-500">Validador de Formatos & Propósito Editorial</p>
                 </div>
               </div>
               <button
@@ -3384,7 +3384,7 @@ export default function MarketingStudioPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-800 font-bold mb-1">Formato (Página 6)</label>
+                  <label className="block text-slate-800 font-bold mb-1">Formato</label>
                   <select
                     value={newContent.format}
                     onChange={(e) => {
@@ -3408,7 +3408,7 @@ export default function MarketingStudioPage() {
               <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-950">
                 <div className="font-bold mb-0.5 flex items-center gap-1.5">
                   <Info className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>Propósito Metodológico Oficial (HubSpot):</span>
+                  <span>Propósito Metodológico Oficial:</span>
                 </div>
                 <div>{newContent.purpose}</div>
               </div>
@@ -3504,7 +3504,7 @@ export default function MarketingStudioPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-xs border border-slate-200">
-                  Ficha Ejecutiva HubSpot
+                  Ficha Ejecutiva ICP
                 </span>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">

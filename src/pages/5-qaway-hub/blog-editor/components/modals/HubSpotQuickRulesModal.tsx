@@ -18,7 +18,7 @@ export default function HubSpotQuickRulesModal({
         <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
           <h3 className="font-display font-bold text-base text-primary flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-accent" />
-            Checklist Rápido: 11 Normas HubSpot
+            Checklist Rápido: 11 Normas Editoriales
           </h3>
           <button
             onClick={onClose}
@@ -54,7 +54,7 @@ export default function HubSpotQuickRulesModal({
               <li><strong>Estadística impactante:</strong> Inicia con un dato o número revelador.</li>
               <li><strong>Humor o anécdota:</strong> Situación cotidiana que genere cercanía.</li>
               <li><strong>Pregunta retadora:</strong> Desafía una creencia común.</li>
-              <li><em>💡 Secreto HubSpot:</em> Si te bloqueas, <strong>redacta el cuerpo primero y la intro al final</strong>.</li>
+              <li><em>💡 Consejo Editorial:</em> Si te bloqueas, <strong>redacta el cuerpo primero y la intro al final</strong>.</li>
             </ul>
           </div>
 

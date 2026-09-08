@@ -163,7 +163,7 @@ export default function DashboardPage() {
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>Metodología HubSpot</span>
+                <span>Guía Editorial & SEO</span>
               </button>
             </div>
 

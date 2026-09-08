@@ -56,7 +56,7 @@ export default function LeadFormModal({ isOpen, onClose, onInsert, initialData }
         <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
           <h3 className="font-display font-bold text-base text-primary flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-accent" />
-            Configurar Formulario de Captación de Leads (HubSpot Video 5)
+            Configurar Formulario de Captación de Leads
           </h3>
           <button
             onClick={onClose}
@@ -185,7 +185,7 @@ export default function LeadFormModal({ isOpen, onClose, onInsert, initialData }
                     <Mail className="w-4 h-4 text-accent" />
                     <div>
                       <span className="font-bold text-xs text-primary block">Correo Electrónico</span>
-                      <span className="text-[10px] text-muted block">Requerido por defecto por HubSpot</span>
+                      <span className="text-[10px] text-muted block">Requerido por defecto para suscripción</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold bg-accent/15 text-accent px-2 py-0.5 rounded">Obligatorio</span>
@@ -335,7 +335,7 @@ export default function LeadFormModal({ isOpen, onClose, onInsert, initialData }
                     className="w-full accent-accent cursor-pointer"
                   />
                   <p className="text-[10px] text-muted-light">
-                    HubSpot recomienda activar formularios deslizantes al llegar al 50% de lectura del contenido.
+                    Recomendación de conversión: activar formularios deslizantes al llegar al 50% de lectura del contenido.
                   </p>
                 </div>
               )}

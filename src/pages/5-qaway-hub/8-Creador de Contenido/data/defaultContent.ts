@@ -1,8 +1,52 @@
-import { CompetitorVideo, ScriptItem, CarouselDeck, LeadMagnetResource } from '../types/content.types'
+import { TenantWorkspace, CompetitorVideo, ScriptItem, CarouselDeck, LeadMagnetResource, CreatorTask } from '../types/content.types'
+
+export const DEFAULT_TENANTS: TenantWorkspace[] = [
+  {
+    id: 'tenant-qaway',
+    name: 'Qaway Lab (Digital Studio)',
+    slug: 'qaway-lab',
+    niche: 'Agentes de IA, Automatización & Software',
+    brandVoice: 'Autoridad técnica, transparente, sin relleno ("no fluff"), educativo y orientado a sistemas.',
+    tier: 'agency_scale',
+    limits: {
+      maxMonthlyPieces: 60,
+      maxCompetitors: 20,
+      maxLeadMagnets: 15,
+      manyChatEnabled: true
+    },
+    currentMonthProgress: {
+      planned: 30,
+      recorded: 21,
+      published: 14,
+      targetMonth: 'Septiembre 2026'
+    }
+  },
+  {
+    id: 'tenant-dental',
+    name: 'Dr. Dental Elite (Cliente Demo)',
+    slug: 'dental-elite',
+    niche: 'Odontología & Estética Dental',
+    brandVoice: 'Cálido, profesional, tranquilizador, enfocado en confianza y transformación de sonrisa.',
+    tier: 'creator_pro',
+    limits: {
+      maxMonthlyPieces: 30,
+      maxCompetitors: 5,
+      maxLeadMagnets: 3,
+      manyChatEnabled: true
+    },
+    currentMonthProgress: {
+      planned: 20,
+      recorded: 8,
+      published: 6,
+      targetMonth: 'Septiembre 2026'
+    }
+  }
+]
 
 export const INITIAL_COMPETITORS: CompetitorVideo[] = [
   {
     id: 'comp-1',
+    tenantId: 'tenant-qaway',
     creatorName: 'Nate Herk / AI Labs',
     handle: '@nateherk',
     videoUrl: 'https://instagram.com/p/reel-1',
@@ -16,6 +60,7 @@ export const INITIAL_COMPETITORS: CompetitorVideo[] = [
   },
   {
     id: 'comp-2',
+    tenantId: 'tenant-qaway',
     creatorName: 'Growth Design Hub',
     handle: '@growthdesign',
     videoUrl: 'https://instagram.com/p/reel-2',
@@ -29,6 +74,7 @@ export const INITIAL_COMPETITORS: CompetitorVideo[] = [
   },
   {
     id: 'comp-3',
+    tenantId: 'tenant-qaway',
     creatorName: 'SaaS Builder Lab',
     handle: '@saasbuilder',
     videoUrl: 'https://instagram.com/p/reel-3',
@@ -45,6 +91,7 @@ export const INITIAL_COMPETITORS: CompetitorVideo[] = [
 export const INITIAL_SCRIPTS: ScriptItem[] = [
   {
     id: 'script-1',
+    tenantId: 'tenant-qaway',
     title: 'Las 5 Skills de Automatización de Contenidos',
     format: 'reel',
     platform: 'instagram',
@@ -69,6 +116,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
   },
   {
     id: 'script-2',
+    tenantId: 'tenant-qaway',
     title: 'Cómo estructurar un Carrusel que convierta seguidores en leads',
     format: 'carrusel',
     platform: 'instagram',
@@ -93,6 +141,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
   },
   {
     id: 'script-3',
+    tenantId: 'tenant-qaway',
     title: 'Arquitectura de Agentes de IA para Productividad Empresarial',
     format: 'blog',
     platform: 'blog_qaway',
@@ -115,7 +164,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
       metaDescription: 'Descubre cómo los agentes de IA con MCP y orquestadores autónomos multiplican la productividad técnica sin exponer datos sensibles.',
       targetKeywords: ['agentes ia', 'productividad empresarial', 'mcp claude', 'automatizacion n8n'],
       readingTimeMin: 6,
-      contentMarkdown: `# Agentes Autónomos de IA: La Nueva Frontera de la Productividad Técnica\n\nEl paso de simples chatbots conversacionales a **sistemas agénticos con herramientas de ejecución** marca el cambio más importante en desarrollo de software y operaciones digitales.\n\n## 1. El límite de los chatbots tradicionales\nUn chat pasivo depende de que el usuario formule la pregunta exacta y copie el resultado. En contraste, un **agente autónomo**:\n- Inspecciona el entorno y los archivos.\n- Diseña un plan antes de modificar código.\n- Ejecuta pruebas y valida que la solución funcione.\n\n## 2. El rol de los protocolos de contexto (MCP)\nCon la llegada de protocolos abiertos como MCP, la IA puede interactuar de forma segura con bases de datos, APIs de redes sociales y terminales de ejecución sin exponer credenciales en texto plano.\n\n## 3. Conclusión para líderes de negocio\nAutomatizar no es sustituir el criterio humano, sino eliminar la fricción repetitiva para enfocar el talento en estrategia y diseño de producto.`
+      contentMarkdown: `# Agentes Autónomos de IA: La Nueva Frontera de la Productividad Técnica\n\nEl paso de simples chatbots conversacionales a **sistemas agénticos con herramientas de ejecución** marca el cambio más importante en desarrollo de software y operaciones digitales.`
     },
     status: 'programado',
     scheduledDate: '2026-09-22',
@@ -124,6 +173,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
   },
   {
     id: 'script-4',
+    tenantId: 'tenant-qaway',
     title: 'Framework de 3 Pasos para Diseñar Landing Pages que Sí Vendan',
     format: 'post',
     platform: 'linkedin',
@@ -140,7 +190,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
       triggerKeyword: 'AUDITORIA',
       leadMagnetName: 'Checklist de Auditoría Web Express'
     },
-    descriptionCopy: 'El diseño web efectivo no es arte decorativo; es claridad y reducción de fricción cognitiva. ¿Cuándo fue la última vez que auditaste la tasa de rebote de tu portada?',
+    descriptionCopy: 'El diseño web efectivo no es arte decorativo; es claridad y reducción de fricción cognitiva.',
     postVisualText: '3 Reglas de Oro para tu Landing Page:\n1. 1 Promesa Clara\n2. Cero Texto Relleno\n3. Evidencias Verificables',
     status: 'guion_aprobado',
     scheduledDate: '2026-09-25',
@@ -152,6 +202,7 @@ export const INITIAL_SCRIPTS: ScriptItem[] = [
 export const INITIAL_CAROUSELS: CarouselDeck[] = [
   {
     id: 'carousel-1',
+    tenantId: 'tenant-qaway',
     title: '5 Skills de Claude para 1 Mes de Contenido',
     niche: 'Creación de Contenido & IA',
     theme: 'dark_qaway',
@@ -223,20 +274,61 @@ export const INITIAL_CAROUSELS: CarouselDeck[] = [
 export const INITIAL_LEAD_MAGNETS: LeadMagnetResource[] = [
   {
     id: 'lm-1',
+    tenantId: 'tenant-qaway',
     title: 'SOP Maestro: Auditoría de Perfil Instagram en Chrome',
     category: 'Estrategia de Redes',
     summary: 'Prompt maestro paso a paso para auditar perfiles en segundos y detectar fugas de conversión en biografía, historias destacadas y reels.',
     triggerKeyword: 'AUDITORIA',
     targetFormat: 'prompt_maestro',
-    contentMarkdown: `# SOP: Auditoría de Perfil de Instagram para Conversión\n\n## 1. Biografía (Los 3 Segundos de Decisión)\n- [ ] ¿El titular deja claro exactamente qué problema resuelves sin usar tecnicismos confusos?\n- [ ] ¿Hay una prueba social o credencial verificable?\n- [ ] ¿El enlace único dirige a un recurso de alto valor con captura de lead?\n\n## 2. Historias Destacadas (El Embudo Invisible)\n- **Destacada 1: 'Empieza Aquí'** → Quién eres, tu historia y a quién ayudas.\n- **Destacada 2: 'Resultados / Casos'** → Capturas reales de clientes satisfechos.\n- **Destacada 3: 'Recurso Gratis'** → Cómo conseguir tu guía principal.\n\n## 3. Matriz de Contenido (Los Últimos 9 Posts)\n- Al menos 3 reels orientados a alcance de nuevos usuarios.\n- Al menos 3 carruseles orientados a guardados y autoridad.\n- Al menos 3 publicaciones con llamada a la acción hacia mensajería privada.`
+    contentMarkdown: `# SOP: Auditoría de Perfil de Instagram para Conversión\n\n## 1. Biografía (Los 3 Segundos de Decisión)\n- [ ] ¿El titular deja claro exactamente qué problema resuelves sin usar tecnicismos confusos?\n- [ ] ¿Hay una prueba social o credencial verificable?\n- [ ] ¿El enlace único dirige a un recurso de alto valor con captura de lead?`
   },
   {
     id: 'lm-2',
+    tenantId: 'tenant-qaway',
     title: 'Guía Maestra: Fórmulas de Hooks y Tiempos de Retención',
     category: 'Copywriting Audiovisual',
     summary: '25 Fórmulas probadas de ganchos verbales y visuales clasificados por categoría: Contrarian, Curiosidad, Error Común y Resultado Rápido.',
     triggerKeyword: 'HOOKS',
     targetFormat: 'checklist',
-    contentMarkdown: `# 25 Fórmulas de Hooks de Alta Retención\n\n### Categoría 1: Contrarian (Romper la creencia común)\n1. *"Todo el mundo te dice que hagas [X], pero en realidad eso está arruinando tu [Y]."* \n2. *"Si tuviera que empezar de cero en [año], no usaría [herramienta popular]. Haría esto."*\n3. *"Deja de [acción común]. Es una pérdida de tiempo por esta sencilla razón..."*\n\n### Categoría 2: Resultado Específico con Prueba\n4. *"Cómo conseguimos [resultado numérico] en [periodo corto] con solo [recurso]."*\n5. *"Este pequeño cambio en [área] aumentó nuestra conversión en un [porcentaje]%."*\n\n### Categoría 3: El Error Oculto\n6. *"El 95% de las marcas comete este error en los primeros 3 segundos y ni se dan cuenta."*\n7. *"Si tu contenido no está consiguiendo guardados, estás ignorando esta regla básica."*`
+    contentMarkdown: `# 25 Fórmulas de Hooks de Alta Retención\n\n### Categoría 1: Contrarian (Romper la creencia común)\n1. *"Todo el mundo te dice que hagas [X], pero en realidad eso está arruinando tu [Y]."* \n2. *"Si tuviera que empezar de cero en [año], no usaría [herramienta popular]. Haría esto."*`
+  }
+]
+
+export const INITIAL_TASKS: CreatorTask[] = [
+  {
+    id: 'task-1',
+    tenantId: 'tenant-qaway',
+    title: 'Grabar 5 ganchos alternativos para Reel de Agentes IA',
+    priority: 'alta',
+    type: 'grabar',
+    dueDate: 'Hoy',
+    completed: false
+  },
+  {
+    id: 'task-2',
+    tenantId: 'tenant-qaway',
+    title: 'Revisar portada y slide 7 de carrusel de Landing Pages',
+    priority: 'media',
+    type: 'revisar',
+    dueDate: 'Mañana',
+    completed: false
+  },
+  {
+    id: 'task-3',
+    tenantId: 'tenant-qaway',
+    title: 'Vincular trigger SKILL en ManyChat con link de Google Drive',
+    priority: 'alta',
+    type: 'manychat',
+    dueDate: '15 Sep',
+    completed: true
+  },
+  {
+    id: 'task-4',
+    tenantId: 'tenant-qaway',
+    title: 'Publicar artículo de Blog en Qaway Lab y repostear en LinkedIn',
+    priority: 'media',
+    type: 'lead_magnet',
+    dueDate: '22 Sep',
+    completed: false
   }
 ]

@@ -707,7 +707,7 @@ export default function FixedToolbar({
             type="button"
             onClick={onOpenLeadFormModal}
             className="h-8 px-2.5 rounded-lg text-xs font-semibold text-primary bg-white hover:bg-surface-muted border border-line transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            title="Insertar Formulario Emergente o Embebido para Captar Leads (HubSpot Video 5)"
+            title="Insertar Formulario Emergente o Embebido para Captar Leads"
           >
             <Mail className="w-3.5 h-3.5 text-muted" />
             <span>Captura Leads</span>
@@ -733,17 +733,17 @@ export default function FixedToolbar({
         </button>
       </div>
 
-      {/* 5. Plantillas HubSpot */}
+      {/* 5. Plantillas de Estructura */}
       {onOpenHubSpotTemplates && (
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onOpenHubSpotTemplates}
             className="h-8 px-2.5 rounded-lg text-xs font-semibold text-primary bg-white hover:bg-surface-muted border border-line transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            title="Cargar Plantillas de Estructura HubSpot"
+            title="Cargar Plantillas de Estructura Editorial"
           >
             <BookOpen className="w-3.5 h-3.5 text-muted" />
-            <span>Plantillas HubSpot</span>
+            <span>Plantillas</span>
           </button>
         </div>
       )}
