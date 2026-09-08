@@ -284,6 +284,10 @@ export default function AppRouter() {
           path="hub/agenda"
           element={<AgendaAppPage />}
         />
+        <Route
+          path="hub/gestor-proyectos-v2"
+          element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
+        />
         <Route index element={<InicioPage />} />
 
         <Route element={<Layout />}>
@@ -306,10 +310,6 @@ export default function AppRouter() {
           <Route
             path="hub/gestor-proyectos"
             element={renderRoute('hub', <ProtectedRoute><GestorProyectosHubPage /></ProtectedRoute>)}
-          />
-          <Route
-            path="hub/gestor-proyectos-v2"
-            element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
           />
           <Route
             path="hub/gestor-proyectos/:serviceType/:projectSlug"
