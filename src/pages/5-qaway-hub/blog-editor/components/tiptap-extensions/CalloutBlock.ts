@@ -79,16 +79,15 @@ export const CalloutBlock = Node.create({
 
     const currentStyle = styles[calloutType as keyof typeof styles] || styles.tip
 
-    const paragraphChildren: any[] = []
-    if (title) {
-      paragraphChildren.push(['strong', { class: `font-bold mr-1.5 ${currentStyle.titleColor}` }, `${title}: `])
-    }
-    paragraphChildren.push(['span', {}, text])
-
     const innerContent: any[] = [
       'div',
       { class: 'space-y-1 flex-1 min-w-0' },
-      ['p', { class: 'text-base text-primary leading-relaxed m-0 font-sans' }, ...paragraphChildren],
+      [
+        'p',
+        { class: 'text-base text-primary leading-relaxed m-0 font-sans' },
+        title ? ['strong', { class: `font-bold mr-1.5 ${currentStyle.titleColor}` }, `${title}: `] : '',
+        ['span', {}, text],
+      ],
     ]
 
     if (sourceUrl) {

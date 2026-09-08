@@ -124,15 +124,6 @@ export const CtaBlock = Node.create({
     const finalCardText = cardTextColor || '#ffffff'
     const isLightCard = finalCardBg.toLowerCase() === '#ffffff' || finalCardBg.toLowerCase() === '#fafafc'
 
-    const textContainer: any[] = [
-      'div',
-      { class: 'space-y-1.5 max-w-xl' },
-      ['h3', { class: 'font-display font-bold text-lg sm:text-xl tracking-tight m-0', style: `color: ${finalCardText} !important;` }, title],
-    ]
-    if (description) {
-      textContainer.push(['p', { class: 'text-xs sm:text-sm leading-relaxed m-0 opacity-90', style: `color: ${finalCardText} !important;` }, description])
-    }
-
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
@@ -149,7 +140,12 @@ export const CtaBlock = Node.create({
         class: `not-prose my-8 p-6 sm:p-8 rounded-2xl ${isLightCard ? 'border border-line shadow-md' : 'border border-line/20 shadow-xl'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 clear-both`,
         style: `background-color: ${finalCardBg} !important; color: ${finalCardText} !important;`,
       }),
-      textContainer,
+      [
+        'div',
+        { class: 'space-y-1.5 max-w-xl' },
+        ['h3', { class: 'font-display font-bold text-lg sm:text-xl tracking-tight m-0', style: `color: ${finalCardText} !important;` }, title],
+        description ? ['p', { class: 'text-xs sm:text-sm leading-relaxed m-0 opacity-90', style: `color: ${finalCardText} !important;` }, description] : '',
+      ],
       [
         'a',
         {
