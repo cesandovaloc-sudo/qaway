@@ -876,7 +876,7 @@ function AcademyFeature() {
           <ArrowLink to={isPublicSiteMode ? '#formulario' : '/academy'}>
             {isPublicSiteMode ? 'Consultar formación' : 'Ver Academy'}
           </ArrowLink>
-          <ArrowLink to={isPublicSiteMode ? WHATSAPP_LINK : `${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} newTab>
+          <ArrowLink to={isPublicSiteMode ? WHATSAPP_LINK : '/academy/app/cursos'} newTab={false}>
             {isPublicSiteMode ? 'Consultar por WhatsApp' : 'Ver todos los cursos'}
           </ArrowLink>
         </motion.div>

@@ -5,7 +5,7 @@ export const isPublicSiteMode = SITE_MODE === 'public'
 export const ACADEMY_CONFIG = {
   mode: 'dev_only', // 'dev_only' (pruebas locales) | 'native' (dentro de web) | 'external' (subdominio)
   externalUrl: 'https://academy.qawaylab.com',
-  localUrl: 'http://localhost:7000',
+  localUrl: '/academy/app',
 }
 
 export const routeVisibility = {

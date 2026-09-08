@@ -421,9 +421,7 @@ export default function AcademyPage() {
                 <ArrowRight size={17} />
               </a>
               <a
-                href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/academy/app/cursos"
                 className="academy-text-link"
               >
                 Conocer todos los cursos
@@ -523,9 +521,7 @@ export default function AcademyPage() {
             </motion.h2>
             <div className="mt-8 flex flex-wrap items-center gap-6 pb-10">
               <a
-                href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/academy/app/cursos"
                 className="academy-primary-button"
               >
                 Ver todos los cursos
@@ -559,7 +555,7 @@ export default function AcademyPage() {
               </motion.p>
             </div>
             <motion.div variants={copyItem} style={{ marginTop: '2rem', display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} target="_blank" rel="noopener noreferrer" className="academy-primary-button">
+              <a href="/academy/app/cursos" className="academy-primary-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>
@@ -814,7 +810,7 @@ export default function AcademyPage() {
                 Explorar Academy
                 <ArrowRight size={18} />
               </MagneticLink>
-              <a href={`${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`} target="_blank" rel="noopener noreferrer" className="academy-white-button">
+              <a href="/academy/app/cursos" className="academy-white-button">
                 Ver todos los cursos
                 <ArrowRight size={17} />
               </a>

@@ -16,10 +16,11 @@ export const navItems = [
   },
   {
     label: 'Academy',
+    path: '/academy',
     items: [
-      { label: 'Acceder', path: `${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/acceder`, external: true },
-      { label: 'Registrarse', path: `${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/registro`, external: true },
-      { label: 'Cursos', path: `${import.meta.env.VITE_ACADEMY_URL || 'http://localhost:7000'}/cursos`, external: true },
+      { label: 'Acceder', path: '/academy/app/acceder' },
+      { label: 'Registrarse', path: '/academy/app/registro' },
+      { label: 'Cursos', path: '/academy/app/cursos' },
     ],
   },
   {
