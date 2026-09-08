@@ -45,6 +45,7 @@ Cada vez que se acople un módulo, el agente debe auditar y documentar en la bit
 | **AC-02** | Academy | Pantalla blanca infinita en carga inicial | `getSession()` y `fetchProfile` de Supabase bloqueaban el render ante latencia de red. | Inyección de temporizador de seguridad (1.2s timeout) y `storageKey: 'qaway_academy_auth_token'`. |
 | **AC-03** | Academy | Super Administrador no reconocido | `profiles.role` devolvía `null` y `AdminLayout` expulsaba al admin maestro. | Integración de `isSuperAdmin(email)` con bypass automático a `/admin`. |
 | **AC-04** | Pagos | Módulo desacoplado / standalone | Componentes en `3-qawaylab-pagos` sin wrapper de página ni ruta en `AppRouter.jsx`. | Creación de página contenedora `PagosHubPage.jsx` y montaje en `/hub/pagos`. |
+| **AC-05** | Agenda | Módulo SaaS aislado con subrouter | App completa con `AgendaProvider` y subrutas dinámicas (`/:slug/:eventSlug`) no registradas en el Router central. | Creación de `AgendaAppPage.jsx` con rutas anidadas bajo `/hub/agenda/*` y fallback de datos demo. |
 
 ---
 

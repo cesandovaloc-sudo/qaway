@@ -34,6 +34,17 @@ import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
   {
+    icon: Calendar,
+    title: 'Qaway Agenda & Sistema de Citas',
+    description: 'Software de reservas y calendario estilo Calendly: Agendamiento público, gestión de horarios, recordatorios y panel de control de citas.',
+    path: '/hub/agenda',
+    access: 'pro',
+    badge: 'Nuevo SaaS',
+    category: 'Gestión & Productividad',
+    tone: 'bg-indigo-500/10 text-indigo-500',
+    published: true,
+  },
+  {
     icon: CreditCard,
     title: 'Qaway Pagos & Checkout Multi-método',
     description: 'Pasarela de pagos multi-método: Tarjeta Stripe, Yape, Plin, PagoEfectivo, transferencias, catálogo de productos y gestión de órdenes.',

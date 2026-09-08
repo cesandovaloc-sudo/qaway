@@ -35,6 +35,7 @@ const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEd
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/crm/CRMPage'))
 const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
 const GestorProyectosHubPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosHubPage'))
+const GestorProyectosV2Page = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/GestorProyectosV2Page'))
 const ProjectTimelineViewerPage = lazy(() => import('@/pages/5-qaway-hub/5-gestor-de-proyectos/ProjectTimelineViewerPage'))
 const AnalyticsStudioPage = lazy(() => import('@/pages/5-qaway-hub/analytics/AnalyticsStudioPage'))
 const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'))
@@ -43,6 +44,7 @@ const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/M
 const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
 const PagosHubPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosHubPage'))
+const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -265,6 +267,14 @@ export default function AppRouter() {
           path="hub/academy/*"
           element={<AcademyRealAppPage />}
         />
+        <Route
+          path="hub/agenda/*"
+          element={<AgendaAppPage />}
+        />
+        <Route
+          path="hub/agenda"
+          element={<AgendaAppPage />}
+        />
         <Route index element={<InicioPage />} />
 
         <Route element={<Layout />}>
@@ -295,6 +305,10 @@ export default function AppRouter() {
           <Route
             path="hub/gestor-proyectos"
             element={renderRoute('hub', <ProtectedRoute><GestorProyectosHubPage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/gestor-proyectos-v2"
+            element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
           />
           <Route
             path="hub/gestor-proyectos/:serviceType/:projectSlug"
