@@ -358,6 +358,24 @@ Inspirado en el estándar de oro de **Atlassian / Trello**, el menú de perfil d
 6. **Salida del Sistema:**
    * Botón inferior aislado con divisor, tipografía en tono neutro o destructivo (`text-red-400 hover:bg-red-500/10`), que limpia tokens de sesión y redirige al login.
 
+### 10.3. Reglas Técnicas de Implementación Probadas (Patrón Qaway Academy)
+Extraído de la implementación en producción de `UserMenu.tsx` y `StudentLayout.tsx`:
+1. **Algoritmo `formatShortName` (Prevención de desbordamiento en Header):**
+   * Si el usuario entra con correo (`ce.sandovaloc@gmail.com`), extrae la parte local y capitaliza (`Ce.sandovaloc`).
+   * Si entra con nombre completo (`Carlos Enrique Sandoval Ocaña`), lo transforma al estándar ejecutivo: `Carlos S.` (Nombre + Inicial del primer apellido).
+2. **Monograma Tipográfico Dinámico (`getInitial`):**
+   * Genera el avatar con la primera letra en mayúscula sobre fondo de color corporativo de contraste (`bg-primary-100 text-primary-700`).
+3. **Inyección Condicional de Rutas según Rol (*Role-Based Links*):**
+   * Si `profile.role === 'admin'`: Inyecta el acceso directo al `Panel Admin` con icono vectorial `[Icon: Lock]`.
+   * Si `profile.role === 'teacher'`: Inyecta el acceso al `Panel Docente` con `[Icon: FileText]`.
+   * Si `profile.role === 'student'`: Muestra secciones de *Certificados* y *Recursos*.
+4. **Accesibilidad y Cierre Seguro:**
+   * **Click-Outside Listener:** Cierra automáticamente el menú si el usuario hace clic fuera de su contenedor.
+   * **Escape Key Listener:** Cierra inmediatamente al pulsar la tecla `Esc` (requisito de accesibilidad WCAG).
+5. **Micro-interacción de Apertura:**
+   * El icono chevron rota 180° fluidamente (`rotate-180 transition-transform duration-200`).
+   * El contenedor del menú utiliza animación de entrada limpia: `animate-in fade-in slide-in-from-top-2 duration-150`.
+
 ---
 
 ## 11. Orquestación del Ecosistema: App Switcher ("Waffle"), Retorno a Web y Espacios de Trabajo
@@ -483,6 +501,106 @@ Inspirado en el estándar de bienvenida de **Trello / Atlassian**, las aplicacio
      - Aparece el mensaje de éxito de alta confianza (`¡Listo! La tarea se guardó en tu bandeja de entrada`).
 4. **Persistencia del Estado de Onboarding:**
    * Una vez completado o cerrado el flujo, el estado se guarda en la base de datos (Supabase `user_metadata.has_completed_onboarding = true`) o en `localStorage`, evitando que vuelva a interrumpir al usuario en futuras sesiones.
+
+---
+
+## 14. Benchmark de Repositorios Top Globales (Patrones de Alto Margen y Vanguardia)
+
+Para que los proyectos de Qaway Lab compitan al nivel de los productos SaaS de mayor puntuación y referencia mundial, se incorporan los siguientes 6 patrones arquitectónicos de los referentes de la industria:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                    MATRIZ DE PATRONES DE REPOSITORIOS TOP MUNDIALES                     │
+├──────────────────────────────┬──────────────────────────────────────────────────────────┤
+│ 1. Slide-Over Sheet / Drawer │ Inspirado en Linear.app & Plane.so                       │
+│    (Edición sin perder foco) │ Abre un panel lateral deslizante sin abandonar la lista. │
+├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ 2. Command Palette (Cmd+K)   │ Inspirado en Raycast & Vercel Dashboard                  │
+│    (Omnibox de Comandos)     │ Búsqueda difusa que ejecuta acciones y navegación en 0ms.│
+├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ 3. Sincronización en URL     │ Inspirado en Dub.co & Cal.com (URL State Sync)           │
+│    (Filtros Compartibles)    │ Filtros, vistas y páginas reflejados en la URL (?tab=...)│
+├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ 4. Actualizaciones Optimistas│ Inspirado en Superhuman & Linear                         │
+│    (Zero-Latency UX)         │ La UI cambia al instante (0ms) y sincroniza en fondo.    │
+├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ 5. Skeletons de Precisión    │ Inspirado en GitHub & Supabase Studio                    │
+│    (Cero Saltos de Layout)   │ Siluetas animadas que eliminan el CLS (Layout Shift).    │
+├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+│ 6. Toasts con Acción Deshacer│ Inspirado en Sonner / Gmail                              │
+│    (Undo Timed Action)       │ Notificaciones flotantes con botón de reversión 5 seg.   │
+└──────────────────────────────┴──────────────────────────────────────────────────────────┘
+```
+
+### 14.1. Panel Deslizante Lateral (Slide-Over Sheet / Drawer Detail)
+* **Problema tradicional:** Hacer clic en un cliente, tarea o post te saca a una página nueva, perdiendo el contexto de la lista y obligando a presionar "Atrás".
+* **Estándar Linear / Plane:** Al hacer clic, se abre un panel lateral deslizante desde el borde derecho (`Sheet w-[480px] - w-[640px]`), permitiendo editar campos, cambiar estados y ver comentarios mientras la tabla o tablero sigue visible a la izquierda.
+
+### 14.2. Command Palette Avanzada (`Cmd+K` / `Ctrl+K`)
+* No es solo un buscador de texto; es un motor de ejecución directa dividido en 3 bloques:
+  1. *Navegación rápida:* `Ir a CRM`, `Ir a Blog Editor`, `Ir a Configuración`.
+  2. *Acciones inmediatas:* `Crear nuevo lead`, `Generar reporte mensual`, `Cambiar tema a modo oscuro`.
+  3. *Búsqueda difusa:* Encuentra proyectos o clientes aunque el usuario escriba con errores ortográficos menores.
+
+### 14.3. Sincronización de Estado en la URL (URL State Sync)
+* Todos los filtros (`status=en_redaccion`), el orden (`sort=fecha_desc`), la vista (`view=kanban`) y la búsqueda (`q=whatsapp`) se sincronizan en la URL mediante `URLSearchParams`.
+* **Beneficio directo:** Si un miembro del equipo filtra un listado y copia el enlace para enviárselo a otro por WhatsApp o Slack, el destinatario abre exactamente la misma vista filtrada.
+
+### 14.4. Actualizaciones Optimistas (*Optimistic UI*)
+* Cuando el usuario marca un checkbox, arrastra una tarjeta en el Kanban o cambia un estado, la interfaz se actualiza **inmediatamente en 0 milisegundos**.
+* La petición a Supabase/Backend se procesa en segundo plano. Si ocurre un fallo de conexión, el sistema revierte el cambio de forma segura y notifica al usuario con un mensaje de alerta.
+
+### 14.5. Skeletons de Precisión contra el Salto de Pantalla (*Zero CLS*)
+* Queda prohibido el uso de spinners genéricos en el centro de páginas completas.
+* Se utilizan **Skeletons con brillo (*Shimmer Animation*)** que calcan exactamente la altura, anchura y distribución de las tarjetas o tablas que se están cargando, evitando cualquier salto visual (*Cumulative Layout Shift*).
+
+### 14.6. Notificaciones Flotantes con Botón "Deshacer" (*Undo Pattern*)
+* Cuando el usuario elimina un ítem o realiza una acción masiva, el toast flotante inferior incluye un botón interactivo **`[ Deshacer ]`** con temporizador de 5 segundos antes de hacer la eliminación irreversible en la base de datos.
+
+---
+
+## 15. Protocolo de Ensamblaje y Generación Rápida de Proyectos por Nicho (Zero-Reinvention Policy)
+
+> **Regla de oro de productividad:** Queda prohibido iniciar un nuevo proyecto o software desde una hoja en blanco. Todo proyecto nuevo se ensambla combinando los bloques chasis existentes adaptados al nicho del cliente.
+
+### 15.1. El Algoritmo de Creación en 3 Pasos
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. DEFINIR NICHO Y ENTIDADES                                                │
+│    • Nicho: (ej. Barbería, Clínica Dental, Inmobiliaria, Estudio Contable)  │
+│    • 4 Métricas clave (KPIs) del negocio                                    │
+│    • 3 Estados de su flujo de trabajo (para Listas y Kanban)                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 2. SELECCIONAR ARQUETIPO VISUAL Y LAYOUT                                    │
+│    • Arquetipo 1 (Minimal / Plane.so) → Devs, blogs, tareas técnicas        │
+│    • Arquetipo 2 (Vibrant Creative)   → Creadores, marketing, media         │
+│    • Arquetipo 3 (Executive Contrast) → CRM, ventas, barberías, negocios    │
+│    • Arquetipo 4 (Structured Dossier) → Consultoría, diagnósticos, etapas   │
+│    • Disposición: Sidebar Lateral (Estándar) o TopNav (Panorámico)          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 3. ENSAMBLAJE AUTOMÁTICO DE BLOQUES CHASIS                                  │
+│    ├── A. Auth Shell: LoginPage.jsx con toggle ojo y branding del nicho     │
+│    ├── B. Layout Shell: Sidebar fija con scroll independiente + TopBar      │
+│    ├── C. TopBar: Tríada (Apps waffle + Logo retorno + Home app) + UserMenu │
+│    ├── D. Home Canvas: Hero saludo con fecha + 4 KPIs + Quick Actions       │
+│    ├── E. Data Views: Switcher (Lista / Kanban / Calendario)                │
+│    ├── F. Detalle: Slide-over Sheet lateral para edición sin perder lista   │
+│    └── G. Onboarding: Wizard interactivo simulado de primer uso             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 15.2. Matriz de Adaptación Rápida por Nichos Frecuentes
+
+| Nicho de Cliente | Arquetipo Recomendado | 4 KPIs de Portada | Estados Kanban Base |
+| :--- | :--- | :--- | :--- |
+| **Barbería / Salón** | **Arquetipo 3 (Executive)** | Citas hoy · Ingresos día · Clientes VIP · Ticket prom. | En espera → Atendiendo → Cobrado |
+| **Clínica Dental** | **Arquetipo 1 o 3** | Pacientes día · Tratamientos activos · Pagos pendientes · Presupuestos | Cita agendada → En gabinete → Tratamiento fin. |
+| **Agencia / Media** | **Arquetipo 2 (Creative)** | Guiones listos · Videos producidos · Ritmo mensual · Leads | Idea / Hook → En rodaje → Editado / Publicado |
+| **Inmobiliaria** | **Arquetipo 3 (Executive)** | Propiedades activas · Visitas semana · Oportunidades · Comisiones | Contacto inicial → Visita agendada → Cierre / Firma |
+| **Consultora / Legal**| **Arquetipo 4 (Dossier)** | Casos activos · Documentos auditados · Hitos completados · ROI | Diagnóstico → En elaboración → Dictamen emitido |
+
+
 
 
 
