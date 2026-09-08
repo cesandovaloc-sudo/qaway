@@ -29,7 +29,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 
 // Code-splitting para herramientas administrativas del Hub y páginas secundarias
 const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
-const AcademyRealAppPage = lazy(() => import('@/pages/5-qaway-hub/2-qawaylab-app-academy-real/AcademyAppPage'))
+const AcademyRealAppPage = lazy(() => import('@/pages/4-academy/2-qawaylab-app-academy-real/AcademyAppPage'))
 const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
 const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/crm/CRMPage'))
@@ -248,11 +248,11 @@ export default function AppRouter() {
           element={<MarketingStudioTwentyPage />}
         />
         <Route
-          path="hub/academy/*"
+          path="academy/*"
           element={<AcademyRealAppPage />}
         />
         <Route
-          path="academy-app/*"
+          path="hub/academy/*"
           element={<AcademyRealAppPage />}
         />
         <Route index element={<InicioPage />} />
@@ -375,8 +375,7 @@ export default function AppRouter() {
             element={<Navigate to="/sistemas-digitales/automatizacion" replace />}
           />
 
-          <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
-          <Route path="academy/*" element={renderRoute('academy', <AcademyPage />)} />
+          <Route path="academy-legacy" element={renderRoute('academy', <AcademyPage />)} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />

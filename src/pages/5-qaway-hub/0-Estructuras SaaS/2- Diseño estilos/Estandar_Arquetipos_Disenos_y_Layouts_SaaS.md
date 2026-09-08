@@ -435,6 +435,56 @@ Para no depender exclusivamente de la intuición del usuario ni generar ambigüe
    * Si no se dispone de logotipo oficial en vector, se genera un **Monograma Tipográfico de Alta Calidad** (círculo o pastilla estilizada con radio de borde de diseño, fondo con token de color de la marca y tipografía refinada con iniciales en peso `font-black text-xs`). Jamás un emoji.
    * Todos los activos de marca deben ser nítidos y vectoriales, escalando a pantallas Retina/4K sin pixelación.
 
+---
+
+## 13. Flujos de Onboarding Interactivo y Micro-Simulaciones (Learn-by-Doing Wizard)
+
+Inspirado en el estándar de bienvenida de **Trello / Atlassian**, las aplicaciones clave de Qaway Lab pueden implementar un **recorrido interactivo guiado** para nuevos usuarios.
+
+### 13.1. Filosofía: Aprender Haciendo (Zero Videos Pasivos)
+* En lugar de obligar al usuario a leer textos largos o ver videos pasivos, el sistema presenta una **micro-simulación interactiva** donde el usuario realiza una acción real en menos de 45 segundos.
+* El objetivo es alcanzar el **"Aha! Moment"** (el momento exacto donde el usuario comprende el valor del software de forma tangible).
+
+### 13.2. Diagrama de Arquitectura del Componente Onboarding
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ [Logo] Trello / Qaway Hub          ←  [ ━ ] [ ━ ] [ ━ ] [   ]  →        [x] │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                  TITULAR CLARO DE LA ACCIÓN (H2)                            │
+│           "Añadir una tarea por hacer a la Bandeja de entrada"              │
+│                                                                             │
+│       Subtítulo explicativo con la promesa de valor en 1 sola línea         │
+│                                                                             │
+│     ┌──────────────────┐           ┌─────────────────────────────┐          │
+│     │ [Icono / Avatar] │           │ [Icon: Inbox] Bandeja       │          │
+│     │ ¡Hola! Haz clic  │ ────────► │ ┌─────────────────────────┐ │          │
+│     │ en 'Añadir'      │ (Flecha   │ │ ¿Qué tienes pendiente?  │ │          │
+│     │ para probar      │  SVG)     │ │        [ Añadir Tarea ] │ │          │
+│     └──────────────────┘           │ └─────────────────────────┘ │          │
+│                                    └─────────────────────────────┘          │
+│                                                                             │
+│                               [ Continuar → ]                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 13.3. Estándar de Construcción Técnica (100% Frontend React + SVG)
+1. **Componente de Estado (Stepper):**
+   * Controla el paso actual (`step: 1 -> 2 -> 3 -> 4 -> Complete`).
+   * Renderiza el indicador superior de progreso (`Stepper Bar`) con botones anterior `←` y siguiente `→`, además del botón de cierre `[x]` para saltar el tutorial si el usuario ya es experto.
+2. **Elementos de Micro-Simulación (Sandboxing):**
+   * Los widgets son **componentes React reales** (inputs funcionales, botones clicables, tarjetas de preview).
+   * Las flechas conectivas, líneas de flujo y mascotas son **vectores SVG dinámicos**.
+3. **Física de Animación y Feedback:**
+   * Al pulsar el botón de acción (ej. *"Añadir Tarea"* o *"Enviar Correo"*), se ejecuta una animación suave con curvas desaceleradas (`cubic-bezier(0.16, 1, 0.3, 1)`):
+     - La tarjeta se traslada hacia el contenedor destino.
+     - Aparece el mensaje de éxito de alta confianza (`¡Listo! La tarea se guardó en tu bandeja de entrada`).
+4. **Persistencia del Estado de Onboarding:**
+   * Una vez completado o cerrado el flujo, el estado se guarda en la base de datos (Supabase `user_metadata.has_completed_onboarding = true`) o en `localStorage`, evitando que vuelva a interrumpir al usuario en futuras sesiones.
+
+
 
 
 
