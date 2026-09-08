@@ -1,0 +1,1 @@
+import{f as e}from"./index-DhyMs26s.js";var t=e(`https://qrusdsqgygfolxfrafyd.supabase.co`,`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`,{auth:{persistSession:!0,autoRefreshToken:!0}});export{t};

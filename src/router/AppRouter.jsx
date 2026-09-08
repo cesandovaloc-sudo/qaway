@@ -29,6 +29,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 
 // Code-splitting para herramientas administrativas del Hub y páginas secundarias
 const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
+const AcademyRealAppPage = lazy(() => import('@/pages/5-qaway-hub/2-qawaylab-app-academy-real/AcademyAppPage'))
 const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
 const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/crm/CRMPage'))
@@ -245,6 +246,14 @@ export default function AppRouter() {
         <Route
           path="/hub/marketing2"
           element={<MarketingStudioTwentyPage />}
+        />
+        <Route
+          path="hub/academy/*"
+          element={<AcademyRealAppPage />}
+        />
+        <Route
+          path="academy-app/*"
+          element={<AcademyRealAppPage />}
         />
         <Route index element={<InicioPage />} />
 

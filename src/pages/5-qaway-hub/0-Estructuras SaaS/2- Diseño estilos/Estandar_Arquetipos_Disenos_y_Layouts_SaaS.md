@@ -364,34 +364,49 @@ Inspirado en el estándar de oro de **Atlassian / Trello**, el menú de perfil d
 
 Para que el usuario pueda transitar libremente entre el sitio público de Qaway Lab y las diferentes aplicaciones del Hub sin perder el estado de su trabajo, se establece el siguiente estándar de orquestación:
 
-### 11.1. El Lanzador de Aplicaciones Híbrido (App Switcher de Alta Usabilidad)
-* **El estándar de la industria (Waffle Icon):** El icono de 9 puntos (`[:::]`) es el estándar global en Google Workspace, Microsoft 365 y Atlassian.
-* **Solución de descubribilidad de Qaway Lab:** Para no depender exclusivamente del icono de 9 puntos (que puede ser desconocido para usuarios novatos), la cabecera combina:
-  1. **Icono Waffle con texto / tooltip explícito:** `[::: Apps]` o `[::: Ecosistema]`.
-  2. **Logo Qaway Lab como enlace de retorno:** Clic en el logo permite volver a la web pública (`qaway.pe`) o abrirla en pestaña nueva.
-  3. **Migas de Pan conmutables:** `Qaway Lab / Hub Central / [App Activa]`, permitiendo retroceder al nivel anterior con 1 clic.
+### 11.1. El Lanzador de Aplicaciones Híbrido y la Tríada de Navegación Superior
+Para no depender exclusivamente de la intuición del usuario ni generar ambigüedades, la cabecera superior izquierda implementa la **Tríada de Navegación Inteligente** con micro-interacciones suaves de hover:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ [::: Apps] [Qaway Lab] / [Hub Central] / Studio Blog   ... [🔍] [👤 Perfil] │
-└──────┬───────────┬──────────────────────────────────────────────────────────┘
-       │           │
-       │           └──► Retorno a Web Pública o Hub General
+┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [::: ⤹ Apps]  [Qaway Lab ⤹ Web]  [Icon:Home Inicio] / [Submódulo]  ...  [Icon:Search] [Usuario]│
+└──────┬───────────────┬──────────────────────┬───────────────────────────────────────────────────┘
+       │               │                      │
+       │               │                      └──► 3. Icono Casa (Home): Inicio de la MISMA APP activa
+       │               │                           (ej. Portada del Blog si estás en Blog)
+       │               │
+       │               └──► 2. Logo Qaway Lab: Retorno seguro a la WEB PÚBLICA (qaway.pe)
+       │                       (Feedback visual sutil "Ir a web principal")
        │
-       └──► Menú Flotante del Ecosistema:
-            ┌──────────────────────────────────────────┐
-            │ ECOSISTEMA QAWAY LAB                     │
-            │ • 🏠 Web Pública (qaway.pe) [↗]          │
-            │ • 🗂 Hub Central de Aplicaciones        │
-            ├──────────────────────────────────────────┤
-            │ APLICACIONES ACTIVAS                     │
-            │ • ✍️ Editor de Blog                      │
-            │ • 📊 CRM Comercial                       │
-            │ • 🚀 Gestor de Proyectos                 │
-            │ • 🎬 Content Studio                      │
-            │ • 🎓 Academy                             │
-            │ • 💳 Pagos & Facturación                 │
-            └──────────────────────────────────────────┘
+       └──► 1. Icono de 9 Puntos (Waffle): Conmutador de ECOSISTEMA
+               (Microinteracción: al pasar el mouse, se expande suavemente el texto "Apps")
+```
+
+#### Reglas de Interacción y Física de Animación (Motion Protocol):
+1. **Icono de 9 Puntos (`[:::]`):**
+   * **En reposo:** Icono compacto de 9 puntos (Vector SVG).
+   * **Al pasar el mouse (*Hover*):** Se expande suavemente hacia la derecha revelando la etiqueta `"Apps"` o `"Ecosistema"` mediante una transición desacelerada (`transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1)`), eliminando cualquier salto tosco. Al hacer clic, despliega el menú flotante con todas las herramientas del Hub.
+2. **Logo `Qaway Lab`:**
+   * Al pasar el mouse, despliega una indicación suave de retorno (*"Web Principal qaway.pe"*). Permite explorar la web sin cerrar ni resetear la sesión del Hub.
+3. **Icono de Casa (`Home` Inicio):**
+   * **Es el inicio local de la aplicación activa:** Si el usuario está redactando un artículo en el *Editor de Blog*, el icono `Home` lo regresa a la portada/lista del Blog; si está en el *CRM*, lo regresa al Dashboard Comercial del CRM. No sale de la herramienta.
+
+```text
+┌──────────────────────────────────────────────────┐
+│ MENÚ FLOTANTE DEL ECOSISTEMA (Al pulsar [:::])   │
+├──────────────────────────────────────────────────┤
+│ PORTALES GLOBALES                                │
+│ • [Icon: Globe] Web Pública Principal (qaway.pe) │
+│ • [Icon: LayoutGrid] Hub Central de Aplicaciones │
+├──────────────────────────────────────────────────┤
+│ TUS APLICACIONES ACTIVAS                         │
+│ • [Icon: FileEdit] Editor de Blog                │
+│ • [Icon: BarChart3] CRM Comercial                │
+│ • [Icon: Kanban] Gestor de Proyectos             │
+│ • [Icon: Video] Content Studio                   │
+│ • [Icon: GraduationCap] Academy                  │
+│ • [Icon: CreditCard] Pagos & Facturación         │
+└──────────────────────────────────────────────────┘
 ```
 
 ### 11.2. Módulo de Plantillas Interactivas (Interactive Template Hero)
@@ -402,5 +417,24 @@ Para que el usuario pueda transitar libremente entre el sitio público de Qaway 
 ### 11.3. Grid de Espacios de Trabajo con Quick-Create Card Integrada
 * Las tarjetas de proyectos o tableros utilizan portadas con degradados visuales o miniaturas de contenido.
 * **Tarjeta de creación en el mismo flujo:** El botón **`[ + Crear nuevo... ]`** se renderiza como la última tarjeta de la cuadrícula con un borde interactivo destacado (`border-dashed border-2 hover:border-solid`), garantizando fricción cero al añadir trabajo.
+
+---
+
+## 12. Regla de Oro de Iconografía y Activos Visuales (Zero-Emoji Policy)
+
+> **Política estricta de diseño Qaway Lab:** Queda **terminantemente prohibido el uso de emojis Unicode como iconos de interfaz** en cualquier producto, dashboard o portal. El uso de emojis en interfaces degrada la percepción de marca y denota estética genérica o descuidada.
+
+### 12.1. Estándar de Iconografía Vectorial
+1. **Vectores SVG Nativos o Bibliotecas Profesionales:**
+   * Toda la iconografía del sistema debe provenir exclusivamente de bibliotecas vectoriales de precisión como **Lucide React**, **Heroicons**, **Tabler Icons** o **Radix Icons**.
+   * El grosor de trazo (*stroke width*) debe mantenerse coherente en toda la aplicación (estándar: `strokeWidth={1.75}` o `2.0`).
+   * Tamaño ergonómico unificado: `w-4 h-4` (16px) para botones compactos y badges; `w-5 h-5` (20px) para navegación principal; `w-6 h-6` (24px) para titulares de sección.
+
+2. **Marcas, Clientes y Símbolos Personalizados:**
+   * Si un cliente o proyecto requiere un identificador propio, **se diseña o importa su isotipo vectorial SVG en alta definición**.
+   * Si no se dispone de logotipo oficial en vector, se genera un **Monograma Tipográfico de Alta Calidad** (círculo o pastilla estilizada con radio de borde de diseño, fondo con token de color de la marca y tipografía refinada con iniciales en peso `font-black text-xs`). Jamás un emoji.
+   * Todos los activos de marca deben ser nítidos y vectoriales, escalando a pantallas Retina/4K sin pixelación.
+
+
 
 

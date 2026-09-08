@@ -33,6 +33,17 @@ import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
   {
+    icon: Star,
+    title: 'Qaway Academy (LMS Cursos & Certificaciones)',
+    description: 'Plataforma educativa integral: Catálogo de cursos, reproductor de lecciones, tareas, quizzes, certificados, panel de estudiante y docente.',
+    path: '/hub/academy',
+    access: 'pro',
+    badge: 'LMS Real',
+    category: 'Educación & Cursos',
+    tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    published: true,
+  },
+  {
     icon: Sparkles,
     title: 'Creador de Contenido Modular (5 Skills)',
     description: 'Fábrica de contenidos con IA: Radar viral, Guiones con retención medida, Matriz de hooks, Calendario 30 días, Diseñador de Carruseles, Blog y Posts.',

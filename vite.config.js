@@ -11,6 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@academy': path.resolve(__dirname, './src/pages/5-qaway-hub/2-qawaylab-app-academy-real/src'),
       '@': path.resolve(__dirname, './src'),
       react: path.resolve(__dirname, './node_modules/react'),
       'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
