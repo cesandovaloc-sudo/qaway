@@ -10,15 +10,26 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
   },
   resolve: {
-    alias: {
-      '@academy': path.resolve(__dirname, './src/pages/4-academy/2-qawaylab-app-academy-real/src'),
-      '@': path.resolve(__dirname, './src'),
-      react: path.resolve(__dirname, './node_modules/react'),
-      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
-    },
+    alias: [
+      {
+        find: /^@\/(.*)/,
+        replacement: '$1',
+        async customResolver(source, importer, options) {
+          if (importer && importer.replace(/\\/g, '/').includes('2-qawaylab-app-academy-real')) {
+            const target = path.resolve(__dirname, 'src/pages/4-academy/2-qawaylab-app-academy-real/src', source)
+            return this.resolve(target, importer, { skipSelf: true, ...options })
+          }
+          const mainTarget = path.resolve(__dirname, 'src', source)
+          return this.resolve(mainTarget, importer, { skipSelf: true, ...options })
+        },
+      },
+      { find: 'react', replacement: path.resolve(__dirname, './node_modules/react') },
+      { find: 'react-dom', replacement: path.resolve(__dirname, './node_modules/react-dom') },
+    ],
     dedupe: ['react', 'react-dom'],
   },
   build: {
+    emptyOutDir: false,
     rollupOptions: {
       output: {
         // manualChunks removido — estándar v3 #25: "No usar manualChunks por costumbre"
