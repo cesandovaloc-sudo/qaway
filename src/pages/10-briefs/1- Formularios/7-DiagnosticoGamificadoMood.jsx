@@ -340,15 +340,27 @@ export default function DiagnosticoGamificadoMood() {
         </div>
       </header>
 
-      {/* Main Container - STABLE FIX HEIGHT 50/50 SPLIT WITHOUT NESTED CARDS OR JITTER */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[660px] lg:h-[660px]">
+      {/* Main Container - VIEWPORT FIT: no scroll needed */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center">
+        <div className="w-full bg-white rounded-[28px] sm:rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-140px)] lg:max-h-[680px]">
           
+          {/* MOBILE COMPACT PROGRESS BAR (visible only below lg) */}
+          <div className="flex lg:hidden items-center justify-between bg-gradient-to-r from-[#ff3b00] to-[#ffaa00] text-white px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+              <span className="text-xs font-bold">{stageData.badgeText}</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-bold">
+              <span className="font-mono bg-black/15 px-2 py-0.5 rounded-md">{answeredCount}/10</span>
+              <span>{answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}</span>
+            </div>
+          </div>
+
           {/* =============================================================
               LEFT PANEL: FULL DIRECT WARM CANVAS (NO NESTED GRAY CARDS)
               (Solid continuous warm gradient filling 100% height & width)
              ============================================================= */}
-          <aside className="lg:col-span-5 h-full w-full bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+          <aside className="hidden lg:flex lg:col-span-5 h-full w-full bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white p-6 xl:p-8 flex-col justify-between relative overflow-hidden">
             {/* Ambient lighting flares */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
@@ -402,12 +414,12 @@ export default function DiagnosticoGamificadoMood() {
           {/* =============================================================
               RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (STABLE HEIGHT)
              ============================================================= */}
-          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white h-full overflow-y-auto">
+          <section className="col-span-1 lg:col-span-7 p-4 sm:p-6 lg:p-8 xl:p-10 flex flex-col justify-between bg-white h-full overflow-y-auto">
             {!isCompleted ? (
               <>
                 {/* Stepper Header */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#ff4b0b] bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200/70">
                         {currentQuestion.pilar}
@@ -419,7 +431,7 @@ export default function DiagnosticoGamificadoMood() {
                   </div>
 
                   {/* 10 Step Dots */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 w-full mb-6">
+                  <div className="flex items-center gap-1.5 sm:gap-2 w-full mb-4">
                     {QUESTIONS.map((q, idx) => {
                       const isPassed = idx < currentStep
                       const isCurrent = idx === currentStep
@@ -446,10 +458,10 @@ export default function DiagnosticoGamificadoMood() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
                       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                      className="space-y-5"
+                      className="space-y-3"
                     >
                       <div>
-                        <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-snug">
+                        <h3 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight leading-snug">
                           {currentQuestion.question}
                         </h3>
                         <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
@@ -458,7 +470,7 @@ export default function DiagnosticoGamificadoMood() {
                       </div>
 
                       {/* Interactive Option Cards */}
-                      <div className="space-y-2.5 pt-1">
+                      <div className="space-y-2">
                         {currentQuestion.options.map((opt, optIndex) => {
                           const isSelected = selectedOptionIndex === optIndex
                           return (
@@ -466,7 +478,7 @@ export default function DiagnosticoGamificadoMood() {
                               key={optIndex}
                               type="button"
                               onClick={() => handleSelectOption(optIndex)}
-                              className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 group cursor-pointer ${
+                              className={`w-full text-left p-3 sm:p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer ${
                                 isSelected
                                   ? 'bg-orange-50/70 border-[#ff4b0b] shadow-sm ring-1 ring-[#ff4b0b]'
                                   : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'
@@ -511,7 +523,7 @@ export default function DiagnosticoGamificadoMood() {
                 </div>
 
                 {/* Navigation Buttons */}
-                <div className="pt-4 flex items-center justify-between gap-4 border-t border-slate-100">
+                <div className="pt-3 flex items-center justify-between gap-4 border-t border-slate-100">
                     <button
                       type="button"
                       onClick={handlePrev}
