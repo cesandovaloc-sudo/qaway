@@ -47,6 +47,7 @@ Cada vez que se acople un módulo, el agente debe auditar y documentar en la bit
 | **AC-04** | Pagos | Módulo desacoplado / standalone | Componentes en `3-qawaylab-pagos` sin wrapper de página ni ruta en `AppRouter.jsx`. | Creación de página contenedora `PagosHubPage.jsx` y montaje en `/hub/pagos`. |
 | **AC-05** | Agenda | Módulo SaaS aislado con subrouter | App completa con `AgendaProvider` y subrutas dinámicas (`/:slug/:eventSlug`) no registradas en el Router central. | Creación de `AgendaAppPage.jsx` con rutas anidadas bajo `/hub/agenda/*` y fallback de datos demo. |
 | **AC-06** | Pagos | Pérdida de identidad estética / rediseño no deseado | Envoltorios y estilos oscuros ajenos sobreescribían el diseño original 'papel y tinta' de Mesa Selecta. | Restauración limpia del repositorio original en `src/pages/5-qaway-hub/3-qawaylab-pagos/`, montaje de `PagosAppPage.jsx` consumiendo directamente los componentes nativos (`ProductGrid`, `ProductDetail`, `CartView`, `Checkout`, `PurchaseHistory`) con estilos scoped `.qawa-storefront` (`storefront.css`) y rutas anidadas bajo `/hub/pagos/*`. |
+| **AC-07** | Academy | Colisión de alias `@/` entre host y submódulo | El submódulo `2-qawaylab-app-academy-real` usaba `@/` para su propio `src/`, lo que chocaba con el `@/` del host `1-qawaylab-web`. | Configuración de `customResolver` en `vite.config.js` (`resolve.alias`) para redirigir dinámicamente `@/` a `2-qawaylab-app-academy-real/src/` cuando el importador pertenezca al submódulo, preservando el 100% del código fuente intacto. |
 
 ---
 
