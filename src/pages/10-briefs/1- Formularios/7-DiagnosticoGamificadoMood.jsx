@@ -174,6 +174,181 @@ function AnimatedScoreCounter({ value }) {
   return <span>{displayValue}</span>
 }
 
+// 3D Isometric Character & Room Scene (Reacts dynamically to progress & score)
+function CharacterScene3D({ stage, pulse }) {
+  return (
+    <div className="relative w-full h-[220px] flex items-center justify-center select-none pointer-events-none">
+      <svg
+        viewBox="0 0 320 240"
+        className="w-full h-full max-h-[220px] overflow-visible drop-shadow-xl"
+      >
+        <defs>
+          <radialGradient id="rugGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="chairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffe699" />
+            <stop offset="100%" stopColor="#f5b842" />
+          </linearGradient>
+          <linearGradient id="cushionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#fff2be" />
+            <stop offset="100%" stopColor="#f2a92c" />
+          </linearGradient>
+          <linearGradient id="tabletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38bdf8" />
+            <stop offset="100%" stopColor="#0284c7" />
+          </linearGradient>
+        </defs>
+
+        {/* 3D Floor Base Rug */}
+        <ellipse cx="160" cy="205" rx="110" ry="24" fill="url(#rugGlow)" />
+        <ellipse cx="160" cy="202" rx="96" ry="18" fill="#ffffff" fillOpacity="0.22" />
+
+        {/* Plant on the right */}
+        <g transform="translate(232, 140)">
+          {/* Pot */}
+          <polygon points="12,48 28,48 32,70 8,70" fill="#f8fafc" />
+          <polygon points="8,70 32,70 28,75 12,75" fill="#e2e8f0" />
+          <rect x="10" y="75" width="4" height="8" fill="#b45309" rx="1" />
+          <rect x="26" y="75" width="4" height="8" fill="#b45309" rx="1" />
+          {/* Leaves */}
+          <motion.path
+            d="M20,48 Q8,30 6,14 Q20,24 20,48"
+            fill="#34d399"
+            animate={{ rotate: [-2, 3, -2] }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.path
+            d="M20,48 Q32,28 36,12 Q24,24 20,48"
+            fill="#10b981"
+            animate={{ rotate: [2, -3, 2] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <path d="M20,48 Q20,20 20,6 Q26,22 20,48" fill="#059669" />
+        </g>
+
+        {/* Floor Lamp on the left */}
+        <g transform="translate(60, 60)">
+          <line x1="25" y1="50" x2="25" y2="145" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
+          <ellipse cx="25" cy="145" rx="14" ry="4" fill="#ffffff" opacity="0.6" />
+          {/* Lampshade */}
+          <polygon points="12,50 38,50 44,22 6,22" fill="#ffffff" opacity="0.95" />
+          {/* Soft light glow cone */}
+          <polygon points="6,50 44,50 68,145 -18,145" fill="#ffffff" opacity="0.08" />
+        </g>
+
+        {/* Cozy 3D Armchair */}
+        <g transform="translate(100, 100)">
+          {/* Chair Legs */}
+          <line x1="25" y1="85" x2="16" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
+          <line x1="95" y1="85" x2="104" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
+          <line x1="45" y1="85" x2="40" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
+          <line x1="75" y1="85" x2="80" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
+
+          {/* Chair Backrest */}
+          <rect x="20" y="8" width="80" height="70" rx="18" fill="url(#chairGrad)" />
+          {/* Left/Right Armrests */}
+          <rect x="10" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
+          <rect x="88" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
+          {/* Seat Cushion */}
+          <rect x="22" y="52" width="76" height="32" rx="14" fill="url(#cushionGrad)" />
+        </g>
+
+        {/* Character sitting in the Armchair */}
+        <motion.g
+          transform="translate(132, 85)"
+          animate={{
+            scale: pulse ? 1.08 : 1,
+            y: [-1, 2, -1],
+          }}
+          transition={{
+            scale: { duration: 0.3, ease: 'easeOut' },
+            y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+          }}
+        >
+          {/* Hair Bun */}
+          <circle cx="28" cy="10" r="11" fill="#ea580c" />
+          <ellipse cx="28" cy="18" rx="15" ry="12" fill="#c2410c" />
+
+          {/* Head & Face */}
+          <circle cx="28" cy="24" r="12" fill="#fed7aa" />
+          {/* Eyes */}
+          <circle cx="24" cy="23" r="1.5" fill="#431407" />
+          <circle cx="32" cy="23" r="1.5" fill="#431407" />
+          {/* Smile */}
+          <path d="M25,27 Q28,30 31,27" stroke="#431407" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          {/* Blush */}
+          <circle cx="22" cy="26" r="2" fill="#f87171" opacity="0.6" />
+          <circle cx="34" cy="26" r="2" fill="#f87171" opacity="0.6" />
+
+          {/* Body / Sweater */}
+          <path d="M16,36 Q28,34 40,36 L44,66 Q28,68 12,66 Z" fill="#38bdf8" />
+          <path d="M22,35 Q28,38 34,35" stroke="#bae6fd" strokeWidth="1.5" fill="none" />
+
+          {/* Legs relaxed on the armchair */}
+          <path d="M16,66 Q14,85 24,96" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
+          <path d="M38,66 Q48,78 64,82" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
+          {/* Shoes */}
+          <rect x="18" y="93" width="14" height="7" rx="3.5" fill="#0f172a" />
+          <rect x="58" y="79" width="14" height="7" rx="3.5" fill="#0f172a" />
+
+          {/* Arms holding Tablet / Laptop */}
+          <path d="M14,44 Q24,52 34,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          <path d="M42,44 Q36,52 26,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+
+          {/* Tablet Screen */}
+          <g transform="translate(18, 42)">
+            <rect x="0" y="0" width="22" height="16" rx="3" fill="#0f172a" />
+            <rect x="1.5" y="1.5" width="19" height="13" rx="2" fill="url(#tabletGrad)" />
+            {/* Screen lines */}
+            <line x1="4" y1="5" x2="14" y2="5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
+            <line x1="4" y1="8" x2="18" y2="8" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+            <line x1="4" y1="11" x2="10" y2="11" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+          </g>
+
+          {/* Dynamic Floating Feedback Icon based on stage */}
+          {stage === 'trophy' && (
+            <motion.g
+              initial={{ scale: 0, y: 10 }}
+              animate={{ scale: [1, 1.2, 1], y: [-2, -6, -2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              transform="translate(42, -5)"
+            >
+              <circle cx="10" cy="10" r="12" fill="#fbbf24" />
+              <path d="M6,6 L14,6 L13,12 Q10,14 7,12 Z" fill="#78350f" />
+            </motion.g>
+          )}
+
+          {stage === 'flame' && (
+            <motion.g
+              initial={{ scale: 0 }}
+              animate={{ scale: [1, 1.15, 1], y: [0, -4, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity }}
+              transform="translate(42, -2)"
+            >
+              <circle cx="8" cy="8" r="10" fill="#f97316" />
+              <path d="M8,3 Q11,7 9,11 Q7,13 5,10 Q4,7 8,3 Z" fill="#fef08a" />
+            </motion.g>
+          )}
+
+          {stage === 'zap' && (
+            <motion.g
+              initial={{ scale: 0 }}
+              animate={{ scale: [1, 1.2, 1], rotate: [-5, 5, -5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              transform="translate(42, 2)"
+            >
+              <circle cx="8" cy="8" r="9" fill="#38bdf8" />
+              <polygon points="9,2 4,9 8,9 7,14 12,7 8,7" fill="#ffffff" />
+            </motion.g>
+          )}
+        </motion.g>
+      </svg>
+    </div>
+  )
+}
+
 export default function DiagnosticoGamificadoMood() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -181,7 +356,7 @@ export default function DiagnosticoGamificadoMood() {
   const [userEmail, setUserEmail] = useState('')
   const [userName, setUserName] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
-  const [iconPulse, setIconPulse] = useState(false)
+  const [scenePulse, setScenePulse] = useState(false)
 
   const currentQuestion = QUESTIONS[currentStep]
   const selectedOptionIndex = answers[currentQuestion?.id]
@@ -200,11 +375,11 @@ export default function DiagnosticoGamificadoMood() {
 
   const finalScorePercentage = Math.round((currentTotalScore / maxScore) * 100)
 
-  // Trigger pulse ONLY on the central icon when option is chosen
+  // Trigger pulse ONLY inside the 3D scene when option is chosen
   const handleSelectOption = (optionIndex) => {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionIndex }))
-    setIconPulse(true)
-    setTimeout(() => setIconPulse(false), 450)
+    setScenePulse(true)
+    setTimeout(() => setScenePulse(false), 450)
   }
 
   const handleNext = () => {
@@ -228,55 +403,44 @@ export default function DiagnosticoGamificadoMood() {
     setEmailSubmitted(false)
   }
 
-  // Dynamic stages for the central icon (the background stays ONE continuous warm gradient)
-  const getIconStageData = () => {
+  // Determine current stage for the 3D scene
+  const getStageData = () => {
     if (answeredCount === 0) {
       return {
         stageId: 'start',
-        icon: Compass,
         badgeText: 'Auditoría en Curso',
         subText: 'Comienza a responder',
-        rotation: 0,
       }
     }
     if (currentScorePercentage >= 80) {
       return {
         stageId: 'trophy',
-        icon: Trophy,
         badgeText: '¡Nivel Élite! 🏆',
         subText: 'Rendimiento sobresaliente',
-        rotation: 0,
       }
     }
     if (currentScorePercentage >= 60) {
       return {
         stageId: 'flame',
-        icon: Flame,
         badgeText: '¡Alta Tracción! 🔥',
         subText: 'Crecimiento acelerado',
-        rotation: 0,
       }
     }
     if (currentScorePercentage >= 40) {
       return {
         stageId: 'zap',
-        icon: Zap,
         badgeText: 'Potencial Activo ⚡',
         subText: 'Optimizando flujos',
-        rotation: 0,
       }
     }
     return {
       stageId: 'trend',
-      icon: TrendingUp,
       badgeText: 'Cimientos Iniciales 🌱',
       subText: 'Detectando mejoras',
-      rotation: 0,
     }
   }
 
-  const iconData = getIconStageData()
-  const CurrentIcon = iconData.icon
+  const stageData = getStageData()
 
   // Pillar calculations
   const calculatePillarScore = (pillarName) => {
@@ -309,7 +473,7 @@ export default function DiagnosticoGamificadoMood() {
           </Link>
           <span className="hidden sm:inline-block text-slate-300">|</span>
           <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
-            Formulario 07: Diagnóstico Cuadrado con Icono Animado
+            Formulario 07: Diagnóstico 3D con Escena Animada
           </span>
         </div>
 
@@ -323,17 +487,17 @@ export default function DiagnosticoGamificadoMood() {
         </div>
       </header>
 
-      {/* Main Container */}
+      {/* Main Container - Fixed Dimensions to guarantee zero jitter / resizing */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-        <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[640px]">
+        <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[660px] lg:h-[660px]">
           
           {/* =============================================================
-              LEFT PANEL: BALANCED SQUARISH CARD WITH SOLID CONTINUOUS GRADIENT
-              (The background color stays solid & elegant, only the icon animates)
+              LEFT PANEL: BALANCED SQUARISH CARD WITH 3D CHARACTER SCENE
+              (Solid continuous warm gradient, constant size, animated character)
              ============================================================= */}
-          <aside className="lg:col-span-5 p-6 sm:p-8 lg:p-10 flex items-center justify-center bg-slate-50/70 border-r border-slate-100">
+          <aside className="lg:col-span-5 p-6 sm:p-8 flex items-center justify-center bg-slate-50/70 border-r border-slate-100 h-full">
             {/* Proportioned Squarish Card (Single Continuous Warm Gradient) */}
-            <div className="w-full max-w-[360px] aspect-square rounded-[32px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-orange-500/20 bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white">
+            <div className="w-full max-w-[370px] aspect-square rounded-[32px] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-orange-500/20 bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white">
               
               {/* Subtle ambient lighting flares inside the square */}
               <div className="absolute top-0 right-0 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none -mr-12 -mt-12" />
@@ -343,67 +507,40 @@ export default function DiagnosticoGamificadoMood() {
               <div className="relative z-10 flex items-center justify-between">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
-                  <span>{iconData.badgeText}</span>
+                  <span>{stageData.badgeText}</span>
                 </div>
                 <span className="text-[11px] font-mono font-bold text-white/90 bg-black/10 px-2 py-0.5 rounded-md">
                   {answeredCount}/10
                 </span>
               </div>
 
-              {/* CENTER: ANIMATED 3D ICON / ILLUSTRATION ORB */}
-              <div className="relative z-10 flex flex-col items-center justify-center text-center my-auto">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={iconData.stageId}
-                    initial={{ scale: 0.7, opacity: 0, rotate: -15 }}
-                    animate={{
-                      scale: iconPulse ? 1.18 : 1,
-                      opacity: 1,
-                      rotate: 0,
-                      y: [-4, 4, -4],
-                    }}
-                    exit={{ scale: 0.7, opacity: 0, rotate: 15 }}
-                    transition={{
-                      scale: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-                      opacity: { duration: 0.25 },
-                      y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-                    }}
-                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white/25 backdrop-blur-md border-2 border-white/40 flex items-center justify-center shadow-xl shadow-black/10"
-                  >
-                    <CurrentIcon className="w-12 h-12 sm:w-14 sm:h-14 text-white drop-shadow-md" />
-                  </motion.div>
-                </AnimatePresence>
-
-                <motion.div
-                  animate={{ scale: iconPulse ? 1.08 : 1 }}
-                  className="mt-3 text-center"
-                >
-                  <span className="text-2xl sm:text-3xl font-black tracking-tight text-white block">
-                    {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
-                  </span>
-                  <span className="text-[11px] font-bold text-white/80 uppercase tracking-wider block">
-                    {iconData.subText}
-                  </span>
-                </motion.div>
+              {/* CENTER: 3D ISOMETRIC CHARACTER ROOM SCENE */}
+              <div className="relative z-10 my-auto flex items-center justify-center">
+                <CharacterScene3D stage={stageData.stageId} pulse={scenePulse} />
               </div>
 
-              {/* Bottom Card Note */}
+              {/* Bottom Card Metric & Trust Note */}
               <div className="relative z-10 pt-2 border-t border-white/20 flex items-center justify-between text-[11px] font-semibold text-white/90">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-black tracking-tight text-white">
+                    {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
+                  </span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-white/80">
+                    Madurez
+                  </span>
+                </div>
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Qaway Lab Engine</span>
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider bg-white/15 px-2 py-0.5 rounded">
-                  4 Pilares
-                </span>
               </div>
             </div>
           </aside>
 
           {/* =============================================================
-              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW
+              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (FIXED HEIGHT)
              ============================================================= */}
-          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white">
+          <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white h-full overflow-y-auto">
             {!isCompleted ? (
               <>
                 {/* Stepper Header */}
@@ -420,7 +557,7 @@ export default function DiagnosticoGamificadoMood() {
                   </div>
 
                   {/* 10 Step Dots */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 w-full mb-8">
+                  <div className="flex items-center gap-1.5 sm:gap-2 w-full mb-6">
                     {QUESTIONS.map((q, idx) => {
                       const isPassed = idx < currentStep
                       const isCurrent = idx === currentStep
@@ -443,23 +580,23 @@ export default function DiagnosticoGamificadoMood() {
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentQuestion.id}
-                      initial={{ opacity: 0, x: 12 }}
+                      initial={{ opacity: 0, x: 10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -12 }}
-                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="space-y-6"
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      className="space-y-5"
                     >
                       <div>
-                        <h3 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-snug">
+                        <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-snug">
                           {currentQuestion.question}
                         </h3>
-                        <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                        <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                           {currentQuestion.subtitle}
                         </p>
                       </div>
 
                       {/* Interactive Option Cards */}
-                      <div className="space-y-3 pt-1">
+                      <div className="space-y-2.5 pt-1">
                         {currentQuestion.options.map((opt, optIndex) => {
                           const isSelected = selectedOptionIndex === optIndex
                           return (
@@ -467,13 +604,13 @@ export default function DiagnosticoGamificadoMood() {
                               key={optIndex}
                               type="button"
                               onClick={() => handleSelectOption(optIndex)}
-                              className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 group cursor-pointer ${
+                              className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-4 group cursor-pointer ${
                                 isSelected
                                   ? 'bg-orange-50/70 border-[#ff4b0b] shadow-sm ring-1 ring-[#ff4b0b]'
                                   : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'
                               }`}
                             >
-                              <div className="flex items-center gap-3.5">
+                              <div className="flex items-center gap-3">
                                 <div
                                   className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                                     isSelected
@@ -486,7 +623,7 @@ export default function DiagnosticoGamificadoMood() {
                                   )}
                                 </div>
                                 <span
-                                  className={`text-sm sm:text-base font-semibold block ${
+                                  className={`text-xs sm:text-sm font-semibold block ${
                                     isSelected ? 'text-slate-950 font-bold' : 'text-slate-700'
                                   }`}
                                 >
@@ -495,7 +632,7 @@ export default function DiagnosticoGamificadoMood() {
                               </div>
 
                               <span
-                                className={`text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-md transition-colors shrink-0 ${
+                                className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transition-colors shrink-0 ${
                                   isSelected
                                     ? 'bg-[#ff4b0b] text-white'
                                     : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
@@ -512,15 +649,15 @@ export default function DiagnosticoGamificadoMood() {
                 </div>
 
                 {/* Dynamic Bottom Tip & Navigation */}
-                <div className="pt-8 space-y-6">
+                <div className="pt-5 space-y-4">
                   {/* Pedagogical Tip */}
-                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex items-start gap-3">
-                    <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-700 shrink-0">
-                      <Lightbulb className="w-4 h-4" />
+                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex items-start gap-3">
+                    <div className="p-1 rounded-lg bg-amber-500/10 text-amber-700 shrink-0 mt-0.5">
+                      <Lightbulb className="w-3.5 h-3.5" />
                     </div>
                     <div className="text-xs text-amber-950 space-y-0.5">
                       <span className="font-extrabold block text-amber-950">Consejo Estratégico</span>
-                      <p className="leading-relaxed text-amber-900/90">{currentQuestion.tip}</p>
+                      <p className="leading-relaxed text-amber-900/90 text-[11px]">{currentQuestion.tip}</p>
                     </div>
                   </div>
 
@@ -530,7 +667,7 @@ export default function DiagnosticoGamificadoMood() {
                       type="button"
                       onClick={handlePrev}
                       disabled={currentStep === 0}
-                      className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold border transition-colors ${
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors ${
                         currentStep === 0
                           ? 'opacity-30 border-slate-200 text-slate-400 cursor-not-allowed'
                           : 'border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 cursor-pointer'
@@ -544,7 +681,7 @@ export default function DiagnosticoGamificadoMood() {
                       type="button"
                       onClick={handleNext}
                       disabled={selectedOptionIndex === undefined}
-                      className={`inline-flex items-center gap-2 px-7 py-3 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md ${
+                      className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md ${
                         selectedOptionIndex === undefined
                           ? 'bg-slate-300 opacity-60 cursor-not-allowed'
                           : 'bg-[#ff4b0b] hover:bg-[#e04008] active:scale-[0.99] cursor-pointer shadow-orange-500/20'
@@ -562,39 +699,39 @@ export default function DiagnosticoGamificadoMood() {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-7 my-auto"
+                className="space-y-6 my-auto"
               >
-                <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold bg-slate-950 text-white border-slate-950 shadow-2xs">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold bg-slate-950 text-white border-slate-950 shadow-2xs">
                     <Trophy className="w-3.5 h-3.5 text-yellow-400" />
                     <span>Diagnóstico Completado con Éxito</span>
                   </div>
 
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-950 tracking-tight leading-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
                     Puntaje de Madurez Digital
                   </h2>
 
                   <div className="flex items-baseline gap-3">
-                    <span className="text-5xl sm:text-6xl font-black text-[#ff4b0b] tracking-tighter">
+                    <span className="text-4xl sm:text-5xl font-black text-[#ff4b0b] tracking-tighter">
                       <AnimatedScoreCounter value={finalScorePercentage} />
                     </span>
-                    <span className="text-sm sm:text-base font-bold text-slate-400">
+                    <span className="text-xs sm:text-sm font-bold text-slate-400">
                       / 100 Puntos
                     </span>
                   </div>
                 </div>
 
                 {/* 4 Pillars Clean Breakdown */}
-                <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                    <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+                <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
+                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
                       Rendimiento por los 4 Pilares
                     </h4>
-                    <span className="text-[11px] font-bold text-slate-400">Resultados</span>
+                    <span className="text-[10px] font-bold text-slate-400">Resultados</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div className="p-3.5 rounded-2xl bg-white border border-slate-200/70 space-y-1.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-800">1. Oferta & Mensaje</span>
                         <span className="text-slate-950 font-mono">{pillarScores.oferta}%</span>
@@ -604,7 +741,7 @@ export default function DiagnosticoGamificadoMood() {
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-white border border-slate-200/70 space-y-1.5">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-800">2. Canal Web & Branding</span>
                         <span className="text-slate-950 font-mono">{pillarScores.canal}%</span>
@@ -614,7 +751,7 @@ export default function DiagnosticoGamificadoMood() {
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-white border border-slate-200/70 space-y-1.5">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-800">3. Automatización & CRM</span>
                         <span className="text-slate-950 font-mono">{pillarScores.sistemas}%</span>
@@ -624,7 +761,7 @@ export default function DiagnosticoGamificadoMood() {
                       </div>
                     </div>
 
-                    <div className="p-3.5 rounded-2xl bg-white border border-slate-200/70 space-y-1.5">
+                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
                         <span className="text-slate-800">4. Capacidad de Escala</span>
                         <span className="text-slate-950 font-mono">{pillarScores.escala}%</span>
@@ -643,18 +780,18 @@ export default function DiagnosticoGamificadoMood() {
                       e.preventDefault()
                       if (userEmail) setEmailSubmitted(true)
                     }}
-                    className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-3"
+                    className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-2.5"
                   >
-                    <h4 className="text-sm font-extrabold text-slate-950">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-950">
                       ¿Deseas recibir tu reporte detallado con la hoja de ruta en PDF?
                     </h4>
-                    <div className="flex flex-col sm:flex-row gap-2.5">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         type="text"
                         placeholder="Tu nombre o empresa"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-slate-950 flex-1"
+                        className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-slate-950 flex-1"
                       />
                       <input
                         type="email"
@@ -662,20 +799,20 @@ export default function DiagnosticoGamificadoMood() {
                         placeholder="correo@tuempresa.com"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
-                        className="px-4 py-3 rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-slate-950 flex-1"
+                        className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-slate-950 flex-1"
                       />
                       <button
                         type="submit"
-                        className="px-6 py-3 rounded-xl bg-slate-950 text-white font-bold text-xs sm:text-sm hover:bg-[#ff4b0b] transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                        className="px-5 py-2.5 rounded-xl bg-slate-950 text-white font-bold text-xs hover:bg-[#ff4b0b] transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
                       >
-                        <Send className="w-4 h-4" />
+                        <Send className="w-3.5 h-3.5" />
                         <span>Enviar</span>
                       </button>
                     </div>
                   </form>
                 ) : (
-                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
-                    <CheckCircle2 className="w-6 h-6 text-emerald-600 mx-auto" />
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-0.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 mx-auto" />
                     <h4 className="text-xs font-bold text-slate-900">
                       ¡Reporte enviado exitosamente a {userEmail}!
                     </h4>
@@ -695,7 +832,7 @@ export default function DiagnosticoGamificadoMood() {
 
                   <Link
                     to="/estudio/consultoria"
-                    className="px-6 py-3 rounded-xl bg-slate-950 hover:bg-[#ff4b0b] text-white font-bold text-xs sm:text-sm transition-colors shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-[#ff4b0b] text-white font-bold text-xs transition-colors shadow-sm"
                   >
                     Agendar Sesión Estratégica →
                   </Link>
