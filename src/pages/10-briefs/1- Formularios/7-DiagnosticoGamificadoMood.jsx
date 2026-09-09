@@ -174,159 +174,35 @@ function AnimatedScoreCounter({ value }) {
   return <span>{displayValue}</span>
 }
 
-// 3D Isometric Character & Room Scene (Scales cleanly within the left panel)
-function CharacterScene3D({ stage, pulse }) {
+// Dynamic Icon Display per stage
+function StageIconDisplay({ stageId }) {
+  const getIcon = () => {
+    switch (stageId) {
+      case 'trophy':
+        return <Trophy className="w-12 h-12 text-yellow-300 drop-shadow-md" />
+      case 'flame':
+        return <Flame className="w-12 h-12 text-orange-200 drop-shadow-md" />
+      case 'zap':
+        return <Zap className="w-12 h-12 text-amber-200 drop-shadow-md" />
+      case 'trend':
+        return <TrendingUp className="w-12 h-12 text-yellow-100 drop-shadow-md" />
+      default:
+        return <Target className="w-12 h-12 text-white/90 drop-shadow-md" />
+    }
+  }
+
   return (
-    <div className="relative w-full h-[260px] sm:h-[290px] flex items-center justify-center select-none pointer-events-none">
-      <svg
-        viewBox="0 0 320 240"
-        className="w-full h-full max-h-[280px] overflow-visible drop-shadow-2xl"
-      >
-        <defs>
-          <radialGradient id="rugGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id="chairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffe699" />
-            <stop offset="100%" stopColor="#f5b842" />
-          </linearGradient>
-          <linearGradient id="cushionGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#fff2be" />
-            <stop offset="100%" stopColor="#f2a92c" />
-          </linearGradient>
-          <linearGradient id="tabletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#38bdf8" />
-            <stop offset="100%" stopColor="#0284c7" />
-          </linearGradient>
-        </defs>
-
-        {/* 3D Floor Base Rug */}
-        <ellipse cx="160" cy="205" rx="110" ry="24" fill="url(#rugGlow)" />
-        <ellipse cx="160" cy="202" rx="96" ry="18" fill="#ffffff" fillOpacity="0.22" />
-
-        {/* Plant on the right */}
-        <g transform="translate(232, 140)">
-          <polygon points="12,48 28,48 32,70 8,70" fill="#f8fafc" />
-          <polygon points="8,70 32,70 28,75 12,75" fill="#e2e8f0" />
-          <rect x="10" y="75" width="4" height="8" fill="#b45309" rx="1" />
-          <rect x="26" y="75" width="4" height="8" fill="#b45309" rx="1" />
-          <motion.path
-            d="M20,48 Q8,30 6,14 Q20,24 20,48"
-            fill="#34d399"
-            animate={{ rotate: [-2, 3, -2] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <motion.path
-            d="M20,48 Q32,28 36,12 Q24,24 20,48"
-            fill="#10b981"
-            animate={{ rotate: [2, -3, 2] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <path d="M20,48 Q20,20 20,6 Q26,22 20,48" fill="#059669" />
-        </g>
-
-        {/* Floor Lamp on the left */}
-        <g transform="translate(60, 60)">
-          <line x1="25" y1="50" x2="25" y2="145" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
-          <ellipse cx="25" cy="145" rx="14" ry="4" fill="#ffffff" opacity="0.6" />
-          <polygon points="12,50 38,50 44,22 6,22" fill="#ffffff" opacity="0.95" />
-          <polygon points="6,50 44,50 68,145 -18,145" fill="#ffffff" opacity="0.08" />
-        </g>
-
-        {/* Cozy 3D Armchair */}
-        <g transform="translate(100, 100)">
-          <line x1="25" y1="85" x2="16" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
-          <line x1="95" y1="85" x2="104" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
-          <line x1="45" y1="85" x2="40" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
-          <line x1="75" y1="85" x2="80" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
-
-          <rect x="20" y="8" width="80" height="70" rx="18" fill="url(#chairGrad)" />
-          <rect x="10" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
-          <rect x="88" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
-          <rect x="22" y="52" width="76" height="32" rx="14" fill="url(#cushionGrad)" />
-        </g>
-
-        {/* Character sitting in the Armchair */}
-        <motion.g
-          transform="translate(132, 85)"
-          animate={{
-            scale: pulse ? 1.08 : 1,
-            y: [-1, 2, -1],
-          }}
-          transition={{
-            scale: { duration: 0.3, ease: 'easeOut' },
-            y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
-          }}
-        >
-          <circle cx="28" cy="10" r="11" fill="#ea580c" />
-          <ellipse cx="28" cy="18" rx="15" ry="12" fill="#c2410c" />
-
-          <circle cx="28" cy="24" r="12" fill="#fed7aa" />
-          <circle cx="24" cy="23" r="1.5" fill="#431407" />
-          <circle cx="32" cy="23" r="1.5" fill="#431407" />
-          <path d="M25,27 Q28,30 31,27" stroke="#431407" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          <circle cx="22" cy="26" r="2" fill="#f87171" opacity="0.6" />
-          <circle cx="34" cy="26" r="2" fill="#f87171" opacity="0.6" />
-
-          <path d="M16,36 Q28,34 40,36 L44,66 Q28,68 12,66 Z" fill="#38bdf8" />
-          <path d="M22,35 Q28,38 34,35" stroke="#bae6fd" strokeWidth="1.5" fill="none" />
-
-          <path d="M16,66 Q14,85 24,96" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
-          <path d="M38,66 Q48,78 64,82" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
-          <rect x="18" y="93" width="14" height="7" rx="3.5" fill="#0f172a" />
-          <rect x="58" y="79" width="14" height="7" rx="3.5" fill="#0f172a" />
-
-          <path d="M14,44 Q24,52 34,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
-          <path d="M42,44 Q36,52 26,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
-
-          <g transform="translate(18, 42)">
-            <rect x="0" y="0" width="22" height="16" rx="3" fill="#0f172a" />
-            <rect x="1.5" y="1.5" width="19" height="13" rx="2" fill="url(#tabletGrad)" />
-            <line x1="4" y1="5" x2="14" y2="5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
-            <line x1="4" y1="8" x2="18" y2="8" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
-            <line x1="4" y1="11" x2="10" y2="11" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
-          </g>
-
-          {/* Stage Badges */}
-          {stage === 'trophy' && (
-            <motion.g
-              initial={{ scale: 0, y: 10 }}
-              animate={{ scale: [1, 1.2, 1], y: [-2, -6, -2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              transform="translate(42, -5)"
-            >
-              <circle cx="10" cy="10" r="12" fill="#fbbf24" />
-              <path d="M6,6 L14,6 L13,12 Q10,14 7,12 Z" fill="#78350f" />
-            </motion.g>
-          )}
-
-          {stage === 'flame' && (
-            <motion.g
-              initial={{ scale: 0 }}
-              animate={{ scale: [1, 1.15, 1], y: [0, -4, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              transform="translate(42, -2)"
-            >
-              <circle cx="8" cy="8" r="10" fill="#f97316" />
-              <path d="M8,3 Q11,7 9,11 Q7,13 5,10 Q4,7 8,3 Z" fill="#fef08a" />
-            </motion.g>
-          )}
-
-          {stage === 'zap' && (
-            <motion.g
-              initial={{ scale: 0 }}
-              animate={{ scale: [1, 1.2, 1], rotate: [-5, 5, -5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              transform="translate(42, 2)"
-            >
-              <circle cx="8" cy="8" r="9" fill="#38bdf8" />
-              <polygon points="9,2 4,9 8,9 7,14 12,7 8,7" fill="#ffffff" />
-            </motion.g>
-          )}
-        </motion.g>
-      </svg>
-    </div>
+    <motion.div
+      key={stageId}
+      initial={{ scale: 0.85, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="flex flex-col items-center justify-center text-center p-6"
+    >
+      <div className="w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-md border border-white/25 shadow-xl flex items-center justify-center mb-3 group hover:scale-105 transition-transform duration-300">
+        {getIcon()}
+      </div>
+    </motion.div>
   )
 }
 
@@ -488,10 +364,23 @@ export default function DiagnosticoGamificadoMood() {
               </span>
             </div>
 
-            {/* CENTER: 3D ISOMETRIC CHARACTER ROOM SCENE */}
+            {/* CENTER: STAGE ICON DISPLAY */}
             <div className="relative z-10 my-auto flex flex-col items-center justify-center">
-              <CharacterScene3D stage={stageData.stageId} pulse={scenePulse} />
+              <StageIconDisplay stageId={stageData.stageId} />
             </div>
+
+            {/* Pedagogical Tip moved to left panel */}
+            {!isCompleted && currentQuestion?.tip && (
+              <div className="relative z-10 my-3 p-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-white space-y-1">
+                <div className="flex items-center gap-2 text-xs font-extrabold text-yellow-200">
+                  <Lightbulb className="w-4 h-4 shrink-0" />
+                  <span>Consejo Estratégico</span>
+                </div>
+                <p className="text-xs text-white/90 leading-relaxed font-normal">
+                  {currentQuestion.tip}
+                </p>
+              </div>
+            )}
 
             {/* Bottom Panel Metric & Trust Note */}
             <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs font-semibold text-white/95">
@@ -621,21 +510,8 @@ export default function DiagnosticoGamificadoMood() {
                   </AnimatePresence>
                 </div>
 
-                {/* Dynamic Bottom Tip & Navigation */}
-                <div className="pt-5 space-y-4">
-                  {/* Pedagogical Tip */}
-                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/70 flex items-start gap-3">
-                    <div className="p-1 rounded-lg bg-amber-500/10 text-amber-700 shrink-0 mt-0.5">
-                      <Lightbulb className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="text-xs text-amber-950 space-y-0.5">
-                      <span className="font-extrabold block text-amber-950">Consejo Estratégico</span>
-                      <p className="leading-relaxed text-amber-900/90 text-[11px]">{currentQuestion.tip}</p>
-                    </div>
-                  </div>
-
-                  {/* Navigation Buttons */}
-                  <div className="flex items-center justify-between gap-4 pt-1">
+                {/* Navigation Buttons */}
+                <div className="pt-4 flex items-center justify-between gap-4 border-t border-slate-100">
                     <button
                       type="button"
                       onClick={handlePrev}
@@ -663,7 +539,6 @@ export default function DiagnosticoGamificadoMood() {
                       <span>{currentStep === QUESTIONS.length - 1 ? 'Ver Resultado Final' : 'Siguiente'}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
-                  </div>
                 </div>
               </>
             ) : (
