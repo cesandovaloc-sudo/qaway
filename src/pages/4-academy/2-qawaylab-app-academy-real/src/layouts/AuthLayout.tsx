@@ -9,11 +9,11 @@ export default function AuthLayout() {
 
   // Si ya está logueado, redirigir a su panel según rol
   const roleRoutes: Record<string, string> = {
-    student: '/panel',
-    teacher: '/docente',
-    editor: '/docente',
-    admin: '/admin',
-    support: '/admin',
+    student: '/academy/app/panel',
+    teacher: '/academy/app/docente',
+    editor: '/academy/app/docente',
+    admin: '/academy/app/admin',
+    support: '/academy/app/admin',
   }
 
   // Mientras se resuelve la sesión NO mostramos el formulario: así un usuario ya

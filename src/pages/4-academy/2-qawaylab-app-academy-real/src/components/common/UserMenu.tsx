@@ -9,11 +9,11 @@ interface UserMenuProps {
 }
 
 const menuItems = [
-  { to: '/panel', label: 'Mi Aprendizaje', icon: '📊' },
-  { to: '/panel/certificados', label: 'Certificados', icon: '🎓', studentOnly: true },
-  { to: '/panel/recursos', label: 'Recursos', icon: '📎', studentOnly: true },
-  { to: '/panel/compras', label: 'Mis Compras', icon: '🛒' },
-  { to: '/panel/configuracion', label: 'Configuración', icon: '⚙️' },
+  { to: '/academy/app/panel', label: 'Mi Aprendizaje', icon: '📊' },
+  { to: '/academy/app/panel/certificados', label: 'Certificados', icon: '🎓', studentOnly: true },
+  { to: '/academy/app/panel/recursos', label: 'Recursos', icon: '📎', studentOnly: true },
+  { to: '/academy/app/panel/compras', label: 'Mis Compras', icon: '🛒' },
+  { to: '/academy/app/panel/configuracion', label: 'Configuración', icon: '⚙️' },
 ]
 
 function formatShortName(name: string) {
@@ -127,7 +127,7 @@ export default function UserMenu({ user, profile, signOut }: UserMenuProps) {
             <div className="border-t border-surface-100 mt-1 pt-1">
               {isAdmin && (
                 <Link
-                  to="/admin"
+                  to="/academy/app/admin"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 rounded-none px-3 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
                   role="menuitem"
@@ -138,7 +138,7 @@ export default function UserMenu({ user, profile, signOut }: UserMenuProps) {
               )}
               {isTeacher && (
                 <Link
-                  to="/docente"
+                  to="/academy/app/docente"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-3 rounded-none px-3 py-2.5 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50"
                   role="menuitem"

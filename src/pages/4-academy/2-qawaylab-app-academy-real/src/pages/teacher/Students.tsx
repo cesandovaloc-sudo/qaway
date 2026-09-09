@@ -650,7 +650,7 @@ export default function TeacherStudents() {
               ? 'Los alumnos aparecerán aquí cuando se inscriban en tus cursos.'
               : 'Prueba seleccionando otro curso.'}
           </p>
-          <Link to="/docente" className="btn-primary text-sm inline-flex items-center gap-2">
+          <Link to="/academy/app/docente" className="btn-primary text-sm inline-flex items-center gap-2">
             ← Volver al panel
           </Link>
         </div>

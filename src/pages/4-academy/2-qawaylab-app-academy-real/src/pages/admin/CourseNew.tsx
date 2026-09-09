@@ -14,8 +14,8 @@ export default function CourseNew() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
-  const fromTeacher = location.pathname.startsWith('/docente')
-  const returnPath = fromTeacher ? '/docente/cursos' : '/admin/cursos'
+  const fromTeacher = location.pathname.startsWith('/academy/app/docente')
+  const returnPath = fromTeacher ? '/academy/app/docente/cursos' : '/academy/app/admin/cursos'
 
   const [categories, setCategories] = useState<Category[]>([])
   const [form, setForm] = useState({
@@ -89,15 +89,15 @@ export default function CourseNew() {
         <nav className="flex items-center gap-2 text-sm text-surface-400 mb-4">
           {fromTeacher ? (
             <>
-              <Link to="/docente" className="hover:text-surface-600">Panel</Link>
+              <Link to="/academy/app/docente" className="hover:text-surface-600">Panel</Link>
               <span>/</span>
-              <Link to="/docente/cursos" className="hover:text-surface-600">Mis Cursos</Link>
+              <Link to="/academy/app/docente/cursos" className="hover:text-surface-600">Mis Cursos</Link>
             </>
           ) : (
             <>
-              <Link to="/admin" className="hover:text-surface-600">Admin</Link>
+              <Link to="/academy/app/admin" className="hover:text-surface-600">Admin</Link>
               <span>/</span>
-              <Link to="/admin/cursos" className="hover:text-surface-600">Cursos</Link>
+              <Link to="/academy/app/admin/cursos" className="hover:text-surface-600">Cursos</Link>
             </>
           )}
           <span>/</span>

@@ -29,15 +29,15 @@ export default function Login() {
           .single()
 
         const roleRoutes: Record<string, string> = {
-          student: '/panel',
-          teacher: '/docente',
-          editor: '/docente',
-          admin: '/admin',
-          support: '/admin',
+          student: '/academy/app/panel',
+          teacher: '/academy/app/docente',
+          editor: '/academy/app/docente',
+          admin: '/academy/app/admin',
+          support: '/academy/app/admin',
         }
-        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/panel')
+        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/academy/app/panel')
       } else {
-        navigate(safeRedirect || '/panel')
+        navigate(safeRedirect || '/academy/app/panel')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err) || 'Error al iniciar sesión')
@@ -52,7 +52,7 @@ export default function Login() {
         <h1 className="text-2xl font-bold text-surface-900">Acceder a tu cuenta</h1>
         <p className="mt-2 text-sm text-surface-500">
           ¿No tienes cuenta?{' '}
-          <Link to={safeRedirect ? `/registro?redirect=${encodeURIComponent(safeRedirect)}` : '/registro'} className="font-medium text-primary-600 hover:text-primary-700">
+          <Link to={safeRedirect ? `/academy/app/registro?redirect=${encodeURIComponent(safeRedirect)}` : '/academy/app/registro'} className="font-medium text-primary-600 hover:text-primary-700">
             Regístrate aquí
           </Link>
         </p>
@@ -82,7 +82,7 @@ export default function Login() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label htmlFor="password" className="label-field mb-0">Contraseña</label>
-              <Link to="/recuperar" className="text-xs font-medium text-primary-600 hover:text-primary-700">
+              <Link to="/academy/app/recuperar" className="text-xs font-medium text-primary-600 hover:text-primary-700">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>

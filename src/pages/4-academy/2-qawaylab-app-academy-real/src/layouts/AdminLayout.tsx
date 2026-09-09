@@ -7,12 +7,12 @@ import Logo from '@/components/common/Logo'
 import RouteFallback from '@/components/common/RouteFallback'
 
 const sidebarLinks = [
-  { to: '/admin', label: 'Dashboard', icon: '📊' },
-  { to: '/admin/cursos', label: 'Cursos', icon: '📚' },
-  { to: '/admin/alumnos', label: 'Usuarios', icon: '👥' },
-  { to: '/admin/docentes', label: 'Docentes', icon: '👨‍🏫' },
-  { to: '/admin/pagos', label: 'Pagos', icon: '💰' },
-  { to: '/admin/permisos', label: 'Permisos', icon: '🔐' },
+  { to: '/academy/app/admin', label: 'Dashboard', icon: '📊' },
+  { to: '/academy/app/admin/cursos', label: 'Cursos', icon: '📚' },
+  { to: '/academy/app/admin/alumnos', label: 'Usuarios', icon: '👥' },
+  { to: '/academy/app/admin/docentes', label: 'Docentes', icon: '👨‍🏫' },
+  { to: '/academy/app/admin/pagos', label: 'Pagos', icon: '💰' },
+  { to: '/academy/app/admin/permisos', label: 'Permisos', icon: '🔐' },
 ]
 
 const ALLOWED_ROLES = ['admin', 'support']
@@ -29,7 +29,7 @@ export default function AdminLayout() {
     )
   }
 
-  if (!user) return <Navigate to="/acceder" replace />
+  if (!user) return <Navigate to="/academy/app/acceder" replace />
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -37,7 +37,7 @@ export default function AdminLayout() {
       </div>
     )
   }
-  if (!ALLOWED_ROLES.includes(profile.role || '')) return <Navigate to="/acceder" replace />
+  if (!ALLOWED_ROLES.includes(profile.role || '')) return <Navigate to="/academy/app/acceder" replace />
 
   return (
     <div className="flex min-h-screen bg-surface-50">
@@ -65,10 +65,10 @@ export default function AdminLayout() {
 
         <div className="border-t border-surface-200 p-4">
           <Link
-            to="/"
+            to="/academy/app/cursos"
             className="flex items-center gap-3 rounded-none px-3 py-2 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700"
           >
-            ← Volver al inicio
+            ← Volver a Cursos
           </Link>
         </div>
       </aside>

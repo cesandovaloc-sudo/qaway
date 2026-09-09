@@ -206,7 +206,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
       visible: true,
       forceCollapse: false,
       slug: slug || '',
-      coursePath: isStudentView ? `/panel/cursos/${slug}` : `/cursos/${slug}`,
+      coursePath: isStudentView ? `/academy/app/panel/cursos/${slug}` : `/academy/app/cursos/${slug}`,
       title: course.title,
       totalLessons: flatLessons.length,
       modules: (course.modules || []).map(m => ({ id: m.id, title: m.title, lessons: (m.lessons || []).map(l => ({ id: l.id, title: l.title })) })),
@@ -239,12 +239,12 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
       <div className="flex flex-col items-center justify-center py-20">
         <span className="mb-4 text-5xl">Video</span>
         <h3 className="mb-2 text-lg font-semibold text-surface-900">Leccion no encontrada</h3>
-        <Link to={isStudentView ? `/panel/cursos/${slug}` : `/cursos/${slug}`} className="btn-primary text-sm">Volver al curso</Link>
+        <Link to={isStudentView ? `/academy/app/panel/cursos/${slug}` : `/academy/app/cursos/${slug}`} className="btn-primary text-sm">Volver al curso</Link>
       </div>
     )
   }
 
-  const coursePath = isStudentView ? `/panel/cursos/${slug}` : `/cursos/${slug}`
+  const coursePath = isStudentView ? `/academy/app/panel/cursos/${slug}` : `/academy/app/cursos/${slug}`
   const lessonPath = (lessonNumber: number) => `${coursePath}/leccion/${lessonNumber}`
   const canOpenLesson = (targetLesson: FlatLesson | null) => isStudentView || Boolean(targetLesson?.isFreePreview)
   const hasVideoUrl = Boolean(lesson.video_url)
@@ -423,7 +423,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
                   <span className="text-2xl block mb-1">🎓</span>
                   <h4 className="text-xs font-bold text-surface-900 mb-1">¿Listo para más?</h4>
                   <p className="text-[11px] text-surface-600 mb-3">Accede al curso completo y avanza a tu propio ritmo.</p>
-                  <Link to="/cursos" className="inline-block border border-surface-200 bg-white px-3 py-1.5 text-xs font-bold text-surface-800 hover:bg-surface-50 transition">
+                  <Link to="/academy/app/cursos" className="inline-block border border-surface-200 bg-white px-3 py-1.5 text-xs font-bold text-surface-800 hover:bg-surface-50 transition">
                     Ver planes y precios
                   </Link>
                 </div>

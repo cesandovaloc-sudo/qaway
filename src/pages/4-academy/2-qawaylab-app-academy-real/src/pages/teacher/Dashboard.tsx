@@ -286,7 +286,7 @@ export default function TeacherDashboard() {
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-surface-900">Entregas Recientes</h2>
-          <Link to="/docente/tareas" className="btn-ghost text-sm">Ver todas →</Link>
+          <Link to="/academy/app/docente/tareas" className="btn-ghost text-sm">Ver todas →</Link>
         </div>
         {recentSubmissions.length > 0 ? (
           <div className="space-y-3">

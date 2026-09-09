@@ -312,7 +312,7 @@ export default function CourseManage() {
     return (
       <div className="card p-12 text-center">
         <p className="text-surface-500">{error}</p>
-        <Link to="/docente" className="btn-primary mt-4 inline-block">Volver al panel</Link>
+        <Link to="/academy/app/docente" className="btn-primary mt-4 inline-block">Volver al panel</Link>
       </div>
     )
   }
@@ -326,7 +326,7 @@ export default function CourseManage() {
     <div>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-surface-400 mb-4">
-        <Link to="/docente" className="hover:text-surface-600 transition-colors">Panel</Link>
+        <Link to="/academy/app/docente" className="hover:text-surface-600 transition-colors">Panel</Link>
         <span>/</span>
         <span className="text-surface-900 font-medium">{course.title}</span>
       </nav>

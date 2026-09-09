@@ -57,10 +57,10 @@ export default function Permissions() {
 
       {/* Quick actions */}
       <div className="mb-8 flex flex-wrap items-center gap-3">
-        <Link to="/admin/alumnos" className="btn-primary text-sm">
+        <Link to="/academy/app/admin/alumnos" className="btn-primary text-sm">
           Gestionar usuarios y roles
         </Link>
-        <Link to="/admin/docentes" className="btn-secondary text-sm">
+        <Link to="/academy/app/admin/docentes" className="btn-secondary text-sm">
           Crear nuevo docente
         </Link>
         {error && (

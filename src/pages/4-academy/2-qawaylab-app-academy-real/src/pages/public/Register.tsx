@@ -34,15 +34,15 @@ export default function Register() {
           .single()
 
         const roleRoutes: Record<string, string> = {
-          student: '/panel',
-          teacher: '/docente',
-          editor: '/docente',
-          admin: '/admin',
-          support: '/admin',
+          student: '/academy/app/panel',
+          teacher: '/academy/app/docente',
+          editor: '/academy/app/docente',
+          admin: '/academy/app/admin',
+          support: '/academy/app/admin',
         }
-        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/panel')
+        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/academy/app/panel')
       } else {
-        navigate(safeRedirect || '/panel')
+        navigate(safeRedirect || '/academy/app/panel')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err) || 'Error al registrarse')
@@ -57,7 +57,7 @@ export default function Register() {
         <h1 className="text-2xl font-bold text-surface-900">Crear tu cuenta</h1>
         <p className="mt-2 text-sm text-surface-500">
           ¿Ya tienes cuenta?{' '}
-          <Link to={safeRedirect ? `/acceder?redirect=${encodeURIComponent(safeRedirect)}` : '/acceder'} className="font-medium text-primary-600 hover:text-primary-700">
+          <Link to={safeRedirect ? `/academy/app/acceder?redirect=${encodeURIComponent(safeRedirect)}` : '/academy/app/acceder'} className="font-medium text-primary-600 hover:text-primary-700">
             Accede aquí
           </Link>
         </p>

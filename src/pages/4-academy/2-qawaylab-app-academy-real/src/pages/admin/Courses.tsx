@@ -56,7 +56,7 @@ export default function AdminCourses() {
           <h1 className="section-title">Cursos</h1>
           <p className="section-subtitle mt-1">Gestiona todos los cursos de la plataforma</p>
         </div>
-        <Link to="/admin/cursos/nuevo" className="btn-primary text-sm">+ Nuevo Curso</Link>
+        <Link to="/academy/app/admin/cursos/nuevo" className="btn-primary text-sm">+ Nuevo Curso</Link>
       </div>
 
       <div className="card overflow-hidden">

@@ -12,11 +12,11 @@ import StudentPreviewPanel from '@/components/teacher/StudentPreviewPanel'
 import RouteFallback from '@/components/common/RouteFallback'
 
 const sidebarLinks = [
-  { to: '/docente', label: 'Panel', icon: '📊' },
-  { to: '/docente/cursos', label: 'Mis Cursos', icon: '📚' },
-  { to: '/docente/contenido', label: 'Contenido', icon: '📝' },
-  { to: '/docente/alumnos', label: 'Alumnos', icon: '👥' },
-  { to: '/docente/tareas', label: 'School [BETA]', icon: '🏫', beta: true, separator: true },
+  { to: '/academy/app/docente', label: 'Panel', icon: '📊' },
+  { to: '/academy/app/docente/cursos', label: 'Mis Cursos', icon: '📚' },
+  { to: '/academy/app/docente/contenido', label: 'Contenido', icon: '📝' },
+  { to: '/academy/app/docente/alumnos', label: 'Alumnos', icon: '👥' },
+  { to: '/academy/app/docente/tareas', label: 'School [BETA]', icon: '🏫', beta: true, separator: true },
 ]
 
 const ALLOWED_ROLES = ['teacher', 'editor']
@@ -31,7 +31,7 @@ export default function TeacherLayout() {
     )
   }
 
-  if (!user) return <Navigate to="/acceder" replace />
+  if (!user) return <Navigate to="/academy/app/acceder" replace />
   if (!profile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -39,7 +39,7 @@ export default function TeacherLayout() {
       </div>
     )
   }
-  if (!ALLOWED_ROLES.includes(profile?.role || '')) return <Navigate to="/acceder" replace />
+  if (!ALLOWED_ROLES.includes(profile?.role || '')) return <Navigate to="/academy/app/acceder" replace />
 
   return (
     <TeacherPreviewProvider>
@@ -58,8 +58,8 @@ function TeacherLayoutContent() {
   const [collapsedCourses, setCollapsedCourses] = useState<Record<string, boolean>>({})
 
   // Determine if we're on a courses page (list or specific course)
-  const isCourseList = location.pathname === '/docente/cursos'
-  const isCourseDetail = Boolean(location.pathname.match(/^\/docente\/cursos\/[^/]+$/))
+  const isCourseList = location.pathname === '/academy/app/docente/cursos'
+  const isCourseDetail = Boolean(location.pathname.match(/^\/academy\/app\/docente\/cursos\/[^/]+$/))
   const showCoursesSidebar = isCourseList || isCourseDetail
 
   // Load all teacher courses for sidebar
@@ -175,7 +175,7 @@ function TeacherLayoutContent() {
                             if (isCurrentCourse) {
                               toggleCourse(course.id)
                             } else {
-                              navigate(`/docente/cursos/${course.slug}`)
+                              navigate(`/academy/app/docente/cursos/${course.slug}`)
                             }
                           }}
                           className={`flex w-full items-center gap-2 rounded-none px-3 py-2 text-xs font-medium transition-colors cursor-pointer ${
@@ -255,10 +255,10 @@ function TeacherLayoutContent() {
 
         <div className="border-t border-surface-200 p-4">
           <Link
-            to="/"
+            to="/academy/app/cursos"
             className="flex items-center gap-3 rounded-none px-3 py-2 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700"
           >
-            ← Volver al inicio
+            ← Volver a Cursos
           </Link>
         </div>
       </aside>

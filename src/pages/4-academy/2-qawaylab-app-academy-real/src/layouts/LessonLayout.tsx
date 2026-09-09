@@ -52,8 +52,8 @@ function LessonLayoutContent() {
   }
 
   const showSidebar = Boolean(courseSidebar && cs!.visible && cs!.modules?.length > 0)
-  const isStudentMode = Boolean(cs?.coursePath?.startsWith('/panel'))
-  const coursesLink = isStudentMode ? '/panel/cursos' : '/cursos'
+  const isStudentMode = Boolean(cs?.coursePath?.startsWith('/academy/app/panel'))
+  const coursesLink = isStudentMode ? '/academy/app/panel/cursos' : '/academy/app/cursos'
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-50 font-sans">
@@ -84,7 +84,7 @@ function LessonLayoutContent() {
               <div className="hidden sm:flex items-center gap-1.5 text-xs text-surface-500 font-medium truncate">
                 <Link to={coursesLink} className="hover:text-surface-900 transition shrink-0">Cursos</Link>
                 <span>/</span>
-                <Link to={cs!.coursePath || (cs!.slug ? `/cursos/${cs!.slug}` : '/cursos')} className="hover:text-surface-900 transition truncate max-w-[200px]">{cs!.title}</Link>
+                <Link to={cs!.coursePath || (cs!.slug ? `/academy/app/cursos/${cs!.slug}` : '/academy/app/cursos')} className="hover:text-surface-900 transition truncate max-w-[200px]">{cs!.title}</Link>
                 {cs!.currentLessonTitle && (
                   <>
                     <span>/</span>
@@ -103,7 +103,7 @@ function LessonLayoutContent() {
               <UserMenu user={user} profile={profile} signOut={signOut} />
             ) : (
               <Link
-                to="/acceder"
+                to="/academy/app/acceder"
                 className="flex h-9 items-center justify-center border border-surface-200 bg-white px-3 text-xs font-semibold text-surface-700 transition hover:bg-surface-50 hover:text-surface-900"
               >
                 Iniciar sesión
@@ -125,7 +125,7 @@ function LessonLayoutContent() {
               </div>
 
               <Link
-                to={cs?.coursePath || (cs?.slug ? `/cursos/${cs!.slug}` : '/cursos')}
+                to={cs?.coursePath || (cs?.slug ? `/academy/app/cursos/${cs!.slug}` : '/academy/app/cursos')}
                 className="flex h-9 mb-4 items-center gap-1.5 border border-surface-200 bg-surface-50 px-3 text-xs font-semibold text-surface-700 transition hover:bg-surface-100 hover:text-surface-900"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -193,7 +193,7 @@ function LessonLayoutContent() {
                         <div className="mt-1 space-y-0.5 border-t border-surface-200/50 pt-1">
                           {module.lessons?.map((lesson) => {
                             const isCurrent = lesson.id === cs!.currentLessonId
-                            const lessonUrl = `${cs!.coursePath || `/cursos/${cs!.slug}`}/leccion/${lesson.number}`
+                            const lessonUrl = `${cs!.coursePath || `/academy/app/cursos/${cs!.slug}`}/leccion/${lesson.number}`
                             return (
                               <React.Fragment key={lesson.id}>
                                 <Link

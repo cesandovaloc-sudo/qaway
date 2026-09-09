@@ -84,7 +84,7 @@ export default function MyCourses() {
           <p className="text-sm text-surface-500 mb-6">
             Explora el catálogo y encuentra el curso perfecto para ti
           </p>
-          <Link to="/cursos" className="btn-primary">
+          <Link to="/academy/app/cursos" className="btn-primary">
             Explorar Cursos
           </Link>
         </div>

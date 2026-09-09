@@ -37,7 +37,7 @@ export default function CourseHub() {
         <span className="text-5xl mb-4">📚</span>
         <h1 className="text-2xl font-bold text-surface-900">Curso no disponible</h1>
         <p className="mt-3 text-sm text-surface-500">No fue posible cargar este curso.</p>
-        <Link to="/panel" className="btn-primary inline-flex mt-6">Volver al panel</Link>
+        <Link to="/academy/app/panel" className="btn-primary inline-flex mt-6">Volver al panel</Link>
       </div>
     )
   }
@@ -80,7 +80,7 @@ export default function CourseHub() {
     <div>
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-surface-400 mb-4">
-        <Link to="/panel" className="hover:text-surface-600 transition-colors">Panel</Link>
+        <Link to="/academy/app/panel" className="hover:text-surface-600 transition-colors">Panel</Link>
         <span>/</span>
         <span className="text-surface-900 font-medium">{courseData.title}</span>
       </nav>

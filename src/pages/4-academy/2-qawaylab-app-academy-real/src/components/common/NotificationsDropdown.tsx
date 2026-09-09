@@ -133,7 +133,7 @@ export default function NotificationsDropdown() {
               <span className="text-2xl">🔔</span>
               <p className="text-sm font-semibold text-surface-800">Inicia sesión para ver tus notificaciones</p>
               <Link
-                to="/acceder"
+                to="/academy/app/acceder"
                 onClick={() => setOpen(false)}
                 className="mt-1 inline-flex items-center gap-1 rounded-none bg-primary-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-700"
               >

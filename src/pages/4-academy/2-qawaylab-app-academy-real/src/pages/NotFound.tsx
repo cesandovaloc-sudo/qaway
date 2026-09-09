@@ -6,16 +6,16 @@ export default function NotFound() {
   const { user, profile } = useAuth()
 
   const getDashboardLink = () => {
-    if (!user) return '/'
+    if (!user) return '/academy/app/cursos'
     switch (profile?.role as string | undefined) {
       case 'admin':
       case 'support':
-        return '/admin'
+        return '/academy/app/admin'
       case 'teacher':
       case 'editor':
-        return '/docente'
+        return '/academy/app/docente'
       default:
-        return '/panel'
+        return '/academy/app/panel'
     }
   }
 
@@ -50,7 +50,7 @@ export default function NotFound() {
             {user ? 'Ir a mi panel' : 'Ir al inicio'}
           </Link>
           <Link
-            to="/cursos"
+            to="/academy/app/cursos"
             className="btn-secondary min-w-[160px] text-center"
           >
             Explorar cursos

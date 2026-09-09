@@ -167,7 +167,7 @@ export default function Checkout() {
         <div className="card p-12 text-center">
           <h1 className="text-xl font-bold text-surface-900 mb-2">Falta seleccionar un curso</h1>
           <p className="text-surface-500 mb-6">El checkout necesita recibir un curso desde el catálogo.</p>
-          <Link to="/cursos" className="btn-primary">Volver al catálogo</Link>
+          <Link to="/academy/app/cursos" className="btn-primary">Volver al catálogo</Link>
         </div>
       </div>
     )
@@ -188,7 +188,7 @@ export default function Checkout() {
         <div className="card p-12 text-center">
           <h1 className="text-xl font-bold text-surface-900 mb-2">Curso no disponible</h1>
           <p className="text-surface-500 mb-6">No pudimos cargar el curso para iniciar la compra.</p>
-          <Link to="/cursos" className="btn-primary">Volver al catálogo</Link>
+          <Link to="/academy/app/cursos" className="btn-primary">Volver al catálogo</Link>
         </div>
       </div>
     )
@@ -200,7 +200,7 @@ export default function Checkout() {
         <div className="card p-12 text-center">
           <h1 className="text-xl font-bold text-surface-900 mb-2">Este curso es gratis</h1>
           <p className="text-surface-500 mb-6">La inscripción se realiza desde la página del curso.</p>
-          <Link to={`/cursos/${course.slug}`} className="btn-primary">Volver al curso</Link>
+          <Link to={`/academy/app/cursos/${course.slug}`} className="btn-primary">Volver al curso</Link>
         </div>
       </div>
     )
@@ -211,7 +211,7 @@ export default function Checkout() {
       <div className="mx-auto max-w-2xl py-12">
         <div className="card p-12 text-center">
           <p className="text-surface-500 mb-4">Inicia sesión para continuar con la compra de {course.title}</p>
-          <Link to={`/acceder?redirect=${encodeURIComponent(`/checkout?curso=${course.slug}`)}`} className="btn-primary">Iniciar sesión</Link>
+          <Link to={`/academy/app/acceder?redirect=${encodeURIComponent(`/academy/app/checkout?curso=${course.slug}`)}`} className="btn-primary">Iniciar sesión</Link>
         </div>
       </div>
     )
@@ -220,9 +220,9 @@ export default function Checkout() {
   return (
     <div className="mx-auto max-w-2xl py-12">
       <nav className="flex items-center gap-2 text-sm text-surface-400 mb-6">
-        <Link to="/" className="hover:text-surface-600">Inicio</Link>
+        <Link to="/academy/app/cursos" className="hover:text-surface-600">Inicio</Link>
         <span>/</span>
-        <Link to={`/cursos/${course.slug}`} className="hover:text-surface-600">{course.title}</Link>
+        <Link to={`/academy/app/cursos/${course.slug}`} className="hover:text-surface-600">{course.title}</Link>
         <span>/</span>
         <span className="text-surface-900 font-medium">Checkout</span>
       </nav>
@@ -378,8 +378,8 @@ export default function Checkout() {
               : 'Tu inscripción fue activada para este curso.'}
           </p>
           <div className="flex items-center justify-center gap-3">
-            <Link to={`/panel/cursos/${course.slug}`} className="btn-primary">Ir al curso</Link>
-            <Link to="/cursos" className="btn-ghost">Seguir explorando</Link>
+            <Link to={`/academy/app/panel/cursos/${course.slug}`} className="btn-primary">Ir al curso</Link>
+            <Link to="/academy/app/cursos" className="btn-ghost">Seguir explorando</Link>
           </div>
         </div>
       )}

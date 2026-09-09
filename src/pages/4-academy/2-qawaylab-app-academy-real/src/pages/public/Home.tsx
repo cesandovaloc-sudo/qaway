@@ -40,7 +40,7 @@ export default function Home() {
 
   function CourseCard({ course, featuredCard = false }: { course: HomeCourse; featuredCard?: boolean }) {
     return (
-      <Link to={`/cursos/${course.slug}`} className={`card-hover group overflow-hidden ${featuredCard ? 'lg:row-span-2' : ''}`}>
+      <Link to={`/academy/app/cursos/${course.slug}`} className={`card-hover group overflow-hidden ${featuredCard ? 'lg:row-span-2' : ''}`}>
         {course.image_url ? (
           <div className={`${featuredCard ? 'aspect-[4/3] lg:aspect-auto lg:h-full' : 'aspect-video'} overflow-hidden bg-surface-200`}>
             <img src={course.image_url} alt={course.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]" loading="lazy" />
@@ -102,8 +102,8 @@ export default function Home() {
               Cursos prácticos para aplicar IA, procesos y tecnología con estructura, criterio y avance medible.
             </p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Link to="/cursos" className="btn-primary min-h-14 px-7 text-base">Explorar cursos</Link>
-              <Link to="/registro" className="btn-secondary min-h-14 px-7 text-base">Crear cuenta</Link>
+              <Link to="/academy/app/cursos" className="btn-primary min-h-14 px-7 text-base">Explorar cursos</Link>
+              <Link to="/academy/app/registro" className="btn-secondary min-h-14 px-7 text-base">Crear cuenta</Link>
             </div>
           </div>
 
@@ -143,7 +143,7 @@ export default function Home() {
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-primary-400">Cursos destacados</p>
               <h2 className="font-display text-[clamp(3rem,5vw,5.5rem)] font-bold leading-[0.86] tracking-[-0.06em]">Empieza por una habilidad concreta.</h2>
             </div>
-            <Link to="/cursos" className="btn-secondary border-white/20 bg-white text-surface-950 hover:bg-primary-500 hover:text-white">Ver catálogo</Link>
+            <Link to="/academy/app/cursos" className="btn-secondary border-white/20 bg-white text-surface-950 hover:bg-primary-500 hover:text-white">Ver catálogo</Link>
           </div>
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             {featured.slice(0, 3).map((course, index) => (
@@ -164,7 +164,7 @@ export default function Home() {
             <h2 className="font-display text-[clamp(3rem,5vw,5.4rem)] font-bold leading-[0.86] tracking-[-0.06em]">Revisa la plataforma desde adentro.</h2>
             <p className="mt-5 max-w-xl text-white/80">Crea una cuenta, explora el catálogo y valida el flujo completo antes de conectarla con la web principal.</p>
           </div>
-          <Link to="/registro" className="inline-flex min-h-14 items-center justify-center bg-surface-950 px-7 text-sm font-bold text-white transition-colors hover:bg-surface-900">Crear cuenta</Link>
+          <Link to="/academy/app/registro" className="inline-flex min-h-14 items-center justify-center bg-surface-950 px-7 text-sm font-bold text-white transition-colors hover:bg-surface-900">Crear cuenta</Link>
         </div>
       </section>
     </div>

@@ -90,7 +90,7 @@ export default function AdminCategories() {
     <div>
       <div className="mb-8">
         <nav className="flex items-center gap-2 text-sm text-surface-400 mb-4">
-          <Link to="/admin" className="hover:text-surface-600">Admin</Link>
+          <Link to="/academy/app/admin" className="hover:text-surface-600">Admin</Link>
           <span>/</span>
           <span className="text-surface-900 font-medium">Categorías</span>
         </nav>

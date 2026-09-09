@@ -316,7 +316,7 @@ export default function StudentPanel() {
               )}
             </div>
             <Link
-              to={`/panel/cursos/${nextStepCourse.enrollment.course?.slug}`}
+              to={`/academy/app/panel/cursos/${nextStepCourse.enrollment.course?.slug}`}
               className="btn-primary shrink-0 bg-white text-primary-700 hover:bg-primary-50"
             >
               Continuar →
@@ -375,7 +375,7 @@ export default function StudentPanel() {
                 return (
                   <Link
                     key={enrollment.id}
-                    to={isCompleted ? '/panel/certificados' : `/panel/cursos/${course.slug}`}
+                    to={isCompleted ? '/academy/app/panel/certificados' : `/academy/app/panel/cursos/${course.slug}`}
                     className="card p-5 flex items-center justify-between gap-4 hover:shadow-md transition-all group"
                   >
                     <div className="flex items-center gap-4 min-w-0">
@@ -435,7 +435,7 @@ export default function StudentPanel() {
               title="No tienes cursos"
               description={searchQuery ? 'No se encontraron cursos con ese nombre.' : 'Aún no tienes cursos inscritos. Explora nuestro catálogo.'}
               actionLabel="Explorar Cursos"
-              actionTo="/cursos"
+              actionTo="/academy/app/cursos"
             />
           )}
         </>
@@ -454,7 +454,7 @@ export default function StudentPanel() {
                 return (
                   <Link
                     key={enrollment.id}
-                    to={`/panel/cursos/${course.slug}`}
+                    to={`/academy/app/panel/cursos/${course.slug}`}
                     className="card p-5 flex items-center justify-between gap-4 hover:shadow-md transition-all group"
                   >
                     <div className="flex items-center gap-4 min-w-0">
@@ -503,7 +503,7 @@ export default function StudentPanel() {
                   : 'Aún no tienes cursos activos. Explora nuestro catálogo y encuentra el curso perfecto para ti.'
               }
               actionLabel="Explorar Cursos"
-              actionTo="/cursos"
+              actionTo="/academy/app/cursos"
             />
           )}
 
@@ -561,7 +561,7 @@ export default function StudentPanel() {
                         : ' Revisa tus certificados.'}
                     </p>
                     <Link
-                      to="/panel/certificados"
+                      to="/academy/app/panel/certificados"
                       className="btn-secondary text-sm inline-flex"
                     >
                       Ver certificados →
@@ -600,7 +600,7 @@ export default function StudentPanel() {
                 return (
                   <Link
                     key={enrollment.id}
-                    to={`/panel/certificados`}
+                    to={`/academy/app/panel/certificados`}
                     className="card p-5 flex items-center justify-between gap-4 hover:shadow-md transition-all group"
                   >
                     <div className="flex items-center gap-4 min-w-0">
@@ -634,7 +634,7 @@ export default function StudentPanel() {
               title="Aún no has completado ningún curso"
               description="Sigue aprendiendo con tus cursos activos. Al completar un curso, recibirás un certificado."
               actionLabel={totalActive > 0 ? 'Ir a mis cursos' : 'Explorar Cursos'}
-              actionTo={totalActive > 0 ? '/panel/cursos' : '/cursos'}
+              actionTo={totalActive > 0 ? '/academy/app/panel/cursos' : '/academy/app/cursos'}
             />
           )}
         </>
@@ -693,7 +693,7 @@ export default function StudentPanel() {
               title="Certificados en proceso"
               description="Completaste cursos pero los certificados aún no están disponibles. Vuelve pronto o contacta a soporte."
               actionLabel="Ir a completados"
-              actionTo="/panel/certificados"
+              actionTo="/academy/app/panel/certificados"
             />
           ) : (
             <EmptyState
@@ -701,7 +701,7 @@ export default function StudentPanel() {
               title="Sin certificados aún"
               description="Completa un curso para obtener tu primer certificado. ¡Te esperamos!"
               actionLabel="Explorar Cursos"
-              actionTo="/cursos"
+              actionTo="/academy/app/cursos"
             />
           )}
         </>
@@ -720,7 +720,7 @@ export default function StudentPanel() {
             Este es tu espacio de aprendizaje. Aquí verás tus cursos, seguirás tu progreso
             y accederás a tus certificados. ¡Empieza explorando nuestro catálogo!
           </p>
-          <Link to="/cursos" className="btn-primary text-base px-8 py-3">
+          <Link to="/academy/app/cursos" className="btn-primary text-base px-8 py-3">
             Explorar Cursos
           </Link>
         </div>

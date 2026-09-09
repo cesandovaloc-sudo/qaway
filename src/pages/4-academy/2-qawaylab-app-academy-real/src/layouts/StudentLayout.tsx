@@ -11,10 +11,10 @@ import Logo from '@/components/common/Logo'
 import RouteFallback from '@/components/common/RouteFallback'
 
 const sidebarLinks = [
-  { to: '/panel', label: 'Panel', icon: '📊' },
-  { to: '/panel/cursos', label: 'Mis Cursos', icon: '📚' },
-  { to: '/panel/certificados', label: 'Certificados', icon: '🎓', separator: true },
-  { to: '/panel/recursos', label: 'Recursos', icon: '📎' },
+  { to: '/academy/app/panel', label: 'Panel', icon: '📊' },
+  { to: '/academy/app/panel/cursos', label: 'Mis Cursos', icon: '📚' },
+  { to: '/academy/app/panel/certificados', label: 'Certificados', icon: '🎓', separator: true },
+  { to: '/academy/app/panel/recursos', label: 'Recursos', icon: '📎' },
 ]
 
 export default function StudentLayout() {
@@ -22,10 +22,10 @@ export default function StudentLayout() {
 
   // Redirigir según rol si no es student
   const roleRoutes: Record<string, string> = {
-    teacher: '/docente',
-    editor: '/docente',
-    admin: '/admin',
-    support: '/admin',
+    teacher: '/academy/app/docente',
+    editor: '/academy/app/docente',
+    admin: '/academy/app/admin',
+    support: '/academy/app/admin',
   }
 
   if (loading) {
@@ -36,7 +36,7 @@ export default function StudentLayout() {
     )
   }
 
-  if (!user) return <Navigate to="/acceder" replace />
+  if (!user) return <Navigate to="/academy/app/acceder" replace />
   if (profile?.role && roleRoutes[profile.role]) return <Navigate to={roleRoutes[profile.role]} replace />
 
   return (
@@ -109,7 +109,7 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
   const { courseSidebar } = useCourseSidebar()
   const showCourseSidebar = Boolean(courseSidebar?.visible && courseSidebar?.modules?.length)
   const cs = courseSidebar
-  const showEnrollments = location.pathname.startsWith('/panel/cursos') && !showCourseSidebar
+  const showEnrollments = location.pathname.startsWith('/academy/app/panel/cursos') && !showCourseSidebar
   const [collapsedModules, setCollapsedModules] = useState<Record<string, boolean>>({})
 
   const { data: enrollments } = useData(
@@ -171,11 +171,11 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
                     {(enrollments || []).map((enrollment) => {
                       const course = enrollment.course
                       if (!course) return null
-                      const isCourseActive = location.pathname.startsWith(`/panel/cursos/${course.slug}`)
+                      const isCourseActive = location.pathname.startsWith(`/academy/app/panel/cursos/${course.slug}`)
                       return (
                         <Link
                           key={enrollment.id}
-                          to={`/panel/cursos/${course.slug}`}
+                          to={`/academy/app/panel/cursos/${course.slug}`}
                           className={isCourseActive
                             ? 'flex items-center gap-2 rounded-none bg-primary-50 px-3 py-2 text-sm font-medium text-primary-700 transition-colors'
                             : 'flex items-center gap-2 rounded-none px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-100 hover:text-surface-900'
@@ -191,7 +191,7 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
                 {!isCollapsed && link.to === '/panel/cursos' && showCourseSidebar && courseSidebar && (
                   <div className="mt-1 ml-3 border-l border-surface-200 pl-3 space-y-3">
                     <Link
-                      to={`/panel/cursos/${cs!.slug}`}
+                      to={`/academy/app/panel/cursos/${cs!.slug}`}
                       className="flex items-center gap-3 rounded-none bg-primary-50 px-3 py-2.5 text-sm font-medium text-primary-700 transition-colors truncate"
                       title={cs!.title}
                     >
@@ -221,7 +221,7 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
                                 return (
                                   <React.Fragment key={moduleLesson.id}>
                                   <Link
-                                    to={`/panel/cursos/${cs!.slug}/leccion/${moduleLesson.number}`}
+                                    to={`/academy/app/panel/cursos/${cs!.slug}/leccion/${moduleLesson.number}`}
                                     className={isCurrent
                                       ? 'flex items-center gap-2 rounded-none bg-primary-50 px-3 py-2 text-sm font-medium text-primary-700 transition-colors'
                                       : 'flex items-center gap-2 rounded-none px-3 py-2 text-sm font-medium text-surface-600 transition-colors hover:bg-surface-100 hover:text-surface-900'
@@ -275,9 +275,9 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
 
       <div className={`border-t border-surface-200 p-4 ${isCollapsed ? 'flex justify-center' : ''}`}>
         <Link
-          to="/"
+          to="/academy/app/cursos"
           className={`flex items-center rounded-none py-2 text-sm font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-3'}`}
-          title={isCollapsed ? "Volver al inicio" : undefined}
+          title={isCollapsed ? "Volver a Cursos" : undefined}
         >
           {isCollapsed ? '←' : '← Volver al inicio'}
         </Link>

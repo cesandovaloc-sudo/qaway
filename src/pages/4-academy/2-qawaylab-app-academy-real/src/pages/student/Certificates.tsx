@@ -95,7 +95,7 @@ export default function Certificates() {
           <p className="text-sm text-surface-500 mb-6">
             Completa un curso para obtener tu primer certificado
           </p>
-          <Link to="/cursos" className="btn-primary">
+          <Link to="/academy/app/cursos" className="btn-primary">
             Explorar Cursos
           </Link>
         </div>

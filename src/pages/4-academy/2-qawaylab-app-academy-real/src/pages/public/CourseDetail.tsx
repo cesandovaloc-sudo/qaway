@@ -29,12 +29,12 @@ export default function CourseDetail() {
     if (!courseData) return
 
     if (!user) {
-      navigate(`/acceder?redirect=/cursos/${slug}`)
+      navigate(`/academy/app/acceder?redirect=/academy/app/cursos/${slug}`)
       return
     }
 
     if (!courseData?.is_free) {
-      navigate(`/checkout?curso=${courseData.slug}`)
+      navigate(`/academy/app/checkout?curso=${courseData.slug}`)
       return
     }
 
@@ -44,7 +44,7 @@ export default function CourseDetail() {
       if (!existingEnrollment) {
         await enrollStudent(user.id, courseData.id)
       }
-      navigate(`/panel/cursos/${courseData.slug}`)
+      navigate(`/academy/app/panel/cursos/${courseData.slug}`)
     } catch (err) {
       setEnrollError(err instanceof Error ? err.message : String(err) || 'No pudimos completar la inscripción')
     } finally {
@@ -69,7 +69,7 @@ export default function CourseDetail() {
         <span className="text-5xl mb-4 inline-block">📚</span>
         <h1 className="text-2xl font-bold text-surface-900">Curso no disponible</h1>
         <p className="mt-3 text-sm text-surface-500">No fue posible cargar este curso desde la base de datos.</p>
-        <Link to="/cursos" className="btn-primary inline-flex mt-6">Volver al catálogo</Link>
+        <Link to="/academy/app/cursos" className="btn-primary inline-flex mt-6">Volver al catálogo</Link>
       </div>
     )
   }
@@ -91,9 +91,9 @@ export default function CourseDetail() {
       <section className="bg-gradient-to-br from-surface-900 to-surface-800 py-16">
         <div className="page-container">
           <nav className="flex items-center gap-2 text-sm text-surface-400 mb-6">
-            <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
+            <Link to="/academy/app/cursos" className="hover:text-white transition-colors">Inicio</Link>
             <span>/</span>
-            <Link to="/cursos" className="hover:text-white transition-colors">Cursos</Link>
+            <Link to="/academy/app/cursos" className="hover:text-white transition-colors">Cursos</Link>
             <span>/</span>
             <span className="text-white">{courseData.title}</span>
           </nav>
@@ -206,7 +206,7 @@ export default function CourseDetail() {
                                 return (
                                   <Link
                                     key={lesson.id || `${moduleIndex}-${lessonIndex}`}
-                                    to={`/cursos/${slug}/leccion/${globalLessonIdx}`}
+                                    to={`/academy/app/cursos/${slug}/leccion/${globalLessonIdx}`}
                                     className="flex items-center justify-between rounded-none bg-surface-50 px-4 py-3 hover:bg-primary-50 transition-colors"
                                   >
                                     {lessonContent}

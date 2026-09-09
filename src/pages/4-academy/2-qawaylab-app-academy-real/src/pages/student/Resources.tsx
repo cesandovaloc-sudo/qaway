@@ -226,7 +226,7 @@ function EmptyState() {
       <p className="text-sm text-surface-500 mb-6 max-w-md mx-auto">
         Los recursos aparecerán cuando te inscribas en un curso
       </p>
-      <Link to="/cursos" className="btn-primary">Explorar Cursos</Link>
+      <Link to="/academy/app/cursos" className="btn-primary">Explorar Cursos</Link>
     </div>
   )
 }

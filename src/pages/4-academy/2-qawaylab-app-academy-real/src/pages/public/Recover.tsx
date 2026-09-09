@@ -14,7 +14,7 @@ export default function Recover() {
     setLoading(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/acceder`,
+        redirectTo: `${window.location.origin}/academy/app/acceder`,
       })
       if (error) throw error
       setSent(true)
@@ -41,7 +41,7 @@ export default function Recover() {
           <p className="text-sm text-surface-500 mb-6">
             Si existe una cuenta con {email}, recibirás un enlace para restablecer tu contraseña.
           </p>
-          <Link to="/acceder" className="btn-primary">
+          <Link to="/academy/app/acceder" className="btn-primary">
             Volver a Acceder
           </Link>
         </div>
@@ -73,7 +73,7 @@ export default function Recover() {
           </div>
 
           <div className="mt-6 text-center">
-            <Link to="/acceder" className="text-sm font-medium text-primary-600 hover:text-primary-700">
+            <Link to="/academy/app/acceder" className="text-sm font-medium text-primary-600 hover:text-primary-700">
               ← Volver a Acceder
             </Link>
           </div>

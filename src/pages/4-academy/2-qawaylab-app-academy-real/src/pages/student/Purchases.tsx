@@ -41,7 +41,7 @@ export default function Purchases() {
         <span className="text-5xl block mb-4">❌</span>
         <h3 className="text-lg font-semibold text-surface-900 mb-2">Error al cargar</h3>
         <p className="text-sm text-surface-500 mb-6">No pudimos cargar tu historial de compras</p>
-        <Link to="/panel" className="btn-primary">Volver al Panel</Link>
+        <Link to="/academy/app/panel" className="btn-primary">Volver al Panel</Link>
       </div>
     )
   }
@@ -104,7 +104,7 @@ export default function Purchases() {
           <p className="text-sm text-surface-500 mb-6">
             Explora el catálogo y encuentra el curso perfecto para ti
           </p>
-          <Link to="/cursos" className="btn-primary">
+          <Link to="/academy/app/cursos" className="btn-primary">
             Explorar Cursos
           </Link>
         </div>

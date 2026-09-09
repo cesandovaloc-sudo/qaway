@@ -130,7 +130,7 @@ export default function TeacherCourses() {
             {courses.length} curso{courses.length !== 1 ? 's' : ''} en total
           </p>
         </div>
-        <Link to="/docente/cursos/nuevo" className="btn-primary text-sm shrink-0">
+        <Link to="/academy/app/docente/cursos/nuevo" className="btn-primary text-sm shrink-0">
           + Nuevo Curso
         </Link>
       </div>
@@ -288,7 +288,7 @@ export default function TeacherCourses() {
                 ? 'Los cursos que te asigne un administrador aparecerán aquí.'
                 : 'Prueba con otro filtro.'}
           </p>
-          <Link to="/docente" className="btn-primary text-sm inline-flex items-center gap-2">
+          <Link to="/academy/app/docente" className="btn-primary text-sm inline-flex items-center gap-2">
             ← Volver al panel
           </Link>
         </div>

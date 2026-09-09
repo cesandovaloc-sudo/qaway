@@ -131,7 +131,7 @@ export default function Teachers() {
           <p className="section-subtitle mt-1">Gestiona los docentes y editores de la plataforma</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link to="/admin/alumnos" className="btn-ghost text-sm">
+          <Link to="/academy/app/admin/alumnos" className="btn-ghost text-sm">
             Gestionar todos los usuarios
           </Link>
           <button onClick={() => setShowModal(true)} className="btn-primary text-sm">

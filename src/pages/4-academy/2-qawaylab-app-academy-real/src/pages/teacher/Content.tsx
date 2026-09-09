@@ -462,7 +462,7 @@ export default function TeacherContent() {
           <span className="text-5xl block mb-4">📝</span>
           <h3 className="text-lg font-semibold text-surface-900 mb-2">No tienes cursos asignados</h3>
           <p className="text-sm text-surface-500 mb-4">Los cursos que te asigne un administrador aparecerán aquí.</p>
-          <Link to="/docente" className="btn-primary text-sm inline-flex items-center gap-2">← Volver al panel</Link>
+          <Link to="/academy/app/docente" className="btn-primary text-sm inline-flex items-center gap-2">← Volver al panel</Link>
         </div>
       )}
     </div>
