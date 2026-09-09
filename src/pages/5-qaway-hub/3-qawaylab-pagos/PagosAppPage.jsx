@@ -7,10 +7,12 @@ import {
   PaymentsPanel,
   ProductsManager,
   ProductGrid,
+  ProductCard,
   ProductDetail,
   CartView,
 } from './index.js'
 import './styles/storefront.css'
+import { supabase as realSupabase } from '@/config/supabase'
 
 const SAMPLE_PRODUCTS = [
   {
@@ -68,11 +70,6 @@ const SAMPLE_PRODUCTS = [
   },
 ]
 
-const APP_NAME = import.meta.env.VITE_APP_NAME || 'Qaway Lab'
-const APP_NAME_SPLIT = APP_NAME.split(' ')
-const BRAND_FIRST = APP_NAME_SPLIT[0]
-const BRAND_REST = APP_NAME_SPLIT.slice(1).join(' ')
-
 const DEMO_USER = { id: 'user-demo-001', email: 'demo@qawaylab.com' }
 
 const supabaseMock = {
@@ -106,7 +103,8 @@ const supabaseMock = {
   },
 }
 
-const { payments, orders, products } = createQawaServices(supabaseMock, {
+const activeSupabase = realSupabase || supabaseMock
+const { payments, orders, products } = createQawaServices(activeSupabase, {
   onPaymentCompleted: async (payment) => {
     console.log('[Qaway] Pago completado:', payment.id)
   },
@@ -145,29 +143,26 @@ export default function PagosAppPage() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
+  const isCatalog = location.pathname === '/hub/pagos' || location.pathname === '/hub/pagos/'
+  const isCart = location.pathname.includes('/hub/pagos/carrito')
+  const isPurchases = location.pathname.includes('/hub/pagos/purchases')
+  const isAdmin = location.pathname.includes('/hub/pagos/admin')
+
   return (
-    <div className="qawa-storefront min-h-screen bg-[#f4f3f0]">
-      {/* Header oficial del Storefront */}
+    <div className="qawa-storefront" style={{ minHeight: '100vh', background: 'var(--paper, #f4f3f0)' }}>
+      {/* Header oficial de Mesa Selecta / Qaway Pagos */}
       <header className="site-header">
         <div className="container">
           <div className="header-inner">
             <Link to="/hub/pagos" className="brand">
-              {BRAND_FIRST} <span>{BRAND_REST || 'Lab'}</span>
+              Qaway <span>Lab</span>
             </Link>
 
             <nav className="main-nav">
-              <Link to="/hub/pagos" className={location.pathname === '/hub/pagos' || location.pathname === '/hub/pagos/' ? 'active' : ''}>
-                Catálogo
-              </Link>
-              <Link to="/hub/pagos/carrito" className={location.pathname === '/hub/pagos/carrito' ? 'active' : ''}>
-                Mi Pedido ({cartCount})
-              </Link>
-              <Link to="/hub/pagos/purchases" className={location.pathname === '/hub/pagos/purchases' ? 'active' : ''}>
-                Mis Compras
-              </Link>
-              <Link to="/hub/pagos/admin" className={location.pathname.startsWith('/hub/pagos/admin') ? 'active' : ''}>
-                Admin
-              </Link>
+              <Link to="/hub/pagos" className={isCatalog ? 'active' : ''}>Catálogo</Link>
+              <Link to="/hub/pagos/carrito" className={isCart ? 'active' : ''}>Mi Pedido ({cartCount})</Link>
+              <Link to="/hub/pagos/purchases" className={isPurchases ? 'active' : ''}>Mis Compras</Link>
+              <Link to="/hub/pagos/admin" className={isAdmin ? 'active' : ''}>Admin</Link>
             </nav>
 
             <div className="header-actions">
@@ -196,7 +191,16 @@ export default function PagosAppPage() {
                   </p>
                 </div>
 
-                <ProductGrid products={SAMPLE_PRODUCTS} />
+                <ProductGrid
+                  products={SAMPLE_PRODUCTS}
+                  renderCard={(p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      detailHref={`/hub/pagos/producto/${p.slug}`}
+                    />
+                  )}
+                />
               </section>
             }
           />
@@ -204,10 +208,15 @@ export default function PagosAppPage() {
           {/* 2. Página Intermedia Descriptiva de Producto */}
           <Route
             path="producto/:slug"
-            element={<ProductDetailRoute products={SAMPLE_PRODUCTS} onAddToCart={addToCart} />}
+            element={
+              <ProductDetailRoute
+                products={SAMPLE_PRODUCTS}
+                onAddToCart={addToCart}
+              />
+            }
           />
 
-          {/* 3. Página de "Mi pedido" (CartView del módulo) */}
+          {/* 3. Página de "Mi pedido" */}
           <Route
             path="carrito"
             element={
@@ -217,6 +226,8 @@ export default function PagosAppPage() {
                 onRemove={removeFromCart}
                 count={cartCount}
                 subtotal={cartSubtotal}
+                emptyHref="/hub/pagos"
+                checkoutHref="/hub/pagos/checkout"
               />
             }
           />
@@ -235,7 +246,7 @@ export default function PagosAppPage() {
                 <Checkout
                   paymentsService={payments}
                   ordersService={orders}
-                  supabase={supabaseMock}
+                  supabase={activeSupabase}
                   user={DEMO_USER}
                   items={cart}
                   currency="PEN"
@@ -268,7 +279,7 @@ export default function PagosAppPage() {
                 <span className="eyebrow">Administración</span>
                 <h1 className="section-title">Panel de Control de Pagos</h1>
                 <div style={{ marginTop: '24px', background: 'var(--white)', padding: '24px', border: '1px solid var(--line)' }}>
-                  <PaymentsPanel paymentsService={payments} supabase={supabaseMock} />
+                  <PaymentsPanel paymentsService={payments} supabase={activeSupabase} />
                   <div style={{ marginTop: '36px' }}>
                     <ProductsManager productsService={products} />
                   </div>
@@ -282,9 +293,15 @@ export default function PagosAppPage() {
   )
 }
 
-// Resuelve el slug → producto y delega en el ProductDetail del módulo
 function ProductDetailRoute({ products, onAddToCart }) {
   const { slug } = useParams()
   const product = products.find((p) => p.slug === slug) || products[0]
-  return <ProductDetail product={product} onAddToCart={onAddToCart} />
+  return (
+    <ProductDetail
+      product={product}
+      onAddToCart={onAddToCart}
+      catalogHref="/hub/pagos"
+      cartHref="/hub/pagos/carrito"
+    />
+  )
 }

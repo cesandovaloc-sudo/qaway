@@ -46,6 +46,7 @@ Cada vez que se acople un módulo, el agente debe auditar y documentar en la bit
 | **AC-03** | Academy | Super Administrador no reconocido | `profiles.role` devolvía `null` y `AdminLayout` expulsaba al admin maestro. | Integración de `isSuperAdmin(email)` con bypass automático a `/admin`. |
 | **AC-04** | Pagos | Módulo desacoplado / standalone | Componentes en `3-qawaylab-pagos` sin wrapper de página ni ruta en `AppRouter.jsx`. | Creación de página contenedora `PagosHubPage.jsx` y montaje en `/hub/pagos`. |
 | **AC-05** | Agenda | Módulo SaaS aislado con subrouter | App completa con `AgendaProvider` y subrutas dinámicas (`/:slug/:eventSlug`) no registradas en el Router central. | Creación de `AgendaAppPage.jsx` con rutas anidadas bajo `/hub/agenda/*` y fallback de datos demo. |
+| **AC-06** | Pagos | Pérdida de identidad estética / rediseño no deseado | Envoltorios y estilos oscuros ajenos sobreescribían el diseño original 'papel y tinta' de Mesa Selecta. | Restauración limpia del repositorio original en `src/pages/5-qaway-hub/3-qawaylab-pagos/`, montaje de `PagosAppPage.jsx` consumiendo directamente los componentes nativos (`ProductGrid`, `ProductDetail`, `CartView`, `Checkout`, `PurchaseHistory`) con estilos scoped `.qawa-storefront` (`storefront.css`) y rutas anidadas bajo `/hub/pagos/*`. |
 
 ---
 
