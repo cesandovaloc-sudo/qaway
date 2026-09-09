@@ -261,14 +261,6 @@ export default function AppRouter() {
           element={<MarketingStudioTwentyPage />}
         />
         <Route
-          path="academy/app/*"
-          element={<AcademyRealAppPage />}
-        />
-        <Route
-          path="hub/academy/*"
-          element={<AcademyRealAppPage />}
-        />
-        <Route
           path="hub/agenda/*"
           element={<AgendaAppPage />}
         />
@@ -419,6 +411,8 @@ export default function AppRouter() {
 
           <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
           <Route path="academy-legacy" element={renderRoute('academy', <AcademyPage />)} />
+          <Route path="academy/app/*" element={<AcademyRealAppPage />} />
+          <Route path="hub/academy/*" element={<AcademyRealAppPage />} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />
