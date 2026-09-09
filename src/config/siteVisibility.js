@@ -14,7 +14,7 @@ export const routeVisibility = {
   proyectos: true,
   brief: false,
   sistemasDigitales: true,
-  academy: false,
+  academy: true,
   hub: true,
   recursos: true,
   blog: true,
@@ -25,6 +25,8 @@ export const routeVisibility = {
 
 const publicPathAllowList = new Set([
   '/',
+  '/academy',
+  '/academy/app',
   '/blog',
   '/blog/articulo/:id',
   '/blog/articulo/google-calendar-dominado-guia-productividad',
