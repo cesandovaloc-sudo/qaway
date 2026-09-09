@@ -294,7 +294,7 @@ export default function AdminPanelPage() {
     return <LoginView onSuccess={() => {}} />
   }
 
-  const publicUrl = `${window.location.origin}/${business?.slug || 'demo'}`
+  const publicUrl = `${window.location.origin}/hub/agenda/${business?.slug || 'demo'}`
 
   const copyPublicLink = () => {
     navigator.clipboard.writeText(publicUrl)

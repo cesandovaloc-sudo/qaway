@@ -51,7 +51,7 @@ export default function ManageBookingPage() {
           </p>
           <div className="pt-2">
             <Link
-              to="/"
+              to="/hub/agenda"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:underline"
             >
               <ArrowLeft className="w-4 h-4" /> Volver a la portada

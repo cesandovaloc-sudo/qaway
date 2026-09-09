@@ -99,13 +99,13 @@ export default function HomePage() {
 
           <div className="flex items-center gap-3">
             <Link
-              to="/demo"
+              to="/hub/agenda/demo"
               className="text-xs font-bold text-slate-600 hover:text-main px-3 py-2 rounded-xl transition-colors"
             >
               Ver Demo Cliente
             </Link>
             <Link
-              to="/panel"
+              to="/hub/agenda/panel"
               className="text-xs bg-accent hover:bg-accent-hover text-white font-bold px-4 py-2.5 rounded-xl shadow-md shadow-accent/20 transition-all flex items-center gap-1.5"
             >
               Panel de Administración <ArrowRight className="w-3.5 h-3.5" />
@@ -132,13 +132,13 @@ export default function HomePage() {
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
-              to="/panel"
+              to="/hub/agenda/panel"
               className="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3.5 rounded-2xl shadow-xl shadow-accent/25 flex items-center gap-2 text-sm transition-all active:scale-[0.99]"
             >
               <Zap className="w-4 h-4" /> Entrar al Panel de Control
             </Link>
             <Link
-              to="/demo"
+              to="/hub/agenda/demo"
               className="bg-surface hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-6 py-3.5 rounded-2xl shadow-sm flex items-center gap-2 text-sm transition-all"
             >
               Probar flujo de reserva <ArrowRight className="w-4 h-4 text-slate-400" />

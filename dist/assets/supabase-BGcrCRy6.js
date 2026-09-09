@@ -1,1 +1,0 @@
-import{f as e}from"./index-BFmqpyqx.js";var t=e(`https://jkstekoaiwdjpivkrsil.supabase.co`,`sb_publishable_t3rwEPQ9QTiIKQA4Wtgs_w_0g6HngVj`,{auth:{persistSession:!0,autoRefreshToken:!0,storageKey:`qaway_academy_auth_token`}});export{t};
