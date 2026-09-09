@@ -174,13 +174,13 @@ function AnimatedScoreCounter({ value }) {
   return <span>{displayValue}</span>
 }
 
-// 3D Isometric Character & Room Scene (Reacts dynamically to progress & score)
+// 3D Isometric Character & Room Scene (Scales cleanly within the left panel)
 function CharacterScene3D({ stage, pulse }) {
   return (
-    <div className="relative w-full h-[220px] flex items-center justify-center select-none pointer-events-none">
+    <div className="relative w-full h-[260px] sm:h-[290px] flex items-center justify-center select-none pointer-events-none">
       <svg
         viewBox="0 0 320 240"
-        className="w-full h-full max-h-[220px] overflow-visible drop-shadow-xl"
+        className="w-full h-full max-h-[280px] overflow-visible drop-shadow-2xl"
       >
         <defs>
           <radialGradient id="rugGlow" cx="50%" cy="50%" r="50%">
@@ -207,12 +207,10 @@ function CharacterScene3D({ stage, pulse }) {
 
         {/* Plant on the right */}
         <g transform="translate(232, 140)">
-          {/* Pot */}
           <polygon points="12,48 28,48 32,70 8,70" fill="#f8fafc" />
           <polygon points="8,70 32,70 28,75 12,75" fill="#e2e8f0" />
           <rect x="10" y="75" width="4" height="8" fill="#b45309" rx="1" />
           <rect x="26" y="75" width="4" height="8" fill="#b45309" rx="1" />
-          {/* Leaves */}
           <motion.path
             d="M20,48 Q8,30 6,14 Q20,24 20,48"
             fill="#34d399"
@@ -232,26 +230,20 @@ function CharacterScene3D({ stage, pulse }) {
         <g transform="translate(60, 60)">
           <line x1="25" y1="50" x2="25" y2="145" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
           <ellipse cx="25" cy="145" rx="14" ry="4" fill="#ffffff" opacity="0.6" />
-          {/* Lampshade */}
           <polygon points="12,50 38,50 44,22 6,22" fill="#ffffff" opacity="0.95" />
-          {/* Soft light glow cone */}
           <polygon points="6,50 44,50 68,145 -18,145" fill="#ffffff" opacity="0.08" />
         </g>
 
         {/* Cozy 3D Armchair */}
         <g transform="translate(100, 100)">
-          {/* Chair Legs */}
           <line x1="25" y1="85" x2="16" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
           <line x1="95" y1="85" x2="104" y2="105" stroke="#9a3412" strokeWidth="4" strokeLinecap="round" />
           <line x1="45" y1="85" x2="40" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
           <line x1="75" y1="85" x2="80" y2="100" stroke="#7c2d12" strokeWidth="3.5" strokeLinecap="round" />
 
-          {/* Chair Backrest */}
           <rect x="20" y="8" width="80" height="70" rx="18" fill="url(#chairGrad)" />
-          {/* Left/Right Armrests */}
           <rect x="10" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
           <rect x="88" y="38" width="22" height="42" rx="10" fill="#f59e0b" />
-          {/* Seat Cushion */}
           <rect x="22" y="52" width="76" height="32" rx="14" fill="url(#cushionGrad)" />
         </g>
 
@@ -267,47 +259,36 @@ function CharacterScene3D({ stage, pulse }) {
             y: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
           }}
         >
-          {/* Hair Bun */}
           <circle cx="28" cy="10" r="11" fill="#ea580c" />
           <ellipse cx="28" cy="18" rx="15" ry="12" fill="#c2410c" />
 
-          {/* Head & Face */}
           <circle cx="28" cy="24" r="12" fill="#fed7aa" />
-          {/* Eyes */}
           <circle cx="24" cy="23" r="1.5" fill="#431407" />
           <circle cx="32" cy="23" r="1.5" fill="#431407" />
-          {/* Smile */}
           <path d="M25,27 Q28,30 31,27" stroke="#431407" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-          {/* Blush */}
           <circle cx="22" cy="26" r="2" fill="#f87171" opacity="0.6" />
           <circle cx="34" cy="26" r="2" fill="#f87171" opacity="0.6" />
 
-          {/* Body / Sweater */}
           <path d="M16,36 Q28,34 40,36 L44,66 Q28,68 12,66 Z" fill="#38bdf8" />
           <path d="M22,35 Q28,38 34,35" stroke="#bae6fd" strokeWidth="1.5" fill="none" />
 
-          {/* Legs relaxed on the armchair */}
           <path d="M16,66 Q14,85 24,96" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
           <path d="M38,66 Q48,78 64,82" stroke="#fed7aa" strokeWidth="7" strokeLinecap="round" fill="none" />
-          {/* Shoes */}
           <rect x="18" y="93" width="14" height="7" rx="3.5" fill="#0f172a" />
           <rect x="58" y="79" width="14" height="7" rx="3.5" fill="#0f172a" />
 
-          {/* Arms holding Tablet / Laptop */}
           <path d="M14,44 Q24,52 34,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
           <path d="M42,44 Q36,52 26,50" stroke="#fed7aa" strokeWidth="4.5" strokeLinecap="round" fill="none" />
 
-          {/* Tablet Screen */}
           <g transform="translate(18, 42)">
             <rect x="0" y="0" width="22" height="16" rx="3" fill="#0f172a" />
             <rect x="1.5" y="1.5" width="19" height="13" rx="2" fill="url(#tabletGrad)" />
-            {/* Screen lines */}
             <line x1="4" y1="5" x2="14" y2="5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.9" />
             <line x1="4" y1="8" x2="18" y2="8" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
             <line x1="4" y1="11" x2="10" y2="11" stroke="#ffffff" strokeWidth="1" strokeLinecap="round" opacity="0.7" />
           </g>
 
-          {/* Dynamic Floating Feedback Icon based on stage */}
+          {/* Stage Badges */}
           {stage === 'trophy' && (
             <motion.g
               initial={{ scale: 0, y: 10 }}
@@ -361,7 +342,6 @@ export default function DiagnosticoGamificadoMood() {
   const currentQuestion = QUESTIONS[currentStep]
   const selectedOptionIndex = answers[currentQuestion?.id]
 
-  // Calculate live cumulative score based on answered questions
   const answeredCount = Object.keys(answers).length
   const currentTotalScore = Object.entries(answers).reduce((acc, [qId, optIdx]) => {
     const q = QUESTIONS.find((item) => item.id === Number(qId))
@@ -375,7 +355,6 @@ export default function DiagnosticoGamificadoMood() {
 
   const finalScorePercentage = Math.round((currentTotalScore / maxScore) * 100)
 
-  // Trigger pulse ONLY inside the 3D scene when option is chosen
   const handleSelectOption = (optionIndex) => {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionIndex }))
     setScenePulse(true)
@@ -403,12 +382,11 @@ export default function DiagnosticoGamificadoMood() {
     setEmailSubmitted(false)
   }
 
-  // Determine current stage for the 3D scene
   const getStageData = () => {
     if (answeredCount === 0) {
       return {
         stageId: 'start',
-        badgeText: 'Auditoría en Curso',
+        badgeText: 'Auditoría en Curso 🔍',
         subText: 'Comienza a responder',
       }
     }
@@ -442,7 +420,6 @@ export default function DiagnosticoGamificadoMood() {
 
   const stageData = getStageData()
 
-  // Pillar calculations
   const calculatePillarScore = (pillarName) => {
     const pillarQuestions = QUESTIONS.filter((q) => q.pilar === pillarName)
     const points = pillarQuestions.reduce((acc, q) => {
@@ -473,7 +450,7 @@ export default function DiagnosticoGamificadoMood() {
           </Link>
           <span className="hidden sm:inline-block text-slate-300">|</span>
           <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
-            Formulario 07: Diagnóstico 3D con Escena Animada
+            Formulario 07: Diagnóstico 3D en Panel Directo
           </span>
         </div>
 
@@ -487,58 +464,54 @@ export default function DiagnosticoGamificadoMood() {
         </div>
       </header>
 
-      {/* Main Container - Fixed Dimensions to guarantee zero jitter / resizing */}
+      {/* Main Container - STABLE FIX HEIGHT 50/50 SPLIT WITHOUT NESTED CARDS OR JITTER */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex items-center justify-center">
         <div className="w-full bg-white rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[660px] lg:h-[660px]">
           
           {/* =============================================================
-              LEFT PANEL: BALANCED SQUARISH CARD WITH 3D CHARACTER SCENE
-              (Solid continuous warm gradient, constant size, animated character)
+              LEFT PANEL: FULL DIRECT WARM CANVAS (NO NESTED GRAY CARDS)
+              (Solid continuous warm gradient filling 100% height & width)
              ============================================================= */}
-          <aside className="lg:col-span-5 p-6 sm:p-8 flex items-center justify-center bg-slate-50/70 border-r border-slate-100 h-full">
-            {/* Proportioned Squarish Card (Single Continuous Warm Gradient) */}
-            <div className="w-full max-w-[370px] aspect-square rounded-[32px] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-orange-500/20 bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white">
-              
-              {/* Subtle ambient lighting flares inside the square */}
-              <div className="absolute top-0 right-0 w-44 h-44 bg-white/20 rounded-full blur-2xl pointer-events-none -mr-12 -mt-12" />
-              <div className="absolute bottom-0 left-0 w-44 h-44 bg-black/10 rounded-full blur-2xl pointer-events-none -ml-12 -mb-12" />
+          <aside className="lg:col-span-5 h-full w-full bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+            {/* Ambient lighting flares */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
 
-              {/* Top Dynamic Tag inside the Square */}
-              <div className="relative z-10 flex items-center justify-between">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
-                  <span>{stageData.badgeText}</span>
-                </div>
-                <span className="text-[11px] font-mono font-bold text-white/90 bg-black/10 px-2 py-0.5 rounded-md">
-                  {answeredCount}/10
+            {/* Top Tag inside the Panel */}
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+                <span>{stageData.badgeText}</span>
+              </div>
+              <span className="text-xs font-mono font-bold text-white/90 bg-black/15 px-2.5 py-1 rounded-md">
+                {answeredCount}/10
+              </span>
+            </div>
+
+            {/* CENTER: 3D ISOMETRIC CHARACTER ROOM SCENE */}
+            <div className="relative z-10 my-auto flex flex-col items-center justify-center">
+              <CharacterScene3D stage={stageData.stageId} pulse={scenePulse} />
+            </div>
+
+            {/* Bottom Panel Metric & Trust Note */}
+            <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs font-semibold text-white/95">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black tracking-tight text-white font-mono">
+                  {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-white/80">
+                  Madurez Digital
                 </span>
               </div>
-
-              {/* CENTER: 3D ISOMETRIC CHARACTER ROOM SCENE */}
-              <div className="relative z-10 my-auto flex items-center justify-center">
-                <CharacterScene3D stage={stageData.stageId} pulse={scenePulse} />
-              </div>
-
-              {/* Bottom Card Metric & Trust Note */}
-              <div className="relative z-10 pt-2 border-t border-white/20 flex items-center justify-between text-[11px] font-semibold text-white/90">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-black tracking-tight text-white">
-                    {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
-                  </span>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-white/80">
-                    Madurez
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Qaway Lab Engine</span>
-                </div>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Qaway Lab Engine</span>
               </div>
             </div>
           </aside>
 
           {/* =============================================================
-              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (FIXED HEIGHT)
+              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (STABLE HEIGHT)
              ============================================================= */}
           <section className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-between bg-white h-full overflow-y-auto">
             {!isCompleted ? (
