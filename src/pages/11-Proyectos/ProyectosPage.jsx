@@ -267,7 +267,7 @@ function StaticProjectCard({ to, image, tag, title, desc, delay = 0, isMockup = 
     <motion.div
       initial={{ opacity: 0, y: 22 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={to ? { y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } } : undefined}
+      whileHover={{ y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
       className={`group flex flex-col overflow-hidden rounded-[12px] border border-[#e4e4e7] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${to ? 'cursor-pointer' : ''}`}
@@ -578,20 +578,20 @@ export default function ProyectosPage() {
                 statusColor: '#111111'
               },
               {
-                title: 'Captación Inmobiliaria',
-                desc: 'Tours inmersivos y contacto directo a WhatsApp en un solo toque.',
-                image: mockupVallet,
-                tag: 'Lead Directo',
-                statusBg: '#fffdf9',
-                statusColor: '#111111'
-              },
-              {
                 title: 'Servicios Profesionales',
                 desc: 'Agendamiento de citas y presentación corporativa de alta credibilidad.',
                 image: mockupEpc,
                 tag: 'Agendamiento',
                 statusBg: '#06153a',
                 statusColor: '#ffffff'
+              },
+              {
+                title: 'Captación Inmobiliaria',
+                desc: 'Tours inmersivos y contacto directo a WhatsApp en un solo toque.',
+                image: mockupVallet,
+                tag: 'Lead Directo',
+                statusBg: '#fffdf9',
+                statusColor: '#111111'
               }
             ].map((mockup, i) => (
               <motion.div
