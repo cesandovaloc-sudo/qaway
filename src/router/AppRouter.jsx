@@ -117,7 +117,7 @@ function PublicPathRoute({ routeKey, children, fallback = '/' }) {
 }
 
 export default function AppRouter() {
-  const notFoundElement = isPublicSiteMode ? <Navigate to="/" replace /> : <NotFoundPage />
+  const notFoundElement = <NotFoundPage />
 
   return (
     <>
@@ -170,7 +170,7 @@ export default function AppRouter() {
         />
         <Route
           path="/inicio-v3"
-          element={<InicioPageV3 />}
+          element={renderPublicPathRoute('inicio', '/inicio-v3', <InicioPageV3 />)}
         />
         <Route
           path="/proyectos/panaderia-josue"
@@ -411,8 +411,8 @@ export default function AppRouter() {
 
           <Route path="academy" element={renderRoute('academy', <AcademyPage />)} />
           <Route path="academy-legacy" element={renderRoute('academy', <AcademyPage />)} />
-          <Route path="academy/app/*" element={<AcademyRealAppPage />} />
-          <Route path="hub/academy/*" element={<AcademyRealAppPage />} />
+          <Route path="academy/app/*" element={renderRoute('academy', <AcademyRealAppPage />)} />
+          <Route path="hub/academy/*" element={renderRoute('academy', <AcademyRealAppPage />)} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />

@@ -16,8 +16,8 @@ export default function NotFoundPage() {
         <div className="text-8xl font-black text-zinc-300 mb-4">404</div>
         <h1 className="text-3xl font-bold text-zinc-900 mb-4">Ups, un enlace fuera del workflow</h1>
         <p className="text-zinc-600 mb-8 max-w-lg mx-auto leading-relaxed">
-          Este recurso no está disponible por el momento 😢 <br />
-          No te preocupes, el resto de la operación sigue en línea. 😎
+          Este recurso no está disponible por el momento. <br />
+          No te preocupes, el resto de la operación sigue en línea.
         </p>
         <Link
           to="/"
