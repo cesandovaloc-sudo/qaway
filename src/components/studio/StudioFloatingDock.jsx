@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import './studio-dock.css';
+import { useRecordingMode } from '@/config/recordingMode';
 
 export default function StudioFloatingDock({
   projectName = "Proyecto Qaway",
@@ -10,8 +11,15 @@ export default function StudioFloatingDock({
   scrollThreshold = 140
 }) {
   const [isVisible, setIsVisible] = useState(false);
+  const { hideDock, hideBackLinks } = useRecordingMode();
 
   useEffect(() => {
+    // Modo Grabación activo: no se engancha el listener ni se muestra la barra.
+    if (hideDock) {
+      setIsVisible(false);
+      return undefined;
+    }
+
     const handleScroll = () => {
       if (window.scrollY > scrollThreshold) {
         setIsVisible(true);
@@ -24,12 +32,18 @@ export default function StudioFloatingDock({
     handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrollThreshold]);
+  }, [scrollThreshold, hideDock]);
 
   const whatsappMessage = encodeURIComponent(
     `Hola Qaway Lab, estuve viendo el proyecto ${projectName} y me gustaría conversar sobre el desarrollo de una presencia digital similar para mi marca.`
   );
   const whatsappUrl = `https://wa.me/51953282216?text=${whatsappMessage}`;
+
+  // ── MODO GRABACIÓN ─────────────────────────────────────────────────────────
+  // Oculta temporalmente la barra flotante del estudio para grabar demos limpias
+  // de los proyectos. NO elimina nada: todo se restaura con ?grabacion=0 o al
+  // cerrar la pestaña. Ver src/config/recordingMode.js
+  if (hideDock) return null;
 
   return (
     <div className="qw-studio-dock-container" role="region" aria-label="Barra de información y contacto de Qaway Lab">
@@ -42,15 +56,17 @@ export default function StudioFloatingDock({
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
             className="qw-studio-dock glass-white"
           >
-            {/* 1. Botón Volver a Proyectos */}
-            <Link
-              to={backUrl}
-              className="dock-back-pill"
-              aria-label="Volver al catálogo de proyectos"
-            >
-              <ArrowLeft size={14} strokeWidth={2.4} />
-              <span>Volver a Proyectos</span>
-            </Link>
+            {/* 1. Botón Volver a Proyectos — ocultable por separado con ?grabacion=volver */}
+            {!hideBackLinks && (
+              <Link
+                to={backUrl}
+                className="dock-back-pill"
+                aria-label="Volver al catálogo de proyectos"
+              >
+                <ArrowLeft size={14} strokeWidth={2.4} />
+                <span>Volver a Proyectos</span>
+              </Link>
+            )}
 
             {/* 2. Bloque de Texto General + Derechos Reservados */}
             <div className="dock-brand-info">

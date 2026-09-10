@@ -66,7 +66,7 @@ export default function HorizontePage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#0D1B17] text-[#F6F4F1] font-sans selection:bg-[#C49A44] selection:text-[#0D1B17]">
+    <main className="horizonte-case min-h-screen bg-[#0D1B17] text-[#F6F4F1] font-sans selection:bg-[#C49A44] selection:text-[#0D1B17]">
       
       {/* Header Sticky */}
       <header className="fixed top-0 left-0 right-0 z-50 h-20 border-b border-white/10 bg-black/40 backdrop-blur-xl">

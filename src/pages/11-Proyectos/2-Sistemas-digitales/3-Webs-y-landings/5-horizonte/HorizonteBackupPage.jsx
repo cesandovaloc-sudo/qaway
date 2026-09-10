@@ -50,7 +50,7 @@ export default function HorizonteBackupPage() {
   })
 
   return (
-    <main className="min-h-screen bg-[#0D1B17] text-[#F6F4F1] font-sans selection:bg-[#C49A44] selection:text-[#0D1B17]">
+    <main className="horizonte-case min-h-screen bg-[#0D1B17] text-[#F6F4F1] font-sans selection:bg-[#C49A44] selection:text-[#0D1B17]">
       <SEO
         title="Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab"
         description="Caso de estudio: sitio web corporativo y plataforma de captación para Horizonte Inmobiliaria. Diseño, desarrollo e integración con CRM y WhatsApp."

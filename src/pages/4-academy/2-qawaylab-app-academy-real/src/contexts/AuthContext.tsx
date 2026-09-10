@@ -22,12 +22,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else setLoading(false)
-    })
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        if (session?.user) fetchProfile(session.user.id)
+        else setLoading(false)
+      })
+      .catch((error) => {
+        // Una sesión ilegible (storage corrupto, bloqueado o de otro proyecto) no debe
+        // dejar la app en "Cargando..." para siempre: limpiamos el estado y liberamos el gate.
+        console.error('No se pudo leer la sesión de Academy:', error)
+        setSession(null)
+        setUser(null)
+        setProfile(null)
+        setLoading(false)
+      })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)

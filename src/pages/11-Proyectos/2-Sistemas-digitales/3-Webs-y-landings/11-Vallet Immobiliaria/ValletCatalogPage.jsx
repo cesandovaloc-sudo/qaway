@@ -13,6 +13,7 @@ import logo from './ChatGPT Image 3 sept 2026, 11_47_38.webp';
 import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.webp';
 import './vallet-inmobiliaria.css';
 import './vallet-catalog.css';
+import { useRecordingMode } from '@/config/recordingMode';
 
 function PropertyCardCarousel({ images, alt, type }) {
   const imageList = Array.isArray(images) && images.length > 0 ? images : [images].filter(Boolean);
@@ -114,6 +115,8 @@ export default function ValletCatalogPage() {
 
   useValletReveal();
 
+  const { hideBackLinks } = useRecordingMode();
+
   return (
     <div className="vallet-landing vallet-catalog-page site-shell">
       <SEO
@@ -141,9 +144,12 @@ export default function ValletCatalogPage() {
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
         </Link>
         <div className="header-nav-back">
-          <Link to="/proyectos/vallet" className="back-link">
-            <ArrowLeft size={16} /> <span>Volver a la portada</span>
-          </Link>
+          {/* Modo Grabación: se oculta el retroceso sin desmontar el wrapper (no altera el layout del header) */}
+          {!hideBackLinks && (
+            <Link to="/proyectos/vallet" className="back-link">
+              <ArrowLeft size={16} /> <span>Volver a la portada</span>
+            </Link>
+          )}
         </div>
         <a
           className="header-cta"

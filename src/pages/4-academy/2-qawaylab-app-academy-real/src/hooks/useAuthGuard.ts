@@ -1,5 +1,4 @@
 import { useAuth } from '@/contexts/AuthContext'
-import { Navigate } from 'react-router-dom'
 
 const ROLE_ROUTES: Record<string, string> = {
   student: '/academy/app/panel',
@@ -12,8 +11,11 @@ const ROLE_ROUTES: Record<string, string> = {
 export function useAuthGuard() {
   const { user, profile, loading } = useAuth()
 
-  // Mientras se resuelve la sesión o el profile, mostramos loading
-  if (loading || (user && !profile)) {
+  // Solo esperamos mientras la sesión se está resolviendo. Antes esta condición
+  // incluía también "usuario sin profile", y como el profile puede no existir
+  // (fila ausente o no legible), las páginas de acceso se quedaban girando para
+  // siempre, sin formulario y sin forma de salir.
+  if (loading) {
     return { guard: 'loading' }
   }
 
@@ -25,6 +27,6 @@ export function useAuthGuard() {
     }
   }
 
-  // No hay usuario autenticado: permite acceder al formulario
+  // Sin sesión utilizable: se muestra el formulario de acceso
   return { guard: 'allow' }
 }

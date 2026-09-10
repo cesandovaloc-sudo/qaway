@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { WHATSAPP_LINK, navItems } from '@/data/navigation'
 import { getNavbarLinks } from '@/config/siteVisibility'
+import { useRecordingMode } from '@/config/recordingMode'
 
 const NavbarVariantContext = createContext('light')
 const NavbarSetVariantContext = createContext(() => { })
@@ -109,6 +110,7 @@ export default function Navbar({ variant: explicitVariant }) {
   const menuContainerRef = useRef(null)
   const lastScrollY = useRef(0)
   const isNavigatingRef = useRef(isProjectDock)
+  const { hideBackLinks } = useRecordingMode()
 
   useEffect(() => {
     if (isProjectDock) {
@@ -199,6 +201,11 @@ export default function Navbar({ variant: explicitVariant }) {
   const menuBtnClass = isTransparentInitial ? 'text-white' : styles.menuBtn
 
   const isHeaderShown = isProjectDock ? (scrolled && headerVisible) : headerVisible
+
+  // Modo Grabación: el variant 'project-dock' solo renderiza el botón
+  // "Volver a Proyectos", así que ocultamos la barra superior completa.
+  // No se elimina nada: se restaura con ?grabacion=0
+  if (isProjectDock && hideBackLinks) return null
 
   return (
     <>

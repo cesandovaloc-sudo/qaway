@@ -5,15 +5,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
 
-/* Mantenemos las fuentes personalizadas para las clases utilitarias del documento */
-.font-serif {
+/* Utilidades tipograficas de este case study, acotadas a su raiz (.horizonte-case).
+   Antes eran clases globales y pisaban la utilidad .font-sans de Tailwind en toda
+   la web (rompia el navbar global en dev, donde el orden de inyeccion es distinto). */
+.horizonte-case.font-serif,
+.horizonte-case .font-serif {
   font-family: "Playfair Display", serif;
 }
 
-.font-sans {
+.horizonte-case.font-sans,
+.horizonte-case .font-sans {
   font-family: "DM Sans", sans-serif;
 }
 
-.font-mono {
+.horizonte-case.font-mono,
+.horizonte-case .font-mono {
   font-family: "DM Mono", monospace;
 }

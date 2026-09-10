@@ -1,22 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 export default function Register() {
-  const guard = useAuthGuard()
-  if (guard.guard === 'loading') {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-50">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
-      </div>
-    )
-  }
-  if (guard.guard === 'redirect') {
-    return <Navigate to={guard.target} replace />
-  }
-
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,6 +15,21 @@ export default function Register() {
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect')
   const safeRedirect = redirect?.startsWith('/') ? redirect : null
+  const guard = useAuthGuard()
+
+  // Todos los hooks van antes de cualquier return (regla de hooks de React).
+  // Antes estaban después de estos dos returns y, al cambiar el estado del guard,
+  // el número de hooks cambiaba entre renders y React rompía el componente.
+  if (guard.guard === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface-50">
+        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+  if (guard.guard === 'redirect') {
+    return <Navigate to={guard.target} replace />
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()

@@ -14,10 +14,12 @@ import logo from './ChatGPT Image 3 sept 2026, 11_47_38.webp';
 import logoWhite from './ChatGPT Image 3 sept 2026, 12_41_06.webp';
 import './vallet-inmobiliaria.css';
 import './vallet-property-detail.css';
+import { useRecordingMode } from '@/config/recordingMode';
 
 export default function ValletPropertyDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { hideBackLinks } = useRecordingMode();
 
   // Find property by slug, or default to first property (Miraflores)
   const property = valletProperties.find((p) => p.slug === slug) || valletProperties[0];
@@ -121,9 +123,12 @@ export default function ValletPropertyDetailPage() {
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
         </Link>
         <div className="header-nav-back">
-          <Link to="/proyectos/vallet" className="back-link">
-            <ArrowLeft size={16} /> <span>Volver a propiedades</span>
-          </Link>
+          {/* Modo Grabación: se oculta el retroceso sin desmontar el wrapper (no altera el layout del header) */}
+          {!hideBackLinks && (
+            <Link to="/proyectos/vallet" className="back-link">
+              <ArrowLeft size={16} /> <span>Volver a propiedades</span>
+            </Link>
+          )}
         </div>
         <a className="header-cta" href={`https://wa.me/${property.agent.whatsapp}`} target="_blank" rel="noreferrer">
           <MessageCircle size={17} /> Contactar asesor
