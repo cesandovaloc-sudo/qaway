@@ -1365,6 +1365,13 @@
   .vallet-landing .footer-grid {
     grid-template-columns: 1fr;
   }
+  .vallet-landing .footer {
+    padding-top: 32px;
+  }
+  .vallet-landing .footer-grid {
+    gap: 28px;
+    padding-bottom: 32px;
+  }
   .vallet-landing .registered {
     font-size: 13px;
     line-height: 1.45;
@@ -1377,6 +1384,7 @@
     flex-direction: column;
     gap: 10px;
     text-align: center;
+    padding-block: 20px;
   }
 }
 
