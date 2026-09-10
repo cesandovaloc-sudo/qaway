@@ -314,13 +314,13 @@ export default function DiagnosticoGamificadoMood() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 font-sans selection:bg-[#ff4b0b] selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[color:var(--b0)] text-slate-900 font-sans selection:bg-[#FF4B0B] selection:text-white flex flex-col justify-between">
       {/* Header */}
-      <header className="w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
+      <header className="w-full border-b border-slate-500/30 bg-[#0d0d0d]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="text-xl font-black tracking-tight text-slate-950">QAWAY</span>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#ff4b0b] bg-orange-50 px-2.5 py-0.5 rounded-md border border-orange-200">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-[#FF4B0B] bg-[color:var(--b2)] px-2.5 py-0.5 rounded-md border border-[#FF4B0B]/30">
               MOOD LAB
             </span>
           </Link>
@@ -342,16 +342,15 @@ export default function DiagnosticoGamificadoMood() {
 
       {/* Main Container - VIEWPORT FIT: no scroll needed */}
       <main className="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center">
-        <div className="w-full bg-white rounded-[28px] sm:rounded-[36px] border border-slate-200 shadow-2xl shadow-slate-200/60 overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-140px)] lg:max-h-[680px]">
+        <div className="w-full bg-[#0d0d0d] rounded-[28px] sm:rounded-[36px] border border-slate-500/30 overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-140px)] lg:max-h-[680px]">
           
           {/* MOBILE COMPACT PROGRESS BAR (visible only below lg) */}
-          <div className="flex lg:hidden items-center justify-between bg-gradient-to-r from-[#ff3b00] to-[#ffaa00] text-white px-4 py-3">
+          <div className="flex lg:hidden items-center justify-between px-4 py-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
               <span className="text-xs font-bold">{stageData.badgeText}</span>
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
-              <span className="font-mono bg-black/15 px-2 py-0.5 rounded-md">{answeredCount}/10</span>
+              <span className="font-mono bg-[color:var(--b3)] px-2 py-0.5 rounded-md">{answeredCount}/10</span>
               <span>{answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}</span>
             </div>
           </div>
@@ -360,18 +359,18 @@ export default function DiagnosticoGamificadoMood() {
               LEFT PANEL: FULL DIRECT WARM CANVAS (NO NESTED GRAY CARDS)
               (Solid continuous warm gradient filling 100% height & width)
              ============================================================= */}
-          <aside className="hidden lg:flex lg:col-span-5 h-full w-full bg-gradient-to-br from-[#ff3b00] via-[#ff5a1f] to-[#ffaa00] text-white p-6 xl:p-8 flex-col justify-between relative overflow-hidden">
-            {/* Ambient lighting flares */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/20 rounded-full blur-3xl pointer-events-none -mr-16 -mt-16" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none -ml-16 -mb-16" />
+          <aside className="hidden lg:flex lg:col-span-5 h-full w-full bg-[#0d0d0d] p-6 xl:p-8 flex-col justify-between relative overflow-hidden">
+            {/* Subtle radial glow as small accent only */}
+            <div className="absolute top-0 left-0 w-24 h-24 rounded-full blur-2xl bg-[#FF4B0B]/5 opacity-20 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-24 h-24 rounded-full bg-[#0d0d0d]/3 backdrop-blur-md pointer-events-none" />
 
             {/* Top Tag inside the Panel */}
             <div className="relative z-10 flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-white/20 text-white backdrop-blur-md border border-white/20 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#0d0d0d]/80 text-slate-300 backdrop-blur-md border border-slate-500/30 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 opacity-60" />
                 <span>{stageData.badgeText}</span>
               </div>
-              <span className="text-xs font-mono font-bold text-white/90 bg-black/15 px-2.5 py-1 rounded-md">
+              <span className="text-xs font-mono font-bold text-slate-300 bg-black/15 px-2.5 py-1 rounded-md">
                 {answeredCount}/10
               </span>
             </div>
@@ -383,30 +382,30 @@ export default function DiagnosticoGamificadoMood() {
 
             {/* Pedagogical Tip moved to left panel */}
             {!isCompleted && currentQuestion?.tip && (
-              <div className="relative z-10 my-3 p-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 text-white space-y-1">
-                <div className="flex items-center gap-2 text-xs font-extrabold text-yellow-200">
-                  <Lightbulb className="w-4 h-4 shrink-0" />
+              <div className="relative z-10 my-3 p-4 rounded-2xl bg-[#0d0d0d]/60 backdrop-blur-md border border-slate-500/30 text-slate-300 space-y-1">
+                <div className="flex items-center gap-2 text-xs font-extrabold text-[#FF4B0B]">
+                  <Lightbulb className="w-4 h-4 shrink-0 opacity-80" />
                   <span>Consejo Estratégico</span>
                 </div>
-                <p className="text-xs text-white/90 leading-relaxed font-normal">
+                <p className="text-xs text-slate-400 leading-relaxed font-normal">
                   {currentQuestion.tip}
                 </p>
               </div>
             )}
 
             {/* Bottom Panel Metric & Trust Note */}
-            <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs font-semibold text-white/95">
+            <div className="relative z-10 pt-4 border-t border-slate-500/30 flex items-center justify-between text-xs font-semibold text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-white font-mono">
+                <span className="text-xl font-black tracking-tight text-slate-100 font-mono">
                   {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-white/80">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
                   Madurez Digital
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Qaway Lab Engine</span>
+                <ShieldCheck className="w-4 h-4 opacity-60" />
+                <span className="text-slate-500 text-xs font-medium">Qaway Lab Engine</span>
               </div>
             </div>
           </aside>
@@ -414,14 +413,14 @@ export default function DiagnosticoGamificadoMood() {
           {/* =============================================================
               RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (STABLE HEIGHT)
              ============================================================= */}
-          <section className="col-span-1 lg:col-span-7 p-4 sm:p-6 lg:p-8 xl:p-10 flex flex-col justify-between bg-white h-full overflow-y-auto">
+          <section className="col-span-1 lg:col-span-7 p-4 sm:p-6 lg:p-8 xl:p-10 flex flex-col justify-between bg-[color:var(--b0)] h-full overflow-y-auto">
             {!isCompleted ? (
               <>
                 {/* Stepper Header */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#ff4b0b] bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200/70">
+                      <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 bg-[color:var(--b2)] px-2.5 py-1 rounded-md border border-slate-500/30">
                         {currentQuestion.pilar}
                       </span>
                     </div>
@@ -440,10 +439,10 @@ export default function DiagnosticoGamificadoMood() {
                           key={q.id}
                           className={`h-2 flex-1 rounded-full transition-all duration-300 ${
                             isCurrent
-                              ? 'bg-[#ff4b0b] ring-2 ring-orange-200'
+                              ? 'bg-[#FF4B0B] ring-2 ring-[#FF4B0B]/30'
                               : isPassed
                               ? 'bg-slate-900'
-                              : 'bg-slate-100'
+                              : 'bg-slate-200'
                           }`}
                         />
                       )
@@ -480,17 +479,17 @@ export default function DiagnosticoGamificadoMood() {
                               onClick={() => handleSelectOption(optIndex)}
                               className={`w-full text-left p-3 sm:p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer ${
                                 isSelected
-                                  ? 'bg-orange-50/70 border-[#ff4b0b] shadow-sm ring-1 ring-[#ff4b0b]'
-                                  : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'
+                                  ? 'bg-[color:var(--b1)] border-slate-500/30 shadow-sm ring-1 ring-[#FF4B0B]/20'
+                                  : 'bg-[color:var(--b1)] border-slate-300 hover:border-slate-400 hover:bg-[color:var(--b2)]/50'
                               }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div
-                                  className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                                     isSelected
-                                      ? 'border-[#ff4b0b] bg-white'
+                                      ? 'border-[#FF4B0B]/50 bg-[color:var(--b1)]'
                                       : 'border-slate-300 group-hover:border-slate-400 bg-slate-50'
-                                  }`}
+                                }`}
                                 >
                                   {isSelected && (
                                     <div className="w-2.5 h-2.5 rounded-full bg-[#ff4b0b]" />
@@ -506,10 +505,10 @@ export default function DiagnosticoGamificadoMood() {
                               </div>
 
                               <span
-                                className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transition-colors shrink-0 ${
-                                  isSelected
-                                    ? 'bg-[#ff4b0b] text-white'
-                                    : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transition-colors shrink-0 ${
+                                    isSelected
+                                      ? 'bg-[color:var(--b2)] text-slate-950'
+                                      : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
                                 }`}
                               >
                                 {opt.grade}
@@ -530,8 +529,8 @@ export default function DiagnosticoGamificadoMood() {
                       disabled={currentStep === 0}
                       className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors ${
                         currentStep === 0
-                          ? 'opacity-30 border-slate-200 text-slate-400 cursor-not-allowed'
-                          : 'border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 cursor-pointer'
+                          ? 'opacity-30 border-slate-500/30 text-slate-400 cursor-not-allowed'
+                          : 'border-slate-500/30 text-slate-400 hover:bg-[color:var(--b2)] hover:text-slate-900 cursor-pointer'
                       }`}
                     >
                       <ArrowLeft className="w-4 h-4" />
@@ -542,10 +541,10 @@ export default function DiagnosticoGamificadoMood() {
                       type="button"
                       onClick={handleNext}
                       disabled={selectedOptionIndex === undefined}
-                      className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md ${
+                      className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-950 transition-all shadow-md ${
                         selectedOptionIndex === undefined
-                          ? 'bg-slate-300 opacity-60 cursor-not-allowed'
-                          : 'bg-[#ff4b0b] hover:bg-[#e04008] active:scale-[0.99] cursor-pointer shadow-orange-500/20'
+                          ? 'bg-[color:var(--b2)] opacity-60 cursor-not-allowed'
+                          : 'bg-[#FF4B0B] hover:bg-[#e04008] active:scale-[0.99] cursor-pointer shadow-[color:var(--b1)]/20'
                       }`}
                     >
                       <span>{currentStep === QUESTIONS.length - 1 ? 'Ver Resultado Final' : 'Siguiente'}</span>
@@ -562,8 +561,8 @@ export default function DiagnosticoGamificadoMood() {
                 className="space-y-6 my-auto"
               >
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold bg-slate-950 text-white border-slate-950 shadow-2xs">
-                    <Trophy className="w-3.5 h-3.5 text-yellow-400" />
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold bg-[color:var(--b2)] text-slate-300 border-slate-500/30">
+                    <Trophy className="w-3.5 h-3.5 opacity-80" />
                     <span>Diagnóstico Completado con Éxito</span>
                   </div>
 
@@ -572,7 +571,7 @@ export default function DiagnosticoGamificadoMood() {
                   </h2>
 
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl sm:text-5xl font-black text-[#ff4b0b] tracking-tighter">
+                    <span className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tighter">
                       <AnimatedScoreCounter value={finalScorePercentage} />
                     </span>
                     <span className="text-xs sm:text-sm font-bold text-slate-400">
@@ -591,43 +590,43 @@ export default function DiagnosticoGamificadoMood() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
+                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-800">1. Oferta & Mensaje</span>
-                        <span className="text-slate-950 font-mono">{pillarScores.oferta}%</span>
+                        <span className="text-slate-600">1. Oferta & Mensaje</span>
+                        <span className="text-slate-500 font-mono">{pillarScores.oferta}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.oferta}%` }} />
+                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.oferta}%` }} />
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
+                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-800">2. Canal Web & Branding</span>
-                        <span className="text-slate-950 font-mono">{pillarScores.canal}%</span>
+                        <span className="text-slate-600">2. Canal Web & Branding</span>
+                        <span className="text-slate-500 font-mono">{pillarScores.canal}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.canal}%` }} />
+                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.canal}%` }} />
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
+                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-800">3. Automatización & CRM</span>
-                        <span className="text-slate-950 font-mono">{pillarScores.sistemas}%</span>
+                        <span className="text-slate-600">3. Automatización & CRM</span>
+                        <span className="text-slate-500 font-mono">{pillarScores.sistemas}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-[#ff4b0b] h-full rounded-full" style={{ width: `${pillarScores.sistemas}%` }} />
+                        <div className="bg-[color:var(--primary-accent)] h-full rounded-full" style={{ width: `${pillarScores.sistemas}%` }} />
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-white border border-slate-200/70 space-y-1">
+                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
                       <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-800">4. Capacidad de Escala</span>
-                        <span className="text-slate-950 font-mono">{pillarScores.escala}%</span>
+                        <span className="text-slate-600">4. Capacidad de Escala</span>
+                        <span className="text-slate-500 font-mono">{pillarScores.escala}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-900 h-full rounded-full" style={{ width: `${pillarScores.escala}%` }} />
+                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.escala}%` }} />
                       </div>
                     </div>
                   </div>
@@ -640,7 +639,7 @@ export default function DiagnosticoGamificadoMood() {
                       e.preventDefault()
                       if (userEmail) setEmailSubmitted(true)
                     }}
-                    className="p-4 sm:p-5 rounded-3xl bg-white border border-slate-200/90 shadow-sm space-y-2.5"
+                    className="p-4 sm:p-5 rounded-3xl bg-[color:var(--b1)] border border-slate-500/30 shadow-sm space-y-2.5"
                   >
                     <h4 className="text-xs sm:text-sm font-extrabold text-slate-950">
                       ¿Deseas recibir tu reporte detallado con la hoja de ruta en PDF?
@@ -651,7 +650,7 @@ export default function DiagnosticoGamificadoMood() {
                         placeholder="Tu nombre o empresa"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-slate-950 flex-1"
+                        className="px-3.5 py-2.5 rounded-xl border border-slate-500/30 text-xs focus:outline-none focus:border-[#FF4B0B] flex-1"
                       />
                       <input
                         type="email"
@@ -659,11 +658,11 @@ export default function DiagnosticoGamificadoMood() {
                         placeholder="correo@tuempresa.com"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
-                        className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-slate-950 flex-1"
+                        className="px-3.5 py-2.5 rounded-xl border border-slate-500/30 text-xs focus:outline-none focus:border-[#FF4B0B] flex-1"
                       />
                       <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-slate-950 text-white font-bold text-xs hover:bg-[#ff4b0b] transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                        className="px-5 py-2.5 rounded-xl bg-[color:var(--b2)] text-white font-bold text-xs hover:bg-[#FF4B0B] transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>Enviar</span>
@@ -671,16 +670,16 @@ export default function DiagnosticoGamificadoMood() {
                     </div>
                   </form>
                 ) : (
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-0.5">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 mx-auto" />
-                    <h4 className="text-xs font-bold text-slate-900">
+                  <div className="p-3.5 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 text-center space-y-0.5">
+                    <CheckCircle2 className="w-5 h-5 opacity-80" />
+                    <h4 className="text-xs font-bold text-slate-400">
                       ¡Reporte enviado exitosamente a {userEmail}!
                     </h4>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-500/30">
                   <button
                     type="button"
                     onClick={handleRestart}
@@ -692,7 +691,7 @@ export default function DiagnosticoGamificadoMood() {
 
                   <Link
                     to="/estudio/consultoria"
-                    className="px-5 py-2.5 rounded-xl bg-slate-950 hover:bg-[#ff4b0b] text-white font-bold text-xs transition-colors shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-[color:var(--b2)] hover:bg-[#FF4B0B] text-white font-bold text-xs transition-colors shadow-sm"
                   >
                     Agendar Sesión Estratégica →
                   </Link>
@@ -704,7 +703,7 @@ export default function DiagnosticoGamificadoMood() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-slate-200 bg-white px-6 py-3 text-center text-xs text-slate-400">
+      <footer className="w-full border-t border-slate-500/30 bg-[color:var(--b0)] px-6 py-3 text-center text-xs text-slate-400">
         Qaway Lab Mood Lab • Gamificación Visual y Diagnósticos Comerciales
       </footer>
     </div>
