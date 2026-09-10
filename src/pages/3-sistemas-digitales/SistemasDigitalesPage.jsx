@@ -248,7 +248,6 @@ function HeroInicioBlockPractice() {
               }}
             />
           </div>
-          <div className="absolute left-0 top-0 w-12 h-12 bg-linear-to-br from-black/40 to-transparent pointer-events-none opacity-50"></div>
 
           <div className="relative mx-auto grid flex-1 w-full max-w-[96rem] grid-cols-1 lg:grid-cols-[.95fr_1.05fr_.7fr]">
             <div className="relative z-10 bg-white flex flex-col justify-center px-6 py-10 sm:px-10 lg:min-h-[28rem] lg:justify-center lg:pt-6 lg:pb-10 lg:px-10">

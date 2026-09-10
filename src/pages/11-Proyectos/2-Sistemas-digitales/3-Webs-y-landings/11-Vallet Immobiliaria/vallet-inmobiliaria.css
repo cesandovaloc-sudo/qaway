@@ -7,6 +7,9 @@
   --paper: #f8f6f2;
   --line: #e5e0d8;
   --white: #fffdf9;
+  /* Alto del header: fuente única. Cambia en el breakpoint móvil (ver @media 640px).
+     Lo consumen el propio header, el hero y la posición oculta del menú móvil. */
+  --vallet-header-h: 82px;
   
   margin: 0;
   background: var(--paper);
@@ -43,7 +46,7 @@
 
 /* Header Sticky con efecto Glassmorphism */
 .vallet-landing .site-header {
-  height: 82px;
+  height: var(--vallet-header-h);
   background: rgba(255, 253, 249, 0.94);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -137,8 +140,8 @@
 
 /* Hero */
 .vallet-landing .hero {
-  min-height: calc(100vh - 82px);
-  min-height: calc(100dvh - 82px);
+  min-height: calc(100vh - var(--vallet-header-h));
+  min-height: calc(100dvh - var(--vallet-header-h));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1246,8 +1249,10 @@
 }
 
 @media (max-width: 640px) {
+  .vallet-landing {
+    --vallet-header-h: 70px;
+  }
   .vallet-landing .site-header {
-    height: 70px;
     background: #fffdf9 !important;
     border: none !important;
     border-top: none !important;
@@ -1255,7 +1260,7 @@
   }
   .vallet-landing .nav {
     position: fixed;
-    top: 70px;
+    top: var(--vallet-header-h);
     left: 0;
     right: 0;
     background: #fffdf9;
@@ -1263,11 +1268,16 @@
     padding: 24px;
     gap: 20px;
     border-bottom: 1px solid var(--line);
-    transform: translateY(-120%);
-    transition: transform .3s ease;
+    /* Ocultado exacto: se desplaza su propia altura + el alto del header, de modo
+       que su borde inferior queda justo en el límite del viewport. No depende de
+       cuánto mida el menú; antes con -120% el borde inferior asomaba ~10px. */
+    transform: translateY(calc(-100% - var(--vallet-header-h)));
+    visibility: hidden;
+    transition: transform .3s ease, visibility .3s ease;
   }
   .vallet-landing .nav.open {
     transform: translateY(0);
+    visibility: visible;
   }
   .vallet-landing .menu-button {
     display: block;
