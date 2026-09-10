@@ -6,7 +6,6 @@ import { useData } from '@/hooks/useData'
 import type { Module } from '@/lib/types'
 import GlobalSearch from '@/components/common/GlobalSearch'
 import UserMenu from '@/components/common/UserMenu'
-import Logo from '@/components/common/Logo'
 import { TeacherPreviewProvider, useTeacherPreview } from '@/contexts/TeacherPreviewContext'
 import StudentPreviewPanel from '@/components/teacher/StudentPreviewPanel'
 import RouteFallback from '@/components/common/RouteFallback'
@@ -131,9 +130,7 @@ function TeacherLayoutContent() {
     <div className="flex min-h-screen bg-surface-50">
       {/* Left sidebar */}
       <aside className="fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-surface-200 bg-white">
-        <div className="flex h-16 items-center border-b border-surface-200 px-6">
-          <Logo size="sm" />
-        </div>
+        <div className="flex h-16 items-center border-b border-surface-200 px-6" />
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
           {sidebarLinks.map((link, idx) => (

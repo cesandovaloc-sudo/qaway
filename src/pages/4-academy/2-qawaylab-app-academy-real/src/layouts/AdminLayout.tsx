@@ -3,7 +3,6 @@ import { Link, Outlet, useLocation, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import GlobalSearch from '@/components/common/GlobalSearch'
 import UserMenu from '@/components/common/UserMenu'
-import Logo from '@/components/common/Logo'
 import RouteFallback from '@/components/common/RouteFallback'
 
 const sidebarLinks = [
@@ -42,9 +41,7 @@ export default function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-surface-50">
       <aside className="fixed left-0 top-0 z-40 flex h-full w-64 flex-col border-r border-surface-200 bg-white">
-        <div className="flex h-16 items-center border-b border-surface-200 px-6">
-          <Logo size="sm" />
-        </div>
+        <div className="flex h-16 items-center border-b border-surface-200 px-6" />
 
         <nav className="flex-1 space-y-1 p-4">
           {sidebarLinks.map((link) => (

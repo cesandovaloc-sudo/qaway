@@ -2,8 +2,21 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
+import { useAuthGuard } from '@/hooks/useAuthGuard'
 
 export default function Login() {
+  const guard = useAuthGuard()
+  if (guard.guard === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface-50">
+        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
+  if (guard.guard === 'redirect') {
+    return <Navigate to={guard.target} replace />
+  }
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')

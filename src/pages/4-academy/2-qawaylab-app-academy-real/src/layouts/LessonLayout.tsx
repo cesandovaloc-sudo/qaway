@@ -6,9 +6,6 @@ import { useAuth } from '@/contexts/AuthContext'
 import GlobalSearch from '@/components/common/GlobalSearch'
 import NotificationsDropdown from '@/components/common/NotificationsDropdown'
 import UserMenu from '@/components/common/UserMenu'
-import Logo from '@/components/common/Logo'
-
-const MAIN_WEB_URL = import.meta.env.VITE_MAIN_WEB_URL || 'https://www.qawaylab.com'
 
 export default function LessonLayout() {
   return (
@@ -119,11 +116,6 @@ function LessonLayoutContent() {
         {showSidebar && isSidebarOpen && (
           <aside className="fixed left-0 top-0 z-50 flex h-screen w-80 flex-col justify-between overflow-y-auto border-r border-surface-200 bg-[#f8f9f7] p-4 hide-scrollbar">
             <div>
-              {/* Logo único de la app — alineado con la misma ubicación que el navbar original (px-6 → sm:px-10 → lg:px-14) */}
-              <div className="flex items-center mb-6 mt-1 ml-2 sm:ml-6 lg:ml-10">
-                <Logo href={MAIN_WEB_URL} target="_blank" rel="noopener noreferrer" />
-              </div>
-
               <Link
                 to={cs?.coursePath || (cs?.slug ? `/academy/app/cursos/${cs!.slug}` : '/academy/app/cursos')}
                 className="flex h-9 mb-4 items-center gap-1.5 border border-surface-200 bg-surface-50 px-3 text-xs font-semibold text-surface-700 transition hover:bg-surface-100 hover:text-surface-900"
@@ -257,12 +249,7 @@ function LessonLayoutContent() {
         </main>
       </div>
 
-      {/* Footer — solo logo */}
-      <footer className="border-t border-surface-200 bg-white py-6">
-        <div className="mx-auto flex max-w-[98rem] items-center px-6 sm:px-10 lg:px-14">
-          <Logo href={MAIN_WEB_URL} target="_blank" rel="noopener noreferrer" size="sm" />
-        </div>
-      </footer>
+
     </div>
   )
 }

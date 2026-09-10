@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { Suspense, lazy, useEffect, Component, type ReactNode, type ErrorInfo } from 'react'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import RouteFallback from '@/components/common/RouteFallback'
@@ -59,8 +59,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     return this.props.children
   }
 }
-import PublicLayout from '@/layouts/PublicLayout'
-import AuthLayout from '@/layouts/AuthLayout'
+import SimpleLayout from '@/layouts/SimpleLayout'
 import LessonLayout from '@/layouts/LessonLayout'
 
 // Layouts cargados de forma eager: así el sidebar/navbar NUNCA se desmontan al
@@ -71,7 +70,6 @@ import TeacherLayout from '@/layouts/TeacherLayout'
 import AdminLayout from '@/layouts/AdminLayout'
 
 // Lazy-loaded public pages
-const Home = lazy(() => import('@/pages/public/Home'))
 const Courses = lazy(() => import('@/pages/public/Courses'))
 const CourseDetail = lazy(() => import('@/pages/public/CourseDetail'))
 const Login = lazy(() => import('@/pages/public/Login'))
@@ -142,14 +140,12 @@ function StudentLessonGate() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <AuthProvider>
-        <ErrorBoundary>
-          <Routes>
+    <ScrollToTop />
+    <AuthProvider>
+      <ErrorBoundary>
+        <Routes>
             {/* Public routes */}
-            <Route element={<PublicLayout />}>
-              <Route index element={<Home />} />
+            <Route element={<SimpleLayout />}>
               <Route path="cursos" element={<Courses />} />
               <Route path="cursos/:slug" element={<CourseDetail />} />
             </Route>
@@ -161,7 +157,7 @@ export default function App() {
             </Route>
 
             {/* Auth routes */}
-            <Route element={<AuthLayout />}>
+            <Route element={<SimpleLayout />}>
               <Route path="acceder" element={<Login />} />
               <Route path="registro" element={<Register />} />
               <Route path="recuperar" element={<Recover />} />
@@ -207,9 +203,8 @@ export default function App() {
 
             {/* 404 - Catch all */}
             <Route path="*" element={<Suspense fallback={<RouteFallback />}><NotFound /></Suspense>} />
-          </Routes>
-        </ErrorBoundary>
-      </AuthProvider>
-    </BrowserRouter>
+        </Routes>
+      </ErrorBoundary>
+    </AuthProvider>
   )
 }

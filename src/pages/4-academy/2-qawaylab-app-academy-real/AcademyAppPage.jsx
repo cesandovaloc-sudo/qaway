@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy, Component } from 'react'
 import { AuthProvider, useAuth } from './src/contexts/AuthContext'
 import RouteFallback from './src/components/common/RouteFallback'
-import AuthLayout from './src/layouts/AuthLayout'
+import SimpleLayout from './src/layouts/SimpleLayout'
 import LessonLayout from './src/layouts/LessonLayout'
 import StudentLayout from './src/layouts/StudentLayout'
 import TeacherLayout from './src/layouts/TeacherLayout'
@@ -136,7 +136,7 @@ export default function AcademyAppPage() {
           </Route>
 
           {/* Auth routes */}
-          <Route element={<AuthLayout />}>
+          <Route element={<SimpleLayout />}>
             <Route path="acceder" element={<Suspense fallback={<RouteFallback />}><Login /></Suspense>} />
             <Route path="registro" element={<Suspense fallback={<RouteFallback />}><Register /></Suspense>} />
             <Route path="recuperar" element={<Suspense fallback={<RouteFallback />}><Recover /></Suspense>} />

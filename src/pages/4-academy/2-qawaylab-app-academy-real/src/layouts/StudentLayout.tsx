@@ -7,7 +7,6 @@ import { CourseSidebarProvider, useCourseSidebar } from '@/contexts/CourseSideba
 import UserMenu from '@/components/common/UserMenu'
 import GlobalSearch from '@/components/common/GlobalSearch'
 import NotificationsDropdown from '@/components/common/NotificationsDropdown'
-import Logo from '@/components/common/Logo'
 import RouteFallback from '@/components/common/RouteFallback'
 
 const sidebarLinks = [
@@ -136,11 +135,8 @@ function StudentSidebar({ location, isCollapsed, onToggle }: { location: Locatio
   }
 
   return (
-    <aside className={`fixed left-0 top-0 z-40 flex h-full flex-col border-r border-surface-200 bg-white transition-all duration-500 ease-in-out overflow-x-hidden ${isCollapsed ? 'w-20' : 'w-80'}`}>
-      <div className={`flex h-16 items-center border-b border-surface-200 min-w-[320px] ${isCollapsed ? 'justify-center px-6' : 'justify-between px-6'}`}>
-        {/* Logo único de la app — se mantiene igual en modo colapsado */}
-        <Logo size="sm" className={isCollapsed ? 'justify-center' : ''} />
-        {!isCollapsed && (
+    <aside className={`fixed left-0 top-0 z-40 flex h-full flex-col border-r border-surface-200 bg-white transition-all duration-500 ease-in-out overflow-x-hidden ${isCollapsed ? 'w-20' : 'w-80'}`}>        <div className={`flex h-16 items-center border-b border-surface-200 min-w-[320px] ${isCollapsed ? 'justify-center px-6' : 'justify-between px-6'}`}>
+          {!isCollapsed && (
           <button
             type="button"
             onClick={onToggle}
