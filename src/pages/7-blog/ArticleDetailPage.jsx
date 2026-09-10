@@ -76,6 +76,18 @@ export default function ArticleDetailPage() {
     return !visibleArticles.some((art) => art.id === id)
   })
 
+  // Lista de todos los artículos para recomendaciones (Caché SWR + Supabase)
+  const [allArticles, setAllArticles] = useState(() => {
+    try {
+      const cached = localStorage.getItem('qaway_blog_articles_cache')
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      }
+    } catch (e) {}
+    return visibleArticles
+  })
+
   // Estados para comentarios de Supabase
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
@@ -210,6 +222,65 @@ export default function ArticleDetailPage() {
 
     loadArticle()
   }, [id])
+
+  // Scroll al tope de la página al cambiar de artículo
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }, [id])
+
+  // Cargar lista completa de artículos publicados para recomendaciones
+  useEffect(() => {
+    async function fetchAllArticles() {
+      try {
+        let { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('status', 'publicado')
+          .order('published_at', { ascending: false })
+
+        if (error || !data || data.length === 0) {
+          const res = await supabase
+            .from('blog_articles')
+            .select('*')
+            .eq('public', true)
+            .order('published_at', { ascending: false })
+          if (!res.error && res.data && res.data.length > 0) {
+            data = res.data
+            error = null
+          }
+        }
+
+        if (!error && data && data.length > 0) {
+          const mapped = data.map((item) => ({
+            id: item.slug || item.id,
+            slug: item.slug || item.id,
+            category: item.category ? item.category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-') : 'marketing',
+            categoryLabel: item.category || item.category_label || 'General',
+            formatLabel: item.format_label || 'Guía',
+            title: item.title,
+            excerpt: item.excerpt || '',
+            content: item.content_html || item.content || item.body || '',
+            date: item.published_at ? new Date(item.published_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : item.date || 'Reciente',
+            readTime: item.reading_time ? `${item.reading_time} min` : item.read_time || '4 min',
+            publishedAt: item.published_at || item.created_at,
+            public: item.status === 'publicado' || item.public !== false,
+            featured: item.featured ? { order: item.featured_order || 1, label: item.featured_label || 'Destacado' } : null,
+            image: item.cover_url || item.image || item.cover_image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+            audioUrl: item.audio_url || null,
+          }))
+          setAllArticles(mapped)
+          try {
+            localStorage.setItem('qaway_blog_articles_cache', JSON.stringify(mapped))
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.warn('[Article] Error cargando artículos recomendados:', err)
+      }
+    }
+    fetchAllArticles()
+  }, [])
 
   // Actualizar Meta Tags Open Graph (Facebook, LinkedIn, X) dinámicamente según el artículo
   useEffect(() => {
@@ -603,10 +674,15 @@ export default function ArticleDetailPage() {
     )
   }
 
-  // Obtener artículos recomendados (excluyendo el actual, máximo 3)
-  const recommendedArticles = visibleArticles
-    .filter(art => art.id !== article.id)
-    .slice(0, 3)
+  // Obtener artículos recomendados dinámicos (excluyendo el actual, máximo 3)
+  const currentId = article?.id || id
+  const currentCategory = article?.category
+  const otherArticles = allArticles.filter(
+    (art) => art.id !== currentId && art.slug !== currentId && art.id !== id && art.slug !== id
+  )
+  const sameCategoryArticles = otherArticles.filter((art) => art.category === currentCategory)
+  const otherCategoryArticles = otherArticles.filter((art) => art.category !== currentCategory)
+  const recommendedArticles = [...sameCategoryArticles, ...otherCategoryArticles].slice(0, 3)
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900 pt-[100px] pb-24 relative">
