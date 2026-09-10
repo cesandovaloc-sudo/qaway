@@ -70,7 +70,7 @@ const TypeformFluidExperience = lazy(() => import('@/pages/10-briefs/1- Formular
 const TrelloInteractiveBoardForm = lazy(() => import('@/pages/10-briefs/1- Formularios/4-TrelloInteractiveBoardForm.jsx'))
 const NotionInteractiveWorkspaceForm = lazy(() => import('@/pages/10-briefs/1- Formularios/5-NotionInteractiveWorkspaceForm.jsx'))
 const AirbnbWizardCardDeck = lazy(() => import('@/pages/10-briefs/1- Formularios/6-AirbnbWizardCardDeck.jsx'))
-const DiagnosticoGamificadoMood = lazy(() => import('@/pages/10-briefs/1- Formularios/7-DiagnosticoGamificadoMood.jsx'))
+const TestPreparacionDigital = lazy(() => import('@/pages/10-briefs/1- Formularios/7-TestPreparacionDigital.jsx'))
 
 // Proyectos (importación estática directa para máxima estabilidad y cero riesgo de carga diferida)
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
@@ -352,7 +352,8 @@ export default function AppRouter() {
           <Route path="formularios/trello-board" element={<TrelloInteractiveBoardForm />} />
           <Route path="formularios/notion-workspace" element={<NotionInteractiveWorkspaceForm />} />
           <Route path="formularios/airbnb-card-deck" element={<AirbnbWizardCardDeck />} />
-          <Route path="formularios/diagnostico-gamificado" element={<DiagnosticoGamificadoMood />} />
+          <Route path="formularios/test-preparacion-digital" element={<TestPreparacionDigital />} />
+          <Route path="formularios/diagnostico-gamificado" element={<TestPreparacionDigital />} />
           <Route path="diagnostico" element={<DiagnosticoSplitStudio />} />
           <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />

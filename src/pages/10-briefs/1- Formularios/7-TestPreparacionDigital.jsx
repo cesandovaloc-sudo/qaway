@@ -206,7 +206,7 @@ function StageIconDisplay({ stageId }) {
   )
 }
 
-export default function DiagnosticoGamificadoMood() {
+export default function TestPreparacionDigital() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [isCompleted, setIsCompleted] = useState(false)
