@@ -176,35 +176,42 @@
   .qw-studio-dock-container {
     left: 50%;
     right: auto;
-    bottom: 18px;
+    bottom: 16px;
     transform: translateX(-50%);
     width: calc(100vw - 24px);
-    max-width: 460px;
+    max-width: 390px;
+    box-sizing: border-box;
   }
   .qw-studio-dock.glass-white {
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 7px 10px 7px 12px;
+    justify-content: stretch;
+    gap: 8px;
+    padding: 6px 8px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72) !important;
+    background: rgba(255, 255, 255, 0.76) !important;
     backdrop-filter: blur(24px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
     border: 1px solid rgba(255, 255, 255, 0.70) !important;
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
+    box-sizing: border-box;
   }
   .qw-studio-dock .dock-back-pill {
-    padding: 10px 18px;
-    font-size: 15px;
+    width: 100%;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 13.5px;
     font-weight: 600;
-    gap: 7px;
+    gap: 6px;
     background: linear-gradient(135deg, #18181b 0%, #27272a 50%, #09090b 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 999px;
     color: #ffffff !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     transition: all 0.2s ease;
+    white-space: nowrap;
+    box-sizing: border-box;
   }
   .qw-studio-dock .dock-back-pill:hover,
   .qw-studio-dock .dock-back-pill:active {
@@ -218,17 +225,21 @@
     display: none;
   }
   .qw-studio-dock .dock-actions {
-    width: auto;
+    width: 100%;
     margin: 0;
+    display: flex;
   }
   .qw-studio-dock .dock-cta-btn {
-    width: auto;
-    padding: 10px 22px;
-    font-size: 15.5px;
+    width: 100%;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 14px;
     font-weight: 600;
-    gap: 8px;
+    gap: 6px;
     border-radius: 999px;
     box-shadow: 0 6px 18px rgba(254, 102, 18, 0.38);
+    white-space: nowrap;
+    box-sizing: border-box;
   }
 }
 

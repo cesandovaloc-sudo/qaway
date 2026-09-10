@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowRight, BedDouble, Building2, ChevronLeft, ChevronRight, Filter,
-  Home, MapPin, MessageCircle, Ruler, Search, ShieldCheck, SlidersHorizontal, Sparkles, X
+  ArrowLeft, ArrowRight, BedDouble, Building2, ChevronLeft, ChevronRight, Facebook, Filter,
+  Home, Instagram, Linkedin, Mail, MapPin, Menu, MessageCircle, Phone, Ruler, Search, ShieldCheck, SlidersHorizontal, Sparkles, X
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
-import Navbar from '@/components/layout/Navbar';
 import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
@@ -85,7 +84,15 @@ function PropertyCardCarousel({ images, alt, type }) {
   );
 }
 
+const normalizeStr = (str) =>
+  (str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
 export default function ValletCatalogPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('TODOS'); // 'TODOS' | 'ALQUILER' | 'VENTA'
   const [selectedLocation, setSelectedLocation] = useState('TODOS'); // 'TODOS' | 'Miraflores' | 'Jesús María' | 'Magdalena'
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,19 +103,36 @@ export default function ValletCatalogPage() {
 
   const handleLocationChange = (loc) => {
     setSelectedLocation(loc);
+    if (loc !== 'TODOS' && selectedType !== 'TODOS') {
+      const normLoc = normalizeStr(loc);
+      const matchesCurrentType = valletProperties.some(
+        (p) => p.type === selectedType && (normalizeStr(p.location).includes(normLoc) || normalizeStr(p.title).includes(normLoc))
+      );
+      if (!matchesCurrentType) {
+        setSelectedType('TODOS');
+      }
+    }
   };
 
   const filteredProperties = useMemo(() => {
     return valletProperties.filter((item) => {
+      const normLoc = normalizeStr(selectedLocation);
+      const normQuery = normalizeStr(searchQuery);
+      const itemTitleNorm = normalizeStr(item.title);
+      const itemLocNorm = normalizeStr(item.location);
+      const itemTaglineNorm = normalizeStr(item.tagline);
+
       const matchType = selectedType === 'TODOS' || item.type === selectedType;
       const matchLoc =
         selectedLocation === 'TODOS' ||
-        item.location.toLowerCase().includes(selectedLocation.toLowerCase()) ||
-        item.title.toLowerCase().includes(selectedLocation.toLowerCase());
+        itemLocNorm.includes(normLoc) ||
+        itemTitleNorm.includes(normLoc);
       const matchSearch =
         !searchQuery ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.location.toLowerCase().includes(searchQuery.toLowerCase());
+        itemTitleNorm.includes(normQuery) ||
+        itemLocNorm.includes(normQuery) ||
+        itemTaglineNorm.includes(normQuery);
+
       return matchType && matchLoc && matchSearch;
     });
   }, [selectedType, selectedLocation, searchQuery]);
@@ -136,29 +160,30 @@ export default function ValletCatalogPage() {
           }))
         }}
       />
-      {/* <Navbar variant="project-dock" /> */}
 
-      {/* Header */}
+      {/* Header Unificado Maestro Vallet */}
       <header className="site-header">
         <Link className="brand" to="/proyectos/vallet" aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
         </Link>
-        <div className="header-nav-back">
-          {/* Modo Grabación: se oculta el retroceso sin desmontar el wrapper (no altera el layout del header) */}
-          {!hideBackLinks && (
-            <Link to="/proyectos/vallet" className="back-link">
-              <ArrowLeft size={16} /> <span>Volver a la portada</span>
-            </Link>
-          )}
-        </div>
-        <a
-          className="header-cta"
-          href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20estoy%20viendo%20el%20catálogo%20de%20Vallet%20y%20quiero%20cotizar%20un%20sistema%20inmobiliario%20similar."
-          target="_blank"
-          rel="noreferrer"
-        >
-          <MessageCircle size={17} /> Asesoría personalizada
-        </a>
+        <nav className={menuOpen ? 'nav open' : 'nav'} aria-label="Navegación principal">
+          <Link to="/proyectos/vallet" onClick={() => setMenuOpen(false)}>Inicio</Link>
+          <Link to="/proyectos/vallet#servicios" onClick={() => setMenuOpen(false)}>Servicios</Link>
+          <Link to="/proyectos/vallet/propiedades" onClick={() => setMenuOpen(false)}>Propiedades</Link>
+          <Link to="/proyectos/vallet#nosotros" onClick={() => setMenuOpen(false)}>Nosotros</Link>
+          <Link to="/proyectos/vallet#contacto" onClick={() => setMenuOpen(false)}>Contacto</Link>
+          <a
+            className="header-cta"
+            href="https://wa.me/51930756781?text=Hola%20Qaway%20Lab,%20estoy%20viendo%20el%20catálogo%20de%20Vallet%20y%20quiero%20cotizar%20un%20sistema%20inmobiliario%20similar."
+            target="_blank"
+            rel="noreferrer"
+          >
+            Quiero asesoría <ArrowRight size={17} />
+          </a>
+        </nav>
+        <button className="menu-button" aria-label="Abrir menú" onClick={() => setMenuOpen((v) => !v)}>
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </header>
 
       <main className="catalog-main">
@@ -322,27 +347,43 @@ export default function ValletCatalogPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="site-footer">
+      {/* Footer Unificado Maestro Vallet */}
+      <footer className="footer">
         <div className="container footer-grid">
-          <div className="footer-brand">
-            <img src={logo} alt="Vallet" />
-            <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
+          <div>
+            <img src={logoWhite} alt="Vallet" className="footer-logo" />
+            <p>Te acompañamos en la compra, venta o alquiler de propiedades con total transparencia, seguridad y atención directa.</p>
+            <div className="socials">
+              <a href="#" aria-label="Facebook"><Facebook size={18} /></a>
+              <a href="#" aria-label="Instagram"><Instagram size={18} /></a>
+              <a href="#" aria-label="Linkedin"><Linkedin size={18} /></a>
+              <a href="https://wa.me/51930756781" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={18} /></a>
+            </div>
           </div>
-          <div className="footer-links">
-            <h4>Navegación</h4>
-            <ul>
-              <li><Link to="/proyectos/vallet">Inicio</Link></li>
-              <li><Link to="/proyectos/vallet/propiedades">Catálogo Completo</Link></li>
-              <li><Link to="/proyectos/vallet#contacto">Contacto</Link></li>
-            </ul>
+          <div>
+            <h3>Navegación</h3>
+            <Link className="footer-link" to="/proyectos/vallet">Inicio</Link>
+            <Link className="footer-link" to="/proyectos/vallet#servicios">Servicios</Link>
+            <Link className="footer-link" to="/proyectos/vallet/propiedades">Propiedades</Link>
+            <Link className="footer-link" to="/proyectos/vallet#nosotros">Nosotros</Link>
+            <Link className="footer-link" to="/proyectos/vallet#contacto">Contacto</Link>
           </div>
-          <div className="footer-links">
-            <h4>Contacto</h4>
-            <p>Av. Javier Prado Este 951411, San Isidro</p>
-            <p>+51 974 974 9741</p>
-            <p>hola@valletinmobiliaria.com</p>
+          <div>
+            <h3>Servicios</h3>
+            {['Compra de propiedades', 'Alquiler de propiedades', 'Asesoría personalizada', 'Acompañamiento integral', 'Gestión legal y documentación'].map((item) => (
+              <span className="footer-link" key={item}>{item}</span>
+            ))}
           </div>
+          <div>
+            <h3>Contacto</h3>
+            <p className="contact-line"><Phone size={15} /> +51 974 974 9741</p>
+            <p className="contact-line"><Mail size={15} /> hola@valletinmobiliaria.com</p>
+            <p className="contact-line"><Building2 size={15} /> Av. Javier Prado Este 951411<br />San Isidro, Lima</p>
+          </div>
+        </div>
+        <div className="container footer-bottom">
+          <span>© 2026 Vallet Inmobiliaria. Todos los derechos reservados.</span>
+          <span>Política de privacidad &nbsp; | &nbsp; Términos y condiciones</span>
         </div>
       </footer>
       <StudioFloatingDock projectName="Vallet Inmobiliaria" />

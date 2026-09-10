@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, ArrowRight, BedDouble, Building2, Calendar as CalendarIcon, CheckCircle2, ChevronLeft, ChevronRight,
-  Clock, Copy, ExternalLink, Heart, KeyRound, MapPin, MessageCircle, Phone, Ruler,
+  Clock, Copy, ExternalLink, Facebook, Heart, Instagram, KeyRound, Linkedin, Mail, MapPin, Menu, MessageCircle, Phone, Ruler,
   Share2, ShieldCheck, Sparkles, Star, Users, Wifi, Car, Tv, Sun, Wind, Dog, Check, X, Eye
 } from 'lucide-react';
 import SEO from '@/components/seo/SEO';
-import Navbar from '@/components/layout/Navbar';
 import StudioFloatingDock from '@/components/studio/StudioFloatingDock';
 import { valletProperties } from './valletPropertiesData';
 import { useValletReveal } from './useValletReveal';
@@ -24,6 +23,7 @@ export default function ValletPropertyDetailPage() {
   // Find property by slug, or default to first property (Miraflores)
   const property = valletProperties.find((p) => p.slug === slug) || valletProperties[0];
 
+  const [menuOpen, setMenuOpen] = useState(false);
   const [selectedVisitType, setSelectedVisitType] = useState('presencial'); // 'presencial' | 'virtual'
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('tarde'); // 'manana' | 'tarde'
@@ -115,24 +115,25 @@ export default function ValletPropertyDetailPage() {
           }
         }}
       />
-      {/* <Navbar variant="project-dock" /> */}
 
-      {/* Header específico de la ficha */}
+      {/* Header Unificado Maestro Vallet */}
       <header className="site-header">
         <Link className="brand" to="/proyectos/vallet" aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
         </Link>
-        <div className="header-nav-back">
-          {/* Modo Grabación: se oculta el retroceso sin desmontar el wrapper (no altera el layout del header) */}
-          {!hideBackLinks && (
-            <Link to="/proyectos/vallet" className="back-link">
-              <ArrowLeft size={16} /> <span>Volver a propiedades</span>
-            </Link>
-          )}
-        </div>
-        <a className="header-cta" href={`https://wa.me/${property.agent.whatsapp}`} target="_blank" rel="noreferrer">
-          <MessageCircle size={17} /> Contactar asesor
-        </a>
+        <nav className={menuOpen ? 'nav open' : 'nav'} aria-label="Navegación principal">
+          <Link to="/proyectos/vallet" onClick={() => setMenuOpen(false)}>Inicio</Link>
+          <Link to="/proyectos/vallet#servicios" onClick={() => setMenuOpen(false)}>Servicios</Link>
+          <Link to="/proyectos/vallet/propiedades" onClick={() => setMenuOpen(false)}>Propiedades</Link>
+          <Link to="/proyectos/vallet#nosotros" onClick={() => setMenuOpen(false)}>Nosotros</Link>
+          <Link to="/proyectos/vallet#contacto" onClick={() => setMenuOpen(false)}>Contacto</Link>
+          <a className="header-cta" href={`https://wa.me/${property.agent.whatsapp}`} target="_blank" rel="noreferrer">
+            <MessageCircle size={17} /> Contactar asesor
+          </a>
+        </nav>
+        <button className="menu-button" aria-label="Abrir menú" onClick={() => setMenuOpen((v) => !v)}>
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </header>
 
       <main className="property-detail-main">
@@ -561,6 +562,46 @@ export default function ValletPropertyDetailPage() {
           <span>Enlace copiado al portapapeles</span>
         </div>
       )}
+
+      {/* Footer Unificado Maestro Vallet */}
+      <footer className="footer">
+        <div className="container footer-grid">
+          <div>
+            <img src={logoWhite} alt="Vallet" className="footer-logo" />
+            <p>Te acompañamos en la compra, venta o alquiler de propiedades con total transparencia, seguridad y atención directa.</p>
+            <div className="socials">
+              <a href="#" aria-label="Facebook"><Facebook size={18} /></a>
+              <a href="#" aria-label="Instagram"><Instagram size={18} /></a>
+              <a href="#" aria-label="Linkedin"><Linkedin size={18} /></a>
+              <a href="https://wa.me/51930756781" target="_blank" rel="noreferrer" aria-label="WhatsApp"><MessageCircle size={18} /></a>
+            </div>
+          </div>
+          <div>
+            <h3>Navegación</h3>
+            <Link className="footer-link" to="/proyectos/vallet">Inicio</Link>
+            <Link className="footer-link" to="/proyectos/vallet#servicios">Servicios</Link>
+            <Link className="footer-link" to="/proyectos/vallet/propiedades">Propiedades</Link>
+            <Link className="footer-link" to="/proyectos/vallet#nosotros">Nosotros</Link>
+            <Link className="footer-link" to="/proyectos/vallet#contacto">Contacto</Link>
+          </div>
+          <div>
+            <h3>Servicios</h3>
+            {['Compra de propiedades', 'Alquiler de propiedades', 'Asesoría personalizada', 'Acompañamiento integral', 'Gestión legal y documentación'].map((item) => (
+              <span className="footer-link" key={item}>{item}</span>
+            ))}
+          </div>
+          <div>
+            <h3>Contacto</h3>
+            <p className="contact-line"><Phone size={15} /> +51 974 974 9741</p>
+            <p className="contact-line"><Mail size={15} /> hola@valletinmobiliaria.com</p>
+            <p className="contact-line"><Building2 size={15} /> Av. Javier Prado Este 951411<br />San Isidro, Lima</p>
+          </div>
+        </div>
+        <div className="container footer-bottom">
+          <span>© 2026 Vallet Inmobiliaria. Todos los derechos reservados.</span>
+          <span>Política de privacidad &nbsp; | &nbsp; Términos y condiciones</span>
+        </div>
+      </footer>
 
       {/* Studio Floating Dock Qaway Lab */}
       <StudioFloatingDock projectName="Vallet Inmobiliaria" />
