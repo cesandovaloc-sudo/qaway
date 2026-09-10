@@ -179,15 +179,15 @@ function StageIconDisplay({ stageId }) {
   const getIcon = () => {
     switch (stageId) {
       case 'trophy':
-        return <Trophy className="w-12 h-12 text-yellow-300 drop-shadow-md" />
+        return <Trophy className="w-10 h-10 text-amber-500" />
       case 'flame':
-        return <Flame className="w-12 h-12 text-orange-200 drop-shadow-md" />
+        return <Flame className="w-10 h-10 text-orange-500" />
       case 'zap':
-        return <Zap className="w-12 h-12 text-amber-200 drop-shadow-md" />
+        return <Zap className="w-10 h-10 text-sky-500" />
       case 'trend':
-        return <TrendingUp className="w-12 h-12 text-yellow-100 drop-shadow-md" />
+        return <TrendingUp className="w-10 h-10 text-emerald-500" />
       default:
-        return <Target className="w-12 h-12 text-white/90 drop-shadow-md" />
+        return <Target className="w-10 h-10 text-slate-400" />
     }
   }
 
@@ -197,9 +197,9 @@ function StageIconDisplay({ stageId }) {
       initial={{ scale: 0.85, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center justify-center text-center p-6"
+      className="flex flex-col items-center justify-center p-4"
     >
-      <div className="w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-md border border-white/25 shadow-xl flex items-center justify-center mb-3 group hover:scale-105 transition-transform duration-300">
+      <div className="w-20 h-20 rounded-3xl bg-white border border-slate-200 shadow-md flex items-center justify-center">
         {getIcon()}
       </div>
     </motion.div>
@@ -314,134 +314,103 @@ export default function DiagnosticoGamificadoMood() {
   }
 
   return (
-    <div className="min-h-screen bg-[color:var(--b0)] text-slate-900 font-sans selection:bg-[#FF4B0B] selection:text-white flex flex-col justify-between">
-      {/* Header */}
-      <header className="w-full border-b border-slate-500/30 bg-[#0d0d0d]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-black tracking-tight text-slate-950">QAWAY</span>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#FF4B0B] bg-[color:var(--b2)] px-2.5 py-0.5 rounded-md border border-[#FF4B0B]/30">
-              MOOD LAB
-            </span>
-          </Link>
-          <span className="hidden sm:inline-block text-slate-300">|</span>
-          <span className="hidden sm:inline-block text-xs font-semibold text-slate-500">
-            Formulario 07: Diagnóstico 3D en Panel Directo
-          </span>
-        </div>
+    <div className="min-h-screen bg-[#f4f5f8] text-slate-900 font-sans selection:bg-orange-500 selection:text-white flex flex-col">
+      {/* Main Container - viewport fit */}
+      <main className="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center">
+        <div className="w-full bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 shadow-xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-100px)] lg:min-h-[520px] lg:max-h-[660px]">
 
-        <div className="flex items-center gap-3">
-          <Link
-            to="/formularios"
-            className="text-xs font-bold text-slate-600 hover:text-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
-          >
-            ← Ver los 7 Modelos
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Container - VIEWPORT FIT: no scroll needed */}
-      <main className="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-4 lg:p-6 flex items-center justify-center">
-        <div className="w-full bg-[#0d0d0d] rounded-[28px] sm:rounded-[36px] border border-slate-500/30 overflow-hidden grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-140px)] lg:max-h-[680px]">
-          
-          {/* MOBILE COMPACT PROGRESS BAR (visible only below lg) */}
-          <div className="flex lg:hidden items-center justify-between px-4 py-3">
+          {/* MOBILE COMPACT PROGRESS BAR */}
+          <div className="flex lg:hidden items-center justify-between bg-gradient-to-r from-slate-100 to-slate-50 border-b border-slate-200/60 px-4 py-2.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold">{stageData.badgeText}</span>
+              <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+              <span className="text-xs font-bold text-slate-700">{stageData.badgeText}</span>
             </div>
-            <div className="flex items-center gap-3 text-xs font-bold">
-              <span className="font-mono bg-[color:var(--b3)] px-2 py-0.5 rounded-md">{answeredCount}/10</span>
-              <span>{answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}</span>
+            <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
+              <span className="font-mono bg-white px-2 py-0.5 rounded-md border border-slate-200">{answeredCount}/10</span>
+              <span>{answeredCount > 0 ? `${currentScorePercentage}%` : '—'}</span>
             </div>
           </div>
 
-          {/* =============================================================
-              LEFT PANEL: FULL DIRECT WARM CANVAS (NO NESTED GRAY CARDS)
-              (Solid continuous warm gradient filling 100% height & width)
-             ============================================================= */}
-          <aside className="hidden lg:flex lg:col-span-5 h-full w-full bg-[#0d0d0d] p-6 xl:p-8 flex-col justify-between relative overflow-hidden">
-            {/* Subtle radial glow as small accent only */}
-            <div className="absolute top-0 left-0 w-24 h-24 rounded-full blur-2xl bg-[#FF4B0B]/5 opacity-20 pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-24 h-24 rounded-full bg-[#0d0d0d]/3 backdrop-blur-md pointer-events-none" />
+          {/* ============= LEFT PANEL: SOFT GRAY AESTHETIC ============= */}
+          <aside className="hidden lg:flex lg:col-span-5 h-full w-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 p-6 xl:p-8 flex-col justify-between relative overflow-hidden">
+            {/* Subtle decorative blurs */}
+            <div className="absolute top-0 right-0 w-48 h-48 bg-orange-100/40 rounded-full blur-3xl pointer-events-none -mr-12 -mt-12" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-slate-200/60 rounded-full blur-3xl pointer-events-none -ml-10 -mb-10" />
 
-            {/* Top Tag inside the Panel */}
+            {/* Top badge */}
             <div className="relative z-10 flex items-center justify-between">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-[#0d0d0d]/80 text-slate-300 backdrop-blur-md border border-slate-500/30 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 opacity-60" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-orange-400" />
                 <span>{stageData.badgeText}</span>
               </div>
-              <span className="text-xs font-mono font-bold text-slate-300 bg-black/15 px-2.5 py-1 rounded-md">
+              <span className="text-xs font-mono font-bold text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200">
                 {answeredCount}/10
               </span>
             </div>
 
-            {/* CENTER: STAGE ICON DISPLAY */}
+            {/* Center icon */}
             <div className="relative z-10 my-auto flex flex-col items-center justify-center">
               <StageIconDisplay stageId={stageData.stageId} />
             </div>
 
-            {/* Pedagogical Tip moved to left panel */}
+            {/* Tip box */}
             {!isCompleted && currentQuestion?.tip && (
-              <div className="relative z-10 my-3 p-4 rounded-2xl bg-[#0d0d0d]/60 backdrop-blur-md border border-slate-500/30 text-slate-300 space-y-1">
-                <div className="flex items-center gap-2 text-xs font-extrabold text-[#FF4B0B]">
-                  <Lightbulb className="w-4 h-4 shrink-0 opacity-80" />
+              <div className="relative z-10 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-slate-200/70 space-y-1 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-extrabold text-orange-600">
+                  <Lightbulb className="w-4 h-4 shrink-0" />
                   <span>Consejo Estratégico</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed font-normal">
+                <p className="text-xs text-slate-600 leading-relaxed font-normal">
                   {currentQuestion.tip}
                 </p>
               </div>
             )}
 
-            {/* Bottom Panel Metric & Trust Note */}
-            <div className="relative z-10 pt-4 border-t border-slate-500/30 flex items-center justify-between text-xs font-semibold text-slate-400">
+            {/* Bottom metric */}
+            <div className="relative z-10 pt-3 mt-3 border-t border-slate-200/70 flex items-center justify-between text-xs font-semibold text-slate-500">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-slate-100 font-mono">
+                <span className="text-lg font-black text-slate-800 font-mono">
                   {answeredCount > 0 ? `${currentScorePercentage}%` : '0%'}
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                   Madurez Digital
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 opacity-60" />
-                <span className="text-slate-500 text-xs font-medium">Qaway Lab Engine</span>
+              <div className="flex items-center gap-1.5 text-slate-400">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-medium">Qaway Lab Engine</span>
               </div>
             </div>
           </aside>
 
-          {/* =============================================================
-              RIGHT PANEL: INTERACTIVE FORM & QUESTION FLOW (STABLE HEIGHT)
-             ============================================================= */}
-          <section className="col-span-1 lg:col-span-7 p-4 sm:p-6 lg:p-8 xl:p-10 flex flex-col justify-between bg-[color:var(--b0)] h-full overflow-y-auto">
+          {/* ============= RIGHT PANEL: CLEAN MINIMALIST FORM ============= */}
+          <section className="col-span-1 lg:col-span-7 p-4 sm:p-6 lg:p-8 flex flex-col justify-between bg-white h-full overflow-y-auto">
             {!isCompleted ? (
               <>
-                {/* Stepper Header */}
+                {/* Stepper */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 bg-[color:var(--b2)] px-2.5 py-1 rounded-md border border-slate-500/30">
-                        {currentQuestion.pilar}
-                      </span>
-                    </div>
-                    <span className="text-xs font-extrabold text-slate-800">
+                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-orange-600 bg-orange-50 px-2.5 py-1 rounded-md border border-orange-200/70">
+                      {currentQuestion.pilar}
+                    </span>
+                    <span className="text-xs font-extrabold text-slate-500">
                       Paso {currentStep + 1} de {QUESTIONS.length}
                     </span>
                   </div>
 
-                  {/* 10 Step Dots */}
-                  <div className="flex items-center gap-1.5 sm:gap-2 w-full mb-4">
+                  {/* Progress dots */}
+                  <div className="flex items-center gap-1.5 w-full mb-4">
                     {QUESTIONS.map((q, idx) => {
                       const isPassed = idx < currentStep
                       const isCurrent = idx === currentStep
                       return (
                         <div
                           key={q.id}
-                          className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                          className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
                             isCurrent
-                              ? 'bg-[#FF4B0B] ring-2 ring-[#FF4B0B]/30'
+                              ? 'bg-orange-500'
                               : isPassed
-                              ? 'bg-slate-900'
+                              ? 'bg-slate-800'
                               : 'bg-slate-200'
                           }`}
                         />
@@ -449,26 +418,26 @@ export default function DiagnosticoGamificadoMood() {
                     })}
                   </div>
 
-                  {/* Question with Motion */}
+                  {/* Question */}
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={currentQuestion.id}
-                      initial={{ opacity: 0, x: 10 }}
+                      initial={{ opacity: 0, x: 8 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                       className="space-y-3"
                     >
                       <div>
-                        <h3 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight leading-snug">
+                        <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-snug">
                           {currentQuestion.question}
                         </h3>
-                        <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                        <p className="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed">
                           {currentQuestion.subtitle}
                         </p>
                       </div>
 
-                      {/* Interactive Option Cards */}
+                      {/* Options */}
                       <div className="space-y-2">
                         {currentQuestion.options.map((opt, optIndex) => {
                           const isSelected = selectedOptionIndex === optIndex
@@ -479,36 +448,35 @@ export default function DiagnosticoGamificadoMood() {
                               onClick={() => handleSelectOption(optIndex)}
                               className={`w-full text-left p-3 sm:p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer ${
                                 isSelected
-                                  ? 'bg-[color:var(--b1)] border-slate-500/30 shadow-sm ring-1 ring-[#FF4B0B]/20'
-                                  : 'bg-[color:var(--b1)] border-slate-300 hover:border-slate-400 hover:bg-[color:var(--b2)]/50'
+                                  ? 'bg-orange-50 border-orange-400 ring-1 ring-orange-300'
+                                  : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
                               }`}
                             >
                               <div className="flex items-center gap-3">
                                 <div
-className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                                  className={`w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                     isSelected
-                                      ? 'border-[#FF4B0B]/50 bg-[color:var(--b1)]'
-                                      : 'border-slate-300 group-hover:border-slate-400 bg-slate-50'
-                                }`}
+                                      ? 'border-orange-500 bg-white'
+                                      : 'border-slate-300 group-hover:border-slate-400'
+                                  }`}
                                 >
                                   {isSelected && (
-                                    <div className="w-2.5 h-2.5 rounded-full bg-[#ff4b0b]" />
+                                    <div className="w-2 h-2 rounded-full bg-orange-500" />
                                   )}
                                 </div>
                                 <span
-                                  className={`text-xs sm:text-sm font-semibold block ${
-                                    isSelected ? 'text-slate-950 font-bold' : 'text-slate-700'
+                                  className={`text-xs sm:text-sm font-medium ${
+                                    isSelected ? 'text-slate-900 font-semibold' : 'text-slate-600'
                                   }`}
                                 >
                                   {opt.text}
                                 </span>
                               </div>
-
                               <span
-className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transition-colors shrink-0 ${
-                                    isSelected
-                                      ? 'bg-[color:var(--b2)] text-slate-950'
-                                      : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+                                className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md shrink-0 ${
+                                  isSelected
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-slate-100 text-slate-400'
                                 }`}
                               >
                                 {opt.grade}
@@ -521,128 +489,97 @@ className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transiti
                   </AnimatePresence>
                 </div>
 
-                {/* Navigation Buttons */}
-                <div className="pt-3 flex items-center justify-between gap-4 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={handlePrev}
-                      disabled={currentStep === 0}
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold border transition-colors ${
-                        currentStep === 0
-                          ? 'opacity-30 border-slate-500/30 text-slate-400 cursor-not-allowed'
-                          : 'border-slate-500/30 text-slate-400 hover:bg-[color:var(--b2)] hover:text-slate-900 cursor-pointer'
-                      }`}
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Anterior</span>
-                    </button>
+                {/* Navigation */}
+                <div className="pt-3 mt-auto flex items-center justify-between gap-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    disabled={currentStep === 0}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition-colors ${
+                      currentStep === 0
+                        ? 'opacity-30 border-slate-200 text-slate-400 cursor-not-allowed'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer'
+                    }`}
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Anterior</span>
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      disabled={selectedOptionIndex === undefined}
-                      className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-950 transition-all shadow-md ${
-                        selectedOptionIndex === undefined
-                          ? 'bg-[color:var(--b2)] opacity-60 cursor-not-allowed'
-                          : 'bg-[#FF4B0B] hover:bg-[#e04008] active:scale-[0.99] cursor-pointer shadow-[color:var(--b1)]/20'
-                      }`}
-                    >
-                      <span>{currentStep === QUESTIONS.length - 1 ? 'Ver Resultado Final' : 'Siguiente'}</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={selectedOptionIndex === undefined}
+                    className={`inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white transition-all ${
+                      selectedOptionIndex === undefined
+                        ? 'bg-slate-300 cursor-not-allowed'
+                        : 'bg-orange-500 hover:bg-orange-600 active:scale-[0.98] cursor-pointer shadow-md shadow-orange-500/20'
+                    }`}
+                  >
+                    <span>{currentStep === QUESTIONS.length - 1 ? 'Ver Resultado' : 'Siguiente'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               </>
             ) : (
-              /* Results Screen */
+              /* ============= RESULTS SCREEN ============= */
               <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-6 my-auto"
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-5 my-auto"
               >
                 <div className="space-y-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold bg-[color:var(--b2)] text-slate-300 border-slate-500/30">
-                    <Trophy className="w-3.5 h-3.5 opacity-80" />
-                    <span>Diagnóstico Completado con Éxito</span>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white shadow-sm">
+                    <Trophy className="w-3.5 h-3.5 text-yellow-400" />
+                    <span>Diagnóstico Completado</span>
                   </div>
-
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                     Puntaje de Madurez Digital
                   </h2>
-
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl sm:text-5xl font-black text-slate-950 tracking-tighter">
+                    <span className="text-4xl sm:text-5xl font-black text-orange-500 tracking-tighter">
                       <AnimatedScoreCounter value={finalScorePercentage} />
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-400">
-                      / 100 Puntos
-                    </span>
+                    <span className="text-sm font-bold text-slate-400">/ 100</span>
                   </div>
                 </div>
 
-                {/* 4 Pillars Clean Breakdown */}
-                <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
-                    <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
-                      Rendimiento por los 4 Pilares
-                    </h4>
-                    <span className="text-[10px] font-bold text-slate-400">Resultados</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-600">1. Oferta & Mensaje</span>
-                        <span className="text-slate-500 font-mono">{pillarScores.oferta}%</span>
+                {/* 4 Pillars */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 pb-1 border-b border-slate-200/60">
+                    Rendimiento por los 4 Pilares
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {[
+                      { label: '1. Oferta & Mensaje', value: pillarScores.oferta },
+                      { label: '2. Canal Web & Branding', value: pillarScores.canal },
+                      { label: '3. Automatización & CRM', value: pillarScores.sistemas },
+                      { label: '4. Capacidad de Escala', value: pillarScores.escala },
+                    ].map((p) => (
+                      <div key={p.label} className="p-2.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                        <div className="flex justify-between text-xs font-bold">
+                          <span className="text-slate-700">{p.label}</span>
+                          <span className="text-slate-500 font-mono">{p.value}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                          <div className="bg-slate-800 h-full rounded-full transition-all duration-500" style={{ width: `${p.value}%` }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.oferta}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-600">2. Canal Web & Branding</span>
-                        <span className="text-slate-500 font-mono">{pillarScores.canal}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.canal}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-600">3. Automatización & CRM</span>
-                        <span className="text-slate-500 font-mono">{pillarScores.sistemas}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-[color:var(--primary-accent)] h-full rounded-full" style={{ width: `${pillarScores.sistemas}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 space-y-1">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-600">4. Capacidad de Escala</span>
-                        <span className="text-slate-500 font-mono">{pillarScores.escala}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div className="bg-slate-800 h-full rounded-full" style={{ width: `${pillarScores.escala}%` }} />
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Lead Capture Box */}
+                {/* Lead Capture */}
                 {!emailSubmitted ? (
                   <form
                     onSubmit={(e) => {
                       e.preventDefault()
                       if (userEmail) setEmailSubmitted(true)
                     }}
-                    className="p-4 sm:p-5 rounded-3xl bg-[color:var(--b1)] border border-slate-500/30 shadow-sm space-y-2.5"
+                    className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2.5"
                   >
-                    <h4 className="text-xs sm:text-sm font-extrabold text-slate-950">
-                      ¿Deseas recibir tu reporte detallado con la hoja de ruta en PDF?
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-800">
+                      ¿Deseas recibir tu reporte detallado en PDF?
                     </h4>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input
@@ -650,7 +587,7 @@ className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transiti
                         placeholder="Tu nombre o empresa"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        className="px-3.5 py-2.5 rounded-xl border border-slate-500/30 text-xs focus:outline-none focus:border-[#FF4B0B] flex-1"
+                        className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-orange-400 flex-1 bg-white"
                       />
                       <input
                         type="email"
@@ -658,11 +595,11 @@ className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transiti
                         placeholder="correo@tuempresa.com"
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
-                        className="px-3.5 py-2.5 rounded-xl border border-slate-500/30 text-xs focus:outline-none focus:border-[#FF4B0B] flex-1"
+                        className="px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-orange-400 flex-1 bg-white"
                       />
                       <button
                         type="submit"
-                        className="px-5 py-2.5 rounded-xl bg-[color:var(--b2)] text-white font-bold text-xs hover:bg-[#FF4B0B] transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                        className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-orange-500 transition-colors flex items-center justify-center gap-2 cursor-pointer shrink-0"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>Enviar</span>
@@ -670,30 +607,29 @@ className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transiti
                     </div>
                   </form>
                 ) : (
-                  <div className="p-3.5 rounded-2xl bg-[color:var(--b1)] border border-slate-500/30 text-center space-y-0.5">
-                    <CheckCircle2 className="w-5 h-5 opacity-80" />
-                    <h4 className="text-xs font-bold text-slate-400">
-                      ¡Reporte enviado exitosamente a {userEmail}!
+                  <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-0.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 mx-auto" />
+                    <h4 className="text-xs font-bold text-slate-800">
+                      ¡Reporte enviado a {userEmail}!
                     </h4>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-500/30">
+                <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={handleRestart}
-                    className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span>Repetir Diagnóstico</span>
                   </button>
-
                   <Link
                     to="/estudio/consultoria"
-                    className="px-5 py-2.5 rounded-xl bg-[color:var(--b2)] hover:bg-[#FF4B0B] text-white font-bold text-xs transition-colors shadow-sm"
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-orange-500 text-white font-bold text-xs transition-colors"
                   >
-                    Agendar Sesión Estratégica →
+                    Agendar Sesión →
                   </Link>
                 </div>
               </motion.div>
@@ -701,11 +637,6 @@ className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md transiti
           </section>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full border-t border-slate-500/30 bg-[color:var(--b0)] px-6 py-3 text-center text-xs text-slate-400">
-        Qaway Lab Mood Lab • Gamificación Visual y Diagnósticos Comerciales
-      </footer>
     </div>
   )
 }
