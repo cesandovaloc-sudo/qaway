@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MessageCircle } from 'lucide-react';
 import './studio-dock.css';
@@ -12,6 +12,7 @@ export default function StudioFloatingDock({
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const { hideDock, hideBackLinks } = useRecordingMode();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     // Modo Grabación activo: no se engancha el listener ni se muestra la barra.
@@ -21,18 +22,15 @@ export default function StudioFloatingDock({
     }
 
     const handleScroll = () => {
-      if (window.scrollY > scrollThreshold) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      setIsVisible(window.scrollY > scrollThreshold);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrollThreshold, hideDock]);
+  }, [scrollThreshold, hideDock, pathname]);
 
   const whatsappMessage = encodeURIComponent(
     `Hola Qaway Lab, estuve viendo el proyecto ${projectName} y me gustaría conversar sobre el desarrollo de una presencia digital similar para mi marca.`
