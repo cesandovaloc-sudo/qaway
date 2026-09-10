@@ -202,10 +202,8 @@ export default function Navbar({ variant: explicitVariant }) {
 
   const isHeaderShown = isProjectDock ? (scrolled && headerVisible) : headerVisible
 
-  // Modo Grabación: el variant 'project-dock' solo renderiza el botón
-  // "Volver a Proyectos", así que ocultamos la barra superior completa.
-  // No se elimina nada: se restaura con ?grabacion=0
-  if (isProjectDock && hideBackLinks) return null
+  // Ocultar barra superior 'project-dock' para no tapar el navbar de los proyectos
+  if (isProjectDock) return null
 
   return (
     <>
