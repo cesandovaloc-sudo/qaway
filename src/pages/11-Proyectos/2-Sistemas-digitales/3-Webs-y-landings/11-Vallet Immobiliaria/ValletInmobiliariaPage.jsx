@@ -178,7 +178,7 @@ export default function ValletInmobiliariaPage() {
           priceRange: 'S/ 2,000 - S/ 15,000',
         }}
       />
-      <Navbar variant="project-dock" />
+      {/* <Navbar variant="project-dock" /> */}
       <header className="site-header">
         <a className="brand" href="#inicio" onClick={handleScrollToTop} aria-label="Vallet inicio">
           <img src={logo} alt="Vallet Asesoría Inmobiliaria" />
@@ -392,7 +392,7 @@ export default function ValletInmobiliariaPage() {
             <Info title="Documentación">Te orientamos sobre los documentos necesarios para cada tipo de transacción.</Info>
             <Info title="Canales de atención">WhatsApp, llamada o correo. Elige el canal que prefieras.</Info>
           </div>
-          <div className="registered">
+          <div className="container registered">
             <ShieldCheck size={18}/> Somos una empresa registrada y contamos con asesores inmobiliarios colegiados.
           </div>
         </section>

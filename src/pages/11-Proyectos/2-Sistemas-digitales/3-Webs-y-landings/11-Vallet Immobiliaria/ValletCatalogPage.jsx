@@ -136,7 +136,7 @@ export default function ValletCatalogPage() {
           }))
         }}
       />
-      <Navbar variant="project-dock" />
+      {/* <Navbar variant="project-dock" /> */}
 
       {/* Header */}
       <header className="site-header">

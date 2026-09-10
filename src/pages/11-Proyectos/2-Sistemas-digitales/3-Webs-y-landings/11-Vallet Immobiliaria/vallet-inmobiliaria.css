@@ -54,6 +54,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
+  border-top: none !important;
   border-bottom: 1px solid rgba(8,46,52,.08);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: all .25s ease;
@@ -1210,6 +1211,17 @@
   .vallet-landing .consultation-grid {
     grid-template-columns: 1fr;
   }
+  .vallet-landing .consultation-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .vallet-landing .consultation-layout img {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16/10;
+    border-radius: 14px;
+    object-fit: cover;
+  }
   .vallet-landing .info-strip {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1223,6 +1235,7 @@
     height: 70px;
     background: #fffdf9 !important;
     border: none !important;
+    border-top: none !important;
     box-shadow: none !important;
   }
   .vallet-landing .nav {
@@ -1326,6 +1339,14 @@
   .vallet-landing .info-strip,
   .vallet-landing .footer-grid {
     grid-template-columns: 1fr;
+  }
+  .vallet-landing .registered {
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: center;
+    justify-content: center;
+    padding-inline: 12px;
+    margin-top: 20px;
   }
   .vallet-landing .footer-bottom {
     flex-direction: column;

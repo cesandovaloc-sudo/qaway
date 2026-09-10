@@ -115,7 +115,7 @@ export default function ValletPropertyDetailPage() {
           }
         }}
       />
-      <Navbar variant="project-dock" />
+      {/* <Navbar variant="project-dock" /> */}
 
       {/* Header específico de la ficha */}
       <header className="site-header">
