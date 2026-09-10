@@ -21,7 +21,7 @@ export default function NotFoundPage() {
         </p>
         <Link
           to="/"
-          className="inline-flex items-center gap-2 bg-qaway-accent text-black px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-sm hover:bg-qaway-accent-light transition-all duration-300"
+          className="inline-flex items-center gap-2 bg-qaway-accent text-white px-8 py-3.5 rounded-xl font-bold uppercase tracking-wider text-sm hover:bg-qaway-accent-light transition-all duration-300"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver al inicio
