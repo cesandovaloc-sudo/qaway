@@ -472,29 +472,6 @@ export default function ValletPropertyDetailPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="site-footer">
-        <div className="container footer-grid">
-          <div className="footer-brand">
-            <img src={logo} alt="Vallet" />
-            <p>Asesoría inmobiliaria de confianza en Lima. Compra, venta y alquiler con total respaldo y claridad legal.</p>
-          </div>
-          <div className="footer-links">
-            <h4>Navegación</h4>
-            <ul>
-              <li><Link to="/proyectos/vallet">Inicio</Link></li>
-              <li><Link to="/proyectos/vallet/propiedades">Catálogo Completo</Link></li>
-              <li><Link to="/proyectos/vallet#contacto">Contacto</Link></li>
-            </ul>
-          </div>
-          <div className="footer-links">
-            <h4>Contacto</h4>
-            <p>Av. Javier Prado Este 951411, San Isidro</p>
-            <p>+51 974 974 9741</p>
-            <p>hola@valletinmobiliaria.com</p>
-          </div>
-        </div>
-      </footer>
 
       {/* Modal Fullscreen de Galería */}
       {galleryModalOpen && (
