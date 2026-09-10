@@ -280,9 +280,8 @@ export default function AppRouter() {
           path="hub/gestor-proyectos-v2"
           element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
         />
-        <Route index element={<InicioPage />} />
-
         <Route element={<Layout />}>
+          <Route index element={<InicioPage />} />
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}

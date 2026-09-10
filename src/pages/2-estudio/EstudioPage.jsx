@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import Navbar, { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { SectionPrimitive, Kicker } from '@/components/typography'
 import DigitalPresenceCopy from './DigitalPresenceCopy';
 import SEO from '../../components/seo/SEO';
@@ -187,8 +187,6 @@ function Hero() {
     <section
       className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
     >
-      <Navbar variant="light" />
-
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{

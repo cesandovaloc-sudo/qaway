@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
+import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import {
   ArrowRight,
   BarChart3,
@@ -264,8 +263,6 @@ function Hero() {
     <section
       className="relative min-h-[100dvh] overflow-hidden pt-20 text-[#20201f] bg-white"
     >
-      <Navbar variant="light" />
-
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.04]"
         style={{
@@ -1225,6 +1222,10 @@ function CoursesLandings() {
 }
 
 export default function InicioPage() {
+  // El hero de Inicio es blanco y opaco: declara su variante por el canal oficial
+  // (NavbarProvider de Layout) en lugar de montar una instancia propia del Navbar.
+  useSetNavbarVariant('light')
+
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -1329,7 +1330,6 @@ export default function InicioPage() {
         onSubmit={submitInterest}
         onReset={() => setSubmitted(false)}
       />
-      <Footer />
     </>
   )
 }
