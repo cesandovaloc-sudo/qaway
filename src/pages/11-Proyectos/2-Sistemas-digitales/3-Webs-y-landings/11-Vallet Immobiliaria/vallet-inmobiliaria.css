@@ -54,10 +54,25 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  border-top: none !important;
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
   border-bottom: 1px solid rgba(8,46,52,.08);
+  outline: none !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: all .25s ease;
+}
+
+.vallet-landing .site-header::before,
+.vallet-landing .site-header::after {
+  display: none !important;
+  content: none !important;
+}
+
+.vallet-landing .brand,
+.vallet-landing .brand img {
+  border: 0 !important;
+  outline: none !important;
 }
 
 .vallet-landing .brand img {
