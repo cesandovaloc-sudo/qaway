@@ -359,7 +359,6 @@ export default function AppRouter() {
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
           <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
-          <Route path="proyectos/*" element={renderRoute('proyectos', <ProyectosPage />)} />
 
           <Route
             path="sistemas-digitales"
@@ -393,17 +392,12 @@ export default function AppRouter() {
             path="sistemas-digitales/estrategia-digital"
             element={renderRoute('sistemasDigitales', <SistemasEstrategiaDigitalPage />)}
           />
-          <Route
-            path="sistemas-digitales/*"
-            element={renderRoute('sistemasDigitales', <SistemasDigitalesPage />)}
-          />
 
           <Route path="ops-ia" element={<Navigate to="/sistemas-digitales" replace />} />
           <Route
             path="ops-ia/automatizacion"
             element={<Navigate to="/sistemas-digitales/automatizacion" replace />}
           />
-          <Route path="ops-ia/*" element={<Navigate to="/sistemas-digitales" replace />} />
           <Route
             path="ops-ia-v2"
             element={<Navigate to="/sistemas-digitales/automatizacion" replace />}
@@ -444,7 +438,6 @@ export default function AppRouter() {
           />
 
           <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
-          <Route path="landings/*" element={<PublicPathRoute routeKey="landings"><LandingsPage /></PublicPathRoute>} />
 
           <Route path="rutas" element={<RutasPage />} />
 

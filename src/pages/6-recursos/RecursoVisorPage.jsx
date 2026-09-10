@@ -8,6 +8,7 @@ import {
   FolderOpen, Zap, Key, Settings, Info
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
+import NotFoundPage from '@/pages/NotFoundPage'
 
 // Resources detailed data with simulation structures
 const SIMULATED_RESOURCES = {
@@ -353,15 +354,7 @@ export default function RecursoVisorPage() {
   }, [id])
 
   if (!resource || !resourceMatchesRoute) {
-    return (
-      <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center justify-center p-8">
-        <h2 className="text-2xl font-black mb-4">Recurso no encontrado</h2>
-        <p className="text-zinc-500 text-sm mb-6">El recurso simulado solicitado no existe o fue movido.</p>
-        <Link to="/recursos" className="bg-black text-white px-6 py-3 rounded-lg font-bold text-xs uppercase tracking-wider">
-          Volver a Recursos
-        </Link>
-      </div>
-    )
+    return <NotFoundPage />
   }
 
   // Handle copying prompt
