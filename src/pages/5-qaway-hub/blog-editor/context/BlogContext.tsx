@@ -15,55 +15,7 @@ const initialCategories: Category[] = [
   { id: 'cat-auto', name: 'Automatización', slug: 'automatizacion', color: '#ea580c' },
 ]
 
-const initialPosts: Post[] = [
-  {
-    id: 'p1',
-    title: 'Cómo estructurar una landing que convierta',
-    slug: 'como-estructurar-una-landing-que-convierta',
-    excerpt: 'Jerarquía, un solo mensaje y un CTA claro: la fórmula detrás de las páginas que venden.',
-    category: 'Diseño',
-    coverUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200&auto=format&fit=crop',
-    coverAlt: 'Estructura de diseño web',
-    body: 'Una landing no es una página bonita, es una conversación de una sola idea. Antes de escribir una línea, define qué acción quieres que tome el visitante y quita todo lo demás.',
-    contentHtml: '<h2>La anatomía de una landing efectiva</h2><p>Una landing no es una página bonita, es una conversación de <strong>una sola idea</strong>. Antes de escribir una sola línea de código o de copy, responde esta pregunta:</p><blockquote>¿Qué acción única e inequívoca quiero que tome la persona que aterriza aquí?</blockquote><h3>1. El Gancho Principal</h3><p>Los primeros 3 segundos definen el 80% del éxito. Explica con claridad cristalina el valor que ofreces, no los tecnicismos de tu producto.</p>',
-    readingTime: 3,
-    status: 'publicado',
-    createdAt: '2026-07-20T10:00:00.000Z',
-    updatedAt: '2026-07-20T10:00:00.000Z',
-    publishedAt: '2026-07-20T10:00:00.000Z',
-  },
-  {
-    id: 'p2',
-    title: 'Automatizar WhatsApp sin perder el trato humano',
-    slug: 'automatizar-whatsapp-sin-perder-el-trato-humano',
-    excerpt: 'Las plantillas ayudan a responder rápido, pero el cliente percibe cuándo hay una persona detrás.',
-    category: 'Automatización',
-    coverUrl: 'https://images.unsplash.com/photo-1611746872915-64382b5c76da?q=80&w=1200&auto=format&fit=crop',
-    coverAlt: 'Mensajería y automatización móvil',
-    body: 'La automatización resuelve el "no te olvido", no el "te quiero". Usa plantillas para el primer contacto y agenda humana para lo importante.',
-    contentHtml: '<h2>El equilibrio entre rapidez y empatía</h2><p>La automatización resuelve el <em>"no te olvido"</em>, no el <em>"te quiero"</em>. Usa plantillas y disparadores inteligentes para el primer contacto inmediato, pero deja la conversación estratégica en manos de tu equipo humano.</p>',
-    readingTime: 2,
-    status: 'borrador',
-    createdAt: '2026-07-25T15:30:00.000Z',
-    updatedAt: '2026-07-25T15:30:00.000Z',
-  },
-  {
-    id: 'p3',
-    title: 'CRM para equipos pequeños: qué registrar y qué ignorar',
-    slug: 'crm-para-equipos-pequenos',
-    excerpt: 'No necesitas 40 campos. Necesitas el embudo claro y las notas de cada conversación.',
-    category: 'Productividad',
-    coverUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1200&auto=format&fit=crop',
-    coverAlt: 'Dashboard y métricas de clientes',
-    body: 'Un CRM muere por exceso de campos obligatorios. Registra el estado del embudo, la última conversación y el próximo paso. Nada más.',
-    contentHtml: '<h2>Menos fricción, más ventas</h2><p>Un CRM muere cuando llenar un contacto toma 10 minutos. Lo fundamental para un equipo ágil:</p><ul><li>Estado actual en el pipeline</li><li>Fecha del último contacto y siguiente acción</li><li>Notas claras de las objeciones del cliente</li></ul>',
-    readingTime: 4,
-    status: 'publicado',
-    createdAt: '2026-07-28T09:00:00.000Z',
-    updatedAt: '2026-07-28T09:00:00.000Z',
-    publishedAt: '2026-07-28T09:00:00.000Z',
-  },
-]
+const initialPosts: Post[] = []
 
 export type SyncState = 'local' | 'synced' | 'syncing' | 'error'
 
@@ -169,8 +121,8 @@ export function BlogProvider({ children }: { children: ReactNode }) {
           .order('updated_at', { ascending: false })
 
         if (postsError) throw postsError
-        if (postsData && postsData.length > 0 && isMounted) {
-          const remotePosts: Post[] = postsData.map((d: any) => {
+        if (isMounted) {
+          const remotePosts: Post[] = (postsData || []).map((d: any) => {
             const meta = (typeof d.content_json === 'object' && d.content_json !== null)
               ? d.content_json.metadata || {}
               : {}
@@ -199,24 +151,13 @@ export function BlogProvider({ children }: { children: ReactNode }) {
             }
           })
 
-          setPosts(prev => {
-            const postMap = new Map<string, Post>()
-            remotePosts.forEach(rp => postMap.set(rp.id, rp))
-            // Preservar borradores locales que no están en Supabase o son más recientes
-            prev.forEach(lp => {
-              const existing = postMap.get(lp.id)
-              if (!existing || new Date(lp.updatedAt).getTime() > new Date(existing.updatedAt).getTime()) {
-                postMap.set(lp.id, lp)
-              }
-            })
-            const merged = Array.from(postMap.values())
-            try {
-              localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(merged))
-            } catch (e) {
-              console.debug(e)
-            }
-            return merged
-          })
+          setPosts(remotePosts)
+          idbSet(STORAGE_KEY_POSTS, remotePosts)
+          try {
+            localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(remotePosts))
+          } catch (e) {
+            console.debug(e)
+          }
         }
 
         // 2. Cargar Categorías directamente de Supabase
@@ -433,10 +374,16 @@ export function BlogProvider({ children }: { children: ReactNode }) {
 
   const deletePost = useCallback(
     async (id: string): Promise<void> => {
-      setPosts(prev => prev.filter(p => p.id !== id))
-      try {
-        localStorage.removeItem('qaway_blog_articles_cache')
-      } catch (e) {}
+      setPosts(prev => {
+        const updated = prev.filter(p => p.id !== id)
+        idbSet(STORAGE_KEY_POSTS, updated)
+        try {
+          localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated))
+          localStorage.removeItem('qaway_blog_articles_cache')
+        } catch (e) {}
+        return updated
+      })
+
       const supabase = getSupabaseClient()
       if (supabase) {
         try {
