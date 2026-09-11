@@ -76,7 +76,12 @@ export async function trackBlogVisit(post: { slug: string; title?: string; categ
     const rawReferrer = document.referrer || ''
     const channelName = normalizeReferrer(rawReferrer, utmSource, fbclid)
 
-    const payload: TrackEventPayload = {
+    const isAdminDevice = typeof window !== 'undefined' && (
+      localStorage.getItem('qaway_admin_active') === 'true' ||
+      localStorage.getItem('qaway_blog_posts_v3') !== null
+    )
+
+    const payload: TrackEventPayload & { is_admin?: boolean; visitor_id?: string } = {
       slug: post.slug || 'articulo',
       title: post.title || 'Artículo de Blog',
       category: post.category || 'General',
@@ -88,6 +93,8 @@ export async function trackBlogVisit(post: { slug: string; title?: string; categ
       device: getDeviceType(),
       browser: getBrowser(),
       os: typeof navigator !== 'undefined' ? navigator.platform || 'Desconocido' : 'Desconocido',
+      is_admin: isAdminDevice,
+      visitor_id: isAdminDevice ? 'admin_device' : undefined,
     }
 
     // 1. Save locally for instant offline analysis

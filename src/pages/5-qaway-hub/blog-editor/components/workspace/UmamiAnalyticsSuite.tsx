@@ -118,6 +118,22 @@ export default function UmamiAnalyticsSuite() {
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false)
   const themeMenuRef = useRef<HTMLDivElement>(null)
 
+  // Filtro sutil de tráfico: 'all' (Todos) o 'public' (Público)
+  const [trafficFilter, setTrafficFilter] = useState<'all' | 'public'>(() => {
+    try {
+      return (localStorage.getItem('qaway_analytics_traffic_filter') as 'all' | 'public') || 'all'
+    } catch {
+      return 'all'
+    }
+  })
+
+  const handleSetTrafficFilter = (filter: 'all' | 'public') => {
+    setTrafficFilter(filter)
+    try {
+      localStorage.setItem('qaway_analytics_traffic_filter', filter)
+    } catch {}
+  }
+
   // Lista de eventos de telemetría reales (de Supabase o buffer local)
   const [events, setEvents] = useState<RawTelemetryEvent[]>([])
 
@@ -201,9 +217,22 @@ export default function UmamiAnalyticsSuite() {
     return posts.find(p => p.slug === selectedArticleSlug || p.id === selectedArticleSlug) || null
   }, [selectedArticleSlug, posts])
 
-  // 1. Filtrado temporal estricto
+  // 1. Filtrado sutil de tráfico (Todos vs Público/Orgánico)
+  const trafficFilteredEvents = useMemo(() => {
+    if (trafficFilter === 'all') return events
+    return events.filter(ev => {
+      const isInternal =
+        (ev as any).is_admin === true ||
+        (ev as any).is_admin === 'true' ||
+        ev.visitor_id === 'admin_device' ||
+        ev.referrer?.includes('Admin')
+      return !isInternal
+    })
+  }, [events, trafficFilter])
+
+  // 2. Filtrado temporal estricto
   const timeFilteredEvents = useMemo(() => {
-    if (events.length === 0) return []
+    if (trafficFilteredEvents.length === 0) return []
     const now = Date.now()
 
     let cutoff = 0
@@ -212,13 +241,13 @@ export default function UmamiAnalyticsSuite() {
     else if (timeRange === '30d') cutoff = now - 30 * 24 * 60 * 60 * 1000
     else if (timeRange === '90d') cutoff = now - 90 * 24 * 60 * 60 * 1000
 
-    if (cutoff === 0) return events // 'all'
+    if (cutoff === 0) return trafficFilteredEvents // 'all'
 
-    return events.filter(ev => {
+    return trafficFilteredEvents.filter(ev => {
       if (!ev.created_at) return true
       return new Date(ev.created_at).getTime() >= cutoff
     })
-  }, [events, timeRange])
+  }, [trafficFilteredEvents, timeRange])
 
   // 2. Filtrado por artículo (Segmentación)
   const scopedEvents = useMemo(() => {
@@ -582,6 +611,34 @@ export default function UmamiAnalyticsSuite() {
                 {tab.label}
               </button>
             ))}
+          </div>
+
+          {/* Filtro Sutil de Tráfico: Todos / Público */}
+          <div className="flex items-center bg-surface-muted p-1 rounded-xl border border-line text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => handleSetTrafficFilter('all')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                trafficFilter === 'all'
+                  ? 'bg-white text-primary shadow-xs font-bold'
+                  : 'text-muted hover:text-primary'
+              }`}
+              title="Mostrar todo el tráfico registrado"
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSetTrafficFilter('public')}
+              className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                trafficFilter === 'public'
+                  ? 'bg-white text-primary shadow-xs font-bold'
+                  : 'text-muted hover:text-primary'
+              }`}
+              title="Filtrar sesiones internas y mostrar únicamente lectores externos"
+            >
+              Público
+            </button>
           </div>
 
           {/* Exportar CSV */}
