@@ -16,7 +16,7 @@ import {
 // ESTRUCTURA JERÁRQUICA DE RUTAS CENTRALIZADA (MANDOS SUPERIORES -> HIJOS)
 // Fuente única de verdad para el sistema de rutas del portal.
 // =========================================================================
-export const hierarchicalRoutes = [
+const baseHierarchicalRoutes = [
   // 0. PORTADA & PÁGINA DE INICIO
   {
     id: 'inicio',
@@ -564,17 +564,235 @@ export const hierarchicalRoutes = [
       },
     ],
   },
+
+  // 9. BRIEFS & FORMULARIOS
+  {
+    id: 'briefs-formularios',
+    title: 'Briefs & Formularios Interactivos',
+    path: '/formularios',
+    category: 'Briefs & Formularios',
+    icon: FolderKanban,
+    badge: 'Interactivo',
+    badgeType: 'demo',
+    summary: 'Suite de formularios de captación, diagnóstico digital, cotizadores interactivos y wizards de onboarding.',
+    children: [
+      {
+        title: 'Showcase de Formularios',
+        path: '/formularios',
+        description: 'Vitrina interactiva con todos los conceptos y prototipos de formularios dinámicos.',
+        tag: 'Showcase',
+      },
+      {
+        title: 'Test de Preparación Digital',
+        path: '/formularios/test-preparacion-digital',
+        description: 'Test interactivo para medir el nivel de madurez digital de empresas y profesionales.',
+        tag: 'Test Digital',
+      },
+      {
+        title: 'Diagnóstico Split Studio',
+        path: '/formularios/diagnostico-split',
+        description: 'Formulario en pantalla dividida con vista previa dinámica de respuestas.',
+        tag: 'Split UI',
+      },
+      {
+        title: 'Asistente Conversacional Hub',
+        path: '/formularios/asistente-conversacional',
+        description: 'Captura guiada paso a paso estilo chat interactivo con IA.',
+        tag: 'Chatbot',
+      },
+      {
+        title: 'Typeform Fluid Experience',
+        path: '/formularios/typeform',
+        description: 'Flujo inmersivo una pregunta a la vez con transiciones fluidas.',
+        tag: 'Typeform',
+      },
+      {
+        title: 'Trello Interactive Board',
+        path: '/formularios/trello',
+        description: 'Formulario con tablero kanban visual para priorización de requerimientos.',
+        tag: 'Kanban',
+      },
+      {
+        title: 'Notion Interactive Workspace',
+        path: '/formularios/notion',
+        description: 'Experiencia tipo workspace de Notion con bloques modulares.',
+        tag: 'Workspace',
+      },
+      {
+        title: 'Airbnb Wizard Card Deck',
+        path: '/formularios/airbnb',
+        description: 'Formulario estilo baraja de cartas con selector visual interactivo.',
+        tag: 'Wizard',
+      },
+      {
+        title: 'Brief de Branding & Onboarding',
+        path: '/brief',
+        description: 'Formulario de captura de requerimientos de marca e identidad corporativa.',
+        tag: 'Briefing',
+      },
+    ],
+  },
 ]
 
-export const categoriesList = [
-  'Todos',
-  'Inicio',
-  'Estudio',
-  'Sistemas Digitales',
-  'Proyectos',
-  'Blog',
-  'Recursos',
-  'Academy',
-  'Qaway Hub',
-  'Landings',
-]
+// =========================================================================
+// MOTOR DE DETECCIÓN DINÁMICA DE RUTAS (VITE IMPORT.META.GLOB)
+// Escanea automáticamente src/pages/ para descubrir nuevas páginas y sub-rutas.
+// =========================================================================
+const folderToCategoryMap = {
+  '1-inicio': { category: 'Inicio', parentId: 'inicio' },
+  '2-estudio': { category: 'Estudio', parentId: 'estudio' },
+  '3-sistemas-digitales': { category: 'Sistemas Digitales', parentId: 'sistemas-digitales' },
+  '4-academy': { category: 'Academy', parentId: 'academy' },
+  '5-qaway-hub': { category: 'Qaway Hub', parentId: 'qaway-hub' },
+  '6-recursos': { category: 'Recursos', parentId: 'recursos' },
+  '7-blog': { category: 'Blog', parentId: 'blog-publico' },
+  '8-landings': { category: 'Landings', parentId: 'landings' },
+  '10-briefs': { category: 'Briefs & Formularios', parentId: 'briefs-formularios' },
+  '11-proyectos': { category: 'Proyectos', parentId: 'proyectos' },
+  '12-rutas': { category: 'Rutas', parentId: 'rutas' },
+  'auth': { category: 'Seguridad', parentId: 'auth' },
+}
+
+function cleanTitle(rawName) {
+  let name = rawName.replace(/\.(jsx|tsx)$/, '')
+  name = name.replace(/^\d+[-_]?\s*/, '')
+  name = name.replace(/Page$/, '')
+  name = name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_]+/g, ' ')
+  return name.trim() || rawName
+}
+
+function buildDynamicHierarchicalRoutes(baseRoutes) {
+  // Clonar base para no mutar de forma destructiva
+  const routes = baseRoutes.map((card) => ({
+    ...card,
+    children: [...(card.children || [])],
+  }))
+
+  try {
+    // Escanear dinámicamente todos los archivos de páginas
+    const rawModules = import.meta.glob([
+      '/src/pages/**/*.{jsx,tsx}',
+      '!/src/pages/**/components/**',
+      '!/src/pages/**/docs/**',
+      '!/src/pages/**/data/**',
+      '!/src/pages/**/src/**',
+      '!/src/pages/**/app/**',
+      '!/src/pages/**/public/**',
+      '!/src/pages/**/dist/**',
+      '!/src/pages/**/node_modules/**',
+      '!/src/pages/**/test/**',
+      '!/src/pages/**/tests/**',
+    ])
+
+    // Registrar todas las rutas ya existentes en la estructura base
+    const existingPaths = new Set()
+    routes.forEach((parent) => {
+      existingPaths.add(parent.path)
+      if (parent.children) {
+        parent.children.forEach((c) => {
+          existingPaths.add(c.path)
+          if (c.subPages) {
+            c.subPages.forEach((sp) => existingPaths.add(sp.path))
+          }
+        })
+      }
+    })
+
+    // Analizar cada archivo detectado
+    Object.keys(rawModules).forEach((fileKey) => {
+      const relative = fileKey.replace(/^\/src\/pages\//, '')
+      const parts = relative.split('/')
+      const fileName = parts[parts.length - 1]
+
+      // Ignorar layouts, contextos y archivos no principales
+      if (
+        fileName.includes('Layout') ||
+        fileName.includes('Context') ||
+        fileName.includes('NotFound') ||
+        fileName.startsWith('_')
+      ) {
+        return
+      }
+
+      const topFolder = parts[0]?.toLowerCase() || ''
+      const mapping = folderToCategoryMap[topFolder]
+
+      // Generar ruta estimada para la página
+      const cleanParts = parts.map((p) => {
+        let clean = p.replace(/\.(jsx|tsx)$/, '')
+        clean = clean.replace(/^\d+[-_]?\s*/, '')
+        clean = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+        return clean
+      }).filter(Boolean)
+
+      const derivedPath = '/' + cleanParts.join('/')
+
+      // Si ya está registrada en la suite o en children, omitir
+      if (existingPaths.has(derivedPath)) {
+        return
+      }
+
+      // Buscar o crear la tarjeta padre
+      let parentCard = mapping
+        ? routes.find((r) => r.id === mapping.parentId || r.category === mapping.category)
+        : routes.find((r) => r.title.toLowerCase().includes(topFolder))
+
+      if (parentCard) {
+        parentCard.children.push({
+          title: cleanTitle(fileName),
+          path: derivedPath,
+          description: `Página detectada automáticamente en ${relative}.`,
+          tag: 'Auto-detectado',
+        })
+        existingPaths.add(derivedPath)
+      } else if (parts.length > 1) {
+        // Si es una carpeta nueva de primer nivel, crear tarjeta padre automáticamente
+        const newCategory = cleanTitle(parts[0])
+        const newParent = {
+          id: `auto-${cleanParts[0]}`,
+          title: newCategory,
+          path: derivedPath,
+          category: newCategory,
+          icon: FolderKanban,
+          badge: 'Auto-detectado',
+          badgeType: 'area',
+          summary: `Sección detectada automáticamente desde src/pages/${parts[0]}.`,
+          children: [
+            {
+              title: cleanTitle(fileName),
+              path: derivedPath,
+              description: `Página detectada automáticamente en ${relative}.`,
+              tag: 'Auto-detectado',
+            },
+          ],
+        }
+        routes.push(newParent)
+        existingPaths.add(derivedPath)
+      }
+    })
+  } catch (err) {
+    console.warn('[routesRegistry] No se pudo ejecutar el escaneo dinámico:', err)
+  }
+
+  return routes
+}
+
+export const hierarchicalRoutes = buildDynamicHierarchicalRoutes(baseHierarchicalRoutes)
+
+export const categoriesList = Array.from(
+  new Set([
+    'Todos',
+    ...hierarchicalRoutes.map((r) => r.category),
+    'Inicio',
+    'Estudio',
+    'Sistemas Digitales',
+    'Proyectos',
+    'Blog',
+    'Recursos',
+    'Briefs & Formularios',
+    'Academy',
+    'Qaway Hub',
+    'Landings',
+  ])
+)
+

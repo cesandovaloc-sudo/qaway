@@ -1,0 +1,1 @@
+var e=`/assets/qaway-calendar-C6Uy0hRg.webp`;export{e as t};

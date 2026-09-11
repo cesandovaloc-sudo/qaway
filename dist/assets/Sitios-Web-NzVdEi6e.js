@@ -1,0 +1,1 @@
+var e=`/assets/Hero-2-6GpVBMWC.webp`,t=`/assets/Sitios-Web-9c_NSH0o.webp`;export{e as n,t};
