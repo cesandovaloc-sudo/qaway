@@ -38,6 +38,7 @@ import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import './rutas.css'
 import { hierarchicalRoutes, categoriesList } from '@/config/routesRegistry'
 import { publicPaths } from '@/config/siteVisibility'
+import { getRecordingMode, setRecordingMode } from '@/config/recordingMode'
 
 function getBadgeStyle(badgeType) {
   switch (badgeType) {
@@ -497,7 +498,24 @@ export default function RutasPage() {
   const [copiedPath, setCopiedPath] = useState(null)
   const [copiedAction, setCopiedAction] = useState(null)
   const [showCodeModal, setShowCodeModal] = useState(false)
+  const [recordingMode, setRecordingModeState] = useState(() => getRecordingMode())
   const searchInputRef = useRef(null)
+
+  // Sincronizar estado del Modo Grabación en tiempo real
+  useEffect(() => {
+    const sync = () => setRecordingModeState(getRecordingMode())
+    window.addEventListener('qw-recording-mode-change', sync)
+    window.addEventListener('storage', sync)
+    return () => {
+      window.removeEventListener('qw-recording-mode-change', sync)
+      window.removeEventListener('storage', sync)
+    }
+  }, [])
+
+  const handleToggleRecordingMode = (enabled) => {
+    setRecordingMode(enabled)
+    setRecordingModeState(enabled)
+  }
 
   // Estado de rutas aprobadas para producción (Persistente en localStorage)
   const [approvedPaths, setApprovedPaths] = useState(() => {
@@ -1148,6 +1166,32 @@ ${pathsFormatted}
                   >
                     Desactivar todos
                   </button>
+                </div>
+
+                {/* Control Interactivo de Modo Grabación (Ocultar Barra Flotante) */}
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all select-none cursor-pointer ${
+                    recordingMode
+                      ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-xs ring-1 ring-rose-400/20'
+                      : 'bg-zinc-100/90 border-zinc-200/90 text-zinc-700 hover:bg-zinc-200/80 hover:border-zinc-300'
+                  }`}
+                  onClick={() => handleToggleRecordingMode(!recordingMode)}
+                  title="Oculta la barra flotante de los proyectos para grabar videos y demos limpias"
+                >
+                  <span className="text-xs font-bold flex items-center gap-1.5">
+                    <span>🎬</span>
+                    <span className="hidden md:inline">Modo Grabación</span>
+                    <span className="md:hidden">Grabación</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${recordingMode ? 'bg-rose-600 text-white' : 'bg-zinc-200 text-zinc-600'}`}>
+                      {recordingMode ? 'Dock Oculto' : 'Dock Visible'}
+                    </span>
+                  </span>
+                  <SwitchToggle
+                    size="small"
+                    isChecked={recordingMode}
+                    onChange={handleToggleRecordingMode}
+                    label="Modo Grabación (Ocultar Dock Flotante)"
+                  />
                 </div>
               </div>
 

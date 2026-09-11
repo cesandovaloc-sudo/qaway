@@ -50,7 +50,7 @@ function readParam() {
 function readStored() {
   if (typeof window === 'undefined') return null;
   try {
-    return window.sessionStorage.getItem(STORAGE_KEY);
+    return window.sessionStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(STORAGE_KEY);
   } catch {
     return null; // navegación privada / storage bloqueado
   }
@@ -59,8 +59,13 @@ function readStored() {
 function writeStored(level) {
   if (typeof window === 'undefined') return;
   try {
-    if (level === 'off') window.sessionStorage.removeItem(STORAGE_KEY);
-    else window.sessionStorage.setItem(STORAGE_KEY, level);
+    if (level === 'off') {
+      window.sessionStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(STORAGE_KEY);
+    } else {
+      window.sessionStorage.setItem(STORAGE_KEY, level);
+      window.localStorage.setItem(STORAGE_KEY, level);
+    }
   } catch {
     /* storage bloqueado: el modo sigue funcionando vía URL */
   }
@@ -73,7 +78,7 @@ export function resolveRecordingLevel() {
   const raw = readParam();
 
   if (raw === null) {
-    // Sin parámetro en la URL: mantener el modo ya elegido en esta pestaña.
+    // Sin parámetro en la URL: mantener el modo ya elegido en esta pestaña o localStorage.
     const stored = readStored();
     return stored === 'dock' || stored === 'back' ? stored : 'off';
   }
@@ -88,6 +93,22 @@ export function resolveRecordingLevel() {
   const level = BACK_ONLY_VALUES.has(value) ? 'back' : 'dock';
   writeStored(level);
   return level;
+}
+
+/** Obtiene si el modo grabación está activo (booleano). */
+export function getRecordingMode() {
+  if (typeof window === 'undefined') return false;
+  return resolveRecordingLevel() === 'dock';
+}
+
+/** Activa o desactiva el modo grabación de forma global. */
+export function setRecordingMode(active) {
+  if (typeof window === 'undefined') return;
+  const level = active ? 'dock' : 'off';
+  writeStored(level);
+  window.dispatchEvent(new Event('popstate'));
+  window.dispatchEvent(new Event('storage'));
+  window.dispatchEvent(new Event('qw-recording-mode-change'));
 }
 
 /**
@@ -106,7 +127,13 @@ export function useRecordingMode() {
   useEffect(() => {
     const sync = () => setLevel(resolveRecordingLevel());
     window.addEventListener('popstate', sync);
-    return () => window.removeEventListener('popstate', sync);
+    window.addEventListener('storage', sync);
+    window.addEventListener('qw-recording-mode-change', sync);
+    return () => {
+      window.removeEventListener('popstate', sync);
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('qw-recording-mode-change', sync);
+    };
   }, []);
 
   if (level === 'dock') {
@@ -117,3 +144,4 @@ export function useRecordingMode() {
   }
   return { ...OFF, isRecording: false };
 }
+
