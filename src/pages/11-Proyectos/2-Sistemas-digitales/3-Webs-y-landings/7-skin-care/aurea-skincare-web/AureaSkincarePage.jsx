@@ -148,7 +148,11 @@ export default function AureaSkincarePage() {
   }, []);
 
   const navItems = useMemo(() => [
-    ["Colección","#coleccion"],["Sobre nosotros","#filosofia"],["Ingredientes","#ingredientes"],["Rituales","#rituales"],["Beneficios","#beneficios"]
+    ["Beneficios", "#beneficios"],
+    ["Nosotros", "#filosofia"],
+    ["Rituales", "#rituales"],
+    ["Ingredientes", "#ingredientes"],
+    ["Colección", "#coleccion"]
   ], []);
 
   const handleScrollToTop = (e) => {
