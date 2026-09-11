@@ -10,7 +10,7 @@ import mockupSitiosWeb from '../8-landings/8-desarollo web/assets/Sitios-Web.web
 import mockupAureaSkincare from './2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/aurea-skincare(iPhone 14 Pro Max)2.webp'
 import mockupVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/vallet(iPhone 14 Pro Max)2.webp'
 import showcaseVallet from './2-Sistemas-digitales/3-Webs-y-landings/11-Vallet Immobiliaria/1-vallet-showcase.webp'
-import showcaseDental from './2-Sistemas-digitales/3-Webs-y-landings/3-Dental/1-dental-showcase.png'
+import showcaseDental from './2-Sistemas-digitales/3-Webs-y-landings/3-Dental/1-dental-showcase.webp'
 import mockupEpc from './2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/epc(iPhone 14 Pro Max).webp'
 import './proyectos.css'
 

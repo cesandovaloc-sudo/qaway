@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
-import heroImage from '../assets/script-backup.png'
+import heroImage from '../assets/script-backup.webp'
 
 const pipelineSteps = [
   {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useCRM } from '../context/CRMContext'
-import { XCircle, Star, Settings2, Eye, EyeOff } from 'lucide-react'
+import { XCircle, Star, Settings2, Eye, EyeOff, X, Mail, Phone, Calendar } from 'lucide-react'
 
 const COLUMNS = [
   { id: 'new', title: 'Nuevos', color: 'bg-cyan-50 text-cyan-700 border-cyan-100' },
@@ -16,6 +16,11 @@ export default function KanbanView() {
   
   // Estados para columnas visibles y panel de configuración
   const [showColConfig, setShowColConfig] = useState(false)
+
+  // Inspector lateral del lead (patrón Twenty/Notion): abre el detalle apoyado
+  // sobre el tablero, para mover la etapa sin perder el contexto del embudo.
+  const [drawerLeadId, setDrawerLeadId] = useState(null)
+  const drawerLead = leads.find(l => l.id === drawerLeadId) || null
   const [visibleCols, setVisibleCols] = useState({
     new: true,
     contactado: true,
@@ -110,7 +115,10 @@ export default function KanbanView() {
                       key={lead.id}
                       layoutId={lead.id}
                       whileHover={{ y: -3, boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}
-                      onClick={() => setSelectedLeadId(lead.id)}
+                      onClick={() => {
+                        setSelectedLeadId(lead.id)
+                        setDrawerLeadId(lead.id)
+                      }}
                       className="bg-white border border-zinc-200/80 rounded-[15px] p-4 cursor-pointer transition-all duration-300 relative group"
                     >
                       {/* Atribución de campaña */}
@@ -177,6 +185,114 @@ export default function KanbanView() {
           )
         })}
       </div>
+
+      {/* =========================================================================
+          INSPECTOR LATERAL DEL LEAD (patrón Twenty/Notion)
+          ========================================================================= */}
+      <AnimatePresence>
+        {drawerLead && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 backdrop-blur-sm"
+            style={{ marginTop: 0 }}
+          >
+            <div className="absolute inset-0" onClick={() => setDrawerLeadId(null)} />
+
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md h-full bg-white shadow-2xl border-l border-zinc-200 flex flex-col"
+            >
+              {/* Encabezado */}
+              <div className="p-5 border-b border-zinc-100 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-[8px] bg-zinc-50 text-zinc-400 font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border border-zinc-100">
+                    {drawerLead.campaignName || 'Sin campaña'}
+                  </span>
+                  <h3 className="mt-2 text-sm font-bold text-zinc-950 truncate">{drawerLead.name}</h3>
+                  <p className="text-[11px] text-zinc-400 font-semibold">{drawerLead.agent || 'Sin agente'}</p>
+                </div>
+                <button
+                  onClick={() => setDrawerLeadId(null)}
+                  aria-label="Cerrar inspector"
+                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Detalle */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs text-zinc-700">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-[12px] border border-zinc-100 bg-zinc-50/60 px-3 py-2">
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">Presupuesto</p>
+                    <p className="mt-0.5 font-black text-zinc-950">${Number(drawerLead.budget || 0).toFixed(0)}</p>
+                  </div>
+                  <div className="rounded-[12px] border border-zinc-100 bg-zinc-50/60 px-3 py-2">
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">Prioridad</p>
+                    <p className="mt-0.5 font-semibold text-zinc-800">
+                      {drawerLead.priority === 'high' ? 'Alta' : drawerLead.priority === 'low' ? 'Baja' : 'Media'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="flex items-center gap-2 font-semibold text-zinc-800">
+                    <Phone className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    {drawerLead.whatsapp || '—'}
+                  </p>
+                  <p className="flex items-center gap-2 font-semibold text-zinc-800">
+                    <Mail className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    {drawerLead.email || '—'}
+                  </p>
+                  <p className="flex items-center gap-2 font-semibold text-zinc-800">
+                    <Calendar className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    {drawerLead.created_at ? new Date(drawerLead.created_at).toLocaleDateString('es-PE') : '—'}
+                  </p>
+                </div>
+
+                {drawerLead.lastMessage && (
+                  <div>
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">Último mensaje</p>
+                    <p className="mt-1 leading-relaxed text-zinc-600">{drawerLead.lastMessage}</p>
+                  </div>
+                )}
+
+                <div className="pt-3 border-t border-zinc-100">
+                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-zinc-400 mb-2">Etapa del embudo</p>
+                  {currentRole !== 'marketing' ? (
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={drawerLead.status || 'new'}
+                        onChange={(e) => updateLeadStatus(drawerLead.id, e.target.value)}
+                        className="flex-1 text-[11px] font-bold uppercase bg-white border border-zinc-200 rounded-[10px] px-3 py-2 text-zinc-700 focus:outline-none focus:border-zinc-300"
+                      >
+                        <option value="new">Nuevo</option>
+                        <option value="contactado">Contactado</option>
+                        <option value="propuesta">Propuesta</option>
+                        <option value="negociacion">Negociación</option>
+                        <option value="ganado">Ganado</option>
+                      </select>
+                      <button
+                        onClick={() => handleMarkLost(drawerLead.id)}
+                        title="Marcar como perdido"
+                        className="p-2 rounded-[10px] border border-zinc-200 text-zinc-400 hover:text-red-500 hover:border-red-200 transition-colors"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="inline-block text-[10px] font-bold uppercase bg-zinc-50 border border-zinc-200 rounded-[10px] px-3 py-1.5 text-zinc-400">
+                      Sólo Lectura
+                    </span>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

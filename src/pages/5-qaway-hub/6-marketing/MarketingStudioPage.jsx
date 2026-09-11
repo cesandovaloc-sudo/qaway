@@ -498,6 +498,11 @@ export default function MarketingStudioPage() {
   const [executiveSlideTab, setExecutiveSlideTab] = useState('demography')
   const [slideDropdownOpen, setSlideDropdownOpen] = useState(false)
 
+  // Inspector lateral (patrón Twenty/Notion): detalle del contenido seleccionado
+  // en la tabla, sin salir de la vista ni perder el contexto del listado.
+  const [inspectorContentId, setInspectorContentId] = useState(null)
+  const inspectorContent = contents.find(c => c.id === inspectorContentId) || null
+
   const SLIDE_TABS = [
     { id: 'demography', label: '1. Demografía (Perfil & Personalidad)' },
     { id: 'needs', label: '2. Necesidades (Dolores & Dimensiones)' },
@@ -3099,7 +3104,11 @@ export default function MarketingStudioPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-slate-700">
                       {contents.map((item, index) => (
-                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                        <tr
+                          key={item.id}
+                          onClick={() => setInspectorContentId(item.id)}
+                          className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                        >
                           <td className="py-3.5 px-4 font-mono text-slate-400">{index + 1}</td>
                           <td className="py-3.5 px-4 font-bold text-slate-900">{item.title}</td>
                           <td className="py-3.5 px-4">
@@ -3121,7 +3130,10 @@ export default function MarketingStudioPage() {
                           </td>
                           <td className="py-3.5 px-4 text-right">
                             <button
-                              onClick={() => handleDeleteContent(item.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteContent(item.id)
+                              }}
                               className="p-1 rounded text-slate-400 hover:text-red-500"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -4065,6 +4077,72 @@ export default function MarketingStudioPage() {
         </div>
       )}
 
+      {/* =========================================================================
+          INSPECTOR LATERAL DE CONTENIDO (patrón Twenty/Notion)
+          ========================================================================= */}
+      <AnimatePresence>
+        {inspectorContent && (
+          <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/20 backdrop-blur-sm">
+            <div className="absolute inset-0" onClick={() => setInspectorContentId(null)} />
+
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-md h-full bg-white shadow-2xl border-l border-slate-200 flex flex-col"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                    {inspectorContent.stage} • {inspectorContent.stageName}
+                  </p>
+                  <h3 className="mt-1 text-sm font-bold text-slate-900 leading-snug">{inspectorContent.title}</h3>
+                </div>
+                <button
+                  onClick={() => setInspectorContentId(null)}
+                  aria-label="Cerrar inspector"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 text-xs text-slate-700">
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    ['Formato', inspectorContent.format],
+                    ['Canal', inspectorContent.channel],
+                    ['Estado', inspectorContent.status],
+                    ['Fecha', inspectorContent.date],
+                    ['Modelo', inspectorContent.modelType],
+                    ['Tag', inspectorContent.tag]
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2">
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">{label}</p>
+                      <p className="mt-0.5 font-semibold text-slate-800">{value || '—'}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {inspectorContent.purpose && (
+                  <div>
+                    <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Propósito</p>
+                    <p className="mt-1 leading-relaxed text-slate-600">{inspectorContent.purpose}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Persona</p>
+                  <p className="mt-1 font-semibold text-slate-800">
+                    {personas.find(p => p.id === inspectorContent.personaId)?.name || 'Sin asignar'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   )
