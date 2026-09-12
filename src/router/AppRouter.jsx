@@ -60,7 +60,7 @@ const FotografiaLinkedinPage = lazy(() => import('@/pages/8-landings/5-fotografi
 const RestauracionFotografica2Page = lazy(() => import('@/pages/8-landings/6-restauracion-fotografica2/RestauracionFotografica2Page'))
 const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'))
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
-const RutasPage = lazy(() => import('@/pages/12-rutas/RutasPage.jsx'))
+import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))

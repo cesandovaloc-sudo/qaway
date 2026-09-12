@@ -100,12 +100,59 @@ export function QawayLeadContactForm() {
       setSubmitted(true);
       e.currentTarget.reset();
 
-      // 3. Abrir WhatsApp directamente con mensaje estructurado
-      const contactMsg = encodeURIComponent(
-        `Hola Qaway Lab, quiero cotizar mi proyecto web:\n\n• Nombre: ${lead.name}\n• Empresa: ${lead.company || "No especificada"}\n• WhatsApp: ${lead.phone}\n• Email: ${lead.email}\n• Presupuesto: ${lead.budget}\n• Plazo: ${lead.timeline}\n• Mensaje: ${lead.message || "Solicito cotización"}`
-      );
-      const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
-      window.location.href = waUrl;
+      // 3. Mapear el plan seleccionado e ingresarlo al carrito
+      let selectedProduct = {
+        id: 'web-comercial',
+        title: 'Web Comercial Corporativa',
+        slug: 'web-comercial',
+        price: 290.0,
+        type: 'service',
+        category: 'Desarrollo Web',
+        quantity: 1,
+        image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
+      };
+
+      if (selectedBudget.includes("One Web")) {
+        selectedProduct = {
+          id: 'one-web',
+          title: 'One Web (Landing Page de Alto Impacto)',
+          slug: 'one-web',
+          price: 79.90,
+          type: 'service',
+          category: 'Desarrollo Web',
+          quantity: 1,
+          image_url: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=600&q=80',
+        };
+      } else if (selectedBudget.includes("Tienda Online")) {
+        selectedProduct = {
+          id: 'tienda-online',
+          title: 'Tienda Online Autoadministrable',
+          slug: 'tienda-online',
+          price: 490.0,
+          type: 'service',
+          category: 'Desarrollo Web',
+          quantity: 1,
+          image_url: 'https://images.unsplash.com/photo-1556742049-0a67e55722c0?auto=format&fit=crop&w=600&q=80',
+        };
+      }
+
+      // Guardar en el carrito persistente
+      try {
+        const currentCart = JSON.parse(localStorage.getItem('qaway_cart') || '[]');
+        const exists = currentCart.find((p) => p.id === selectedProduct.id);
+        const nextCart = exists ? currentCart : [...currentCart, selectedProduct];
+        localStorage.setItem('qaway_cart', JSON.stringify(nextCart));
+        localStorage.setItem('qaway_checkout_user', JSON.stringify({
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone,
+        }));
+      } catch (err) {
+        console.warn('Error al persistir carrito:', err);
+      }
+
+      // Redirigir al Carrito oficial de pagos
+      window.location.href = '/hub/pagos/carrito';
     } catch (err) {
       console.error("Error al enviar formulario:", err);
       setSubmitError("Hubo un problema de conexión. Puedes escribirnos directamente por WhatsApp.");
@@ -290,7 +337,7 @@ export function QawayLeadContactForm() {
                     </>
                   ) : (
                     <>
-                      <span>Enviar solicitud</span>
+                      <span>Continuar con mi Pedido</span>
                       <ArrowRight size={18} />
                     </>
                   )}

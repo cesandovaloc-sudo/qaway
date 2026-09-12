@@ -55,12 +55,25 @@ export default function Checkout({
   const [orderCompleted, setOrderCompleted] = useState(null)
 
   // Form State
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    district: '',
-    address: '',
-    notes: '',
+  const [formData, setFormData] = useState(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem('qaway_checkout_user') || '{}')
+      return {
+        name: savedUser.name || '',
+        phone: savedUser.phone || '',
+        district: '',
+        address: '',
+        notes: '',
+      }
+    } catch {
+      return {
+        name: '',
+        phone: '',
+        district: '',
+        address: '',
+        notes: '',
+      }
+    }
   })
   const [proofFile, setProofFile] = useState(null)
 

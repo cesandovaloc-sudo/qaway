@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useParams, useLocation } from 'react-router-dom'
 import {
   createQawaServices,
@@ -68,6 +68,60 @@ const SAMPLE_PRODUCTS = [
       ['Licencia', 'Uso Comercial Ilimitado'],
     ],
   },
+  {
+    id: 'one-web',
+    title: 'One Web (Landing Page de Alto Impacto)',
+    slug: 'one-web',
+    price: 79.90,
+    type: 'service',
+    category: 'Desarrollo Web',
+    description:
+      'Diseño web de una sola página de alto impacto, adaptado a tu marca, optimizado para móviles y conexión directa a WhatsApp.',
+    image_url:
+      'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=600&q=80',
+    facts: [
+      ['Tipo', 'Landing Page One Page'],
+      ['Entrega', 'Rápida (3 a 5 días)'],
+      ['Optimización', 'Móviles, SEO y Carga Rápida'],
+      ['Soporte', 'Garantía Qaway Lab'],
+    ],
+  },
+  {
+    id: 'web-comercial',
+    title: 'Web Comercial Corporativa',
+    slug: 'web-comercial',
+    price: 290.0,
+    type: 'service',
+    category: 'Desarrollo Web',
+    description:
+      'Sitio web corporativo de hasta 5 secciones principales, diseño corporativo, formulario de contacto, mapas y WhatsApp.',
+    image_url:
+      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
+    facts: [
+      ['Tipo', 'Sitio Web Multi-sección'],
+      ['Páginas', 'Hasta 5 secciones'],
+      ['Integraciones', 'WhatsApp + Formulario + Maps'],
+      ['Diseño', '100% Personalizado'],
+    ],
+  },
+  {
+    id: 'tienda-online',
+    title: 'Tienda Online Autoadministrable',
+    slug: 'tienda-online',
+    price: 490.0,
+    type: 'service',
+    category: 'Desarrollo Web',
+    description:
+      'Catálogo digital interactivo con carrito, panel autoadministrable de productos, stock y pasarela de cobros.',
+    image_url:
+      'https://images.unsplash.com/photo-1556742049-0a67e55722c0?auto=format&fit=crop&w=600&q=80',
+    facts: [
+      ['Tipo', 'E-commerce / Tienda Online'],
+      ['Catálogo', 'Productos ilimitados + Carrito'],
+      ['Panel', 'Gestor de stock y pedidos'],
+      ['Pagos', 'Multi-método integrado'],
+    ],
+  },
 ]
 
 const DEMO_USER = { id: 'user-demo-001', email: 'demo@qawaylab.com' }
@@ -111,13 +165,45 @@ const { payments, orders, products } = createQawaServices(activeSupabase, {
 })
 
 export default function PagosAppPage() {
-  const [cart, setCart] = useState([])
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('qaway_cart')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const location = useLocation()
+
+  // Sincronizar persistencia en localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('qaway_cart', JSON.stringify(cart))
+    } catch (e) {
+      console.warn('[Qaway Pagos] Error al persistir carrito:', e)
+    }
+  }, [cart])
+
+  // Soporte de precarga directa por parámetro ?plan=... o ?add=...
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const planSlug = params.get('plan') || params.get('add')
+    if (planSlug) {
+      const targetProduct = SAMPLE_PRODUCTS.find((p) => p.slug === planSlug || p.id === planSlug)
+      if (targetProduct) {
+        addToCart(targetProduct, 1)
+      }
+    }
+  }, [location.search])
 
   function addToCart(product, quantity = 1) {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id)
       if (existing) {
+        // Si es un servicio, mantener en 1 para no duplicar compra única
+        if (product.type === 'service' || product.type === 'course') {
+          return prev
+        }
         return prev.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
         )
