@@ -15,7 +15,8 @@ export default function RequireAuth() {
   }
 
   if (!session) {
-    return <Navigate to="/login" replace state={{ from: location }} />
+    const loginPath = location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/login' : '/login'
+    return <Navigate to={loginPath} replace state={{ from: location }} />
   }
 
   return <Outlet />

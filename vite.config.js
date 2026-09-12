@@ -19,6 +19,10 @@ export default defineConfig({
             const target = path.resolve(__dirname, 'src/pages/4-academy/2-qawaylab-app-academy-real/src', source)
             return this.resolve(target, importer, { skipSelf: true, ...options })
           }
+          if (importer && importer.replace(/\\/g, '/').includes('10-qawaylab-inventario')) {
+            const target = path.resolve(__dirname, 'src/pages/5-qaway-hub/10-qawaylab-inventario/src', source)
+            return this.resolve(target, importer, { skipSelf: true, ...options })
+          }
           const mainTarget = path.resolve(__dirname, 'src', source)
           return this.resolve(mainTarget, importer, { skipSelf: true, ...options })
         },

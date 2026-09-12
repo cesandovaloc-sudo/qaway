@@ -45,6 +45,7 @@ const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marke
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 const PagosAppPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosAppPage'))
+const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -275,6 +276,14 @@ export default function AppRouter() {
         <Route
           path="hub/pagos"
           element={<PagosAppPage />}
+        />
+        <Route
+          path="hub/inventario/*"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="hub/inventario"
+          element={<InventarioAppPage />}
         />
         <Route
           path="hub/gestor-proyectos-v2"

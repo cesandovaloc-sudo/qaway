@@ -26,6 +26,7 @@ import {
   RotateCcw,
   Instagram,
   CreditCard,
+  Package,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -53,6 +54,17 @@ const routes = [
     badge: 'Módulo Pagos',
     category: 'Comercio & Finanzas',
     tone: 'bg-emerald-500/10 text-emerald-500',
+    published: true,
+  },
+  {
+    icon: Package,
+    title: 'Qaway Inventario & ERP Comercial',
+    description: 'Sistema integral de gestión de productos, stock, almacenes, movimientos Kardex, captura con IA, facturación y cotizaciones.',
+    path: '/hub/inventario',
+    access: 'pro',
+    badge: 'SaaS ERP',
+    category: 'Logística & Almacenes',
+    tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     published: true,
   },
   {

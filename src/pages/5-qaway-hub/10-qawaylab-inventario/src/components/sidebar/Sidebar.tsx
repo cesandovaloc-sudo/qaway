@@ -61,6 +61,13 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
 
+  const getHref = (to: string) => {
+    const isCoupled = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')
+    if (!isCoupled) return to
+    if (to === '/') return '/hub/inventario'
+    return `/hub/inventario${to.startsWith('/') ? to : `/${to}`}`
+  }
+
   return (
     <aside
       className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-ink transition-all duration-300 overflow-y-auto ${
@@ -89,7 +96,7 @@ export default function Sidebar() {
               </div>
             )}
             <NavLink
-              to={item.to}
+              to={getHref(item.to)}
               end={item.end}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
@@ -110,7 +117,7 @@ export default function Sidebar() {
       {!collapsed && (
         <div className="px-3 pb-3">
           <NavLink
-            to="/captura"
+            to={getHref('/captura')}
             className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-light transition-colors"
           >
             <Camera size={16} />
@@ -129,7 +136,7 @@ export default function Sidebar() {
 
       {/* Settings */}
       <NavLink
-        to="/config"
+        to={getHref('/config')}
         className={({ isActive }) =>
           `flex items-center gap-3 px-3 py-3 border-t border-white/10 text-sm transition-colors ${
             isActive ? 'text-brand' : 'text-muted-light hover:text-white'
