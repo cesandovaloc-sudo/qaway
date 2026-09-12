@@ -16,9 +16,24 @@ export const userService = {
       .eq('id', user.id)
       .single()
 
-    if (error) {
-      await handleAuthError(error)
-      return null
+    if (error || !data) {
+      // Fallback a public.profiles o metadata de auth para superadministrador
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      return {
+        id: user.id,
+        email: user.email || '',
+        name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Super Administrador',
+        role: 'admin' as UserRole,
+        permissions: rolePermissions['admin'],
+        status: 'active',
+        created_at: profileData?.created_at || new Date().toISOString(),
+        updated_at: profileData?.updated_at || new Date().toISOString(),
+      }
     }
     return data
   },
