@@ -17,6 +17,7 @@ export default function CookieBanner() {
 
   const acceptCookies = () => {
     localStorage.setItem('qaway_cookie_consent', 'accepted')
+    window.dispatchEvent(new Event('qaway_cookie_consent_change'))
     setIsVisible(false)
   }
 

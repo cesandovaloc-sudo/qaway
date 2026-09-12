@@ -1297,7 +1297,10 @@ export default function InicioPage() {
         })
       }
 
-      setSubmitted(true)
+      setSubmitted(true);
+      if (window.fbq) {
+        window.fbq('track', 'Lead');
+      }
       formElement.reset()
       
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)

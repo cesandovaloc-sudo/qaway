@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useCookieConsent } from "@/context/CookieConsentContext";
-import { useAuth } from "@/context/AuthContext";
 
 const COUNTRIES_REQUIRING_CONSENT = [
   // LATAM
@@ -13,8 +11,10 @@ const COUNTRIES_REQUIRING_CONSENT = [
 ];
 
 export default function PixelConfigPanel() {
-  const { user } = useAuth();
-  const { accepted, setAccepted } = useCookieConsent();
+  const [accepted, setAccepted] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("qaway_cookie_consent") === "accepted";
+  });
   const [loadAlways, setLoadAlways] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState(["PageView", "Lead", "AddToCart", "Purchase"]);
   const [country, setCountry] = useState(null);
@@ -23,12 +23,10 @@ export default function PixelConfigPanel() {
     fetch("https://ipapi.co/json/")
       .then(r => r.json())
       .then(d => setCountry(d.country_code))
-      .catch(() => setCountry("US"));
+      .catch(() => setCountry("PE"));
   }, []);
 
   const shouldLoadPixel = loadAlways || (country && !COUNTRIES_REQUIRING_CONSENT.includes(country)) || accepted;
-
-  if (!user?.isAdmin) return null;
 
   const toggleEvent = (ev) => {
     setSelectedEvents(prev =>

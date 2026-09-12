@@ -522,7 +522,10 @@ export default function RutasPage() {
     try {
       const saved = localStorage.getItem('qaway_dist_approved_paths')
       if (saved) {
-        return new Set(JSON.parse(saved))
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          return new Set(parsed)
+        }
       }
     } catch {
       // ignore
