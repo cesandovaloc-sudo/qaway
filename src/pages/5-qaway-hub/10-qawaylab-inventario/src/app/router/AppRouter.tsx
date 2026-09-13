@@ -18,6 +18,7 @@ import QuotationsPage from '@/pages/quotations/QuotationsPage'
 import SalesPage from '@/pages/sales/SalesPage'
 import NewSalePage from '@/pages/sales/NewSalePage'
 import SaleDetailPage from '@/pages/sales/SaleDetailPage'
+import WebOrdersPage from '@/pages/sales/WebOrdersPage'
 import SuppliersPage from '@/pages/suppliers/SuppliersPage'
 import PurchaseOrdersPage from '@/pages/purchases/PurchaseOrdersPage'
 import NewPurchaseOrderPage from '@/pages/purchases/NewPurchaseOrderPage'
@@ -71,6 +72,7 @@ export default function AppRouter() {
 
           {/* Ventas */}
           <Route path="ventas" element={<SalesPage />} />
+          <Route path="ventas/pedidos-web" element={<WebOrdersPage />} />
           <Route path="ventas/nueva" element={<NewSalePage />} />
           <Route path="ventas/:id" element={<SaleDetailPage />} />
 

@@ -154,6 +154,7 @@ async function captureWebAndMobile({
     mobile: false
   });
   await sendCDP(ws, 'Page.navigate', { url });
+  await sendCDP(ws, 'Runtime.evaluate', { expression: `localStorage.setItem('qaway_cookie_consent', 'accepted');` });
   await new Promise(r => setTimeout(r, 1500));
   await sendCDP(ws, 'Runtime.evaluate', { expression: prepareDOMScript, awaitPromise: true });
   await new Promise(r => setTimeout(r, 1000));
