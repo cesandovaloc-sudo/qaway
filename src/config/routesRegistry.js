@@ -715,6 +715,7 @@ function buildDynamicHierarchicalRoutes(baseRoutes) {
       }
 
       const topFolder = parts[0]?.toLowerCase() || ''
+      const mapping = folderToCategoryMap[topFolder]
       // Buscar o crear la tarjeta padre
       let parentCard = mapping
         ? routes.find((r) => r.id === mapping.parentId || r.category === mapping.category)

@@ -154,10 +154,29 @@ async function captureWebAndMobile({
     mobile: false
   });
   await sendCDP(ws, 'Page.navigate', { url });
-  await sendCDP(ws, 'Runtime.evaluate', { expression: `localStorage.setItem('qaway_cookie_consent', 'accepted');` });
-  await new Promise(r => setTimeout(r, 1500));
+  await sendCDP(ws, 'Runtime.evaluate', { 
+    expression: `
+      localStorage.setItem('qaway_cookie_consent', 'accepted');
+      window.dispatchEvent(new Event('qaway_cookie_consent_change'));
+    ` 
+  });
+  await new Promise(r => setTimeout(r, 2000));
   await sendCDP(ws, 'Runtime.evaluate', { expression: prepareDOMScript, awaitPromise: true });
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Ocultar cualquier elemento del CookieBanner antes de tomar la captura
+  await sendCDP(ws, 'Runtime.evaluate', {
+    expression: `
+      (() => {
+        document.querySelectorAll('div').forEach(el => {
+          if (el.textContent && (el.textContent.includes('cookies') || el.textContent.includes('Utilizamos cookies'))) {
+            el.style.display = 'none';
+            el.remove();
+          }
+        });
+      })()
+    `
+  });
 
   const s1EndRes = await sendCDP(ws, 'Runtime.evaluate', {
     expression: `
