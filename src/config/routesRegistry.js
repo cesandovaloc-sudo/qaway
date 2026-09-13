@@ -200,12 +200,6 @@ const baseHierarchicalRoutes = [
         description: 'Planificación editorial, lanzamientos de productos y campañas de contenido.',
         tag: 'Marketing',
       },
-      {
-        title: 'Marketing Studio Twenty',
-        path: '/hub/marketing2',
-        description: 'Módulo extendido de experimentación y segmentación de audiencias para growth.',
-        tag: 'Growth',
-      },
     ],
   },
 

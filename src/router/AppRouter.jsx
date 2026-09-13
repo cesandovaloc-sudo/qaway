@@ -41,7 +41,6 @@ const AnalyticsStudioPage = lazy(() => import('@/pages/5-qaway-hub/analytics/Ana
 const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizador-webp/OptimizadorWebpHubPage'))
 const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'))
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
-const MarketingStudioTwentyPage = lazy(() => import('@/pages/5-qaway-hub/7-marketing2/MarketingStudioTwentyPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 const PagosAppPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosAppPage'))
@@ -258,10 +257,6 @@ export default function AppRouter() {
           element={<MarketingStudioPage />}
         />
         <Route
-          path="/hub/marketing2"
-          element={<MarketingStudioTwentyPage />}
-        />
-        <Route
           path="hub/agenda/*"
           element={<AgendaAppPage />}
         />
@@ -305,19 +300,27 @@ export default function AppRouter() {
           path="hub/gestor-proyectos-v2"
           element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
         />
+        <Route
+          path="hub/pagos/*"
+          element={renderRoute('hub', <PagosAppPage />)}
+        />
+        <Route
+          path="hub/pagos"
+          element={renderRoute('hub', <PagosAppPage />)}
+        />
+        <Route
+          path="/hub/pagos/*"
+          element={renderRoute('hub', <PagosAppPage />)}
+        />
+        <Route
+          path="/hub/pagos"
+          element={renderRoute('hub', <PagosAppPage />)}
+        />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
-          />
-          <Route
-            path="hub/pagos/*"
-            element={renderRoute('hub', <PagosAppPage />)}
-          />
-          <Route
-            path="hub/pagos"
-            element={renderRoute('hub', <PagosAppPage />)}
           />
           <Route
             path="hub/creador-contenido"
