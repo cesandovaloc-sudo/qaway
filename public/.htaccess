@@ -1,11 +1,15 @@
-﻿# Qaway Lab - Fallback SPA cuando el DocumentRoot es dist/
+# Qaway Lab - Fallback SPA cuando el DocumentRoot es dist/
 DirectoryIndex index.html
 DirectorySlash Off
 
 RewriteEngine On
 RewriteBase /
 
-# 1. Si el archivo existe fisicamente (js, css, imagenes, etc.), servirlo directamente
+# 1. Despachador dinamico Open Graph en tiempo real para rastreadores de redes sociales
+RewriteCond %{HTTP_USER_AGENT} (facebookexternalhit|Facebot|Twitterbot|LinkedInBot|WhatsApp|TelegramBot|Discordbot|Applebot|Google-InspectionTool) [NC]
+RewriteRule ^blog/articulo/([^/]+)/?$ /og-preview.php?slug=$1 [L,QSA]
+
+# 2. Si el archivo existe fisicamente (js, css, imagenes, etc.), servirlo directamente
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ - [L]
 
