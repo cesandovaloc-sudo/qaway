@@ -715,31 +715,68 @@ function buildDynamicHierarchicalRoutes(baseRoutes) {
       }
 
       const topFolder = parts[0]?.toLowerCase() || ''
-      const mapping = folderToCategoryMap[topFolder]
+      // Buscar o crear la tarjeta padre
+      let parentCard = mapping
+        ? routes.find((r) => r.id === mapping.parentId || r.category === mapping.category)
+        : routes.find((r) => r.title.toLowerCase().includes(topFolder))
 
       // Generar ruta estimada para la página
-      const cleanParts = parts.map((p) => {
-        let clean = p.replace(/\.(jsx|tsx)$/, '')
-        clean = clean.replace(/^\d+[-_]?\s*/, '')
-        clean = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-        return clean
-      }).filter(Boolean)
+      let derivedPath = ''
+      if (parentCard && parentCard.path) {
+        const subParts = parts.slice(1, parts.length - 1)
+        const cleanedSub = subParts.map((p) => {
+          return p
+            .replace(/^\d+[-_]?\s*/, '')
+            .replace(/^qawaylab-/, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+        }).filter(Boolean)
 
-      const derivedPath = '/' + cleanParts.join('/')
+        const isAppEntry =
+          fileName.endsWith('AppPage.jsx') ||
+          fileName.endsWith('AppPage.tsx') ||
+          fileName.startsWith('Index.') ||
+          (cleanedSub.length > 0 &&
+            fileName.toLowerCase().replace(/page\.(jsx|tsx)$/, '').includes(cleanedSub[cleanedSub.length - 1]))
+
+        if (isAppEntry && cleanedSub.length > 0) {
+          const basePath = parentCard.path === '/' ? '' : parentCard.path
+          derivedPath = `${basePath}/${cleanedSub.join('/')}`
+        } else {
+          const cleanFile = fileName
+            .replace(/\.(jsx|tsx)$/, '')
+            .replace(/^\d+[-_]?\s*/, '')
+            .replace(/Page$/, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+          const combined = [...cleanedSub, cleanFile].filter(Boolean)
+          const basePath = parentCard.path === '/' ? '' : parentCard.path
+          derivedPath = `${basePath}/${combined.join('/')}`
+        }
+      } else {
+        const cleanParts = parts.map((p) => {
+          let clean = p.replace(/\.(jsx|tsx)$/, '')
+          clean = clean.replace(/^\d+[-_]?\s*/, '')
+          clean = clean.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+          return clean
+        }).filter(Boolean)
+        derivedPath = '/' + cleanParts.join('/')
+      }
 
       // Si ya está registrada en la suite o en children, omitir
       if (existingPaths.has(derivedPath)) {
         return
       }
 
-      // Buscar o crear la tarjeta padre
-      let parentCard = mapping
-        ? routes.find((r) => r.id === mapping.parentId || r.category === mapping.category)
-        : routes.find((r) => r.title.toLowerCase().includes(topFolder))
-
       if (parentCard) {
+        const displayTitle = fileName.endsWith('AppPage.jsx') || fileName.endsWith('AppPage.tsx')
+          ? cleanTitle(fileName).replace(/App$/, '').trim() || cleanTitle(fileName)
+          : cleanTitle(fileName)
+
         parentCard.children.push({
-          title: cleanTitle(fileName),
+          title: displayTitle,
           path: derivedPath,
           description: `Página detectada automáticamente en ${relative}.`,
           tag: 'Auto-detectado',

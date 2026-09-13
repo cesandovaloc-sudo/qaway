@@ -34,6 +34,7 @@ const publicPathAllowList = new Set([
   '/hub',
   '/hub/blog-editor',
   '/hub/blog-editor/editor/:id',
+  '/hub/inventario',
   '/landings/desarrollo-web',
   '/landings/identidad-visual',
   '/landings/sistema-contenido-notion',

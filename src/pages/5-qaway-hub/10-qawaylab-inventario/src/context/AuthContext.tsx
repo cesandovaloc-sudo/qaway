@@ -23,6 +23,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true
 
+    // Temporizador de seguridad (failsafe)
+    const failsafe = setTimeout(() => {
+      if (mounted) setLoading(false)
+    }, 1500)
+
     supabase.auth
       .getSession()
       .then(({ data }) => {
@@ -42,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false
+      clearTimeout(failsafe)
       subscription.unsubscribe()
     }
   }, [])

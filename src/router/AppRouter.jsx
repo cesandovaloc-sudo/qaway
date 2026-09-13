@@ -270,11 +270,27 @@ export default function AppRouter() {
           element={<AgendaAppPage />}
         />
         <Route
+          path="/hub/inventario/*"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="/hub/inventario"
+          element={<InventarioAppPage />}
+        />
+        <Route
           path="hub/inventario/*"
           element={<InventarioAppPage />}
         />
         <Route
           path="hub/inventario"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="/inventario/*"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="/inventario"
           element={<InventarioAppPage />}
         />
         <Route
