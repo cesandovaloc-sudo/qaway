@@ -270,19 +270,19 @@ export default function AppRouter() {
           element={<AgendaAppPage />}
         />
         <Route
-          path="hub/pagos/*"
-          element={<PagosAppPage />}
-        />
-        <Route
-          path="hub/pagos"
-          element={<PagosAppPage />}
-        />
-        <Route
           path="hub/inventario/*"
           element={<InventarioAppPage />}
         />
         <Route
           path="hub/inventario"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="inventario/*"
+          element={<InventarioAppPage />}
+        />
+        <Route
+          path="inventario"
           element={<InventarioAppPage />}
         />
         <Route
@@ -294,6 +294,14 @@ export default function AppRouter() {
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
+          />
+          <Route
+            path="hub/pagos/*"
+            element={renderRoute('hub', <PagosAppPage />)}
+          />
+          <Route
+            path="hub/pagos"
+            element={renderRoute('hub', <PagosAppPage />)}
           />
           <Route
             path="hub/creador-contenido"

@@ -5,6 +5,7 @@ import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProductsPage from '@/pages/inventory/ProductsPage'
 import ProductDetailPage from '@/pages/inventory/ProductDetailPage'
+import NewProductPage from '@/pages/inventory/NewProductPage'
 import CategoriesPage from '@/pages/inventory/CategoriesPage'
 import LocationsPage from '@/pages/inventory/LocationsPage'
 import MovementsPage from '@/pages/inventory/MovementsPage'
@@ -48,12 +49,18 @@ export default function AppRouter() {
           {/* Dashboard */}
           <Route index element={<DashboardPage />} />
 
-          {/* Logística */}
+          {/* Logística / Inventario */}
           <Route path="logistica" element={<ProductsPage />} />
+          <Route path="logistica/nuevo" element={<NewProductPage />} />
           <Route path="logistica/:id" element={<ProductDetailPage />} />
           <Route path="logistica/categorias" element={<CategoriesPage />} />
           <Route path="logistica/ubicaciones" element={<LocationsPage />} />
           <Route path="logistica/movimientos" element={<MovementsPage />} />
+          <Route path="inventario" element={<ProductsPage />} />
+          <Route path="inventario/nuevo" element={<NewProductPage />} />
+          <Route path="inventario/:id" element={<ProductDetailPage />} />
+          <Route path="nuevo" element={<NewProductPage />} />
+          <Route path=":id" element={<ProductDetailPage />} />
 
           {/* Comercial */}
           <Route path="clientes" element={<CustomersPage />} />

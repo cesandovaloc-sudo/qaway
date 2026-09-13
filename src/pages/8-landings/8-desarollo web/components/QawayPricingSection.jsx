@@ -1,8 +1,58 @@
 import { motion } from "framer-motion";
 import { Check, Flame } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { DigitalCountdown } from "./DigitalCountdown";
 
 export function QawayPricingSection() {
+  const navigate = useNavigate();
+
+  const handleSelectPlan = (plan) => {
+    const productMap = {
+      'web-comercial': {
+        id: 'web-comercial',
+        title: 'Web Comercial Corporativa',
+        slug: 'web-comercial',
+        price: 290.0,
+        type: 'service',
+        category: 'Desarrollo Web',
+        quantity: 1,
+        image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
+      },
+      'one-web': {
+        id: 'one-web',
+        title: 'One Web (Landing Page de Alto Impacto)',
+        slug: 'one-web',
+        price: 79.90,
+        type: 'service',
+        category: 'Desarrollo Web',
+        quantity: 1,
+        image_url: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=600&q=80',
+      },
+      'tienda-online': {
+        id: 'tienda-online',
+        title: 'Tienda Online Autoadministrable',
+        slug: 'tienda-online',
+        price: 490.0,
+        type: 'service',
+        category: 'Desarrollo Web',
+        quantity: 1,
+        image_url: 'https://images.unsplash.com/photo-1556742049-0a67e55722c0?auto=format&fit=crop&w=600&q=80',
+      },
+    };
+
+    const selectedProduct = productMap[plan.id];
+    if (selectedProduct) {
+      try {
+        const currentCart = JSON.parse(localStorage.getItem('qaway_cart') || '[]');
+        const exists = currentCart.find((p) => p.id === selectedProduct.id);
+        const nextCart = exists ? currentCart : [...currentCart, selectedProduct];
+        localStorage.setItem('qaway_cart', JSON.stringify(nextCart));
+      } catch (err) {
+        console.warn('Error al persistir carrito:', err);
+      }
+    }
+    navigate(`/hub/pagos/carrito?add=${plan.id}`);
+  };
   const plans = [
     {
       id: "web-comercial",
@@ -184,11 +234,10 @@ export function QawayPricingSection() {
                   </ul>
                 </div>
 
-                {/* Botón CTA */}
-                <a
-                  href={p.waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                {/* Botón CTA hacia Carrito */}
+                <button
+                  type="button"
+                  onClick={() => handleSelectPlan(p)}
                   aria-label={`Elegir plan ${p.name}`}
                   style={{
                     display: "block",
@@ -198,6 +247,8 @@ export function QawayPricingSection() {
                     textAlign: "center",
                     fontWeight: "700",
                     fontSize: "14px",
+                    border: "none",
+                    cursor: "pointer",
                     textDecoration: "none",
                     transition: "all 0.2s ease",
                     background: isEmpresarial ? "#fe6612" : "#18181b",
@@ -222,7 +273,7 @@ export function QawayPricingSection() {
                   }}
                 >
                   {p.btnText}
-                </a>
+                </button>
               </motion.div>
             );
           })}

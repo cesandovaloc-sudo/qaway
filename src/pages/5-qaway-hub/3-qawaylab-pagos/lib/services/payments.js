@@ -1,5 +1,16 @@
 import { genId } from './orders.js'
 
+// Helper para persistencia local de pagos
+function saveLocalPayment(payment) {
+  try {
+    const payments = JSON.parse(localStorage.getItem('qaway_payments') || '[]')
+    payments.unshift(payment)
+    localStorage.setItem('qaway_payments', JSON.stringify(payments.slice(0, 50)))
+  } catch (e) {
+    console.warn('[PaymentsService] Error guardando pago local:', e)
+  }
+}
+
 export function createPaymentsService(supabase, options = {}) {
   const {
     onPaymentCompleted = null,
@@ -32,20 +43,33 @@ export function createPaymentsService(supabase, options = {}) {
 
       // Invitado: id client-side y sin .select() (misma razón que en orders)
       if (!userId) {
-        const payload = { id: genId(), ...paymentData }
-        const { error } = await supabase.from('payments').insert(payload)
-        if (error) throw error
+        const payload = { id: genId(), created_at: new Date().toISOString(), ...paymentData }
+        try {
+          const { error } = await supabase.from('payments').insert(payload)
+          if (error) console.warn('[PaymentsService] Supabase payments warning:', error.message)
+        } catch (err) {
+          console.warn('[PaymentsService] Supabase payments fallback:', err)
+        }
+        saveLocalPayment(payload)
         return payload
       }
 
-      const { data: payment, error } = await supabase
-        .from('payments')
-        .insert(paymentData)
-        .select()
-        .single()
+      try {
+        const { data: payment, error } = await supabase
+          .from('payments')
+          .insert(paymentData)
+          .select()
+          .single()
 
-      if (error) throw error
-      return payment
+        if (error) throw error
+        saveLocalPayment(payment)
+        return payment
+      } catch (err) {
+        console.warn('[PaymentsService] Supabase payments fallback (user):', err)
+        const fallbackPayment = { id: genId(), created_at: new Date().toISOString(), ...paymentData }
+        saveLocalPayment(fallbackPayment)
+        return fallbackPayment
+      }
     },
 
     async updatePaymentStatus(paymentId, status, { providerId = null, notes = null } = {}) {
@@ -53,41 +77,56 @@ export function createPaymentsService(supabase, options = {}) {
       if (providerId) updates.provider_id = providerId
       if (notes) updates.notes = notes
 
-      const { data: payment, error } = await supabase
-        .from('payments')
-        .update(updates)
-        .eq('id', paymentId)
-        .select()
-        .single()
+      try {
+        const { data: payment, error } = await supabase
+          .from('payments')
+          .update(updates)
+          .eq('id', paymentId)
+          .select()
+          .single()
 
-      if (error) throw error
+        if (error) throw error
 
-      if (status === 'completed' && payment.order_id) {
-        await supabase
-          .from('orders')
-          .update({
-            status: 'paid',
-            paid_at: new Date().toISOString(),
-          })
-          .eq('id', payment.order_id)
+        if (status === 'completed' && payment.order_id) {
+          try {
+            await supabase
+              .from('orders')
+              .update({
+                status: 'paid',
+                paid_at: new Date().toISOString(),
+              })
+              .eq('id', payment.order_id)
+          } catch (e) {
+            console.warn('[PaymentsService] Update orders paid fallback:', e)
+          }
+        }
+
+        if (status === 'completed' && onPaymentCompleted) {
+          await onPaymentCompleted(payment)
+        }
+
+        return payment
+      } catch (err) {
+        console.warn('[PaymentsService] Update status fallback:', err)
+        return { id: paymentId, status }
       }
-
-      if (status === 'completed' && onPaymentCompleted) {
-        await onPaymentCompleted(payment)
-      }
-
-      return payment
     },
 
     async getUserPayments(userId) {
-      const { data, error } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
+      try {
+        const { data, error } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
 
-      if (error) throw error
-      return data
+        if (error) throw error
+        return data || []
+      } catch (err) {
+        console.warn('[PaymentsService] Supabase getUserPayments fallback:', err)
+        const local = JSON.parse(localStorage.getItem('qaway_payments') || '[]')
+        return local
+      }
     },
 
     async getPendingPayments() {

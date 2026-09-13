@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { Plus, Camera, Search, Filter, Grid3X3, List, X, FileSpreadsheet } from 'lucide-react'
 import { useProducts } from '@/hooks/useProducts'
 import ProductTable from '@/components/products/ProductTable'
@@ -21,7 +21,8 @@ export default function ProductsPage() {
   const [importOpen, setImportOpen] = useState(false)
 
   const handleProductClick = useCallback((product: Product) => {
-    navigate(`/inventario/${product.id}`)
+    const isHub = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')
+    navigate(isHub ? `/hub/inventario/logistica/${product.id}` : `/inventario/${product.id}`)
   }, [navigate])
 
   const handleSearch = useCallback(
@@ -78,20 +79,20 @@ export default function ProductsPage() {
             <FileSpreadsheet size={14} />
             Importar
           </button>
-          <a
-            href="/captura"
+          <Link
+            to={typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/captura' : '/captura'}
             className="inline-flex items-center gap-2 px-3 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
           >
             <Camera size={14} />
             Capturar
-          </a>
-          <a
-            href="/inventario/nuevo"
+          </Link>
+          <Link
+            to={typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/logistica/nuevo' : '/inventario/nuevo'}
             className="inline-flex items-center gap-2 px-3 py-2 bg-white text-ink border border-surface-muted rounded-lg text-sm font-medium hover:border-brand/30 transition-colors"
           >
             <Plus size={14} />
             Nuevo
-          </a>
+          </Link>
         </div>
       </div>
 

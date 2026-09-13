@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { 
   Plus, 
   Camera, 
@@ -56,6 +57,17 @@ const actions: QuickAction[] = [
 ]
 
 export function QuickActions() {
+  const getHref = (href: string) => {
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+    const basePrefix = pathname.startsWith('/hub/inventario')
+      ? '/hub/inventario'
+      : pathname.startsWith('/inventario')
+      ? '/inventario'
+      : ''
+    if (!basePrefix) return href
+    return `${basePrefix}${href.startsWith('/') ? href : `/${href}`}`
+  }
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
@@ -67,9 +79,9 @@ export function QuickActions() {
       
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {actions.map((action) => (
-          <a
+          <Link
             key={action.label}
-            href={action.href}
+            to={getHref(action.href)}
             className={`
               relative group
               flex flex-col items-center gap-3 
@@ -136,7 +148,7 @@ export function QuickActions() {
               }
               transition-all duration-300
             `} />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

@@ -62,10 +62,15 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
 
   const getHref = (to: string) => {
-    const isCoupled = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')
-    if (!isCoupled) return to
-    if (to === '/') return '/hub/inventario'
-    return `/hub/inventario${to.startsWith('/') ? to : `/${to}`}`
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
+    const basePrefix = pathname.startsWith('/hub/inventario')
+      ? '/hub/inventario'
+      : pathname.startsWith('/inventario')
+      ? '/inventario'
+      : ''
+    if (!basePrefix) return to
+    if (to === '/') return basePrefix
+    return `${basePrefix}${to.startsWith('/') ? to : `/${to}`}`
   }
 
   return (
