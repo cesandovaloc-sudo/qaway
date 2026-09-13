@@ -6,51 +6,11 @@ import { DigitalCountdown } from "./DigitalCountdown";
 export function QawayPricingSection() {
   const navigate = useNavigate();
 
+  // Única vía de entrada al carrito: el propio carrito resuelve el slug contra
+  // su catálogo vigente (Supabase). Escribir aquí un objeto con identidad
+  // estática creaba una segunda identidad para el mismo producto y duplicaba
+  // la fila en "Mi pedido".
   const handleSelectPlan = (plan) => {
-    const productMap = {
-      'web-comercial': {
-        id: 'web-comercial',
-        title: 'Web Comercial Corporativa',
-        slug: 'web-comercial',
-        price: 290.0,
-        type: 'service',
-        category: 'Desarrollo Web',
-        quantity: 1,
-        image_url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-      },
-      'one-web': {
-        id: 'one-web',
-        title: 'One Web (Landing Page de Alto Impacto)',
-        slug: 'one-web',
-        price: 79.90,
-        type: 'service',
-        category: 'Desarrollo Web',
-        quantity: 1,
-        image_url: 'https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=600&q=80',
-      },
-      'tienda-online': {
-        id: 'tienda-online',
-        title: 'Tienda Online Autoadministrable',
-        slug: 'tienda-online',
-        price: 490.0,
-        type: 'service',
-        category: 'Desarrollo Web',
-        quantity: 1,
-        image_url: 'https://images.unsplash.com/photo-1556742049-0a67e55722c0?auto=format&fit=crop&w=600&q=80',
-      },
-    };
-
-    const selectedProduct = productMap[plan.id];
-    if (selectedProduct) {
-      try {
-        const currentCart = JSON.parse(localStorage.getItem('qaway_cart') || '[]');
-        const exists = currentCart.find((p) => p.id === selectedProduct.id);
-        const nextCart = exists ? currentCart : [...currentCart, selectedProduct];
-        localStorage.setItem('qaway_cart', JSON.stringify(nextCart));
-      } catch (err) {
-        console.warn('Error al persistir carrito:', err);
-      }
-    }
     navigate(`/hub/pagos/carrito?add=${plan.id}`);
   };
   const plans = [

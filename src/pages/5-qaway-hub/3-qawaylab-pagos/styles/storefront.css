@@ -655,3 +655,140 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Programa de beneficios (plantilla: lib/benefits.js) ───────
+   Clases nuevas y aditivas: no se modifica ninguna regla existente
+   (.choice / .choice-grid siguen intactas para los métodos de pago). */
+.qawa-storefront .section-hint {
+  margin: -8px 0 18px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+.qawa-storefront .benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.qawa-storefront .benefit-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 18px 18px 16px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.qawa-storefront .benefit-card:hover {
+  border-color: var(--muted);
+}
+.qawa-storefront .benefit-card:focus-within {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+.qawa-storefront .benefit-card.is-selected {
+  border-color: var(--red);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+.qawa-storefront .benefit-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.qawa-storefront .benefit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.qawa-storefront .benefit-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+}
+.qawa-storefront .benefit-card.is-selected .benefit-icon {
+  border-color: var(--red);
+  background: var(--red);
+  color: var(--white);
+}
+.qawa-storefront .benefit-tag {
+  border: 1px solid var(--line);
+  background: var(--white);
+  padding: 3px 7px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.qawa-storefront .benefit-card.is-selected .benefit-tag {
+  border-color: var(--red);
+  color: var(--red-dark);
+}
+.qawa-storefront .benefit-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.qawa-storefront .benefit-copy {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.qawa-storefront .benefit-discount {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--green);
+}
+.qawa-storefront .benefit-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.qawa-storefront .benefit-card.is-selected .benefit-foot {
+  color: var(--red-dark);
+}
+.qawa-storefront .benefit-dot {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+}
+.qawa-storefront .benefit-card.is-selected .benefit-dot {
+  border-color: var(--red);
+}
+.qawa-storefront .benefit-dot::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: transparent;
+}
+.qawa-storefront .benefit-card.is-selected .benefit-dot::after {
+  background: var(--red);
+}
+
+@media (max-width: 640px) {
+  .qawa-storefront .benefit-grid {
+    grid-template-columns: 1fr;
+  }
+}

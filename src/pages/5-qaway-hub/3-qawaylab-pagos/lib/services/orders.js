@@ -23,8 +23,12 @@ function saveLocalOrder(order) {
 
 export function createOrdersService(supabase) {
   return {
-    async createOrder(userId, items, { paymentMethod = null, shippingAddress = null, notes = null } = {}) {
-      const total = items.reduce((sum, item) => sum + (item.unit_price * (item.quantity || 1)), 0)
+    async createOrder(userId, items, { paymentMethod = null, shippingAddress = null, notes = null, discount = 0 } = {}) {
+      const gross = items.reduce((sum, item) => sum + (item.unit_price * (item.quantity || 1)), 0)
+      // El descuento del programa de beneficios se resta del total del pedido.
+      // Es un valor de presentación: antes de cobrar, el backend debe recalcularlo.
+      const appliedDiscount = Number(discount) > 0 ? Number(discount) : 0
+      const total = Math.max(0, Math.round((gross - appliedDiscount) * 100) / 100)
       const isGuest = !userId
 
       let order

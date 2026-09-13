@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Routes, Route, Link, useParams, useLocation, useNavigate, Navigate } from 'react-router-dom'
 import {
   createQawaServices,
   Checkout,
@@ -13,6 +13,7 @@ import {
 } from './index.js'
 import './styles/storefront.css'
 import { supabase as realSupabase } from '@/config/supabase'
+import { itemKey, isSingleInstance, normalizeCart } from './components/storefront/utils.js'
 
 const SAMPLE_PRODUCTS = [
   {
@@ -167,13 +168,17 @@ const { payments, orders, products } = createQawaServices(activeSupabase, {
 export default function PagosAppPage() {
   const [cart, setCart] = useState(() => {
     try {
+      // Normalizado al restaurar: colapsa duplicados de sesiones anteriores
       const saved = localStorage.getItem('qaway_cart')
-      return saved ? JSON.parse(saved) : []
+      return saved ? normalizeCart(JSON.parse(saved)) : []
     } catch {
       return []
     }
   })
   const location = useLocation()
+  const navigate = useNavigate()
+  // Slug de ?add= ya resuelto: evita reinyectar el producto en cada re-render
+  const processedAddRef = useRef(null)
 
   // Sincronizar persistencia en localStorage
   useEffect(() => {
@@ -185,6 +190,7 @@ export default function PagosAppPage() {
   }, [cart])
 
   const [dbProducts, setDbProducts] = useState([])
+  const [productsLoaded, setProductsLoaded] = useState(false)
 
   // Cargar productos reales desde la tabla products de Supabase
   useEffect(() => {
@@ -206,61 +212,97 @@ export default function PagosAppPage() {
         }
       } catch (err) {
         console.warn('[Qaway Pagos] Error cargando productos de Supabase:', err)
+      } finally {
+        setProductsLoaded(true)
       }
     }
     loadProductsFromSupabase()
   }, [])
 
   // Soporte de precarga directa por parámetro ?plan=... o ?add=...
+  //
+  // Resolución determinista: se espera a que el catálogo termine de cargar para
+  // resolver el slug contra una sola fuente de verdad. Antes, el efecto corría
+  // primero con el catálogo estático (id "one-web") y luego otra vez con el
+  // producto de Supabase (UUID), insertando el mismo servicio dos veces.
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const planSlug = params.get('plan') || params.get('add')
-    if (planSlug) {
-      const allPool = dbProducts.length > 0 ? dbProducts : SAMPLE_PRODUCTS
-      const targetProduct = allPool.find(
-        (p) => p.slug === planSlug || p.id === planSlug || p.sku === planSlug
-      )
-      if (targetProduct) {
-        addToCart(
-          {
-            ...targetProduct,
-            title: targetProduct.title || targetProduct.name,
-            price: Number(targetProduct.price || targetProduct.base_price || 0),
-          },
-          1
-        )
-      }
+
+    if (!planSlug) {
+      processedAddRef.current = null
+      return
     }
-  }, [location.search, dbProducts])
+    if (!productsLoaded) return
+    if (processedAddRef.current === planSlug) return
+
+    processedAddRef.current = planSlug
+
+    const allPool = dbProducts.length > 0 ? dbProducts : SAMPLE_PRODUCTS
+    const targetProduct = allPool.find(
+      (p) => p.slug === planSlug || p.id === planSlug || p.sku === planSlug
+    )
+    if (targetProduct) {
+      addToCart(
+        {
+          ...targetProduct,
+          title: targetProduct.title || targetProduct.name,
+          price: Number(targetProduct.price || targetProduct.base_price || 0),
+        },
+        1
+      )
+    }
+
+    // Se limpia el parámetro para que un refresh no reinyecte el producto
+    navigate(location.pathname, { replace: true })
+  }, [location.search, location.pathname, dbProducts, productsLoaded, navigate])
 
   function addToCart(product, quantity = 1) {
+    const incomingKey = itemKey(product)
+    if (!incomingKey) return
+
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id)
+      const existing = prev.find((item) => itemKey(item) === incomingKey)
+
       if (existing) {
-        // Si es un servicio, mantener en 1 para no duplicar compra única
-        if (product.type === 'service' || product.type === 'course') {
+        // Servicios y cursos: compra única, nunca se duplica ni se incrementa
+        if (isSingleInstance(existing) || isSingleInstance(product)) {
           return prev
         }
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item
+          itemKey(item) === incomingKey
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         )
       }
-      return [...prev, { ...product, quantity }]
+
+      // La cantidad de un servicio nace fijada en 1
+      return [...prev, { ...product, quantity: isSingleInstance(product) ? 1 : quantity }]
     })
   }
 
-  function updateQuantity(productId, qty) {
-    if (qty <= 0) {
-      removeFromCart(productId)
-      return
-    }
-    setCart((prev) =>
-      prev.map((item) => (item.id === productId ? { ...item, quantity: qty } : item))
-    )
+  function updateQuantity(key, qty) {
+    setCart((prev) => {
+      const target = prev.find((item) => itemKey(item) === key)
+      if (!target) return prev
+
+      // Barrera autoritativa: un servicio o curso nunca supera 1 unidad, ni
+      // aunque la UI llegara a permitir el intento.
+      if (isSingleInstance(target)) {
+        if (qty <= 0) return prev.filter((item) => itemKey(item) !== key)
+        return prev
+      }
+
+      if (qty <= 0) return prev.filter((item) => itemKey(item) !== key)
+
+      return prev.map((item) =>
+        itemKey(item) === key ? { ...item, quantity: qty } : item
+      )
+    })
   }
 
-  function removeFromCart(productId) {
-    setCart((prev) => prev.filter((item) => item.id !== productId))
+  function removeFromCart(key) {
+    setCart((prev) => prev.filter((item) => itemKey(item) !== key))
   }
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)

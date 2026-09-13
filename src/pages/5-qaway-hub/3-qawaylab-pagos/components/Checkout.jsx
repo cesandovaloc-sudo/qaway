@@ -1,4 +1,10 @@
 import { useState } from 'react'
+import BenefitIcon from './storefront/BenefitIcon.jsx'
+import {
+  BENEFIT_NOTE,
+  computeBenefitTotals,
+  resolveBenefits,
+} from '../lib/benefits.js'
 
 const PAYMENT_METHODS = [
   {
@@ -49,7 +55,19 @@ export default function Checkout({
   // Invitado sin sesión: user_id queda NULL (el schema permite pedidos anónimos con RLS)
   const uid = userId || user?.id || null
   const [selectedMethod, setSelectedMethod] = useState('mercadopago')
-  const [promotionChoice, setPromotionChoice] = useState('discount')
+
+  // Programa de beneficios: catálogo resuelto para este carrito y beneficio
+  // activo. Si el carrito cambia y el elegido deja de aplicar, se cae al primero
+  // disponible para que la sección nunca quede sin selección.
+  const availableBenefits = resolveBenefits(items)
+  const [benefitChoice, setBenefitChoice] = useState(
+    () => availableBenefits[0]?.id ?? null
+  )
+  const selectedBenefit =
+    availableBenefits.find((benefit) => benefit.id === benefitChoice) ||
+    availableBenefits[0] ||
+    null
+  const activeBenefitId = selectedBenefit?.id ?? null
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [orderCompleted, setOrderCompleted] = useState(null)
@@ -81,6 +99,9 @@ export default function Checkout({
     (sum, item) => sum + (item.price || item.unit_price || 0) * (item.quantity || 1),
     0
   )
+  // El descuento solo existe si el beneficio activo declara discountPercent.
+  // Mientras sea 0, el total coincide con el subtotal.
+  const { discount, total } = computeBenefitTotals(subtotal, selectedBenefit)
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -127,9 +148,13 @@ export default function Checkout({
               phone: formData.phone,
               district: formData.district,
               address: formData.address,
-              promotion: promotionChoice,
+              // `promotion` es el id legado del programa de beneficios;
+              // `promotionLabel` deja el pedido legible sin depender del id.
+              promotion: activeBenefitId,
+              promotionLabel: selectedBenefit?.label ?? null,
             },
             notes: formData.notes,
+            discount,
           })
         } catch (err) {
           console.warn('[Checkout] Error en createOrder, usando fallback:', err)
@@ -163,11 +188,11 @@ export default function Checkout({
           payment = await paymentsService.createPayment({
             userId: uid,
             orderId: order?.id,
-            amount: subtotal,
+            amount: total,
             currency,
             provider,
             proofUrl,
-            notes: `Distrito: ${formData.district}. Promo: ${promotionChoice}`,
+            notes: `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`,
           })
         } catch (err) {
           console.warn('[Checkout] Error en createPayment, usando fallback:', err)
@@ -202,8 +227,14 @@ export default function Checkout({
               <p style={{ fontWeight: 800, marginBottom: '8px', color: '#009ee3' }}>Pago mediante Mercado Pago (Perú):</p>
               <p><span>Pasarela:</span> <strong>Mercado Pago Checkout</strong></p>
               <p><span>Estado:</span> <strong>Pendiente de procesamiento de pasarela</strong></p>
+              {selectedBenefit ? (
+                <p><span>Beneficio:</span> <strong>{selectedBenefit.label}</strong></p>
+              ) : null}
+              {discount > 0 ? (
+                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {discount.toFixed(2)}</strong></p>
+              ) : null}
               <p style={{ marginTop: '12px', borderTop: '1px solid #009ee3', paddingTop: '8px' }}>
-                <span>Monto total:</span> <strong style={{ color: '#009ee3', fontSize: '1.1rem' }}>S/ {subtotal.toFixed(2)}</strong>
+                <span>Monto total:</span> <strong style={{ color: '#009ee3', fontSize: '1.1rem' }}>S/ {total.toFixed(2)}</strong>
               </p>
             </div>
           ) : (selectedMethod === 'yape' || selectedMethod === 'directo') ? (
@@ -213,8 +244,14 @@ export default function Checkout({
               <p><span>Titular:</span> <strong>{ACCOUNT_INFO.holder}</strong></p>
               <p><span>Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
               <p><span>Yape / Plin:</span> <strong>{ACCOUNT_INFO.yape}</strong></p>
+              {selectedBenefit ? (
+                <p><span>Beneficio:</span> <strong>{selectedBenefit.label}</strong></p>
+              ) : null}
+              {discount > 0 ? (
+                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {discount.toFixed(2)}</strong></p>
+              ) : null}
               <p style={{ marginTop: '12px', borderTop: '1px solid var(--red)', paddingTop: '8px' }}>
-                <span>Monto a pagar:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {subtotal.toFixed(2)}</strong>
+                <span>Monto a pagar:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {total.toFixed(2)}</strong>
               </p>
             </div>
           ) : null}
@@ -258,39 +295,54 @@ export default function Checkout({
           </div>
         </section>
 
-        {/* Sección 2: Opciones y Promoción */}
+        {/* Sección 2: Programa de beneficios — plantilla en lib/benefits.js */}
         <section className="form-section">
           <h2>Beneficio de compra</h2>
-          <div className="choice-grid">
-            <label className={`choice ${promotionChoice === 'discount' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="promotion"
-                value="discount"
-                checked={promotionChoice === 'discount'}
-                onChange={() => setPromotionChoice('discount')}
-              />
-              <span>
-                <strong>Acceso Inmediato / Descuento</strong>
-                <br />
-                Descuento directo aplicado en tu resumen.
-              </span>
-            </label>
-            <label className={`choice ${promotionChoice === 'delivery' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="promotion"
-                value="delivery"
-                checked={promotionChoice === 'delivery'}
-                onChange={() => setPromotionChoice('delivery')}
-              />
-              <span>
-                <strong>Soporte Prioritario</strong>
-                <br />
-                Atención directa vía WhatsApp para cualquier duda.
-              </span>
-            </label>
+          <p className="section-hint">
+            Elige un beneficio y lo aplicamos a tu pedido.
+          </p>
+          <div
+            className="benefit-grid"
+            role="radiogroup"
+            aria-label="Beneficio de compra"
+          >
+            {availableBenefits.map((benefit) => {
+              const isSelected = benefit.id === activeBenefitId
+              return (
+                <label
+                  key={benefit.id}
+                  className={`benefit-card${isSelected ? ' is-selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="benefit"
+                    value={benefit.id}
+                    checked={isSelected}
+                    onChange={() => setBenefitChoice(benefit.id)}
+                    className="benefit-input"
+                  />
+                  <span className="benefit-head">
+                    <span className="benefit-icon">
+                      <BenefitIcon name={benefit.icon} />
+                    </span>
+                    <span className="benefit-tag">{benefit.tag}</span>
+                  </span>
+                  <span className="benefit-label">{benefit.label}</span>
+                  <span className="benefit-copy">{benefit.description}</span>
+                  {benefit.discountPercent > 0 ? (
+                    <span className="benefit-discount">
+                      −{benefit.discountPercent}% sobre tu subtotal
+                    </span>
+                  ) : null}
+                  <span className="benefit-foot">
+                    <span className="benefit-dot" aria-hidden="true" />
+                    {isSelected ? 'Seleccionado' : 'Elegir'}
+                  </span>
+                </label>
+              )
+            })}
           </div>
+          <p className="summary-note">{BENEFIT_NOTE}</p>
         </section>
 
         {/* Sección 3: Forma de Pago */}
@@ -357,9 +409,29 @@ export default function Checkout({
           </div>
         ))}
 
+        {discount > 0 ? (
+          <>
+            <div className="summary-row" style={{ marginTop: '12px' }}>
+              <span>Subtotal</span>
+              <strong>S/ {subtotal.toFixed(2)}</strong>
+            </div>
+            <div className="summary-row">
+              <span>Descuento ({selectedBenefit?.discountPercent}%)</span>
+              <strong style={{ color: 'var(--green)' }}>− S/ {discount.toFixed(2)}</strong>
+            </div>
+          </>
+        ) : null}
+
+        {selectedBenefit ? (
+          <div className="summary-row">
+            <span>Beneficio</span>
+            <strong style={{ fontSize: '0.8rem' }}>{selectedBenefit.label}</strong>
+          </div>
+        ) : null}
+
         <div className="summary-row" style={{ borderTop: '2px solid var(--ink)', marginTop: '12px', paddingTop: '14px', fontSize: '1rem' }}>
           <span>Total a pagar</span>
-          <strong style={{ color: 'var(--red)', fontSize: '1.2rem' }}>S/ {subtotal.toFixed(2)}</strong>
+          <strong style={{ color: 'var(--red)', fontSize: '1.2rem' }}>S/ {total.toFixed(2)}</strong>
         </div>
 
         <p className="summary-note">
