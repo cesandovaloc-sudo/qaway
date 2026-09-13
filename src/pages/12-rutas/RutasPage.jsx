@@ -40,6 +40,8 @@ import { hierarchicalRoutes, categoriesList } from '@/config/routesRegistry'
 import { publicPaths } from '@/config/siteVisibility'
 import { getRecordingMode, setRecordingMode } from '@/config/recordingMode'
 
+const PROD_BASE_URL = 'https://www.qawaylab.com'
+
 function getBadgeStyle(badgeType) {
   switch (badgeType) {
     case 'public':
@@ -230,15 +232,28 @@ function SuiteProjectItem({
                       />
                     </div>
 
-                    <Link
-                      to={sub.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors px-2 py-0.5 rounded-md hover:bg-orange-50"
-                    >
-                      <span>Abrir</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Link
+                        to={sub.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-700 hover:text-[#fe6612] transition-colors px-2 py-0.5 rounded-md hover:bg-orange-50"
+                        title="Abrir en Servidor Local"
+                      >
+                        <span>Local</span>
+                        <ArrowRight className="w-2.5 h-2.5 text-[#fe6612]" />
+                      </Link>
+                      <a
+                        href={`${PROD_BASE_URL}${sub.path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 transition-colors px-2 py-0.5 rounded-md hover:bg-emerald-50"
+                        title="Abrir en Producción (www.qawaylab.com)"
+                      >
+                        <span>Prod</span>
+                        <ExternalLink className="w-2.5 h-2.5 text-emerald-600" />
+                      </a>
+                    </div>
                   </div>
                 </div>
               )
@@ -341,17 +356,28 @@ function HierarchicalRouteCard({
             )}
           </div>
 
-          {/* Fila Inferior: Botón Abrir */}
-          <div className="w-full flex justify-end">
+          {/* Fila Inferior: Botones Abrir Local y Abrir Prod */}
+          <div className="w-full flex items-center justify-end gap-2 flex-wrap">
             <Link
               to={item.path}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-xl text-xs font-bold text-zinc-900 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-950 transition-colors w-full sm:w-auto"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold text-zinc-800 bg-zinc-100 hover:bg-zinc-200 hover:text-zinc-950 transition-colors"
+              title="Abrir en Servidor Local"
             >
-              <span>Abrir</span>
+              <span>Abrir Local</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#fe6612]" />
             </Link>
+            <a
+              href={`${PROD_BASE_URL}${item.path}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 transition-colors"
+              title="Abrir en Producción (www.qawaylab.com)"
+            >
+              <span>Abrir Prod</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-600" />
+            </a>
           </div>
 
         </div>
@@ -443,35 +469,75 @@ function HierarchicalRouteCard({
                         </p>
                       </div>
 
-                      {/* Fila de Path y Acciones */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-zinc-100/80">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <code className="text-[11px] font-mono text-zinc-800 truncate">
-                            {child.path}
-                          </code>
-                          <button
-                            type="button"
-                            onClick={(e) => onCopy(child.path, e)}
-                            title="Copiar URL"
-                            className="shrink-0 p-1 text-zinc-400 hover:text-[#fe6612] transition-colors"
+                      {/* Fila de Path y Acciones: Local y Producción */}
+                      <div className="pt-2 border-t border-zinc-100/80 space-y-1.5">
+                        {/* Fila 1: Servidor Local */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600 shrink-0">
+                              Local
+                            </span>
+                            <code className="text-[10.5px] font-mono text-zinc-800 truncate" title={`${window.location.origin}${child.path}`}>
+                              {child.path}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={(e) => onCopy(`${window.location.origin}${child.path}`, e, `local-${child.path}`)}
+                              title="Copiar URL Local"
+                              className="shrink-0 p-1 text-zinc-400 hover:text-[#fe6612] transition-colors"
+                            >
+                              {copiedPath === `local-${child.path}` || copiedPath === child.path ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+
+                          <Link
+                            to={child.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-700 hover:text-[#fe6612] transition-colors shrink-0"
                           >
-                            {copiedPath === child.path ? (
-                              <Check className="w-3 h-3 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                          </button>
+                            <span>Abrir Local</span>
+                            <ArrowRight className="w-3 h-3 text-[#fe6612]" />
+                          </Link>
                         </div>
 
-                        <Link
-                          to={child.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[11.5px] font-bold text-[#fe6612] hover:text-[#e0550a] transition-colors shrink-0"
-                        >
-                          <span>Abrir</span>
-                          <ArrowRight className="w-3 h-3" />
-                        </Link>
+                        {/* Fila 2: Producción Oficial */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200/60 shrink-0">
+                              Prod
+                            </span>
+                            <code className="text-[10.5px] font-mono text-emerald-800/90 truncate" title={`${PROD_BASE_URL}${child.path}`}>
+                              www.qawaylab.com{child.path}
+                            </code>
+                            <button
+                              type="button"
+                              onClick={(e) => onCopy(`${PROD_BASE_URL}${child.path}`, e, `prod-${child.path}`)}
+                              title="Copiar URL Producción"
+                              className="shrink-0 p-1 text-zinc-400 hover:text-emerald-600 transition-colors"
+                            >
+                              {copiedPath === `prod-${child.path}` ? (
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="w-3 h-3" />
+                              )}
+                            </button>
+                          </div>
+
+                          <a
+                            href={`${PROD_BASE_URL}${child.path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 transition-colors shrink-0"
+                          >
+                            <span>Abrir Prod</span>
+                            <ExternalLink className="w-3 h-3 text-emerald-600" />
+                          </a>
+                        </div>
                       </div>
                     </div>
                   )
@@ -606,12 +672,12 @@ export default function RutasPage() {
     setApprovedPaths(new Set(['/']))
   }
 
-  const handleCopy = (path, e) => {
+  const handleCopy = (path, e, key = null) => {
     e.preventDefault()
     e.stopPropagation()
-    const fullUrl = `${window.location.origin}${path}`
+    const fullUrl = path.startsWith('http') ? path : `${window.location.origin}${path}`
     navigator.clipboard.writeText(fullUrl)
-    setCopiedPath(path)
+    setCopiedPath(key || path)
     setTimeout(() => setCopiedPath(null), 2000)
   }
 
