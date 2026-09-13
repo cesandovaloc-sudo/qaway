@@ -184,17 +184,54 @@ export default function PagosAppPage() {
     }
   }, [cart])
 
+  const [dbProducts, setDbProducts] = useState([])
+
+  // Cargar productos reales desde la tabla products de Supabase
+  useEffect(() => {
+    async function loadProductsFromSupabase() {
+      try {
+        const { data, error } = await activeSupabase
+          .from('products')
+          .select('*')
+          .eq('status', 'active')
+        if (data && data.length > 0) {
+          const formatted = data.map((p) => ({
+            ...p,
+            id: p.id,
+            title: p.title || p.name,
+            price: Number(p.price || p.base_price || 0),
+            image_url: p.image_url || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+          }))
+          setDbProducts(formatted)
+        }
+      } catch (err) {
+        console.warn('[Qaway Pagos] Error cargando productos de Supabase:', err)
+      }
+    }
+    loadProductsFromSupabase()
+  }, [])
+
   // Soporte de precarga directa por parámetro ?plan=... o ?add=...
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const planSlug = params.get('plan') || params.get('add')
     if (planSlug) {
-      const targetProduct = SAMPLE_PRODUCTS.find((p) => p.slug === planSlug || p.id === planSlug)
+      const allPool = dbProducts.length > 0 ? dbProducts : SAMPLE_PRODUCTS
+      const targetProduct = allPool.find(
+        (p) => p.slug === planSlug || p.id === planSlug || p.sku === planSlug
+      )
       if (targetProduct) {
-        addToCart(targetProduct, 1)
+        addToCart(
+          {
+            ...targetProduct,
+            title: targetProduct.title || targetProduct.name,
+            price: Number(targetProduct.price || targetProduct.base_price || 0),
+          },
+          1
+        )
       }
     }
-  }, [location.search])
+  }, [location.search, dbProducts])
 
   function addToCart(product, quantity = 1) {
     setCart((prev) => {
@@ -229,80 +266,23 @@ export default function PagosAppPage() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  const isCatalog = location.pathname === '/hub/pagos' || location.pathname === '/hub/pagos/'
-  const isCart = location.pathname.includes('/hub/pagos/carrito')
-  const isPurchases = location.pathname.includes('/hub/pagos/purchases')
-  const isAdmin = location.pathname.includes('/hub/pagos/admin')
-
   return (
-    <div className="qawa-storefront" style={{ minHeight: '100vh', background: 'var(--paper, #f4f3f0)' }}>
-      {/* Header oficial de Mesa Selecta / Qaway Pagos */}
-      <header className="site-header">
-        <div className="container">
-          <div className="header-inner">
-            <Link to="/hub/pagos" className="brand">
-              Qaway <span>Lab</span>
-            </Link>
-
-            <nav className="main-nav">
-              <Link to="/hub/pagos" className={isCatalog ? 'active' : ''}>Catálogo</Link>
-              <Link to="/hub/pagos/carrito" className={isCart ? 'active' : ''}>Mi Pedido ({cartCount})</Link>
-              <Link to="/hub/pagos/purchases" className={isPurchases ? 'active' : ''}>Mis Compras</Link>
-              <Link to="/hub/pagos/admin" className={isAdmin ? 'active' : ''}>Admin</Link>
-            </nav>
-
-            <div className="header-actions">
-              <Link to="/hub/pagos/carrito" className="cart-link">
-                <span>Mi pedido</span>
-                <span className="cart-count">{cartCount}</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Contenido Principal */}
+    <div
+      className="qawa-storefront"
+      style={{
+        minHeight: '100vh',
+        background: 'var(--paper, #f4f3f0)',
+        paddingTop: '96px',
+        paddingBottom: '80px',
+      }}
+    >
+      {/* Contenido Principal de Cliente */}
       <main className="container">
         <Routes>
-          {/* 1. Página de Catálogo Principal */}
-          <Route
-            index
-            element={
-              <section className="section">
-                <div style={{ marginBottom: '32px' }}>
-                  <span className="eyebrow">Catálogo Oficial</span>
-                  <h1 className="section-title">Formación y Sistemas Digitales</h1>
-                  <p className="section-copy">
-                    Haz clic en cualquier producto para ver su ficha descriptiva y agregar la cantidad deseada.
-                  </p>
-                </div>
+          {/* 1. Redirección automática a Carrito */}
+          <Route index element={<Navigate to="carrito" replace />} />
 
-                <ProductGrid
-                  products={SAMPLE_PRODUCTS}
-                  renderCard={(p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      detailHref={`/hub/pagos/producto/${p.slug}`}
-                    />
-                  )}
-                />
-              </section>
-            }
-          />
-
-          {/* 2. Página Intermedia Descriptiva de Producto */}
-          <Route
-            path="producto/:slug"
-            element={
-              <ProductDetailRoute
-                products={SAMPLE_PRODUCTS}
-                onAddToCart={addToCart}
-              />
-            }
-          />
-
-          {/* 3. Página de "Mi pedido" */}
+          {/* 2. Vista del Carrito ("Mi pedido") */}
           <Route
             path="carrito"
             element={
@@ -312,13 +292,13 @@ export default function PagosAppPage() {
                 onRemove={removeFromCart}
                 count={cartCount}
                 subtotal={cartSubtotal}
-                emptyHref="/hub/pagos"
+                emptyHref="/landings/desarrollo-web-qaway#precios"
                 checkoutHref="/hub/pagos/checkout"
               />
             }
           />
 
-          {/* 4. Página de Checkout Final con Datos y Métodos de Pago */}
+          {/* 3. Página de Checkout Final con Datos y Métodos de Pago */}
           <Route
             path="checkout"
             element={
@@ -344,7 +324,7 @@ export default function PagosAppPage() {
             }
           />
 
-          {/* 5. Historial de compras */}
+          {/* 4. Historial de compras para clientes */}
           <Route
             path="purchases"
             element={
@@ -358,37 +338,10 @@ export default function PagosAppPage() {
             }
           />
 
-          {/* 6. Panel de Administración */}
-          <Route
-            path="admin"
-            element={
-              <section className="section">
-                <span className="eyebrow">Administración</span>
-                <h1 className="section-title">Panel de Control de Pagos</h1>
-                <div style={{ marginTop: '24px', background: 'var(--white)', padding: '24px', border: '1px solid var(--line)' }}>
-                  <PaymentsPanel paymentsService={payments} supabase={activeSupabase} />
-                  <div style={{ marginTop: '36px' }}>
-                    <ProductsManager productsService={products} />
-                  </div>
-                </div>
-              </section>
-            }
-          />
+          {/* Redirección por defecto */}
+          <Route path="*" element={<Navigate to="carrito" replace />} />
         </Routes>
       </main>
     </div>
-  )
-}
-
-function ProductDetailRoute({ products, onAddToCart }) {
-  const { slug } = useParams()
-  const product = products.find((p) => p.slug === slug) || products[0]
-  return (
-    <ProductDetail
-      product={product}
-      onAddToCart={onAddToCart}
-      catalogHref="/hub/pagos"
-      cartHref="/hub/pagos/carrito"
-    />
   )
 }
