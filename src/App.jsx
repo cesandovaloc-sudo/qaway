@@ -3,12 +3,12 @@ import RouteSeo from './components/seo/RouteSeo'
 import { CampaignProvider } from './services/campaign/campaignContext'
 
 import CookieBanner from './components/ui/CookieBanner'
-import MetaPixel from '@/components/analytics/MetaPixel'
+import MetaPixelRouteTracker from '@/components/analytics/MetaPixelRouteTracker'
 
 export default function App() {
   return (
     <CampaignProvider>
-      <MetaPixel />
+      <MetaPixelRouteTracker />
       <RouteSeo />
       <AppRouter />
       <CookieBanner />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import {
   ArrowRight,
   BarChart3,
@@ -1298,14 +1299,14 @@ export default function InicioPage() {
       }
 
       setSubmitted(true);
-      if (window.fbq) {
-        window.fbq('track', 'Lead');
-      }
+      trackLead('Inicio - Formulario Academy');
       formElement.reset()
       
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
-      window.location.href = waUrl
+      // Espera defensiva: asegura que el beacon de Lead se despache antes de
+      // abandonar la pestana hacia WhatsApp (navegacion externa dura).
+      window.setTimeout(() => { window.location.href = waUrl }, 250)
     } catch (error) {
       console.error('Error al enviar consulta de Academy:', error)
       setSubmitError(error.message || 'No pudimos enviar tu consulta. Inténtalo nuevamente.')

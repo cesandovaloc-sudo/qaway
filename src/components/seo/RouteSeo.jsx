@@ -3,7 +3,11 @@ import { useLocation } from 'react-router-dom'
 import { isPublicPathAllowed } from '@/config/siteVisibility'
 
 const SITE_URL = 'https://qawaylab.com'
-const DEFAULT_IMAGE = `${SITE_URL}/assets/pages/1-inicio/hero-qaway-vision-lab.webp`
+// og:image por defecto: 1200x630 raster. Facebook/WhatsApp ignoran SVG y
+// recortan mal las verticales, por eso no se usa el hero en formato retrato.
+const DEFAULT_IMAGE = `${SITE_URL}/assets/og/home.png`
+const DEFAULT_IMAGE_WIDTH = '1200'
+const DEFAULT_IMAGE_HEIGHT = '630'
 
 const seoByPath = {
   '/': {
@@ -86,6 +90,11 @@ function setPropertyMeta(property, content) {
   meta.setAttribute('content', content)
 }
 
+function removePropertyMeta(property) {
+  const meta = document.querySelector(`meta[property="${property}"]`)
+  if (meta) meta.remove()
+}
+
 function setCanonical(href) {
   let link = document.querySelector('link[rel="canonical"]')
   if (!link) {
@@ -135,8 +144,16 @@ export default function RouteSeo() {
     setPropertyMeta('og:description', seo.description)
     setPropertyMeta('og:url', canonicalUrl)
     setPropertyMeta('og:image', pageImage)
-    setPropertyMeta('og:image:width', '768')
-    setPropertyMeta('og:image:height', '512')
+    // Solo se declaran dimensiones cuando se usa la imagen por defecto, cuyas
+    // medidas son conocidas (1200x630). Las rutas con portada propia declaran
+    // las suyas o se omiten, en lugar de heredar medidas incorrectas.
+    if (seo.image) {
+      removePropertyMeta('og:image:width')
+      removePropertyMeta('og:image:height')
+    } else {
+      setPropertyMeta('og:image:width', DEFAULT_IMAGE_WIDTH)
+      setPropertyMeta('og:image:height', DEFAULT_IMAGE_HEIGHT)
+    }
     setPropertyMeta('og:image:alt', seo.title)
     setCanonical(canonicalUrl)
 

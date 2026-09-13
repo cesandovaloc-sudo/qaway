@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import './estudio.css'
 
 
@@ -740,11 +741,14 @@ function Diagnostic() {
         })
       }
       setSubmitted(true)
+      trackLead('Estudio - Formulario')
       formElement.reset()
       
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest} (Estudio). ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
-      window.location.href = waUrl
+      // Espera defensiva: asegura que el beacon de Lead se despache antes de
+      // abandonar la pestana hacia WhatsApp (navegacion externa dura).
+      window.setTimeout(() => { window.location.href = waUrl }, 250)
     } catch (e) {
       console.error(e)
       setSubmitError('Hubo un error al enviar tu solicitud. Inténtalo de nuevo.')

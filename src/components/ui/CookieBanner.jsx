@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ExternalLink, ShieldCheck } from 'lucide-react'
+import { revokeMetaPixel } from '@/lib/analytics/metaPixel'
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false)
@@ -23,6 +24,10 @@ export default function CookieBanner() {
 
   const declineCookies = () => {
     localStorage.setItem('qaway_cookie_consent', 'declined')
+    // La decision del usuario manda: se detiene la emision de eventos de Meta
+    // y se eliminan los identificadores que ya se hubieran escrito.
+    revokeMetaPixel()
+    window.dispatchEvent(new Event('qaway_cookie_consent_change'))
     setIsVisible(false)
   }
 

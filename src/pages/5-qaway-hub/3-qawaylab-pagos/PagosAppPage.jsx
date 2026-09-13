@@ -235,9 +235,9 @@ export default function PagosAppPage() {
   const isAdmin = location.pathname.includes('/hub/pagos/admin')
 
   return (
-    <div className="qawa-storefront" style={{ minHeight: '100vh', background: 'var(--paper, #f4f3f0)', paddingTop: '96px', paddingBottom: '70px' }}>
-      {/* Header oficial de Mesa Selecta / Qaway Pagos (Oculto para integrarse con el Navbar oficial de Qaway Lab) */}
-      <header className="site-header" style={{ display: 'none' }} aria-hidden="true">
+    <div className="qawa-storefront" style={{ minHeight: '100vh', background: 'var(--paper, #f4f3f0)' }}>
+      {/* Header oficial de Mesa Selecta / Qaway Pagos */}
+      <header className="site-header">
         <div className="container">
           <div className="header-inner">
             <Link to="/hub/pagos" className="brand">
@@ -264,8 +264,32 @@ export default function PagosAppPage() {
       {/* Contenido Principal */}
       <main className="container">
         <Routes>
-          {/* 1. Redirección automática a Carrito (el catálogo vive en la landing oficial) */}
-          <Route index element={<Navigate to="carrito" replace />} />
+          {/* 1. Página de Catálogo Principal */}
+          <Route
+            index
+            element={
+              <section className="section">
+                <div style={{ marginBottom: '32px' }}>
+                  <span className="eyebrow">Catálogo Oficial</span>
+                  <h1 className="section-title">Formación y Sistemas Digitales</h1>
+                  <p className="section-copy">
+                    Haz clic en cualquier producto para ver su ficha descriptiva y agregar la cantidad deseada.
+                  </p>
+                </div>
+
+                <ProductGrid
+                  products={SAMPLE_PRODUCTS}
+                  renderCard={(p) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      detailHref={`/hub/pagos/producto/${p.slug}`}
+                    />
+                  )}
+                />
+              </section>
+            }
+          />
 
           {/* 2. Página Intermedia Descriptiva de Producto */}
           <Route
@@ -288,7 +312,7 @@ export default function PagosAppPage() {
                 onRemove={removeFromCart}
                 count={cartCount}
                 subtotal={cartSubtotal}
-                emptyHref="/landings/desarrollo-web-qaway#precios"
+                emptyHref="/hub/pagos"
                 checkoutHref="/hub/pagos/checkout"
               />
             }
@@ -320,7 +344,7 @@ export default function PagosAppPage() {
             }
           />
 
-          {/* 5. Historial de compras (Mantenido activo) */}
+          {/* 5. Historial de compras */}
           <Route
             path="purchases"
             element={
@@ -329,6 +353,23 @@ export default function PagosAppPage() {
                 <h1 className="section-title">Mis Compras</h1>
                 <div style={{ marginTop: '24px', background: 'var(--white)', padding: '24px', border: '1px solid var(--line)' }}>
                   <PurchaseHistory paymentsService={payments} userId={DEMO_USER.id} />
+                </div>
+              </section>
+            }
+          />
+
+          {/* 6. Panel de Administración */}
+          <Route
+            path="admin"
+            element={
+              <section className="section">
+                <span className="eyebrow">Administración</span>
+                <h1 className="section-title">Panel de Control de Pagos</h1>
+                <div style={{ marginTop: '24px', background: 'var(--white)', padding: '24px', border: '1px solid var(--line)' }}>
+                  <PaymentsPanel paymentsService={payments} supabase={activeSupabase} />
+                  <div style={{ marginTop: '36px' }}>
+                    <ProductsManager productsService={products} />
+                  </div>
                 </div>
               </section>
             }

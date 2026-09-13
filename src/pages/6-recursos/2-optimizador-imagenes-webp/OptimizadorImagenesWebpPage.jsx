@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import heroImage from '../assets/script-backup.webp'
 
 const pipelineSteps = [
@@ -271,6 +272,7 @@ run();
 
       // 3. Desbloquear y recordar en localStorage
       localStorage.setItem('recurso_desbloqueado_optimizador-imagenes-webp', 'true')
+      trackLead('Recurso - Optimizador de Imagenes WebP')
       setIsUnlocked(true)
       setShowModal(false)
 

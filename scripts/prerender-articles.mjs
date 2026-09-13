@@ -36,7 +36,7 @@ function cleanText(text = '') {
 }
 
 function resolveArticleImage(imgUrl = '', slug = 'default') {
-  if (!imgUrl) return 'https://www.qawaylab.com/assets/logo/logo-primary.png'
+  if (!imgUrl) return 'https://qawaylab.com/assets/og/home.png'
 
   // Si la imagen está en Base64 (data:image/...), guardarla como archivo físico para que Facebook la pueda descargar
   if (imgUrl.startsWith('data:image/')) {
@@ -58,7 +58,7 @@ function resolveArticleImage(imgUrl = '', slug = 'default') {
         fs.writeFileSync(path.resolve(distCoversDir, fileName), buffer)
         fs.writeFileSync(path.resolve(publicCoversDir, fileName), buffer)
 
-        return `https://www.qawaylab.com/assets/blog-covers/${fileName}`
+        return `https://qawaylab.com/assets/blog-covers/${fileName}`
       }
     } catch (err) {
       console.warn('[Prerender] Error guardando imagen base64:', err.message)
@@ -66,8 +66,8 @@ function resolveArticleImage(imgUrl = '', slug = 'default') {
   }
 
   if (imgUrl.startsWith('http://') || imgUrl.startsWith('https://')) return imgUrl
-  if (imgUrl.startsWith('/')) return `https://www.qawaylab.com${imgUrl}`
-  return `https://www.qawaylab.com/${imgUrl}`
+  if (imgUrl.startsWith('/')) return `https://qawaylab.com${imgUrl}`
+  return `https://qawaylab.com/${imgUrl}`
 }
 
 function generateArticleHtml(templateHtml, article) {
@@ -75,7 +75,7 @@ function generateArticleHtml(templateHtml, article) {
   const title = cleanText(article.title || 'Artículo de Blog')
   const description = cleanText(article.excerpt || article.description || 'Lee el artículo completo en Qaway Lab Blog.').slice(0, 180)
   const imageUrl = resolveArticleImage(article.cover_url || article.image || article.cover_image, slug)
-  const articleUrl = `https://www.qawaylab.com/blog/articulo/${slug}`
+  const articleUrl = `https://qawaylab.com/blog/articulo/${slug}`
   const publishedTime = article.published_at || article.created_at || new Date().toISOString()
 
   let html = templateHtml
@@ -159,7 +159,7 @@ async function prerender() {
       id: 'google-calendar-dominado-guia-productividad',
       title: 'Google Calendar Dominado: guia para ordenar tu semana con IA',
       excerpt: 'Aprende a usar Google Calendar con metodo, bloques de tiempo, tareas y apoyo de IA para reducir friccion operativa.',
-      image: 'https://www.qawaylab.com/assets/og-calendar.png',
+      image: 'https://qawaylab.com/assets/og/home.png',
     },
     {
       id: 'como-automatizar-facturacion-make-chatgpt',

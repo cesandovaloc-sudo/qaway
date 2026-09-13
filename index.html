@@ -23,19 +23,63 @@
     <!-- Open Graph / Facebook / LinkedIn / WhatsApp Default Meta -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Qaway Lab" />
-    <meta property="og:url" content="https://www.qawaylab.com/" />
+    <meta property="og:url" content="https://qawaylab.com/" />
     <meta property="og:title" content="Qaway Lab | Marcas, sistemas digitales y formacion con IA" />
     <meta property="og:description" content="Qaway Lab integra estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos con IA aplicada para marcas, negocios y proyectos." />
-    <meta property="og:image" content="https://www.qawaylab.com/assets/logo/logo-primary.svg" />
+    <!-- og:image debe ser raster 1200x630: Facebook/WhatsApp ignoran SVG -->
+    <meta property="og:image" content="https://qawaylab.com/assets/og/home.png" />
+    <meta property="og:image:secure_url" content="https://qawaylab.com/assets/og/home.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Qaway Lab | Marcas, sistemas digitales y formacion con IA" />
+    <meta property="og:locale" content="es_PE" />
     
     <!-- Twitter / X Default Meta -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Qaway Lab | Marcas, sistemas digitales y formacion con IA" />
     <meta name="twitter:description" content="Qaway Lab integra estudio creativo, sistemas digitales, automatizacion, marketing, formacion y recursos con IA aplicada para marcas, negocios y proyectos." />
-    <meta name="twitter:image" content="https://www.qawaylab.com/assets/logo/logo-primary.svg" />
+    <meta name="twitter:url" content="https://qawaylab.com/" />
+    <meta name="twitter:image" content="https://qawaylab.com/assets/og/home.png" />
+    <meta name="twitter:image:alt" content="Qaway Lab | Marcas, sistemas digitales y formacion con IA" />
+
+    <!-- ============================================================
+         Meta Pixel - ID canonico Qaway Lab: 1787532068936007
+         Codigo base oficial dentro de <head>, como especifica Meta:
+         https://developers.facebook.com/docs/meta-pixel/get-started
+         Consentimiento: carga por defecto (opt-out). Si el usuario
+         rechazo explicitamente las cookies opcionales se omite por
+         completo, sin importar su ubicacion geografica.
+         ============================================================ -->
+    <script>
+      (function () {
+        try {
+          if (window.localStorage &&
+              window.localStorage.getItem('qaway_cookie_consent') === 'declined') {
+            return;
+          }
+        } catch (e) {
+          /* Almacenamiento no disponible: se aplica la carga por defecto. */
+        }
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1787532068936007');
+        fbq('track', 'PageView');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=1787532068936007&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

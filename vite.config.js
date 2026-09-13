@@ -33,7 +33,10 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   build: {
-    emptyOutDir: false,
+    // Limpia dist/ en cada build: con `false` se acumulaban bundles antiguos
+    // con hash y quedaba un index.html apuntando a artefactos obsoletos.
+    // Seguro: todo lo no generado por Vite vive en public/ y se recopia.
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         // manualChunks removido — estándar v3 #25: "No usar manualChunks por costumbre"

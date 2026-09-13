@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import {
   ArrowRight, Check, ChevronDown, ShieldCheck, HelpCircle,
   Calculator, Users, FileText, TrendingUp, Scale,
@@ -614,7 +615,10 @@ function ContableCTA() {
       console.error('Error al procesar formulario:', err);
     }
 
-    window.location.href = waUrl
+    trackLead('Landing Contable')
+    // Espera defensiva: asegura que el beacon de Lead se despache antes de
+    // abandonar la pestana hacia WhatsApp (navegacion externa dura).
+    window.setTimeout(() => { window.location.href = waUrl }, 250)
   }
 
   return (

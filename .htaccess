@@ -1,4 +1,4 @@
-﻿# Qaway Lab - Configuracion Estructural y Segura para Hostinger
+# Qaway Lab - Configuracion Estructural y Segura para Hostinger
 DirectoryIndex dist/index.html index.html
 DirectorySlash Off
 
@@ -17,6 +17,17 @@ RewriteRule ^(package\.json|package-lock\.json|tsconfig\.json|vite\.config\.js|R
 # Si el archivo existe fisicamente dentro de dist/ (js, css, png, jpg, webp, svg, ico, etc.)
 RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
 RewriteRule ^(.*)$ dist/$1 [L]
+
+# ==============================================================================
+# 2b. RUTAS PRERENDERIZADAS: Carpetas con su propio index.html (Open Graph)
+# ==============================================================================
+# /blog/articulo/<slug>, /landings/<slug>, etc. generados por
+# scripts/prerender-articles.mjs. El test de la regla 2 es "-f" (archivo), y una
+# ruta prerenderizada es un DIRECTORIO: sin esta regla el bot de Facebook/WhatsApp
+# cae al fallback SPA y recibe la home generica en lugar del articulo.
+# Mismo test que usa la regla 2 (backreference $1 del patron de la RewriteRule).
+RewriteCond %{DOCUMENT_ROOT}/dist/$1/index.html -f
+RewriteRule ^(.+?)/?$ dist/$1/index.html [L]
 
 # ==============================================================================
 # 3. FALLBACK SPA: Rutas virtuales de React Router y articulos de Supabase

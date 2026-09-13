@@ -38,6 +38,7 @@ import HeroPrimitive from "@/components/typography/HeroPrimitive";
 import '@/pages/4-academy/academy.css'
 import SEO from "@/components/seo/SEO";
 import { supabase } from "@/config/supabase";
+import { trackLead } from '@/lib/analytics/metaPixel';
 import { WHATSAPP_LINK } from "@/data/navigation";
 
 const ASSET = '/assets/pages/2-estudio'
@@ -729,10 +730,13 @@ export default function SistemasDigitalesPage() {
       }
 
       setFormSubmitted(true);
+      trackLead('Sistemas Digitales - Formulario');
 
       const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`);
       const waUrl = `https://wa.me/51930756781?text=${contactMsg}`;
-      window.location.href = waUrl;
+      // Espera defensiva: asegura que el beacon de Lead se despache antes de
+      // abandonar la pestana hacia WhatsApp (navegacion externa dura).
+      window.setTimeout(() => { window.location.href = waUrl; }, 250);
     } catch {
       setFormError('Ocurrió un error al enviar. Intenta de nuevo.');
     } finally {

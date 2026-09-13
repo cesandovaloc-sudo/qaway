@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, ShieldCheck, Zap, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/config/supabase";
+import { trackLead } from '@/lib/analytics/metaPixel';
 
 export function QawayLeadContactForm() {
   const [submitting, setSubmitting] = useState(false);
@@ -98,6 +99,7 @@ export function QawayLeadContactForm() {
       }
 
       setSubmitted(true);
+      trackLead('Landing Desarrollo Web');
       e.currentTarget.reset();
 
       // 3. Mapear el plan seleccionado e ingresarlo al carrito

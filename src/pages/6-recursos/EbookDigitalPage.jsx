@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import '@/styles/recursos-ebooks.css'
 
 // Initial events for the Calendar Simulator
@@ -241,6 +242,7 @@ export default function EbookDigitalPage() {
 
       // 3. Registrar desbloqueo en localStorage y React state
       localStorage.setItem('recurso_desbloqueado_google-calendar-dominado', 'true')
+      trackLead('Recurso - Ebook Google Calendar Dominado')
       setIsUnlocked(true)
       setShowLockCard(false)
     } catch (err) {

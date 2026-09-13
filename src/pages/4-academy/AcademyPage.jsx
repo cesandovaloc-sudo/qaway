@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import { featuredCourses, courseCatalog } from '@/data/academyCourses'
 import './academy.css'
 
@@ -386,6 +387,7 @@ export default function AcademyPage() {
       }
 
       setSubmitted(true)
+      trackLead('Academy - Formulario')
       formElement.reset()
     } catch (error) {
       console.error('Error al enviar consulta de Academy:', error)

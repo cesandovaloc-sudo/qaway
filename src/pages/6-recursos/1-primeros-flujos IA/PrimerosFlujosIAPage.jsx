@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
+import { trackLead } from '@/lib/analytics/metaPixel'
 import heroImage from './ChatGPT Image 1 sept 2026, 19_04_24.webp'
 import pdfFile from './Guia_Qaway Lab_Primeros_Flujos_IA.pdf'
 
@@ -179,6 +180,7 @@ export default function PrimerosFlujosIAPage() {
 
       // 3. Desbloquear y recordar en localStorage
       localStorage.setItem('recurso_desbloqueado_primeros-flujos-ia', 'true')
+      trackLead('Recurso - Primeros Flujos IA')
       setIsUnlocked(true)
       setShowModal(false)
 

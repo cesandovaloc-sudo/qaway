@@ -26,6 +26,13 @@
     
     
     
+    <!-- og:image debe ser raster 1200x630: Facebook/WhatsApp ignoran SVG -->
+    
+    
+    
+    
+    
+    
     
     
     <!-- Twitter / X Default Meta -->
@@ -33,7 +40,40 @@
     
     
     
-    <script type="module" crossorigin src="/assets/index-DV43L6QT.js"></script>
+    
+    
+
+    <!-- ============================================================
+         Meta Pixel - ID canonico Qaway Lab: 1787532068936007
+         Codigo base oficial dentro de <head>, como especifica Meta:
+         https://developers.facebook.com/docs/meta-pixel/get-started
+         Consentimiento: carga por defecto (opt-out). Si el usuario
+         rechazo explicitamente las cookies opcionales se omite por
+         completo, sin importar su ubicacion geografica.
+         ============================================================ -->
+    <script>
+      (function () {
+        try {
+          if (window.localStorage &&
+              window.localStorage.getItem('qaway_cookie_consent') === 'declined') {
+            return;
+          }
+        } catch (e) {
+          /* Almacenamiento no disponible: se aplica la carga por defecto. */
+        }
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1787532068936007');
+        fbq('track', 'PageView');
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-B647y1mQ.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-B0Z9INg1.js">
     <link rel="modulepreload" crossorigin href="/assets/react-CUdNIagt.js">
     <link rel="modulepreload" crossorigin href="/assets/react-dom-CKsE8sC1.js">
@@ -79,9 +119,10 @@
     <link rel="modulepreload" crossorigin href="/assets/menu-ay0rHbXD.js">
     <link rel="modulepreload" crossorigin href="/assets/recordingMode-CF1ugV34.js">
     <link rel="modulepreload" crossorigin href="/assets/Navbar-BcS29F1B.js">
+    <link rel="modulepreload" crossorigin href="/assets/metaPixel-D9d4u_8N.js">
     <link rel="modulepreload" crossorigin href="/assets/academyCourses-BR4M0-bG.js">
     <link rel="modulepreload" crossorigin href="/assets/schemas-C7uI7QYS.js">
-    <link rel="modulepreload" crossorigin href="/assets/InicioPage-Cdkdtyxj.js">
+    <link rel="modulepreload" crossorigin href="/assets/InicioPage-7UcM-X_C.js">
     <link rel="modulepreload" crossorigin href="/assets/calendar-days-Ba4cage-.js">
     <link rel="modulepreload" crossorigin href="/assets/chart-pie-CFeAr9ja.js">
     <link rel="modulepreload" crossorigin href="/assets/circle-check-D7rN4eoO.js">
@@ -157,7 +198,7 @@
     <link rel="modulepreload" crossorigin href="/assets/layout-dashboard-Cvao2RET.js">
     <link rel="modulepreload" crossorigin href="/assets/radio-CQY2ipwd.js">
     <link rel="modulepreload" crossorigin href="/assets/HeroPrimitive-BJR63dtJ.js">
-    <link rel="modulepreload" crossorigin href="/assets/SistemasDigitalesPage-R3QQIJo4.js">
+    <link rel="modulepreload" crossorigin href="/assets/SistemasDigitalesPage-BAbNgi6V.js">
     <link rel="modulepreload" crossorigin href="/assets/calendar-check-lyLbnd_C.js">
     <link rel="modulepreload" crossorigin href="/assets/stethoscope-lm2XPc8a.js">
     <link rel="modulepreload" crossorigin href="/assets/DentalPage-Bv4GmTCc.js">
@@ -174,7 +215,7 @@
     <link rel="modulepreload" crossorigin href="/assets/use-in-view-avnbdjAO.js">
     <link rel="modulepreload" crossorigin href="/assets/DigitalPresenceCopy-C3D8gbgZ.js">
     <link rel="modulepreload" crossorigin href="/assets/mouse-pointer-2-C-JZrN3V.js">
-    <link rel="modulepreload" crossorigin href="/assets/EstudioPage-BbPEmxJs.js">
+    <link rel="modulepreload" crossorigin href="/assets/EstudioPage-DJLhLYnz.js">
     <link rel="modulepreload" crossorigin href="/assets/EstudioLayout-BXf6KqGh.js">
     <link rel="modulepreload" crossorigin href="/assets/filter-ChZuOmtQ.js">
     <link rel="modulepreload" crossorigin href="/assets/EstrategiaDigitalPage-CVnxjX0D.js">
@@ -224,24 +265,28 @@
     <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Qaway Lab" />
-    <meta property="og:url" content="https://www.qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
+    <meta property="og:url" content="https://qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
     <meta property="og:title" content="Por qué tu negocio necesita un ADN visual único" />
     <meta property="og:description" content="La coherencia de marca reduce el costo de adquisición de clientes y genera autoridad inmediata. Estrategia de marca moderna." />
     <meta property="og:image" content="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1200" />
     <meta property="og:image:secure_url" content="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1200" />
     <meta property="og:image:alt" content="Por qué tu negocio necesita un ADN visual único" />
-    <meta property="article:published_time" content="2026-09-13T17:08:06.506Z" />
+    <meta property="article:published_time" content="2026-09-13T18:27:56.592Z" />
     <meta property="article:author" content="Qaway Lab" />
     <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://www.qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
+    <meta name="twitter:url" content="https://qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
     <meta name="twitter:title" content="Por qué tu negocio necesita un ADN visual único" />
     <meta name="twitter:description" content="La coherencia de marca reduce el costo de adquisición de clientes y genera autoridad inmediata. Estrategia de marca moderna." />
     <meta name="twitter:image" content="https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1200" />
-    <link rel="canonical" href="https://www.qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
+    <link rel="canonical" href="https://qawaylab.com/blog/articulo/por-que-tu-negocio-necesita-adn-visual" />
   
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <noscript>
+      <img height="1" width="1" style="display:none"
+           src="https://www.facebook.com/tr?id=1787532068936007&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
   </body>
 </html>
