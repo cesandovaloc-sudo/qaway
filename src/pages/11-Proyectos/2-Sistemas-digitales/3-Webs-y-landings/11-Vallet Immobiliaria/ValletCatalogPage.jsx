@@ -146,8 +146,8 @@ export default function ValletCatalogPage() {
       <SEO
         title="Catálogo de Propiedades Exclusivas en Lima | Vallet Asesoría Inmobiliaria"
         description="Explora nuestra cartera de departamentos y casas en alquiler y venta en Miraflores, Jesús María y Magdalena. Propiedades 100% verificadas."
-        canonical="https://qawaylab.com/proyectos/vallet/propiedades"
-        image="https://qawaylab.com/assets/miraflores1.webp"
+        canonical="https://www.qawaylab.com/proyectos/vallet/propiedades"
+        image="https://www.qawaylab.com/assets/og/home.png"
         schema={{
           '@context': 'https://schema.org',
           '@type': 'ItemList',
@@ -156,7 +156,7 @@ export default function ValletCatalogPage() {
             '@type': 'ListItem',
             position: idx + 1,
             name: p.title,
-            url: `https://qawaylab.com/proyectos/vallet/propiedad/${p.slug}`
+            url: `https://www.qawaylab.com/proyectos/vallet/propiedad/${p.slug}`
           }))
         }}
       />

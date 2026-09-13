@@ -10,7 +10,7 @@ const dentalSchema = {
   "image": "/src/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/3-Dental/src/assets/generated/hero-clean.webp",
   "telephone": "+51 987 654 321",
   "email": "citas@sonrisadental.pe",
-  "url": "https://qawaylab.com/proyectos/dental",
+  "url": "https://www.qawaylab.com/proyectos/dental",
   "description": "Especialistas en ortodoncia personalizada, alineadores invisibles y estética dental con tecnología avanzada.",
   "openingHours": "Mo-Fr 09:00-19:00, Sa 09:00-14:00",
   "priceRange": "$$",

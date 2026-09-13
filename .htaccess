@@ -6,6 +6,15 @@ RewriteEngine On
 RewriteBase /
 
 # ==============================================================================
+# 0. DOMINIO CANONICO UNICO: qawaylab.com (sin www) -> www.qawaylab.com
+# ==============================================================================
+# Condicion EXACTA sobre el host: no toca subdominios (academy.qawaylab.com)
+# ni la propia www. Ese anclaje ^...$ es lo que impide el bucle de redireccion.
+# mod_rewrite conserva el query string automaticamente al redirigir.
+RewriteCond %{HTTP_HOST} ^qawaylab\.com$ [NC]
+RewriteRule ^(.*)$ https://www.qawaylab.com/$1 [R=301,L]
+
+# ==============================================================================
 # 1. SEGURIDAD: Bloquear acceso a codigo fuente, dependencias y archivos sensibles
 # ==============================================================================
 RewriteRule ^(\.git|\.env|src|node_modules|docs|\.agents)(\/.*)?$ - [F,L,NC]

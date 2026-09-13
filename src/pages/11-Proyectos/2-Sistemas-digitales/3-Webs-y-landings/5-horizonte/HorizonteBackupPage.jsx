@@ -54,7 +54,7 @@ export default function HorizonteBackupPage() {
       <SEO
         title="Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab"
         description="Caso de estudio: sitio web corporativo y plataforma de captación para Horizonte Inmobiliaria. Diseño, desarrollo e integración con CRM y WhatsApp."
-        canonical="https://qawaylab.com/proyectos/horizonte-backup"
+        canonical="https://www.qawaylab.com/proyectos/horizonte-backup"
         type="website"
         schema={{
           "@context": "https://schema.org",

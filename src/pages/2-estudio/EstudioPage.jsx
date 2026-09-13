@@ -867,7 +867,7 @@ export default function EstudioPage() {
     "provider": {
       "@type": "Organization",
       "name": "Qaway Lab",
-      "url": "https://qaway.pe"
+      "url": "https://www.qawaylab.com"
     },
     "description": "Desarrollamos la identidad visual, branding y contenido digital para que tu proyecto o marca tenga una presencia profesional y confiable.",
     "areaServed": "PE",
@@ -905,7 +905,7 @@ export default function EstudioPage() {
       <SEO
         title="Estudio Creativo y Dirección Visual | Qaway Lab"
         description="Creamos la identidad visual, branding y contenido digital para que tu proyecto tenga una presencia profesional y confiable."
-        canonical="https://qaway.pe/estudio"
+        canonical="https://www.qawaylab.com/estudio"
         schema={estudioSchema}
       />
       <Hero />

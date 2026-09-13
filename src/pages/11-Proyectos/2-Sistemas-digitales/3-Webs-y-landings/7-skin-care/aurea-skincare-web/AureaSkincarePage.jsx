@@ -73,10 +73,10 @@ const schemaData = {
   "@graph": [
     {
       "@type": "BeautySalon",
-      "@id": "https://qawaylab.com/proyectos/aurea-skincare/#organization",
+      "@id": "https://www.qawaylab.com/proyectos/aurea-skincare/#organization",
       "name": "Auréa Skincare Botánico",
-      "url": "https://qawaylab.com/proyectos/aurea-skincare",
-      "logo": "https://qawaylab.com/aurea-images/hero_products.jpg",
+      "url": "https://www.qawaylab.com/proyectos/aurea-skincare",
+      "logo": "https://www.qawaylab.com/aurea-images/hero_products.jpg",
       "description": "Fórmulas botánicas conscientes, ingredientes puros y rituales diarios para una piel radiante y saludable.",
       "priceRange": "S/ 119 - S/ 139"
     },
@@ -89,7 +89,7 @@ const schemaData = {
           "@type": "Product",
           "name": p.name,
           "description": p.description,
-          "image": `https://qawaylab.com${p.image}`,
+          "image": `https://www.qawaylab.com${p.image}`,
           "brand": {
             "@type": "Brand",
             "name": "Auréa"
@@ -168,7 +168,7 @@ export default function AureaSkincarePage() {
       <SEO
         title="Auréa | Skincare Botánico Consciente & Fórmulas Puras"
         description="Descubre Auréa: cosmética botánica y fórmulas conscientes elaboradas con extractos puros, vitamina C estabilizada y aceites regeneradores para una piel luminosa y equilibrada."
-        canonical="https://qawaylab.com/proyectos/aurea-skincare"
+        canonical="https://www.qawaylab.com/proyectos/aurea-skincare"
         schema={schemaData}
       />
       

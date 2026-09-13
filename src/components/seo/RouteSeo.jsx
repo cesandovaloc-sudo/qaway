@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { isPublicPathAllowed } from '@/config/siteVisibility'
 
-const SITE_URL = 'https://qawaylab.com'
+const SITE_URL = 'https://www.qawaylab.com'
 // og:image por defecto: 1200x630 raster. Facebook/WhatsApp ignoran SVG y
 // recortan mal las verticales, por eso no se usa el hero en formato retrato.
 const DEFAULT_IMAGE = `${SITE_URL}/assets/og/home.png`

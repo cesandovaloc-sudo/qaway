@@ -749,7 +749,7 @@ export default function SistemasDigitalesPage() {
       <SEO
         title="Sistemas Digitales y Automatización con IA | Qaway LAB"
         description="Implementamos sistemas, CRMs y agentes con IA para optimizar la operación de tu negocio."
-        canonical="https://qaway.dev/sistemas-digitales"
+        canonical="https://www.qawaylab.com/sistemas-digitales"
         type="website"
         schema={{
           "@context": "https://schema.org",

@@ -25,7 +25,7 @@ export const openrouterProvider = {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
-            'HTTP-Referer': 'https://qawaylab.com',
+            'HTTP-Referer': 'https://www.qawaylab.com',
             'X-Title': 'Qaway Campaign Console'
           },
           body: JSON.stringify({

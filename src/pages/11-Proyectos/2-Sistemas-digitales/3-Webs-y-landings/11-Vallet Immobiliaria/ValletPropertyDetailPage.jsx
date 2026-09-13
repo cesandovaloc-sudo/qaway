@@ -81,7 +81,7 @@ export default function ValletPropertyDetailPage() {
       <SEO
         title={`${property.title} | Vallet Asesoría Inmobiliaria`}
         description={`${property.tagline} Ubicado en ${property.location}. Precio: ${property.price}.`}
-        canonical={`https://qawaylab.com/proyectos/vallet/propiedad/${property.slug}`}
+        canonical={`https://www.qawaylab.com/proyectos/vallet/propiedad/${property.slug}`}
         image={property.images[0]}
         schema={{
           '@context': 'https://schema.org',

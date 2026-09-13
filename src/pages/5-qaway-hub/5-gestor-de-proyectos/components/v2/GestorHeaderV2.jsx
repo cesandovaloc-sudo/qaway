@@ -126,11 +126,11 @@ export function GestorHeaderV2({
 
         {/* 2. Logo Qaway Lab (Retorno a Web Pública) */}
         <a
-          href="https://qaway.pe"
+          href="https://www.qawaylab.com"
           target="_blank"
           rel="noopener noreferrer"
           className="hidden sm:flex items-center gap-1.5 text-xs font-black text-zinc-900 px-2 py-1 rounded-lg hover:bg-zinc-100 transition-colors group"
-          title="Ir a la web principal (qaway.pe)"
+          title="Ir a la web principal (www.qawaylab.com)"
         >
           <span className="w-5 h-5 rounded-md bg-zinc-950 text-white flex items-center justify-center text-[10px] font-black group-hover:bg-orange-500 transition-colors">
             Q

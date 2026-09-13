@@ -16,7 +16,7 @@ const demoData = {
   year: '2024',
   technologies: ['React', 'Vite', 'Tailwind CSS', 'Supabase'],
   videoSrc: null,
-  liveUrl: 'https://qawaylab.com',
+  liveUrl: 'https://www.qawaylab.com',
   
   presentationText: 'Desarrollamos un sistema digital completo para Qaway Lab, incluyendo sitio web corporativo, plataforma de formación (Academy), sistema de pagos y herramientas de gestión. El objetivo era crear una presencia digital profesional que comunicara expertise en transformación digital.',
   

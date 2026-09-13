@@ -87,7 +87,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
           Portales Globales
         </p>
         <a
-          href="https://qaway.pe"
+          href="https://www.qawaylab.com"
           target="_blank"
           rel="noopener noreferrer"
           onClick={onClose}
@@ -97,7 +97,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
             <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
               <Globe className="w-4 h-4" />
             </div>
-            <span>Web Pública (qaway.pe)</span>
+            <span>Web Pública (www.qawaylab.com)</span>
           </div>
           <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
         </a>

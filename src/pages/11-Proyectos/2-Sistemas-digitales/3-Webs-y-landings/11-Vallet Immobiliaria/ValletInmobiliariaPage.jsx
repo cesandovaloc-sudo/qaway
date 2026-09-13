@@ -165,14 +165,14 @@ export default function ValletInmobiliariaPage() {
       <SEO
         title="Vallet Inmobiliaria | Asesoría Inmobiliaria Personalizada en Lima"
         description="Te acompañamos en la compra, venta o alquiler de propiedades en Lima con total transparencia, seguridad y atención directa."
-        canonical="https://qawaylab.com/proyectos/vallet"
-        image="https://qawaylab.com/assets/miraflores1.webp"
+        canonical="https://www.qawaylab.com/proyectos/vallet"
+        image="https://www.qawaylab.com/assets/og/home.png"
         schema={{
           '@context': 'https://schema.org',
           '@type': 'RealEstateAgent',
           name: 'Vallet Asesoría Inmobiliaria',
           description: 'Asesoría inmobiliaria personalizada para compra, venta y alquiler de inmuebles en Lima.',
-          url: 'https://qawaylab.com/proyectos/vallet',
+          url: 'https://www.qawaylab.com/proyectos/vallet',
           telephone: '+51930756781',
           areaServed: 'Lima Metropolitana, Perú',
           priceRange: 'S/ 2,000 - S/ 15,000',

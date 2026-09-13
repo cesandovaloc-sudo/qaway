@@ -19,10 +19,10 @@ const schemaJsonLd = {
   "@graph": [
     {
       "@type": "ProfessionalService",
-      "@id": "https://qawaylab.com/#organization",
+      "@id": "https://www.qawaylab.com/#organization",
       "name": "Qaway Lab",
-      "url": "https://qawaylab.com",
-      "logo": "https://qawaylab.com/assets/logo-qaway.png",
+      "url": "https://www.qawaylab.com",
+      "logo": "https://www.qawaylab.com/assets/og/home.png",
       "description": "Estudio de desarrollo de páginas web, landing pages y tiendas online de alto impacto visual y conversión en Perú.",
       "priceRange": "$$",
       "address": {
@@ -33,8 +33,8 @@ const schemaJsonLd = {
     },
     {
       "@type": "WebPage",
-      "@id": "https://qawaylab.com/landings/desarrollo-web-qaway/#webpage",
-      "url": "https://qawaylab.com/landings/desarrollo-web-qaway",
+      "@id": "https://www.qawaylab.com/landings/desarrollo-web-qaway/#webpage",
+      "url": "https://www.qawaylab.com/landings/desarrollo-web-qaway",
       "name": "Desarrollo Web & Landings de Alta Conversión 2026 | Qaway Lab",
       "description": "Creamos páginas web, landing pages y tiendas online que transmiten confianza, cargan en menos de 1 segundo y convierten visitantes en clientes por WhatsApp.",
       "inLanguage": "es-PE"
@@ -132,20 +132,20 @@ export default function DesarrolloWebQawayPage() {
       <Helmet>
         <title>Desarrollo Web & Landings de Alta Conversión 2026 | Qaway Lab</title>
         <meta name="description" content="Diseño y desarrollo de páginas web, landing pages y tiendas online en Perú. Carga ultrarrápida, alta conversión a WhatsApp y diseño visual de alto impacto." />
-        <link rel="canonical" href="https://qawaylab.com/landings/desarrollo-web-qaway" />
+        <link rel="canonical" href="https://www.qawaylab.com/landings/desarrollo-web-qaway" />
         
         {/* OpenGraph / Facebook / WhatsApp */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://qawaylab.com/landings/desarrollo-web-qaway" />
+        <meta property="og:url" content="https://www.qawaylab.com/landings/desarrollo-web-qaway" />
         <meta property="og:title" content="Desarrollo Web & Landings de Alta Conversión | Qaway Lab" />
         <meta property="og:description" content="Páginas web y tiendas digitales de alto impacto visual y conversión directa a WhatsApp. Planes desde S/ 79.90." />
-        <meta property="og:image" content="https://qawaylab.com/assets/og-desarrollo-web.png" />
+        <meta property="og:image" content="https://www.qawaylab.com/assets/og/home.png" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Desarrollo Web & Landings de Alta Conversión | Qaway Lab" />
         <meta name="twitter:description" content="Páginas web y tiendas online diseñadas para convertir visitas en ventas. Qaway Lab." />
-        <meta name="twitter:image" content="https://qawaylab.com/assets/og-desarrollo-web.png" />
+        <meta name="twitter:image" content="https://www.qawaylab.com/assets/og/home.png" />
         
         {/* Schema.org JSON-LD */}
         <script type="application/ld+json">
