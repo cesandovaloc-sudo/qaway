@@ -376,6 +376,15 @@
    (`.order-summary`), así que no depende del scroll de la columna izquierda. */
 .qawa-storefront .cart-layout--cabecera {
   padding-top: 0;
+  /* `sticky` solo viaja dentro de su fila, y la fila mide lo que mida la columna
+     más alta. Con pocos productos (un servicio de compra única es el caso
+     normal) el resumen es MÁS ALTO que la lista: la fila la marcaba el resumen,
+     su recorrido era cero y la tarjeta se iba con el scroll. Esta altura mínima
+     garantiza fila > resumen, de modo que la tarjeta se queda fija igual que
+     "Tu pedido" en el checkout. Solo añade aire bajo la lista: no cambia
+     tipografías, tamaños ni el diseño de los elementos. */
+  min-height: calc(100vh - var(--qawa-sticky-top, 96px) - 24px);
+  min-height: calc(100dvh - var(--qawa-sticky-top, 96px) - 24px);
 }
 .qawa-storefront .cart-layout--cabecera > * {
   min-width: 0;
