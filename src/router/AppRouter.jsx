@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
@@ -119,6 +119,11 @@ function PublicPathRoute({ routeKey, children, fallback = '/' }) {
 function RedirectToInventarioCarrito() {
   const location = useLocation()
   return <Navigate to={`/hub/inventario/carrito${location.search}`} replace />
+}
+
+function CoursesCanonicalRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={slug ? `/academy/app/cursos/${slug}` : '/academy/app/cursos'} replace />
 }
 
 export default function AppRouter() {
@@ -444,6 +449,8 @@ export default function AppRouter() {
           <Route path="academy-legacy" element={renderRoute('academy', <AcademyPage />)} />
           <Route path="academy/app/*" element={renderRoute('academy', <AcademyRealAppPage />)} />
           <Route path="hub/academy/*" element={renderRoute('academy', <AcademyRealAppPage />)} />
+          <Route path="cursos" element={<Navigate to="/academy/app/cursos" replace />} />
+          <Route path="cursos/:slug" element={<CoursesCanonicalRedirect />} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />

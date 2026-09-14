@@ -46,13 +46,16 @@ En la vista del catálogo de Academy (/academy/app/cursos), la pantalla mostraba
 
 ---
 
-## 6. Iteración 3 — Corrección de Enlace "Ver contenido" (Resolución 404)
-- **Problema Detectado:**
-  Al hacer clic en "Ver contenido" en cualquiera de las tarjetas de curso (`WebStyleCourseCard`), el navegador era redirigido a una página 404 (Not Found).
-- **Causa Raíz:**
-  El componente `Courses.tsx` generaba el enlace con la ruta `/cursos/${course.slug}`. Al estar la aplicación de Academy montada en el host bajo el prefijo `/academy/app/*`, la ruta real configurada en `AcademyAppPage.jsx` es `/academy/app/cursos/:slug`.
-- **Solución Estructural Aplicada:**
-  Se actualizó el prop `to` del enlace `Ver contenido` en `Courses.tsx` y `Resources.tsx` para apuntar a `/academy/app/cursos/${course.slug}`.
+## 6. Iteración 3 y 4 — Solución Estructural de Enrutamiento y Desacoplamiento de URLs
+- **Problema de Arquitectura:**
+  1. Rutas absolutas quemadas (`/cursos/...` vs `/academy/app/...`) dispersas en componentes.
+  2. Ausencia de manejo de rutas cortas canónicas en el host (`AppRouter.jsx`), lo que provocaba 404 si un usuario o enlace externo navegaba directamente a `/cursos` o `/cursos/:slug`.
+- **Solución Estructural Aplicada (Cero Parches):**
+  1. **Generador Centralizado de Rutas (`routes.ts`):** Se creó `src/lib/routes.ts` con el mapa canónico de rutas de Academy (`academyRoutes`), desacoplando todos los componentes de strings quemados.
+  2. **Consumo en Componentes:** `Courses.tsx` y `Resources.tsx` resuelven enlaces mediante `academyRoutes.courseDetail(slug)`.
+  3. **Interoperabilidad en la Tarjeta:** Tanto la imagen como el título de la tarjeta y el botón de acción "Ver contenido" comparten el enlace canónico.
+  4. **Redirección Canónica en Host (`AppRouter.jsx`):** Se registraron rutas canónicas para `/cursos` y `/cursos/:slug` (`CoursesCanonicalRedirect`) que redirigen de forma transparente hacia `/academy/app/cursos/:slug`, blindando el sistema contra cualquier 404.
 - **Validación:**
-  Ruta verificada contra `AcademyAppPage.jsx` (`Route path="cursos/:slug"`) y compilación TypeScript exitosa.
+  Compilación y validación de tipos `npx tsc --noEmit` completada con 0 errores.
+
 

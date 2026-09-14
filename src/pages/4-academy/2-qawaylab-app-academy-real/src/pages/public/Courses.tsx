@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '@/hooks/useData'
 import { getCourses, getCategories } from '@/lib/services'
+import { academyRoutes } from '@/lib/routes'
 import type { Course } from '@/lib/types'
 
 const levels = ['Todos', 'Principiante', 'Intermedio', 'Avanzado']
@@ -17,7 +18,7 @@ function formatPrice(course: Course) {
 function WebStyleCourseCard({ course }: { course: Course }) {
   return (
     <article className="group relative flex h-full min-h-[24.5rem] flex-col overflow-hidden rounded-md border border-black/10 bg-white shadow-[0_18px_48px_rgba(75,55,44,0.07)] transition-[box-shadow,border-color] duration-300 ease-out hover:border-black/15 hover:shadow-[0_16px_40px_rgba(75,55,44,0.08)]">
-      <div className="relative h-[10.75rem] w-full overflow-hidden bg-[#ddd9d2] after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-55% after:to-[#191614]/20">
+      <Link to={academyRoutes.courseDetail(course.slug)} className="relative block h-[10.75rem] w-full overflow-hidden bg-[#ddd9d2] after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-55% after:to-[#191614]/20">
         {course.image_url ? (
           <img src={course.image_url} alt={course.title} className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.012]" loading="lazy" />
         ) : (
@@ -30,7 +31,7 @@ function WebStyleCourseCard({ course }: { course: Course }) {
             Destacado
           </span>
         )}
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col p-5">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[0.69rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
@@ -44,7 +45,9 @@ function WebStyleCourseCard({ course }: { course: Course }) {
         </div>
         
         <h3 className="mt-3.5 line-clamp-2 text-[1.26rem] font-bold leading-[1.08] tracking-[-0.03em] text-[#20201f]">
-          {course.title}
+          <Link to={academyRoutes.courseDetail(course.slug)} className="hover:text-[#ff4b0b] transition-colors">
+            {course.title}
+          </Link>
         </h3>
         
         <p className="mt-2 text-[0.76rem] font-medium text-surface-500">
@@ -67,7 +70,7 @@ function WebStyleCourseCard({ course }: { course: Course }) {
         </div>
         
         <div className="mt-auto flex items-center justify-between gap-4 pt-5">
-          <Link to={`/academy/app/cursos/${course.slug}`} className="inline-flex items-center gap-2 text-[0.84rem] font-bold text-[#ff4b0b] transition-colors group-hover:text-[#ff4b0b]">
+          <Link to={academyRoutes.courseDetail(course.slug)} className="inline-flex items-center gap-2 text-[0.84rem] font-bold text-[#ff4b0b] transition-colors group-hover:text-[#ff4b0b]">
             Ver contenido
             <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </Link>

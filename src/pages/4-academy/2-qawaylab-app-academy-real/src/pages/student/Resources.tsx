@@ -4,6 +4,7 @@ import { useData } from '@/hooks/useData'
 import { useAuth } from '@/contexts/AuthContext'
 import { getStudentResources, getResourceIcon, type StudentResource } from '@/lib/services/resources'
 import ResourcePreview from '@/components/student/ResourcePreview'
+import { academyRoutes } from '@/lib/routes'
 import type { Course, Module, Lesson } from '@/lib/types'
 
 const PREVIEWABLE_TYPES = ['PDF', 'Word', 'Excel']
@@ -305,7 +306,7 @@ export default function Resources() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <Link
-                      to={`/academy/app/cursos/${group.course.slug}`}
+                      to={academyRoutes.courseDetail(group.course.slug)}
                       onClick={(e) => e.stopPropagation()}
                       className="btn-ghost text-xs font-medium text-primary-600 hover:text-primary-700 hidden sm:inline-flex"
                     >
