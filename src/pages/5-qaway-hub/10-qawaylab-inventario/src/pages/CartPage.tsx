@@ -1,26 +1,60 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, Minus, Package, Plus, ShoppingCart } from 'lucide-react'
-import { Checkout } from '@qawaylab/pago'
+import Checkout from '@/components/checkout/Checkout'
 import { supabase } from '@/config/supabase'
 import { siteConfig } from '@/config/site'
 import { setPageMeta } from '@/utils/seo'
 import { qawaServices } from '@/services/qawaService'
 import { useCart } from '@/hooks/useCart'
 import { useAuth } from '@/context/AuthContext'
-// Piel del checkout y la tienda: única fuente en el módulo @qawaylab/pago
-import '@qawaylab/pago/styles/storefront.css'
+// Piel del checkout y la tienda nativa de inventario
+import '@/components/checkout/storefront.css'
 
 export default function CartPage() {
-  const { items, updateQuantity, remove, clear, count, subtotal } = useCart()
+  const { items, add, updateQuantity, remove, clear, count, subtotal } = useCart()
   // Si hay sesión, el pedido se asocia al usuario real (RLS lo permite);
   // invitados: userId null → el schema registra un pedido anónimo
   const { session } = useAuth()
   const [orderDone, setOrderDone] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const handledAddRef = useRef<string | null>(null)
 
   useEffect(() => {
     setPageMeta({ title: 'Mi pedido | Qaway Lab', robots: 'noindex' })
   }, [])
+
+  useEffect(() => {
+    const addSlug = searchParams.get('add')
+    if (!addSlug || handledAddRef.current === addSlug) return
+    handledAddRef.current = addSlug
+
+    async function loadItem() {
+      try {
+        const { data } = await supabase
+          .from('products')
+          .select('*')
+          .or(`id.eq.${addSlug},slug.eq.${addSlug},sku.eq.${addSlug}`)
+          .limit(1)
+
+        if (data && data[0]) {
+          const p = data[0]
+          add({
+            product_id: p.id,
+            title: p.title || p.name,
+            unit_price: Number(p.base_price || p.price || 0),
+            quantity: 1,
+            product_type: p.type || 'digital',
+            image_url: p.images?.[0]?.processed_url || p.image_url || null,
+          })
+        }
+      } catch (err) {
+        console.warn('[CartPage] Error precargando producto:', err)
+      }
+      setSearchParams({}, { replace: true })
+    }
+    loadItem()
+  }, [searchParams, add, setSearchParams])
 
   const handleOrderSuccess = () => {
     setOrderDone(true)

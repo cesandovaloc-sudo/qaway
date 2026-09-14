@@ -17,7 +17,6 @@
     "test:unit": "vitest run --exclude '**/*.integration.test.ts'"
   },
   "dependencies": {
-    "@qawaylab/pago": "file:../3-qawaylab-pagos",
     "@supabase/supabase-js": "^2.112.3",
     "@tailwindcss/vite": "^4.3.3",
     "html2canvas": "^1.4.1",

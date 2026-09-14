@@ -41,6 +41,7 @@ export default function AppRouter() {
       <Route path="login" element={<LoginPage />} />
       <Route path="remates/:slug" element={<PublicCatalogPage />} />
       <Route path="carrito" element={<CartPage />} />
+      <Route path="checkout" element={<CartPage />} />
       <Route path="acceso/:token" element={<GuestAccessPage />} />
 
       {/* Rutas protegidas (requieren sesión) */}
