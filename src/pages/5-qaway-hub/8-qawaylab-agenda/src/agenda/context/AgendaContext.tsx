@@ -75,6 +75,8 @@ interface AgendaContextValue {
   saveException: (exc: Partial<AvailabilityException>) => Promise<{ data: AvailabilityException | null; error: unknown }>
   signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>
   signUp: (email: string, password: string) => Promise<{ data?: unknown; error: { message: string } | null }>
+  signInWithOAuth: (provider: 'google') => Promise<{ error: { message: string } | null }>
+  resetPassword: (email: string) => Promise<{ error: { message: string } | null }>
   loginAsDemo: () => void
   signOut: () => Promise<void>
 }
@@ -286,6 +288,14 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
     return await agendaAdapter.signUpWithPassword(email, password)
   }, [])
 
+  const signInWithOAuth = useCallback(async (provider: 'google') => {
+    return await agendaAdapter.signInWithOAuth(provider)
+  }, [])
+
+  const resetPassword = useCallback(async (email: string) => {
+    return await agendaAdapter.resetPassword(email)
+  }, [])
+
   const loginAsDemo = useCallback(() => {
     const demoSession = {
       user: { id: 'demo-user-id', email: 'demo@qawaylab.com' },
@@ -360,11 +370,11 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AgendaContextValue>(() => ({
     session, business, eventTypes, schedules, exceptions, bookings, loading, toast, notify,
     loadPublicData, getSlotsForDate, createBooking, getBookingByToken, cancelBooking, rescheduleBooking,
-    saveEventType, deleteEventType, saveSchedule, saveException, signIn, signUp, loginAsDemo, signOut, loadBusinessData,
+    saveEventType, deleteEventType, saveSchedule, saveException, signIn, signUp, signInWithOAuth, resetPassword, loginAsDemo, signOut, loadBusinessData,
   }), [
     session, business, eventTypes, schedules, exceptions, bookings, loading, toast, notify,
     loadPublicData, getSlotsForDate, createBooking, getBookingByToken, cancelBooking, rescheduleBooking,
-    saveEventType, deleteEventType, saveSchedule, saveException, signIn, signUp, loginAsDemo, signOut, loadBusinessData,
+    saveEventType, deleteEventType, saveSchedule, saveException, signIn, signUp, signInWithOAuth, resetPassword, loginAsDemo, signOut, loadBusinessData,
   ])
 
   return (

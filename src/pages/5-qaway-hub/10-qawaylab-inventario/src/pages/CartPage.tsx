@@ -11,6 +11,25 @@ import { useAuth } from '@/context/AuthContext'
 // Piel del checkout y la tienda nativa de inventario
 import '@/components/checkout/storefront.css'
 
+// `products.id` es uuid y `slug`/`sku` son text. Mezclar ambos tipos en un mismo
+// filtro OR (`id.eq.<texto>,slug.eq.<texto>`) obliga a Postgres a convertir el
+// texto a uuid y rechaza la consulta completa (error 22P02), dejando el pedido
+// vacío. Por eso el identificador se resuelve según su tipo real.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function resolveProductByRef(ref: string) {
+  if (UUID_RE.test(ref)) {
+    const { data } = await supabase.from('products').select('*').eq('id', ref).limit(1)
+    return data?.[0] ?? null
+  }
+
+  const { data } = await supabase.from('products').select('*').eq('slug', ref).limit(1)
+  if (data?.[0]) return data[0]
+
+  const { data: bySku } = await supabase.from('products').select('*').eq('sku', ref).limit(1)
+  return bySku?.[0] ?? null
+}
+
 export default function CartPage() {
   const { items, add, updateQuantity, remove, clear, count, subtotal } = useCart()
   // Si hay sesión, el pedido se asocia al usuario real (RLS lo permite);
@@ -29,16 +48,11 @@ export default function CartPage() {
     if (!addSlug || handledAddRef.current === addSlug) return
     handledAddRef.current = addSlug
 
-    async function loadItem() {
+    async function loadItem(ref: string) {
       try {
-        const { data } = await supabase
-          .from('products')
-          .select('*')
-          .or(`id.eq.${addSlug},slug.eq.${addSlug},sku.eq.${addSlug}`)
-          .limit(1)
+        const p = await resolveProductByRef(ref)
 
-        if (data && data[0]) {
-          const p = data[0]
+        if (p) {
           add({
             product_id: p.id,
             title: p.title || p.name,
@@ -53,7 +67,7 @@ export default function CartPage() {
       }
       setSearchParams({}, { replace: true })
     }
-    loadItem()
+    loadItem(addSlug)
   }, [searchParams, add, setSearchParams])
 
   const handleOrderSuccess = () => {

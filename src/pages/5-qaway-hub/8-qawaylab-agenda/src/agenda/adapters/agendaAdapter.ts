@@ -7,6 +7,8 @@ export interface AgendaAdapter {
   onAuthStateChange(cb: (session: Session | null) => void): () => void
   signInWithPassword(email: string, password: string): Promise<{ error: { message: string } | null }>
   signUpWithPassword(email: string, password: string): Promise<{ data?: unknown; error: { message: string } | null }>
+  signInWithOAuth(provider: 'google'): Promise<{ error: { message: string } | null }>
+  resetPassword(email: string): Promise<{ error: { message: string } | null }>
   signOut(): Promise<void>
   getOrCreateBusiness(ownerId: string, email: string | null | undefined): Promise<Business | null>
   loadBusinessData(businessId: string): Promise<{ eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookings: Booking[] }>
@@ -39,6 +41,19 @@ export const agendaAdapter: AgendaAdapter = {
   async signUpWithPassword(email, password) {
     const { data, error } = await supabase.auth.signUp({ email, password })
     return { data, error }
+  },
+  async signInWithOAuth(provider) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/hub/agenda/panel` },
+    })
+    return { error }
+  },
+  async resetPassword(email) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    })
+    return { error }
   },
   async signOut() {
     await supabase.auth.signOut()

@@ -14,4 +14,11 @@ if (!supabaseConfigured) {
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'public-anon-key-placeholder',
+  {
+    auth: {
+      storageKey: 'qaway_agenda_auth_token',
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
 )

@@ -14,13 +14,21 @@ const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Jul
 
 // ─── Componente Login / Registro del negocio ──────────────────────────────
 function LoginView({ onSuccess }: { onSuccess: () => void }) {
-  const { signIn, signUp, loginAsDemo, notify } = useAgenda()
+  const { signIn, signUp, signInWithOAuth, resetPassword, loginAsDemo, notify } = useAgenda()
   const [isRegister, setIsRegister] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [oauthLoading, setOauthLoading] = useState(false)
+
+  // Subflujo: Recuperación de contraseña
+  const [showReset, setShowReset] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -50,6 +58,38 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
     }
   }
 
+  const handleOAuth = async () => {
+    setOauthLoading(true)
+    setError(null)
+    try {
+      const { error: err } = await signInWithOAuth('google')
+      if (err) setError('No se pudo conectar con Google. Intenta nuevamente.')
+    } catch (_) {
+      setError('Error al iniciar autenticación con Google.')
+    } finally {
+      setOauthLoading(false)
+    }
+  }
+
+  const handleResetSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!resetEmail.trim()) return
+    setResetLoading(true)
+    setError(null)
+    try {
+      const { error: err } = await resetPassword(resetEmail.trim())
+      if (err) {
+        setError(err.message || 'No se pudo enviar el correo de recuperación.')
+      } else {
+        setResetSent(true)
+      }
+    } catch (_) {
+      setError('Error al enviar el enlace de recuperación.')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
   const handleDemoLogin = () => {
     loginAsDemo()
     onSuccess()
@@ -68,85 +108,195 @@ function LoginView({ onSuccess }: { onSuccess: () => void }) {
 
         {/* Card Principal */}
         <div className="bg-surface border border-line rounded-3xl p-8 shadow-xl shadow-slate-200/50 space-y-6">
-          {/* Selector Iniciar Sesión / Crear Cuenta */}
-          <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
-            <button
-              type="button"
-              onClick={() => { setIsRegister(false); setError(null) }}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${!isRegister ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:text-main'}`}
-            >
-              Iniciar Sesión
-            </button>
-            <button
-              type="button"
-              onClick={() => { setIsRegister(true); setError(null) }}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${isRegister ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:text-main'}`}
-            >
-              Crear Cuenta
-            </button>
-          </div>
+          {showReset ? (
+            /* ── Modo: Recuperación de Contraseña ── */
+            <div className="space-y-5">
+              <button
+                type="button"
+                onClick={() => { setShowReset(false); setResetSent(false); setError(null) }}
+                className="text-xs font-semibold text-muted hover:text-main flex items-center gap-1.5 transition-colors"
+              >
+                ← Volver al inicio de sesión
+              </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Correo electrónico</label>
-              <input
-                type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="tu@negocio.com"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:bg-white transition-all text-main"
-              />
+              <div>
+                <h2 className="text-lg font-bold text-main">Recuperar acceso</h2>
+                <p className="text-xs text-muted mt-1">Te enviaremos un enlace a tu correo para restablecer tu contraseña.</p>
+              </div>
+
+              {resetSent ? (
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl p-4 leading-relaxed text-center font-medium">
+                  ✓ Correo enviado con éxito. Revisa tu bandeja de entrada o spam.
+                </div>
+              ) : (
+                <form onSubmit={handleResetSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Correo registrado</label>
+                    <input
+                      type="email"
+                      required
+                      value={resetEmail}
+                      onChange={e => setResetEmail(e.target.value)}
+                      placeholder="tu@negocio.com"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:bg-white transition-all text-main"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3 leading-relaxed flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-accent/20 transition-all flex items-center justify-center gap-2 active:scale-[0.99] text-sm"
+                  >
+                    {resetLoading ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}
+                  </button>
+                </form>
+              )}
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Contraseña</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Tu contraseña secreta"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-accent focus:bg-white transition-all text-main"
-                />
+          ) : (
+            /* ── Modo Principal: Login / Registro ── */
+            <>
+              {/* Selector Iniciar Sesión / Crear Cuenta */}
+              <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 focus:outline-none"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                  onClick={() => { setIsRegister(false); setError(null) }}
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${!isRegister ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:text-main'}`}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Iniciar Sesión
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsRegister(true); setError(null) }}
+                  className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all ${isRegister ? 'bg-surface text-accent shadow-sm' : 'text-muted hover:text-main'}`}
+                >
+                  Crear Cuenta
                 </button>
               </div>
-            </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3.5 leading-relaxed flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                <span>{error}</span>
+              {/* Botón Google OAuth */}
+              <button
+                type="button"
+                onClick={handleOAuth}
+                disabled={oauthLoading}
+                className="w-full flex items-center justify-center gap-2.5 bg-slate-50 hover:bg-slate-100/90 border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition-all text-xs active:scale-[0.99] disabled:opacity-60"
+              >
+                {oauthLoading ? (
+                  <span className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                )}
+                Continuar con Google
+              </button>
+
+              <div className="relative flex py-0.5 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">o con correo</span>
+                <div className="flex-grow border-t border-slate-200"></div>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-accent/20 transition-all flex items-center justify-center gap-2 active:scale-[0.99] text-sm"
-            >
-              <LogIn className="w-4 h-4" /> {loading ? 'Procesando...' : (isRegister ? 'Crear cuenta y entrar' : 'Entrar al panel')}
-            </button>
-          </form>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Correo electrónico</label>
+                  <input
+                    type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="tu@negocio.com"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:bg-white transition-all text-main"
+                  />
+                </div>
 
-          <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">o prueba de inmediato</span>
-            <div className="flex-grow border-t border-slate-200"></div>
-          </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">Contraseña</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Tu contraseña secreta"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:border-accent focus:bg-white transition-all text-main"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 focus:outline-none"
+                      aria-label={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
 
-          <button
-            type="button"
-            onClick={handleDemoLogin}
-            className="w-full bg-purple-50 hover:bg-purple-100/80 border border-purple-200/80 text-purple-700 text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
-          >
-            <Sparkles className="w-4 h-4 text-accent" /> Entrar en Modo Demo / Vista Previa
-          </button>
+                {/* Fila: Recordarme + Olvidé mi contraseña */}
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <label className="flex items-center gap-2 cursor-pointer text-slate-600 select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={e => setRememberMe(e.target.checked)}
+                      className="rounded border-slate-300 text-accent focus:ring-accent/20 w-3.5 h-3.5 cursor-pointer"
+                    />
+                    <span>Recordarme</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => { setShowReset(true); setError(null) }}
+                    className="text-accent hover:underline font-semibold"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
+
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3.5 leading-relaxed flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-accent/20 transition-all flex items-center justify-center gap-2 active:scale-[0.99] text-sm"
+                >
+                  <LogIn className="w-4 h-4" /> {loading ? 'Procesando...' : (isRegister ? 'Crear cuenta y entrar' : 'Entrar al panel')}
+                </button>
+              </form>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-4 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">o prueba de inmediato</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDemoLogin}
+                className="w-full bg-purple-50 hover:bg-purple-100/80 border border-purple-200/80 text-purple-700 text-xs font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+              >
+                <Sparkles className="w-4 h-4 text-accent" /> Entrar en Modo Demo / Vista Previa
+              </button>
+
+              {/* Sello de Seguridad */}
+              <div className="pt-2 text-center">
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  Acceso Seguro · Encriptación SSL/TLS
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
     </div>
