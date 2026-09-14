@@ -533,8 +533,20 @@
 
 /* ── Resumen de pedido ─────────────────────────────────────── */
 .qawa-storefront .order-summary {
+  /* Barra lateral "pegajosa" (sticky), NO parallax: el resumen no se desplaza
+     a otra velocidad, se queda fijo mientras scrollea la columna de productos.
+     El tope superior cubre el navbar fijo del host (80px) + aire. */
   position: sticky;
-  top: var(--qawa-sticky-top, 112px);
+  top: var(--qawa-sticky-top, 96px);
+  align-self: start;
+  /* Tope estratégico (1): el resumen acompaña el scroll y se suelta solo al
+     llegar al final de su contenedor, así nunca invade el pie de página. */
+  /* Tope estratégico (2): si el resumen es más alto que la ventana, no se queda
+     atrapado escondiendo el CTA — scrollea por dentro. */
+  max-height: calc(100vh - var(--qawa-sticky-top, 96px) - 24px);
+  max-height: calc(100dvh - var(--qawa-sticky-top, 96px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--white);
   border: 1px solid var(--line);
   padding: 26px;
