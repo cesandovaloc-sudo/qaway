@@ -780,8 +780,16 @@ function buildDynamicHierarchicalRoutes(baseRoutes) {
       } else if (parts.length > 1) {
         // Si es una carpeta nueva de primer nivel, crear tarjeta padre automáticamente
         const newCategory = cleanTitle(parts[0])
+        // `cleanParts` sólo existe en la rama sin parentCard; aquí se recalcula
+        // el slug de la carpeta de primer nivel para el id automático.
+        const autoId = parts[0]
+          .replace(/^\d+[-_]?\s*/, '')
+          .replace(/^qawaylab-/, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
         const newParent = {
-          id: `auto-${cleanParts[0]}`,
+          id: `auto-${autoId || 'seccion'}`,
           title: newCategory,
           path: derivedPath,
           category: newCategory,

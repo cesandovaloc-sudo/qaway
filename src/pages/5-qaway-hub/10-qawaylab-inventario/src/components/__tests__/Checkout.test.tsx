@@ -43,7 +43,7 @@ function renderCheckout(props: Record<string, unknown> = {}) {
 }
 
 describe('Checkout (módulo @qawaylab/pago)', () => {
-  it('renderiza el formulario completo con contacto, beneficio, métodos de pago y resumen', () => {
+  it('renderiza el formulario completo con contacto, métodos de pago y resumen', () => {
     renderCheckout()
 
     expect(screen.getByText('Datos de contacto y entrega')).toBeInTheDocument()
@@ -51,11 +51,10 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByLabelText('WhatsApp / Celular')).toBeInTheDocument()
     expect(screen.getByLabelText('Distrito / Ciudad')).toBeInTheDocument()
     expect(screen.getByLabelText('Dirección')).toBeInTheDocument()
-    expect(screen.getByText('Beneficio de compra')).toBeInTheDocument()
     expect(screen.getByText('Forma de pago')).toBeInTheDocument()
 
-    // 4 métodos de pago + 2 beneficios = 6 radios
-    expect(screen.getAllByRole('radio')).toHaveLength(6)
+    // 4 métodos de pago (el programa de beneficios quedó latente)
+    expect(screen.getAllByRole('radio')).toHaveLength(4)
     expect(screen.getByText('Mercado Pago (Tarjetas, Yape, Cuotas)')).toBeInTheDocument()
     expect(screen.getByText('Yape / Plin Directo')).toBeInTheDocument()
     expect(screen.getByText('Tarjeta Internacional (Stripe)')).toBeInTheDocument()
@@ -95,22 +94,11 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByText('Yape / Plin:')).toBeInTheDocument()
   })
 
-  it('permite cambiar el beneficio de compra a Soporte Prioritario', async () => {
-    const user = userEvent.setup()
-    const { createOrder, services } = defaultServices()
-    renderCheckout(services)
+  it('ya no renderiza el bloque de beneficios (programa latente)', () => {
+    renderCheckout()
 
-    await user.click(screen.getByRole('radio', { name: /Soporte Prioritario/ }))
-    await fillContactForm(user)
-    await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
-
-    expect(createOrder).toHaveBeenCalledWith(
-      null,
-      expect.any(Array),
-      expect.objectContaining({
-        shippingAddress: expect.objectContaining({ promotion: 'delivery' }),
-      }),
-    )
+    expect(screen.queryByText('Beneficio de compra')).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /Soporte Prioritario/ })).not.toBeInTheDocument()
   })
 
   it('submit con carrito vacío muestra error y no llama a los servicios', async () => {
@@ -148,7 +136,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
           phone: '999 888 777',
           district: 'Miraflores',
           address: 'Av. Principal 123',
-          promotion: 'discount',
+          promotion: null,
         }),
         notes: '',
       }),

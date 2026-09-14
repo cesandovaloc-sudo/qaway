@@ -2,7 +2,7 @@
 
 Módulo: `src/pages/5-qaway-hub/3-qawaylab-pagos`
 Rama: `main-web` · Repo: `1-qawaylab-web`
-Estado: **Fases 1 y 2 APLICADAS** + **bloque de Beneficios optimizado** (2026-09-13). Fases 3-5 y Parte B pendientes.
+Estado: **Fases 1 y 2** + **camino de pago** + **checkout simplificado y voucher estilizado** (2026-09-13). Programa de beneficios **OCULTO tras `SHOW_BENEFITS = false` — no eliminado**. Pendiente: pasarela real.
 Bitácora hermana: `ITERACION-CARRITO.md`
 
 ---
@@ -247,3 +247,268 @@ Los tests `error de createPayment…` y `error al crear la orden…` del host In
 | `components/Checkout.jsx` | bloque de beneficios optimizado, totales reales, resumen y confirmación coherentes |
 | `lib/services/orders.js` | `createOrder` acepta `discount` (default 0) |
 | `styles/storefront.css` | clases aditivas del bloque; ninguna regla existente alterada |
+
+---
+
+## 9. Iteración aplicada — Camino de pago y correcciones críticas (2026-09-13)
+
+**Origen:** pruebas en pantalla reportaron 3 fallos críticos del flujo de compra. Se verificaron contra el código, la base y el catálogo real antes de tocar nada. Los 3 eran ciertos; además se encontró un fallo mayor no detectado.
+
+### Diagnóstico verificado
+
+1. **Imagen rota de `tienda-online`:** CONFIRMADO. La URL devolvía **HTTP 404**. Auditoría completa del catálogo (**20 productos**, verificados uno por uno con `curl`): **1 sola imagen rota**. El fallo estaba duplicado en la fila de Supabase y en el fallback local.
+2. **"Monto total: S/ 0.00":** CONFIRMADO. La confirmación leía montos derivados de `items`, y `onSuccess` vacía el carrito.
+3. **"Volver a la tienda" deja el carrito vacío:** CONFIRMADO. El botón hacía `window.location.reload()` sobre la propia ruta del checkout.
+4. **Fallo mayor no detectado — el pedido nunca se guardaba:** `PagosAppPage` pasaba `user={{ id: 'user-demo-001' }}`, que **no es un UUID** y no cumple la política RLS (`auth.uid() = user_id or user_id is null`). El insert era **rechazado**, el error se registraba como *warning* y se devolvía un pedido simulado. Ningún pedido del Hub llegaba a Supabase.
+
+### Puntos esenciales de la corrección
+
+1. **Persistencia real.** Se dejó de pasar el usuario ficticio: el pedido entra como invitado (`user_id NULL`), que la política RLS sí admite. Es el arreglo que hace que un pedido exista de verdad.
+2. **Snapshot congelado.** `setOrderCompleted` guarda `subtotal`, `discount`, `total`, beneficio, método, código de pedido y pasos. La confirmación lee solo de ahí: se acabó el "S/ 0.00".
+3. **Camino de pago explícito.** Nuevo `lib/paymentConfig.js`: cada método declara `operational` y, si no lo está, **por qué**. El checkout muestra la etiqueta *Disponible / En habilitación* y un aviso honesto al elegir uno no operativo. Regla aplicada: **nunca ofrecer un método que no pueda completarse sin decirlo**.
+4. **Próximos pasos reales por método.** `paymentSteps()` devuelve 2–3 pasos concretos según el método, y se renderizan en la confirmación junto a un CTA de WhatsApp con el **código de pedido y el monto ya redactados**. Esto es lo que resuelve "no se entiende el camino de pago": antes la pantalla de éxito no decía qué hacer.
+5. **Stripe dejó de ser un callejón sin salida.** Antes, elegirlo mostraba "éxito" sin ningún dato ni monto. Ahora tiene su bloque propio con monto y sus pasos.
+6. **Indicador de pasos** (nuevo `CheckoutSteps`): Carrito → Datos y pago → Confirmación.
+7. **Navegación sana.** "Volver a la tienda" es un enlace a la landing de precios (ancla, no `reload`), y se añadió "Ver mis pedidos". Se usan anclas y no `Link`/`useNavigate` a propósito: `Checkout` se renderiza en tests sin `Router` y los hooks de router romperían el contrato del host.
+8. **Imagen a prueba de caídas.** `ItemMedia` (nuevo, por ítem) degrada con `onError` a un marcador neutro: una URL muerta ya no muestra el cuadro roto. La URL de `tienda-online` se reemplazó por una **verificada con 200**. Queda pendiente la misma corrección en la fila de Supabase: el rol `anon` solo tiene `select` sobre `products`, así que **no se puede escribir desde aquí**.
+9. **Correo opcional** para el comprobante, precargado desde el formulario de la landing (`qaway_checkout_user`), y guardado en `shipping_address.email`.
+10. **Copy alineada en el carrito:** la nota hablaba de "beneficio de descuento" (ya inexistente) y la fila "Delivery / Acceso — Gratis" no aplica a servicios. Se pasan por props desde el carrito, sin tocar el componente `OrderSummary` (cuyos textos están fijados por tests).
+
+### Candado Visual respetado
+
+Todas las clases son nuevas y aditivas (`.checkout-steps`, `.checkout-step*`, `.method-head`, `.method-tag`, `.method-notice`, `.product-media-empty`, `.next-steps*`). **Ninguna regla CSS existente fue modificada** y **ningún texto fijado por los tests del host fue alterado**.
+
+### Verificación ejecutada
+
+- `oxlint` sobre todo el módulo: **0 errores**.
+- Tests del host Inventario (`Checkout`, `CartItems`, `CartView`, `OrderSummary`, `storefrontUtils`): **65 pasan**, 2 fallan.
+- **Compilación de la ruta:** con el dev server levantado en un puerto temporal, los **8 módulos** del carrito (PagosAppPage, Checkout, CartItems, CheckoutSteps, BenefitIcon, paymentConfig, benefits, storefront.css) se transforman con **HTTP 200** y `/hub/pagos/carrito` responde **200**. Servidor apagado tras verificar.
+
+### Pendiente (requiere credenciales o decisión del negocio)
+
+- **Pasarela real** de Mercado Pago / Stripe: access token, Edge Function que cree la preferencia, `back_urls` y webhook.
+- **Datos de cobro reales:** `ACCOUNT_INFO` en `lib/paymentConfig.js` sigue con valores de ejemplo y el voucher continúa siendo opcional (su obligatoriedad está fijada por tests del host).
+- **Corregir la fila `tienda-online` en Supabase** (requiere rol con escritura).
+- **Autenticación real** y enrutado del panel admin (`PaymentsManager`/`PaymentsPanel` siguen sin ruta).
+- **Los 2 tests que fallan** documentan un conflicto real: si `createOrder`/`createPayment` fallan, el checkout igual muestra "Pedido registrado con éxito". Hay que decidir si debe fallar de forma visible.
+
+---
+
+## 10. Iteración aplicada — Retiro de beneficios, voucher estilizado y cierre de flujo (2026-09-13)
+
+### Ajustes solicitados y resultado
+
+1. **Retiro del bloque "Beneficio de compra" — aplicado.** El checkout ahora fluye **Datos de contacto y entrega → Forma de pago → Resumen y Confirmar pedido**. Se eliminaron el bloque, su estado, sus imports, y las filas **Beneficio**, **Descuento** y **Subtotal** del resumen. La data queda con un **fallback neutro** (`promotion: null`) para no romper la tabla `orders`, y se quitó `promotionLabel`. La nota del pago ya no menciona beneficios.
+2. **Voucher estilizado — aplicado.** El `<input type="file">` gris quedó oculto de forma accesible dentro de una **zona dashed** con el texto *Subir captura o Voucher de pago*, ayuda de formatos, y al seleccionar muestra **nombre + peso** con acción **Quitar archivo** (que además limpia el input por ref). No deforma la caja de datos bancarios: va dentro de ella, a ancho completo.
+3. **Cierre de flujo en pagos manuales — ya existía; refinado.** El enlace a WhatsApp con el número oficial (`51930756781`), el código de pedido y el monto ya estaba desde la iteración 9. Se refinó: el mensaje ahora dice *"adjunto el voucher del pedido #… por S/ …"* y el botón cambia de etiqueta según el método — **Enviar mi voucher por WhatsApp** en Yape/Transferencia, **Coordinar por WhatsApp** en los métodos en habilitación.
+
+### Módulo de beneficios: LATENTE (decisión de producto)
+
+`lib/benefits.js`, `components/storefront/BenefitIcon.jsx` y sus ~150 líneas de CSS **se conservan** y quedan marcados como latentes, listos para reutilizar en otro servicio. Ya no se renderiza nada del bloque. No se perdió la maqueta.
+
+### Contratos del host actualizados (autorizado)
+
+En `10-qawaylab-inventario/.../Checkout.test.tsx` se actualizaron las 4 assertions que fijaban el bloque retirado. En lugar de solo borrar el test del beneficio, se **reemplazó por uno que documenta el retiro** (`queryByText('Beneficio de compra')` y `queryByRole` de "Soporte Prioritario" ausentes) y se dejó el conteo de radios en **4**. El test de `OrderSummary` siguió verde sin tocarlo, porque su nota por defecto vive en ese componente y no en el checkout.
+
+### Bug atrapado durante la verificación
+
+Al retirar el motor de beneficios quedó un `discount` huérfano en la llamada a `ordersService.createOrder`, que habría lanzado **`ReferenceError` al confirmar cualquier pedido**. El linter **no lo marcó**; lo detectó un grep dirigido y se corrigió. `orders.createOrder` mantiene su parámetro `discount` (default 0), así que la compatibilidad sigue intacta.
+
+### Verificación ejecutada
+
+- `oxlint` sobre todo el módulo: **0 errores**.
+- Tests del host (`Checkout`, `CartItems`, `CartView`, `OrderSummary`, `storefrontUtils`): **65 pasan**, 2 fallan (los 2 preexistentes de `createOrder`/`createPayment`).
+- **Compilación de la ruta:** dev server en puerto temporal → **8 de 8 módulos** transforman con **HTTP 200**, y `/hub/pagos/carrito` y `/hub/pagos/checkout` responden **200**. Servidor apagado tras verificar.
+
+### Pendiente (sin cambios respecto de la iteración 9)
+
+Pasarela real de Mercado Pago/Stripe con credenciales, datos de cobro reales, corregir la fila `tienda-online` en Supabase (requiere rol con escritura), autenticación real y enrutado del panel admin, y decidir si el checkout debe fallar visiblemente cuando el pedido no se registra.
+
+---
+
+## 11. Corrección de la iteración 10 — Beneficios OCULTOS y fin del pantallazo (2026-09-13)
+
+### Qué estuvo mal
+
+La instrucción fue **ocultar** el programa de beneficios, no eliminarlo. En la iteración 10 se quitó el **JSX** que lo pintaba (quedaron intactos el módulo, los iconos y el CSS). Fue una lectura demasiado estrecha de la instrucción y se corrigió.
+
+### Recuperación: evaluación y resultado
+
+No se perdió material y **no hubo que reescribir nada**:
+
+| Material | Estado | Fuente de recuperación |
+|---|---|---|
+| `lib/benefits.js` (catálogo + motor de totales) | nunca se tocó | working tree |
+| `components/storefront/BenefitIcon.jsx` | nunca se tocó | working tree |
+| 22 reglas CSS `.benefit-*` + `.section-hint` | nunca se tocaron | working tree |
+| **JSX del bloque** (grilla, tarjetas, estado, filas del resumen) | se había quitado | commit `6b988482` |
+
+El JSX se restauró **verbatim** desde el commit anterior a la eliminación. Verificación de integridad ejecutada: comparación de los **tokens de clase `benefit-*`** entre la versión previa y la actual → **11 tokens, idénticos, sin faltantes**.
+
+### Cómo quedó: interruptor de una línea
+
+Nuevo `const SHOW_BENEFITS = false` en `Checkout.jsx`. El bloque completo sigue montado y **gateado** por esa constante:
+- `availableBenefits` se resuelve solo si el interruptor está encendido; con él apagado `selectedBenefit` es `null`, el descuento queda en 0 y **un beneficio oculto no altera precios en silencio**.
+- `promotion` viaja como `null` mientras está oculto (fallback neutro pedido) y vuelve a llevar el id al reencenderlo; `promotionLabel` igual.
+- La sección, las filas del resumen y las líneas de la confirmación están todas gateadas, no borradas.
+- **Reencender la sección = poner `true`.** Un solo cambio.
+
+### Pantallazo de "carrito vacío": era una regresión propia
+
+Al hacer determinista la resolución del `?add=` (iteración 9) el efecto quedó esperando la respuesta de Supabase. Con el carrito vacío, esa espera mostraba el **estado vacío real** durante la consulta. Antes era imperceptible porque el producto entraba en el primer pase, sin red.
+
+**Solución aplicada:** se distingue "vacío" de "resolviendo":
+- `PagosAppPage` lleva `pendingAdd` (el slug en resolución).
+- `CartView` acepta `loading` (default `false`) y, con carrito vacío + `loading`, muestra *"Agregando tu producto…"* reutilizando `.empty-state` → **cero CSS nuevo**.
+- Se mantiene la espera, porque la tabla `products` es la fuente de verdad del precio y la imagen.
+- Al ser `loading` default `false`, los tests del host quedan intactos.
+
+### Verificación ejecutada
+
+- `oxlint` sobre el módulo: **0 errores**.
+- Tests del host: **65 pasan**, 2 fallan (los 2 preexistentes).
+- Integridad del material recuperado: **11/11 tokens `benefit-*` idénticos**.
+- **Compilación de la ruta:** dev server en puerto temporal → **8 de 8 módulos** con HTTP 200; `/hub/pagos/carrito` y `/hub/pagos/checkout` responden **200**. Servidor apagado tras verificar.
+
+---
+
+## 12. Backlog abierto — observaciones del 2026-09-13 (revisión de pantalla)
+
+Tareas registradas a partir de la revisión visual del checkout. **Pendientes de aprobación; ninguna aplicada.**
+
+### T1 · Espaciado del encabezado del checkout — BUG PROPIO CONFIRMADO
+El párrafo `Ingresa tus datos de contacto…` y el indicador de pasos quedan pegados, sin aire.
+**Causa raíz medida:** `.section-copy` **no tiene `margin`** (`storefront.css:85-90`) y `.checkout-steps` tiene `margin: 0 0 22px` → **0 de separación arriba**.
+**Fix:** dar margen superior al stepper (clase propia, sin tocar `.section-copy`, que es compartida).
+
+### T2 · ¿Migas de pan o indicador de pasos?
+**NO son migas de pan y no deben serlo.** Son cosas distintas:
+- **Migas de pan:** ubican al usuario en una **jerarquía** (Inicio › Blog › Artículo). Son navegación, no proceso.
+- **Indicador de pasos (stepper):** muestran avance en un **proceso lineal con fin**. Es lo correcto para un checkout.
+**Decisión propuesta:** mantener el stepper (correcto para checkout), corregir T1 y, opcionalmente, hacer clicable el paso ya cumplido para volver al carrito. No convertirlo en migas de pan.
+
+### T3 · Placeholders de entrega física en un carrito de servicios
+`Ej. Miraflores`, `Av. Principal 123` y `Referencia de casa, dpto, o nota del pedido…` son ejemplos de **reparto a domicilio** y no aplican a la compra de un servicio digital. Propuestas 4 alternativas (A–D) para que se elija una.
+**Causa de fondo (mayor):** `Distrito / Ciudad` y `Dirección` son **obligatorios** (`required`) y para un servicio digital son fricción pura. Fix real propuesto: hacerlos **opcionales** y **condicionales** a que el carrito tenga algún ítem físico.
+
+### T4 · Desplegable del método de pago — CONFIRMADO, está mal
+Al elegir *Yape / Plin Directo*, el bloque de datos bancarios + voucher se abre **al final de la lista**, debajo de *Transferencia bancaria / Pago Directo*, no debajo de la opción elegida.
+**Causa raíz:** el panel se renderiza **después** del `.choice-grid` completo (`Checkout.jsx:454-460`), que contiene las 4 tarjetas.
+**Fix:** renderizar el panel **dentro del mismo ítem de la tarjeta elegida**, para que el efecto quede junto a su causa (divulgación progresiva adyacente al disparador).
+**Restricción:** mantener los textos que fijan los tests del host (`Datos para transferir o Yapear:`, `BCP Cuenta:`, `getByLabelText(/Voucher/)`, y su ausencia con Mercado Pago).
+
+### T5 · La zona de voucher no parece un botón
+Hoy es un recuadro dashed con texto: se lee como enunciado, no como acción. **Referencia enviada:** dropzone de BulkResize (recuadro dashed + **botón sólido visible** "Elegir imágenes").
+**Fix propuesto:** botón sólido *Elegir archivo* dentro de la zona + soporte de **arrastrar y soltar**; al seleccionar, chip con nombre + peso y acciones *Cambiar* / *Quitar*.
+**Restricción:** el `<label>` debe seguir envolviendo/asociando el `<input type="file">` para no romper los tests del host.
+
+### T6 · Hallazgo aparte, fuera del carrito (SEO)
+La captura de la inspección de URL de Google muestra que la **URL canónica de un artículo del blog apunta a `https://www.qawaylab.com/`** (el home) y el código de respuesta es **206**. Eso impide que Google indexe el artículo por su propia URL. **No es del carrito**: confirmar si se registra como tarea separada.
+
+---
+
+## 13. Iteración aplicada — Bloque 1 del backlog + horario de comunicación (2026-09-13)
+
+### Cerrado en esta iteración
+
+| Tarea | Estado | Qué se hizo |
+|---|---|---|
+| **T1** Espaciado del encabezado | **APLICADO** | `.checkout-steps` pasa de `margin: 0 0 22px` a `26px 0 30px`: el stepper ya no queda pegado al párrafo |
+| **T2** ¿Migas de pan? | **DECIDIDO** | Se mantiene como **stepper**: es un proceso lineal, no una jerarquía. Las migas de pan serían el patrón equivocado |
+| **T3** Placeholders | **PARCIAL** | Solo el campo de notas, según lo pedido: label `Notas adicionales (opcional)` y placeholder `Detalles que debamos considerar`. El resto se mantiene |
+| **T4** Desplegable del método | **APLICADO** | El aviso y el panel de cobro ahora se renderizan **dentro del ítem elegido** (`Fragment` por método), no al final de la lista. Efecto junto a su causa |
+| **T5** Zona de voucher | **APLICADO** | Botón sólido **Elegir archivo** dentro de la zona + **arrastrar y soltar** real (`is-dragging`) + chip con nombre y peso + *Quitar archivo*. El `<label>` sigue envolviendo al `<input type="file">` |
+
+### Añadido: Horario de comunicación
+
+Campo `contactSchedule` (select, opcional, default "Cualquier horario") junto al correo. Se guarda en `shipping_address.contactSchedule`. Aplica a cualquier rubro y responde a que el negocio necesita **llamar** para afinar detalles.
+
+### Verificación
+
+- `oxlint`: **0 errores**.
+- Tests del host (`Checkout`, `CartView`, `CartItems`): **34 pasan**, 2 fallan (los 2 preexistentes).
+- **7 de 7 módulos** compilan con HTTP 200; `/hub/pagos/checkout` responde **200**. Servidor temporal apagado.
+
+---
+
+## 14. Backlog nuevo — cierre de compra: brief y página de gracias con Pixel (propuesta)
+
+Ideas planteadas por el responsable. **Nada aplicado.** Se detectaron dos restricciones técnicas duras que condicionan el diseño.
+
+### T7 · Formulario de brief después del pago
+**Recomendación:** no pedir el brief **dentro** del checkout (sube el abandono); hacerlo **después** de confirmar, cuando la intención del cliente es máxima y espera el onboarding. Formulario corto (5-8 campos) y guardado asociado al pedido.
+
+**RESTRICCIÓN TÉCNICA 1 (bloqueante):** los pedidos del Hub son **de invitado** (`user_id NULL`) y la RLS de `orders` solo permite `update` al dueño (`auth.uid() = user_id`). Por lo tanto **el cliente no puede guardar el brief actualizando el pedido**. Opciones reales:
+- (a) tabla nueva `order_briefs` con política `insert` para `anon` validando el código de pedido (mismo patrón que ya usa el proyecto con `is_guest_order`), o
+- (b) Edge Function con `service_role`.
+La opción (a) es coherente con el esquema existente. Requiere migración SQL.
+
+### T8 · Página de "gracias" para el Pixel de Meta
+**Contexto verificado:** el pixel **ya existe** — el código base con `fbq('init', '1787532068936007')` y el PageView están en `index.html:47-81`, y `src/lib/analytics/metaPixel.js` es el emisor central con **gate de consentimiento** (`trackStandard`, `trackLead`, `pageview`). **Falta el evento `Purchase` y una página donde dispararlo.**
+
+**RESTRICCIÓN TÉCNICA 2 (bloqueante para el pixel):** Meta necesita **una URL propia de confirmación**. Un cambio de estado en la misma ruta no es fiable para el pixel y además el proyecto ya dispara `pageview()` en transiciones de ruta. Por eso la confirmación debe ser su propia ruta.
+
+**Plan propuesto:**
+1. `metaPixel.js` → añadir `trackPurchase({ orderId, value, currency, contents })` emitiendo `Purchase` con `value`, `currency`, `content_type` y **`event_id` = id del pedido** (deduplicación con la API de Conversiones si algún día se usa).
+2. Ruta nueva `/hub/pagos/gracias?pedido=XXXXXXXX` que:
+   - lee el código y el monto, **dispara `Purchase` una sola vez** (guardia por `event_id` en `sessionStorage` para que un refresco no duplique la conversión),
+   - muestra los próximos pasos y el enlace de WhatsApp,
+   - aloja el formulario de brief (T7).
+3. El checkout navega a esa ruta al confirmar, en lugar de quedarse en su pantalla de éxito interna.
+
+**Nota:** la deduplicación y el disparo único importan porque Meta **cuenta conversiones de más** si el evento se repite; es el error más común en este punto.
+
+---
+
+## 15. Corrección del layout del voucher — la causa era CSS, no diseño (2026-09-13)
+
+La captura mostró el contenido del voucher amontonado en una sola línea y el botón solapado. **No era solo estética: era una colisión de CSS.**
+
+**Causa raíz medida:** la regla `.field label` (`storefront.css:458-467`) aplica `text-transform: uppercase`, `font-size: 0.69rem`, `letter-spacing: 0.06em` y **`display: block`**. La zona de voucher era un `<label>` dentro de `<div className="field">`, así que:
+- `display: block` **pisaba mi `display: grid`** (mayor especificidad: `.field label` = 0,2,1 vs `.upload-zone` = 0,2,0) → los hijos fluían en línea,
+- y heredaba `uppercase` + tamaño diminuto → el texto se veía como un grito amontonado.
+
+**Corrección (solución, no parche):**
+1. Se sacó la zona de `.field`: es una **zona de arrastre**, no la etiqueta de un campo de formulario.
+2. Se reforzaron sus propiedades (`text-transform: none`, `letter-spacing: normal`, tamaños explícitos) para que **no pueda volver a heredar** tipografía de label aunque cambie de contenedor.
+3. Se reorganizó el contenido: título en su línea → fila con el **botón sólido** + "o arrastra el archivo aquí" → ayuda de formatos → chip del archivo con nombre y peso.
+
+**Verificación:** `oxlint` 0 errores; tests del host **24 pasan** (el voucher sigue resolviéndose por su label y `user.upload` funciona); `/hub/pagos/checkout` → **200**.
+
+---
+
+## 16. Regla de pagos seguros + implementación base (2026-09-13)
+
+### Verificaciones solicitadas
+
+**Mercado Pago — visible, NO instalado.** Lo que se ve en el checkout es solo una **etiqueta**: una entrada de `PAYMENT_METHODS` en `lib/paymentConfig.js` con `operational: false` ("En habilitación"). No hay SDK, ni llamada HTTP, ni credenciales; `VITE_MERCADOPAGO_PUBLIC_KEY` / `MERCADOPAGO_ACCESS_TOKEN` existen **únicamente en el README** y ningún archivo los lee. El esquema sí acepta `provider: 'mercadopago'`, y por eso parece listo.
+
+**Culqi — sí está en el repo, y no oculta: está diseñada en otro módulo y nunca se implementó.**
+- `4-academy/2-qawaylab-app-academy-real/QAWAY-PAGOS-BRIEF.md`: brief completo del flujo Culqi (Yape QR automático, tarjetas, PagoEfectivo, comisión de referencia ~3.9% + S/0.50, `culqi-webhook.js`, `culqi-client.js` y `VITE_CULQI_PUBLIC_KEY` / `CULQI_SECRET_KEY` / `CULQI_WEBHOOK_SECRET`).
+- `4-academy/.../src/lib/services/payments.ts:343-348`: `simulateCulqiWebhook`, con el comentario *"In production, this would be an Edge Function called by Culqi"*.
+- `3-qawaylab-pagos`: `lib/services/payments.js:159` solo tiene el simulador; el esquema y el panel admin ya contemplan el proveedor.
+→ **Diseñada, documentada y simulada; nunca conectada.** Y ese brief ya preveía una Edge Function, que es exactamente lo que ahora existe.
+
+**¿Culqi exige RUC y ~20 días?**
+- **RUC: no es obligatorio.** El procedimiento de registro de Culqi (publicado por Wally) exige que la cuenta bancaria esté a nombre del **RUC o DNI** ingresado → **acepta cualquiera de los dos**.
+- **~20 días: NO verificado.** El mismo procedimiento describe que Culqi **evalúa el negocio** y responde APROBADO u OBSERVADO *"en el plazo establecido"*, **sin publicar un número de días**. No se encontró plazo oficial. Para confirmarlo: Culqi, (01) 643 1050 / WhatsApp +51 946 030 900.
+
+### Implementado
+
+**1. La regla:** `REGLAS-PAGOS-SEGUROS.md` — R1 a R7 + checklist de aceptación. No es un documento aspiracional: cada regla tiene su punto de verificación.
+
+**2. El código que la aplica** (no simulacros):
+
+| Archivo | Rol |
+|---|---|
+| `supabase/functions/_shared/pagos.ts` | Recálculo del total desde la base; firma HMAC-SHA256 comparada **en tiempo constante**; detección de eventos ya procesados; seam de pasarela |
+| `supabase/functions/pago-crear/index.ts` | Recalcula el importe en el servidor y **aborta** si el cliente manda un monto distinto |
+| `supabase/functions/pago-webhook/index.ts` | Orden obligatorio: firma → evento aprobatorio → idempotencia → coincidencia de monto → recién ahí marca pagado |
+
+**3. Hallazgo importante — R1 no se cumple hoy:** el total del pedido lo calcula el **navegador** (`lib/services/orders.js:27`) y el monto del pago también (`Checkout.jsx`). Hoy no es explotable porque no hay cobro conectado, pero es **lo primero que debe cerrarse** antes de habilitar cualquier pasarela. Queda registrado como deuda abierta en el documento de reglas.
+
+**4. El seam no finge:** mientras `PASARELA` no esté configurada, `pago-crear` responde `PASARELA_NO_CONFIGURADA` (501) en lugar de simular un cobro o devolver un identificador falso.
+
+### Verificación
+
+`oxlint` sobre `supabase/functions`: **0 advertencias y 0 errores**. El módulo de pagos mantiene sus 15 avisos preexistentes. Las funciones no forman parte del build del front, así que no alteran la ruta verificada.

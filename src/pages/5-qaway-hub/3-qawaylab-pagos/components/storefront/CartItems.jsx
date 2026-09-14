@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   itemKey,
   itemTitle,
@@ -8,6 +9,31 @@ import {
   isSingleInstance,
   money,
 } from './utils.js'
+
+/**
+ * Media del ítem con red de seguridad ante URLs caídas.
+ *
+ * Una URL externa puede morir (nos pasó: una foto del catálogo devuelve 404) y
+ * el navegador renderiza el icono de imagen rota. Con `onError` se degrada a un
+ * marcador neutro, nunca al cuadro roto. Vive en su propio componente porque
+ * cada ítem necesita su propio estado (no se pueden usar hooks dentro de un map).
+ */
+function ItemMedia({ src }) {
+  const [failed, setFailed] = useState(false)
+
+  return (
+    <div
+      className="product-media"
+      style={{ width: '80px', height: '80px', borderRadius: '4px' }}
+    >
+      {src && !failed ? (
+        <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />
+      ) : (
+        <span className="product-media-empty" aria-hidden="true" />
+      )}
+    </div>
+  )
+}
 
 /**
  * Lista de ítems del carrito (estilo "Mi pedido").
@@ -38,12 +64,7 @@ export default function CartItems({
         const singleInstance = isSingleInstance(item)
         return (
           <article className="cart-item" key={key}>
-            <div
-              className="product-media"
-              style={{ width: '80px', height: '80px', borderRadius: '4px' }}
-            >
-              {image ? <img src={image} alt="" /> : null}
-            </div>
+            <ItemMedia src={image} />
             <div>
               {itemCategory(item) ? (
                 <span className="product-brand">{itemCategory(item)}</span>

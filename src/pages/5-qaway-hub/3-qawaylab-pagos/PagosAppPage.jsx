@@ -11,6 +11,7 @@ import {
   ProductDetail,
   CartView,
 } from './index.js'
+import CheckoutSteps from './components/storefront/CheckoutSteps.jsx'
 import './styles/storefront.css'
 import { supabase as realSupabase } from '@/config/supabase'
 import { itemKey, isSingleInstance, normalizeCart } from './components/storefront/utils.js'
@@ -115,7 +116,7 @@ const SAMPLE_PRODUCTS = [
     description:
       'Catálogo digital interactivo con carrito, panel autoadministrable de productos, stock y pasarela de cobros.',
     image_url:
-      'https://images.unsplash.com/photo-1556742049-0a67e55722c0?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=600&q=80',
     facts: [
       ['Tipo', 'E-commerce / Tienda Online'],
       ['Catálogo', 'Productos ilimitados + Carrito'],
@@ -179,6 +180,9 @@ export default function PagosAppPage() {
   const navigate = useNavigate()
   // Slug de ?add= ya resuelto: evita reinyectar el producto en cada re-render
   const processedAddRef = useRef(null)
+  // Slug en resolución: mientras exista, el carrito muestra "cargando" en lugar
+  // del estado vacío (antes parpadeaba "Tu pedido está vacío" al entrar).
+  const [pendingAdd, setPendingAdd] = useState(null)
 
   // Sincronizar persistencia en localStorage
   useEffect(() => {
@@ -231,12 +235,17 @@ export default function PagosAppPage() {
 
     if (!planSlug) {
       processedAddRef.current = null
+      setPendingAdd(null)
       return
     }
-    if (!productsLoaded) return
+    if (!productsLoaded) {
+      setPendingAdd(planSlug)
+      return
+    }
     if (processedAddRef.current === planSlug) return
 
     processedAddRef.current = planSlug
+    setPendingAdd(null)
 
     const allPool = dbProducts.length > 0 ? dbProducts : SAMPLE_PRODUCTS
     const targetProduct = allPool.find(
@@ -336,6 +345,10 @@ export default function PagosAppPage() {
                 subtotal={cartSubtotal}
                 emptyHref="/landings/desarrollo-web-qaway#precios"
                 checkoutHref="/hub/pagos/checkout"
+                deliveryLabel="Plazo"
+                deliveryValue="Según plan"
+                loading={Boolean(pendingAdd)}
+                note="Revisa los ítems y luego completa tus datos y forma de pago."
               />
             }
           />
@@ -351,11 +364,12 @@ export default function PagosAppPage() {
                   Ingresa tus datos de contacto y selecciona tu método de pago preferido.
                 </p>
 
+                <CheckoutSteps active={2} />
+
                 <Checkout
                   paymentsService={payments}
                   ordersService={orders}
                   supabase={activeSupabase}
-                  user={DEMO_USER}
                   items={cart}
                   currency="PEN"
                   onSuccess={() => {

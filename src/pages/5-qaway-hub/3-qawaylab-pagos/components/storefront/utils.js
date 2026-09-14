@@ -94,3 +94,12 @@ export function money(value, currency = 'S/') {
   const n = typeof value === 'number' && Number.isFinite(value) ? value : 0
   return `${currency} ${n.toFixed(2)}`
 }
+
+/** Tamaño de archivo legible, para mostrar el comprobante de pago cargado. */
+export function formatBytes(bytes) {
+  const n = Number(bytes)
+  if (!Number.isFinite(n) || n <= 0) return '0 KB'
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`
+}

@@ -1,42 +1,30 @@
-import { useState } from 'react'
+import { Fragment, useRef, useState } from 'react'
 import BenefitIcon from './storefront/BenefitIcon.jsx'
 import {
   BENEFIT_NOTE,
   computeBenefitTotals,
   resolveBenefits,
 } from '../lib/benefits.js'
+import {
+  ACCOUNT_INFO,
+  MANUAL_CONTACT,
+  PAYMENT_METHODS,
+  paymentSteps,
+  whatsappOrderLink,
+} from '../lib/paymentConfig.js'
+import { formatBytes } from './storefront/utils.js'
 
-const PAYMENT_METHODS = [
-  {
-    id: 'mercadopago',
-    label: 'Mercado Pago (Tarjetas, Yape, Cuotas)',
-    description: 'Paga con tarjeta de crédito/débito en Soles (PEN), cuotas sin interés o saldo Mercado Pago.',
-  },
-  {
-    id: 'yape',
-    label: 'Yape / Plin Directo',
-    description: 'Escanea el código QR o Yapea al número oficial. Adjunta tu voucher.',
-  },
-  {
-    id: 'stripe',
-    label: 'Tarjeta Internacional (Stripe)',
-    description: 'Tarjeta de crédito o débito Visa, Mastercard o Amex en USD.',
-  },
-  {
-    id: 'directo',
-    label: 'Transferencia bancaria / Pago Directo',
-    description: 'Transferencia a nuestra cuenta BCP. Te enviamos los datos.',
-  },
-]
-
-const ACCOUNT_INFO = {
-  bank: 'Banco de Crédito del Perú (BCP)',
-  accountType: 'Cuenta de Ahorros',
-  accountNumber: '191-78901234-0-55',
-  cci: '002-191-0078901234055-52',
-  holder: 'Qaway Lab E.I.R.L.',
-  yape: '999 888 777',
-}
+// ── Interruptor del programa de beneficios ───────────────────────────────────
+// DECISIÓN DE PRODUCTO (2026-09-13): el bloque queda OCULTO, no eliminado.
+// Todo su material sigue en el repo y se reutilizará en otro servicio:
+//   · lib/benefits.js                        (catálogo y motor de totales)
+//   · components/storefront/BenefitIcon.jsx  (iconos SVG)
+//   · styles/storefront.css                  (reglas .benefit-* y .section-hint)
+//   · el JSX de este archivo, ya montado y gateado por esta constante
+// Para reencender la sección completa basta poner `true` aquí: no hay que
+// reescribir nada. Con `false` tampoco se aplica ningún descuento, para que un
+// beneficio oculto no altere precios en silencio.
+const SHOW_BENEFITS = false
 
 export default function Checkout({
   paymentsService,
@@ -56,17 +44,18 @@ export default function Checkout({
   const uid = userId || user?.id || null
   const [selectedMethod, setSelectedMethod] = useState('mercadopago')
 
-  // Programa de beneficios: catálogo resuelto para este carrito y beneficio
-  // activo. Si el carrito cambia y el elegido deja de aplicar, se cae al primero
-  // disponible para que la sección nunca quede sin selección.
-  const availableBenefits = resolveBenefits(items)
+  // Programa de beneficios (oculto por SHOW_BENEFITS). Con el interruptor
+  // apagado no se resuelve el catálogo, así que `selectedBenefit` es null y el
+  // descuento queda en 0.
+  const availableBenefits = SHOW_BENEFITS ? resolveBenefits(items) : []
   const [benefitChoice, setBenefitChoice] = useState(
     () => availableBenefits[0]?.id ?? null
   )
-  const selectedBenefit =
-    availableBenefits.find((benefit) => benefit.id === benefitChoice) ||
-    availableBenefits[0] ||
-    null
+  const selectedBenefit = SHOW_BENEFITS
+    ? availableBenefits.find((benefit) => benefit.id === benefitChoice) ||
+      availableBenefits[0] ||
+      null
+    : null
   const activeBenefitId = selectedBenefit?.id ?? null
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -79,6 +68,8 @@ export default function Checkout({
       return {
         name: savedUser.name || '',
         phone: savedUser.phone || '',
+        email: savedUser.email || '',
+        contactSchedule: '',
         district: '',
         address: '',
         notes: '',
@@ -87,6 +78,8 @@ export default function Checkout({
       return {
         name: '',
         phone: '',
+        email: '',
+        contactSchedule: '',
         district: '',
         address: '',
         notes: '',
@@ -94,13 +87,17 @@ export default function Checkout({
     }
   })
   const [proofFile, setProofFile] = useState(null)
+  const proofInputRef = useRef(null)
+  // Resalta la zona de voucher mientras se arrastra un archivo encima.
+  const [dragging, setDragging] = useState(false)
 
   const subtotal = items.reduce(
     (sum, item) => sum + (item.price || item.unit_price || 0) * (item.quantity || 1),
     0
   )
-  // El descuento solo existe si el beneficio activo declara discountPercent.
-  // Mientras sea 0, el total coincide con el subtotal.
+  // Con el programa oculto `selectedBenefit` es null y el descuento es 0, así
+  // que el total coincide con el subtotal. Al reencender el bloque, el motor de
+  // descuento vuelve a operar sin tocar nada más.
   const { discount, total } = computeBenefitTotals(subtotal, selectedBenefit)
 
   function handleChange(e) {
@@ -148,13 +145,17 @@ export default function Checkout({
               phone: formData.phone,
               district: formData.district,
               address: formData.address,
-              // `promotion` es el id legado del programa de beneficios;
-              // `promotionLabel` deja el pedido legible sin depender del id.
-              promotion: activeBenefitId,
-              promotionLabel: selectedBenefit?.label ?? null,
+              // Fallback neutro mientras el programa está oculto: la columna de
+              // `orders` recibe null explícito. Al reencenderlo vuelve a viajar
+              // el id del beneficio elegido.
+              promotion: SHOW_BENEFITS ? activeBenefitId : null,
+              promotionLabel: SHOW_BENEFITS ? selectedBenefit?.label ?? null : null,
+              email: formData.email || null,
+              // Necesitamos llamar para afinar detalles: se guarda la franja
+              // horaria preferida por el cliente.
+              contactSchedule: formData.contactSchedule || null,
             },
             notes: formData.notes,
-            discount,
           })
         } catch (err) {
           console.warn('[Checkout] Error en createOrder, usando fallback:', err)
@@ -192,7 +193,9 @@ export default function Checkout({
             currency,
             provider,
             proofUrl,
-            notes: `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`,
+            notes: SHOW_BENEFITS
+              ? `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`
+              : `Distrito: ${formData.district}.`,
           })
         } catch (err) {
           console.warn('[Checkout] Error en createPayment, usando fallback:', err)
@@ -202,7 +205,19 @@ export default function Checkout({
         payment = { id: `pay_${Date.now()}`, status: 'pending' }
       }
 
-      setOrderCompleted({ order, payment })
+      // Snapshot congelado: la confirmación no puede leer del carrito, porque
+      // `onSuccess` lo vacía y los montos caían a "S/ 0.00".
+      setOrderCompleted({
+        order,
+        payment,
+        subtotal,
+        discount,
+        total,
+        benefitLabel: selectedBenefit?.label ?? null,
+        methodId: selectedMethod,
+        orderCode: String(order?.id || payment?.id || '').slice(0, 8),
+        steps: paymentSteps(selectedMethod),
+      })
       onSuccess({ order, payment })
     } catch (err) {
       console.error('Error al procesar pedido:', err)
@@ -215,50 +230,105 @@ export default function Checkout({
   }
 
   if (orderCompleted) {
+    // El cierre del flujo cambia según el método: en los manuales el comprador
+    // todavía debe enviarnos el voucher, así que el CTA lo dice explícitamente.
+    const isManualPayment =
+      orderCompleted.methodId === 'yape' || orderCompleted.methodId === 'directo'
+
     return (        <div className="checkout-layout">
         <div className="form-section" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
           <h2 style={{ fontSize: '2rem', marginBottom: '10px', fontFamily: "'Space Grotesk', sans-serif" }}>Pedido registrado con éxito</h2>
           <p className="muted" style={{ maxWidth: '500px', margin: '0 auto 24px' }}>
-            Hemos recibido tus datos correctamente. Código de pedido: <strong>#{orderCompleted.order.id.slice(0, 8)}</strong>
+            Hemos recibido tus datos correctamente. Código de pedido: <strong>#{orderCompleted.orderCode}</strong>
           </p>
 
-          {selectedMethod === 'mercadopago' ? (
+          {orderCompleted.methodId === 'mercadopago' ? (
             <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left', borderColor: '#009ee3' }}>
               <p style={{ fontWeight: 800, marginBottom: '8px', color: '#009ee3' }}>Pago mediante Mercado Pago (Perú):</p>
               <p><span>Pasarela:</span> <strong>Mercado Pago Checkout</strong></p>
               <p><span>Estado:</span> <strong>Pendiente de procesamiento de pasarela</strong></p>
-              {selectedBenefit ? (
-                <p><span>Beneficio:</span> <strong>{selectedBenefit.label}</strong></p>
+              {orderCompleted.benefitLabel ? (
+                <p><span>Beneficio:</span> <strong>{orderCompleted.benefitLabel}</strong></p>
               ) : null}
-              {discount > 0 ? (
-                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {discount.toFixed(2)}</strong></p>
+              {orderCompleted.discount > 0 ? (
+                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {orderCompleted.discount.toFixed(2)}</strong></p>
               ) : null}
               <p style={{ marginTop: '12px', borderTop: '1px solid #009ee3', paddingTop: '8px' }}>
-                <span>Monto total:</span> <strong style={{ color: '#009ee3', fontSize: '1.1rem' }}>S/ {total.toFixed(2)}</strong>
+                <span>Monto total:</span> <strong style={{ color: '#009ee3', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
               </p>
             </div>
-          ) : (selectedMethod === 'yape' || selectedMethod === 'directo') ? (
+          ) : (orderCompleted.methodId === 'yape' || orderCompleted.methodId === 'directo') ? (
             <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left' }}>
               <p style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--red)' }}>Datos para completar tu pago:</p>
               <p><span>Banco:</span> <strong>{ACCOUNT_INFO.bank}</strong></p>
               <p><span>Titular:</span> <strong>{ACCOUNT_INFO.holder}</strong></p>
               <p><span>Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
               <p><span>Yape / Plin:</span> <strong>{ACCOUNT_INFO.yape}</strong></p>
-              {selectedBenefit ? (
-                <p><span>Beneficio:</span> <strong>{selectedBenefit.label}</strong></p>
+              {orderCompleted.benefitLabel ? (
+                <p><span>Beneficio:</span> <strong>{orderCompleted.benefitLabel}</strong></p>
               ) : null}
-              {discount > 0 ? (
-                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {discount.toFixed(2)}</strong></p>
+              {orderCompleted.discount > 0 ? (
+                <p><span>Descuento:</span> <strong style={{ color: 'var(--green)' }}>− S/ {orderCompleted.discount.toFixed(2)}</strong></p>
               ) : null}
               <p style={{ marginTop: '12px', borderTop: '1px solid var(--red)', paddingTop: '8px' }}>
-                <span>Monto a pagar:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {total.toFixed(2)}</strong>
+                <span>Monto a pagar:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
+              </p>
+            </div>
+          ) : orderCompleted.methodId === 'stripe' ? (
+            <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left', borderColor: '#635bff' }}>
+              <p style={{ fontWeight: 800, marginBottom: '8px', color: '#635bff' }}>Pago con tarjeta internacional (Stripe):</p>
+              <p><span>Pasarela:</span> <strong>Stripe Checkout</strong></p>
+              <p><span>Estado:</span> <strong>Pendiente de habilitación de la pasarela</strong></p>
+              {orderCompleted.benefitLabel ? (
+                <p><span>Beneficio:</span> <strong>{orderCompleted.benefitLabel}</strong></p>
+              ) : null}
+              <p style={{ marginTop: '12px', borderTop: '1px solid #635bff', paddingTop: '8px' }}>
+                <span>Monto total:</span> <strong style={{ color: '#635bff', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
               </p>
             </div>
           ) : null}
 
-          <button className="button button-red" onClick={() => window.location.reload()}>
-            Volver a la tienda
-          </button>
+          {/* Próximos pasos: es lo que evita que el comprador quede sin saber
+              qué hacer después de confirmar. Se calcula por método en
+              lib/paymentConfig.js y viaja congelado en el snapshot. */}
+          <div className="next-steps" style={{ maxWidth: '560px', margin: '0 auto 24px', textAlign: 'left' }}>
+            <p className="next-steps-title">Qué sigue ahora</p>
+            <ol className="next-steps-list">
+              {orderCompleted.steps.map((step, index) => (
+                <li className="next-step" key={step.title}>
+                  <span className="next-step-num" aria-hidden="true">{index + 1}</span>
+                  <span>
+                    <strong className="next-step-title">{step.title}</strong>
+                    <span className="next-step-detail">{step.detail}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+            <a
+              className="button button-red next-steps-cta"
+              href={whatsappOrderLink({
+                code: orderCompleted.orderCode,
+                amount: orderCompleted.total.toFixed(2),
+                intent: isManualPayment ? 'voucher' : 'pago',
+              })}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {isManualPayment ? 'Enviar mi voucher por WhatsApp' : MANUAL_CONTACT.label}
+            </a>
+            <p className="muted" style={{ fontSize: '0.72rem', marginTop: '8px', textAlign: 'center' }}>
+              {MANUAL_CONTACT.hours}
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a className="button button-red" href="/landings/desarrollo-web-qaway#precios">
+              Volver a la tienda
+            </a>
+            <a className="button button-secondary" href="/hub/pagos/purchases">
+              Ver mis pedidos
+            </a>
+          </div>
         </div>
       </div>
     )
@@ -288,73 +358,90 @@ export default function Checkout({
               <label htmlFor="address">Dirección</label>
               <input id="address" name="address" required value={formData.address} onChange={handleChange} placeholder="Av. Principal 123" />
             </div>
+            <div className="field">
+              <label htmlFor="email">Correo electrónico (para tu comprobante)</label>
+              <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="tu@correo.com" autoComplete="email" />
+            </div>
+            <div className="field">
+              <label htmlFor="contactSchedule">Horario de comunicación</label>
+              <select id="contactSchedule" name="contactSchedule" value={formData.contactSchedule} onChange={handleChange}>
+                <option value="">Cualquier horario</option>
+                <option value="morning">Mañana (9:00 – 12:00)</option>
+                <option value="afternoon">Tarde (12:00 – 17:00)</option>
+                <option value="evening">Noche (17:00 – 20:00)</option>
+              </select>
+            </div>
             <div className="field field-full">
-              <label htmlFor="notes">Indicaciones adicionales</label>
-              <textarea id="notes" name="notes" rows={3} value={formData.notes} onChange={handleChange} placeholder="Referencia de casa, dpto, o nota del pedido..." />
+              <label htmlFor="notes">Notas adicionales (opcional)</label>
+              <textarea id="notes" name="notes" rows={3} value={formData.notes} onChange={handleChange} placeholder="Detalles que debamos considerar" />
             </div>
           </div>
         </section>
 
-        {/* Sección 2: Programa de beneficios — plantilla en lib/benefits.js */}
-        <section className="form-section">
-          <h2>Beneficio de compra</h2>
-          <p className="section-hint">
-            Elige un beneficio y lo aplicamos a tu pedido.
-          </p>
-          <div
-            className="benefit-grid"
-            role="radiogroup"
-            aria-label="Beneficio de compra"
-          >
-            {availableBenefits.map((benefit) => {
-              const isSelected = benefit.id === activeBenefitId
-              return (
-                <label
-                  key={benefit.id}
-                  className={`benefit-card${isSelected ? ' is-selected' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="benefit"
-                    value={benefit.id}
-                    checked={isSelected}
-                    onChange={() => setBenefitChoice(benefit.id)}
-                    className="benefit-input"
-                  />
-                  <span className="benefit-head">
-                    <span className="benefit-icon">
-                      <BenefitIcon name={benefit.icon} />
+        {/* Sección 2: Programa de beneficios — OCULTO por SHOW_BENEFITS, no
+            eliminado. Plantilla configurable en lib/benefits.js; estilos en
+            styles/storefront.css. Reencenderlo = poner SHOW_BENEFITS en true. */}
+        {SHOW_BENEFITS ? (
+          <section className="form-section">
+            <h2>Beneficio de compra</h2>
+            <p className="section-hint">
+              Elige un beneficio y lo aplicamos a tu pedido.
+            </p>
+            <div
+              className="benefit-grid"
+              role="radiogroup"
+              aria-label="Beneficio de compra"
+            >
+              {availableBenefits.map((benefit) => {
+                const isSelected = benefit.id === activeBenefitId
+                return (
+                  <label
+                    key={benefit.id}
+                    className={`benefit-card${isSelected ? ' is-selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="benefit"
+                      value={benefit.id}
+                      checked={isSelected}
+                      onChange={() => setBenefitChoice(benefit.id)}
+                      className="benefit-input"
+                    />
+                    <span className="benefit-head">
+                      <span className="benefit-icon">
+                        <BenefitIcon name={benefit.icon} />
+                      </span>
+                      <span className="benefit-tag">{benefit.tag}</span>
                     </span>
-                    <span className="benefit-tag">{benefit.tag}</span>
-                  </span>
-                  <span className="benefit-label">{benefit.label}</span>
-                  <span className="benefit-copy">{benefit.description}</span>
-                  {benefit.discountPercent > 0 ? (
-                    <span className="benefit-discount">
-                      −{benefit.discountPercent}% sobre tu subtotal
+                    <span className="benefit-label">{benefit.label}</span>
+                    <span className="benefit-copy">{benefit.description}</span>
+                    {benefit.discountPercent > 0 ? (
+                      <span className="benefit-discount">
+                        −{benefit.discountPercent}% sobre tu subtotal
+                      </span>
+                    ) : null}
+                    <span className="benefit-foot">
+                      <span className="benefit-dot" aria-hidden="true" />
+                      {isSelected ? 'Seleccionado' : 'Elegir'}
                     </span>
-                  ) : null}
-                  <span className="benefit-foot">
-                    <span className="benefit-dot" aria-hidden="true" />
-                    {isSelected ? 'Seleccionado' : 'Elegir'}
-                  </span>
-                </label>
-              )
-            })}
-          </div>
-          <p className="summary-note">{BENEFIT_NOTE}</p>
-        </section>
+                  </label>
+                )
+              })}
+            </div>
+            <p className="summary-note">{BENEFIT_NOTE}</p>
+          </section>
+        ) : null}
 
         {/* Sección 3: Forma de Pago */}
         <section className="form-section">
           <h2>Forma de pago</h2>
           <div className="choice-grid" style={{ gridTemplateColumns: '1fr' }}>
             {PAYMENT_METHODS.map((method) => (
-              <label
-                key={method.id}
-                className={`choice ${selectedMethod === method.id ? 'selected' : ''}`}
-                style={{ padding: '18px' }}
-              >
+              <Fragment key={method.id}>
+                <label
+                  className={`choice ${selectedMethod === method.id ? 'selected' : ''}`}
+                  style={{ padding: '18px' }}
+                >
                 <input
                   type="radio"
                   name="paymentMethod"
@@ -362,35 +449,89 @@ export default function Checkout({
                   checked={selectedMethod === method.id}
                   onChange={() => setSelectedMethod(method.id)}
                 />
-                <div>
-                  <strong style={{ fontSize: '0.95rem' }}>{method.label}</strong>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span className="method-head">
+                    <strong style={{ fontSize: '0.95rem' }}>{method.label}</strong>
+                    <span className={`method-tag${method.operational ? ' is-ready' : ''}`}>
+                      {method.operational ? 'Disponible' : 'En habilitación'}
+                    </span>
+                  </span>
                   <br />
                   <span className="muted" style={{ fontSize: '0.78rem' }}>{method.description}</span>
                 </div>
-              </label>
+                </label>
+
+                {/* Aviso y datos de cobro DENTRO del ítem elegido: la divulgación
+                    progresiva debe quedar junto a su disparador. Antes el panel se
+                    abría al final de la lista, debajo de la 4.ª opción, y no se
+                    entendía qué lo había abierto. */}
+                {selectedMethod === method.id && !method.operational ? (
+                  <p className="method-notice">{method.notice}</p>
+                ) : null}
+
+                {selectedMethod === method.id && (method.id === 'yape' || method.id === 'directo') ? (
+                  <div className="bank-info" style={{ marginTop: '10px' }}>
+                    <p style={{ fontWeight: 800, marginBottom: '6px' }}>Datos para transferir o Yapear:</p>
+                    <p><span>BCP Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
+                    <p><span>BCP CCI:</span> <strong>{ACCOUNT_INFO.cci}</strong></p>
+                    <p><span>Yape / Plin:</span> <strong>{ACCOUNT_INFO.yape}</strong></p>
+
+                <label
+                  className={`upload-zone${dragging ? ' is-dragging' : ''}`}
+                  htmlFor="proof"
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setDragging(true)
+                  }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragging(false)
+                    const dropped = e.dataTransfer?.files?.[0]
+                    if (dropped) setProofFile(dropped)
+                  }}
+                >
+                  <input
+                    id="proof"
+                    ref={proofInputRef}
+                    className="upload-zone-input"
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setProofFile(e.target.files[0] || null)}
+                  />
+                  <span className="upload-zone-title">Subir captura o Voucher de pago</span>
+                  <span className="upload-zone-action">
+                    <span className="upload-zone-button">Elegir archivo</span>
+                    <span className="upload-zone-hint">o arrastra el archivo aquí</span>
+                  </span>
+                  <span className="upload-zone-hint">
+                    JPG, PNG o PDF · Opcional, pero acelera la verificación de tu pago.
+                  </span>
+                  {proofFile ? (
+                    <span className="upload-zone-file">
+                      <strong>{proofFile.name}</strong>
+                      <span className="upload-zone-size">{formatBytes(proofFile.size)}</span>
+                    </span>
+                  ) : null}
+                </label>
+                {proofFile ? (
+                  <button
+                    type="button"
+                    className="remove-link"
+                    style={{ justifySelf: 'start' }}
+                    onClick={() => {
+                      setProofFile(null)
+                      if (proofInputRef.current) proofInputRef.current.value = ''
+                    }}
+                  >
+                    Quitar archivo
+                  </button>
+                ) : null}
+                  </div>
+                ) : null}
+              </Fragment>
             ))}
           </div>
-
-          {/* Adjuntar Voucher si es Yape o Pago Directo */}
-          {(selectedMethod === 'yape' || selectedMethod === 'directo') && (
-            <div className="bank-info" style={{ marginTop: '20px' }}>
-              <p style={{ fontWeight: 800, marginBottom: '6px' }}>Datos para transferir o Yapear:</p>
-              <p><span>BCP Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
-              <p><span>BCP CCI:</span> <strong>{ACCOUNT_INFO.cci}</strong></p>
-              <p><span>Yape / Plin:</span> <strong>{ACCOUNT_INFO.yape}</strong></p>
-
-              <div className="field" style={{ marginTop: '14px' }}>
-                <label htmlFor="proof" style={{ color: 'var(--ink)' }}>Adjuntar captura de pantalla (Voucher - Opcional):</label>
-                <input
-                  id="proof"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setProofFile(e.target.files[0])}
-                  style={{ minHeight: 'auto', padding: '6px' }}
-                />
-              </div>
-            </div>
-          )}
         </section>
 
         {error && <div className="form-status">{error}</div>}
@@ -409,7 +550,7 @@ export default function Checkout({
           </div>
         ))}
 
-        {discount > 0 ? (
+        {SHOW_BENEFITS && discount > 0 ? (
           <>
             <div className="summary-row" style={{ marginTop: '12px' }}>
               <span>Subtotal</span>
@@ -422,7 +563,7 @@ export default function Checkout({
           </>
         ) : null}
 
-        {selectedBenefit ? (
+        {SHOW_BENEFITS && selectedBenefit ? (
           <div className="summary-row">
             <span>Beneficio</span>
             <strong style={{ fontSize: '0.8rem' }}>{selectedBenefit.label}</strong>
