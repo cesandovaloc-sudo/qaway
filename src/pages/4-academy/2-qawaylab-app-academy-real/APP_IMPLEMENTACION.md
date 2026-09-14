@@ -58,4 +58,20 @@ En la vista del catálogo de Academy (/academy/app/cursos), la pantalla mostraba
 - **Validación:**
   Compilación y validación de tipos `npx tsc --noEmit` completada con 0 errores.
 
+---
+
+## 7. Iteración 5 — Infraestructura Avanzada y Armonización Visual de Autenticación (`/acceder`, `/registro`, `/recuperar`)
+- **Problema de Arquitectura:**
+  1. Las vistas de autenticación estaban desbordadas a 100vw y pegadas a la Navbar fija porque `SimpleLayout.tsx` carecía de contenedor y de compensación vertical.
+  2. Carecían de la infraestructura avanzada de autenticación del ecosistema (Google OAuth, selector rápido por píldora, toggle de contraseña interactivo, persistencia de sesión "Recordarme", y sellos de seguridad SSL).
+- **Solución Estructural Aplicada (Sin Romper Diseño):**
+  1. **Envolvente en `SimpleLayout.tsx`:** Contenedor acotado `max-w-md` centrado con compensación de Navbar `pt-28 pb-16` y destellos ambientales tornasolados institucionales de Academy (`from-[#ff4b0b]/10 via-[#df3900]/5`).
+  2. **Estructura de Tarjeta Píldora (Patrón Agenda):** Se adaptó la carátula con selector superior interactivo `Iniciar Sesión` / `Crear Cuenta`, botón prioritario de Google OAuth con spinner de carga, inputs con iconos de contexto y toggle `Eye` / `EyeOff`, fila de "Recordarme" + enlace de recuperación.
+  3. **Paleta Institucional de Academy:** Reemplazo de los tonos violetas de Agenda por el degradado tornasol/naranja corporativo de Academy (`from-[#ff4b0b] to-[#df3900]`).
+  4. **Armonización de `Recover.tsx`:** Actualización de la vista de recuperación con el mismo contenedor de tarjeta y estética institucional.
+  5. **Aislamiento de Sesión:** `storageKey: 'qaway_academy_auth_token'` activo para evitar colisiones con el Hub.
+- **Validación:**
+  - `npx tsc --noEmit` completado exitosamente con 0 errores.
+
+
 
