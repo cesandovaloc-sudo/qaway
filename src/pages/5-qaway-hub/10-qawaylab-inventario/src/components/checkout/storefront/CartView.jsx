@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import CartItems from './CartItems.jsx'
 import OrderSummary from './OrderSummary.jsx'
+import TiendaHeader from './TiendaHeader.jsx'
 import { itemQty, itemPrice } from './utils.js'
 
 /**
@@ -34,6 +35,7 @@ export default function CartView({
   checkoutHref = '/checkout',
   action,
   loading = false,
+  steps = null,
 }) {
   const totalCount =
     typeof count === 'number'
@@ -46,9 +48,8 @@ export default function CartView({
 
   return (
     <section className="section">
-      <span className="eyebrow">{eyebrow}</span>
-      <h1 className="section-title">{title}</h1>
-      <p className="section-copy">{copy}</p>
+      {/* Kicker → título → párrafo → migas: misma cabecera que el checkout */}
+      <TiendaHeader eyebrow={eyebrow} title={title} copy={copy} steps={steps} />
 
       {items.length === 0 ? (
         loading ? (

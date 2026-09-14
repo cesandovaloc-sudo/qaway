@@ -379,7 +379,7 @@ export default function Checkout({
             <a className="button button-red" href="/landings/desarrollo-web-qaway#precios">
               Volver a la tienda
             </a>
-            <a className="button button-secondary" href="/hub/pagos/purchases">
+            <a className="button button-secondary" href="/carrito/compras">
               Ver mis pedidos
             </a>
           </div>

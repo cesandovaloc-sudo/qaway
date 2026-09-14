@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import AppLayout from '@/app/layouts/AppLayout'
 import RequireAuth from '@/app/router/RequireAuth'
 import LoginPage from '@/pages/LoginPage'
@@ -31,6 +31,8 @@ import CapturePage from '@/pages/CapturePage'
 import PublicCatalogPage from '@/pages/PublicCatalogPage'
 import GuestAccessPage from '@/pages/GuestAccessPage'
 import CartPage from '@/pages/CartPage'
+import CheckoutPage from '@/pages/CheckoutPage'
+import PurchasesPage from '@/pages/PurchasesPage'
 import SharedLinksPage from '@/pages/config/SharedLinksPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
@@ -40,8 +42,13 @@ export default function AppRouter() {
       {/* Rutas públicas (sin layout admin) */}
       <Route path="login" element={<LoginPage />} />
       <Route path="remates/:slug" element={<PublicCatalogPage />} />
+      {/* Tienda de cliente: carrito → checkout → compras (piel del storefront) */}
       <Route path="carrito" element={<CartPage />} />
-      <Route path="checkout" element={<CartPage />} />
+      <Route path="carrito/checkout" element={<CheckoutPage />} />
+      <Route path="carrito/compras" element={<PurchasesPage />} />
+      {/* Alias del flujo original, para no romper enlaces ya emitidos */}
+      <Route path="checkout" element={<Navigate to="/carrito/checkout" replace />} />
+      <Route path="compras" element={<Navigate to="/carrito/compras" replace />} />
       <Route path="acceso/:token" element={<GuestAccessPage />} />
 
       {/* Rutas protegidas (requieren sesión) */}

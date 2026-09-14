@@ -45,6 +45,12 @@ const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
+// Tienda de cliente: las páginas viven en inventario y se sirven aquí, dentro
+// del Layout, para que lleven el navbar oficial de Qaway Lab.
+const TiendaClientePage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/TiendaClientePage'))
+const TiendaCarritoPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CartPage'))
+const TiendaCheckoutPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/CheckoutPage'))
+const TiendaComprasPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/PurchasesPage'))
 
 // Recursos y Landings secundarias
 const EbookDigitalPage = lazy(() => import('@/pages/6-recursos/EbookDigitalPage'))
@@ -116,9 +122,14 @@ function PublicPathRoute({ routeKey, children, fallback = '/' }) {
   return <Navigate to={fallback} replace />
 }
 
-function RedirectToInventarioCarrito() {
+function RedirectToTiendaCarrito() {
   const location = useLocation()
-  return <Navigate to={`/hub/inventario/carrito${location.search}`} replace />
+  return <Navigate to={`/carrito${location.search}`} replace />
+}
+
+/** Envuelve una página de la tienda con el AuthProvider que `useAuth` exige. */
+function Tienda({ children }) {
+  return <TiendaClientePage>{children}</TiendaClientePage>
 }
 
 function CoursesCanonicalRedirect() {
@@ -312,18 +323,20 @@ export default function AppRouter() {
         />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
-          <Route
-            path="carrito"
-            element={<RedirectToInventarioCarrito />}
-          />
-          <Route
-            path="hub/pagos/*"
-            element={<RedirectToInventarioCarrito />}
-          />
-          <Route
-            path="hub/pagos"
-            element={<RedirectToInventarioCarrito />}
-          />
+          {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
+              Carrito y checkout son las dos páginas de cliente y se sirven
+              aquí para que lleven el navbar oficial, igual que el flujo
+              original. La app de pagos antigua sigue fuera del router. */}
+          <Route path="carrito" element={<Tienda><TiendaCarritoPage /></Tienda>} />
+          <Route path="carrito/checkout" element={<Tienda><TiendaCheckoutPage /></Tienda>} />
+          <Route path="carrito/compras" element={<Tienda><TiendaComprasPage /></Tienda>} />
+          {/* Alias heredados: no rompen enlaces ya emitidos */}
+          <Route path="checkout" element={<Navigate to="/carrito/checkout" replace />} />
+          <Route path="purchases" element={<Navigate to="/carrito/compras" replace />} />
+          <Route path="hub/pagos/checkout" element={<Navigate to="/carrito/checkout" replace />} />
+          <Route path="hub/pagos/purchases" element={<Navigate to="/carrito/compras" replace />} />
+          <Route path="hub/pagos/*" element={<RedirectToTiendaCarrito />} />
+          <Route path="hub/pagos" element={<RedirectToTiendaCarrito />} />
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}

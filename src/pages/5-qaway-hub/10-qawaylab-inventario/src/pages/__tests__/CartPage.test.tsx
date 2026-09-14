@@ -3,39 +3,48 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import CartPage from '@/pages/CartPage'
-import type { Session } from '@supabase/supabase-js'
-import { useAuth } from '@/context/AuthContext'
-import { siteConfig } from '@/config/site'
 import type { CartItem } from '../../../contracts/commerce/v1.types'
 
-// Los servicios reales de @qawaylab/pago tocan supabase: se mockean para el flujo
-const { createOrderMock, createPaymentMock } = vi.hoisted(() => ({
-  createOrderMock: vi.fn(),
-  createPaymentMock: vi.fn(),
-}))
-
-vi.mock('@/services/qawaService', () => ({
-  qawaServices: {
-    orders: { createOrder: createOrderMock },
-    payments: { createPayment: createPaymentMock },
-  },
-}))
-
-vi.mock('@/context/AuthContext', () => ({
-  useAuth: vi.fn(),
-}))
-
-vi.mock('@/config/site', () => ({
-  siteConfig: {
-    siteUrl: 'https://inventario.qawaylab.test',
-    appUrl: 'https://app.qawaylab.test',
-    whatsapp: null,
-    phone: null,
-    cart: { appUrl: null, enabled: true },
-  },
-}))
-
 const STORAGE_KEY = 'qaway-cart-v1'
+
+// Supabase se mockea: el carrito consulta `products` al resolver `?add=`.
+const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }))
+
+vi.mock('@/config/supabase', () => ({
+  supabase: { from: fromMock },
+}))
+
+type EqCall = [string, unknown]
+const eqCalls: EqCall[] = []
+
+/** Cadena fluida mínima de PostgREST: select().eq().limit() → resultado. */
+function makeQuery(result: { data: unknown[] }) {
+  const query = {
+    select: () => query,
+    eq: (column: string, value: unknown) => {
+      eqCalls.push([column, value])
+      return query
+    },
+    limit: () => Promise.resolve(result),
+  }
+  return query
+}
+
+function productRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: '3f6a1c92-0f4e-4a1b-9c2d-7e5b8a1d0c33',
+    slug: 'one-web',
+    sku: 'QW-ONE-WEB',
+    title: 'One Web (Landing Page de Alto Impacto)',
+    name: 'One Web',
+    base_price: 79.9,
+    price: 79.9,
+    type: 'service',
+    images: [],
+    image_url: null,
+    ...overrides,
+  }
+}
 
 // Stub de localStorage: en este entorno el global de Node pisa al de jsdom
 class LocalStorageMock {
@@ -71,22 +80,15 @@ function seedCart(items: CartItem[]) {
   storage.setItem(STORAGE_KEY, JSON.stringify(items))
 }
 
-function renderPage() {
+function renderPage(entry = '/carrito') {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[entry]}>
       <CartPage />
     </MemoryRouter>,
   )
 }
 
-async function fillCheckoutForm(user: ReturnType<typeof userEvent.setup>) {
-  await user.type(screen.getByLabelText('Nombre completo'), 'Juan Pérez')
-  await user.type(screen.getByLabelText('WhatsApp / Celular'), '999 888 777')
-  await user.type(screen.getByLabelText('Distrito / Ciudad'), 'Miraflores')
-  await user.type(screen.getByLabelText('Dirección'), 'Av. Principal 123')
-}
-
-describe('CartPage (useCart + Checkout integrados)', () => {
+describe('CartPage — tienda · «Mi pedido» (storefront)', () => {
   beforeAll(() => {
     Object.defineProperty(window, 'localStorage', {
       value: storage,
@@ -98,50 +100,55 @@ describe('CartPage (useCart + Checkout integrados)', () => {
 
   beforeEach(() => {
     storage.clear()
+    eqCalls.length = 0
     vi.clearAllMocks()
-    siteConfig.cart.enabled = true
-    createOrderMock.mockResolvedValue({ id: 'ord-1234567890' })
-    createPaymentMock.mockResolvedValue({ id: 'pay-1' })
-    vi.mocked(useAuth).mockReturnValue({
-      session: null,
-      profile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
-    })
   })
 
   afterAll(() => {
     vi.unstubAllGlobals()
   })
 
-  it('carrito vacío: header, estado vacío con link al catálogo y sin checkout', () => {
+  it('carrito vacío: encabezado del storefront y CTA al catálogo', () => {
     renderPage()
 
-    expect(screen.getByText('Mi pedido')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Volver al inicio' })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('heading', { name: 'Mi pedido.' })).toBeInTheDocument()
     expect(screen.getByText('Tu pedido está vacío')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute('href', '/')
-    expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute(
+      'href',
+      '/landings/desarrollo-web-qaway#precios',
+    )
+
+    // Misma cabecera que el checkout, con las migas arriba del kicker
+    const steps = screen.getByRole('list', { name: 'Pasos de la compra' })
+    const kicker = screen.getByText('Compra')
+    expect(
+      Boolean(steps.compareDocumentPosition(kicker) & Node.DOCUMENT_POSITION_FOLLOWING),
+    ).toBe(true)
   })
 
-  it('restaura el carrito de localStorage y renderiza los ítems con el checkout', () => {
+  it('restaura el carrito de localStorage y muestra ítems, resumen y CTA al checkout', () => {
     seedCart([
       makeItem(),
       makeItem({ product_id: 'prod-2', title: 'Medias Deportivas', unit_price: 29.9, quantity: 1 }),
     ])
     renderPage()
 
+    // Ítems (CartItems)
     expect(screen.getByText('Zapatillas Running Pro')).toBeInTheDocument()
     expect(screen.getByText('S/ 249.90 c/u')).toBeInTheDocument()
     expect(screen.getByText('Medias Deportivas')).toBeInTheDocument()
-    // 2 + 1 = 3 ítems; 2×249.9 + 1×29.9 = 529.70
-    expect(screen.getByText('3 ítems')).toBeInTheDocument()
-    expect(screen.getByText('Subtotal S/ 529.70')).toBeInTheDocument()
 
-    // Checkout del módulo integrado
-    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
-    expect(screen.getByText('Tu pedido')).toBeInTheDocument()
+    // Resumen (OrderSummary): productos + subtotal 2×249.9 + 29.9 = 529.70
+    expect(screen.getByRole('heading', { name: 'Resumen' })).toBeInTheDocument()
+    expect(screen.getByText('Productos')).toBeInTheDocument()
+    expect(screen.getByText('S/ 529.70')).toBeInTheDocument()
+
+    // El pago ya no vive en el carrito: es el paso 2
+    expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Continuar con el pedido' })).toHaveAttribute(
+      'href',
+      '/carrito/checkout',
+    )
   })
 
   it('los controles +/− actualizan la cantidad y persisten en localStorage', async () => {
@@ -150,12 +157,10 @@ describe('CartPage (useCart + Checkout integrados)', () => {
     renderPage()
 
     await user.click(screen.getByRole('button', { name: 'Sumar uno' }))
-    expect(screen.getByText('3 ítems')).toBeInTheDocument()
-    expect(screen.getByText('Subtotal S/ 749.70')).toBeInTheDocument()
     expect(JSON.parse(storage.getItem(STORAGE_KEY)!)[0].quantity).toBe(3)
+    expect(screen.getAllByText('S/ 749.70').length).toBeGreaterThan(0)
 
     await user.click(screen.getByRole('button', { name: 'Restar uno' }))
-    expect(screen.getByText('2 ítems')).toBeInTheDocument()
     expect(JSON.parse(storage.getItem(STORAGE_KEY)!)[0].quantity).toBe(2)
   })
 
@@ -169,73 +174,71 @@ describe('CartPage (useCart + Checkout integrados)', () => {
     expect(screen.getByText('Tu pedido está vacío')).toBeInTheDocument()
   })
 
-  it('Quitar elimina el ítem del carrito', async () => {
+  it('Retirar elimina el ítem del carrito', async () => {
     const user = userEvent.setup()
     seedCart([makeItem()])
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: 'Quitar' }))
+    await user.click(screen.getByRole('button', { name: 'Retirar' }))
 
     expect(screen.getByText('Tu pedido está vacío')).toBeInTheDocument()
   })
 
-  it('flujo completo: confirmar el pedido en el checkout → éxito, carrito limpio y localStorage vacío', async () => {
-    const user = userEvent.setup()
-    seedCart([makeItem()])
+  it('un servicio se cobra una sola vez aunque el carrito guardado traiga cantidad 3', () => {
+    seedCart([
+      makeItem({
+        product_id: 'prod-one-web',
+        title: 'One Web (Landing Page de Alto Impacto)',
+        unit_price: 79.9,
+        quantity: 3,
+        product_type: 'service',
+      }),
+    ])
     renderPage()
 
-    await fillCheckoutForm(user)
-    await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
-
-    // Orden creada con los ítems del carrito mapeados (userId null sin sesión)
-    expect(createOrderMock).toHaveBeenCalledWith(
-      null,
-      [
-        {
-          product_id: 'prod-1',
-          product_title: 'Zapatillas Running Pro',
-          product_type: 'physical',
-          unit_price: 249.9,
-          quantity: 2,
-        },
-      ],
-      expect.objectContaining({ paymentMethod: 'manual' }),
-    )
-    expect(createPaymentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 499.8 }),
-    )
-
-    // Pantalla de éxito y carrito limpio (useCart.clear + persistencia)
-    expect(screen.getByText('¡Pedido registrado!')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
+    // La fila y el resumen deben decir lo mismo: 1 unidad
+    expect(screen.getByText('1 (Servicio único)')).toBeInTheDocument()
+    expect(screen.getByText('1 × One Web (Landing Page de Alto Impacto)')).toBeInTheDocument()
+    expect(screen.queryByText('3 × One Web (Landing Page de Alto Impacto)')).not.toBeInTheDocument()
+    // Y el subtotal, el real: 79.90 y no 239.70
+    expect(screen.getAllByText('S/ 79.90').length).toBeGreaterThan(0)
+    expect(screen.queryByText('S/ 239.70')).not.toBeInTheDocument()
   })
 
-  it('asocia el pedido al userId de la sesión autenticada', async () => {
-    const user = userEvent.setup()
-    vi.mocked(useAuth).mockReturnValue({
-      session: { user: { id: 'user-123' } } as unknown as Session,
-      profile: null,
-      loading: false,
-      signIn: vi.fn(),
-      signOut: vi.fn(),
+  // ── Regresión: el filtro mezclaba uuid con text y Postgres devolvía 22P02,
+  // dejando el pedido vacío al entrar desde la landing. ──
+  describe('resolución del producto entrante (?add=)', () => {
+    it('con un slug de texto consulta por slug, nunca por id', async () => {
+      fromMock.mockReturnValue(makeQuery({ data: [productRow()] }))
+
+      renderPage('/carrito?add=one-web')
+
+      expect(await screen.findByText('One Web (Landing Page de Alto Impacto)')).toBeInTheDocument()
+      expect(eqCalls).toEqual([['slug', 'one-web']])
     })
-    seedCart([makeItem()])
-    renderPage()
 
-    await fillCheckoutForm(user)
-    await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
+    it('con un UUID consulta por id, nunca por slug', async () => {
+      const uuid = '3f6a1c92-0f4e-4a1b-9c2d-7e5b8a1d0c33'
+      fromMock.mockReturnValue(makeQuery({ data: [productRow()] }))
 
-    expect(createOrderMock).toHaveBeenCalledWith('user-123', expect.any(Array), expect.any(Object))
-    expect(createPaymentMock).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-123' }))
-  })
+      renderPage(`/carrito?add=${uuid}`)
 
-  it('con el carrito desactivado (VITE_CART_ENABLED=false) no se renderiza el checkout', () => {
-    siteConfig.cart.enabled = false
-    seedCart([makeItem()])
-    renderPage()
+      expect(await screen.findByText('One Web (Landing Page de Alto Impacto)')).toBeInTheDocument()
+      expect(eqCalls).toEqual([['id', uuid]])
+    })
 
-    expect(screen.getByText('Zapatillas Running Pro')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
+    it('si el slug no existe, cae al sku (mismo tipo text)', async () => {
+      fromMock
+        .mockReturnValueOnce(makeQuery({ data: [] }))
+        .mockReturnValueOnce(makeQuery({ data: [productRow({ slug: null, sku: 'QW-ONE-WEB' })] }))
+
+      renderPage('/carrito?add=QW-ONE-WEB')
+
+      expect(await screen.findByText('One Web (Landing Page de Alto Impacto)')).toBeInTheDocument()
+      expect(eqCalls).toEqual([
+        ['slug', 'QW-ONE-WEB'],
+        ['sku', 'QW-ONE-WEB'],
+      ])
+    })
   })
 })

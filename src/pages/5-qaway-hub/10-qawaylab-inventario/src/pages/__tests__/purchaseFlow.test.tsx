@@ -7,6 +7,7 @@ import { catalogService } from '@/services/catalogService'
 import type { CatalogFull } from '@/services/catalogService'
 import { useAuth } from '@/context/AuthContext'
 import { siteConfig } from '@/config/site'
+import { firstEnabledMethod } from '@/components/checkout/paymentConfig'
 
 // Los servicios reales de @qawaylab/pago tocan supabase: se mockean para el flujo
 const { createOrderMock, createPaymentMock } = vi.hoisted(() => ({
@@ -212,15 +213,18 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
     // 2. Ir al carrito desde el mini carrito (navegación real del router)
     await user.click(screen.getByRole('button', { name: 'Ver carrito' }))
 
-    // 3. El carrito restaura el ítem y muestra el checkout integrado
-    expect(await screen.findByText('Mi pedido')).toBeInTheDocument()
+    // 3. El carrito del storefront restaura el ítem y muestra el resumen
+    expect(await screen.findByRole('heading', { name: 'Mi pedido.' })).toBeInTheDocument()
     expect(screen.getByText('Zapatillas Running Pro')).toBeInTheDocument()
     expect(screen.getByText('S/ 249.90 c/u')).toBeInTheDocument()
-    expect(screen.getByText('1 ítems')).toBeInTheDocument()
-    expect(screen.getByText('Subtotal S/ 249.90')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
+    expect(screen.getByText('Subtotal')).toBeInTheDocument()
+    expect(screen.getAllByText('S/ 249.90').length).toBeGreaterThan(0)
 
-    // 4. Checkout del módulo: pedido exitoso con el ítem mapeado por el adaptador
+    // 4. Paso 2 del flujo: continuar al checkout (página propia)
+    await user.click(screen.getByRole('link', { name: 'Continuar con el pedido' }))
+    expect(await screen.findByRole('heading', { name: 'Completar Datos y Pago' })).toBeInTheDocument()
+
+    // 5. Checkout del módulo: pedido exitoso con el ítem mapeado por el adaptador
     await fillCheckoutForm(user)
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
 
@@ -235,14 +239,14 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
           quantity: 1,
         },
       ],
-      expect.objectContaining({ paymentMethod: 'manual' }),
+      expect.objectContaining({ paymentMethod: firstEnabledMethod()?.id }),
     )
     expect(createPaymentMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 249.9 }),
     )
 
-    // 5. Éxito y carrito vacío persistido
-    expect(await screen.findByText('¡Pedido registrado!')).toBeInTheDocument()
+    // 6. Éxito y carrito vacío persistido
+    expect(await screen.findByText('Pedido registrado con éxito')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
     expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
   })

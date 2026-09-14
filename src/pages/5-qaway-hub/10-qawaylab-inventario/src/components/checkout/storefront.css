@@ -539,6 +539,14 @@
   border-bottom: 1px solid var(--line);
   font-size: 0.84rem;
 }
+/* El monto nunca se parte en dos líneas: la etiqueta larga del producto
+   ("3 × One Web (Landing Page de Alto Impacto)") empujaba al importe a
+   envolverse y el resumen se veía desbordado. */
+.qawa-storefront .summary-row > strong {
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+}
 .qawa-storefront .summary-note {
   margin: 16px 0;
   color: var(--muted);
@@ -801,9 +809,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px 18px;
-  /* Aire arriba y abajo: sin margen superior el stepper quedaba pegado al
-     párrafo de la sección (`.section-copy` no define margen). */
-  margin: 26px 0 30px;
+  /* Migas de pan de la cabecera: abren la página, así que no llevan margen
+     superior (el aire de arriba lo aporta el contenedor) y sí un hueco claro
+     de 28px antes del kicker. */
+  margin: 0 0 28px;
   padding: 0;
   list-style: none;
 }
