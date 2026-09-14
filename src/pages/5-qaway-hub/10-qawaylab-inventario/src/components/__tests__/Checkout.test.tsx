@@ -53,12 +53,15 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByLabelText('Dirección')).toBeInTheDocument()
     expect(screen.getByText('Forma de pago')).toBeInTheDocument()
 
-    // 4 métodos de pago (el programa de beneficios quedó latente)
-    expect(screen.getAllByRole('radio')).toHaveLength(4)
+    // 3 métodos de pago: MP, QR (TAYPI) y el manual unificado.
+    // · Stripe se retiró: no abre cuenta de comercio para Perú y MP ya cubre lo
+    //   internacional.
+    // · "Yape / Plin Directo" y "Transferencia bancaria / Pago Directo" se
+    //   unificaron porque mostraban exactamente el mismo bloque de datos.
+    expect(screen.getAllByRole('radio')).toHaveLength(3)
     expect(screen.getByText('Mercado Pago (Tarjetas, Yape, Cuotas)')).toBeInTheDocument()
-    expect(screen.getByText('Yape / Plin Directo')).toBeInTheDocument()
-    expect(screen.getByText('Tarjeta Internacional (Stripe)')).toBeInTheDocument()
-    expect(screen.getByText('Transferencia bancaria / Pago Directo')).toBeInTheDocument()
+    expect(screen.getByText('Pago con QR (Yape, Plin y tu banco)')).toBeInTheDocument()
+    expect(screen.getByText('Yape / Plin / Transferencia')).toBeInTheDocument()
 
     expect(screen.getByText('Tu pedido')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
@@ -74,20 +77,27 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByText(`S/ ${SUBTOTAL.toFixed(2)}`)).toBeInTheDocument()
   })
 
-  it('por defecto el método seleccionado es Mercado Pago y no muestra el voucher', () => {
+  it('por defecto elige el único método habilitado y los no habilitados no son elegibles', () => {
     renderCheckout()
 
-    const mercadoPago = screen.getByRole('radio', { name: /Mercado Pago/ })
-    expect(mercadoPago).toBeChecked()
+    // Mercado Pago y TAYPI todavía no están conectados: se muestran con su aviso
+    // pero NO se pueden seleccionar, para no ofrecer algo que no puede completarse.
+    expect(screen.getByRole('radio', { name: /Mercado Pago/ })).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Pago con QR/ })).toBeDisabled()
+
+    // El default es el primer método habilitado (manual).
+    expect(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/ })).toBeChecked()
+
+    // El panel de datos de cobro arranca COLAPSADO: se abre al hacer clic.
     expect(screen.queryByLabelText(/Voucher/)).not.toBeInTheDocument()
     expect(screen.queryByText(/BCP Cuenta/)).not.toBeInTheDocument()
   })
 
-  it('al elegir Yape muestra los datos bancarios y el input de voucher', async () => {
+  it('al elegir Yape / Plin / Transferencia muestra los datos bancarios y el input de voucher', async () => {
     const user = userEvent.setup()
     renderCheckout()
 
-    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin Directo/ }))
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/ }))
 
     expect(screen.getByLabelText(/Voucher/)).toBeInTheDocument()
     expect(screen.getByText(/BCP Cuenta/)).toBeInTheDocument()
@@ -130,7 +140,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
         { product_id: 'prod-2', product_title: 'Medias Deportivas', product_type: 'physical', unit_price: 29.9, quantity: 1 },
       ],
       expect.objectContaining({
-        paymentMethod: 'mercadopago',
+        paymentMethod: 'manual',
         shippingAddress: expect.objectContaining({
           name: 'Juan Pérez',
           phone: '999 888 777',
@@ -148,7 +158,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
         orderId: 'ord-1234567890',
         amount: SUBTOTAL,
         currency: 'PEN',
-        provider: 'mercadopago',
+        provider: 'manual',
         proofUrl: null,
       }),
     )
@@ -170,13 +180,13 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(createOrder).toHaveBeenCalledWith('user-123', expect.any(Array), expect.any(Object))
   })
 
-  it('mueve provider manual y muestra datos bancarios en la pantalla de éxito con Yape', async () => {
+  it('usa el proveedor manual y muestra los datos bancarios en la pantalla de éxito', async () => {
     const user = userEvent.setup()
     const { createPayment, services } = defaultServices()
     renderCheckout(services)
 
     await fillContactForm(user)
-    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin Directo/ }))
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/ }))
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
 
     expect(createPayment).toHaveBeenCalledWith(
@@ -186,7 +196,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByText('Datos para completar tu pago:')).toBeInTheDocument()
   })
 
-  it('sube el voucher al bucket cuando hay archivo con Yape/Pago Directo', async () => {
+  it('sube el voucher al bucket cuando hay archivo con el método manual', async () => {
     const user = userEvent.setup()
     const upload = vi.fn().mockResolvedValue({ error: null })
     const getPublicUrl = vi.fn(() => ({ data: { publicUrl: 'https://cdn.qawaylab.com/voucher.png' } }))
@@ -197,7 +207,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     const file = new File(['contenido'], 'voucher.png', { type: 'image/png' })
 
     await fillContactForm(user)
-    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin Directo/ }))
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/ }))
     await user.upload(screen.getByLabelText(/Voucher/), file)
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
 
@@ -210,18 +220,11 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     )
   })
 
-  it('mapea provider stripe al elegir Tarjeta Internacional', async () => {
-    const user = userEvent.setup()
-    const { createPayment, services } = defaultServices()
-    renderCheckout(services)
+  it('ya no ofrece Tarjeta Internacional (Stripe)', () => {
+    renderCheckout()
 
-    await fillContactForm(user)
-    await user.click(screen.getByRole('radio', { name: /Tarjeta Internacional/ }))
-    await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
-
-    expect(createPayment).toHaveBeenCalledWith(
-      expect.objectContaining({ provider: 'stripe' }),
-    )
+    expect(screen.queryByText('Tarjeta Internacional (Stripe)')).not.toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /Tarjeta Internacional/ })).not.toBeInTheDocument()
   })
 
   it('error de createPayment (tras crear la orden) muestra el mensaje y llama onError', async () => {

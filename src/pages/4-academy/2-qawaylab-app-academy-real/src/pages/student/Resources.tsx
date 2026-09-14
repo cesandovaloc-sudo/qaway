@@ -305,7 +305,7 @@ export default function Resources() {
 
                   <div className="flex items-center gap-3 shrink-0">
                     <Link
-                      to={`/cursos/${group.course.slug}`}
+                      to={`/academy/app/cursos/${group.course.slug}`}
                       onClick={(e) => e.stopPropagation()}
                       className="btn-ghost text-xs font-medium text-primary-600 hover:text-primary-700 hidden sm:inline-flex"
                     >

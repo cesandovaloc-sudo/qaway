@@ -199,7 +199,7 @@ describe('CartPage (useCart + Checkout integrados)', () => {
           quantity: 2,
         },
       ],
-      expect.objectContaining({ paymentMethod: 'mercadopago' }),
+      expect.objectContaining({ paymentMethod: 'manual' }),
     )
     expect(createPaymentMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 499.8 }),

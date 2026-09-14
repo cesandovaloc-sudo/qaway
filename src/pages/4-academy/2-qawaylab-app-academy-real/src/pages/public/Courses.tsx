@@ -9,8 +9,9 @@ const levels = ['Todos', 'Principiante', 'Intermedio', 'Avanzado']
 function formatPrice(course: Course) {
   if (course?.is_free) return 'Gratis'
   if (course?.price == null || course.price === '') return 'Consultar'
-  if (typeof course.price === 'number') return `$${course.price}`
-  return `${course.price}`
+  if (typeof course.price === 'number') return `S/ ${course.price}`
+  const str = String(course.price).replace(/^\$/, '').trim()
+  return `S/ ${str}`
 }
 
 function WebStyleCourseCard({ course }: { course: Course }) {
@@ -66,7 +67,7 @@ function WebStyleCourseCard({ course }: { course: Course }) {
         </div>
         
         <div className="mt-auto flex items-center justify-between gap-4 pt-5">
-          <Link to={`/cursos/${course.slug}`} className="inline-flex items-center gap-2 text-[0.84rem] font-bold text-[#ff4b0b] transition-colors group-hover:text-[#ff4b0b]">
+          <Link to={`/academy/app/cursos/${course.slug}`} className="inline-flex items-center gap-2 text-[0.84rem] font-bold text-[#ff4b0b] transition-colors group-hover:text-[#ff4b0b]">
             Ver contenido
             <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </Link>
@@ -125,7 +126,7 @@ export default function Courses() {
   }, [carouselReady, carouselPaused, featured.length])
 
   return (
-    <div className="py-12">
+    <div className="pt-28 pb-16 sm:pt-32 sm:pb-20">
       <div className="page-container mb-8">
         <h1 className="section-title">Catálogo de Cursos</h1>
         <p className="section-subtitle mt-1">Explora todos los cursos disponibles en la plataforma</p>

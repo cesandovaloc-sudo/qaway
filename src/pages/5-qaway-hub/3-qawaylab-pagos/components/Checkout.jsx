@@ -9,6 +9,8 @@ import {
   ACCOUNT_INFO,
   MANUAL_CONTACT,
   PAYMENT_METHODS,
+  findPaymentMethod,
+  firstEnabledMethod,
   paymentSteps,
   whatsappOrderLink,
 } from '../lib/paymentConfig.js'
@@ -37,12 +39,17 @@ export default function Checkout({
   bucketName = 'resources',
   onSuccess = () => {},
   onError = () => {},
-  stripePublishableKey = null,
-  mercadoPagoPublicKey = null,
+  // El módulo no conoce herramientas de analítica: el host inyecta aquí su
+  // emisor de conversión (ej. Meta Pixel). Por defecto no hace nada.
+  onOrderCompleted = () => {},
 }) {
   // Invitado sin sesión: user_id queda NULL (el schema permite pedidos anónimos con RLS)
   const uid = userId || user?.id || null
-  const [selectedMethod, setSelectedMethod] = useState('mercadopago')
+  // Arranca en el primer método habilitado: nunca se preselecciona uno que no
+  // pueda completarse. Al habilitar una pasarela, pasa a ser el default solo.
+  const [selectedMethod, setSelectedMethod] = useState(
+    () => firstEnabledMethod()?.id ?? 'manual'
+  )
 
   // Programa de beneficios (oculto por SHOW_BENEFITS). Con el interruptor
   // apagado no se resuelve el catálogo, así que `selectedBenefit` es null y el
@@ -90,6 +97,24 @@ export default function Checkout({
   const proofInputRef = useRef(null)
   // Resalta la zona de voucher mientras se arrastra un archivo encima.
   const [dragging, setDragging] = useState(false)
+  // Panel de datos de cobro: arranca COLAPSADO y se abre al hacer clic en la
+  // tarjeta. Guarda el id del método expandido (null = ninguno).
+  const [expandedMethod, setExpandedMethod] = useState(null)
+
+  /**
+   * Clic en una tarjeta de método: si no estaba elegida, la elige y la expande;
+   * si ya estaba elegida, alterna el panel (abrir/cerrar).
+   */
+  function handleMethodClick(method) {
+    if (!method.enabled && method.id !== selectedMethod) return
+
+    if (method.id !== selectedMethod) {
+      setSelectedMethod(method.id)
+      setExpandedMethod(method.id)
+      return
+    }
+    setExpandedMethod((prev) => (prev === method.id ? null : method.id))
+  }
 
   const subtotal = items.reduce(
     (sum, item) => sum + (item.price || item.unit_price || 0) * (item.quantity || 1),
@@ -117,7 +142,8 @@ export default function Checkout({
       let proofUrl = null
 
       // Subida de voucher si es Yape o Pago Directo y hay archivo
-      if (proofFile && (selectedMethod === 'yape' || selectedMethod === 'directo') && supabase) {
+      // El voucher solo aplica al método manual (Yape / Plin / Transferencia).
+      if (proofFile && selectedMethod === 'manual' && supabase) {
         const fileExt = proofFile.name.split('.').pop()
         const filePath = `vouchers/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
         const { error: uploadError } = await supabase.storage.from(bucketName).upload(filePath, proofFile)
@@ -178,11 +204,8 @@ export default function Checkout({
 
       // 2. Crear Registro de Pago usando servicio de Qaway Pagos
       let payment = null
-      const provider = selectedMethod === 'stripe'
-        ? 'stripe'
-        : selectedMethod === 'mercadopago'
-        ? 'mercadopago'
-        : 'manual'
+      // El proveedor lo declara cada método en lib/paymentConfig.js.
+      const provider = selectedMethodInfo?.provider ?? 'manual'
 
       if (paymentsService && paymentsService.createPayment) {
         try {
@@ -205,6 +228,31 @@ export default function Checkout({
         payment = { id: `pay_${Date.now()}`, status: 'pending' }
       }
 
+      // Cobro por pasarela: el navegador NO manda el importe. El servidor lee el
+      // pedido, lo recalcula (regla R1) y devuelve la URL de pago o el QR.
+      let cobro = null
+      if (
+        selectedMethodInfo?.provider &&
+        selectedMethodInfo.provider !== 'manual' &&
+        supabase?.functions
+      ) {
+        const { data, error: errCobro } = await supabase.functions.invoke('pago-crear', {
+          body: { orderId: order?.id, provider: selectedMethodInfo.provider },
+        })
+        if (errCobro) throw new Error('No pudimos iniciar el pago. Intenta de nuevo en un momento.')
+        cobro = data ?? null
+      }
+
+      onSuccess({ order, payment })
+      // Se avisa al host para que registre la conversión (disparo único allá).
+      onOrderCompleted({ order, payment, total, currency, items: orderItems })
+
+      // Si la pasarela devuelve URL de pago, se sale del sitio hacia su checkout.
+      if (cobro?.redirectUrl) {
+        window.location.href = cobro.redirectUrl
+        return
+      }
+
       // Snapshot congelado: la confirmación no puede leer del carrito, porque
       // `onSuccess` lo vacía y los montos caían a "S/ 0.00".
       setOrderCompleted({
@@ -215,10 +263,10 @@ export default function Checkout({
         total,
         benefitLabel: selectedBenefit?.label ?? null,
         methodId: selectedMethod,
+        qrImage: cobro?.qrImage ?? null,
         orderCode: String(order?.id || payment?.id || '').slice(0, 8),
         steps: paymentSteps(selectedMethod),
       })
-      onSuccess({ order, payment })
     } catch (err) {
       console.error('Error al procesar pedido:', err)
       const msg = err.message || 'No se pudo registrar el pedido.'
@@ -232,8 +280,7 @@ export default function Checkout({
   if (orderCompleted) {
     // El cierre del flujo cambia según el método: en los manuales el comprador
     // todavía debe enviarnos el voucher, así que el CTA lo dice explícitamente.
-    const isManualPayment =
-      orderCompleted.methodId === 'yape' || orderCompleted.methodId === 'directo'
+    const isManualPayment = orderCompleted.methodId === 'manual'
 
     return (        <div className="checkout-layout">
         <div className="form-section" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
@@ -257,7 +304,7 @@ export default function Checkout({
                 <span>Monto total:</span> <strong style={{ color: '#009ee3', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
               </p>
             </div>
-          ) : (orderCompleted.methodId === 'yape' || orderCompleted.methodId === 'directo') ? (
+          ) : orderCompleted.methodId === 'manual' ? (
             <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left' }}>
               <p style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--red)' }}>Datos para completar tu pago:</p>
               <p><span>Banco:</span> <strong>{ACCOUNT_INFO.bank}</strong></p>
@@ -274,16 +321,23 @@ export default function Checkout({
                 <span>Monto a pagar:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
               </p>
             </div>
-          ) : orderCompleted.methodId === 'stripe' ? (
-            <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left', borderColor: '#635bff' }}>
-              <p style={{ fontWeight: 800, marginBottom: '8px', color: '#635bff' }}>Pago con tarjeta internacional (Stripe):</p>
-              <p><span>Pasarela:</span> <strong>Stripe Checkout</strong></p>
-              <p><span>Estado:</span> <strong>Pendiente de habilitación de la pasarela</strong></p>
+          ) : orderCompleted.methodId === 'taypi' ? (
+            <div className="bank-info" style={{ maxWidth: '480px', margin: '0 auto 24px', textAlign: 'left' }}>
+              <p style={{ fontWeight: 800, marginBottom: '8px', color: 'var(--red)' }}>Pago con código QR:</p>
+              <p><span>Pasarela:</span> <strong>QR interoperable (Yape, Plin y bancos)</strong></p>
+              <p><span>Estado:</span> <strong>Pendiente de pago</strong></p>
+              {orderCompleted.qrImage ? (
+                <img
+                  className="qr-image"
+                  alt="Código QR para completar el pago"
+                  src={`data:image/svg+xml;base64,${orderCompleted.qrImage}`}
+                />
+              ) : null}
               {orderCompleted.benefitLabel ? (
                 <p><span>Beneficio:</span> <strong>{orderCompleted.benefitLabel}</strong></p>
               ) : null}
-              <p style={{ marginTop: '12px', borderTop: '1px solid #635bff', paddingTop: '8px' }}>
-                <span>Monto total:</span> <strong style={{ color: '#635bff', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
+              <p style={{ marginTop: '12px', borderTop: '1px solid var(--red)', paddingTop: '8px' }}>
+                <span>Monto total:</span> <strong style={{ color: 'var(--red)', fontSize: '1.1rem' }}>S/ {orderCompleted.total.toFixed(2)}</strong>
               </p>
             </div>
           ) : null}
@@ -333,6 +387,8 @@ export default function Checkout({
       </div>
     )
   }
+
+  const selectedMethodInfo = findPaymentMethod(selectedMethod)
 
   return (
     <form className="checkout-layout" onSubmit={handleSubmit}>
@@ -441,6 +497,7 @@ export default function Checkout({
                 <label
                   className={`choice ${selectedMethod === method.id ? 'selected' : ''}`}
                   style={{ padding: '18px' }}
+                  onClick={() => handleMethodClick(method)}
                 >
                 <input
                   type="radio"
@@ -448,29 +505,48 @@ export default function Checkout({
                   value={method.id}
                   checked={selectedMethod === method.id}
                   onChange={() => setSelectedMethod(method.id)}
+                  /* El método YA seleccionado nunca se deshabilita: así la UI no
+                     puede quedar en un estado sin salida si cambia la config. */
+                  disabled={!method.enabled && method.id !== selectedMethod}
+                  aria-expanded={method.showAccounts ? expandedMethod === method.id : undefined}
+                  aria-controls={method.showAccounts ? `panel-${method.id}` : undefined}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <span className="method-head">
                     <strong style={{ fontSize: '0.95rem' }}>{method.label}</strong>
-                    <span className={`method-tag${method.operational ? ' is-ready' : ''}`}>
-                      {method.operational ? 'Disponible' : 'En habilitación'}
+                    <span className={`method-tag${method.enabled ? ' is-ready' : ''}`}>
+                      {method.enabled ? 'Disponible' : 'En habilitación'}
                     </span>
                   </span>
                   <br />
                   <span className="muted" style={{ fontSize: '0.78rem' }}>{method.description}</span>
+                  {/* El aviso vive DENTRO de la tarjeta no habilitada: explica por
+                      qué no se puede elegir. Nunca se ofrece sin decirlo. */}
+                  {!method.enabled && method.notice ? (
+                    <span className="method-notice">{method.notice}</span>
+                  ) : null}
+                  {/* Señal de que la tarjeta despliega contenido: sin esto, un
+                      panel colapsado no se descubre. */}
+                  {method.showAccounts ? (
+                    <span className="method-toggle">
+                      <span
+                        className={`method-toggle-icon${expandedMethod === method.id ? ' is-open' : ''}`}
+                        aria-hidden="true"
+                      >
+                        ▾
+                      </span>
+                      {expandedMethod === method.id ? 'Ocultar datos de pago' : 'Ver datos de pago'}
+                    </span>
+                  ) : null}
                 </div>
                 </label>
 
-                {/* Aviso y datos de cobro DENTRO del ítem elegido: la divulgación
-                    progresiva debe quedar junto a su disparador. Antes el panel se
-                    abría al final de la lista, debajo de la 4.ª opción, y no se
-                    entendía qué lo había abierto. */}
-                {selectedMethod === method.id && !method.operational ? (
-                  <p className="method-notice">{method.notice}</p>
-                ) : null}
-
-                {selectedMethod === method.id && (method.id === 'yape' || method.id === 'directo') ? (
-                  <div className="bank-info" style={{ marginTop: '10px' }}>
+                {/* Datos de cobro DENTRO del ítem elegido: la divulgación
+                    progresiva debe quedar junto a su disparador.
+                    El panel lo declara el método (`showAccounts`), no un id
+                    escrito aquí, y arranca COLAPSADO. */}
+                {expandedMethod === method.id && method.showAccounts ? (
+                  <div className="bank-info" id={`panel-${method.id}`} style={{ marginTop: '10px' }}>
                     <p style={{ fontWeight: 800, marginBottom: '6px' }}>Datos para transferir o Yapear:</p>
                     <p><span>BCP Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
                     <p><span>BCP CCI:</span> <strong>{ACCOUNT_INFO.cci}</strong></p>

@@ -87,6 +87,47 @@ export function trackLead(source, extraParams = {}) {
 }
 
 /**
+ * Evento `Purchase`: la conversión de compra, la que Meta usa para optimizar
+ * campañas. Debe emitirse UNA sola vez por pedido.
+ *
+ * El disparo único se garantiza con `sessionStorage` por `order_id`: si el
+ * comprador recarga la página de confirmación, NO se vuelve a emitir. Repetir
+ * el evento hace que Meta cuente conversiones de más y distorsione la
+ * optimización, que es peor que perder un evento aislado.
+ *
+ * `event_id` permite deduplicar si algún día se suma la Conversions API.
+ *
+ * @param {object}  args
+ * @param {string}  args.orderId   Identificador del pedido (obligatorio).
+ * @param {number}  args.value     Importe total pagado.
+ * @param {string} [args.currency] Moneda ISO (default PEN).
+ * @param {Array}  [args.contents] Ids de producto, para catálogos dinámicos.
+ * @returns {boolean} true si el evento se emitió en esta llamada.
+ */
+export function trackPurchase({ orderId, value, currency = 'PEN', contents = [] }) {
+  if (!orderId) return false
+
+  const clave = `qaway_purchase_tracked_${orderId}`
+  try {
+    if (window.sessionStorage.getItem(clave) === '1') return false
+    window.sessionStorage.setItem(clave, '1')
+  } catch {
+    // Sin sessionStorage no hay forma de garantizar el disparo único: se omite
+    // para no inflar conversiones.
+    return false
+  }
+
+  trackStandard('Purchase', {
+    value: Number(value) || 0,
+    currency,
+    content_type: 'product',
+    content_ids: contents,
+    event_id: orderId,
+  })
+  return true
+}
+
+/**
  * Revoca el consentimiento en caliente: el usuario rechazó las cookies
  * opcionales DESPUÉS de que el píxel ya se hubiera cargado.
  *

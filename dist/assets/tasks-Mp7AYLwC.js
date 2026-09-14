@@ -1,0 +1,1 @@
+import{t as e}from"./supabase-lJFYjTWB.js";async function t(t,{status:n,grade:r,feedback:i}){let{data:a,error:o}=await e.from(`submissions`).update({status:n,grade:r,feedback:i,reviewed_at:new Date().toISOString()}).eq(`id`,t).select().single();if(o)throw o;return a}export{t};

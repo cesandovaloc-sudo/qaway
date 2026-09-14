@@ -235,7 +235,7 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
           quantity: 1,
         },
       ],
-      expect.objectContaining({ paymentMethod: 'mercadopago' }),
+      expect.objectContaining({ paymentMethod: 'manual' }),
     )
     expect(createPaymentMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 249.9 }),

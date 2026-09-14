@@ -8,8 +8,9 @@ import type { Course } from '@/lib/types'
 function formatPrice(course: Course | null | undefined) {
   if (course?.is_free) return 'Gratis'
   if (course?.price == null || course.price === '') return 'Consultar'
-  if (typeof course.price === 'number') return `$${course.price}`
-  return `${course.price}`
+  if (typeof course.price === 'number') return `S/ ${course.price}`
+  const str = String(course.price).replace(/^\$/, '').trim()
+  return `S/ ${str}`
 }
 
 export default function CourseDetail() {
@@ -88,7 +89,7 @@ export default function CourseDetail() {
 
   return (
     <div>
-      <section className="bg-gradient-to-br from-surface-900 to-surface-800 py-16">
+      <section className="bg-gradient-to-br from-surface-900 to-surface-800 pt-28 pb-16">
         <div className="page-container">
           <nav className="flex items-center gap-2 text-sm text-surface-400 mb-6">
             <Link to="/academy/app/cursos" className="hover:text-white transition-colors">Inicio</Link>

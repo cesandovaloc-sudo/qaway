@@ -512,3 +512,187 @@ La captura mostró el contenido del voucher amontonado en una sola línea y el b
 ### Verificación
 
 `oxlint` sobre `supabase/functions`: **0 advertencias y 0 errores**. El módulo de pagos mantiene sus 15 avisos preexistentes. Las funciones no forman parte del build del front, así que no alteran la ruta verificada.
+
+---
+
+## 17. Pasos 1 y 2 del plan de pagos aplicados (2026-09-14)
+
+### Paso 1 · Recorte de métodos de pago
+
+**Decisión:** la línea de pago baja de 4 a **3 métodos**, cada uno con una razón distinta.
+
+| Método | `id` | Proveedor | Habilitado |
+|---|---|---|---|
+| Mercado Pago | `mercadopago` | `mercadopago` | No (falta conectar) |
+| Pago con QR (Yape, Plin y bancos) | `taypi` | `taypi` | No (falta conectar) |
+| Yape / Plin / Transferencia | `manual` | `manual` | **Sí** |
+
+**Qué se retiró y por qué:**
+- **"Tarjeta Internacional (Stripe)"**: Stripe no abre cuenta de comercio para Perú (requiere empresa en EE.UU.) y Mercado Pago ya cubre lo internacional. Era una opción que no podía completarse.
+- **"Yape / Plin Directo" + "Transferencia bancaria / Pago Directo"**: renderizaban **exactamente el mismo bloque** de datos (BCP Cuenta, CCI, Yape). Se unificaron en `manual`.
+
+**`enabled` reemplaza a `operational`.** Un método no habilitado **se muestra con su aviso pero no se puede seleccionar** (radio deshabilitado). Antes era visible *y* elegible, lo que permitía entrar a un camino que no podía completarse. El aviso ahora vive **dentro** de la tarjeta afectada.
+
+**Default = primer método habilitado** (`firstEnabledMethod()`). Hoy es `manual`. Al habilitar una pasarela pasa a ser el default **sin tocar código**: solo cambiando su `enabled`.
+
+### Paso 2 · Proveedor por petición (habilita varias pasarelas a la vez)
+
+Antes `PASARELA` era una constante global: **solo una pasarela podía estar activa**. Ahora:
+
+| Antes | Ahora |
+|---|---|
+| `PASARELA` global | `PROVEEDORES` + `proveedorDeRequest(req)` → `?provider=mercadopago\|taypi` |
+| Un solo `PASARELA_WEBHOOK_SECRET` | `ENV_WEBHOOK_SECRET` por proveedor (`MERCADOPAGO_WEBHOOK_SECRET`, `TAYPI_WEBHOOK_SECRET`) |
+| Idempotencia por `provider_id` | Idempotencia por **`(provider, provider_id)`** |
+
+Cada pasarela registra en su panel **su propia URL**: `.../pago-webhook?provider=<proveedor>`.
+
+**Migración:** `supabase/migrations/20260914000001_pagos_multipasarela.sql` (idempotente, no borra datos):
+1. `payments.provider` → agrega `taypi`.
+2. `orders.payment_method` → agrega `taypi` y `manual`.
+3. **Índice único `(provider, provider_id)`** — sin él, con dos pasarelas activas un pago podría descartarse como "duplicado" del de otra.
+4. Índice de apoyo `(order_id, status)`.
+
+### Bug que atraparon los tests (no el linter)
+
+La subida del voucher seguía condicionada a `selectedMethod === 'yape' || 'directo'`. Con la unificación, **el voucher nunca se habría subido**. Lo detectó el test del host en la primera corrida. Corregido a `selectedMethod === 'manual'`.
+
+Es el segundo bug que aparece por retirar el motor de beneficios y unificar métodos: confirma que **los tests del host Inventario son la red de seguridad real de este módulo**, por encima del linter.
+
+### Tests del host actualizados (autorizado)
+
+| Archivo | Cambio |
+|---|---|
+| `Checkout.test.tsx` | 3 radios en vez de 4; labels nuevos (QR y manual unificado); Stripe retirado; default = manual y no habilitados **deshabilitados**; `paymentMethod`/`provider` del submit → `manual`; test de Stripe reemplazado por uno que documenta su retiro |
+| `purchaseFlow.test.tsx` | `paymentMethod` → `manual` |
+| `CartPage.test.tsx` | `paymentMethod` → `manual` |
+
+> **Acoplamiento a tener presente:** esas assertions fijan el default actual (`manual`). Cuando se habilite Mercado Pago (`enabled: true`) pasará a ser el default y habrá que revisarlas. Está anotado aquí para que no sorprenda.
+
+### Verificación
+
+- `oxlint`: **0 errores** en el módulo y en `supabase/functions`.
+- Tests del host afectados: **58 pasan**, 2 fallan (los 2 preexistentes de `createOrder`/`createPayment`).
+- **4 de 4 módulos** compilan con HTTP 200; `/hub/pagos/checkout` y `/hub/pagos/carrito` → **200**.
+
+### Paso 3 (pendiente, espera credenciales)
+
+Conectar los adaptadores de **Mercado Pago** y **TAYPI** en `crearCobroEnPasarela`, registrar las URLs de webhook en cada panel y probar con credenciales de test. Requiere: Access Token de Mercado Pago, API key + secret de TAYPI, y sus webhook secrets.
+
+---
+
+## 18. Orden por fricción, blindaje del panel y conversión de Meta (2026-09-14)
+
+### Consulta: ¿cuál genera menos fricción y debería ir primero?
+
+**Sí, el QR debe ir primero.** Orden por fricción real, y por uso:
+
+| Puesto | Método | Fricción | Por qué |
+|---|---|---|---|
+| **1º** | **QR (TAYPI)** | **Mínima** | No se escribe ningún dato: se escanea. Yape supera los **14 millones de usuarios activos** en Perú —más que las tarjetas activas del país— y es el método con mayor adopción |
+| 2º | Mercado Pago | Media | Datos de tarjeta o redirección; a cambio da cuotas e internacional |
+| 3º | Manual | **Máxima** | Salir de la web, transferir, capturar el voucher, subirlo y esperar verificación humana. Es respaldo, no camino principal |
+
+Aplicado en `lib/paymentConfig.js`: el array pasó de `mercadopago, taypi, manual` a **`taypi, mercadopago, manual`**, y `orderedMethods()` coloca además **los habilitados primero**. Resultado práctico: hoy (solo `manual` habilitado) se ve primero el manual; cuando se habilite el QR, sube solo al primer puesto y pasa a ser el default.
+
+### El panel de Yape/Plin: verificación y blindaje
+
+**Verificado primero:** el `paymentConfig.js` en disco tiene `enabled: false / false / true` y el bundle `dist/assets/Checkout-*.js` está actualizado (ya no contiene "Yape / Plin Directo" ni "Tarjeta Internacional"). Los tests del host renderizan el panel por defecto, así que el código está bien.
+
+**Dos blindajes aplicados**, para que este tipo de fallo no pueda repetirse por un desajuste de datos:
+
+1. **El panel ya no depende de un id escrito en el componente.** Antes: `method.id === 'manual'`. Ahora el método lo declara (`showAccounts: true`) y el checkout solo obedece al dato. Si mañana otro método muestra cuentas, se activa sin tocar el componente.
+2. **El método ya seleccionado nunca se deshabilita:** `disabled={!method.enabled && method.id !== selectedMethod}`. Si un cambio de configuración dejara la selección en un método no habilitado, la UI **no puede quedar sin salida** (antes el radio quedaba marcado y bloqueado a la vez).
+
+> Si en pantalla seguía sin desplegarse, la causa más probable es caché del navegador sobre el dev server: un **recargado forzado** (Ctrl+F5) lo resuelve. No se encontró defecto en el código ni en el bundle.
+
+### Conversión de Meta (Pixel)
+
+**`trackPurchase` agregado a `src/lib/analytics/metaPixel.js`** (el emisor central que ya existía con su gate de consentimiento):
+- Emite `Purchase` con `value`, `currency`, `content_type`, `content_ids` y **`event_id` = id del pedido** (deduplicable con la Conversions API si algún día se suma).
+- **Disparo único** por pedido vía `sessionStorage`: recargar la confirmación **no** vuelve a contarlo. Si no hay `sessionStorage`, **no emite**: repetir el evento infla las conversiones y distorsiona la optimización, que es peor que perder un evento aislado.
+
+**Aislamiento respetado:** el módulo de pagos **no importa** herramientas de analítica del host (rompería su independencia y el host Inventario no tiene ese archivo). En su lugar, `Checkout` expone `onOrderCompleted` y **`PagosAppPage` inyecta `trackPurchase`**. Así el módulo sigue siendo agnóstico y los tests del host no cambian.
+
+**Limpieza extra:** se retiraron las props ya muertas `stripePublishableKey` y `mercadoPagoPublicKey` (avisos de lint del módulo: 15 → **13**).
+
+### Verificación
+
+- `oxlint`: **0 errores** (módulo de pagos, `metaPixel`).
+- Tests del host afectados: **28 pasan**, 2 fallan (los 2 preexistentes).
+- **5 de 5 módulos** compilan con HTTP 200; `/hub/pagos/checkout` → **200**.
+
+---
+
+## 19. Correcciones de la iteración 18 (2026-09-14)
+
+Dos correcciones sobre lo anterior, ambas señaladas por el responsable.
+
+### C1 · El panel debe arrancar COLAPSADO y abrirse al clic
+
+**Qué se entendió mal:** en la iteración 18 se interpretó "no despliega" como un fallo de render y se dejó el panel **siempre visible** al estar el método seleccionado. Lo pedido era lo contrario: **colapsado por defecto y desplegable al hacer clic**.
+
+**Implementado:**
+- Estado `expandedMethod` (null = ninguno). Arranca colapsado.
+- `handleMethodClick(method)`: si la tarjeta no estaba elegida, la elige **y la expande**; si ya estaba elegida, **alterna** (abrir/cerrar). Se engancha al `onClick` del `<label>`, porque el `onChange` del radio no se dispara al hacer clic sobre una opción ya marcada.
+- **Señal visible obligatoria:** un indicador *Ver datos de pago / Ocultar datos de pago* con chevron que rota. Un panel colapsado sin señal no se descubre.
+- Accesibilidad: `aria-expanded` y `aria-controls` en el radio apuntando al panel.
+
+**Mitigación del riesgo:** si el comprador nunca expande el panel, la pantalla de confirmación **igual le muestra** los datos de cobro, el monto y los próximos pasos. No puede pagar a ciegas.
+
+### C2 · El orden por fricción no se estaba aplicando
+
+**Causa raíz:** `orderedMethods()` ordenaba por **habilitado primero**, así que el manual (el único habilitado) quedaba **arriba** e invertía el ranking que la propia iteración 18 había recomendado. El orden visible era manual → QR → Mercado Pago.
+
+**Corregido:** se eliminó `orderedMethods()`. El orden del array **es** el orden de presentación y respeta el ranking por fricción y uso:
+
+| Puesto | Método | Fricción |
+|---|---|---|
+| 1º | **QR (TAYPI)** | Mínima — Yape supera los 14 millones de usuarios activos en Perú, más que las tarjetas activas |
+| 2º | Mercado Pago | Media — tarjeta o redirección, a cambio de cuotas e internacional |
+| 3º | **Manual** | Máxima — transferir, capturar, subir voucher y esperar verificación humana |
+
+**Consecuencia asumida y documentada:** mientras el QR y Mercado Pago sigan "en habilitación", esos dos aparecerán **arriba** del manual con su aviso. Es el precio de respetar el ranking; al habilitarlos, el orden ya es el definitivo y el QR pasa a ser el default solo.
+
+### Verificación
+
+- `oxlint`: **0 errores**; el módulo mantiene sus 13 avisos preexistentes.
+- Tests del host: **28 pasan**, 2 fallan (los 2 preexistentes). Se actualizó el test del estado por defecto: ahora comprueba que el panel arranca **colapsado**; los tests que hacen clic siguen verificando que se despliega.
+- **4 de 4 módulos** compilan con HTTP 200; `/hub/pagos/checkout` → **200**.
+- Orden confirmado en el archivo: `taypi`, `mercadopago`, `manual`.
+
+---
+
+## 20. Mercado Pago implementado en el servidor (2026-09-14)
+
+**Contexto:** TAYPI devuelve *"Registro no disponible — el registro se encuentra deshabilitado por el momento"*. No es un fallo nuestro ni algo que podamos resolver desde el código; se reintenta más adelante. Se avanza con **Mercado Pago**, que es el otro elegido.
+
+### Lo implementado
+
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Adaptador de cobro | `_shared/pagos.ts` → `crearCobroMercadoPago` | Crea la preferencia de Checkout Pro **desde el servidor** (`POST /checkout/preferences`) con ítems e importe **recalculados desde la base** (R1), `external_reference`, `metadata.order_id`, `back_urls`, `notification_url` y `X-Idempotency-Key` |
+| Selección de entorno | `mpEsTest()` | Si el token empieza con `TEST-`, devuelve `sandbox_init_point`; si no, `init_point`. Cambiar de prueba a producción es **cambiar el token**, nada más |
+| Firma del webhook | `firmaMercadoPagoValida` | MP **no firma el cuerpo**: firma el *manifest* `id:<data.id>;request-id:<x-request-id>;ts:<ts>;` con HMAC-SHA256 y se compara contra `v1` del header `x-signature`, en tiempo constante |
+| Lectura del pago | `obtenerPagoMercadoPago` | El webhook de MP **no trae el monto**; hay que consultar `GET /v1/payments/{id}`. Sin esto la validación de importe (R5) sería inaplicable |
+| Webhook | `pago-webhook/index.ts` | Orden intacto: firma → evento aprobatorio → idempotencia → monto → marcar pagado |
+| Cobro desde el navegador | `Checkout.jsx` | Si el método tiene proveedor distinto de `manual`, llama a `pago-crear` **sin enviar el importe** y redirige a la URL de pago. Si vuelve un QR, lo muestra en la confirmación |
+| QR | `Checkout.jsx` + `.qr-image` | Renderiza `qr_image` base64 (lo que devuelve TAYPI) como imagen, listo para cuando se reactive |
+
+### Detalle que rompe integraciones y quedó resuelto
+
+Al crear el cobro, el identificador es el de la **preferencia**; en el webhook llega el del **pago**. Son distintos. Se resuelve por `external_reference` y, al confirmar, se guarda el id del **pago** en `provider_id` para que un reintento se reconozca como repetido por R4.
+
+### Verificación
+
+- `oxlint`: **0 errores** (módulo + `supabase/functions`).
+- Tests del host: **38 pasan**, 2 fallan (los 2 preexistentes). El cobro por pasarela no altera el flujo manual.
+- **4 de 4 módulos** compilan con HTTP 200; `/hub/pagos/checkout` → **200**.
+
+### Falta solo esto
+
+1. **Tú:** cuenta de vendedor de Mercado Pago + aplicación → **Access Token** y **secreto de webhook**.
+2. **Agente:** cargar secrets (`MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `PUBLIC_SITE_URL`), aplicar la migración, desplegar y correr las 4 pruebas.
+3. **Agente:** `enabled: true` recién con las pruebas en verde.
+
+Guía completa paso a paso para el negocio: `HABILITAR-PASARELAS.md`.

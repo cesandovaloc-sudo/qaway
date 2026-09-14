@@ -862,7 +862,34 @@
   border-color: var(--green);
   color: var(--green);
 }
+.qawa-storefront .method-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--red-dark);
+}
+.qawa-storefront .method-toggle-icon {
+  display: inline-block;
+  transition: transform 0.18s ease;
+}
+.qawa-storefront .method-toggle-icon.is-open {
+  transform: rotate(180deg);
+}
+.qawa-storefront .qr-image {
+  display: block;
+  width: 220px;
+  max-width: 100%;
+  height: auto;
+  margin: 14px auto 4px;
+  padding: 10px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
 .qawa-storefront .method-notice {
+  display: block;
   margin: 12px 0 0;
   padding: 11px 13px;
   border-left: 3px solid var(--red);

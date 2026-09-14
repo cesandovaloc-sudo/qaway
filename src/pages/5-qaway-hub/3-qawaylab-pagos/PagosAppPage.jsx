@@ -14,6 +14,7 @@ import {
 import CheckoutSteps from './components/storefront/CheckoutSteps.jsx'
 import './styles/storefront.css'
 import { supabase as realSupabase } from '@/config/supabase'
+import { trackPurchase } from '@/lib/analytics/metaPixel'
 import { itemKey, isSingleInstance, normalizeCart } from './components/storefront/utils.js'
 
 const SAMPLE_PRODUCTS = [
@@ -375,6 +376,9 @@ export default function PagosAppPage() {
                   onSuccess={() => {
                     setCart([])
                   }}
+                  onOrderCompleted={({ order, total, currency }) =>
+                    trackPurchase({ orderId: order?.id, value: total, currency })
+                  }
                 />
               </section>
             }
