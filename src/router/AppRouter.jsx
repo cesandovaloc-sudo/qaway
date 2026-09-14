@@ -43,7 +43,7 @@ const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descarga
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
-const PagosAppPage = lazy(() => import('@/pages/5-qaway-hub/3-qawaylab-pagos/PagosAppPage'))
+// PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
 
 // Recursos y Landings secundarias
@@ -116,6 +116,10 @@ function PublicPathRoute({ routeKey, children, fallback = '/' }) {
   return <Navigate to={fallback} replace />
 }
 
+function RedirectToInventarioCarrito() {
+  const location = useLocation()
+  return <Navigate to={`/hub/inventario/carrito${location.search}`} replace />
+}
 
 function CoursesCanonicalRedirect() {
   const { slug } = useParams()
@@ -310,15 +314,15 @@ export default function AppRouter() {
           <Route index element={<InicioPage />} />
           <Route
             path="carrito"
-            element={<Navigate to="/hub/pagos/carrito" replace />}
+            element={<RedirectToInventarioCarrito />}
           />
           <Route
             path="hub/pagos/*"
-            element={renderRoute('hub', <PagosAppPage />)}
+            element={<RedirectToInventarioCarrito />}
           />
           <Route
             path="hub/pagos"
-            element={renderRoute('hub', <PagosAppPage />)}
+            element={<RedirectToInventarioCarrito />}
           />
           <Route
             path="hub"
