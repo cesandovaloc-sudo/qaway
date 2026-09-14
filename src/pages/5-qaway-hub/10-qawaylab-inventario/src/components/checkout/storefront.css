@@ -370,6 +370,19 @@
 .qawa-storefront .cart-items {
   border-top: 2px solid var(--ink);
 }
+/* Variante con la cabecera dentro de la rejilla: la columna izquierda abre con
+   el bloque migas/kicker/título/párrafo, de modo que el resumen arranque a esa
+   misma altura y su total se vea de entrada. El resumen sigue siendo `sticky`
+   (`.order-summary`), así que no depende del scroll de la columna izquierda. */
+.qawa-storefront .cart-layout--cabecera {
+  padding-top: 0;
+}
+.qawa-storefront .cart-layout--cabecera > * {
+  min-width: 0;
+}
+.qawa-storefront .cart-layout--cabecera .cart-items {
+  margin-top: 30px;
+}
 .qawa-storefront .cart-item {
   display: grid;
   grid-template-columns: 90px 1fr auto;

@@ -149,6 +149,14 @@ describe('CartPage — tienda · «Mi pedido» (storefront)', () => {
       'href',
       '/carrito/checkout',
     )
+
+    // La cabecera vive DENTRO de la rejilla: así el resumen arranca a su misma
+    // altura y el total se ve de entrada, sin bajar por la lista.
+    const rejilla = screen
+      .getByRole('heading', { name: 'Mi pedido.' })
+      .closest('.cart-layout--cabecera')
+    expect(rejilla).not.toBeNull()
+    expect(rejilla).toContainElement(screen.getByRole('heading', { name: 'Resumen' }))
   })
 
   it('los controles +/− actualizan la cantidad y persisten en localStorage', async () => {

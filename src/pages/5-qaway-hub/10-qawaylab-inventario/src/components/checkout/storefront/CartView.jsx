@@ -46,37 +46,47 @@ export default function CartView({
       ? subtotal
       : items.reduce((sum, item) => sum + itemPrice(item) * itemQty(item), 0)
 
+  const cabecera = (
+    <TiendaHeader eyebrow={eyebrow} title={title} copy={copy} steps={steps} />
+  )
+
   return (
     <section className="section">
-      {/* Kicker → título → párrafo → migas: misma cabecera que el checkout */}
-      <TiendaHeader eyebrow={eyebrow} title={title} copy={copy} steps={steps} />
-
       {items.length === 0 ? (
-        loading ? (
-          // Hay una precarga (?add=) en curso: mostrar carga en vez del estado
-          // vacío, que aparecía un instante al entrar desde la landing.
-          <div className="empty-state" style={{ marginTop: '24px' }}>
-            <h3>Agregando tu producto…</h3>
-            <p className="muted">Estamos preparando el detalle de tu selección.</p>
-          </div>
-        ) : (
-          <div className="empty-state" style={{ marginTop: '24px' }}>
-            <h3>Tu pedido está vacío</h3>
-            <p className="muted">Agrega productos desde el catálogo para continuar.</p>
-            <br />
-            <Link className="button button-primary" to={emptyHref}>
-              Ver catálogo
-            </Link>
-          </div>
-        )
+        <>
+          {cabecera}
+          {loading ? (
+            // Hay una precarga (?add=) en curso: mostrar carga en vez del estado
+            // vacío, que aparecía un instante al entrar desde la landing.
+            <div className="empty-state" style={{ marginTop: '24px' }}>
+              <h3>Agregando tu producto…</h3>
+              <p className="muted">Estamos preparando el detalle de tu selección.</p>
+            </div>
+          ) : (
+            <div className="empty-state" style={{ marginTop: '24px' }}>
+              <h3>Tu pedido está vacío</h3>
+              <p className="muted">Agrega productos desde el catálogo para continuar.</p>
+              <br />
+              <Link className="button button-primary" to={emptyHref}>
+                Ver catálogo
+              </Link>
+            </div>
+          )}
+        </>
       ) : (
-        <div className="cart-layout">
-          <CartItems
-            items={items}
-            onUpdateQuantity={onUpdateQuantity}
-            onRemove={onRemove}
-            fallbackImage={fallbackImage}
-          />
+        // La cabecera abre la columna izquierda: así el resumen —y su total—
+        // arranca a esa misma altura y se ve de entrada, sin bajar. El resumen
+        // es `sticky`, de modo que se mantiene fijo mientras se recorre la lista.
+        <div className="cart-layout cart-layout--cabecera">
+          <div>
+            {cabecera}
+            <CartItems
+              items={items}
+              onUpdateQuantity={onUpdateQuantity}
+              onRemove={onRemove}
+              fallbackImage={fallbackImage}
+            />
+          </div>
           <OrderSummary
             items={items}
             count={totalCount}
