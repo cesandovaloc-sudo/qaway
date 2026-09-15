@@ -28,6 +28,66 @@ import { formatBytes } from './storefront/utils.js'
 // beneficio oculto no altere precios en silencio.
 const SHOW_BENEFITS = false
 
+/**
+ * Construye el `src` del QR a partir de lo que devuelve la pasarela.
+ *
+ * TAYPI no garantiza un formato único en `qr_image`, así que se aceptan los tres
+ * casos reales:
+ *   · data URI ya completo → se usa tal cual (antes se le anteponía OTRO
+ *     prefijo, y el navegador mostraba la imagen rota)
+ *   · base64 de SVG        → `data:image/svg+xml;base64,…`
+ *   · base64 de PNG        → `data:image/png;base64,…`
+ *
+ * El MIME se deduce del CONTENIDO decodificado, nunca de una lista de prefijos:
+ * un SVG puede empezar por "<svg" (base64 "PHN2…") o por la declaración
+ * "<?xml" (base64 "PD94…"), y asumir uno solo deja la imagen rota. Ese caso se
+ * detectó probando la función con los tres formatos reales.
+ */
+function qrSrc(valor) {
+  if (typeof valor !== 'string') return null
+
+  const v = valor.trim()
+  if (!v) return null
+  if (v.startsWith('data:')) return v
+
+  let mime = 'image/png'
+  try {
+    // 16 caracteres de base64 = 12 bytes exactos: basta para ver la firma.
+    const muestra = atob(v.slice(0, 16))
+    if (muestra.includes('<')) mime = 'image/svg+xml'
+    else if (muestra.charCodeAt(0) === 0x89) mime = 'image/png'
+  } catch {
+    // base64 inválido: se deja PNG y el navegador decide.
+  }
+
+  return `data:${mime};base64,${v}`
+}
+
+/**
+ * Normaliza la respuesta de la pasarela a la forma que usa la confirmación.
+ *
+ * TAYPI responde en snake_case (`payment_id`, `qr_image`, `checkout_token`);
+ * Mercado Pago devuelve `redirectUrl`. Sin esta normalización, `qrImage` y
+ * `redirectUrl` se leerían como `undefined`.
+ *
+ * `qrImage` sale ya listo para usar como `src` (ver `qrSrc`), de modo que el
+ * componente no tenga que adivinar el formato.
+ *
+ * `checkout_url` NO se usa como redirección en esta fase: se guarda en
+ * `checkoutUrl` para la Fase 2 (integración de Checkout.js).
+ */
+function normalizarCobro(data) {
+  if (!data) return null
+
+  return {
+    providerId: data.providerId ?? data.payment_id ?? null,
+    qrImage: qrSrc(data.qrImage ?? data.qr_image),
+    redirectUrl: data.redirectUrl ?? null,
+    checkoutToken: data.checkoutToken ?? data.checkout_token ?? null,
+    checkoutUrl: data.checkout_url ?? null,
+  }
+}
+
 export default function Checkout({
   paymentsService,
   ordersService,
@@ -39,6 +99,11 @@ export default function Checkout({
   bucketName = 'resources',
   onSuccess = () => {},
   onError = () => {},
+  // Se invoca cuando el comprador sale de la confirmación por un CTA final.
+  // NO significa "pago confirmado": el host decide si corresponde limpiar el
+  // carrito (hoy solo en el flujo MANUAL). Para pasarelas el punto queda
+  // preparado y sin conectar hasta tener la confirmación real del webhook.
+  onFinish = () => {},
   // El módulo no conoce herramientas de analítica: el host inyecta aquí su
   // emisor de conversión (ej. Meta Pixel). Por defecto no hace nada.
   onOrderCompleted = () => {},
@@ -203,50 +268,63 @@ export default function Checkout({
         }
       }
 
-      // 2. Crear Registro de Pago usando servicio de Qaway Pagos
+      // 2. Registro del pago.
+      // Modelo A: para pasarelas (taypi, mercadopago) el pago lo escribe la Edge
+      // Function — único escritor, con el importe recalculado en el servidor.
+      // El servicio del cliente registra únicamente el pago MANUAL.
       let payment = null
-      // El proveedor lo declara cada método en lib/paymentConfig.js.
+      // El proveedor lo declara cada método en paymentConfig.
       const provider = selectedMethodInfo?.provider ?? 'manual'
 
-      if (paymentsService && paymentsService.createPayment) {
-        try {
-          payment = await paymentsService.createPayment({
-            userId: uid,
-            orderId: order?.id,
-            amount: total,
-            currency,
-            provider,
-            proofUrl,
-            notes: SHOW_BENEFITS
-              ? `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`
-              : `Distrito: ${formData.district}.`,
-          })
-        } catch (err) {
-          console.warn('[Checkout] Error en createPayment, usando fallback:', err)
+      if (provider === 'manual') {
+        if (paymentsService && paymentsService.createPayment) {
+          try {
+            payment = await paymentsService.createPayment({
+              userId: uid,
+              orderId: order?.id,
+              amount: total,
+              currency,
+              provider,
+              proofUrl,
+              notes: SHOW_BENEFITS
+                ? `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`
+                : `Distrito: ${formData.district}.`,
+            })
+          } catch (err) {
+            console.warn('[Checkout] Error en createPayment, usando fallback:', err)
+            payment = { id: `pay_${Date.now()}`, status: 'pending' }
+          }
+        } else {
           payment = { id: `pay_${Date.now()}`, status: 'pending' }
         }
-      } else {
-        payment = { id: `pay_${Date.now()}`, status: 'pending' }
       }
 
       // Cobro por pasarela: el navegador NO manda el importe. El servidor lee el
-      // pedido, lo recalcula (regla R1) y devuelve la URL de pago o el QR.
+      // pedido, lo recalcula (regla R1) y devuelve el QR o la URL de pago.
       let cobro = null
-      if (
-        selectedMethodInfo?.provider &&
-        selectedMethodInfo.provider !== 'manual' &&
-        supabase?.functions
-      ) {
-        const { data, error: errCobro } = await supabase.functions.invoke('pago-crear', {
-          body: { orderId: order?.id, provider: selectedMethodInfo.provider },
+      if (provider !== 'manual' && supabase?.functions) {
+        // Fase 1 (Sandbox): TAYPI usa su propia función de pruebas.
+        // Mercado Pago conserva su función y su contrato, sin cambios.
+        const funcionPago = provider === 'taypi' ? 'taypi-pago-test' : 'pago-crear'
+        const cuerpoPago =
+          provider === 'taypi'
+            ? { orderId: order?.id } // TAYPI: SOLO orderId, nunca el monto
+            : { orderId: order?.id, provider }
+
+        const { data, error: errCobro } = await supabase.functions.invoke(funcionPago, {
+          body: cuerpoPago,
         })
         if (errCobro) throw new Error('No pudimos iniciar el pago. Intenta de nuevo en un momento.')
-        cobro = data ?? null
+        cobro = normalizarCobro(data)
       }
 
-      onSuccess({ order, payment })
+      const finalOrder = {
+        ...order,
+        payment_method: order?.payment_method || selectedMethod,
+      }
+      onSuccess({ order: finalOrder, payment })
       // Se avisa al host para que registre la conversión (disparo único allá).
-      onOrderCompleted({ order, payment, total, currency, items: orderItems })
+      onOrderCompleted({ order: finalOrder, payment, total, currency, items: orderItems })
 
       // Si la pasarela devuelve URL de pago, se sale del sitio hacia su checkout.
       if (cobro?.redirectUrl) {
@@ -263,6 +341,7 @@ export default function Checkout({
         discount,
         total,
         benefitLabel: selectedBenefit?.label ?? null,
+        checkoutToken: cobro?.checkoutToken ?? null,
         methodId: selectedMethod,
         qrImage: cobro?.qrImage ?? null,
         orderCode: String(order?.id || payment?.id || '').slice(0, 8),
@@ -331,7 +410,7 @@ export default function Checkout({
                 <img
                   className="qr-image"
                   alt="Código QR para completar el pago"
-                  src={`data:image/svg+xml;base64,${orderCompleted.qrImage}`}
+                  src={orderCompleted.qrImage}
                 />
               ) : null}
               {orderCompleted.benefitLabel ? (
@@ -368,6 +447,7 @@ export default function Checkout({
               })}
               target="_blank"
               rel="noreferrer"
+              onClick={onFinish}
             >
               {isManualPayment ? 'Enviar mi voucher por WhatsApp' : MANUAL_CONTACT.label}
             </a>
@@ -377,10 +457,10 @@ export default function Checkout({
           </div>
 
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a className="button button-red" href="/landings/desarrollo-web-qaway#precios">
+            <a className="button button-red" href="/landings/desarrollo-web-qaway#precios" onClick={onFinish}>
               Volver a la tienda
             </a>
-            <a className="button button-secondary" href="/carrito/compras">
+            <a className="button button-secondary" href="/carrito/compras" onClick={onFinish}>
               Ver mis pedidos
             </a>
           </div>

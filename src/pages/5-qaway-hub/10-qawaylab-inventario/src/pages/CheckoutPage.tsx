@@ -24,6 +24,11 @@ export default function CheckoutPage() {
   // invitados: userId null → el schema registra un pedido anónimo
   const { session } = useAuth()
   const [orderDone, setOrderDone] = useState(false)
+  // Solo el flujo MANUAL limpia el carrito, y recién en el CTA final: ese método
+  // no tiene confirmación automática. Para pasarelas el punto de limpieza queda
+  // PREPARADO (`onFinish`) y sin conectar hasta tener la confirmación real del
+  // webhook / flujo de pago.
+  const [pagoManual, setPagoManual] = useState(false)
 
   useEffect(() => {
     setPageMeta({ title: 'Finalizar pedido | Qaway Lab', robots: 'noindex' })
@@ -55,10 +60,16 @@ export default function CheckoutPage() {
           items={items}
           currency="PEN"
           bucketName="resources"
-          onSuccess={() => {
+          onSuccess={({ order }: { order?: { payment_method?: string } }) => {
+            // Crear la orden NO vacía el carrito: el pedido queda PENDIENTE hasta
+            // que el pago se confirme. Antes se borraba aquí y el comprador
+            // perdía su carrito al volver atrás.
             setOrderDone(true)
-            clear()
+            setPagoManual(order?.payment_method === 'manual')
           }}
+          // Único punto de limpieza: el CTA final, y solo cuando el método es el
+          // manual. Para pasarelas queda sin conectar (ver comentario arriba).
+          onFinish={pagoManual ? clear : undefined}
           onError={(err: unknown) => console.error('Checkout error:', err)}
         />
 

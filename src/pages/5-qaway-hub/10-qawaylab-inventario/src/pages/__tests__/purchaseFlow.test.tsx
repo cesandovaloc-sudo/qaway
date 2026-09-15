@@ -245,10 +245,12 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 249.9 }),
     )
 
-    // 6. Éxito y carrito vacío persistido
+    // 6. Éxito y CARRITO CONSERVADO: crear la orden NO debe vaciarlo. El pedido
+    // queda pendiente hasta que el pago se confirme; antes se borraba aquí y el
+    // comprador perdía su carrito al volver atrás.
     expect(await screen.findByText('Pedido registrado con éxito')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).not.toEqual([])
   })
 
   it('con el carrito desactivado no aparecen los botones de agregar ni el mini carrito', async () => {

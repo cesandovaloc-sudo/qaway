@@ -161,8 +161,9 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
 
     // Mercado Pago queda SELECCIONABLE (para poder probarla de verdad)…
     expect(radios.find((r) => r.value === 'mercadopago')).toBeEnabled()
-    // …pero el QR no: su proveedor no está implementado en el servidor.
-    expect(radios.find((r) => r.value === 'taypi')).toBeDisabled()
+    // …y el QR también, ahora que `taypi-pago-test` implementa su proveedor en
+    // el servidor (Fase 1). Sigue sin ser el método por defecto.
+    expect(radios.find((r) => r.value === 'taypi')).toBeEnabled()
   })
 
   it('al TOCAR LA TARJETA (no solo el circulito) se despliegan los datos de cobro', async () => {
@@ -212,7 +213,7 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()
   })
 
-  it('flujo completo: confirmar → éxito, carrito limpio y localStorage vacío', async () => {
+  it('flujo completo: confirmar CONSERVA el carrito y el CTA final lo limpia (manual)', async () => {
     const user = userEvent.setup()
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
@@ -242,7 +243,21 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     )
 
     expect(screen.getByText('Pedido registrado con éxito')).toBeInTheDocument()
-    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
+
+    // Crear la orden NO vacía el carrito: el pedido queda PENDIENTE hasta que el
+    // pago se confirme. Antes se borraba aquí y el comprador perdía su carrito
+    // al volver atrás.
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).not.toEqual([])
+
+    // El CTA final sí limpia, y solo cuando el método es el MANUAL (el único sin
+    // confirmación automática). Para pasarelas el punto queda sin conectar.
+    await user.click(screen.getByRole('link', { name: 'Volver a la tienda' }))
+
+    if (defaultMethod === 'manual') {
+      expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
+    } else {
+      expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).not.toEqual([])
+    }
   })
 
   it('asocia el pedido al userId de la sesión autenticada', async () => {
