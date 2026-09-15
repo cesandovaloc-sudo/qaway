@@ -24,10 +24,10 @@
 export const ACCOUNT_INFO = {
   bank: 'Banco de Crédito del Perú (BCP)',
   accountType: 'Cuenta de Ahorros',
-  accountNumber: '191-78901234-0-55',
-  cci: '002-191-0078901234055-52',
-  holder: 'Qaway Lab E.I.R.L.',
-  yape: '999 888 777',
+  accountNumber: '19475832923010',
+  cci: '00219417583292301098',
+  holder: 'Carlos Sandoval',
+  yape: '930 323 632',
 }
 
 /** Canal de coordinación usado en los próximos pasos del pedido. */

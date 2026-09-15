@@ -42,6 +42,7 @@ export default function Checkout({
   // El módulo no conoce herramientas de analítica: el host inyecta aquí su
   // emisor de conversión (ej. Meta Pixel). Por defecto no hace nada.
   onOrderCompleted = () => {},
+  header = null,
 }) {
   // Invitado sin sesión: user_id queda NULL (el schema permite pedidos anónimos con RLS)
   const uid = userId || user?.id || null
@@ -391,9 +392,10 @@ export default function Checkout({
   const selectedMethodInfo = findPaymentMethod(selectedMethod)
 
   return (
-    <form className="checkout-layout" onSubmit={handleSubmit}>
+    <form className={`checkout-layout ${header ? 'checkout-layout--cabecera' : ''}`} onSubmit={handleSubmit}>
       {/* Columna Izquierda: Formulario Maquetado de Mesa Selecta */}
       <div className="checkout-form">
+        {header}
         {/* Sección 1: Datos de Contacto */}
         <section className="form-section">
           <h2>Datos de contacto y entrega</h2>
@@ -497,7 +499,15 @@ export default function Checkout({
                 <label
                   className={`choice ${selectedMethod === method.id ? 'selected' : ''}`}
                   style={{ padding: '18px' }}
-                  onClick={() => handleMethodClick(method)}
+                  onClick={(e) => {
+                    // El clic en la etiqueta lo reenvía el navegador al radio, y ese
+                    // clic reenviado vuelve a subir hasta aquí: el manejador corría
+                    // DOS veces y el panel se abría y se cerraba en el mismo toque
+                    // (se veía como "no despliega"). preventDefault cancela el
+                    // reenvío, así que el toque cuenta una sola vez.
+                    e.preventDefault()
+                    handleMethodClick(method)
+                  }}
                 >
                 <input
                   type="radio"

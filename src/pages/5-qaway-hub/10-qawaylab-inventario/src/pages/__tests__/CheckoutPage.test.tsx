@@ -165,6 +165,22 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(radios.find((r) => r.value === 'taypi')).toBeDisabled()
   })
 
+  it('al TOCAR LA TARJETA (no solo el circulito) se despliegan los datos de cobro', async () => {
+    const user = userEvent.setup()
+    storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
+    renderPage()
+
+    // El usuario real toca el TEXTO de la tarjeta. Ese clic lo reenvía el
+    // navegador al radio, y ese clic reenviado vuelve a subir al <label>: sin
+    // prevenirlo, el manejador corría DOS veces y el panel se abría y cerraba
+    // en el mismo toque — se veía exactamente como "no despliega".
+    await user.click(screen.getByText('Ver datos de pago'))
+
+    expect(screen.getByText(/BCP Cuenta/)).toBeInTheDocument()
+    expect(screen.getByText('BCP CCI:')).toBeInTheDocument()
+    expect(screen.getByText('Yape / Plin:')).toBeInTheDocument()
+  })
+
   it('la cabecera va en orden: migas → kicker → título → párrafo', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
