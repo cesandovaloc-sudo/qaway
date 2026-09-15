@@ -39,15 +39,15 @@ export default function CheckoutPage() {
   return (
     <TiendaShell>
       <section className="section">
-        {/* Misma cabecera que el carrito: kicker → título → párrafo → migas */}
-        <TiendaHeader
-          eyebrow="Finalizar Pedido"
-          title="Completar Datos y Pago"
-          copy="Ingresa tus datos de contacto y selecciona tu método de pago preferido."
-          steps={<CheckoutSteps active={2} />}
-        />
-
         <Checkout
+          header={
+            <TiendaHeader
+              eyebrow="Finalizar Pedido"
+              title="Completar Datos y Pago"
+              copy="Ingresa tus datos de contacto y selecciona tu método de pago preferido."
+              steps={<CheckoutSteps active={2} />}
+            />
+          }
           paymentsService={qawaServices.payments}
           ordersService={qawaServices.orders}
           supabase={supabase}
