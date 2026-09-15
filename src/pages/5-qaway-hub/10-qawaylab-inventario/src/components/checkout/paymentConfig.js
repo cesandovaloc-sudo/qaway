@@ -73,7 +73,14 @@ export const PAYMENT_METHODS = [
     label: 'Mercado Pago (Tarjetas, Yape, Cuotas)',
     description:
       'Tarjetas nacionales e internacionales, Yape y cuotas sin interés. El cobro se confirma automáticamente.',
-    enabled: true,
+    // GATEADO a propósito: la integración de servidor existe (`pago-crear` /
+    // `pago-webhook` con firma de Mercado Pago), pero mientras no estén
+    // desplegadas con sus secretos, ofrecerla como método por defecto dejaba al
+    // comprador en "No pudimos iniciar el pago". Con `enabled: false` el
+    // checkout arranca en el método que SÍ puede completarse (manual) y este
+    // aparece arriba con su aviso, sin ser seleccionable — que es exactamente
+    // la consecuencia asumida que describe el comentario de arriba.
+    enabled: false,
     notice:
       'En habilitación: falta conectar la pasarela. Mientras tanto puedes pagar por Yape, Plin o transferencia.',
   },

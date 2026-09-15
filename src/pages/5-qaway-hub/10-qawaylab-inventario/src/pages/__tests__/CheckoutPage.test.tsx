@@ -144,6 +144,24 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
   })
 
+  it('arranca en el método que SÍ puede completarse, no en una pasarela sin conectar', () => {
+    storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
+    renderPage()
+
+    // El método por defecto es manual: es el único que cierra la compra hoy.
+    expect(firstEnabledMethod()?.id).toBe('manual')
+
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[]
+    const marcados = radios.filter((r) => r.checked)
+
+    expect(marcados).toHaveLength(1)
+    expect(marcados[0]).toHaveAttribute('value', 'manual')
+    expect(marcados[0]).toBeChecked()
+    // La pasarela sin conectar se muestra con su aviso, pero NO es seleccionable:
+    // si lo fuera, el comprador terminaría en "No pudimos iniciar el pago".
+    expect(radios.find((r) => r.value === 'mercadopago')).toBeDisabled()
+  })
+
   it('la cabecera va en orden: migas → kicker → título → párrafo', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
