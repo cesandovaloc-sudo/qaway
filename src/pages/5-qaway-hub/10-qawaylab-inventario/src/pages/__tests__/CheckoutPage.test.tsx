@@ -144,11 +144,12 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
   })
 
-  it('arranca en el método que SÍ puede completarse, no en una pasarela sin conectar', () => {
+  it('arranca en el método que SÍ puede completarse, aunque la pasarela esté seleccionable', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
 
-    // El método por defecto es manual: es el único que cierra la compra hoy.
+    // El método por defecto es manual: es el único que cierra la compra sin
+    // depender de una pasarela externa. Marcado explícitamente con `isDefault`.
     expect(firstEnabledMethod()?.id).toBe('manual')
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[]
@@ -157,9 +158,11 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(marcados).toHaveLength(1)
     expect(marcados[0]).toHaveAttribute('value', 'manual')
     expect(marcados[0]).toBeChecked()
-    // La pasarela sin conectar se muestra con su aviso, pero NO es seleccionable:
-    // si lo fuera, el comprador terminaría en "No pudimos iniciar el pago".
-    expect(radios.find((r) => r.value === 'mercadopago')).toBeDisabled()
+
+    // Mercado Pago queda SELECCIONABLE (para poder probarla de verdad)…
+    expect(radios.find((r) => r.value === 'mercadopago')).toBeEnabled()
+    // …pero el QR no: su proveedor no está implementado en el servidor.
+    expect(radios.find((r) => r.value === 'taypi')).toBeDisabled()
   })
 
   it('la cabecera va en orden: migas → kicker → título → párrafo', () => {

@@ -122,9 +122,16 @@ function PublicPathRoute({ routeKey, children, fallback = '/' }) {
   return <Navigate to={fallback} replace />
 }
 
-function RedirectToTiendaCarrito() {
+/**
+ * Redirección canónica que CONSERVA el query string.
+ *
+ * Es imprescindible en dos casos: la vuelta de la pasarela
+ * (`?payment_id=…&status=…`) y los enlaces de la landing (`?add=<plan>`).
+ * Con un `<Navigate>` pelado esos parámetros se perdían.
+ */
+function RedirectTo({ to }) {
   const location = useLocation()
-  return <Navigate to={`/carrito${location.search}`} replace />
+  return <Navigate to={`${to}${location.search}`} replace />
 }
 
 /** Envuelve una página de la tienda con el AuthProvider que `useAuth` exige. */
@@ -330,13 +337,14 @@ export default function AppRouter() {
           <Route path="carrito" element={<Tienda><TiendaCarritoPage /></Tienda>} />
           <Route path="carrito/checkout" element={<Tienda><TiendaCheckoutPage /></Tienda>} />
           <Route path="carrito/compras" element={<Tienda><TiendaComprasPage /></Tienda>} />
-          {/* Alias heredados: no rompen enlaces ya emitidos */}
-          <Route path="checkout" element={<Navigate to="/carrito/checkout" replace />} />
-          <Route path="purchases" element={<Navigate to="/carrito/compras" replace />} />
-          <Route path="hub/pagos/checkout" element={<Navigate to="/carrito/checkout" replace />} />
-          <Route path="hub/pagos/purchases" element={<Navigate to="/carrito/compras" replace />} />
-          <Route path="hub/pagos/*" element={<RedirectToTiendaCarrito />} />
-          <Route path="hub/pagos" element={<RedirectToTiendaCarrito />} />
+          {/* Alias heredados: no rompen enlaces ya emitidos (incluida la vuelta
+              de la pasarela, que trae sus parámetros en el query). */}
+          <Route path="checkout" element={<RedirectTo to="/carrito/checkout" />} />
+          <Route path="purchases" element={<RedirectTo to="/carrito/compras" />} />
+          <Route path="hub/pagos/checkout" element={<RedirectTo to="/carrito/checkout" />} />
+          <Route path="hub/pagos/purchases" element={<RedirectTo to="/carrito/compras" />} />
+          <Route path="hub/pagos/*" element={<RedirectTo to="/carrito" />} />
+          <Route path="hub/pagos" element={<RedirectTo to="/carrito" />} />
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}

@@ -268,9 +268,9 @@ async function crearCobroMercadoPago(args: {
     external_reference: args.orderId,
     metadata: { order_id: args.orderId },
     back_urls: {
-      success: `${base}/hub/pagos/purchases`,
-      failure: `${base}/hub/pagos/checkout`,
-      pending: `${base}/hub/pagos/purchases`,
+      success: `${base}/carrito/compras`,
+      failure: `${base}/carrito/checkout`,
+      pending: `${base}/carrito/compras`,
     },
     auto_return: 'approved',
     notification_url: webhookBase

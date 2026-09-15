@@ -73,14 +73,11 @@ export const PAYMENT_METHODS = [
     label: 'Mercado Pago (Tarjetas, Yape, Cuotas)',
     description:
       'Tarjetas nacionales e internacionales, Yape y cuotas sin interés. El cobro se confirma automáticamente.',
-    // GATEADO a propósito: la integración de servidor existe (`pago-crear` /
-    // `pago-webhook` con firma de Mercado Pago), pero mientras no estén
-    // desplegadas con sus secretos, ofrecerla como método por defecto dejaba al
-    // comprador en "No pudimos iniciar el pago". Con `enabled: false` el
-    // checkout arranca en el método que SÍ puede completarse (manual) y este
-    // aparece arriba con su aviso, sin ser seleccionable — que es exactamente
-    // la consecuencia asumida que describe el comentario de arriba.
-    enabled: false,
+    // Seleccionable para poder PROBAR la pasarela de verdad. Mientras el
+    // deploy + los secretos no estén puestos, el comprador que la elija verá el
+    // error, pero NO es el método por defecto: ese es siempre el manual (ver
+    // `isDefault`), así que la ruta de compra nunca termina en un callejón.
+    enabled: true,
     notice:
       'En habilitación: falta conectar la pasarela. Mientras tanto puedes pagar por Yape, Plin o transferencia.',
   },
@@ -91,18 +88,29 @@ export const PAYMENT_METHODS = [
     description:
       'Pagas desde tu app o por transferencia y nos envías el voucher. Verificamos y arrancamos.',
     enabled: true,
+    // Este es SIEMPRE el método preseleccionado: es el único que cierra la
+    // compra sin depender de una pasarela externa.
+    isDefault: true,
     // Datos de cobro declarados por el método: el checkout NO decide por id.
     showAccounts: true,
   },
 ]
 
 /**
- * Método que se selecciona al abrir el checkout: el primero habilitado.
- * Cuando se habilite una pasarela, pasa a ser el default sin tocar código —
- * solo cambiando `enabled` en su definición.
+ * Método que se selecciona al abrir el checkout.
+ *
+ * Se marca explícitamente con `isDefault` en vez de "el primero habilitado":
+ * así una pasarela puede estar SELECCIONABLE (para probarla) sin convertirse
+ * en el método por defecto y dejar al comprador en un callejón sin salida.
+ * Si no hay ninguno marcado, cae al primero habilitado.
  */
 export function firstEnabledMethod() {
-  return PAYMENT_METHODS.find((method) => method.enabled) ?? PAYMENT_METHODS[0] ?? null
+  return (
+    PAYMENT_METHODS.find((method) => method.isDefault && method.enabled) ??
+    PAYMENT_METHODS.find((method) => method.enabled) ??
+    PAYMENT_METHODS[0] ??
+    null
+  )
 }
 
 export function findPaymentMethod(id) {
