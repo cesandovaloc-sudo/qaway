@@ -424,10 +424,10 @@
 /* ── Checkout ──────────────────────────────────────────────── */
 .qawa-storefront .checkout-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 40px;
+  grid-template-columns: 1fr 360px;
+  gap: 34px;
   align-items: start;
-  padding: 40px 0;
+  padding: 30px 0;
 }
 .qawa-storefront .checkout-form {
   display: grid;
