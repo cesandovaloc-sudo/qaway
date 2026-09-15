@@ -166,6 +166,10 @@ export default function Checkout({
   // Panel de datos de cobro: arranca COLAPSADO y se abre al hacer clic en la
   // tarjeta. Guarda el id del método expandido (null = ninguno).
   const [expandedMethod, setExpandedMethod] = useState(null)
+  // Estado para el cobro inline de TAYPI (desplegable en la misma página)
+  const [taypiCobro, setTaypiCobro] = useState(null)
+  // Interruptor para desplegable en la misma página (true: inline desplegable; false: página final original)
+  const INLINE_QR_MODE = true
 
   /**
    * Clic en una tarjeta de método: si no estaba elegida, la elige y la expande;
@@ -325,6 +329,14 @@ export default function Checkout({
       onSuccess({ order: finalOrder, payment })
       // Se avisa al host para que registre la conversión (disparo único allá).
       onOrderCompleted({ order: finalOrder, payment, total, currency, items: orderItems })
+
+      // Modo Desplegable Inline para TAYPI: en lugar de salir de la página o
+      // reemplazar el checkout, el QR se despliega en la misma opción elegida.
+      if (provider === 'taypi' && INLINE_QR_MODE && (cobro?.qrImage || cobro?.checkoutUrl)) {
+        setTaypiCobro(cobro)
+        setExpandedMethod('taypi')
+        return
+      }
 
       // Si la pasarela devuelve URL de pago, se sale del sitio hacia su checkout.
       if (cobro?.redirectUrl) {
@@ -598,8 +610,8 @@ export default function Checkout({
                   /* El método YA seleccionado nunca se deshabilita: así la UI no
                      puede quedar en un estado sin salida si cambia la config. */
                   disabled={!method.enabled && method.id !== selectedMethod}
-                  aria-expanded={method.showAccounts ? expandedMethod === method.id : undefined}
-                  aria-controls={method.showAccounts ? `panel-${method.id}` : undefined}
+                  aria-expanded={method.showAccounts || method.showQr ? expandedMethod === method.id : undefined}
+                  aria-controls={method.showAccounts || method.showQr ? `panel-${method.id}` : undefined}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <span className="method-head">
@@ -617,7 +629,7 @@ export default function Checkout({
                   ) : null}
                   {/* Señal de que la tarjeta despliega contenido: sin esto, un
                       panel colapsado no se descubre. */}
-                  {method.showAccounts ? (
+                  {method.showAccounts || method.showQr ? (
                     <span className="method-toggle">
                       <span
                         className={`method-toggle-icon${expandedMethod === method.id ? ' is-open' : ''}`}
@@ -625,7 +637,9 @@ export default function Checkout({
                       >
                         ▾
                       </span>
-                      {expandedMethod === method.id ? 'Ocultar datos de pago' : 'Ver datos de pago'}
+                      {expandedMethod === method.id
+                        ? (method.showQr ? 'Ocultar código QR' : 'Ocultar datos de pago')
+                        : (method.showQr ? (taypiCobro ? 'Ver código QR' : 'Ver información de pago') : 'Ver datos de pago')}
                     </span>
                   ) : null}
                 </div>
@@ -693,6 +707,84 @@ export default function Checkout({
                     Quitar archivo
                   </button>
                 ) : null}
+                  </div>
+                ) : null}
+
+                {/* Panel desplegable de TAYPI: se expande al seleccionar el método */}
+                {expandedMethod === method.id && method.id === 'taypi' && method.showQr ? (
+                  <div
+                    className="bank-info taypi-panel"
+                    id={`panel-${method.id}`}
+                    style={{
+                      marginTop: '10px',
+                      background: '#fafafa',
+                      border: '1px solid #e2e8f0',
+                      padding: '16px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <p style={{ fontWeight: 800, margin: 0, color: '#1e293b', fontSize: '0.88rem' }}>
+                        Billeteras y bancos compatibles:
+                      </p>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <span style={{ background: '#742284', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Yape</span>
+                        <span style={{ background: '#0284c7', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Plin</span>
+                        <span style={{ background: '#0f172a', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>Bancos</span>
+                      </div>
+                    </div>
+
+                    {!taypiCobro ? (
+                      <div style={{ padding: '6px 0', textAlign: 'left' }}>
+                        <p style={{ color: '#475569', fontSize: '0.82rem', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                          Al confirmar tu pedido, aquí mismo se desplegará tu código QR oficial en tiempo real para que lo escanees y pagues al instante sin comisiones.
+                        </p>
+                        <button
+                          type="button"
+                          className="button button-red"
+                          style={{ minHeight: '38px', fontSize: '0.8rem', padding: '0 16px', width: '100%' }}
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                        >
+                          {submitting ? 'Generando QR oficial...' : `Generar QR para pagar S/ ${total.toFixed(2)}`}
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '8px 0' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '12px' }}>
+                          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                          QR Activo · Esperando tu pago
+                        </div>
+
+                        {taypiCobro.qrImage ? (
+                          <div style={{ margin: '8px auto', display: 'inline-block', padding: '10px', background: '#fff', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+                            <img
+                              src={taypiCobro.qrImage}
+                              alt="Código QR TAYPI"
+                              style={{ width: '210px', height: '210px', display: 'block', margin: '0 auto' }}
+                            />
+                          </div>
+                        ) : null}
+
+                        <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '6px 0' }}>
+                          Total a pagar: S/ {total.toFixed(2)}
+                        </p>
+                        <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 12px 0' }}>
+                          Abre Yape, Plin o tu banca móvil, escanea el código y listo.
+                        </p>
+
+                        {taypiCobro.checkoutUrl ? (
+                          <a
+                            href={taypiCobro.checkoutUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="button button-secondary"
+                            style={{ minHeight: '38px', fontSize: '0.78rem', padding: '0 14px', width: '100%', marginBottom: '8px' }}
+                          >
+                            ¿Pagas desde este mismo celular? Toca aquí
+                          </a>
+                        ) : null}
+                      </div>
+                    )}
                   </div>
                 ) : null}
               </Fragment>

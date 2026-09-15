@@ -65,6 +65,7 @@ export const PAYMENT_METHODS = [
       'Escaneas un código QR con la app de tu banco, Yape o Plin. La confirmación es automática.',
     // Producción: TAYPI habilitado y conectado vía taypi-pago-prod y taypi-webhook-prod.
     enabled: true,
+    showQr: true,
   },
   {
     id: 'mercadopago',
