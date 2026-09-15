@@ -63,12 +63,8 @@ export const PAYMENT_METHODS = [
     label: 'Pago con QR (Yape, Plin y tu banco)',
     description:
       'Escaneas un código QR con la app de tu banco, Yape o Plin. La confirmación es automática.',
-    // Fase 1 (Sandbox): seleccionable para poder PROBAR la pasarela. El pago lo
-    // escribe `taypi-pago-test` (único escritor) con el monto recalculado desde
-    // la orden. NO es el método por defecto: ese es siempre el manual.
+    // Producción: TAYPI habilitado y conectado vía taypi-pago-prod y taypi-webhook-prod.
     enabled: true,
-    notice:
-      'En habilitación: falta conectar la pasarela de QR. Mientras tanto puedes pagar por transferencia.',
   },
   {
     id: 'mercadopago',
