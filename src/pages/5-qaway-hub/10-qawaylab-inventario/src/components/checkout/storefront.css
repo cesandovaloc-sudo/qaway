@@ -543,6 +543,33 @@
   border-color: var(--red);
   background: #ffffff;
 }
+.qawa-storefront .payment-method-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.qawa-storefront .payment-method-item.is-selected {
+  border: 1.5px solid var(--red);
+  box-shadow: 0 4px 14px rgba(255, 75, 11, 0.07);
+}
+.qawa-storefront .payment-method-item .choice {
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+}
+.qawa-storefront .payment-method-drawer {
+  border-top: 1px solid var(--line);
+  background: #f8f9fc;
+  padding: 20px 22px;
+}
+.qawa-storefront .payment-method-drawer p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.84rem;
+}
 .qawa-storefront .form-status {
   padding: 13px 15px;
   background: #f0e2e0;

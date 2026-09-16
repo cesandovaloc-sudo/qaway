@@ -588,7 +588,10 @@ export default function Checkout({
           <h2>Forma de pago</h2>
           <div className="choice-grid" style={{ gridTemplateColumns: '1fr' }}>
             {PAYMENT_METHODS.map((method) => (
-              <Fragment key={method.id}>
+              <div
+                key={method.id}
+                className={`payment-method-item ${selectedMethod === method.id ? 'is-selected' : ''}`}
+              >
                 <label
                   className={`choice ${selectedMethod === method.id ? 'selected' : ''}`}
                   style={{ padding: '18px' }}
@@ -651,7 +654,7 @@ export default function Checkout({
                     El panel lo declara el método (`showAccounts`), no un id
                     escrito aquí, y arranca COLAPSADO. */}
                 {expandedMethod === method.id && method.showAccounts ? (
-                  <div className="bank-info" id={`panel-${method.id}`} style={{ marginTop: '10px' }}>
+                  <div className="payment-method-drawer" id={`panel-${method.id}`}>
                     <p style={{ fontWeight: 800, marginBottom: '6px' }}>Datos para transferir o Yapear:</p>
                     <p><span>BCP Cuenta:</span> <strong>{ACCOUNT_INFO.accountNumber}</strong></p>
                     <p><span>BCP CCI:</span> <strong>{ACCOUNT_INFO.cci}</strong></p>
@@ -714,14 +717,8 @@ export default function Checkout({
                 {/* Panel desplegable de TAYPI: se expande al seleccionar el método */}
                 {expandedMethod === method.id && method.id === 'taypi' && method.showQr ? (
                   <div
-                    className="bank-info taypi-panel"
+                    className="payment-method-drawer taypi-panel"
                     id={`panel-${method.id}`}
-                    style={{
-                      marginTop: '10px',
-                      background: '#fafafa',
-                      border: '1px solid #e2e8f0',
-                      padding: '16px',
-                    }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
                       <p style={{ fontWeight: 800, margin: 0, color: '#1e293b', fontSize: '0.88rem' }}>
@@ -788,7 +785,7 @@ export default function Checkout({
                     )}
                   </div>
                 ) : null}
-              </Fragment>
+              </div>
             ))}
           </div>
         </section>
