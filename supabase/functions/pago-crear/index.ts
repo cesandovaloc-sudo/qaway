@@ -31,7 +31,7 @@ serve(async (req: Request) => {
   )
 
   try {
-    const { orderId, provider, montoCliente, origin } = await req.json().catch(() => ({}))
+    const { orderId, provider, montoCliente } = await req.json().catch(() => ({}))
     if (!orderId) throw new ErrorPago('Falta orderId')
 
     // El proveedor viene por petición: permite tener varias pasarelas
@@ -50,7 +50,7 @@ serve(async (req: Request) => {
       throw new ErrorPago('El monto no coincide con el pedido', 409)
     }
 
-    const cobro = await crearCobroEnPasarela({ provider, orderId, items, total, currency: 'PEN', origin })
+    const cobro = await crearCobroEnPasarela({ provider, orderId, items, total, currency: 'PEN' })
 
     // Se registra el intento con el importe del SERVIDOR, para poder deduplicar
     // y comparar cuando llegue el webhook (R4, R5).
