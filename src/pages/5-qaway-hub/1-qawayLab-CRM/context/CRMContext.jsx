@@ -1,17 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from '../../../../config/supabase'
+﻿import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
+import { crmAdapter, mapLeadToFrontend, checkIs24hWindowActive } from '../adapters/crmAdapter'
 
 const CRMContext = createContext()
-
-// Helper function to map Supabase snake_case to frontend camelCase
-const mapLeadToFrontend = (lead) => ({
-  ...lead,
-  campaignName: lead.campaign_name,
-  campaignId: lead.campaign_id,
-  lastMessage: lead.last_message,
-  unreadCount: lead.unread_count || 0,
-  history: lead.history || []
-})
 
 export function CRMProvider({ children }) {
   const [leads, setLeads] = useState([])
@@ -29,43 +19,38 @@ export function CRMProvider({ children }) {
     if (currentRole === 'management') setCustomMetrics(prev => prev.filter(m => m.id !== id))
   }, [currentRole])
 
-  // Carga inicial y Suscripción Realtime a Supabase
+  // Carga inicial y Suscripción Realtime desacoplada vía Adaptador
   useEffect(() => {
     async function loadData() {
       // 1. Cargar Campañas
-      const { data: campsData } = await supabase.from('campaigns').select('*')
-      if (campsData) setCampaigns(campsData)
+      const campsData = await crmAdapter.getCampaigns()
+      setCampaigns(campsData)
 
       // 2. Cargar Leads
-      const { data: leadsData } = await supabase.from('leads').select('*').order('created_at', { ascending: false })
-      if (leadsData) {
-        const mapped = leadsData.map(mapLeadToFrontend)
-        setLeads(mapped)
-        if (mapped.length > 0 && !selectedLeadId) {
-          setSelectedLeadId(mapped[0].id)
-        }
+      const leadsData = await crmAdapter.getLeads()
+      setLeads(leadsData)
+      if (leadsData.length > 0 && !selectedLeadId) {
+        setSelectedLeadId(leadsData[0].id)
       }
     }
     
     loadData()
 
-    // 3. Suscripción en Tiempo Real para nuevos Leads (Webhook Hostinger -> Supabase -> CRM)
-    const channel = supabase.channel('realtime-leads')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const newMappedLead = mapLeadToFrontend(payload.new)
-          setLeads(prev => [newMappedLead, ...prev])
-        } else if (payload.eventType === 'UPDATE') {
-          const updatedMappedLead = mapLeadToFrontend(payload.new)
-          setLeads(prev => prev.map(l => l.id === payload.new.id ? updatedMappedLead : l))
-        } else if (payload.eventType === 'DELETE') {
-          setLeads(prev => prev.filter(l => l.id !== payload.old.id))
-        }
-      })
-      .subscribe()
+    // 3. Suscripción en Tiempo Real para nuevos Leads (Webhook Hostinger / Meta -> Supabase -> CRM)
+    const unsubscribe = crmAdapter.subscribeToLeads({
+      onInsert: (newMappedLead) => {
+        setLeads(prev => [newMappedLead, ...prev])
+      },
+      onUpdate: (updatedMappedLead) => {
+        setLeads(prev => prev.map(l => l.id === updatedMappedLead.id ? updatedMappedLead : l))
+      },
+      onDelete: (deletedId) => {
+        setLeads(prev => prev.filter(l => l.id !== deletedId))
+      }
+    })
 
     return () => {
-      supabase.removeChannel(channel)
+      unsubscribe()
     }
   }, []) // Se ejecuta una sola vez al montar
 
@@ -84,40 +69,45 @@ export function CRMProvider({ children }) {
     // 1. Optimistic UI Update (instantáneo para el usuario)
     setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l))
     
-    // 2. DB Update (en segundo plano)
-    const { error } = await supabase
-      .from('leads')
-      .update({ status: newStatus })
-      .eq('id', leadId)
-      
-    if (error) console.error("Error updating lead status in Supabase:", error)
+    // 2. DB Update desacoplado
+    await crmAdapter.updateLeadStatus(leadId, newStatus)
   }, [])
 
-  // Enviar mensaje de chat (simulado para UI, guardado en DB)
-  const sendChatMessage = useCallback(async (leadId, text) => {
+  // Enviar mensaje de chat (simulado para UI, guardado en DB con timestamp)
+  const sendChatMessage = useCallback(async (leadId, text, messageType = 'text') => {
     const lead = leads.find(l => l.id === leadId)
     if (!lead) return
 
-    const newMessage = { sender: 'agent', text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+    const timestamp = Date.now()
+    const newMessage = {
+      sender: 'agent',
+      text,
+      time: new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp,
+      type: messageType
+    }
     const updatedHistory = [...(lead.history || []), newMessage]
 
     // 1. Optimistic UI Update
     setLeads(prev => prev.map(l => {
       if (l.id === leadId) {
-        return { ...l, lastMessage: text, history: updatedHistory, unreadCount: 0 }
+        return {
+          ...l,
+          lastMessage: text,
+          history: updatedHistory,
+          unreadCount: 0
+        }
       }
       return l
     }))
 
-    // 2. DB Update
-    await supabase
-      .from('leads')
-      .update({ last_message: text, history: updatedHistory, unread_count: 0 })
-      .eq('id', leadId)
+    // 2. DB Update desacoplado
+    await crmAdapter.updateLeadChat(leadId, text, updatedHistory, 0)
   }, [leads])
 
-  // Simular la llegada de un lead por webhook (Insert directo a Supabase)
+  // Simular la llegada de un lead por webhook (Insert vía Adaptador)
   const simulateIncomingWebhook = useCallback(async (newLead) => {
+    const timestamp = Date.now()
     const leadToInsert = {
       name: newLead.name,
       whatsapp: newLead.whatsapp,
@@ -129,19 +119,27 @@ export function CRMProvider({ children }) {
       budget: newLead.budget || 0,
       agent: 'Agente Qaway A',
       last_message: newLead.lastMessage,
-      history: [{ sender: 'lead', text: newLead.lastMessage, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }],
-      metadata: newLead.metadata || {},
+      history: [{
+        sender: 'lead',
+        text: newLead.lastMessage,
+        time: new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp,
+        type: 'text'
+      }],
+      metadata: {
+        ...(newLead.metadata || {}),
+        referral: newLead.referral || null
+      },
       unread_count: 1
     }
 
-    const { error } = await supabase.from('leads').insert([leadToInsert])
+    const { error } = await crmAdapter.insertLead(leadToInsert)
     if (error) {
-      console.error("Error insertando lead de simulación:", error)
-      alert("Error de Supabase: " + error.message)
+      console.error("[CRM Provider] Error insertando lead de simulación:", error)
+      alert("Error de Supabase: " + (error.message || error))
     } else {
-      console.log("Insert exitoso en Supabase. Si no lo ves, recarga la página o habilita Realtime en tu base de datos.")
+      console.log("[CRM Provider] Insert exitoso. Realtime actualizará el estado de la aplicación.")
     }
-    // NOTA: El canal Realtime se encarga de hacer el setLeads() automáticamente al detectar el INSERT.
   }, [])
 
   // Obtener estadísticas globales
@@ -159,6 +157,12 @@ export function CRMProvider({ children }) {
 
   const selectedLead = visibleLeads.find(l => l.id === selectedLeadId) || visibleLeads[0] || {}
 
+  const is24hWindowActive = useCallback((lead) => {
+    if (!lead) return false
+    if (typeof lead.is24hWindowActive === 'boolean') return lead.is24hWindowActive
+    return checkIs24hWindowActive(lead.lastCustomerMessageTimestamp)
+  }, [])
+
   const contextValue = useMemo(() => ({
     leads: visibleLeads,
     campaigns,
@@ -169,6 +173,7 @@ export function CRMProvider({ children }) {
     sendChatMessage,
     simulateIncomingWebhook,
     getGlobalStats,
+    is24hWindowActive,
     currentRole,
     setCurrentRole,
     customMetrics,
@@ -185,6 +190,7 @@ export function CRMProvider({ children }) {
     sendChatMessage,
     simulateIncomingWebhook,
     getGlobalStats,
+    is24hWindowActive,
     addCustomMetric,
     removeCustomMetric
   ])

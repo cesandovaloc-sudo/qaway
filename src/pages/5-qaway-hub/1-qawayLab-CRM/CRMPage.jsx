@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown } from 'lucide-react'
+import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
@@ -23,19 +23,45 @@ class ErrorBoundary extends React.Component {
   }
   componentDidCatch(error, errorInfo) {
     this.setState({ error, errorInfo });
-    console.error("ErrorBoundary atrapó un error:", error, errorInfo);
+    console.error("ErrorBoundary atrapó un error en CRM:", error, errorInfo);
   }
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-10 bg-red-50 text-red-900 h-screen w-full flex flex-col items-start justify-center overflow-auto">
-          <h1 className="text-2xl font-bold mb-4">🚨 Error de React (Crasheo)</h1>
-          <p className="mb-4">Por favor envíame el siguiente código de error para solucionarlo de inmediato:</p>
-          <pre className="bg-red-100 p-4 rounded text-xs overflow-auto max-w-full font-mono">
-            {this.state.error && this.state.error.toString()}
-            <br />
-            {this.state.errorInfo && this.state.errorInfo.componentStack}
-          </pre>
+        <div className="min-h-screen w-full bg-[#111111] text-zinc-200 flex items-center justify-center p-6 select-none">
+          <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl p-7 shadow-2xl backdrop-blur-sm text-center">
+            <div className="w-12 h-12 rounded-full bg-zinc-800 border border-zinc-700/60 flex items-center justify-center mx-auto mb-4 text-amber-400/90">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h2 className="text-lg font-bold text-white mb-2">Ocurrió un inconveniente temporal en el CRM</h2>
+            <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+              Tus datos y conversaciones están protegidos en la nube. Puedes recargar este módulo o regresar al Hub central.
+            </p>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl hover:bg-zinc-200 transition-colors shadow-xs"
+              >
+                Recargar módulo
+              </button>
+              <a
+                href="/hub"
+                className="px-4 py-2 bg-zinc-800 text-zinc-300 text-xs font-semibold rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700/50"
+              >
+                Volver al Hub
+              </a>
+            </div>
+            <details className="text-left mt-5 pt-4 border-t border-zinc-800/60">
+              <summary className="text-[11px] text-zinc-500 hover:text-zinc-400 cursor-pointer select-none">
+                Ver reporte técnico del sistema
+              </summary>
+              <pre className="mt-2 p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] text-zinc-400 font-mono overflow-auto max-h-36">
+                {this.state.error?.toString()}
+                {this.state.errorInfo?.componentStack}
+              </pre>
+            </details>
+          </div>
         </div>
       );
     }
@@ -67,6 +93,7 @@ const displayFont = {
 }
 
 function CRMContent() {
+  throw new Error("Simulación: Vista previa de la nueva pantalla de contingencia corporativa del CRM.")
   const { simulateIncomingWebhook, currentRole, setCurrentRole } = useCRM()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
