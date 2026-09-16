@@ -486,7 +486,9 @@ export default function Checkout({
     <form className={`checkout-layout ${header ? 'checkout-layout--cabecera' : ''}`} onSubmit={handleSubmit}>
       {/* Columna Izquierda: Formulario Maquetado de Mesa Selecta */}
       <div className="checkout-form">
-        {header}
+        <div className="checkout-header-wrap">
+          {header}
+        </div>
         {/* Sección 1: Datos de Contacto */}
         <section className="form-section">
           <h2>Datos de contacto y entrega</h2>

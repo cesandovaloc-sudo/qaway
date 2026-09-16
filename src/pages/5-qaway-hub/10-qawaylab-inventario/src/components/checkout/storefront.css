@@ -11,16 +11,16 @@
    ───────────────────────────────────────────────────────────── */
 
 .qawa-storefront {
-  --paper: #f4f3f0;
-  --paper-2: #ebe7df;
-  --white: #fbfaf8;
-  --ink: #20201f;
-  --muted: #6d6b68;
-  --line: #d8d2c8;
+  --paper: #f8f9fc;
+  --paper-2: #f1f3f9;
+  --white: #ffffff;
+  --ink: #18181b;
+  --muted: #52525b;
+  --line: #e4e4e7;
   --red: #ff4b0b;
   --red-dark: #df3900;
-  --green: #2e5b4a;
-  --shadow: 0 18px 50px rgba(34, 28, 22, 0.08);
+  --green: #15803d;
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.05);
   --font-inter: 'Inter', sans-serif;
 
   /* Fondo transparente a propósito: el host decide el fondo de su página
@@ -456,8 +456,8 @@
 .qawa-storefront .checkout-layout--cabecera {
   padding-top: 0;
 }
-.qawa-storefront .checkout-layout--cabecera .form-section:first-of-type {
-  margin-top: 30px;
+.qawa-storefront .checkout-header-wrap {
+  margin-bottom: 2px;
 }
 .qawa-storefront .checkout-form {
   display: grid;
