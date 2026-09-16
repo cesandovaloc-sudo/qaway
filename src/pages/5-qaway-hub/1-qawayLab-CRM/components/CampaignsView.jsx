@@ -3,8 +3,46 @@ import { motion } from 'framer-motion'
 import { Megaphone, TrendingUp, Users, DollarSign, Activity } from 'lucide-react'
 import { useCRM } from '../context/CRMContext'
 
+const DEMO_CAMPAIGNS = [
+  {
+    id: 'camp-meta-1',
+    name: 'Qaway Lab_Ventas_Individuales',
+    platform: 'Meta Ads (Instagram & Facebook)',
+    status: 'Activa',
+    spend: 340.00,
+    revenue: 1490.00,
+    leadsCount: 38,
+    impressions: 24500,
+    clicks: 1280
+  },
+  {
+    id: 'camp-meta-2',
+    name: 'Identidad Visual & Branding Digital',
+    platform: 'Meta Ads (Click-to-WhatsApp CTWA)',
+    status: 'Activa',
+    spend: 210.00,
+    revenue: 890.00,
+    leadsCount: 24,
+    impressions: 18200,
+    clicks: 940
+  },
+  {
+    id: 'camp-b2b-notion',
+    name: 'Plantillas Notion B2B Enterprise',
+    platform: 'TikTok Ads & Google Search',
+    status: 'Pausada',
+    spend: 150.00,
+    revenue: 520.00,
+    leadsCount: 16,
+    impressions: 9800,
+    clicks: 410
+  }
+]
+
 export default function CampaignsView() {
   const { campaigns } = useCRM()
+  const isUsingDemo = !campaigns || campaigns.length === 0
+  const displayCampaigns = isUsingDemo ? DEMO_CAMPAIGNS : campaigns
 
   return (
     <div className="space-y-6">
@@ -15,10 +53,15 @@ export default function CampaignsView() {
           </h2>
           <p className="text-sm text-zinc-500 font-medium mt-1">Control y monitoreo del rendimiento publicitario y adquisición.</p>
         </div>
+        {isUsingDemo && (
+          <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" /> Datos de Demostración Meta Ads
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {campaigns.map((camp, i) => {
+        {displayCampaigns.map((camp, i) => {
           const cpl = camp.leadsCount > 0 ? (camp.spend / camp.leadsCount).toFixed(2) : '0.00'
           const ctr = camp.impressions > 0 ? ((camp.clicks / camp.impressions) * 100).toFixed(2) : '0.00'
           const roi = camp.spend > 0 ? (((camp.revenue - camp.spend) / camp.spend) * 100).toFixed(0) : '0'

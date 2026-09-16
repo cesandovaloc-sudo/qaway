@@ -74,7 +74,7 @@ export function CRMProvider({ children }) {
   }, [])
 
   // Enviar mensaje de chat (simulado para UI, guardado en DB con timestamp)
-  const sendChatMessage = useCallback(async (leadId, text, messageType = 'text') => {
+  const sendChatMessage = useCallback(async (leadId, text, messageType = 'text', payload = null) => {
     const lead = leads.find(l => l.id === leadId)
     if (!lead) return
 
@@ -84,7 +84,8 @@ export function CRMProvider({ children }) {
       text,
       time: new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timestamp,
-      type: messageType
+      type: messageType,
+      ...(payload ? { payload } : {})
     }
     const updatedHistory = [...(lead.history || []), newMessage]
 

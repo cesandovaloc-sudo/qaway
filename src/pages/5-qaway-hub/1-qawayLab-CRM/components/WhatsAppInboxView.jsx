@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useCRM } from '../context/CRMContext'
-import { Send, CheckCheck, User, Sparkles, Megaphone, Phone, Mail, Award, ShoppingCart, MailOpen, MessageSquare, Lock } from 'lucide-react'
+import { Send, CheckCheck, User, Sparkles, Megaphone, Phone, Mail, Award, ShoppingCart, MailOpen, MessageSquare, Lock, FileText, CreditCard, ExternalLink } from 'lucide-react'
 
 const META_TEMPLATES = [
   { id: 'tpl-welcome-notion', name: '👋 Bienvenida Notion', text: '¡Hola! Qué gusto saludarte. Vi que descargaste la versión básica de nuestra plantilla de Notion. Te comparto el link del tutorial en video de 3 minutos para que le saques el máximo provecho: qaway.link/notion-guide. ¿Tienes alguna duda?' },
@@ -8,10 +8,47 @@ const META_TEMPLATES = [
   { id: 'tpl-followup-proposal', name: '📈 Seguimiento de Propuesta', text: 'Hola, te escribo para saber si tuviste oportunidad de revisar la propuesta/cotización formal que te enviamos para tu equipo. Quedo atento a cualquier ajuste que desees realizar.' }
 ]
 
+const WABA_FLOWS = [
+  {
+    id: 'flow-quote',
+    name: '📋 Formulario Cotización',
+    title: 'Solicitud de Cotización Personalizada',
+    body: 'Por favor completa este breve formulario interactivo para calcular tu presupuesto a medida sin salir de WhatsApp.',
+    cta: 'Completar Formulario'
+  },
+  {
+    id: 'flow-appointment',
+    name: '📅 Agendar Cita',
+    title: 'Reserva de Sesión Estratégica',
+    body: 'Selecciona fecha y hora para tu sesión de diagnóstico con el equipo de Qaway Lab.',
+    cta: 'Seleccionar Horario'
+  }
+]
+
+const WABA_CATALOG = [
+  {
+    id: 'prod-notion',
+    name: '📦 Plantilla Notion Pro',
+    title: 'Sistema Operativo Digital en Notion',
+    price: 19.00,
+    body: 'Plantilla empresarial completa para gestionar clientes, proyectos y finanzas.',
+    cta: 'Comprar con WhatsApp Pay'
+  },
+  {
+    id: 'prod-academy',
+    name: '🎨 Curso Identidad Visual',
+    title: 'Curso Completo Identidad Visual',
+    price: 49.00,
+    body: 'Acceso de por vida a clases en alta definición con certificación oficial.',
+    cta: 'Comprar con WhatsApp Pay'
+  }
+]
+
 export default function WhatsAppInboxView() {
   const { leads, selectedLead, setSelectedLeadId, sendChatMessage, updateLeadStatus, is24hWindowActive } = useCRM()
   const is24hOpen = is24hWindowActive ? is24hWindowActive(selectedLead) : true
   const [inputText, setInputText] = useState('')
+  const [actionTab, setActionTab] = useState('templates') // 'templates' | 'flows' | 'catalog'
   const chatContainerRef = useRef(null)
   
   // Referencias y estados para los paneles redimensionables ("Resizable")
@@ -69,6 +106,23 @@ export default function WhatsAppInboxView() {
 
   const handleSendTemplate = (templateText) => {
     sendChatMessage(selectedLead.id, templateText, 'template')
+  }
+
+  const handleSendFlow = (flow) => {
+    sendChatMessage(selectedLead.id, flow.body, 'flow', {
+      flowId: flow.id,
+      title: flow.title,
+      cta: flow.cta
+    })
+  }
+
+  const handleSendCatalog = (prod) => {
+    sendChatMessage(selectedLead.id, `${prod.title} - $${prod.price.toFixed(2)} USD`, 'product', {
+      productId: prod.id,
+      title: prod.title,
+      price: prod.price,
+      cta: prod.cta
+    })
   }
 
   // --- EMPTY STATE PARA EVITAR PANTALLA BLANCA ---
@@ -201,12 +255,49 @@ export default function WhatsAppInboxView() {
             const isAgent = msg.sender === 'agent'
             return (
               <div key={index} className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-[15px] p-3.5 text-[13px] leading-relaxed ${
+                <div className={`max-w-[80%] rounded-[15px] p-3.5 text-[13px] leading-relaxed ${
                   isAgent
                     ? 'bg-zinc-950 text-white font-medium rounded-tr-none shadow-xs'
                     : 'bg-white text-zinc-800 rounded-tl-none border border-zinc-200/80 shadow-xs'
                 }`}>
-                  <p className="whitespace-pre-line">{msg.text}</p>
+                  {msg.type === 'flow' ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider text-emerald-400">
+                        <FileText className="w-3.5 h-3.5" /> WhatsApp Flow 3.0 (Nativo)
+                      </div>
+                      <p className="font-bold text-sm text-white">{msg.payload?.title || 'Formulario WhatsApp'}</p>
+                      <p className="text-xs text-white/80 leading-relaxed whitespace-pre-line">{msg.text}</p>
+                      <button
+                        type="button"
+                        onClick={() => alert(`Simulación WABA: El cliente abre el formulario interactivo "${msg.payload?.title || 'Formulario'}" directamente dentro de WhatsApp sin redirección externa.`)}
+                        className="w-full mt-2 py-2 px-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-zinc-950" /> {msg.payload?.cta || 'Completar Formulario'}
+                      </button>
+                    </div>
+                  ) : msg.type === 'product' ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider text-green-400">
+                        <ShoppingCart className="w-3.5 h-3.5" /> Catálogo Oficial & Pagos
+                      </div>
+                      <div className="bg-zinc-900/90 border border-zinc-800 rounded-xl p-3 text-left">
+                        <p className="font-bold text-white text-sm">{msg.payload?.title || msg.text}</p>
+                        <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{msg.text}</p>
+                        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-zinc-800">
+                          <span className="text-sm font-black text-white">${Number(msg.payload?.price || 0).toFixed(2)} USD</span>
+                          <button
+                            type="button"
+                            onClick={() => alert(`Simulación WABA: Se dispara el checkout nativo de WhatsApp Pay para "${msg.payload?.title}".`)}
+                            className="py-1 px-3 bg-white hover:bg-zinc-100 text-zinc-950 font-extrabold text-xs rounded-lg flex items-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
+                          >
+                            <CreditCard className="w-3.5 h-3.5 text-zinc-950" /> {msg.payload?.cta || 'Pagar en Chat'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-line">{msg.text}</p>
+                  )}
                   <div className={`text-[8px] mt-1.5 flex justify-end items-center gap-1.5 ${isAgent ? 'text-white/60' : 'text-zinc-400'}`}>
                     {msg.time}
                     {isAgent && <CheckCheck className="w-3.5 h-3.5 text-green-400" />}
@@ -217,31 +308,89 @@ export default function WhatsAppInboxView() {
           })}
         </div>
 
-        {/* Plantillas oficiales de WhatsApp (Meta Templates) */}
+        {/* Barra de Comercio Conversacional (Plantillas HSM, WhatsApp Flows, Catálogo & Pagos) */}
         <div className={`p-3.5 bg-white border-t border-zinc-100 shrink-0 transition-colors ${!is24hOpen ? 'bg-amber-50/40' : ''}`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">
-              <Sparkles className="w-3.5 h-3.5 text-green-500 fill-green-500/10" /> Plantillas Oficiales de Meta (HSM)
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/60">
+              <button
+                type="button"
+                onClick={() => setActionTab('templates')}
+                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
+                  actionTab === 'templates'
+                    ? 'bg-white text-zinc-900 shadow-2xs'
+                    : 'text-zinc-500 hover:text-zinc-800'
+                }`}
+              >
+                ✨ Plantillas HSM
+              </button>
+              <button
+                type="button"
+                onClick={() => setActionTab('flows')}
+                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer ${
+                  actionTab === 'flows'
+                    ? 'bg-white text-emerald-700 shadow-2xs'
+                    : 'text-zinc-500 hover:text-zinc-800'
+                }`}
+              >
+                <FileText className="w-3 h-3 text-emerald-600" /> WhatsApp Flows
+              </button>
+              <button
+                type="button"
+                onClick={() => setActionTab('catalog')}
+                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer ${
+                  actionTab === 'catalog'
+                    ? 'bg-white text-purple-700 shadow-2xs'
+                    : 'text-zinc-500 hover:text-zinc-800'
+                }`}
+              >
+                <ShoppingCart className="w-3 h-3 text-purple-600" /> Catálogo & Pagos
+              </button>
             </div>
+
             {!is24hOpen && (
-              <span className="text-[10px] font-bold text-amber-700 flex items-center gap-1 bg-amber-100/90 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-bold text-amber-700 flex items-center gap-1 bg-amber-100/90 px-2 py-0.5 rounded-md shrink-0">
                 <Lock className="w-3 h-3 text-amber-600" /> Envía plantilla para reabrir chat
               </span>
             )}
           </div>
+
           <div className="flex flex-wrap gap-2">
-            {META_TEMPLATES.map(tpl => (
+            {actionTab === 'templates' && META_TEMPLATES.map(tpl => (
               <button
                 key={tpl.id}
                 type="button"
                 onClick={() => handleSendTemplate(tpl.text)}
-                className={`transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold active:scale-95 shadow-2xs ${
+                className={`transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold active:scale-95 shadow-2xs cursor-pointer ${
                   !is24hOpen
                     ? 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 hover:border-amber-300'
                     : 'bg-zinc-50 hover:bg-green-50 hover:text-green-700 border border-zinc-200/70 hover:border-green-200 text-zinc-600'
                 }`}
               >
                 {tpl.name}
+              </button>
+            ))}
+
+            {actionTab === 'flows' && WABA_FLOWS.map(flow => (
+              <button
+                key={flow.id}
+                type="button"
+                onClick={() => handleSendFlow(flow)}
+                className="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold active:scale-95 shadow-2xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <FileText className="w-3 h-3 text-emerald-600" />
+                {flow.name}
+              </button>
+            ))}
+
+            {actionTab === 'catalog' && WABA_CATALOG.map(prod => (
+              <button
+                key={prod.id}
+                type="button"
+                onClick={() => handleSendCatalog(prod)}
+                className="bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold active:scale-95 shadow-2xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <ShoppingCart className="w-3 h-3 text-purple-600" />
+                {prod.name} <span className="font-extrabold text-purple-700">(${prod.price.toFixed(0)})</span>
               </button>
             ))}
           </div>
