@@ -397,7 +397,7 @@
   grid-template-columns: 90px 1fr auto;
   gap: 20px;
   padding: 20px;
-  background: var(--white);
+  background: var(--card-bg, #f8f9fc);
   border: 1px solid var(--line);
   border-radius: 10px;
   margin-bottom: 14px;
@@ -464,7 +464,7 @@
   gap: 28px;
 }
 .qawa-storefront .form-section {
-  background: var(--white);
+  background: var(--card-bg, #f8f9fc);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 28px;
@@ -502,9 +502,10 @@
 .qawa-storefront .input-field {
   width: 100%;
   border: 1px solid var(--line);
-  background: var(--paper);
+  background: #ffffff;
   min-height: 44px;
   padding: 10px 12px;
+  border-radius: 6px;
   color: var(--ink);
   font-size: 0.85rem;
 }
@@ -530,7 +531,7 @@
   font-size: 0.8rem;
   line-height: 1.45;
   cursor: pointer;
-  background: var(--paper);
+  background: #ffffff;
   text-align: left;
   width: 100%;
 }
@@ -540,7 +541,7 @@
 }
 .qawa-storefront .choice.selected {
   border-color: var(--red);
-  background: var(--white);
+  background: #ffffff;
 }
 .qawa-storefront .form-status {
   padding: 13px 15px;
@@ -566,7 +567,7 @@
   max-height: calc(100dvh - var(--qawa-sticky-top, 96px) - 24px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: var(--white);
+  background: var(--card-bg, #f8f9fc);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 26px;

@@ -19,7 +19,7 @@ export default function TiendaShell({ children, offsetTop = '96px' }) {
     <div
       className="qawa-storefront"
       style={{
-        background: '#f8f9fc',
+        background: '#ffffff',
         minHeight: '60vh',
         paddingTop: offsetTop,
         paddingBottom: '96px',
