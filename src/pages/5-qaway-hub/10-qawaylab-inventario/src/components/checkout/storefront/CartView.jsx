@@ -86,6 +86,22 @@ export default function CartView({
               onRemove={onRemove}
               fallbackImage={fallbackImage}
             />
+            <div style={{ marginTop: '20px' }}>
+              <Link
+                to="/proyectos"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  color: 'var(--muted)',
+                  textDecoration: 'none',
+                }}
+              >
+                ← Explorar más soluciones en Proyectos
+              </Link>
+            </div>
           </div>
           <OrderSummary
             items={items}

@@ -84,7 +84,7 @@ export default function CartPage() {
         onRemove={remove}
         count={count}
         subtotal={subtotal}
-        emptyHref="/landings/desarrollo-web-qaway#precios"
+        emptyHref="/proyectos"
         checkoutHref="/carrito/checkout"
         deliveryLabel="Plazo"
         deliveryValue="Según plan"

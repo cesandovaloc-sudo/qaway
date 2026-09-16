@@ -115,7 +115,7 @@ describe('CartPage — tienda · «Mi pedido» (storefront)', () => {
     expect(screen.getByText('Tu pedido está vacío')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ver catálogo' })).toHaveAttribute(
       'href',
-      '/landings/desarrollo-web-qaway#precios',
+      '/proyectos',
     )
 
     // Misma cabecera que el checkout, con las migas arriba del kicker
