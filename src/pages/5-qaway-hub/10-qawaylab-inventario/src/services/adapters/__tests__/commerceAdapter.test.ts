@@ -22,7 +22,7 @@ describe('commerceAdapter', () => {
       quantity: 1,
       product_type: 'physical',
       image_url: 'https://cdn.ejemplo.com/procesada.jpg',
-      metadata: { sku: 'RUN-001' },
+      metadata: { sku: 'RUN-001', description: null },
     })
     expect(isValidCartItem(item)).toBe(true)
   })

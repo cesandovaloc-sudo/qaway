@@ -64,6 +64,10 @@ export default function CartPage() {
             quantity: 1,
             product_type: p.type || 'digital',
             image_url: p.images?.[0]?.processed_url || p.image_url || null,
+            metadata: {
+              sku: p.sku || null,
+              description: p.description || p.short_description || null,
+            },
           })
         }
       } catch (err) {

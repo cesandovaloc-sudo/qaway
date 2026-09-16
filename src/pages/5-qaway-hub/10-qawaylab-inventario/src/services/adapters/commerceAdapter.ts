@@ -56,7 +56,10 @@ export const qawaCommerceAdapter: CommerceAdapter = {
       quantity: options.quantity ?? 1,
       product_type: 'physical',
       image_url: productImageUrl(product),
-      metadata: { sku: product.sku ?? null },
+      metadata: { 
+        sku: product.sku ?? null,
+        description: product.description || product.short_description || null
+      },
     }
   },
 

@@ -36,7 +36,7 @@ export function itemCategory(item) {
 }
 
 export function itemDescription(item) {
-  return item?.description || item?.short_description || ''
+  return item?.description || item?.short_description || item?.metadata?.description || ''
 }
 
 /**

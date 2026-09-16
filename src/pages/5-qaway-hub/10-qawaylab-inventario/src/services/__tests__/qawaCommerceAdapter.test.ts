@@ -44,7 +44,7 @@ const expectedItem: CartItem = {
   quantity: 1,
   product_type: 'physical',
   image_url: 'https://cdn.qawaylab.com/processed.jpg',
-  metadata: { sku: 'RUN-001' },
+  metadata: { sku: 'RUN-001', description: null },
 }
 
 describe('qawaCommerceAdapter', () => {
@@ -111,7 +111,7 @@ describe('qawaCommerceAdapter', () => {
 
     it('mapea sku nulo a metadata.sku null', () => {
       const item = qawaCommerceAdapter.toCartItem(makeProduct({ sku: null }))
-      expect(item.metadata).toEqual({ sku: null })
+      expect(item.metadata).toEqual({ sku: null, description: null })
     })
   })
 

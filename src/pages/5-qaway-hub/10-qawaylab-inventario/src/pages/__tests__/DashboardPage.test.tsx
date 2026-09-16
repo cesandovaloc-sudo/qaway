@@ -177,6 +177,6 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Sin actividad reciente')).toBeInTheDocument()
     expect(screen.getByText('Sin productos')).toBeInTheDocument()
     // El dashboard principal sigue visible
-    expect(screen.getByText('Métricas principales')).toBeInTheDocument()
+    expect(screen.getByText('Accesos Rápidos Prioritarios')).toBeInTheDocument()
   })
 })
