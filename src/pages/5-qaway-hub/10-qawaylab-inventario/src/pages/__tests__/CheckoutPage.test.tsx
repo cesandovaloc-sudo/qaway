@@ -144,26 +144,24 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeInTheDocument()
   })
 
-  it('arranca en el método que SÍ puede completarse, aunque la pasarela esté seleccionable', () => {
+  it('arranca en el método por defecto configurado (TAYPI QR por conversión)', () => {
     storage.setItem(STORAGE_KEY, JSON.stringify([makeItem()]))
     renderPage()
 
-    // El método por defecto es manual: es el único que cierra la compra sin
-    // depender de una pasarela externa. Marcado explícitamente con `isDefault`.
-    expect(firstEnabledMethod()?.id).toBe('manual')
+    // El método por defecto configurado es taypi para maximizar conversión con QR directo
+    expect(firstEnabledMethod()?.id).toBe('taypi')
 
     const radios = screen.getAllByRole('radio') as HTMLInputElement[]
     const marcados = radios.filter((r) => r.checked)
 
     expect(marcados).toHaveLength(1)
-    expect(marcados[0]).toHaveAttribute('value', 'manual')
+    expect(marcados[0]).toHaveAttribute('value', 'taypi')
     expect(marcados[0]).toBeChecked()
 
-    // Mercado Pago queda SELECCIONABLE (para poder probarla de verdad)…
+    // Mercado Pago queda SELECCIONABLE…
     expect(radios.find((r) => r.value === 'mercadopago')).toBeEnabled()
-    // …y el QR también, ahora que `taypi-pago-test` implementa su proveedor en
-    // el servidor (Fase 1). Sigue sin ser el método por defecto.
-    expect(radios.find((r) => r.value === 'taypi')).toBeEnabled()
+    // …y manual también queda SELECCIONABLE
+    expect(radios.find((r) => r.value === 'manual')).toBeEnabled()
   })
 
   it('al TOCAR LA TARJETA (no solo el circulito) se despliegan los datos de cobro', async () => {
@@ -219,11 +217,8 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     renderPage()
 
     await fillCheckoutForm(user)
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/i }))
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
-
-    // El método por defecto lo decide paymentConfig, no el test: así la
-    // expectativa no se queda obsoleta si cambia el orden de los métodos.
-    const defaultMethod = firstEnabledMethod()?.id
 
     expect(createOrderMock).toHaveBeenCalledWith(
       null,
@@ -236,7 +231,7 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
           quantity: 2,
         },
       ],
-      expect.objectContaining({ paymentMethod: defaultMethod }),
+      expect.objectContaining({ paymentMethod: 'manual' }),
     )
     expect(createPaymentMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 499.8 }),
@@ -253,11 +248,7 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     // confirmación automática). Para pasarelas el punto queda sin conectar.
     await user.click(screen.getByRole('link', { name: 'Volver a la tienda' }))
 
-    if (defaultMethod === 'manual') {
-      expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
-    } else {
-      expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).not.toEqual([])
-    }
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toEqual([])
   })
 
   it('asocia el pedido al userId de la sesión autenticada', async () => {
@@ -275,6 +266,7 @@ describe('CheckoutPage — tienda · «Completar Datos y Pago» (paso 2)', () =>
     renderPage()
 
     await fillCheckoutForm(user)
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/i }))
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
 
     expect(createOrderMock).toHaveBeenCalledWith('user-123', expect.any(Array), expect.any(Object))

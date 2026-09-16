@@ -66,6 +66,8 @@ export const PAYMENT_METHODS = [
     // Producción: TAYPI habilitado y conectado vía taypi-pago-prod y taypi-webhook-prod.
     enabled: true,
     showQr: true,
+    // Método preseleccionado por defecto: menor fricción y máxima conversión.
+    isDefault: true,
   },
   {
     id: 'mercadopago',
@@ -88,10 +90,7 @@ export const PAYMENT_METHODS = [
     description:
       'Pagas desde tu app o por transferencia y nos envías el voucher. Verificamos y arrancamos.',
     enabled: true,
-    // Este es SIEMPRE el método preseleccionado: es el único que cierra la
-    // compra sin depender de una pasarela externa.
-    isDefault: true,
-    // Datos de cobro declarados por el método: el checkout NO decide por id.
+    // Método de respaldo alternativo si el usuario no desea usar QR automático.
     showAccounts: true,
   },
 ]

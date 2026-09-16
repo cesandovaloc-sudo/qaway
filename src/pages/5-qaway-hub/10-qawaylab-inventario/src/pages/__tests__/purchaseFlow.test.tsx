@@ -226,6 +226,7 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
 
     // 5. Checkout del módulo: pedido exitoso con el ítem mapeado por el adaptador
     await fillCheckoutForm(user)
+    await user.click(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/i }))
     await user.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
 
     expect(createOrderMock).toHaveBeenCalledWith(
@@ -239,7 +240,7 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
           quantity: 1,
         },
       ],
-      expect.objectContaining({ paymentMethod: firstEnabledMethod()?.id }),
+      expect.objectContaining({ paymentMethod: 'manual' }),
     )
     expect(createPaymentMock).toHaveBeenCalledWith(
       expect.objectContaining({ userId: null, orderId: 'ord-1234567890', amount: 249.9 }),

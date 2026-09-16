@@ -163,9 +163,8 @@ export default function Checkout({
   const proofInputRef = useRef(null)
   // Resalta la zona de voucher mientras se arrastra un archivo encima.
   const [dragging, setDragging] = useState(false)
-  // Panel de datos de cobro: arranca COLAPSADO y se abre al hacer clic en la
-  // tarjeta. Guarda el id del método expandido (null = ninguno).
-  const [expandedMethod, setExpandedMethod] = useState(null)
+  // Panel de datos de cobro: arranca expandido en el método por defecto.
+  const [expandedMethod, setExpandedMethod] = useState(() => firstEnabledMethod()?.id || null)
   // Estado para el cobro inline de TAYPI (desplegable en la misma página)
   const [taypiCobro, setTaypiCobro] = useState(null)
   // Interruptor para desplegable en la misma página (true: inline desplegable; false: página final original)
@@ -749,26 +748,26 @@ export default function Checkout({
                         </button>
                       </div>
                     ) : (
-                      <div style={{ textAlign: 'center', padding: '8px 0' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '8px 0' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#dcfce7', color: '#166534', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '12px' }}>
                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
                           QR Activo · Esperando tu pago
                         </div>
 
                         {taypiCobro.qrImage ? (
-                          <div style={{ margin: '8px auto', display: 'inline-block', padding: '10px', background: '#fff', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
+                          <div style={{ margin: '0 auto 12px auto', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '12px', background: '#fff', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.06)' }}>
                             <img
                               src={taypiCobro.qrImage}
                               alt="Código QR TAYPI"
-                              style={{ width: '210px', height: '210px', display: 'block', margin: '0 auto' }}
+                              style={{ width: '210px', height: '210px', display: 'block' }}
                             />
                           </div>
                         ) : null}
 
-                        <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '6px 0' }}>
+                        <p style={{ display: 'block', textAlign: 'center', fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: '4px 0 6px 0', width: '100%' }}>
                           Total a pagar: S/ {total.toFixed(2)}
                         </p>
-                        <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 12px 0' }}>
+                        <p style={{ display: 'block', textAlign: 'center', fontSize: '0.78rem', color: '#64748b', margin: '0 0 12px 0', width: '100%' }}>
                           Abre Yape, Plin o tu banca móvil, escanea el código y listo.
                         </p>
 
@@ -778,7 +777,7 @@ export default function Checkout({
                             target="_blank"
                             rel="noreferrer"
                             className="button button-secondary"
-                            style={{ minHeight: '38px', fontSize: '0.78rem', padding: '0 14px', width: '100%', marginBottom: '8px' }}
+                            style={{ minHeight: '38px', fontSize: '0.78rem', padding: '0 14px', width: '100%', maxWidth: '320px', margin: '0 auto 8px auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                           >
                             ¿Pagas desde este mismo celular? Toca aquí
                           </a>
