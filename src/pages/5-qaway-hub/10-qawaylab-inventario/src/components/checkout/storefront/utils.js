@@ -35,6 +35,10 @@ export function itemCategory(item) {
   return item?.category || ''
 }
 
+export function itemDescription(item) {
+  return item?.description || item?.short_description || ''
+}
+
 /**
  * Clave canónica de una línea de carrito.
  *

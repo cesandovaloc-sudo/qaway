@@ -45,8 +45,14 @@ function makeDashboard(overrides: Record<string, unknown> = {}) {
   }
 }
 
+import { MemoryRouter } from 'react-router-dom'
+
 function renderPage() {
-  return render(<DashboardPage />)
+  return render(
+    <MemoryRouter>
+      <DashboardPage />
+    </MemoryRouter>
+  )
 }
 
 describe('DashboardPage', () => {

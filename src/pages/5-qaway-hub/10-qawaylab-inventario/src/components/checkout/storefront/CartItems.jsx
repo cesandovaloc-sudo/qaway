@@ -6,6 +6,7 @@ import {
   itemQty,
   itemImage,
   itemCategory,
+  itemDescription,
   isSingleInstance,
   money,
 } from './utils.js'
@@ -81,6 +82,14 @@ export default function CartItems({
               <p className="muted" style={{ fontSize: '0.78rem' }}>
                 {money(itemPrice(item))} c/u
               </p>
+              {itemDescription(item) && (
+                <details style={{ marginTop: '8px' }}>
+                  <summary style={{ fontSize: '0.75rem', cursor: 'pointer', color: 'var(--red)', fontWeight: 600, userSelect: 'none' }}>Ver resumen</summary>
+                  <p className="muted" style={{ fontSize: '0.8rem', marginTop: '8px', lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>
+                    {itemDescription(item)}
+                  </p>
+                </details>
+              )}
             </div>
             <div className="cart-item-actions">
               {singleInstance ? (
