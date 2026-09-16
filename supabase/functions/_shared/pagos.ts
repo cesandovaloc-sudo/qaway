@@ -250,11 +250,15 @@ async function crearCobroMercadoPago(args: {
   items: ItemPedido[]
   total: number
   currency: string
+  origin?: string
 }): Promise<Cobro> {
   const token = mpAccessToken()
   if (!token) throw new ErrorPago('Falta MERCADOPAGO_ACCESS_TOKEN', 501)
 
-  const base = Deno.env.get('PUBLIC_SITE_URL') ?? 'https://www.qawaylab.com'
+  const base =
+    args.origin && /^https?:\/\//.test(args.origin)
+      ? args.origin.replace(/\/$/, '')
+      : (Deno.env.get('PUBLIC_SITE_URL') ?? 'https://www.qawaylab.com')
   const webhookBase = Deno.env.get('SUPABASE_URL') ?? ''
 
   const cuerpo = {
@@ -331,6 +335,7 @@ export async function crearCobroEnPasarela(args: {
   items: ItemPedido[]
   total: number
   currency: string
+  origin?: string
 }): Promise<Cobro> {
   if (args.provider === 'mercadopago') {
     return crearCobroMercadoPago(args)

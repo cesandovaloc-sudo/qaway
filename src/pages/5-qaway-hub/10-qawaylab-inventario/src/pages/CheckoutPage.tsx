@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import Checkout from '@/components/checkout/Checkout'
 import CheckoutSteps from '@/components/checkout/storefront/CheckoutSteps'
 import TiendaHeader from '@/components/checkout/storefront/TiendaHeader'
@@ -20,6 +20,7 @@ import { useAuth } from '@/context/AuthContext'
  */
 export default function CheckoutPage() {
   const { items, clear } = useCart()
+  const [searchParams] = useSearchParams()
   // Si hay sesión, el pedido se asocia al usuario real (RLS lo permite);
   // invitados: userId null → el schema registra un pedido anónimo
   const { session } = useAuth()
@@ -30,14 +31,22 @@ export default function CheckoutPage() {
   // webhook / flujo de pago.
   const [pagoManual, setPagoManual] = useState(false)
 
+  // Detección de retorno de pasarelas externas (ej. Mercado Pago Checkout Pro)
+  const isGatewayReturn = Boolean(
+    searchParams.get('payment_id') ||
+    searchParams.get('collection_id') ||
+    searchParams.get('preference_id') ||
+    searchParams.get('status')
+  )
+
   useEffect(() => {
     setPageMeta({ title: 'Finalizar pedido | Qaway Lab', robots: 'noindex' })
   }, [])
 
   // Sin carrito no hay nada que pagar: se vuelve a «Mi pedido».
-  // Tras confirmar el pedido (`orderDone`) no se redirige, para que el
-  // comprador vea la confirmación del checkout.
-  if (!orderDone && (!siteConfig.cart.enabled || items.length === 0)) {
+  // Tras confirmar el pedido (`orderDone`) o volver de pasarela (`isGatewayReturn`),
+  // no se redirige, para que el comprador vea la confirmación del checkout.
+  if (!orderDone && !isGatewayReturn && (!siteConfig.cart.enabled || items.length === 0)) {
     return <Navigate to="/carrito" replace />
   }
 
@@ -50,7 +59,7 @@ export default function CheckoutPage() {
               eyebrow="Finalizar Pedido"
               title="Completar Datos y Pago"
               copy="Ingresa tus datos de contacto y selecciona tu método de pago preferido."
-              steps={<CheckoutSteps active={2} />}
+              steps={<CheckoutSteps active={orderDone ? 3 : 2} />}
             />
           }
           paymentsService={qawaServices.payments}

@@ -318,7 +318,7 @@ export default function Checkout({
         const cuerpoPago =
           provider === 'taypi'
             ? { orderId: order?.id } // TAYPI: SOLO orderId, nunca el monto
-            : { orderId: order?.id, provider }
+            : { orderId: order?.id, provider, origin: window?.location?.origin }
 
         const { data, error: errCobro } = await supabase.functions.invoke(funcionPago, {
           body: cuerpoPago,
