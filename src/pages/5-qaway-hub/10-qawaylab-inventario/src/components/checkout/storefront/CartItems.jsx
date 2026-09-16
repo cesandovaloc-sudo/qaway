@@ -84,8 +84,8 @@ export default function CartItems({
               </p>
               {itemDescription(item) && (
                 <details style={{ marginTop: '8px' }}>
-                  <summary style={{ fontSize: '0.75rem', cursor: 'pointer', color: 'var(--red)', fontWeight: 600, userSelect: 'none' }}>Ver resumen</summary>
-                  <p className="muted" style={{ fontSize: '0.8rem', marginTop: '8px', lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>
+                  <summary style={{ fontSize: '0.88rem', cursor: 'pointer', color: 'var(--red)', fontWeight: 600, userSelect: 'none' }}>Ver resumen</summary>
+                  <p className="muted" style={{ fontSize: '0.92rem', marginTop: '8px', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>
                     {itemDescription(item)}
                   </p>
                 </details>
