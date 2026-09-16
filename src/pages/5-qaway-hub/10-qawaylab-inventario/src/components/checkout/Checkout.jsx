@@ -633,7 +633,7 @@ export default function Checkout({
                   ) : null}
                   {/* Señal de que la tarjeta despliega contenido: sin esto, un
                       panel colapsado no se descubre. */}
-                  {method.showAccounts || method.showQr ? (
+                  {method.showAccounts || method.showQr || method.showInfo ? (
                     <span className="method-toggle">
                       <span
                         className={`method-toggle-icon${expandedMethod === method.id ? ' is-open' : ''}`}
@@ -642,8 +642,8 @@ export default function Checkout({
                         ▾
                       </span>
                       {expandedMethod === method.id
-                        ? (method.showQr ? 'Ocultar código QR' : 'Ocultar datos de pago')
-                        : (method.showQr ? (taypiCobro ? 'Ver código QR' : 'Ver información de pago') : 'Ver datos de pago')}
+                        ? (method.showQr ? 'Ocultar código QR' : method.showInfo ? 'Ocultar información' : 'Ocultar datos de pago')
+                        : (method.showQr ? (taypiCobro ? 'Ver código QR' : 'Ver información de pago') : method.showInfo ? 'Ver opciones y tarjetas aceptadas' : 'Ver datos de pago')}
                     </span>
                   ) : null}
                 </div>
@@ -783,6 +783,41 @@ export default function Checkout({
                         ) : null}
                       </div>
                     )}
+                  </div>
+                ) : null}
+
+                {/* Panel desplegable de MERCADO PAGO: información y opciones aceptadas */}
+                {expandedMethod === method.id && method.id === 'mercadopago' && method.showInfo ? (
+                  <div
+                    className="payment-method-drawer mercadopago-panel"
+                    id={`panel-${method.id}`}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
+                      <p style={{ fontWeight: 800, margin: 0, color: '#18181b', fontSize: '0.88rem' }}>
+                        Tarjetas y opciones aceptadas:
+                      </p>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <span style={{ background: '#1e3a8a', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Visa</span>
+                        <span style={{ background: '#ea580c', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Mastercard</span>
+                        <span style={{ background: '#0284c7', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Amex</span>
+                        <span style={{ background: '#742284', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 800 }}>Yape</span>
+                        <span style={{ background: '#15803d', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>Cuotas</span>
+                      </div>
+                    </div>
+                    <div style={{ padding: '6px 0', textAlign: 'left' }}>
+                      <p style={{ color: '#52525b', fontSize: '0.82rem', margin: '0 0 14px 0', lineHeight: 1.55 }}>
+                        Al confirmar tu pedido, se conectará con la plataforma segura y encriptada de <strong>Mercado Pago</strong> para completar tu transacción al instante. Puedes pagar al contado o en cuotas sin interés.
+                      </p>
+                      <button
+                        type="button"
+                        className="button button-red"
+                        style={{ minHeight: '38px', fontSize: '0.8rem', padding: '0 16px', width: '100%' }}
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                      >
+                        {submitting ? 'Procesando...' : `Pagar con Mercado Pago S/ ${total.toFixed(2)}`}
+                      </button>
+                    </div>
                   </div>
                 ) : null}
               </div>

@@ -80,6 +80,7 @@ export const PAYMENT_METHODS = [
     // error, pero NO es el método por defecto: ese es siempre el manual (ver
     // `isDefault`), así que la ruta de compra nunca termina en un callejón.
     enabled: true,
+    showInfo: true,
     notice:
       'En habilitación: falta conectar la pasarela. Mientras tanto puedes pagar por Yape, Plin o transferencia.',
   },

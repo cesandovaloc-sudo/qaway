@@ -516,6 +516,14 @@
   outline: none;
   border-color: var(--red);
 }
+.qawa-storefront input:-webkit-autofill,
+.qawa-storefront input:-webkit-autofill:hover, 
+.qawa-storefront input:-webkit-autofill:focus, 
+.qawa-storefront input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 .qawa-storefront .choice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -548,7 +556,7 @@
   border-radius: 10px;
   background: #ffffff;
   overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .qawa-storefront .payment-method-item.is-selected {
   border: 1.5px solid var(--red);
@@ -564,6 +572,17 @@
   border-top: 1px solid var(--line);
   background: #f8f9fc;
   padding: 20px 22px;
+  animation: qawaDrawerFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes qawaDrawerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .qawa-storefront .payment-method-drawer p {
   margin: 0;
