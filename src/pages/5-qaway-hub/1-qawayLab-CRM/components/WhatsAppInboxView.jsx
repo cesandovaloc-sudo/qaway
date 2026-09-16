@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useCRM } from '../context/CRMContext'
-import { Send, CheckCheck, User, Sparkles, Megaphone, Phone, Mail, Award, ShoppingCart, MailOpen, MessageSquare } from 'lucide-react'
+import { Send, CheckCheck, User, Sparkles, Megaphone, Phone, Mail, Award, ShoppingCart, MailOpen, MessageSquare, Lock } from 'lucide-react'
 
 const META_TEMPLATES = [
   { id: 'tpl-welcome-notion', name: '👋 Bienvenida Notion', text: '¡Hola! Qué gusto saludarte. Vi que descargaste la versión básica de nuestra plantilla de Notion. Te comparto el link del tutorial en video de 3 minutos para que le saques el máximo provecho: qaway.link/notion-guide. ¿Tienes alguna duda?' },
@@ -9,7 +9,8 @@ const META_TEMPLATES = [
 ]
 
 export default function WhatsAppInboxView() {
-  const { leads, selectedLead, setSelectedLeadId, sendChatMessage, updateLeadStatus } = useCRM()
+  const { leads, selectedLead, setSelectedLeadId, sendChatMessage, updateLeadStatus, is24hWindowActive } = useCRM()
+  const is24hOpen = is24hWindowActive ? is24hWindowActive(selectedLead) : true
   const [inputText, setInputText] = useState('')
   const chatContainerRef = useRef(null)
   
@@ -61,13 +62,13 @@ export default function WhatsAppInboxView() {
 
   const handleSend = (e) => {
     e.preventDefault()
-    if (!inputText.trim()) return
-    sendChatMessage(selectedLead.id, inputText)
+    if (!inputText.trim() || !is24hOpen) return
+    sendChatMessage(selectedLead.id, inputText, 'text')
     setInputText('')
   }
 
   const handleSendTemplate = (templateText) => {
-    sendChatMessage(selectedLead.id, templateText)
+    sendChatMessage(selectedLead.id, templateText, 'template')
   }
 
   // --- EMPTY STATE PARA EVITAR PANTALLA BLANCA ---
@@ -175,9 +176,20 @@ export default function WhatsAppInboxView() {
               <p className="text-[11px] text-zinc-400 font-bold">{selectedLead.whatsapp}</p>
             </div>
           </div>
-          <span className="text-[10px] text-green-600 font-bold flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-lg border border-green-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> Línea Oficial
-          </span>
+          <div className="flex items-center gap-2">
+            {is24hOpen ? (
+              <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60" title="Ventana de 24h abierta: Mensajes de texto libre permitidos">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ventana 24h Activa
+              </span>
+            ) : (
+              <span className="text-[10px] text-amber-700 font-bold flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60" title="Ventana de 24h cerrada: Meta requiere plantilla aprobada (HSM)">
+                <Lock className="w-3 h-3 text-amber-600" /> Fuera de Ventana (Plantilla Requerida)
+              </span>
+            )}
+            <span className="text-[10px] text-zinc-500 font-bold flex items-center gap-1.5 bg-zinc-50 px-2.5 py-1 rounded-lg border border-zinc-200/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" /> Línea Oficial
+            </span>
+          </div>
         </div>
 
         {/* Burbujas de Chat con ref para scroll aislado */}
@@ -206,16 +218,28 @@ export default function WhatsAppInboxView() {
         </div>
 
         {/* Plantillas oficiales de WhatsApp (Meta Templates) */}
-        <div className="p-3.5 bg-white border-t border-zinc-100 shrink-0">
-          <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider text-zinc-400 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-green-500 fill-green-500/10" /> Plantillas Oficiales de Meta
+        <div className={`p-3.5 bg-white border-t border-zinc-100 shrink-0 transition-colors ${!is24hOpen ? 'bg-amber-50/40' : ''}`}>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5 text-[9px] font-extrabold uppercase tracking-wider text-zinc-400">
+              <Sparkles className="w-3.5 h-3.5 text-green-500 fill-green-500/10" /> Plantillas Oficiales de Meta (HSM)
+            </div>
+            {!is24hOpen && (
+              <span className="text-[10px] font-bold text-amber-700 flex items-center gap-1 bg-amber-100/90 px-2 py-0.5 rounded-md">
+                <Lock className="w-3 h-3 text-amber-600" /> Envía plantilla para reabrir chat
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             {META_TEMPLATES.map(tpl => (
               <button
                 key={tpl.id}
+                type="button"
                 onClick={() => handleSendTemplate(tpl.text)}
-                className="bg-zinc-50 hover:bg-green-50 hover:text-green-700 border border-zinc-200/70 hover:border-green-200 transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold text-zinc-600 active:scale-95 shadow-2xs"
+                className={`transition-all py-1.5 px-3 rounded-[15px] text-[10px] font-bold active:scale-95 shadow-2xs ${
+                  !is24hOpen
+                    ? 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100 hover:border-amber-300'
+                    : 'bg-zinc-50 hover:bg-green-50 hover:text-green-700 border border-zinc-200/70 hover:border-green-200 text-zinc-600'
+                }`}
               >
                 {tpl.name}
               </button>
@@ -228,13 +252,27 @@ export default function WhatsAppInboxView() {
           <input
             type="text"
             value={inputText}
+            disabled={!is24hOpen}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={`Escribe a ${selectedLead.name}...`}
-            className="flex-1 bg-zinc-50 border border-zinc-200 rounded-[15px] px-4 py-3 text-[13px] text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white transition-all"
+            placeholder={
+              is24hOpen
+                ? `Escribe a ${selectedLead.name}...`
+                : 'Ventana de 24h cerrada. Selecciona una plantilla aprobada arriba para reactivar el chat...'
+            }
+            className={`flex-1 rounded-[15px] px-4 py-3 text-[13px] transition-all ${
+              is24hOpen
+                ? 'bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-300 focus:bg-white'
+                : 'bg-zinc-100/80 border border-zinc-200/60 text-zinc-400 placeholder:text-zinc-400 cursor-not-allowed'
+            }`}
           />
           <button
             type="submit"
-            className="bg-zinc-950 hover:bg-zinc-800 text-white px-5 py-3 rounded-[15px] transition-all duration-300 active:scale-95 flex items-center justify-center font-bold text-xs gap-1.5"
+            disabled={!is24hOpen || !inputText.trim()}
+            className={`px-5 py-3 rounded-[15px] transition-all duration-300 flex items-center justify-center font-bold text-xs gap-1.5 ${
+              is24hOpen && inputText.trim()
+                ? 'bg-zinc-950 hover:bg-zinc-800 text-white active:scale-95 cursor-pointer shadow-xs'
+                : 'bg-zinc-200 text-zinc-400 cursor-not-allowed'
+            }`}
           >
             <Send className="w-3.5 h-3.5" />
             <span>Enviar</span>
@@ -284,9 +322,23 @@ export default function WhatsAppInboxView() {
               <Megaphone className="w-4 h-4 text-zinc-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-[9px] text-zinc-400 font-bold uppercase">Adquisición</p>
-                <p className="text-zinc-800 font-bold truncate">{selectedLead.campaignName}</p>
+                <p className="text-zinc-800 font-bold truncate">{selectedLead.campaignName || 'Orgánico / Directo'}</p>
               </div>
             </div>
+
+            {selectedLead.referral && (
+              <div className="flex items-start gap-2 pt-3 border-t border-zinc-200/50">
+                <Megaphone className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-[9px] text-emerald-700 font-bold uppercase">Meta Ads (CTWA)</p>
+                    <span className="text-[8px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded">72h Gratis</span>
+                  </div>
+                  <p className="text-zinc-900 font-bold text-[11px] truncate mt-0.5">{selectedLead.referral.headline || 'Campaña Click-to-WhatsApp'}</p>
+                  <p className="text-zinc-400 text-[9px] font-mono truncate">Ad ID: {selectedLead.referral.ad_id || 'N/A'}</p>
+                </div>
+              </div>
+            )}
 
             {selectedLead.metadata?.wooCommerce && (
               <div className="flex items-start gap-2 pt-3 border-t border-zinc-200/50">

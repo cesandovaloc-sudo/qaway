@@ -1,5 +1,5 @@
-﻿import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
-import { crmAdapter, mapLeadToFrontend, checkIs24hWindowActive } from '../adapters/crmAdapter'
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
+import { crmAdapter, checkIs24hWindowActive } from '../adapters/crmAdapter'
 
 const CRMContext = createContext()
 

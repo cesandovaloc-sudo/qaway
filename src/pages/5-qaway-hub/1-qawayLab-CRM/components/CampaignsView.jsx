@@ -22,6 +22,7 @@ export default function CampaignsView() {
           const cpl = camp.leadsCount > 0 ? (camp.spend / camp.leadsCount).toFixed(2) : '0.00'
           const ctr = camp.impressions > 0 ? ((camp.clicks / camp.impressions) * 100).toFixed(2) : '0.00'
           const roi = camp.spend > 0 ? (((camp.revenue - camp.spend) / camp.spend) * 100).toFixed(0) : '0'
+          const roas = camp.spend > 0 ? (camp.revenue / camp.spend).toFixed(2) : '0.00'
 
           return (
             <motion.div 
@@ -71,9 +72,10 @@ export default function CampaignsView() {
                   </div>
                 </div>
               </div>
-              <div className="bg-zinc-100/50 px-5 py-3 border-t border-zinc-100 flex justify-between text-[11px] font-medium text-zinc-500">
-                <span>Impresiones: {camp.impressions.toLocaleString()}</span>
+              <div className="bg-zinc-100/50 px-5 py-3 border-t border-zinc-100 flex justify-between items-center text-[11px] font-medium text-zinc-500">
+                <span>Impresiones: {camp.impressions ? camp.impressions.toLocaleString() : '0'}</span>
                 <span>CTR: {ctr}%</span>
+                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/50">ROAS: {roas}x</span>
               </div>
             </motion.div>
           )

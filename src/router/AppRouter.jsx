@@ -67,6 +67,7 @@ const RestauracionFotografica2Page = lazy(() => import('@/pages/8-landings/6-res
 const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'))
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
+import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
@@ -352,6 +353,10 @@ export default function AppRouter() {
           <Route
             path="hub/creador-contenido"
             element={renderRoute('hub', <CreadorContenidoPage />)}
+          />
+          <Route
+            path="hub/biblioteca"
+            element={renderRoute('hub', <BibliotecaPage />)}
           />
           <Route
             path="hub/crm"

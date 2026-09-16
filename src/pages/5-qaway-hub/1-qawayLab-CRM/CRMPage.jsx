@@ -93,7 +93,6 @@ const displayFont = {
 }
 
 function CRMContent() {
-  throw new Error("Simulación: Vista previa de la nueva pantalla de contingencia corporativa del CRM.")
   const { simulateIncomingWebhook, currentRole, setCurrentRole } = useCRM()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
