@@ -180,6 +180,12 @@ export default function Checkout({
     if (method.id !== selectedMethod) {
       setSelectedMethod(method.id)
       setExpandedMethod(method.id)
+      setTimeout(() => {
+        const el = document.getElementById(`method-card-${method.id}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+      }, 50)
       return
     }
     setExpandedMethod((prev) => (prev === method.id ? null : method.id))
@@ -590,6 +596,7 @@ export default function Checkout({
             {PAYMENT_METHODS.map((method) => (
               <div
                 key={method.id}
+                id={`method-card-${method.id}`}
                 className={`payment-method-item ${selectedMethod === method.id ? 'is-selected' : ''}`}
               >
                 <label
