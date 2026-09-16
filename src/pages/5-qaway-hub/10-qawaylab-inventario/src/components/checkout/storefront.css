@@ -592,6 +592,49 @@
   flex-shrink: 0;
   text-align: right;
 }
+.qawa-storefront .summary-row--total {
+  border-top: 1.5px solid var(--line);
+  border-bottom: 0;
+  padding-top: 16px;
+  padding-bottom: 6px;
+  margin-top: 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+.qawa-storefront .summary-row--total > strong {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+.qawa-storefront .button-ghost-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+.qawa-storefront .button-ghost-nav:hover {
+  color: var(--ink);
+  border-color: #bbb;
+  background: #faf9f7;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.qawa-storefront .button-ghost-nav-arrow {
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.qawa-storefront .button-ghost-nav:hover .button-ghost-nav-arrow {
+  transform: translateX(-4px);
+}
 .qawa-storefront .summary-note {
   margin: 16px 0;
   color: var(--muted);
@@ -858,8 +901,8 @@
   gap: 8px 18px;
   /* Migas de pan de la cabecera: abren la página, así que no llevan margen
      superior (el aire de arriba lo aporta el contenedor) y sí un hueco claro
-     de 28px antes del kicker. */
-  margin: 0 0 28px;
+     antes del kicker. */
+  margin: 0 0 38px;
   padding: 0;
   list-style: none;
 }

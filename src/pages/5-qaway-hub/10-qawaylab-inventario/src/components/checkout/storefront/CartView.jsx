@@ -86,20 +86,13 @@ export default function CartView({
               onRemove={onRemove}
               fallbackImage={fallbackImage}
             />
-            <div style={{ marginTop: '20px' }}>
+            <div style={{ marginTop: '32px' }}>
               <Link
                 to="/proyectos"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.84rem',
-                  fontWeight: 600,
-                  color: 'var(--muted)',
-                  textDecoration: 'none',
-                }}
+                className="button-ghost-nav"
               >
-                ← Explorar más soluciones en Proyectos
+                <span className="button-ghost-nav-arrow" aria-hidden="true">←</span>
+                <span>Explorar más Proyectos</span>
               </Link>
             </div>
           </div>

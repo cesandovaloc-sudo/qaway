@@ -55,6 +55,10 @@ export default function OrderSummary({
         <span>{deliveryLabel}</span>
         <strong style={{ color: 'var(--green)' }}>{deliveryValue}</strong>
       </div>
+      <div className="summary-row summary-row--total">
+        <span>Total</span>
+        <strong>{money(totalSubtotal)}</strong>
+      </div>
 
       <p className="summary-note">{note}</p>
       {action}
