@@ -163,8 +163,8 @@ export default function Checkout({
   const proofInputRef = useRef(null)
   // Resalta la zona de voucher mientras se arrastra un archivo encima.
   const [dragging, setDragging] = useState(false)
-  // Panel de datos de cobro: arranca expandido en el método por defecto.
-  const [expandedMethod, setExpandedMethod] = useState(() => firstEnabledMethod()?.id || null)
+  // Panel de datos de cobro: arranca COLAPSADO para permitir el recorrido visual del comprador.
+  const [expandedMethod, setExpandedMethod] = useState(null)
   // Estado para el cobro inline de TAYPI (desplegable en la misma página)
   const [taypiCobro, setTaypiCobro] = useState(null)
   // Interruptor para desplegable en la misma página (true: inline desplegable; false: página final original)
