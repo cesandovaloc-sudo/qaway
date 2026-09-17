@@ -46,10 +46,13 @@ Deno.serve(async (req) => {
     const items = itemsBd.map((it: any) => ({
       title: String(it.product_title || 'Producto'),
       quantity: Number(it.quantity),
-      unit_price: Number(it.unit_price),
+      unit_price: Number(it.unit_price).toFixed(2),
     }))
 
-    const totalCalculado = items.reduce((acc: number, it: any) => acc + it.unit_price * it.quantity, 0)
+    const totalCalculado = itemsBd.reduce(
+      (acc: number, it: any) => acc + Number(it.unit_price) * Number(it.quantity),
+      0,
+    )
     const total = Math.round(totalCalculado * 100) / 100
 
     // 2. Secret oficial de producción
@@ -65,7 +68,7 @@ Deno.serve(async (req) => {
     const cuerpo = {
       type: 'online',
       processing_mode: 'manual',
-      total_amount: total,
+      total_amount: total.toFixed(2),
       external_reference: orderId,
       items,
       config: {
