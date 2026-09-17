@@ -56,12 +56,7 @@ const catalogItems = [
     category: 'DISEÑO & IA',
     badge: 'CURSO PRÁCTICO',
     title: 'Identidad Visual con Inteligencia Artificial',
-    subtitle: 'Por Qaway Academy',
     desc: 'Construye la identidad gráfica, manual de marca, paleta cromática y componentes de tu negocio con flujos guiados de IA.',
-    meta: [
-      { icon: BookOpen, text: 'Curso práctico' },
-      { icon: Clock, text: 'Acceso de por vida' },
-    ],
     ctaText: 'Ver contenido',
     price: 'S/ 29.00',
     oldPrice: 'S/ 60',
@@ -79,12 +74,7 @@ const catalogItems = [
     category: 'PRODUCTIVIDAD',
     badge: 'DUPLICABLE 1-CLIC',
     title: 'Sistema Estratégico de Contenido en Notion',
-    subtitle: 'Por Qaway Lab Systems',
     desc: 'Arquitectura completa con prompts estratégicos y calendario operativo para planificar 30 días de contenido en menos de una hora.',
-    meta: [
-      { icon: Sparkles, text: 'Prompts IA incluidos' },
-      { icon: Zap, text: 'Gantt operativo' },
-    ],
     ctaText: 'Ver sistema',
     price: 'S/ 29.00',
     oldPrice: 'S/ 60',
@@ -102,15 +92,10 @@ const catalogItems = [
     category: 'DESARROLLO A MEDIDA',
     badge: 'LLAVE EN MANO',
     title: 'Desarrollo Web & Tiendas Online',
-    subtitle: 'Arquitectura corporativa y e-commerce',
     desc: 'Sitios corporativos y tiendas con catálogo interactivo, pasarelas de pago (Mercado Pago/Yape) y conexión directa a WhatsApp.',
-    meta: [
-      { icon: Zap, text: 'Entrega 5 a 10 días' },
-      { icon: MessageSquare, text: 'Pedidos a WhatsApp' },
-    ],
     ctaText: 'Ver planes',
     price: 'Desde S/ 79.90',
-    oldPrice: null,
+    oldPrice: 'S/ 149',
     categories: ['Servicios Web'],
     isMockup: true,
   },
@@ -124,7 +109,7 @@ const catalogItems = [
     ribbonBg: 'bg-[#ff4b0b]',
     category: 'E-COMMERCE & BEAUTY',
     badge: 'EN PRODUCCIÓN',
-    title: 'Aurea Skincare — E-commerce & Cosmética',
+    title: 'Tienda Online para Cosmética & Skincare',
     desc: 'E-commerce editorial para marca de cosmética botánica con catálogo interactivo de sérums, diseño sensorial y checkout optimizado.',
     ctaText: 'Ver proyecto',
     price: 'S/ 490.00',
@@ -140,7 +125,7 @@ const catalogItems = [
     ribbonBg: 'bg-[#18181b]',
     category: 'INMOBILIARIA & TOURS',
     badge: 'CAPTACIÓN 24/7',
-    title: 'Vallet Real Estate — Captación Inmobiliaria',
+    title: 'Web Comercial para Inmobiliaria & Bienes Raíces',
     desc: 'Ecosistema web comercial para agencia de bienes raíces con buscador de inmuebles, recorridos virtuales y captación directa a WhatsApp.',
     ctaText: 'Ver proyecto',
     price: 'S/ 290.00',
@@ -156,7 +141,7 @@ const catalogItems = [
     ribbonBg: 'bg-[#ff4b0b]',
     category: 'ONE WEB LOCAL',
     badge: 'ALTA CONVERSIÓN',
-    title: 'Panadería Josué — Artesanal & Masa Madre',
+    title: 'One Web para Panadería & Gastronomía',
     desc: 'Sitio One Web para comercio gastronómico con presentación de panes artesanales, horarios de horneado y pedidos directos a WhatsApp.',
     ctaText: 'Ver proyecto',
     price: 'Desde S/ 79.90',
@@ -172,7 +157,7 @@ const catalogItems = [
     ribbonBg: 'bg-[#ff4b0b]',
     category: 'SALUD & CLÍNICA',
     badge: 'AGENDAMIENTO',
-    title: 'Clínica Dental — Especialidades Odontológicas',
+    title: 'One Web para Clínica Dental & Salud',
     desc: 'Sitio One Web para centro médico odontológico de alta credibilidad con presentación clara de tratamientos y captación directa de citas.',
     ctaText: 'Ver proyecto',
     price: 'Desde S/ 79.90',
@@ -191,12 +176,7 @@ const catalogItems = [
     category: 'DIRECCIÓN DE ARTE',
     badge: 'LIMA ESTUDIO',
     title: 'Sesión Fotográfica LinkedIn & Ejecutiva',
-    subtitle: 'Retrato profesional de autoridad',
     desc: 'Dirección de postura y expresión para proyectar solidez. 60 min de sesión, 2 cambios de vestuario y 8 fotografías finales retocadas.',
-    meta: [
-      { icon: Camera, text: '8 fotos finales retocadas' },
-      { icon: Clock, text: 'Sesión de 60 minutos' },
-    ],
     ctaText: 'Reservar sesión',
     price: 'S/ 490.00',
     oldPrice: null,
@@ -212,12 +192,7 @@ const catalogItems = [
     category: 'ESTUDIO DIGITAL',
     badge: 'ARCHIVO HISTÓRICO',
     title: 'Restauración Digital de Fotografías Antiguas',
-    subtitle: 'Preservación de memoria y detalle',
     desc: 'Limpieza y reconstrucción de imágenes con manchas, quiebres o pérdida cromática. Respeto absoluto por la fisonomía original.',
-    meta: [
-      { icon: Sparkles, text: 'Corrección cromática' },
-      { icon: ShieldCheck, text: 'Fidelidad fisonómica' },
-    ],
     ctaText: 'Evaluar fotografía',
     price: 'Desde S/ 11.50',
     oldPrice: null,
@@ -289,32 +264,10 @@ function StandardProductCard({ item, delay = 0 }) {
           </Link>
         </h3>
 
-        {/* Subtítulo / Autor */}
-        {item.subtitle && (
-          <p className="mt-1.5 text-[0.76rem] font-medium text-zinc-400">
-            {item.subtitle}
-          </p>
-        )}
-
         {/* Descripción de 2 líneas */}
         <p className="mt-3 line-clamp-2 text-[0.82rem] leading-[1.5] text-zinc-600">
           {item.desc}
         </p>
-
-        {/* Fila de Metadatos con Iconos */}
-        {item.meta && item.meta.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.68rem] font-semibold text-[#5f5d59]">
-            {item.meta.map((m, i) => {
-              const IconComponent = m.icon
-              return (
-                <span key={i} className="flex items-center gap-1.5">
-                  <IconComponent className="h-3.5 w-3.5 text-zinc-400" />
-                  {m.text}
-                </span>
-              )
-            })}
-          </div>
-        )}
 
         {/* ─── FOOTER CON PRECIO INDEPENDIENTE Y DESTACADO ─── */}
         <div className="mt-auto flex items-center justify-between gap-4 pt-5 border-t border-zinc-100">
@@ -333,13 +286,14 @@ function StandardProductCard({ item, delay = 0 }) {
                 {item.price}
               </span>
             ) : (
-              <div className="flex items-baseline gap-1.5">
+              <div className="flex items-baseline gap-2">
                 {item.oldPrice && (
-                  <span className="text-[0.74rem] font-medium text-zinc-400 line-through">
-                    {item.oldPrice}
+                  <span className="text-[0.72rem] font-medium text-zinc-400">
+                    <span className="text-[0.64rem] font-medium text-zinc-400 mr-1">Antes</span>
+                    <span className="line-through decoration-zinc-400">{item.oldPrice}</span>
                   </span>
                 )}
-                <span className="text-[1.05rem] sm:text-[1.12rem] font-extrabold text-[#111111] tracking-tight">
+                <span className="text-[1.05rem] sm:text-[1.14rem] font-extrabold text-[#111111] tracking-tight">
                   {item.price}
                 </span>
               </div>
