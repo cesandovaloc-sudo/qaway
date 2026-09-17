@@ -22,3 +22,24 @@
 - `BibliotecaPage.jsx`: mismo diseño, ahora lee seed, buscador activo, filtros Tipo/Skills/Apps/Repos + funcionalidad + nicho en local, contador real, footer por ítem `metodo · key`.
 - Lint limpio (solo 2 warnings preexistentes). JSON validado: 11 items.
 - Sin commit, sin push.
+
+## Iteración 5 — Taxonomía pareja v3 (2026-09-16)
+- Sin tocar diseño ni `BibliotecaPage.jsx`.
+- Seed v3: + `costo` (gratis 5, freemium 5, suscripcion 1), + `plataforma[]`, + `nivel`, + `licencia: desconocida` (sin inventar).
+- Verificado: gratis = Archify, Omniroute, Omakub, AnyDoc, Grillme. Freemium = Herder, Orca, DeepSeek, Open Montage, Mander. Suscripción = Hostinger.
+- JSON validado seed-v3 11/11.
+
+## Iteración 6 — Visualizar categorías (2026-09-16)
+- Misma arte, solo texto: filtro `Costo: todos/gratis/freemium/suscripcion` en fila de filtros, card con línea `costo · plataforma · nivel`, footer intacto `metodo · key`.
+- Buscador ahora incluye costo/plataforma/nivel. Contador seed-v3.
+- Lint limpio. Sin commit, sin push.
+
+## Iteración 7 — Sticky filtros + fix badge (2026-09-16)
+- Filtros con tope: `sticky top-0 z-20`, mismo fondo `#0E0E11` + hairline inferior. Da tope al scrollear sin cambiar arte.
+- Badge `⌘K` → `Ctrl K` (el glifo se veía como chino según fuente).
+- Lint limpio. Sin commit, sin push.
+
+## Iteración 8 — Ficha funcional (2026-09-16)
+- `Abrir ficha` ahora es botón: abre modal con ficha completa del seed (instalación, acceso, stack, plataforma/nivel, integraciones+tags, nichos, popularidad, estado, prioridad). Cierra con backdrop o botón. Misma arte papel.
+- Para probar: filtra `gratis` o busca `omniroute`, abre ficha BIB-002.
+- Lint limpio. Sin commit, sin push.
