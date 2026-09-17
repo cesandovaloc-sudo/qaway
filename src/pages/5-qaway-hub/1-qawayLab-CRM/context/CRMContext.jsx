@@ -104,6 +104,18 @@ export function CRMProvider({ children }) {
 
     // 2. DB Update desacoplado
     await crmAdapter.updateLeadChat(leadId, text, updatedHistory, 0)
+
+    // 3. Envío saliente hacia WhatsApp Cloud API vía Edge Function
+    const targetLead = leads.find(l => l.id === leadId)
+    if (targetLead?.whatsapp) {
+      crmAdapter.sendWhatsAppMessage({
+        to: targetLead.whatsapp,
+        text,
+        leadId,
+        type: payload?.type || 'text',
+        templateName: payload?.templateName || null
+      }).catch(err => console.warn('[CRMContext] Fallback saliente:', err))
+    }
   }, [leads])
 
   // Simular la llegada de un lead por webhook (Insert vía Adaptador)

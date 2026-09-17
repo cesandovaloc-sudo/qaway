@@ -25,6 +25,13 @@
   --color-ecp-ice: #f5f8ff;
   --color-ecp-ink: #0c1c3d;
 
+  /* Tokens CoraVet Clínica Veterinaria (usados dentro de .coravet-app) */
+  --color-cora-blue: #075dcc;
+  --color-cora-deep: #073879;
+  --color-cora-teal: #12b9bd;
+  --color-cora-pale: #eef9fc;
+  --color-cora-ink: #082b5b;
+
   /* Tokens Academy LMS App */
   --color-primary-50: #fff4ed;
   --color-primary-100: #ffe6d6;

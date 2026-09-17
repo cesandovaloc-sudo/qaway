@@ -1,0 +1,65 @@
+/* ============================================================
+   CORAVET SCOPED STYLES — Estilos Aislados para CoraVet
+   Evita cualquier fuga de estilos hacia el host Qaway Lab
+   ============================================================ */
+
+.coravet-app {
+  --bg: #fff;
+  --text: #082b5b;
+  --muted: #52657c;
+  --border: #dceaf1;
+  background: #fff;
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.coravet-app * {
+  box-sizing: border-box;
+}
+
+.coravet-app a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.coravet-app .container {
+  width: min(1180px, calc(100% - 40px));
+  margin: auto;
+}
+
+.coravet-app .photo-dog {
+  background: url('https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=1200&q=85') center/cover;
+}
+
+.coravet-app .photo-cat {
+  background: url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=1200&q=85') center/cover;
+}
+
+.coravet-app .photo-vet {
+  background: url('https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?auto=format&fit=crop&w=1400&q=85') center/cover;
+}
+
+.coravet-app .hero {
+  background: linear-gradient(90deg, #f4fbfe 0%, #edf9fc 48%, rgba(237, 249, 252, 0.2) 72%),
+    url('https://images.unsplash.com/photo-1556760544-74068565f05c?auto=format&fit=crop&w=1800&q=85') center/cover;
+}
+
+.coravet-app .section {
+  padding: 88px 0;
+}
+
+.coravet-app .focus\:focus-visible {
+  outline: 3px solid #075dcc55;
+  outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+  .coravet-app .container {
+    width: calc(100% - 28px);
+  }
+  .coravet-app .section {
+    padding: 60px 0;
+  }
+}

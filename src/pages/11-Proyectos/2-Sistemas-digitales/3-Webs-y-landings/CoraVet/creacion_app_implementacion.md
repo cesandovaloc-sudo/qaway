@@ -72,3 +72,15 @@
 - **Creación de la Tabla `public.tenants`:** Incluye triggers de Base32 para `client_code`, validación de slugs y políticas RLS.
 - **Siembra de Tenants:** Master Tenant (`QW-00001` - Qaway Lab) y Tenant Piloto (`QW-7K4P2` - CoraVet) registrados y verificados.
 - **Prueba Automatizada de Blindaje:** Validación con `test_tenants.mjs` exitosa.
+
+### [Iteración 03 — 2026-09-17]
+- **Etapa 1 Culminada (Montaje y Verificación del Frontend CoraVet):**
+  - **Candado Visual Estricto:** Diseño, layout, tipografías, componentes y responsive 100% preservados sin alteraciones de clases ni estructuras.
+  - **Tokens de Color:** Incorporación de paleta corporativa CoraVet (`--color-cora-blue`, `--color-cora-deep`, `--color-cora-teal`, `--color-cora-pale`, `--color-cora-ink`) en `@theme` dentro de `src/index.css`.
+  - **Aislamiento de Estilos:** Hoja de estilos `coravet-landing.css` encapsulada bajo `.coravet-app` para blindar el host Qaway Lab de cualquier fuga CSS.
+  - **Enrutamiento Relativo Dual:** Implementación de `coraLink()` en `src/config/site.ts` soportando simultáneamente vista previa dentro de Qaway (`/proyectos/coravet/*`) y despliegue desacoplado en dominio propio (`/`).
+  - **Cableado de Enlaces:** Enrutamiento interno envuelto con `coraLink()` en `Header.tsx`, `Footer.tsx`, `Blocks.tsx`, `Home.tsx` y `Team.tsx`.
+  - **Contenedor Principal:** Creación de `CoraVetAppPage.jsx` con restauración instantánea de scroll en navegación y títulos dinámicos SEO para las 8 páginas (`/`, `/veterinaria`, `/uvivet`, `/equipo`, `/pet-shop`, `/blog`, `/contacto`, `/reservar-cita`).
+  - **Registro en el Sistema:** Integración de la ruta `/proyectos/coravet/*` en `AppRouter.jsx` y catálogo en `routesRegistry.js`.
+  - **Validación de Compilación:** Ejecución de `npm run build:dev` exitosa (`✓ built in 20.41s`, chunk `CoraVetAppPage` generado) y verificación de respuesta HTTP 200 en servidor Vite local.
+

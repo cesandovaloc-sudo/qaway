@@ -72,4 +72,11 @@ El módulo **1-qawayLab-CRM** es la solución centralizada de gestión de relaci
   - **Alertas Visuales en el CRM:** Incorporación de insignias interactivas `⚠️ Asesor Requerido` en la lista de chats y en la cabecera del chat activo de [WhatsAppInboxView.jsx].
   - **Simulación Enriquecida:** Nuevo caso de prueba en [CRMPage.jsx] y [CRMContext.jsx] con solicitud explícita de asesor humano para comprobar el flujo en vivo.
 
+### [Iteración 09 - 2026-09-17]
+- **Uniformización de Nomenclatura y Despacho Saliente (Meta Cloud API):**
+  - **Uniformización de Edge Functions:** Creación de `whatsapp-webhook` como gemelo uniforme y estandarizado de `webhook-whatsapp`, permitiendo convención uniforme con prefijo de módulo.
+  - **Edge Function Saliente `whatsapp-mensaje-enviar`:** Creación del endpoint de despacho saliente hacia la Meta Graph API v20.0 con soporte para mensajes de texto y plantillas HSM oficiales, actualización reactiva del historial del lead en Supabase y modo simulación seguro cuando los secrets no están cargados.
+  - **Conexión en CRM Adaptador y Contexto:** Incorporación de `crmAdapter.sendWhatsAppMessage` y llamado automático dentro de `sendMessage` en [CRMContext.jsx], logrando que el botón "Enviar" despache hacia WhatsApp en producción.
+
+
 

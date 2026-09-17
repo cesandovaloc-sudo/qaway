@@ -383,6 +383,12 @@ const baseHierarchicalRoutes = [
         tag: 'Finanzas',
       },
       {
+        title: 'CoraVet Clínica Veterinaria',
+        path: '/proyectos/coravet',
+        description: 'Clínica veterinaria integral, UviVet y Pet Shop multi-tenant.',
+        tag: 'Veterinaria',
+      },
+      {
         title: 'Panadería Josué',
         path: '/proyectos/panaderia-josue',
         description: 'E-commerce y vitrina de productos artesanales con pedidos directos.',

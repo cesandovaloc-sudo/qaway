@@ -86,6 +86,7 @@ import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-lan
 import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
 import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
 import EpcPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/10-EPC estudio contable/EpcPage'
+import CoraVetAppPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/CoraVet/CoraVetAppPage'
 import HorizonteBackupPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizonteBackupPage'
 import PlantoraPage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/8_Planta/PlantoraPage'
 import AureaSkincarePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/7-skin-care/aurea-skincare-web/AureaSkincarePage'
@@ -261,6 +262,10 @@ export default function AppRouter() {
         <Route
           path="/proyectos/epc/*"
           element={<EpcPage />}
+        />
+        <Route
+          path="/proyectos/coravet/*"
+          element={<CoraVetAppPage />}
         />
         <Route
           path="/hub/blog-editor"

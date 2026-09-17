@@ -197,5 +197,33 @@ export const crmAdapter = {
     return () => {
       supabase.removeChannel(channel)
     }
+  },
+
+  /**
+   * Envía un mensaje saliente de WhatsApp a través de la Edge Function oficial
+   * @param {Object} params
+   * @param {string} params.to - Teléfono del cliente en formato internacional
+   * @param {string} params.text - Contenido del mensaje
+   * @param {string} [params.leadId] - UUID del lead
+   * @param {string} [params.type] - 'text' | 'template' | 'flow'
+   * @param {string} [params.templateName] - Nombre de plantilla HSM de Meta
+   * @returns {Promise<{success: boolean, wamid?: string, error?: any}>}
+   */
+  async sendWhatsAppMessage({ to, text, leadId, type = 'text', templateName = null }) {
+    try {
+      const { data, error } = await supabase.functions.invoke('whatsapp-mensaje-enviar', {
+        body: { to, text, leadId, type, templateName }
+      })
+
+      if (error) {
+        console.warn('[CRM Adapter] Edge function whatsapp-mensaje-enviar reportó error, usando fallback local:', error)
+        return { success: false, error }
+      }
+      return { success: true, ...data }
+    } catch (err) {
+      console.error('[CRM Adapter] Error al invocar whatsapp-mensaje-enviar:', err)
+      return { success: false, error: err }
+    }
   }
 }
+
