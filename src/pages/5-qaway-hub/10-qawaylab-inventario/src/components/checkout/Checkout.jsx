@@ -312,8 +312,8 @@ export default function Checkout({
       // pedido, lo recalcula (regla R1) y devuelve el QR o la URL de pago.
       let cobro = null
       if (provider !== 'manual' && supabase?.functions) {
-        // TEST/SANDBOX: Mercado Pago en modo prueba. Taypi sigue en prod.
-        const funcionPago = provider === 'taypi' ? 'taypi-pago-prod' : 'mercadopago-pago-test'
+        // Producción: ambas pasarelas en producción oficial estandarizada
+        const funcionPago = provider === 'taypi' ? 'taypi-pago-prod' : 'mercadopago-pago-prod'
         const cuerpoPago =
           provider === 'taypi'
             ? { orderId: order?.id } // TAYPI: SOLO orderId, nunca el monto
