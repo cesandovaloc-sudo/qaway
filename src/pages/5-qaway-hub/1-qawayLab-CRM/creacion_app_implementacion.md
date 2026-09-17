@@ -147,7 +147,7 @@ graph TD
 ---
 
 ## 4. Registro de Tareas Pendientes (Mantenimiento y Depuración)
-- [ ] **Depuración de compatibilidad:** Eliminar la carpeta `supabase/functions/webhook-whatsapp/` una vez que la nueva función `whatsapp-webhook` sea validada y probada al 100% en producción con Meta Cloud API.
+- [x] **Depuración de compatibilidad (Completada):** Eliminada la función obsoleta `webhook-whatsapp/` tanto del proyecto local como de Supabase Cloud, unificando toda la arquitectura en `whatsapp-webhook` y `whatsapp-mensaje-enviar`.
 
 
 

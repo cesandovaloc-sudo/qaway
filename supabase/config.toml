@@ -413,13 +413,18 @@ enabled = true
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
 
-[functions.webhook-whatsapp]
+[functions.whatsapp-webhook]
 enabled = true
 verify_jwt = false
-import_map = "./functions/webhook-whatsapp/deno.json"
-# Uncomment to specify a custom file path to the entrypoint.
-# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
-entrypoint = "./functions/webhook-whatsapp/index.ts"
-# Specifies static files to be bundled with the function. Supports glob patterns.
-# For example, if you want to serve static HTML pages in your function:
-# static_files = [ "./functions/webhook-whatsapp/*.html" ]
+entrypoint = "./functions/whatsapp-webhook/index.ts"
+
+[functions.whatsapp-mensaje-enviar]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/whatsapp-mensaje-enviar/index.ts"
+
+[functions.web3forms-mensaje-enviar]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/web3forms-mensaje-enviar/index.ts"
+

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, ArrowRight, ShieldCheck, Zap, Lock, Loader2 } from "lucide-react";
 import { supabase } from "@/config/supabase";
+import { enviarFormularioContacto } from "@/services/contactoService";
 import { trackLead } from '@/lib/analytics/metaPixel';
 
 export function QawayLeadContactForm() {
@@ -63,40 +64,18 @@ export function QawayLeadContactForm() {
         console.warn("Supabase insert warning:", spErr);
       }
 
-      // 2. Enviar por correo con Web3Forms (Proyectos + Respaldo)
-      const primaryKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || "b1022349-bf06-41b2-b110-5beb1cd2a1a0";
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || "d1e5eb0e-95c3-4cba-8029-b9e5ef8f8d49";
-
-      const mailBody = {
-        access_key: primaryKey,
+      // 2. Enviar por correo de forma segura mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: "proyectos",
         subject: `Nuevo Lead Desarrollo Web: ${lead.name} (${lead.company || "Sin empresa"})`,
-        from_name: "Qaway Lab Web Leads",
-        name: lead.name,
-        email: lead.email,
+        nombre: lead.name,
+        correo: lead.email,
         empresa: lead.company || "No especificada",
-        whatsapp: lead.phone,
+        telefono: lead.phone,
         presupuesto: lead.budget,
         plazo_estimado: lead.timeline,
         mensaje: lead.message || "Sin mensaje adicional",
-      };
-
-      await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(mailBody),
       });
-
-      if (backupKey && backupKey !== primaryKey) {
-        fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            ...mailBody,
-            access_key: backupKey,
-            subject: `[Copia] Nuevo Lead Web: ${lead.name}`,
-          }),
-        }).catch(() => {});
-      }
 
       setSubmitted(true);
       trackLead('Landing Desarrollo Web');
