@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Search, ChevronDown } from 'lucide-react'
+import {
+  ArrowRight, Search, ChevronDown, Sparkles, BookOpen, Clock,
+  Layers, CheckCircle2, Camera, MessageSquare, Zap, ShieldCheck
+} from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import mockupGelato from '../8-landings/8-desarollo web/assets/Hero-2.webp'
@@ -43,211 +46,328 @@ const V2_FILTERS = [
 ]
 
 const catalogItems = [
-  // ─── 1. SERVICIOS WEB (TRANSACCIONAL / LANDINGS) ───
-  {
-    id: 'desarrollo-web-hub',
-    to: '/landings/desarrollo-web',
-    image: mockupSitiosWeb,
-    tag: 'Servicio Web · Desde S/ 79.90',
-    tagType: 'service',
-    title: 'Desarrollo Web & Tiendas Online',
-    desc: 'Arquitectura web de alta conversión: One Web (S/ 79.90), Web Comercial (S/ 290) y Tiendas con pasarelas de pago y pedidos directos a WhatsApp.',
-    categories: ['Servicios Web'],
-    ctaText: 'Ver planes y precios',
-    isMockup: true,
-  },
-  {
-    id: 'sistema-notion',
-    to: '/landings/sistema-contenido-notion',
-    image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_hero.webp',
-    tag: 'Producto Digital · S/ 29.00',
-    tagType: 'digital',
-    title: 'Sistema Estratégico de Contenidos en Notion',
-    desc: 'Workspace profesional con prompts de IA y cronograma Gantt para sistematizar 30 días de contenido en menos de una hora. Acceso de por vida.',
-    categories: ['Productos Digitales'],
-    ctaText: 'Implementar sistema',
-    isMockup: false,
-  },
+  // ─── 1. CURSOS ONLINE (ANATOMÍA ACADEMY) ───
   {
     id: 'identidad-visual-curso',
     to: '/landings/identidad-visual',
     image: '/assets/pages/8-landings/2-identidad-visual/1.webp',
-    tag: 'Curso Online · S/ 29.00',
-    tagType: 'course',
-    title: 'Curso: Identidad Visual con Inteligencia Artificial',
-    desc: 'Aprende paso a paso a diseñar la identidad visual, paleta cromática, manual de marca y componentes gráficos profesionales de tu negocio con IA.',
+    ribbon: 'DESTACADO',
+    ribbonBg: 'bg-[#ff4b0b]',
+    category: 'DISEÑO & IA',
+    badge: 'CURSO PRÁCTICO',
+    title: 'Identidad Visual con Inteligencia Artificial',
+    subtitle: 'Por Qaway Academy',
+    desc: 'Construye la identidad gráfica, manual de marca, paleta cromática y componentes de tu negocio con flujos guiados de IA.',
+    meta: [
+      { icon: BookOpen, text: 'Curso práctico' },
+      { icon: Clock, text: 'Acceso de por vida' },
+    ],
+    ctaText: 'Ver contenido',
+    price: 'S/ 29.00',
+    oldPrice: 'S/ 60',
     categories: ['Cursos Academy'],
-    ctaText: 'Inscribirme al curso',
     isMockup: false,
   },
 
-  // ─── 2. CASOS DE ÉXITO (PROOF OF WORK / PORTAFOLIO) ───
+  // ─── 2. PRODUCTOS DIGITALES (NOTION / WORKSPACE) ───
   {
-    id: 'caso-vallet',
-    to: '/proyectos/vallet-inmobiliaria',
-    image: showcaseVallet,
-    tag: 'Caso de Éxito · Captación',
-    tagType: 'case',
-    title: 'Vallet Real Estate — Captación Inmobiliaria',
-    desc: 'Plataforma web inmobiliaria con recorridos virtuales, catálogo dinámico de propiedades y captación automatizada directa a WhatsApp.',
-    categories: ['Casos de Éxito'],
-    ctaText: 'Ver caso de estudio',
+    id: 'sistema-notion',
+    to: '/landings/sistema-contenido-notion',
+    image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_hero.webp',
+    ribbon: 'WORKSPACE NOTION',
+    ribbonBg: 'bg-[#18181b]',
+    category: 'PRODUCTIVIDAD',
+    badge: 'DUPLICABLE 1-CLIC',
+    title: 'Sistema Estratégico de Contenido en Notion',
+    subtitle: 'Por Qaway Lab Systems',
+    desc: 'Arquitectura completa con prompts estratégicos y calendario operativo para planificar 30 días de contenido en menos de una hora.',
+    meta: [
+      { icon: Sparkles, text: 'Prompts IA incluidos' },
+      { icon: Zap, text: 'Gantt operativo' },
+    ],
+    ctaText: 'Ver sistema',
+    price: 'S/ 29.00',
+    oldPrice: 'S/ 60',
+    categories: ['Productos Digitales'],
+    isMockup: false,
+  },
+
+  // ─── 3. SERVICIOS WEB & SISTEMAS (LLAVE EN MANO) ───
+  {
+    id: 'desarrollo-web-hub',
+    to: '/landings/desarrollo-web',
+    image: mockupSitiosWeb,
+    ribbon: 'SERVICIO WEB',
+    ribbonBg: 'bg-[#fe6612]',
+    category: 'DESARROLLO A MEDIDA',
+    badge: 'LLAVE EN MANO',
+    title: 'Desarrollo Web & Tiendas Online',
+    subtitle: 'Arquitectura corporativa y e-commerce',
+    desc: 'Sitios corporativos y tiendas con catálogo interactivo, pasarelas de pago (Mercado Pago/Yape) y conexión directa a WhatsApp.',
+    meta: [
+      { icon: Zap, text: 'Entrega 5 a 10 días' },
+      { icon: MessageSquare, text: 'Pedidos a WhatsApp' },
+    ],
+    ctaText: 'Ver planes',
+    price: 'Desde S/ 79.90',
+    oldPrice: null,
+    categories: ['Servicios Web'],
     isMockup: true,
   },
+
+  // ─── 4. CASOS DE ÉXITO (PROOF OF WORK / CLIENTES) ───
   {
     id: 'caso-aurea',
     to: '/proyectos/aurea-skincare',
     image: '/aurea-images/showcase/1-aurea-skincare-showcase.webp',
-    tag: 'Caso de Éxito · E-commerce',
-    tagType: 'case',
+    ribbon: 'CASO DE ESTUDIO',
+    ribbonBg: 'bg-[#27272a]',
+    category: 'E-COMMERCE & BEAUTY',
+    badge: 'EN PRODUCCIÓN',
     title: 'Aurea Skincare — E-commerce & Cosmética',
-    desc: 'Tienda digital con catálogo interactivo de sérums y aceites, checkout fluido de alta gama y diseño editorial de alta conversión.',
-    categories: ['Casos de Éxito'],
+    subtitle: 'Marca de cosmética botánica',
+    desc: 'E-commerce editorial con catálogo interactivo de sérums, diseño sensorial de alta conversión y checkout optimizado.',
+    meta: [
+      { icon: Layers, text: 'Catálogo interactivo' },
+      { icon: CheckCircle2, text: 'Desplegado en producción' },
+    ],
     ctaText: 'Ver caso de estudio',
+    price: 'Caso Real',
+    isStatusBadge: true,
+    categories: ['Casos de Éxito'],
+    isMockup: true,
+  },
+  {
+    id: 'caso-vallet',
+    to: '/proyectos/vallet-inmobiliaria',
+    image: showcaseVallet,
+    ribbon: 'CASO DE ESTUDIO',
+    ribbonBg: 'bg-[#27272a]',
+    category: 'INMOBILIARIA & TOURS',
+    badge: 'CAPTACIÓN 24/7',
+    title: 'Vallet Real Estate — Captación Inmobiliaria',
+    subtitle: 'Agencia de bienes raíces',
+    desc: 'Ecosistema web con buscador de inmuebles, recorridos virtuales y captación automatizada de leads directamente a WhatsApp.',
+    meta: [
+      { icon: Layers, text: 'Recorridos virtuales' },
+      { icon: CheckCircle2, text: 'En producción' },
+    ],
+    ctaText: 'Ver caso de estudio',
+    price: 'Caso Real',
+    isStatusBadge: true,
+    categories: ['Casos de Éxito'],
     isMockup: true,
   },
   {
     id: 'caso-panaderia-josue',
     to: '/proyectos/panaderia-josue',
     image: '/josue-images/showcase/1-josue-panaderia-hero-productos.webp',
-    tag: 'Caso de Éxito · One Web',
-    tagType: 'case',
-    title: 'Panadería Josué — Artesanal & Local',
-    desc: 'Sitio web One Page con presentación de panes de masa madre, horarios de horneado y pedidos directos en un solo toque a WhatsApp.',
-    categories: ['Casos de Éxito'],
+    ribbon: 'CASO DE ESTUDIO',
+    ribbonBg: 'bg-[#27272a]',
+    category: 'ONE WEB LOCAL',
+    badge: 'ALTA CONVERSIÓN',
+    title: 'Panadería Josué — Artesanal & Masa Madre',
+    subtitle: 'Comercio local gastronómico',
+    desc: 'Página web One Page con presentación de panes artesanales, horarios de horneado y pedidos directos en un solo toque.',
+    meta: [
+      { icon: Layers, text: 'Pedidos WhatsApp' },
+      { icon: CheckCircle2, text: 'En producción' },
+    ],
     ctaText: 'Ver caso de estudio',
+    price: 'Caso Real',
+    isStatusBadge: true,
+    categories: ['Casos de Éxito'],
     isMockup: true,
   },
   {
     id: 'caso-dental',
     to: '/proyectos/dental',
     image: showcaseDental,
-    tag: 'Caso de Éxito · Salud',
-    tagType: 'case',
-    title: 'Clínica Dental — Especialidades & Citas',
-    desc: 'Estructura One Page de alta credibilidad médica, presentación clara de tratamientos clínicos y captación directa de pacientes.',
-    categories: ['Casos de Éxito'],
+    ribbon: 'CASO DE ESTUDIO',
+    ribbonBg: 'bg-[#27272a]',
+    category: 'SALUD & CLÍNICA',
+    badge: 'AGENDAMIENTO',
+    title: 'Clínica Dental — Especialidades Odontológicas',
+    subtitle: 'Centro médico odontológico',
+    desc: 'Sitio corporativo One Page de alta credibilidad, presentación clara de tratamientos clínicos y captación directa de citas.',
+    meta: [
+      { icon: Layers, text: 'Ficha de tratamientos' },
+      { icon: CheckCircle2, text: 'En producción' },
+    ],
     ctaText: 'Ver caso de estudio',
+    price: 'Caso Real',
+    isStatusBadge: true,
+    categories: ['Casos de Éxito'],
     isMockup: true,
   },
 
-  // ─── 3. ESTUDIO & FOTOGRAFÍA ───
+  // ─── 5. ESTUDIO FOTOGRÁFICO & CONTENIDO ───
   {
     id: 'sesion-linkedin',
     to: '/landings/fotografia-linkedin',
     image: '/assets/pages/8-landings/5-fotografia-linkedin/galeria-ejecutivo.png',
-    tag: 'Estudio · S/ 490.00',
-    tagType: 'studio',
+    ribbon: 'ESTUDIO FOTOGRÁFICO',
+    ribbonBg: 'bg-[#ff4b0b]',
+    category: 'DIRECCIÓN DE ARTE',
+    badge: 'LIMA ESTUDIO',
     title: 'Sesión Fotográfica LinkedIn & Ejecutiva',
-    desc: 'Dirección de arte profesional para proyectar autoridad. Sesión individual de hasta 60 min, 2 cambios de vestuario y 8 fotos finales en alta resolución.',
-    categories: ['Estudio & Foto'],
+    subtitle: 'Retrato profesional de autoridad',
+    desc: 'Dirección de postura y expresión para proyectar solidez. 60 min de sesión, 2 cambios de vestuario y 8 fotografías finales retocadas.',
+    meta: [
+      { icon: Camera, text: '8 fotos finales retocadas' },
+      { icon: Clock, text: 'Sesión de 60 minutos' },
+    ],
     ctaText: 'Reservar sesión',
+    price: 'S/ 490.00',
+    oldPrice: null,
+    categories: ['Estudio & Foto'],
     isMockup: false,
   },
   {
     id: 'restauracion-foto',
     to: '/landings/restauracion-fotografica2',
     image: mockupGelato,
-    tag: 'Estudio · Desde S/ 11.50',
-    tagType: 'studio',
+    ribbon: 'RESTAURACIÓN',
+    ribbonBg: 'bg-[#18181b]',
+    category: 'ESTUDIO DIGITAL',
+    badge: 'ARCHIVO HISTÓRICO',
     title: 'Restauración Digital de Fotografías Antiguas',
-    desc: 'Recuperación meticulosa de imágenes dañadas, corrección de pliegues, manchas y color con respeto absoluto por la identidad del rostro original.',
+    subtitle: 'Preservación de memoria y detalle',
+    desc: 'Limpieza y reconstrucción de imágenes con manchas, quiebres o pérdida cromática. Respeto absoluto por la fisonomía original.',
+    meta: [
+      { icon: Sparkles, text: 'Corrección cromática' },
+      { icon: ShieldCheck, text: 'Fidelidad fisonómica' },
+    ],
+    ctaText: 'Evaluar fotografía',
+    price: 'Desde S/ 11.50',
+    oldPrice: null,
     categories: ['Estudio & Foto'],
-    ctaText: 'Evaluar mi fotografía',
     isMockup: true,
   },
 ]
 
-function getBadgeClasses(tagType) {
-  switch (tagType) {
-    case 'service':
-      return 'bg-[#fe6612] text-white border-transparent shadow-xs'
-    case 'digital':
-      return 'bg-[#111111] text-white border-white/20'
-    case 'course':
-      return 'bg-[#7c3aed] text-white border-transparent'
-    case 'studio':
-      return 'bg-[#18181b] text-[#fe6612] border-[#fe6612]/30'
-    case 'case':
-    default:
-      return 'bg-black/60 text-white border-white/20'
-  }
-}
+function StandardProductCard({ item, delay = 0 }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.45, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
+    >
+      {/* Cabecera / Imagen con Ribbon Rectangular Sólido estilo Academy */}
+      <Link to={item.to} className="relative block overflow-hidden">
+        {/* Ribbon Rectangular Sólido */}
+        {item.ribbon && (
+          <span
+            className={`absolute left-[0.65rem] top-[0.65rem] z-10 ${item.ribbonBg || 'bg-[#ff4b0b]'} px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.06em] text-white shadow-xs`}
+          >
+            {item.ribbon}
+          </span>
+        )}
 
-function StaticProjectCardV2({ to, image, tag, tagType = 'case', title, desc, delay = 0, isMockup = false, ctaText = 'Ver proyecto' }) {
-  const badgeClass = getBadgeClasses(tagType)
-
-  const CardContent = (
-    <>
-      {isMockup ? (
-        <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0 relative">
-          {tag && (
-            <div className={`absolute top-3.5 right-3.5 z-20 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs border ${badgeClass}`}>
-              {tag}
+        {item.isMockup ? (
+          <div className="flex h-[240px] sm:h-[260px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+            <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="h-full w-full object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.025]"
+              />
             </div>
-          )}
-          <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
+          </div>
+        ) : (
+          <div className="relative h-[240px] sm:h-[260px] overflow-hidden bg-zinc-100">
             <img
-              src={image}
-              alt={title}
-              className="h-full w-full object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.02]"
+              src={item.image}
+              alt={item.title}
+              className="h-full w-full object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.025]"
             />
           </div>
-        </div>
-      ) : (
-        <div className="relative h-[260px] sm:h-[300px] overflow-hidden bg-zinc-100">
-          <img
-            src={image}
-            alt={title}
-            className="h-full w-full object-cover object-top transition-transform duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)] group-hover:scale-[1.02]"
-          />
-          {tag && (
-            <div className={`absolute top-3.5 right-3.5 z-20 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-xs border ${badgeClass}`}>
-              {tag}
-            </div>
+        )}
+      </Link>
+
+      {/* Cuerpo de la Tarjeta (Anatomía idéntica al Benchmark Academy) */}
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        {/* Fila de Categoría + Badge Formato */}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[0.69rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
+            {item.category}
+          </span>
+          {item.badge && (
+            <span className="text-[0.65rem] font-semibold text-zinc-500 bg-zinc-100 px-2 py-0.5 uppercase tracking-wider rounded-xs">
+              {item.badge}
+            </span>
           )}
         </div>
-      )}
-      <div className="flex flex-1 flex-col justify-between p-[24px] sm:p-[26px]">
-        <div>
-          <h3 className="mb-2.5 text-[19px] font-bold text-[#111111] tracking-[-0.02em] leading-[1.25] transition-colors group-hover:text-[#fe6612]">
-            {title}
-          </h3>
-          <p className="text-[14px] leading-[1.55] text-[#71717a]">
-            {desc}
+
+        {/* Título de la Tarjeta */}
+        <h3 className="mt-3.5 text-[1.18rem] sm:text-[1.26rem] font-bold leading-[1.12] tracking-[-0.03em] text-[#111111]">
+          <Link to={item.to} className="hover:text-[#ff4b0b] transition-colors">
+            {item.title}
+          </Link>
+        </h3>
+
+        {/* Subtítulo / Autor */}
+        {item.subtitle && (
+          <p className="mt-1.5 text-[0.76rem] font-medium text-zinc-400">
+            {item.subtitle}
           </p>
-        </div>
-        {to && (
-          <div className="pt-4 flex items-center">
-            <span className="inline-flex items-center gap-1.5 text-[14px] font-bold text-[#fe6612] transition-colors">
-              <span>{ctaText}</span>
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-            </span>
+        )}
+
+        {/* Descripción de 2 líneas */}
+        <p className="mt-3 line-clamp-2 text-[0.82rem] leading-[1.5] text-zinc-600">
+          {item.desc}
+        </p>
+
+        {/* Fila de Metadatos con Iconos */}
+        {item.meta && item.meta.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[0.68rem] font-semibold text-[#5f5d59]">
+            {item.meta.map((m, i) => {
+              const IconComponent = m.icon
+              return (
+                <span key={i} className="flex items-center gap-1.5">
+                  <IconComponent className="h-3.5 w-3.5 text-zinc-400" />
+                  {m.text}
+                </span>
+              )
+            })}
           </div>
         )}
-      </div>
-    </>
-  )
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 22 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -6, boxShadow: '0 18px 45px rgba(0,0,0,0.1)', transition: { duration: 0.2, ease: 'easeOut' } }}
-      viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.5, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className={`group flex flex-col overflow-hidden rounded-[12px] border border-[#e4e4e7] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${to ? 'cursor-pointer' : ''}`}
-    >
-      {to ? (
-        <Link to={to} className="flex flex-col h-full">
-          {CardContent}
-        </Link>
-      ) : (
-        <div className="flex flex-col h-full">
-          {CardContent}
+        {/* ─── FOOTER CON PRECIO INDEPENDIENTE Y DESTACADO ─── */}
+        <div className="mt-auto flex items-center justify-between gap-4 pt-5 border-t border-zinc-100">
+          <Link
+            to={item.to}
+            className="inline-flex items-center gap-2 text-[0.84rem] font-bold text-[#ff4b0b] transition-colors group-hover:text-[#fe6612]"
+          >
+            <span>{item.ctaText || 'Ver contenido'}</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Link>
+
+          {/* Columna Derecha: Precio Aislado y Contundente */}
+          <div className="text-right shrink-0">
+            {item.isStatusBadge ? (
+              <span className="text-[0.68rem] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-xs border border-emerald-200 uppercase tracking-wider">
+                {item.price}
+              </span>
+            ) : (
+              <div className="flex items-baseline gap-1.5">
+                {item.oldPrice && (
+                  <span className="text-[0.74rem] font-medium text-zinc-400 line-through">
+                    {item.oldPrice}
+                  </span>
+                )}
+                <span className="text-[1.05rem] sm:text-[1.12rem] font-extrabold text-[#111111] tracking-tight">
+                  {item.price}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-      )}
-    </motion.div>
+      </div>
+    </motion.article>
   )
 }
 
@@ -262,7 +382,8 @@ export default function ProyectosPageV2() {
     const matchesSearch = !q || (
       item.title.toLowerCase().includes(q) ||
       item.desc.toLowerCase().includes(q) ||
-      (item.tag && item.tag.toLowerCase().includes(q)) ||
+      item.category.toLowerCase().includes(q) ||
+      (item.badge && item.badge.toLowerCase().includes(q)) ||
       item.categories.some(c => c.toLowerCase().includes(q))
     )
     return matchesFilter && matchesSearch
@@ -291,7 +412,7 @@ export default function ProyectosPageV2() {
             </h1>
 
             <p className="text-white/90 text-base sm:text-lg max-w-2xl leading-relaxed mb-7 text-balance font-normal">
-              Explora nuestros casos de éxito construidos para marcas reales, adquiere herramientas y productos digitales listos para usar, o contrata tu próximo sistema web.
+              Casos de estudio reales, cursos prácticos con IA, plantillas operativas listas para duplicar y servicios de desarrollo web de alto impacto.
             </p>
 
             {/* Buscador Integrado */}
@@ -302,7 +423,7 @@ export default function ProyectosPageV2() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar por servicio, curso, plantilla o caso de éxito..."
+                  placeholder="Buscar por curso, plantilla, servicio o caso de éxito..."
                   className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-black/40 font-medium"
                 />
                 {searchQuery && (
@@ -320,7 +441,7 @@ export default function ProyectosPageV2() {
         </div>
       </section>
 
-      {/* ─── BARRA DE PÍLDORAS / CATEGORÍAS ─── */}
+      {/* ─── BARRA DE PÍLDORAS CON ESTÁNDAR ARTESANAL ─── */}
       <div id="proyectos-listado" className="border-b border-black/10 bg-white py-5 shadow-[0_2px_12px_rgba(0,0,0,0.02)] sticky top-0 z-30">
         <div className="projects-shell flex items-center justify-between gap-4">
           
@@ -364,17 +485,10 @@ export default function ProyectosPageV2() {
           {visibleItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
               {visibleItems.map((item, idx) => (
-                <StaticProjectCardV2
+                <StandardProductCard
                   key={item.id}
-                  to={item.to}
-                  image={item.image}
-                  tag={item.tag}
-                  tagType={item.tagType}
-                  title={item.title}
-                  desc={item.desc}
+                  item={item}
                   delay={Math.min(idx * 0.05, 0.25)}
-                  isMockup={item.isMockup}
-                  ctaText={item.ctaText}
                 />
               ))}
             </div>
