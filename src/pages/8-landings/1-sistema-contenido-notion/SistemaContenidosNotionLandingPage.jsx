@@ -460,9 +460,9 @@ function NotionPrecios() {
                 ))}
               </ul>
 
-              <a href="https://www.qawaylab.com/checkout/?add-to-cart=2971" target="_blank" rel="noopener noreferrer" className="block w-full py-4 bg-[#FF5733] text-white rounded-lg font-black shadow-xl shadow-orange-500/30 hover:scale-[1.02] transition-transform uppercase text-xs tracking-widest leading-tight text-center">
+              <Link to="/carrito?add=sistema-contenido-notion" className="block w-full py-4 bg-[#FF5733] text-white rounded-lg font-black shadow-xl shadow-orange-500/30 hover:scale-[1.02] transition-transform uppercase text-xs tracking-widest leading-tight text-center">
                 Implementar mi Sistema
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -530,9 +530,9 @@ function NotionCta() {
           <span>WORKFLOW ESTRATÉGICO</span>?
         </h2>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <a href="https://www.qawaylab.com/checkout/?add-to-cart=2971" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto bg-black text-white px-12 py-5 rounded-lg font-bold text-xl shadow-2xl hover:scale-105 transition-transform uppercase tracking-tight inline-block text-center">
+          <Link to="/carrito?add=sistema-contenido-notion" className="w-full sm:w-auto bg-black text-white px-12 py-5 rounded-lg font-bold text-xl shadow-2xl hover:scale-105 transition-transform uppercase tracking-tight inline-block text-center">
             Implementar mi Sistema
-          </a>
+          </Link>
           <span className="text-white/40 font-black uppercase text-[10px] tracking-widest px-4">ó</span>
           <a href={waLink} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto bg-transparent border-2 border-white text-white px-12 py-5 rounded-lg font-bold hover:bg-white/10 transition-colors uppercase tracking-tight inline-block text-center">
             Háblame de tu Proyecto

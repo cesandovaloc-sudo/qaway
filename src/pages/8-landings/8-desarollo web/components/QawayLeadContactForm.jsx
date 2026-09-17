@@ -154,7 +154,7 @@ export function QawayLeadContactForm() {
       }
 
       // Redirigir al Carrito oficial de pagos
-      window.location.href = '/hub/pagos/carrito';
+      window.location.href = `/carrito?add=${selectedProduct.slug}`;
     } catch (err) {
       console.error("Error al enviar formulario:", err);
       setSubmitError("Hubo un problema de conexión. Puedes escribirnos directamente por WhatsApp.");

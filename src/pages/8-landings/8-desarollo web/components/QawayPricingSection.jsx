@@ -11,7 +11,7 @@ export function QawayPricingSection() {
   // estática creaba una segunda identidad para el mismo producto y duplicaba
   // la fila en "Mi pedido".
   const handleSelectPlan = (plan) => {
-    navigate(`/hub/pagos/carrito?add=${plan.id}`);
+    navigate(`/carrito?add=${plan.id}`);
   };
   const plans = [
     {

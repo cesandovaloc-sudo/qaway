@@ -21,8 +21,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const WA_COURSE_URL = `${WHATSAPP_PHONE_LINK}?text=${encodeURIComponent('Hola Qaway, quiero comenzar el curso de Identidad Visual con IA.')}`;
-const goToCart = () => window.open(WA_COURSE_URL, '_blank', 'noopener,noreferrer');
+const goToCart = () => {
+  window.location.href = '/carrito?add=identidad-visual-kit';
+};
 
 /**
  * LANDING PRODUCTION AGENT
