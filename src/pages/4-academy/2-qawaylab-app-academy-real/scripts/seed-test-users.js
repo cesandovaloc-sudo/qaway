@@ -31,19 +31,19 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 })
 
 // ─── Datos de prueba ─────────────────────────────────────────
-const TEACHER = { email: 'teacher@qaway.test', password: 'Gyg@fGZk*ByL6LF', name: 'Carlos López' }
+const TEACHER = { email: 'teacher@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Carlos López' }
 
 const STUDENTS = [
-  { email: 'luis.garcia@qaway.test', password: 'test123456', name: 'Luis García' },
-  { email: 'maria.torres@qaway.test', password: 'test123456', name: 'María Torres' },
-  { email: 'pedro.sanchez@qaway.test', password: 'test123456', name: 'Pedro Sánchez' },
-  { email: 'ana.ramos@qaway.test', password: 'test123456', name: 'Ana Ramos' },
-  { email: 'carlos.mendoza@qaway.test', password: 'test123456', name: 'Carlos Mendoza' },
-  { email: 'laura.diaz@qaway.test', password: 'test123456', name: 'Laura Díaz' },
-  { email: 'jorge.vega@qaway.test', password: 'test123456', name: 'Jorge Vega' },
-  { email: 'sofia.castro@qaway.test', password: 'test123456', name: 'Sofía Castro' },
-  { email: 'diego.rojas@qaway.test', password: 'test123456', name: 'Diego Rojas' },
-  { email: 'valeria.navarro@qaway.test', password: 'test123456', name: 'Valeria Navarro' },
+  { email: 'luis.garcia@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Luis García' },
+  { email: 'maria.torres@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'María Torres' },
+  { email: 'pedro.sanchez@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Pedro Sánchez' },
+  { email: 'ana.ramos@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Ana Ramos' },
+  { email: 'carlos.mendoza@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Carlos Mendoza' },
+  { email: 'laura.diaz@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Laura Díaz' },
+  { email: 'jorge.vega@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Jorge Vega' },
+  { email: 'sofia.castro@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Sofía Castro' },
+  { email: 'diego.rojas@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Diego Rojas' },
+  { email: 'valeria.navarro@qaway.test', password: 'CHANGE_ME_STUDENT_PASSWORD', name: 'Valeria Navarro' },
 ]
 
 const COURSE_IDS = {
@@ -232,21 +232,7 @@ async function main() {
   console.log(`   ✅ ${subCount} entregas creadas (${pendingCount} pendientes de revisar)`)
 
   // 7. Resumen final
-  console.log('\n═══════════════════════════════════════════')
-  console.log('✅ TODO LISTO')
-  console.log('═══════════════════════════════════════════')
-  console.log('\n📋 Credenciales de prueba:')
-  console.log(`   👨‍🏫 Teacher:  ${TEACHER.email} / ${TEACHER.password}`)
-  console.log(`   👥 Estudiantes:`)
-  for (const s of STUDENTS) {
-    console.log(`      ${s.email} / ${s.password}`)
-  }
-  console.log('\n🌐 URLs para probar:')
-  console.log(`   📊 /docente          — Panel del teacher`)
-  console.log(`   📝 /docente/tareas   — Revisión de tareas (${pendingCount} pendientes)`)
-  console.log(`   📚 /docente/cursos/introduccion-al-desarrollo-web — Gestión del curso`)
-  console.log(`   👤 /panel            — Panel de estudiante (login con cualquier estudiante)`)
-  console.log('\n✨ Listo para probar la revisión de tareas!')
+  console.log('\n✅ TODO LISTO')
 }
 
 main().catch(console.error)

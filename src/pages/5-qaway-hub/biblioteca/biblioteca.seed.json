@@ -1,6 +1,6 @@
 {
   "version": "seed-v4",
-  "total": 14,
+  "total": 15,
   "vocabulario": {
     "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
     "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
@@ -389,6 +389,33 @@
       "prioridad_qaway": "alta",
       "tags": ["sdk", "agentes", "aws", "mcp", "chatbot", "open-source"],
       "alias_busqueda": ["sdk agentes", "crear agentes", "chatbot", "strands", "aws", "mcp"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+    },
+    {
+      "id": "BIB-015",
+      "slug": "microsoft-tgrep",
+      "nombre": "tgrep (Microsoft)",
+      "nombre_simple": "Buscador de código superveloz",
+      "tipo": "app",
+      "categoria": "Entorno de Desarrollo",
+      "subcategoria": "Búsqueda de código",
+      "instalacion": { "metodo": "1-comando", "formato": "Binario CLI (Rust)", "comando_ejemplo": "tgrep index . / tgrep serve ." },
+      "stack": { "lenguaje": "Rust", "rendimiento": "Índice trigramas, hasta 52x vs ripgrep", "entorno": "Terminal cliente/servidor" },
+      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Open source MIT" },
+      "costo": "gratis",
+      "plataforma": ["local"],
+      "nivel": "dev",
+      "popularidad": { "estrellas": "~3,200", "nota": "Repo oficial Microsoft, lo usa Copilot CLI" },
+      "integraciones": ["cli"],
+      "nichos": ["Desarrolladores", "Agentes de IA"],
+      "funcionalidad_corta": "Los agentes buscan código hasta 52x más rápido",
+      "caso_uso": "Indexas una vez con file watcher y los agentes buscan al instante en monorepos grandes. Lo usa Copilot CLI internamente.",
+      "url_repo": "https://github.com/microsoft/tgrep",
+      "licencia": "open",
+      "estado": "verificado",
+      "prioridad_qaway": "alta",
+      "tags": ["busqueda", "codigo", "rust", "agentes", "ripgrep", "open-source"],
+      "alias_busqueda": ["buscar codigo", "grep", "ripgrep", "tgrep", "indexar", "monorepo"],
       "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     }
   ]

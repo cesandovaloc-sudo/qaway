@@ -173,4 +173,50 @@ graph TD
     PLAN3 -.->|Add-on Opcional| ADDON
 ```
 
+---
+
+## 📌 Flujo 06: Arquitectura Multi-Tenant & Despachador Multi-Modelo Universal (BYOK)
+
+### Propósito:
+Permitir que el SaaS de Qaway Lab opere con múltiples clientes empresariales de forma aislada. Cada cliente puede usar el modelo que prefiera (Gemini, OpenAI, Claude) y elegir si utiliza la cuenta de Qaway Lab (Managed) o conecta su propia API Key corporativa (Bring Your Own Key - BYOK).
+
+```mermaid
+flowchart TD
+    WA[📱 Mensaje Entrante WhatsApp] --> Meta[🌐 Meta Cloud API]
+    Meta --> Webhook[⚡ Edge Function: whatsapp-webhook]
+    
+    Webhook --> Lookup[🔍 Busca Tenant por metadata.phone_number_id en public.tenants]
+    
+    subgraph TENANT_CONFIG["Configuración Dinámica de la Empresa"]
+        T_Prompt[📝 System Prompt & Catálogo Exclusivo del Negocio]
+        T_Provider{🧠 Proveedor de IA Configurado}
+        T_Auth{🔑 Modo de Facturación de Tokens}
+    end
+    
+    Lookup --> TENANT_CONFIG
+    
+    T_Provider -->|provider: 'gemini'| EngineGemini[Google Gemini 2.0 Flash / 1.5 Pro]
+    T_Provider -->|provider: 'openai'| EngineOpenAI[OpenAI GPT-4o / GPT-4o-mini]
+    T_Provider -->|provider: 'anthropic'| EngineClaude[Anthropic Claude 3.5 Sonnet / Haiku]
+    
+    T_Auth -->|mode: 'managed'| KeyQaway[Usa Clave Maestra de Qaway Lab]
+    T_Auth -->|mode: 'byok'| KeyCliente[Usa API Key privada del Cliente - Costo $0 para Qaway]
+    
+    EngineGemini --> Dispatch[🚀 Despachador Universal de IA]
+    EngineOpenAI --> Dispatch
+    EngineClaude --> Dispatch
+    KeyQaway --> Dispatch
+    KeyCliente --> Dispatch
+    T_Prompt --> Dispatch
+    
+    Dispatch --> SendWA[📲 Despacha Respuesta Personalizada al Cliente en WhatsApp]
+    Dispatch --> SaveDB[🗄️ Guarda Historial en Supabase vinculado al tenant_id]
+```
+
+### Casos de uso:
+- **Caso 1 (Qaway Lab):** Utiliza Gemini 2.0 Flash en modo *Managed* con el catálogo y portafolio digital de Qaway.
+- **Caso 2 (CoraVet Veterinaria):** Utiliza Gemini 2.0 Flash en modo *Managed*, con el agente "Luna", protocolo de urgencias veterinarias y agenda médica.
+- **Caso 3 (Vallet Inmobiliaria - BYOK):** Utiliza GPT-4o con su propia API Key de OpenAI, filtrando clientes por presupuesto y zona sin costo de tokens para Qaway.
+
+
 

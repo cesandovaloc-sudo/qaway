@@ -159,7 +159,7 @@ const { Client } = require('@notionhq/client');
 const app = express();
 app.use(express.json());
 
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
+const notion = new Client({ auth: process.env.NOTION_TOKEN || 'placeholder-token-for-demo' });
 const DATABASE_ID = process.env.NOTION_DATABASE_ID;
 
 // Verificación del webhook de Meta (WhatsApp Cloud API)

@@ -22,8 +22,7 @@ export interface AIService {
   suggestPrice(productData: Partial<AIAnalysisResult>): Promise<number | null>
 }
 
-// ── Environment Variables ──
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
+// ── AI API Configuration ──
 const AI_API_URL = import.meta.env.VITE_AI_API_URL || 'https://api.openai.com/v1/chat/completions'
 
 // ── Real AI Implementation (OpenAI Vision) ──
@@ -32,7 +31,7 @@ class OpenAIVisionService implements AIService {
   private apiUrl: string
 
   constructor() {
-    this.apiKey = OPENAI_API_KEY || ''
+    this.apiKey = ''
     this.apiUrl = AI_API_URL
   }
 

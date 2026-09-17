@@ -91,6 +91,13 @@ El módulo **1-qawayLab-CRM** es la solución centralizada de gestión de relaci
   - **Consultoría Oficial Ronda 03 en `meta_ai_consultoria_waba.md`:** Registro de la política de Coexistencia (App móvil WhatsApp Business + Cloud API simultáneos), sincronización de respuestas con `message_echoes`, integración de Catálogo en Commerce Manager y estructura de ventana de 24h con precios.
   - **Ingestión de `message_echoes` en `whatsapp-webhook`:** Soporte nativo para eventos `change.value.message_echoes`. Cuando el asesor responde desde la aplicación móvil de su celular, el mensaje se almacena automáticamente en Supabase con `sender: 'agent'` para que el panel del CRM web lo visualice en tiempo real sin desfase.
 
+### [Iteración 12 - 2026-09-17]
+- **Arquitectura Multi-Tenant & Despachador Multi-Modelo Universal (Gemini, OpenAI, Claude & BYOK):**
+  - **Migración SQL Multi-Modelo (`20260917170000_tenant_ai_settings_multimodel.sql`):** Estructuración de `ai_settings` en `public.tenants` con soporte nativo para `provider: 'gemini' | 'openai' | 'anthropic'`, selección de modelos específicos, modo `managed` (cuenta de Qaway) o `byok` (Bring Your Own Key del cliente), prompts de negocio independientes por empresa e índice ultra-rápido por `waba_phone_number_id`.
+  - **Despachador Multi-Modelo en `whatsapp-webhook/index.ts`:** Motor agnóstico capaz de invocar Gemini 2.0 Flash, OpenAI GPT-4o / GPT-4o-mini o Anthropic Claude 3.5 Sonnet / Haiku.
+  - **Aislamiento Multi-Tenant por WhatsApp:** El webhook detecta automáticamente a qué empresa pertenece el mensaje según `metadata.phone_number_id` y ejecuta el agente específico de ese cliente (ej. Qaway Lab, CoraVet o Inmobiliaria Vallet), etiquetando cada lead con su `tenant_id`.
+  - **Flujo 06 incorporado:** Diagrama de arquitectura Multi-Modelo y BYOK registrado en `diagramas_flujos_arquitectura.md`.
+
 ---
 
 ## 3. Arquitectura Modular Desacoplable por Planes (SaaS Composable)

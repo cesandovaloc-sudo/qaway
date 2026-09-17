@@ -73,3 +73,8 @@
 ## Iteración 14 — Títulos simples (2026-09-16)
 - Nuevo `nombre_simple` en 14/14 (ej. Omniroute → “IAs gratis para probar”, Strands → “Creador de asistentes con IA”, Security Audit → “Revisión de seguridad automática”).
 - Cards, destacados y ficha muestran el simple grande + nombre técnico chico. Buscador lo incluye. Misma arte, lint limpio. Sin commit, sin push.
+
+## Iteración 15 — Navbar fuera real + BIB-015 (2026-09-16)
+- Fix real: las rutas estaban dentro del `Layout` (abría en línea 338). Movidas fuera (líneas 340/344, `Layout` en 347). Ahora sí sin navbar. Recarga dura requerida.
+- Nuevo `BIB-015 tgrep (Microsoft)`: app CLI Rust, índice trigramas hasta 52x vs ripgrep, cliente/servidor + watcher, lo usa Copilot CLI, MIT ~3.2k estrellas, verificado, gratis, prioridad alta.
+- Seed v4 total 15, validado. Lint limpio (2 warnings preexistentes). Sin commit, sin push.

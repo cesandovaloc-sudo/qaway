@@ -1,0 +1,1 @@
+var e=`/assets/Sitios-Web-9c_NSH0o.webp`;export{e as t};

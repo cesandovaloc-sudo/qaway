@@ -3,14 +3,16 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN') || 'QAWAY_VERIFY_TOKEN_123'
 const APP_SECRET = Deno.env.get('WHATSAPP_APP_SECRET') || ''
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
-const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID') || ''
+const MASTER_GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
+const MASTER_OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || ''
+const MASTER_ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') || ''
+const DEFAULT_PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID') || ''
 const ACCESS_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN') || ''
 
 /**
- * System Prompt oficial del Agente de Inteligencia Artificial de Qaway Lab
+ * System Prompt de respaldo por defecto (Qaway Lab Digital)
  */
-const QAWAY_SYSTEM_PROMPT = `
+const DEFAULT_SYSTEM_PROMPT = `
 Eres el Asistente Virtual Oficial de Qaway Lab Digital. Tu misión es brindar atención consultiva, responder dudas sobre nuestros servicios y productos, y calificar prospectos a través de WhatsApp.
 
 DIRECTRICES DE PERSONALIDAD Y TONO:
@@ -32,37 +34,39 @@ REGLAS CRÍTICAS DE NEGOCIO:
 - Responde siempre de forma directa a la duda del prospecto sin rodeos.
 `
 
+const DEFAULT_HUMAN_KEYWORDS = [
+  'humano', 'asesor', 'persona', 'hablar con alguien', 'queja', 'reclamo',
+  'soporte humano', 'atencion personalizada', 'asesora', 'ejecutivo'
+]
+
 /**
- * Genera la respuesta del Agente usando la API de Gemini
+ * 1. Conector Google Gemini REST API (gemini-2.0-flash, gemini-1.5-pro)
  */
-async function generateAiReply(customerMessage: string, history: any[], apiKey: string): Promise<string | null> {
-  if (!apiKey) return null
+async function callGemini(apiKey: string, model: string, systemPrompt: string, history: any[], userMessage: string, temperature = 0.3): Promise<string | null> {
   try {
     const recentHistory = (history || []).slice(-4).map((m: any) => ({
       role: m.sender === 'agent' ? 'model' : 'user',
       parts: [{ text: m.text || '' }]
     }))
 
-    const payload = {
-      systemInstruction: { parts: [{ text: QAWAY_SYSTEM_PROMPT }] },
-      contents: [
-        ...recentHistory,
-        { role: 'user', parts: [{ text: customerMessage }] }
-      ],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 300
-      }
-    }
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+    let targetModel = model || 'gemini-2.5-flash'
+    let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
 
+    if (!res.ok && targetModel !== 'gemini-1.5-flash') {
+      targetModel = 'gemini-1.5-flash'
+      res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+    }
+
     if (!res.ok) {
-      console.warn('[whatsapp-webhook] Respuesta no exitosa de Gemini API:', res.status)
+      console.warn(`[whatsapp-webhook] Error en Gemini API (${res.status}):`, await res.text())
       return null
     }
 
@@ -70,8 +74,134 @@ async function generateAiReply(customerMessage: string, history: any[], apiKey: 
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text
     return text ? text.trim() : null
   } catch (err) {
-    console.error('[whatsapp-webhook] Error en generateAiReply:', err)
+    console.error('[whatsapp-webhook] Excepción en callGemini:', err)
     return null
+  }
+}
+
+/**
+ * 2. Conector OpenAI REST API (gpt-4o, gpt-4o-mini)
+ */
+async function callOpenAI(apiKey: string, model: string, systemPrompt: string, history: any[], userMessage: string, temperature = 0.3): Promise<string | null> {
+  try {
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...(history || []).slice(-4).map((m: any) => ({
+        role: m.sender === 'agent' ? 'assistant' : 'user',
+        content: m.text || ''
+      })),
+      { role: 'user', content: userMessage }
+    ]
+
+    const targetModel = model || 'gpt-4o-mini'
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: targetModel,
+        messages: messages,
+        temperature: temperature,
+        max_tokens: 300
+      })
+    })
+
+    if (!res.ok) {
+      console.warn(`[whatsapp-webhook] Error en OpenAI API (${res.status}):`, await res.text())
+      return null
+    }
+
+    const data = await res.json()
+    const text = data.choices?.[0]?.message?.content
+    return text ? text.trim() : null
+  } catch (err) {
+    console.error('[whatsapp-webhook] Excepción en callOpenAI:', err)
+    return null
+  }
+}
+
+/**
+ * 3. Conector Anthropic Claude REST API (claude-3-5-sonnet, claude-3-haiku)
+ */
+async function callAnthropic(apiKey: string, model: string, systemPrompt: string, history: any[], userMessage: string, temperature = 0.3): Promise<string | null> {
+  try {
+    const messages = [
+      ...(history || []).slice(-4).map((m: any) => ({
+        role: m.sender === 'agent' ? 'assistant' : 'user',
+        content: m.text || ''
+      })),
+      { role: 'user', content: userMessage }
+    ]
+
+    const targetModel = model || 'claude-3-5-sonnet-20241022'
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: targetModel,
+        system: systemPrompt,
+        messages: messages,
+        temperature: temperature,
+        max_tokens: 300
+      })
+    })
+
+    if (!res.ok) {
+      console.warn(`[whatsapp-webhook] Error en Anthropic API (${res.status}):`, await res.text())
+      return null
+    }
+
+    const data = await res.json()
+    const text = data.content?.[0]?.text
+    return text ? text.trim() : null
+  } catch (err) {
+    console.error('[whatsapp-webhook] Excepción en callAnthropic:', err)
+    return null
+  }
+}
+
+/**
+ * Despachador Multi-Modelo Universal con Soporte BYOK vs Managed
+ */
+async function dispatchMultiModelAi(
+  aiSettings: any,
+  customerMessage: string,
+  history: any[]
+): Promise<string | null> {
+  if (!aiSettings || !aiSettings.enabled) return null
+
+  const provider = (aiSettings.provider || 'gemini').toLowerCase()
+  const model = aiSettings.model || ''
+  const systemPrompt = aiSettings.system_prompt || DEFAULT_SYSTEM_PROMPT
+  const temperature = aiSettings.temperature ?? 0.3
+
+  // Resolución de credencial: BYOK (del cliente) vs Managed (de Qaway Lab)
+  let apiKey = ''
+  if (aiSettings.mode === 'byok' && aiSettings.api_key) {
+    apiKey = aiSettings.api_key
+  } else {
+    if (provider === 'gemini') apiKey = MASTER_GEMINI_API_KEY
+    else if (provider === 'openai') apiKey = MASTER_OPENAI_API_KEY
+    else if (provider === 'anthropic') apiKey = MASTER_ANTHROPIC_API_KEY
+  }
+
+  if (!apiKey) {
+    console.warn(`[whatsapp-webhook] Proveedor ${provider} configurado pero falta API Key (BYOK o Master).`)
+    return null
+  }
+
+  if (provider === 'openai') {
+    return await callOpenAI(apiKey, model, systemPrompt, history, customerMessage, temperature)
+  } else if (provider === 'anthropic') {
+    return await callAnthropic(apiKey, model, systemPrompt, history, customerMessage, temperature)
+  } else {
+    return await callGemini(apiKey, model, systemPrompt, history, customerMessage, temperature)
   }
 }
 
@@ -79,9 +209,10 @@ async function generateAiReply(customerMessage: string, history: any[], apiKey: 
  * Despacha un mensaje de texto saliente por WhatsApp Cloud API
  */
 async function sendWhatsAppDirect(to: string, text: string, phoneNumberId: string, accessToken: string): Promise<string | null> {
-  if (!phoneNumberId || !accessToken) return null
+  const targetPhoneId = phoneNumberId || DEFAULT_PHONE_NUMBER_ID
+  if (!targetPhoneId || !accessToken) return null
   try {
-    const res = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}/messages`, {
+    const res = await fetch(`https://graph.facebook.com/v20.0/${targetPhoneId}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -108,7 +239,6 @@ async function sendWhatsAppDirect(to: string, text: string, phoneNumberId: strin
  */
 async function verifySignature(rawBody: string, signatureHeader: string | null, appSecret: string): Promise<boolean> {
   if (!signatureHeader || !appSecret) {
-    // Si no se ha configurado secret en desarrollo, permitir continuar registrando advertencia
     return true
   }
 
@@ -130,12 +260,6 @@ async function verifySignature(rawBody: string, signatureHeader: string | null, 
 
   return computedHex.toLowerCase() === signature.toLowerCase()
 }
-
-// Disparadores semánticos para activación del Handover Protocol (Traspaso a Humano)
-const HUMAN_INTENT_KEYWORDS = [
-  'humano', 'asesor', 'persona', 'hablar con alguien', 'queja', 'reclamo',
-  'soporte humano', 'atencion personalizada', 'asesora', 'ejecutivo'
-]
 
 serve(async (req: Request) => {
   const url = new URL(req.url)
@@ -177,6 +301,44 @@ serve(async (req: Request) => {
 
         for (const entry of payload.entry) {
           for (const change of (entry.changes || [])) {
+            const phoneNumberIdIncoming = change.value?.metadata?.phone_number_id || DEFAULT_PHONE_NUMBER_ID
+
+            // ── RESOLUCIÓN MULTI-TENANT: Identificar qué empresa recibió el chat ──
+            let activeTenant: any = null
+            if (phoneNumberIdIncoming) {
+              const { data: matchedTenants } = await supabase
+                .from('tenants')
+                .select('*')
+                .eq("ai_settings->>'waba_phone_number_id'", phoneNumberIdIncoming)
+                .limit(1)
+              if (matchedTenants && matchedTenants.length > 0) {
+                activeTenant = matchedTenants[0]
+              }
+            }
+
+            // Fallback al tenant master de Qaway Lab si no hay mapeo específico
+            if (!activeTenant) {
+              const { data: defaultTenants } = await supabase
+                .from('tenants')
+                .select('*')
+                .or('slug.eq.qaway-lab,client_code.eq.QW-00000')
+                .limit(1)
+              activeTenant = defaultTenants?.[0] || null
+            }
+
+            const aiSettings = activeTenant?.ai_settings || {
+              enabled: Boolean(MASTER_GEMINI_API_KEY),
+              provider: 'gemini',
+              model: 'gemini-2.5-flash',
+              mode: 'managed',
+              system_prompt: DEFAULT_SYSTEM_PROMPT
+            }
+
+            const customKeywords = Array.isArray(aiSettings.human_handoff_keywords)
+              ? aiSettings.human_handoff_keywords
+              : DEFAULT_HUMAN_KEYWORDS
+
+            // ── PROCESAMIENTO DE MENSAJES ENTRANTES (INBOUND) ──
             if (change.value && Array.isArray(change.value.messages)) {
               const messages = change.value.messages
               const contacts = change.value.contacts || []
@@ -192,9 +354,9 @@ serve(async (req: Request) => {
                 const timestampEpoch = parseInt(message.timestamp) * 1000 || Date.now()
                 const timeString = new Date(timestampEpoch).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
-                // Detección de solicitud explícita de atención humana
+                // Detección de solicitud explícita de atención humana según keywords de la empresa
                 const textLower = messageText.toLowerCase()
-                const isHumanRequested = HUMAN_INTENT_KEYWORDS.some(k => textLower.includes(k))
+                const isHumanRequested = customKeywords.some((k: string) => textLower.includes(k.toLowerCase()))
 
                 // Detección y extracción de Atribución Click-to-WhatsApp (CTWA)
                 const referral = message.referral || null
@@ -225,6 +387,8 @@ serve(async (req: Request) => {
 
                     const metadataUpdate = {
                       ...(lead.metadata || {}),
+                      tenant_id: activeTenant?.id || lead.metadata?.tenant_id,
+                      tenant_slug: activeTenant?.slug || lead.metadata?.tenant_slug,
                       last_customer_message_at: new Date(timestampEpoch).toISOString(),
                       channel: 'whatsapp'
                     }
@@ -245,6 +409,7 @@ serve(async (req: Request) => {
                     await supabase
                       .from('leads')
                       .update({
+                        tenant_id: activeTenant?.id || lead.tenant_id,
                         last_message: messageText,
                         history: history,
                         unread_count: (lead.unread_count || 0) + 1,
@@ -254,13 +419,15 @@ serve(async (req: Request) => {
                       })
                       .eq('id', lead.id)
 
-                    console.log(`[whatsapp-webhook] Lead ${senderPhone} actualizado. Handoff: ${isHumanRequested}, CTWA: ${Boolean(referral)}`)
+                    console.log(`[whatsapp-webhook] Lead ${senderPhone} actualizado (${activeTenant?.name || 'Qaway'}). Handoff: ${isHumanRequested}, CTWA: ${Boolean(referral)}`)
                   } else {
                     console.log(`[whatsapp-webhook] Mensaje duplicado omitido (${wamid})`)
                   }
                 } else {
                   // Creación de Nuevo Lead
                   const metadataNew: Record<string, any> = {
+                    tenant_id: activeTenant?.id || null,
+                    tenant_slug: activeTenant?.slug || null,
                     source: 'whatsapp_cloud_api',
                     channel: 'whatsapp',
                     last_customer_message_at: new Date(timestampEpoch).toISOString(),
@@ -278,11 +445,12 @@ serve(async (req: Request) => {
                   await supabase
                     .from('leads')
                     .insert([{
+                      tenant_id: activeTenant?.id || null,
                       name: senderName,
                       whatsapp: senderPhone,
                       email: 'No especificado',
                       status: isHumanRequested ? 'negociacion' : 'new',
-                      agent: isHumanRequested ? 'Asesor Humano Requerido' : 'Pendiente',
+                      agent: isHumanRequested ? 'Asesor Humano Requerido' : (activeTenant ? `${activeTenant.name} Inbox` : 'Pendiente'),
                       last_message: messageText,
                       history: [newMessageObj],
                       unread_count: 1,
@@ -290,11 +458,11 @@ serve(async (req: Request) => {
                       metadata: metadataNew
                     }])
 
-                  console.log(`[whatsapp-webhook] Nuevo lead creado ${senderPhone}. CTWA: ${Boolean(referral)}`)
+                  console.log(`[whatsapp-webhook] Nuevo lead creado ${senderPhone} (${activeTenant?.name || 'Qaway'}). CTWA: ${Boolean(referral)}`)
                 }
 
-                // ── AUTO-RESPUESTA DEL AGENTE DE IA (Si no se requiere humano) ──
-                if (!isHumanRequested && GEMINI_API_KEY && PHONE_NUMBER_ID && ACCESS_TOKEN) {
+                // ── AUTO-RESPUESTA MULTI-MODELO IA (Si no se requiere humano y el tenant tiene IA activa) ──
+                if (!isHumanRequested && aiSettings.enabled && ACCESS_TOKEN) {
                   try {
                     const { data: currentLeadData } = await supabase
                       .from('leads')
@@ -303,12 +471,13 @@ serve(async (req: Request) => {
                       .single()
 
                     const activeHistory = currentLeadData?.history || [newMessageObj]
-                    const aiReply = await generateAiReply(messageText, activeHistory, GEMINI_API_KEY)
+                    const aiReply = await dispatchMultiModelAi(aiSettings, messageText, activeHistory)
 
                     if (aiReply) {
-                      console.log(`[whatsapp-webhook] Auto-respuesta IA despachada para ${senderPhone}`)
-                      const outWamid = await sendWhatsAppDirect(senderPhone, aiReply, PHONE_NUMBER_ID, ACCESS_TOKEN)
+                      console.log(`[whatsapp-webhook] Auto-respuesta despachada para ${senderPhone} vía ${aiSettings.provider || 'gemini'} (${aiSettings.mode || 'managed'})`)
+                      const outWamid = await sendWhatsAppDirect(senderPhone, aiReply, phoneNumberIdIncoming, ACCESS_TOKEN)
 
+                      const agentTitle = activeTenant?.name ? `${activeTenant.name} AI Agent` : 'Qaway AI Agent'
                       const aiMsgObj = {
                         id: outWamid || `ai_${Date.now()}`,
                         wamid: outWamid || `ai_${Date.now()}`,
@@ -323,14 +492,15 @@ serve(async (req: Request) => {
                         await supabase.from('leads').update({
                           history: finalHistory,
                           last_message: aiReply,
-                          agent: 'Qaway AI Agent'
+                          agent: agentTitle
                         }).eq('id', currentLeadData.id)
                       }
                     }
                   } catch (aiErr) {
-                    console.error('[whatsapp-webhook] Error ejecutando auto-respuesta IA:', aiErr)
+                    console.error('[whatsapp-webhook] Error ejecutando auto-respuesta Multi-Modelo:', aiErr)
                   }
                 }
+              }
             }
 
             // ── COEXISTENCIA HÍBRIDA: Eventos Message Echoes (Respuestas desde el Celular) ──
@@ -389,4 +559,3 @@ serve(async (req: Request) => {
 
   return new Response('Método no permitido', { status: 405 })
 })
-

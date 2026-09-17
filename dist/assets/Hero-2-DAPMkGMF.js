@@ -1,0 +1,1 @@
+var e=`/assets/Hero-2-6GpVBMWC.webp`;export{e as t};

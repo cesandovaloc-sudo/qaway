@@ -103,5 +103,23 @@
   - **Conexión en Formularios Visuales (`Booking.tsx` & `Contact.tsx`):** Cableado reactivo de formularios con estado de confirmación visual amigable, preservando al 100% las clases, márgenes, inputs y botones bajo el **Candado Visual**.
   - **Pruebas de Inserción y Aislamiento:** Inserción y recuperación de cita de prueba en `public.leads` con ID devuelto y limpieza posterior; build Vite exitoso (`✓ built in 17.43s`, chunk generado) y servidor local respondiendo HTTP 200 en ambos módulos.
 
+### [Iteración 06 — 2026-09-17]
+- **Consolidación del Cuarteto de Tenants (Enfoque Práctico sin Deconstruir Diseño):**
+  - **Identificación y Selección:** En lugar de crear maquetas ficticias, se seleccionaron proyectos reales ya montados en la web:
+    1. **Master Tenant:** `Qaway Lab` (`QW-00001`, slug: `qaway-lab`) — 20 productos/servicios maestros.
+    2. **Tenant Piloto 001:** `CoraVet` (`QW-7K4P2`, slug: `coravet`) — 6 productos Pet Shop, citas médicas y transacciones.
+    3. **Tenant 002:** `Estudio Contable Pro` (`QW-3M9K1`, slug: `epc-contable`) — 6 servicios profesionales contables y tributarios.
+    4. **Tenant 003:** `Vallet Inmobiliaria` (`QW-4V8L2`, slug: `vallet-inmobiliaria`) — 3 servicios inmobiliarios de corretaje y gestión patrimonial.
+  - **Migración SQL Ejecutada:** `supabase/migrations/20260917144000_seed_tenants_epc_vallet.sql` aplicada a Supabase remoto.
+  - **Candado Visual 100% Respetado:** Cero alteraciones en las vistas, componentes, estilos, rutas o maquetación de EPC Contable y Vallet Inmobiliaria.
+  - **Validación Automatizada de Aislamiento Cruzado:**
+    - `QW-00001` Qaway Lab: 20 items.
+    - `QW-7K4P2` CoraVet: 6 items.
+    - `QW-3M9K1` Estudio Contable Pro: 6 items.
+    - `QW-4V8L2` Vallet Inmobiliaria: 3 items.
+    - Total: 35 registros conviviendo en la misma tabla `public.products` con filtrado estricto por `tenant_id` y cero fuga de datos.
+  - **Compilación Limpia:** Ejecución de `npm run build:dev` exitosa (`✓ built in 12.65s`).
+
+
 
 

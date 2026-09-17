@@ -335,6 +335,15 @@ export default function AppRouter() {
           path="hub/gestor-proyectos-v2"
           element={renderRoute('hub', <ProtectedRoute><GestorProyectosV2Page /></ProtectedRoute>)}
         />
+        {/* Biblioteca: standalone FUERA del Layout → sin navbar, solo logo interno */}
+        <Route
+          path="/hub/biblioteca"
+          element={renderRoute('hub', <BibliotecaPage />)}
+        />
+        <Route
+          path="hub/biblioteca"
+          element={renderRoute('hub', <BibliotecaPage />)}
+        />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
@@ -387,15 +396,6 @@ export default function AppRouter() {
         <Route
           path="hub/descargador-ig"
           element={renderRoute('hub', <ProtectedRoute><InstagramExtractorPage /></ProtectedRoute>)}
-        />
-        {/* Biblioteca: standalone sin Layout → sin navbar, solo logo interno */}
-        <Route
-          path="/hub/biblioteca"
-          element={renderRoute('hub', <BibliotecaPage />)}
-        />
-        <Route
-          path="hub/biblioteca"
-          element={renderRoute('hub', <BibliotecaPage />)}
         />
           <Route
             path="hub/dashboards"
