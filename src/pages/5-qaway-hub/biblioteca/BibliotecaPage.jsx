@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Search, LibraryBig, Sparkles, AppWindow, FolderGit2, ArrowUpRight, SlidersHorizontal, BookOpen } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import SEED from './biblioteca.seed.json'
 
 /**
@@ -25,6 +26,7 @@ const TIPOS = [
 const FUNCIONALIDADES = ['Automatizar', 'Diseñar', 'Vender', 'Medir', 'Atender', 'Publicar']
 const NICHOS = ['Salud', 'Gastronomía', 'Educación', 'Retail', 'Servicios', 'Inmobiliaria']
 const COSTOS = ['todos', 'gratis', 'freemium', 'suscripcion']
+const DESTACADOS_IDS = ['BIB-002', 'BIB-014']
 
 const ITEMS = SEED.items || []
 
@@ -43,7 +45,7 @@ export default function BibliotecaPage() {
     return ITEMS.filter((it) => {
       if (group && !group.includes(it.tipo)) return false
       if (costo !== 'todos' && it.costo !== costo) return false
-      const hay = `${it.nombre} ${it.funcionalidad_corta} ${it.caso_uso} ${it.categoria} ${it.subcategoria} ${it.costo} ${(it.plataforma || []).join(' ')} ${it.nivel} ${(it.nichos || []).join(' ')} ${(it.tags || []).join(' ')} ${(it.integraciones || []).join(' ')} ${(it.alias_busqueda || []).join(' ')} ${it.curso_repo?.modulo || ''} ${it.curso_repo?.leccion || ''}`.toLowerCase()
+      const hay = `${it.nombre} ${it.nombre_simple || ''} ${it.funcionalidad_corta} ${it.caso_uso} ${it.categoria} ${it.subcategoria} ${it.costo} ${(it.plataforma || []).join(' ')} ${it.nivel} ${(it.nichos || []).join(' ')} ${(it.tags || []).join(' ')} ${(it.integraciones || []).join(' ')} ${(it.alias_busqueda || []).join(' ')} ${it.curso_repo?.modulo || ''} ${it.curso_repo?.leccion || ''}`.toLowerCase()
       if (funcion && !hay.includes(funcion.toLowerCase().slice(0, 4))) return false
       if (nicho && !hay.includes(nicho.toLowerCase().slice(0, 4))) return false
       if (query && !hay.includes(query)) return false
@@ -51,11 +53,16 @@ export default function BibliotecaPage() {
     })
   }, [tipo, funcion, nicho, costo, q])
 
+  const destacados = ITEMS.filter((it) => DESTACADOS_IDS.includes(it.id))
+
   return (
     <div className="min-h-screen" style={{ background: '#0E0E11', color: '#F2EFE6' }}>
       {/* Barra superior de archivo */}
       <header className="border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="mx-auto flex max-w-6xl flex-col gap-5 px-6 py-10">
+          <Link to="/" aria-label="Volver al inicio" className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: '#D8FF3E', color: '#0E0E11' }}>
+            <LibraryBig size={18} />
+          </Link>
           <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.22em]" style={{ color: '#8B8B93' }}>
             <span className="flex items-center gap-2">
               <BookOpen size={14} /> Biblioteca — Índice vivo
@@ -86,6 +93,38 @@ export default function BibliotecaPage() {
           </div>
         </div>
       </header>
+
+      {/* Destacados — no olvidar */}
+      <div className="mx-auto max-w-6xl px-6 pt-6">
+        <div className="mb-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: '#8B8B93' }}>
+          <span>Destacados — no olvidar</span>
+          <span>{destacados.length} fijos</span>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {destacados.map((d) => (
+            <article
+              key={d.id}
+              className="flex flex-col justify-between rounded-[18px] border p-5"
+              style={{ borderColor: '#D8FF3E', background: '#16161A' }}
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs" style={{ color: '#8B8B93' }}>{d.id} · Destacado</span>
+                  <span className="rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-widest" style={{ background: '#D8FF3E', color: '#0E0E11' }}>
+                    {d.tipo} · {d.costo}
+                  </span>
+                </div>
+                <h3 className="mt-3 text-[22px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{d.nombre_simple || d.nombre}</h3>
+                <p className="font-mono text-[11px] uppercase tracking-widest" style={{ color: '#8B8B93' }}>{d.nombre}</p>
+                <p className="mt-2 text-sm" style={{ color: '#C9C9CF' }}>{d.funcionalidad_corta}</p>
+              </div>
+              <button onClick={() => setSelectedId(d.id)} className="mt-4 flex items-center gap-1 text-sm font-medium" style={{ color: '#D8FF3E' }}>
+                Abrir ficha <ArrowUpRight size={16} />
+              </button>
+            </article>
+          ))}
+        </div>
+      </div>
 
       {/* Filtros con tope sticky */}
       <div className="sticky top-0 z-20 mx-auto max-w-6xl px-6 py-6" style={{ background: '#0E0E11', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -190,7 +229,8 @@ export default function BibliotecaPage() {
                     {c.tipo}
                   </span>
                 </div>
-                <h3 className="mt-4 text-[22px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{c.nombre}</h3>
+                <h3 className="mt-4 text-[22px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{c.nombre_simple || c.nombre}</h3>
+                <p className="font-mono text-[11px] uppercase tracking-widest" style={{ color: '#8a8a90' }}>{c.nombre}</p>
                 <p className="mt-2 text-sm" style={{ color: '#55555c' }}>{c.funcionalidad_corta}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {(c.nichos || []).slice(0, 2).map((n) => (
@@ -231,7 +271,8 @@ export default function BibliotecaPage() {
                 {selected.tipo} · {selected.costo}
               </span>
             </div>
-            <h3 className="mt-3 text-[28px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{selected.nombre}</h3>
+            <h3 className="mt-3 text-[28px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{selected.nombre_simple || selected.nombre}</h3>
+            <p className="font-mono text-[11px] uppercase tracking-widest" style={{ color: '#8a8a90' }}>{selected.nombre}</p>
             <p className="mt-1 text-sm font-medium">{selected.funcionalidad_corta}</p>
             <p className="mt-2 text-sm" style={{ color: '#55555c' }}>{selected.caso_uso}</p>
             <div className="mt-4 grid grid-cols-2 gap-3 text-[13px]">

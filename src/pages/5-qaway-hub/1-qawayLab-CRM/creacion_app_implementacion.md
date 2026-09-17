@@ -78,5 +78,70 @@ El módulo **1-qawayLab-CRM** es la solución centralizada de gestión de relaci
   - **Edge Function Saliente `whatsapp-mensaje-enviar`:** Creación del endpoint de despacho saliente hacia la Meta Graph API v20.0 con soporte para mensajes de texto y plantillas HSM oficiales, actualización reactiva del historial del lead en Supabase y modo simulación seguro cuando los secrets no están cargados.
   - **Conexión en CRM Adaptador y Contexto:** Incorporación de `crmAdapter.sendWhatsAppMessage` y llamado automático dentro de `sendMessage` en [CRMContext.jsx], logrando que el botón "Enviar" despache hacia WhatsApp en producción.
 
+### [Iteración 10 - 2026-09-17]
+- **Script de Migración SQL & Motor de Auto-Respuesta IA con System Prompt Oficial:**
+  - **Migración SQL Oficial (`20260917140000_crm_waba_omnichannel.sql`):** Script SQL idempotente con creación/actualización de `public.leads` (canales omnicanal, campos de Handover a humano, atribución CTWA en `metadata`), tabla `public.campaigns` con ROAS e índices de alto rendimiento en WhatsApp y `metadata` GIN.
+  - **Feature Flags en Tenants:** Actualización de `public.tenants` con soporte nativo para los planes modulares (`crm_plan: 'starter' | 'pro' | 'enterprise'`, `has_ai_agent`, `has_custom_metrics`, `has_waba_sync`).
+  - **Cerebro del Agente IA en `whatsapp-webhook`:** Integración del **System Prompt oficial de Qaway Lab** (identidad, servicios, Notion Pro a S/ 49 / $15 USD, desarrollo web y reglas estrictas de negocio).
+  - **Auto-Respuesta Autónoma:** La función `whatsapp-webhook` invoca la API de Gemini para responder de inmediato al WhatsApp del prospecto cuando no requiere atención humana, guardando la respuesta de la IA en Supabase en tiempo real.
+
+### [Iteración 11 - 2026-09-17]
+- **Repositorio Unificado de Diagramas y Coexistencia Híbrida WABA (Message Echoes):**
+  - **Repositorio Oficial de Diagramas (`diagramas_flujos_arquitectura.md`):** Consolidación de 5 diagramas arquitectónicos maestros documentados con propósitos y casos de uso (Flujo 01: Handover Protocol a Humano, Flujo 02: Coexistencia App Móvil + Cloud API, Flujo 03: Ciclo Saliente WABA, Flujo 04: Secuencia de Auto-Respuesta IA y Flujo 05: Planes SaaS Composable).
+  - **Consultoría Oficial Ronda 03 en `meta_ai_consultoria_waba.md`:** Registro de la política de Coexistencia (App móvil WhatsApp Business + Cloud API simultáneos), sincronización de respuestas con `message_echoes`, integración de Catálogo en Commerce Manager y estructura de ventana de 24h con precios.
+  - **Ingestión de `message_echoes` en `whatsapp-webhook`:** Soporte nativo para eventos `change.value.message_echoes`. Cuando el asesor responde desde la aplicación móvil de su celular, el mensaje se almacena automáticamente en Supabase con `sender: 'agent'` para que el panel del CRM web lo visualice en tiempo real sin desfase.
+
+---
+
+## 3. Arquitectura Modular Desacoplable por Planes (SaaS Composable)
+
+El CRM de Qaway Lab está diseñado como un **SaaS Modular de Componentes Desacoplados**, lo que permite comercializarlo o habilitarlo por capas o planes independientes según la necesidad del cliente:
+
+```mermaid
+graph TD
+    subgraph PLAN1["Plan 1: CRM Starter WABA"]
+        P1_1[Inbox WhatsApp WABA Oficial]
+        P1_2[Pipeline Kanban Básico]
+        P1_3[Métricas y Gráficos Esenciales]
+    end
+
+    subgraph PLAN2["Plan 2: CRM Pro Multi-Usuario"]
+        P2_1[Multi-usuarios y Roles: Sales, Marketing, Management]
+        P2_2[Constructor de Métricas Personalizadas: MetricBuilderModal]
+        P2_3[Atribución Publicitaria CTWA y ROAS de Campañas]
+    end
+
+    subgraph PLAN3["Plan 3: CRM Enterprise AI"]
+        P3_1[Agentes de IA Autónomos: Auto-respuesta inteligente]
+        P3_2[Handover Protocol: Detección semántica de humano y traspaso]
+        P3_3[WhatsApp Flows 3.0: Formularios dinámicos nativos]
+    end
+
+    subgraph ADDON["Módulo Acoplable: Inventario & Catálogo con Pagos"]
+        A1[Conexión en tiempo real con Base de Datos de Inventario]
+        A2[Consulta de existencias y precios por el Agente de IA]
+        A3[Fichas interactivas de catálogo con checkout en chat]
+        A4[Descuento automático de stock al confirmar el pago]
+    end
+
+    PLAN1 --> PLAN2
+    PLAN2 --> PLAN3
+    PLAN3 -.->|Add-on Opcional| ADDON
+```
+
+### Principios de Desacoplamiento Técnico:
+1. **Feature Flags por Tenant:** Cada cliente en Supabase cuenta con un flag de plan (`starter`, `pro`, `enterprise`) y módulos habilitados (`has_ai_agent`, `has_inventory`, `has_custom_metrics`).
+2. **Activación de Vistas en Frontend:** Si el cliente tiene Plan 1, las herramientas de analítica avanzada o constructores de métricas se ocultan o bloquean; si adquiere el módulo de Inventario, la sub-pestaña `Catálogo & Pagos` se conecta directamente con su inventario real.
+3. **Backend Independiente (Edge Functions):**
+   - Si no tiene Plan de IA, `whatsapp-webhook` solo registra el mensaje para atención manual humana (Plan 1 y 2).
+   - Si adquiere Plan con IA, `whatsapp-webhook` activa el cerebro LLM para auto-responder.
+   - Si adquiere Inventario, la IA consulta las existencias en la tabla de productos antes de responder o despachar un enlace de pago.
+
+---
+
+## 4. Registro de Tareas Pendientes (Mantenimiento y Depuración)
+- [ ] **Depuración de compatibilidad:** Eliminar la carpeta `supabase/functions/webhook-whatsapp/` una vez que la nueva función `whatsapp-webhook` sea validada y probada al 100% en producción con Meta Cloud API.
+
+
 
 

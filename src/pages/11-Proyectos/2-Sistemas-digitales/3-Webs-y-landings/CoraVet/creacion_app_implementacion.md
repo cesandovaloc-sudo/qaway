@@ -84,3 +84,24 @@
   - **Registro en el Sistema:** Integración de la ruta `/proyectos/coravet/*` en `AppRouter.jsx` y catálogo en `routesRegistry.js`.
   - **Validación de Compilación:** Ejecución de `npm run build:dev` exitosa (`✓ built in 20.41s`, chunk `CoraVetAppPage` generado) y verificación de respuesta HTTP 200 en servidor Vite local.
 
+### [Iteración 04 — 2026-09-17]
+- **Etapa 2 Culminada (Conexión Multi-Tenant de Productos a Supabase):**
+  - **Migración SQL Ejecutada:** `supabase/migrations/20260917141000_tenant_products_categories.sql` aplicada en Supabase remoto (`qrusdsqgygfolxfrafyd`).
+  - **Blindaje de Fase 2:** Adición de `tenant_id` en `public.products` y `public.categories` con valor por defecto al Master Tenant de Qaway Lab (`00000000-0000-0000-0000-000000000001`). Los 20 productos de Qaway siguen 100% operativos.
+  - **Espacio de Nombres Compuesto:** Sustitución de la restricción global de slug único por `unique(tenant_id, slug)` e indexación compuesta `(tenant_id, status)`.
+  - **Siembra de Catálogo CoraVet:** 6 productos insertados y vinculados al tenant `06bacf31-6699-4ef5-9843-e58b835c6b2b` (Royal Canin, Bravecto, Shampoo, Cama, Pelota, Pack).
+  - **Servicio Desacoplado Frontend:** Creación de `coravet-web-v4/src/services/coravetProducts.ts` con estrategia SWR (render instantáneo a 0ms y revalidación en segundo plano) más fallback resiliente en memoria.
+  - **Conexión en Vista Visual (`PetShop.tsx`):** Cableado reactivo del hook `useCoraVetProducts()` y buscador en tiempo real, respetando rigurosamente el **Candado Visual** (márgenes, paddings, clases de botones, cuadrícula responsive y tipografía intactas).
+  - **Validación Automatizada:** Comprobación de conteo independiente (20 productos Qaway vs 6 productos CoraVet en la misma tabla sin cruce de datos), build Vite exitoso (`✓ built in 14.77s`) y servidor local en puerto 4100 respondiendo HTTP 200.
+
+### [Iteración 05 — 2026-09-17]
+- **Etapa 3 Culminada (Aislamiento RLS en Transacciones, Pedidos y Citas):**
+  - **Migración SQL Ejecutada:** `supabase/migrations/20260917143000_tenant_orders_payments.sql` aplicada en Supabase remoto.
+  - **Blindaje de Checkout Fase 2:** Adición de `tenant_id` a `public.orders` y `public.payments` con default a Qaway Lab (`00000000-0000-0000-0000-000000000001`) e indexación `idx_orders_tenant_id`, `idx_orders_tenant_status` y `idx_payments_tenant_id`.
+  - **Políticas RLS Activas:** Permiten el registro seguro de pedidos y leads desde el frontend público sin romper sesiones administrativas.
+  - **Servicio Desacoplado de Transacciones:** Creación de `coravet-web-v4/src/services/coravetTransactions.ts` con `createCoraVetBooking()` y `sendCoraVetContact()`, etiquetando los registros con `tenant_id = '06bacf31-6699-4ef5-9843-e58b835c6b2b'` y `client_code = 'QW-7K4P2'`.
+  - **Conexión en Formularios Visuales (`Booking.tsx` & `Contact.tsx`):** Cableado reactivo de formularios con estado de confirmación visual amigable, preservando al 100% las clases, márgenes, inputs y botones bajo el **Candado Visual**.
+  - **Pruebas de Inserción y Aislamiento:** Inserción y recuperación de cita de prueba en `public.leads` con ID devuelto y limpieza posterior; build Vite exitoso (`✓ built in 17.43s`, chunk generado) y servidor local respondiendo HTTP 200 en ambos módulos.
+
+
+

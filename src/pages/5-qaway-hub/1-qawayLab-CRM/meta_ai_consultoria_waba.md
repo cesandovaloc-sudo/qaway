@@ -112,3 +112,51 @@ Estructura del payload recibido en el webhook cuando el lead ingresa por un anun
   - [WhatsApp Flows Data API](https://developers.facebook.com/docs/whatsapp/flows/reference/data-api)
   - [WhatsApp Flows JSON Schema](https://developers.facebook.com/docs/whatsapp/flows/reference/flow-json-schema)
 
+---
+
+## 📌 Ronda 03: Coexistencia Híbrida (App WAB + Cloud API), Message Echoes & Catálogo (Septiembre 2026)
+
+### 1. El Dilema Operativo del Usuario:
+- **Situación:** El negocio ya tiene configurada su aplicación móvil de WhatsApp Business (WAB) con respuestas rápidas, etiquetas y catálogo manual. La preocupación era perder la comodidad de la app en el celular al conectarse a una API de CRM.
+- **Respuesta Oficial de Meta:** Con las actualizaciones de Septiembre de 2026, **ya no es obligatorio que el número sea exclusivo de la API** ni se pierde la aplicación en el celular gracias a la **Coexistencia (Co-existence)**.
+
+---
+
+### 2. Arquitectura de Coexistencia (App Móvil + Cloud API)
+- **Operación Dual:** El número oficial puede seguir funcionando en la aplicación móvil de WhatsApp Business para que el asesor o dueño chatee cómodamente desde su celular, mientras el CRM en Supabase opera en segundo plano registrando los datos y calculando el ROAS.
+- **Registro Híbrido:** Al conectar la Cloud API, se selecciona la opción de registro que mantiene activo el cliente móvil.
+- **Sincronización Bidireccional:** Todo lo que se habla en el celular se refleja en el CRM, y lo que se envía desde el CRM llega al cliente.
+
+---
+
+### 3. Sincronización en Tiempo Real vía Message Echoes (`message_echoes`)
+- **Funcionamiento:** Cuando el asesor escribe una respuesta desde la app móvil de WhatsApp Business en su celular, la API de Meta genera un evento webhook de tipo `message_echoes`.
+- **Efecto en el CRM:** La Edge Function `whatsapp-webhook` recibe este eco y lo guarda en Supabase con `sender: 'agent'`. Como resultado, el historial del CRM de escritorio se mantiene 100% sincronizado con la conversación manual del celular en tiempo real.
+
+---
+
+### 4. Sincronización del Catálogo con Meta Commerce Manager
+- **Evolución:** En lugar de mantener un catálogo manual aislado en el celular, se vincula con el **Catálogo de Meta (Commerce Manager)**.
+- **Ventajas:**
+  1. El CRM puede consultar productos, precios y existencias vía API.
+  2. Los anuncios de Meta Ads (ej. campañas de venta de servicios o productos) pueden mostrar esos productos dinámicamente con atribución directa.
+  3. Si se adquiere el Módulo de Inventario de Qaway Lab, el catálogo se actualiza automáticamente.
+
+---
+
+### 5. Enlaces Oficiales de Documentación de Meta (Septiembre 2026)
+
+1. **Coexistencia de Aplicación y API (Co-existence):**
+   - [Guía de Coexistencia WABA](https://developers.facebook.com/docs/whatsapp/cloud-api/get-started/coexistence)
+   - [Conceptos de Registro Híbrido](https://developers.facebook.com/docs/whatsapp/on-premises/get-started/coexistence)
+2. **Sincronización vía Message Echoes:**
+   - [Configuración de Webhooks para Ecos de Mensajes](https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components#messages)
+   - [Referencia del campo message_echoes](https://developers.facebook.com/docs/messenger-platform/webhooks/reference/message-echo)
+3. **Sincronización de Catálogo (Commerce Manager):**
+   - [Centro de Ayuda de Catálogos de Meta](https://www.facebook.com/business/help/1275400645914358)
+   - [API de Catálogos para Desarrolladores](https://developers.facebook.com/docs/marketing-api/catalog)
+4. **Políticas de Ventana de Servicio y Precios:**
+   - [Políticas de Ventana de Servicio de 24 Horas](https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages#service-window)
+   - [Modelo de Precios por Conversación de WhatsApp](https://developers.facebook.com/docs/whatsapp/pricing)
+
+

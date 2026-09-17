@@ -59,3 +59,17 @@
 - Nuevo `curso.seed.json` v1: CUR-001 cero-a-despliegue, 4 días (DIA-01 redes, DIA-02 whatsapp con lecciones por-crear, DIA-03 marca con BIB-012, DIA-04 despliegue con BIB-011+BIB-013).
 - Nuevo `rutas.seed.json` v1: RUTA-001 web-de-0-a-produccion, 7 pasos (BIB-007→002→004→006→012→013→011). Ids cruzados validados.
 - Página: buscador incluye alias+curso, ficha muestra bloque `Uso en curso`. Misma arte, lint limpio. Sin commit, sin push.
+
+## Iteración 12 — BIB-014 + Destacados (2026-09-16)
+- Nuevo `BIB-014 Strands Agents SDK (AWS)`: lib, Infra IA / SDK agentes, pip/npm, gratis Apache 2.0, verificado (~6,984 estrellas), prioridad alta, alias con chatbot/mcp.
+- Sección `Destacados — no olvidar` en principal (entre header y filtros): BIB-002 Omniroute + BIB-014 Strands, borde lima, abre ficha. Misma arte.
+- Seed v4 total 14, validado. Lint limpio. Sin commit, sin push.
+
+## Iteración 13 — Sin navbar + logo (2026-09-16)
+- Ruta `hub/biblioteca` movida fuera de `Layout` (patrón de hub tools): sin navbar ni footer oficial.
+- Logo lima arriba (`Link to="/"`) como única salida a la principal. Misma arte.
+- Lint limpio (2 warnings preexistentes). Sin commit, sin push.
+
+## Iteración 14 — Títulos simples (2026-09-16)
+- Nuevo `nombre_simple` en 14/14 (ej. Omniroute → “IAs gratis para probar”, Strands → “Creador de asistentes con IA”, Security Audit → “Revisión de seguridad automática”).
+- Cards, destacados y ficha muestran el simple grande + nombre técnico chico. Buscador lo incluye. Misma arte, lint limpio. Sin commit, sin push.

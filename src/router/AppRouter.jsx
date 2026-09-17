@@ -361,10 +361,6 @@ export default function AppRouter() {
             element={renderRoute('hub', <CreadorContenidoPage />)}
           />
           <Route
-            path="hub/biblioteca"
-            element={renderRoute('hub', <BibliotecaPage />)}
-          />
-          <Route
             path="hub/crm"
             element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
           />
@@ -388,10 +384,19 @@ export default function AppRouter() {
             path="hub/optimizador-webp"
             element={renderPublicPathRoute('hub', '/hub/optimizador-webp', <OptimizadorWebpHubPage />)}
           />
-          <Route
-            path="hub/descargador-ig"
-            element={renderRoute('hub', <ProtectedRoute><InstagramExtractorPage /></ProtectedRoute>)}
-          />
+        <Route
+          path="hub/descargador-ig"
+          element={renderRoute('hub', <ProtectedRoute><InstagramExtractorPage /></ProtectedRoute>)}
+        />
+        {/* Biblioteca: standalone sin Layout → sin navbar, solo logo interno */}
+        <Route
+          path="/hub/biblioteca"
+          element={renderRoute('hub', <BibliotecaPage />)}
+        />
+        <Route
+          path="hub/biblioteca"
+          element={renderRoute('hub', <BibliotecaPage />)}
+        />
           <Route
             path="hub/dashboards"
             element={renderRoute('hub', <ProtectedRoute><AnalyticsStudioPage /></ProtectedRoute>)}
