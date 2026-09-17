@@ -151,8 +151,7 @@ function StandardProductCard({ item, delay = 0 }) {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.15 }}
-      transition={{ duration: 0.45, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out will-change-transform"
+      className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-shadow duration-300"
     >
       {/* Cabecera / Imagen Limpia con Escala Exacta de V1 */}
       <Link to={item.to} className="relative block overflow-hidden">
