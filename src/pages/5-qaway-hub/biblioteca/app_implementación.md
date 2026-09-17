@@ -48,3 +48,14 @@
 - Nuevo ítem `BIB-012 symbl-space`: tipo app, Diseño / Test de logos, web sin instalación, gratis sin key, plataforma web, nivel no-code, prioridad alta (branding Qaway).
 - Funcionalidad: probar logos en tamaños, fondos, distancia, contraste y legibilidad antes de enviar a cliente.
 - Seed v3 total 12, validado. Visible con buscador `symbl` o `logo`, filtro `gratis`. Sin commit, sin push.
+
+## Iteración 10 — BIB-013 Security Audit Skill (2026-09-16)
+- Verificado real: `github.com/cloudflare/security-audit-skill`, MIT, ~6,682 estrellas. Skill agnóstica (Claude Code, Codex, cualquier agente con sub-agentes), 6 fases con validación adversarial + `REPORT.md` + `findings.json`.
+- Instalación: `npx skills add https://github.com/cloudflare/security-audit-skill --skill security-audit`. Requiere Node.js para validador.
+- Seed v3 total 13, estado `verificado`, costo gratis, prioridad alta. Visible con `seguridad` o `audit`. Sin commit, sin push.
+
+## Iteración 11 — Curso + rutas + alias (2026-09-16)
+- Seed v4: + `alias_busqueda[]` en 13/13 + `curso_repo{usar_en_curso, curso, modulo, leccion, orden, rol, prerequisitos, resultado}` en 13/13. En curso: BIB-012 DIA-03 L1 demo, BIB-011 DIA-04 L1 practica, BIB-013 DIA-04 L2 practica.
+- Nuevo `curso.seed.json` v1: CUR-001 cero-a-despliegue, 4 días (DIA-01 redes, DIA-02 whatsapp con lecciones por-crear, DIA-03 marca con BIB-012, DIA-04 despliegue con BIB-011+BIB-013).
+- Nuevo `rutas.seed.json` v1: RUTA-001 web-de-0-a-produccion, 7 pasos (BIB-007→002→004→006→012→013→011). Ids cruzados validados.
+- Página: buscador incluye alias+curso, ficha muestra bloque `Uso en curso`. Misma arte, lint limpio. Sin commit, sin push.

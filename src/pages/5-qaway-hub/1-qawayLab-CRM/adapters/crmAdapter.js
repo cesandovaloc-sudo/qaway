@@ -1,4 +1,4 @@
-﻿import { supabase } from '../../../../config/supabase'
+import { supabase } from '../../../../config/supabase'
 import { WABA_SERVICE_WINDOW_MS } from '../types'
 
 /**
@@ -47,6 +47,9 @@ export function mapLeadToFrontend(rawLead) {
 
   // Extracción de atribución referral si existe en metadata o columna directa
   const referral = rawLead.metadata?.referral || rawLead.referral || null
+  const isHumanRequested = Boolean(rawLead.is_human_requested || rawLead.metadata?.is_human_requested)
+  const channel = rawLead.channel || rawLead.metadata?.channel || 'whatsapp'
+  const humanHandoffRequestedAt = rawLead.human_handoff_requested_at || rawLead.metadata?.human_handoff_requested_at || null
 
   return {
     ...rawLead,
@@ -56,6 +59,9 @@ export function mapLeadToFrontend(rawLead) {
     unreadCount: rawLead.unread_count || 0,
     history,
     referral,
+    channel,
+    isHumanRequested,
+    humanHandoffRequestedAt,
     lastCustomerMessageTimestamp: lastCustomerTimestamp,
     is24hWindowActive: is24hOpen
   }

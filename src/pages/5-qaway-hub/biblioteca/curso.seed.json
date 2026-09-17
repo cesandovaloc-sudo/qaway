@@ -1,0 +1,49 @@
+{
+  "version": "curso-v1",
+  "cursos": [
+    {
+      "id": "CUR-001",
+      "slug": "cero-a-despliegue",
+      "nombre": "De cero a despliegue",
+      "descripcion": "Curso día por día: presencia, contacto, marca, web y despliegue con lo verificado en biblioteca.",
+      "dias": [
+        {
+          "id": "DIA-01",
+          "titulo": "Creación de redes sociales",
+          "objetivo": "Dejar perfiles base listos para captar.",
+          "lecciones": [
+            { "id": "L1", "titulo": "Crear perfiles y base visual", "item_id": null, "estado": "por-crear", "entrega": "Perfiles creados con foto, bio y link" },
+            { "id": "L2", "titulo": "Calendario mínimo de contenido", "item_id": null, "estado": "por-crear", "entrega": "7 posts programados" }
+          ]
+        },
+        {
+          "id": "DIA-02",
+          "titulo": "Configuración de WhatsApp Business",
+          "objetivo": "Canal de contacto profesional operativo.",
+          "lecciones": [
+            { "id": "L1", "titulo": "Cuenta de empresa y perfil", "item_id": null, "estado": "por-crear", "entrega": "Perfil verificado con catálogo base" },
+            { "id": "L2", "titulo": "Mensajes, etiquetas y respuestas", "item_id": null, "estado": "por-crear", "entrega": "Respuestas rápidas + etiquetas activas" }
+          ]
+        },
+        {
+          "id": "DIA-03",
+          "titulo": "Web y marca",
+          "objetivo": "Marca validada antes de publicar.",
+          "lecciones": [
+            { "id": "L1", "titulo": "Validar logo antes del cliente", "item_id": "BIB-012", "estado": "listo", "entrega": "Logo validado en tamaños, fondos y distancia" },
+            { "id": "L2", "titulo": "Estructura base de la web", "item_id": null, "estado": "por-crear", "entrega": "Web mínima publicada en borrador" }
+          ]
+        },
+        {
+          "id": "DIA-04",
+          "titulo": "Despliegue y seguridad",
+          "objetivo": "Proyecto en línea y auditado.",
+          "lecciones": [
+            { "id": "L1", "titulo": "Subir a VPS 24/7", "item_id": "BIB-011", "estado": "listo", "entrega": "VPS en línea 24/7 para el proyecto" },
+            { "id": "L2", "titulo": "Auditar antes de entregar", "item_id": "BIB-013", "estado": "listo", "entrega": "Informe de vulnerabilidades + correcciones aplicadas" }
+          ]
+        }
+      ]
+    }
+  ]
+}

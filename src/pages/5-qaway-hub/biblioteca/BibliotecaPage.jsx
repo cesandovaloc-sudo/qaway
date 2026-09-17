@@ -43,7 +43,7 @@ export default function BibliotecaPage() {
     return ITEMS.filter((it) => {
       if (group && !group.includes(it.tipo)) return false
       if (costo !== 'todos' && it.costo !== costo) return false
-      const hay = `${it.nombre} ${it.funcionalidad_corta} ${it.caso_uso} ${it.categoria} ${it.subcategoria} ${it.costo} ${(it.plataforma || []).join(' ')} ${it.nivel} ${(it.nichos || []).join(' ')} ${(it.tags || []).join(' ')} ${(it.integraciones || []).join(' ')}`.toLowerCase()
+      const hay = `${it.nombre} ${it.funcionalidad_corta} ${it.caso_uso} ${it.categoria} ${it.subcategoria} ${it.costo} ${(it.plataforma || []).join(' ')} ${it.nivel} ${(it.nichos || []).join(' ')} ${(it.tags || []).join(' ')} ${(it.integraciones || []).join(' ')} ${(it.alias_busqueda || []).join(' ')} ${it.curso_repo?.modulo || ''} ${it.curso_repo?.leccion || ''}`.toLowerCase()
       if (funcion && !hay.includes(funcion.toLowerCase().slice(0, 4))) return false
       if (nicho && !hay.includes(nicho.toLowerCase().slice(0, 4))) return false
       if (query && !hay.includes(query)) return false
@@ -250,6 +250,11 @@ export default function BibliotecaPage() {
                 <span key={n} className="rounded-full border px-2.5 py-1 text-xs" style={{ borderColor: 'rgba(0,0,0,0.15)', color: '#55555c' }}>{n}</span>
               ))}
             </div>
+            {selected.curso_repo?.usar_en_curso && (
+              <p className="mt-4 rounded-[12px] px-3 py-2 text-[13px] font-medium" style={{ background: '#0E0E11', color: '#D8FF3E' }}>
+                Uso en curso: {selected.curso_repo.modulo} · {selected.curso_repo.leccion} · {selected.curso_repo.rol} — {selected.curso_repo.resultado_esperado}
+              </p>
+            )}
             <p className="mt-4 font-mono text-[11px] uppercase tracking-widest" style={{ color: '#8a8a90' }}>
               {selected.popularidad?.estrellas || selected.popularidad?.nota} · {selected.estado} · prioridad {selected.prioridad_qaway}
             </p>

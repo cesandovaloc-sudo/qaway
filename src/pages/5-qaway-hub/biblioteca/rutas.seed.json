@@ -1,0 +1,21 @@
+{
+  "version": "ruta-v1",
+  "rutas": [
+    {
+      "id": "RUTA-001",
+      "slug": "web-de-0-a-produccion",
+      "nombre": "Web de 0 a producción",
+      "objetivo": "De la idea al deploy auditado usando biblioteca.",
+      "producto": "web",
+      "pasos": [
+        { "orden": 1, "item_id": "BIB-007", "rol": "Planificar sin código", "entrega": "Plan validado con preguntas", "criterio_done": "Alcance cerrado antes de codificar" },
+        { "orden": 2, "item_id": "BIB-002", "rol": "Modelos gratis para probar", "entrega": "Gateway local funcionando", "criterio_done": "Rotación sin pagar en pruebas" },
+        { "orden": 3, "item_id": "BIB-004", "rol": "Entorno de construcción", "entrega": "Repo con tareas en marcha", "criterio_done": "Flujo diario operativo" },
+        { "orden": 4, "item_id": "BIB-006", "rol": "Datos y documentos", "entrega": "Ingesta a Markdown", "criterio_done": "Docs listos para RAG" },
+        { "orden": 5, "item_id": "BIB-012", "rol": "Validar marca", "entrega": "Logo validado", "criterio_done": "Legible en pequeño y a distancia" },
+        { "orden": 6, "item_id": "BIB-013", "rol": "Auditar antes de entregar", "entrega": "REPORT.md + fixes", "criterio_done": "Sin hallazgos altos abiertos" },
+        { "orden": 7, "item_id": "BIB-011", "rol": "Desplegar 24/7", "entrega": "URL productiva", "criterio_done": "Servicio en línea y respaldado" }
+      ]
+    }
+  ]
+}

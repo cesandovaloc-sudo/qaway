@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file Contratos y Tipos Canónicos del CRM - 1-qawayLab-CRM
  * Define los modelos de datos de acuerdo con el Estándar V4 de Qaway Lab
  * y las especificaciones de la WhatsApp Business Platform (WABA / Cloud API).
@@ -79,6 +79,9 @@ export const CRM_ROLES = {
  * @property {LeadReferral} [referral] - Datos de atribución de Meta Ads
  * @property {number} [lastCustomerMessageTimestamp] - Para cálculo de la ventana de 24h
  * @property {boolean} [windowActive24h] - Indicador de si la ventana de 24h está abierta
+ * @property {'whatsapp' | 'instagram' | 'messenger' | 'email' | 'comment'} [channel] - Canal de procedencia omnicanal
+ * @property {boolean} [isHumanRequested] - Indicador de solicitud de atención humana (Handover Protocol)
+ * @property {string} [humanHandoffRequestedAt] - Marca de tiempo ISO de cuando se solicitó el asesor
  * @property {Record<string, any>} [metadata] - Parámetros adicionales
  * @property {string} [created_at] - Fecha ISO de registro
  */

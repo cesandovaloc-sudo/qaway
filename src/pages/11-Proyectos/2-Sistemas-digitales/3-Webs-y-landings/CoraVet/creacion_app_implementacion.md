@@ -45,28 +45,18 @@
 
 ---
 
-## 3. Plan Maestro de Implementación (18 Requerimientos + 7 Adiciones Clave)
+## 3. Estado en Base de Datos (Supabase Remoto: `qrusdsqgygfolxfrafyd`)
 
-### Paso 1: Migración SQL en Supabase
-- Creación de la tabla `public.tenants` con todos los campos especificados:
-  `id`, `client_code`, `slug`, `name`, `legal_name`, `subdomain`, `custom_domain`, `status`, `branding`, `content`, `features`, `payment_settings`, `created_at`, `updated_at`, `deleted_at`.
-- Trigger automático de generación de `client_code` (prefijo `QW-`, 5 caracteres Base32 anti-confusión, bucle de reintento ante colisión).
-- Inserción idempotente de los 2 primeros tenants:
-  - **Tenant 000 (Master):** Qaway Lab (`client_code: 'QW-00001'`, `slug: 'qaway-lab'`).
-  - **Tenant 001 (Piloto):** CoraVet (`client_code: 'QW-7K4P2'`, `slug: 'coravet'`).
-- Políticas RLS de lectura pública para tenants activos y escritura exclusiva para administradores de Qaway Lab.
+### Tabla `public.tenants` (Activa y Operativa):
+| ID (UUID) | Client Code | Slug | Nombre Comercial | Razón Social | Subdominio | Estado |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `00000000-0000-0000-0000-000000000001` | `QW-00001` | `qaway-lab` | Qaway Lab | Qaway Lab Digital S.A.C. | `qawaylab` | `active` |
+| `06bacf31-6699-4ef5-9843-e58b835c6b2b` | `QW-7K4P2` | `coravet` | CoraVet | CoraVet Servicios Veterinarios Integrales | `coravet` | `active` |
 
-### Paso 2: Prueba Automatizada de No-Conflicto
-- Demostración ejecutable de que `Tenant A (CoraVet 1)` y `Tenant B (CoraVet 1)` coexisten en la base de datos sin conflicto, cada uno con su propio UUID y `client_code` independiente.
-
-### Paso 3: Compatibilidad y Preparación Comercial
-- Documentar y preparar la adición de `tenant_id` en tablas comerciales (`products`, `categories`, `orders`) con valor por defecto del Tenant 000 para no quebrar la Fase 2 existente.
-
-### Paso 4: Montaje y Verificación de CoraVet Frontend
-- Montaje limpio en `AppRouter.jsx` bajo `/proyectos/coravet/*` con encapsulamiento de estilos para auditar la web al 100% en local.
-
-### Paso 5: Documentación Técnica de Gobernanza
-- Registro formal de directrices para onboarding de nuevos clientes, reglas de cambio de marca y consultas multi-tenant.
+### Pruebas Automatizadas Ejecutadas (`test_tenants.mjs`):
+1. **Lectura pública activa:** Verificación de consulta vía clave anon (`@supabase/supabase-js`). Éxito (2 registros recuperados).
+2. **Resolución por slug:** Simulación de frontend resolviendo `slug = 'coravet'` recuperando `branding` y `content`. Éxito.
+3. **Blindaje RLS:** Intento de inserción anónima bloqueado por PostgreSQL (Error `42501: new row violates row-level security policy for table "tenants"`). Éxito.
 
 ---
 
@@ -76,4 +66,9 @@
 - **Auditoría y Extracción:** Extracción del proyecto base `coravet-web-v4` en `src/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/CoraVet/`.
 - **Creación de Bitácora:** Documentación del enfoque metodológico y arquitectura desacoplada (`creacion_app_implementacion.md`).
 - **Registro del Estándar de Nomenclatura:** Adopción del Patrón Dual ID + `client_code` humano anti-confusión.
-- **Acoplamiento del Plan Maestro:** Incorporación de las 7 adiciones críticas (Master Tenant, generador Crockford Base32, `payment_settings`, prueba automatizada de nombres duplicados).
+
+### [Iteración 02 — 2026-09-17]
+- **Migración SQL Ejecutada:** `supabase/migrations/20260917130000_create_tenants_multi_tenant.sql` aplicada a la base de datos remota con `supabase db push`.
+- **Creación de la Tabla `public.tenants`:** Incluye triggers de Base32 para `client_code`, validación de slugs y políticas RLS.
+- **Siembra de Tenants:** Master Tenant (`QW-00001` - Qaway Lab) y Tenant Piloto (`QW-7K4P2` - CoraVet) registrados y verificados.
+- **Prueba Automatizada de Blindaje:** Validación con `test_tenants.mjs` exitosa.

@@ -1,6 +1,6 @@
 {
-  "version": "seed-v3",
-  "total": 12,
+  "version": "seed-v4",
+  "total": 13,
   "vocabulario": {
     "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
     "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
@@ -9,7 +9,8 @@
     "plataforma": ["local", "cloud", "desktop", "movil", "os", "web"],
     "nivel": ["no-code", "low-code", "dev"],
     "licencia": ["open", "closed", "desconocida"],
-    "estado": ["verificado", "por-verificar"]
+    "estado": ["verificado", "por-verificar", "por-crear"],
+    "curso_rol": ["herramienta", "demo", "practica", "referencia"]
   },
   "items": [
     {
@@ -34,7 +35,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["documentacion", "diagramas", "arquitectura"]
+      "tags": ["documentacion", "diagramas", "arquitectura"],
+      "alias_busqueda": ["diagramas", "arquitectura", "documentacion", "secuencia"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-002",
@@ -58,7 +61,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "alta",
-      "tags": ["gateway", "modelos", "agentes", "gratis"]
+      "tags": ["gateway", "modelos", "agentes", "gratis"],
+      "alias_busqueda": ["gateway", "modelos gratis", "sin key", "probar ia", "multi-modelo"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-003",
@@ -82,7 +87,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "alta",
-      "tags": ["ade", "rust", "terminal", "orquestacion"]
+      "tags": ["ade", "rust", "terminal", "orquestacion"],
+      "alias_busqueda": ["terminal", "tui", "orquestar agentes", "ssh"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-004",
@@ -106,7 +113,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["ide", "agentes", "gui", "remoto"]
+      "tags": ["ide", "agentes", "gui", "remoto"],
+      "alias_busqueda": ["ide", "gui", "agentes visual", "remoto", "movil"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-005",
@@ -130,7 +139,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "baja",
-      "tags": ["linux", "arch", "ia", "os"]
+      "tags": ["linux", "arch", "ia", "os"],
+      "alias_busqueda": ["linux", "arch", "os", "hyprland"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-006",
@@ -154,7 +165,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "alta",
-      "tags": ["rag", "markdown", "rust", "datos"]
+      "tags": ["rag", "markdown", "rust", "datos"],
+      "alias_busqueda": ["rag", "markdown", "pdf a markdown", "datos"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-007",
@@ -178,7 +191,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "alta",
-      "tags": ["skill", "prompt", "planificacion"]
+      "tags": ["skill", "prompt", "planificacion"],
+      "alias_busqueda": ["skill", "planificar", "preguntas", "refactor"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-008",
@@ -202,7 +217,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["deepseek", "local", "economico"]
+      "tags": ["deepseek", "local", "economico"],
+      "alias_busqueda": ["deepseek", "barato", "local", "economico"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-009",
@@ -226,7 +243,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["video", "agentes", "contenido"]
+      "tags": ["video", "agentes", "contenido"],
+      "alias_busqueda": ["video", "anuncios", "contenido", "demos"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-010",
@@ -250,7 +269,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "baja",
-      "tags": ["orquestacion", "visual", "agentes"]
+      "tags": ["orquestacion", "visual", "agentes"],
+      "alias_busqueda": ["orquestacion visual", "monitoreo", "agentes grafico"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     },
     {
       "id": "BIB-011",
@@ -274,7 +295,9 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "media",
-      "tags": ["vps", "cloud", "deploy", "24-7"]
+      "tags": ["vps", "cloud", "deploy", "24-7"],
+      "alias_busqueda": ["vps", "servidor", "deploy", "despliegue", "cloud"],
+      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-04 Despliegue y seguridad", "leccion": "L1", "orden": 1, "rol": "practica", "prerequisitos": [], "resultado_esperado": "VPS en línea 24/7 para el proyecto" }
     },
     {
       "id": "BIB-012",
@@ -298,7 +321,35 @@
       "licencia": "desconocida",
       "estado": "por-verificar",
       "prioridad_qaway": "alta",
-      "tags": ["logos", "branding", "diseno", "test-visual", "gratis"]
+      "tags": ["logos", "branding", "diseno", "test-visual", "gratis"],
+      "alias_busqueda": ["logo", "logos", "branding", "probar logo", "legibilidad"],
+      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-03 Web y marca", "leccion": "L1", "orden": 1, "rol": "demo", "prerequisitos": [], "resultado_esperado": "Logo validado en tamaños, fondos y distancia" }
+    },
+    {
+      "id": "BIB-013",
+      "slug": "cloudflare-security-audit-skill",
+      "nombre": "Security Audit Skill (Cloudflare)",
+      "tipo": "skill",
+      "categoria": "Ciberseguridad",
+      "subcategoria": "Auditoría de vulnerabilidades",
+      "instalacion": { "metodo": "1-comando", "formato": "Skill para agentes", "comando_ejemplo": "npx skills add https://github.com/cloudflare/security-audit-skill --skill security-audit" },
+      "stack": { "lenguaje": "", "rendimiento": "6 fases: recon, hunting, validación, reporte, output, verificación", "entorno": "Claude Code / Codex / cualquier agente con sub-agentes + Node.js" },
+      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "Open source MIT" },
+      "costo": "gratis",
+      "plataforma": ["local"],
+      "nivel": "dev",
+      "popularidad": { "estrellas": "~6,682", "nota": "Repo oficial Cloudflare, MIT" },
+      "integraciones": ["cli", "plugin"],
+      "nichos": ["Desarrolladores", "Equipos de seguridad", "DevSecOps"],
+      "funcionalidad_corta": "Convierte tu IA en auditor que encuentra y ayuda a corregir vulnerabilidades",
+      "caso_uso": "Lanza sub-agentes en 6 fases sobre tu proyecto y escribe informe REPORT.md + findings.json con vulnerabilidades y recomendaciones.",
+      "url_repo": "https://github.com/cloudflare/security-audit-skill",
+      "licencia": "open",
+      "estado": "verificado",
+      "prioridad_qaway": "alta",
+      "tags": ["seguridad", "auditoria", "vulnerabilidades", "skill", "cloudflare", "sub-agentes", "open-source"],
+      "alias_busqueda": ["seguridad", "auditoria", "vulnerabilidades", "pentest", "cloudflare"],
+      "curso_repo": { "usar_en_curso": true, "curso": "cero-a-despliegue", "modulo": "DIA-04 Despliegue y seguridad", "leccion": "L2", "orden": 2, "rol": "practica", "prerequisitos": ["BIB-011"], "resultado_esperado": "Informe de vulnerabilidades + correcciones aplicadas" }
     }
   ]
 }

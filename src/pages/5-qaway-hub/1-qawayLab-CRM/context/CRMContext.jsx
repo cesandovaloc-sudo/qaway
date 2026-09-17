@@ -115,11 +115,11 @@ export function CRMProvider({ children }) {
       email: newLead.email,
       campaign_id: newLead.campaignId,
       campaign_name: newLead.campaignName,
-      status: 'new',
-      priority: 'medium',
+      status: newLead.isHumanRequested ? 'negociacion' : (newLead.status || 'new'),
       budget: newLead.budget || 0,
-      agent: 'Agente Qaway A',
+      agent: newLead.isHumanRequested ? 'Asesor Humano Requerido' : 'Agente Qaway A',
       last_message: newLead.lastMessage,
+      is_human_requested: Boolean(newLead.isHumanRequested),
       history: [{
         sender: 'lead',
         text: newLead.lastMessage,
@@ -129,7 +129,9 @@ export function CRMProvider({ children }) {
       }],
       metadata: {
         ...(newLead.metadata || {}),
-        referral: newLead.referral || null
+        channel: newLead.channel || 'whatsapp',
+        referral: newLead.referral || null,
+        is_human_requested: Boolean(newLead.isHumanRequested)
       },
       unread_count: 1
     }

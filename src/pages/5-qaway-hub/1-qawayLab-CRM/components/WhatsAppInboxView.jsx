@@ -183,13 +183,21 @@ export default function WhatsAppInboxView() {
 
                 {/* Etiquetas e indicadores */}
                 <div className="flex justify-between items-center mt-2">
-                  <span className={`text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wide ${
-                    lead.status === 'new' ? 'bg-cyan-50 text-cyan-700 border border-cyan-100' :
-                    lead.status === 'ganado' ? 'bg-green-50 text-green-700 border border-green-100' :
-                    'bg-zinc-100 text-zinc-600 border border-zinc-200'
-                  }`}>
-                    {lead.status}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[9px] px-2 py-0.5 rounded font-extrabold uppercase tracking-wide ${
+                      lead.status === 'new' ? 'bg-cyan-50 text-cyan-700 border border-cyan-100' :
+                      lead.status === 'ganado' ? 'bg-green-50 text-green-700 border border-green-100' :
+                      lead.status === 'negociacion' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                      'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                    }`}>
+                      {lead.status}
+                    </span>
+                    {lead.isHumanRequested && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded font-extrabold tracking-wide bg-red-50 text-red-700 border border-red-200 shrink-0">
+                        ⚠️ Asesor
+                      </span>
+                    )}
+                  </div>
 
                   {lead.unreadCount > 0 && (
                     <span className="w-5 h-5 rounded-full bg-green-500 text-white font-extrabold text-[10px] flex items-center justify-center shadow-xs">
@@ -231,6 +239,11 @@ export default function WhatsAppInboxView() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {selectedLead.isHumanRequested && (
+              <span className="text-[10px] text-red-700 font-bold flex items-center gap-1.5 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200 animate-pulse" title="El prospecto solicitó atención de un asesor humano (Handover Protocol Activo)">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-600" /> ⚠️ Asesor Requerido
+              </span>
+            )}
             {is24hOpen ? (
               <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60" title="Ventana de 24h abierta: Mensajes de texto libre permitidos">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Ventana 24h Activa

@@ -63,3 +63,13 @@ El módulo **1-qawayLab-CRM** es la solución centralizada de gestión de relaci
   - **Atribución CTWA:** Mapeo del objeto `referral` (`source_id`, `headline`, `image_url`) con la campaña activa y ventana de 72 horas gratuitas.
   - **WhatsApp Flows 3.0:** Requerimientos de cifrado RSA y esquemas de intercambio de datos dinámicos.
 
+### [Iteración 08 - 2026-09-17]
+- **Blindaje de Webhooks, Handover Protocol & Soporte Omnicanal en Producción:**
+  - **Edge Function `webhook-whatsapp`:** Implementación de validación criptográfica `x-hub-signature-256` con HMAC-SHA256 y `APP_SECRET` usando Web Crypto API de Deno.
+  - **Detección de Human Handoff:** Algoritmo de detección de disparadores semánticos (`HUMAN_INTENT_KEYWORDS`) en la Edge Function para transferir automáticamente el control de la conversación de la IA al asesor (`is_human_requested: true`).
+  - **Extracción de Atribución CTWA:** Almacenamiento estructurado del objeto `referral` en Supabase con fecha de expiración de ventana gratuita de 72 horas (`ctwa_expires_at`).
+  - **Idempotencia Anti-Duplicados:** Registro de `wamid` y descarte automático de eventos duplicados reenviados por la Cloud API de Meta.
+  - **Alertas Visuales en el CRM:** Incorporación de insignias interactivas `⚠️ Asesor Requerido` en la lista de chats y en la cabecera del chat activo de [WhatsAppInboxView.jsx].
+  - **Simulación Enriquecida:** Nuevo caso de prueba en [CRMPage.jsx] y [CRMContext.jsx] con solicitud explícita de asesor humano para comprobar el flujo en vivo.
+
+

@@ -161,6 +161,24 @@ function CRMContent() {
           headline: '🚀 Sistemas Web y Apps de Alto Rendimiento',
           media_type: 'video'
         }
+      },
+      {
+        name: 'Camila Navarro',
+        whatsapp: '+51 988 777 666',
+        email: 'camila@corporativo.com',
+        campaignId: 'camp-meta-1',
+        campaignName: 'Qaway Lab_Ventas_Individuales',
+        lastMessage: 'Hola, necesito hablar con un asesor humano para coordinar una reunión de consultoría.',
+        budget: 950,
+        priority: 'high',
+        isHumanRequested: true,
+        channel: 'whatsapp',
+        referral: {
+          ad_id: 'ad_meta_887192304918',
+          source_url: 'https://facebook.com/ads/...',
+          headline: '💼 Consultoría y Transformación Digital para Negocios',
+          media_type: 'image'
+        }
       }
     ]
     setTimeout(() => {
