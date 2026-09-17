@@ -114,8 +114,54 @@ function CRMContent() {
   const handleSimulate = () => {
     setSimulating(true)
     const leads = [
-      { name: 'Alejandro Ruiz', whatsapp: '+51 966 333 444', email: 'alejandro@email.com', campaignId: 'camp-id-visual', campaignName: 'Curso Identidad Visual', lastMessage: 'Hola, vi el anuncio en Instagram. Me interesa el curso.', budget: 99, priority: 'high' },
-      { name: 'Camila Torres',  whatsapp: '+51 988 777 666', email: 'camila@email.com',    campaignId: 'camp-notion',    campaignName: 'Plantilla Notion',       lastMessage: '¿Cómo puedo pagar la plantilla Notion?',                  budget: 49, priority: 'medium' },
+      {
+        name: 'Alejandro Ruiz',
+        whatsapp: '+51 966 333 444',
+        email: 'alejandro@email.com',
+        campaignId: 'camp-id-visual',
+        campaignName: 'Curso Identidad Visual (Meta Ads)',
+        lastMessage: 'Hola, vi su anuncio en Instagram sobre el curso de identidad visual. ¿Tienen cupos?',
+        budget: 99,
+        priority: 'high',
+        referral: {
+          ad_id: 'ad_meta_238510928374',
+          source_url: 'https://instagram.com/p/C9x81...',
+          headline: '🎨 Masterclass Identidad Visual & Branding',
+          media_type: 'image'
+        }
+      },
+      {
+        name: 'Camila Torres',
+        whatsapp: '+51 988 777 666',
+        email: 'camila@email.com',
+        campaignId: 'camp-notion',
+        campaignName: 'Plantilla Notion Pro',
+        lastMessage: 'Hola, vi su anuncio en Facebook sobre el sistema Notion. ¿Cómo lo adquiero?',
+        budget: 49,
+        priority: 'medium',
+        referral: {
+          ad_id: 'ad_meta_984719283471',
+          source_url: 'https://facebook.com/ads/...',
+          headline: '⚡ Sistema Operativo Notion Pro para Empresas',
+          media_type: 'video'
+        }
+      },
+      {
+        name: 'Mateo Sandoval',
+        whatsapp: '+51 955 444 333',
+        email: 'mateo@estudiodigital.pe',
+        campaignId: 'camp-meta-1',
+        campaignName: 'Qaway Lab_Ventas_Individuales',
+        lastMessage: 'Hola, quiero una cotización de desarrollo web a medida para mi empresa.',
+        budget: 450,
+        priority: 'high',
+        referral: {
+          ad_id: 'ad_meta_554819283120',
+          source_url: 'https://instagram.com/stories/...',
+          headline: '🚀 Sistemas Web y Apps de Alto Rendimiento',
+          media_type: 'video'
+        }
+      }
     ]
     setTimeout(() => {
       simulateIncomingWebhook(leads[Math.floor(Math.random() * leads.length)])

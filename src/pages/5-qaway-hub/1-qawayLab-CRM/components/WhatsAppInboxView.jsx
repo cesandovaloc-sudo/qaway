@@ -310,15 +310,15 @@ export default function WhatsAppInboxView() {
 
         {/* Barra de Comercio Conversacional (Plantillas HSM, WhatsApp Flows, Catálogo & Pagos) */}
         <div className={`p-3.5 bg-white border-t border-zinc-100 shrink-0 transition-colors ${!is24hOpen ? 'bg-amber-50/40' : ''}`}>
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/60">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <div className="flex items-center gap-1.5 bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/80">
               <button
                 type="button"
                 onClick={() => setActionTab('templates')}
-                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all cursor-pointer ${
+                className={`py-1.5 px-3 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   actionTab === 'templates'
-                    ? 'bg-white text-zinc-900 shadow-2xs'
-                    : 'text-zinc-500 hover:text-zinc-800'
+                    ? 'bg-white text-zinc-950 shadow-xs border border-zinc-200/60'
+                    : 'text-zinc-500 hover:text-zinc-900'
                 }`}
               >
                 ✨ Plantillas HSM
@@ -326,32 +326,40 @@ export default function WhatsAppInboxView() {
               <button
                 type="button"
                 onClick={() => setActionTab('flows')}
-                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer ${
+                className={`py-1.5 px-3 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   actionTab === 'flows'
-                    ? 'bg-white text-emerald-700 shadow-2xs'
-                    : 'text-zinc-500 hover:text-zinc-800'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-zinc-600 hover:text-emerald-700'
                 }`}
               >
-                <FileText className="w-3 h-3 text-emerald-600" /> WhatsApp Flows
+                <FileText className="w-3.5 h-3.5" /> WhatsApp Flows
+                <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${actionTab === 'flows' ? 'bg-emerald-700 text-white' : 'bg-emerald-100 text-emerald-800'}`}>2</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActionTab('catalog')}
-                className={`py-1 px-2.5 rounded-md text-[10px] font-extrabold transition-all flex items-center gap-1 cursor-pointer ${
+                className={`py-1.5 px-3 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   actionTab === 'catalog'
-                    ? 'bg-white text-purple-700 shadow-2xs'
-                    : 'text-zinc-500 hover:text-zinc-800'
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'text-zinc-600 hover:text-purple-700'
                 }`}
               >
-                <ShoppingCart className="w-3 h-3 text-purple-600" /> Catálogo & Pagos
+                <ShoppingCart className="w-3.5 h-3.5" /> Catálogo & Pagos
+                <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${actionTab === 'catalog' ? 'bg-purple-700 text-white' : 'bg-purple-100 text-purple-800'}`}>2</span>
               </button>
             </div>
 
             {!is24hOpen && (
-              <span className="text-[10px] font-bold text-amber-700 flex items-center gap-1 bg-amber-100/90 px-2 py-0.5 rounded-md shrink-0">
-                <Lock className="w-3 h-3 text-amber-600" /> Envía plantilla para reabrir chat
+              <span className="text-[10px] font-bold text-amber-800 flex items-center gap-1 bg-amber-100/90 border border-amber-200 px-2.5 py-1 rounded-lg shrink-0">
+                <Lock className="w-3 h-3 text-amber-700" /> Fuera de ventana de 24h: usa una plantilla para reabrir
               </span>
             )}
+          </div>
+
+          <div className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-2">
+            {actionTab === 'templates' && 'Plantillas oficiales aprobadas por Meta:'}
+            {actionTab === 'flows' && 'WhatsApp Flows 3.0 (Formularios dinámicos dentro de WhatsApp):'}
+            {actionTab === 'catalog' && 'Fichas de producto sincronizadas con botón de pago directo:'}
           </div>
 
           <div className="flex flex-wrap gap-2">

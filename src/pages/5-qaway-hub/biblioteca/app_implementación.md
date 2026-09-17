@@ -16,3 +16,9 @@
 - Causa: `lazy + Suspense fallback=null` dejaba blanco si el chunk nuevo fallaba.
 - Solución: import estático `BibliotecaPage` en `AppRouter.jsx`, misma ruta `hub/biblioteca`.
 - Enlace completo: `http://localhost:4100/hub/biblioteca`.
+
+## Iteración 4 — Seed v2 + conexión (2026-09-16)
+- Nuevo `biblioteca.seed.json`: 11 ítems BIB-001…BIB-011, esquema cerrado (tipo, instalacion.metodo, acceso.tipo_key, integraciones, nichos, funcionalidad_corta, caso_uso, estado, prioridad_qaway, tags). Sin URLs inventadas (`url_repo: ""`, estado `por-verificar`). Incluye Hostinger faltante. Corrige `populaidad`.
+- `BibliotecaPage.jsx`: mismo diseño, ahora lee seed, buscador activo, filtros Tipo/Skills/Apps/Repos + funcionalidad + nicho en local, contador real, footer por ítem `metodo · key`.
+- Lint limpio (solo 2 warnings preexistentes). JSON validado: 11 items.
+- Sin commit, sin push.
