@@ -43,3 +43,8 @@
 - `Abrir ficha` ahora es botón: abre modal con ficha completa del seed (instalación, acceso, stack, plataforma/nivel, integraciones+tags, nichos, popularidad, estado, prioridad). Cierra con backdrop o botón. Misma arte papel.
 - Para probar: filtra `gratis` o busca `omniroute`, abre ficha BIB-002.
 - Lint limpio. Sin commit, sin push.
+
+## Iteración 9 — BIB-012 Symbl.space (2026-09-16)
+- Nuevo ítem `BIB-012 symbl-space`: tipo app, Diseño / Test de logos, web sin instalación, gratis sin key, plataforma web, nivel no-code, prioridad alta (branding Qaway).
+- Funcionalidad: probar logos en tamaños, fondos, distancia, contraste y legibilidad antes de enviar a cliente.
+- Seed v3 total 12, validado. Visible con buscador `symbl` o `logo`, filtro `gratis`. Sin commit, sin push.

@@ -1,6 +1,6 @@
 {
   "version": "seed-v3",
-  "total": 11,
+  "total": 12,
   "vocabulario": {
     "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
     "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
@@ -275,6 +275,30 @@
       "estado": "por-verificar",
       "prioridad_qaway": "media",
       "tags": ["vps", "cloud", "deploy", "24-7"]
+    },
+    {
+      "id": "BIB-012",
+      "slug": "symbl-space",
+      "nombre": "Symbl.space",
+      "tipo": "app",
+      "categoria": "Diseño",
+      "subcategoria": "Test de logos",
+      "instalacion": { "metodo": "app", "formato": "Web sin instalación", "comando_ejemplo": "" },
+      "stack": { "lenguaje": "", "rendimiento": "Prueba visual en segundos", "entorno": "Web UI" },
+      "acceso": { "requiere_key": false, "tipo_key": "none", "es_gratis": true, "costo_ref": "" },
+      "costo": "gratis",
+      "plataforma": ["web"],
+      "nivel": "no-code",
+      "popularidad": { "estrellas": "", "nota": "Recomendado en video" },
+      "integraciones": ["web-ui"],
+      "nichos": ["Diseñadores de logos", "Branding", "Marketing"],
+      "funcionalidad_corta": "Probar logos en condiciones reales en segundos",
+      "caso_uso": "Subir logo y ver tamaños diminutos, fondos, distancia, contraste y legibilidad antes de enviar a cliente.",
+      "url_repo": "",
+      "licencia": "desconocida",
+      "estado": "por-verificar",
+      "prioridad_qaway": "alta",
+      "tags": ["logos", "branding", "diseno", "test-visual", "gratis"]
     }
   ]
 }

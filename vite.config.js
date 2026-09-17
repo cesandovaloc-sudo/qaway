@@ -30,7 +30,7 @@ export default defineConfig({
       { find: 'react', replacement: path.resolve(__dirname, './node_modules/react') },
       { find: 'react-dom', replacement: path.resolve(__dirname, './node_modules/react-dom') },
     ],
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'react-router-dom', 'react-router'],
   },
   build: {
     // Limpia dist/ en cada build: con `false` se acumulaban bundles antiguos
