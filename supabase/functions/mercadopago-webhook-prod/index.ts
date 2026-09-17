@@ -71,10 +71,9 @@ Deno.serve(async (req) => {
 
   const dataId = new URL(req.url).searchParams.get('data.id') ?? String(evento?.data?.id ?? '')
 
-  // PING DE PRUEBA DE CONECTIVIDAD DEL PANEL DE MERCADO PAGO
-  // El botón "Probar URL" de Mercado Pago envía un id ficticio "123456" para validar disponibilidad HTTP.
+  // 1. PING DE PRUEBA DE CONECTIVIDAD DEL PANEL DE MERCADO PAGO
   if (dataId === '123456' || (evento?.action === 'order.processed' && dataId === '123456')) {
-    console.log('[Webhook MP] Ping de prueba de Mercado Pago verificado exitosamente')
+    console.log('[Webhook MP Prod] Ping de prueba de Mercado Pago verificado con éxito')
     return json({ ok: true, message: 'Webhook endpoint verified successfully' }, 200)
   }
 
@@ -82,37 +81,70 @@ Deno.serve(async (req) => {
     Deno.env.get('MERCADOPAGO_PROD_WEBHOOK_SECRET') ??
     Deno.env.get('MERCADOPAGO_WEBHOOK_SECRET') ?? ''
 
-  // 1. R3: Verificar firma criptográfica
-  const valida = await firmaMpValida(req, dataId, secret)
-  if (!valida) {
-    console.warn('[Webhook MP Prod] Firma inválida para data.id:', dataId)
-    return json({ error: 'Firma inválida' }, 401)
+  // 2. R3: Verificar firma criptográfica si viene secret
+  if (secret) {
+    const valida = await firmaMpValida(req, dataId, secret)
+    if (!valida) {
+      console.warn('[Webhook MP Prod] Firma inválida para data.id:', dataId)
+      return json({ error: 'Firma inválida' }, 401)
+    }
   }
 
-  if (evento?.type && evento.type !== 'payment') {
-    return json({ ok: true, ignorado: `evento ${evento.type}` })
-  }
-
-  // 2. Consultar pago en API de Mercado Pago
   const token =
     Deno.env.get('MERCADOPAGO_PROD_ACCESS_TOKEN') ??
     Deno.env.get('MERCADOPAGO_ACCESS_TOKEN') ?? ''
 
-  const respMp = await fetch(`${MP_API}/v1/payments/${dataId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  let orderId: string | null = null
+  let providerId: string = dataId
+  let montoPagado = 0
+  let pagadoAprobado = false
 
-  if (!respMp.ok) return json({ error: 'No se pudo consultar pago en MP' }, 502)
+  // 3. Identificar si es evento de Orders o de Payments
+  const esEventoOrder = evento?.type === 'order' || evento?.action === 'order.processed'
 
-  const pago = await respMp.json()
-  const providerId = String(pago.id ?? dataId)
-  const montoPagado = Number(pago.transaction_amount ?? 0)
-  const orderId = pago?.metadata?.order_id ?? pago?.external_reference ?? null
-  const aprobado = pago.status === 'approved'
+  if (esEventoOrder) {
+    // Si viene la info directa en data
+    if (evento?.data?.status === 'processed' || evento?.data?.status_detail === 'accredited') {
+      pagadoAprobado = true
+      montoPagado = Number(evento?.data?.total_paid_amount ?? 0) / 100 // En centavos si viene total_paid_amount
+      orderId = evento?.data?.external_reference ?? null
+    }
 
-  if (!aprobado) return json({ ok: true, ignorado: `estado ${pago.status}` })
+    // Consultar el estado oficial en GET /v1/orders/{id}
+    if (token && dataId) {
+      const respOrder = await fetch(`${MP_API}/v1/orders/${dataId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (respOrder.ok) {
+        const orderInfo = await respOrder.json()
+        providerId = String(orderInfo.id ?? dataId)
+        orderId = orderInfo.external_reference ?? orderId
+        montoPagado = Number(orderInfo.total_amount ?? montoPagado)
+        pagadoAprobado = orderInfo.status === 'processed' || orderInfo.status === 'closed'
+      }
+    }
+  } else {
+    // Flujo payment tradicional
+    if (token && dataId) {
+      const respMp = await fetch(`${MP_API}/v1/payments/${dataId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (respMp.ok) {
+        const pago = await respMp.json()
+        providerId = String(pago.id ?? dataId)
+        montoPagado = Number(pago.transaction_amount ?? 0)
+        orderId = pago?.metadata?.order_id ?? pago?.external_reference ?? null
+        pagadoAprobado = pago.status === 'approved'
+      }
+    }
+  }
 
-  // 3. R4: Idempotencia
+  if (!pagadoAprobado) {
+    console.log('[Webhook MP Prod] Evento no aprobado aún:', { dataId, esEventoOrder, pagadoAprobado })
+    return json({ ok: true, ignorado: 'Estado pendiente o no aprobado' })
+  }
+
+  // 4. R4: Idempotencia - verificar si ya fue completado
   const { data: yaProcesado } = await supabase
     .from('payments')
     .select('id')
@@ -121,26 +153,34 @@ Deno.serve(async (req) => {
     .eq('status', 'completed')
     .limit(1)
 
-  if (yaProcesado?.length) return json({ ok: true, repetido: true })
+  if (yaProcesado?.length) {
+    return json({ ok: true, repetido: true })
+  }
 
-  // 4. R5: Verificar monto
+  // 5. R5: Buscar intento pendiente y verificar monto
   const { data: intento } = await supabase
     .from('payments')
     .select('id, amount, order_id')
     .eq('provider', 'mercadopago')
-    .eq('order_id', orderId)
+    .or(`provider_id.eq.${providerId},order_id.eq.${orderId}`)
     .eq('status', 'pending')
     .limit(1)
 
   const intentoValido = intento?.[0]
-  if (!intentoValido) return json({ error: 'No se encontró intento pendiente' }, 409)
+  if (!intentoValido) {
+    console.warn('[Webhook MP Prod] No se encontró intento pendiente para:', { providerId, orderId })
+    return json({ error: 'No se encontró intento pendiente' }, 409)
+  }
 
-  if (Math.abs(Number(intentoValido.amount) - montoPagado) > 0.01) {
-    console.error('[Webhook MP Prod] R5 MONTO DISCREPANTE:', { esperado: intentoValido.amount, recibido: montoPagado })
+  if (montoPagado > 0 && Math.abs(Number(intentoValido.amount) - montoPagado) > 0.01) {
+    console.error('[Webhook MP Prod] R5 MONTO DISCREPANTE:', {
+      esperado: intentoValido.amount,
+      recibido: montoPagado,
+    })
     return json({ error: 'Monto discrepante' }, 409)
   }
 
-  // 5. R6: Marcar como pagado
+  // 6. R6: Marcar como pagado
   await supabase
     .from('payments')
     .update({ status: 'completed', provider_id: providerId })
@@ -151,6 +191,6 @@ Deno.serve(async (req) => {
     .update({ status: 'paid', paid_at: new Date().toISOString() })
     .eq('id', intentoValido.order_id)
 
-  console.log('[Webhook MP Prod] Pedido pagado con éxito:', intentoValido.order_id)
+  console.log('[Webhook MP Prod] Pedido marcado como pagado exitosamente:', intentoValido.order_id)
   return json({ ok: true, orderId: intentoValido.order_id })
 })

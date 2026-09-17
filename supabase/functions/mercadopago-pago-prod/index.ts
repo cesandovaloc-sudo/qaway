@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const { orderId } = await req.json().catch(() => ({}))
     if (!orderId) return json({ error: 'Falta orderId' }, 400)
 
-    // 1. R1: Leer el pedido y sus ítems de la base de datos
+    // 1. R1: Leer pedido y recalcular ítems desde la BD
     const { data: orden, error: errOrden } = await supabase
       .from('orders')
       .select('id, total, status')
@@ -44,16 +44,15 @@ Deno.serve(async (req) => {
     if (errItems || !itemsBd?.length) return json({ error: 'El pedido no tiene ítems' }, 400)
 
     const items = itemsBd.map((it: any) => ({
-      title: it.product_title,
+      title: String(it.product_title || 'Producto'),
       quantity: Number(it.quantity),
       unit_price: Number(it.unit_price),
-      currency_id: 'PEN',
     }))
 
     const totalCalculado = items.reduce((acc: number, it: any) => acc + it.unit_price * it.quantity, 0)
     const total = Math.round(totalCalculado * 100) / 100
 
-    // 2. Secret oficial de producción (con fallback automático)
+    // 2. Secret oficial de producción
     const token =
       Deno.env.get('MERCADOPAGO_PROD_ACCESS_TOKEN') ??
       Deno.env.get('MERCADOPAGO_ACCESS_TOKEN')
@@ -61,55 +60,55 @@ Deno.serve(async (req) => {
     if (!token) return json({ error: 'Falta MERCADOPAGO_PROD_ACCESS_TOKEN' }, 501)
 
     const base = Deno.env.get('PUBLIC_SITE_URL') ?? 'https://www.qawaylab.com'
-    const webhookBase = Deno.env.get('SUPABASE_URL') ?? ''
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 
-    // 3. Crear preferencia en Mercado Pago
+    // 3. Crear orden en Mercado Pago API v1/orders (Checkout Pro moderna)
     const cuerpo = {
-      items,
+      type: 'online',
+      processing_mode: 'manual',
+      total_amount: total,
       external_reference: orderId,
-      metadata: { order_id: orderId },
-      back_urls: {
-        success: `${base}/carrito/compras`,
-        failure: `${base}/carrito/checkout`,
-        pending: `${base}/carrito/compras`,
+      items,
+      config: {
+        online: {
+          success_url: `${base}/carrito/compras`,
+          failure_url: `${base}/carrito/checkout`,
+          pending_url: `${base}/carrito/compras`,
+          auto_return: 'approved',
+        },
       },
-      auto_return: 'approved',
-      notification_url: webhookBase && anonKey
-        ? `${webhookBase}/functions/v1/mercadopago-webhook-prod?apikey=${anonKey}`
-        : undefined,
-      statement_descriptor: 'QAWAYLAB',
     }
 
-    const respuestaMp = await fetch(`${MP_API}/checkout/preferences`, {
+    const idempotencyKey = crypto.randomUUID()
+
+    const respuestaMp = await fetch(`${MP_API}/v1/orders`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Idempotency-Key': `pref-${orderId}`,
+        'X-Idempotency-Key': idempotencyKey,
       },
       body: JSON.stringify(cuerpo),
     })
 
     if (!respuestaMp.ok) {
       const detalle = await respuestaMp.text().catch(() => '')
-      console.error('[MP Prod] Error creando cobro:', respuestaMp.status, detalle)
-      return json({ error: `Mercado Pago rechazó el cobro (${respuestaMp.status}): ${detalle}` }, 502)
+      console.error('[MP Orders Prod] Error creando orden:', respuestaMp.status, detalle)
+      return json({ error: `Mercado Pago rechazó la orden (${respuestaMp.status}): ${detalle}` }, 502)
     }
 
-    const preferencia = await respuestaMp.json()
-    const url = preferencia.init_point ?? preferencia.sandbox_init_point
+    const ordenMp = await respuestaMp.json()
+    const checkoutUrl = ordenMp.checkout_url ?? ordenMp.init_point
 
-    if (!url) return json({ error: 'MP no devolvió URL de cobro' }, 502)
+    if (!checkoutUrl) return json({ error: 'MP no devolvió checkout_url' }, 502)
 
-    // 4. Registrar intento en payments
+    // 4. Registrar intento en tabla payments
     await supabase.from('payments').insert({
       order_id: orderId,
       amount: total,
       currency: 'PEN',
       status: 'pending',
       provider: 'mercadopago',
-      provider_id: String(preferencia.id),
+      provider_id: String(ordenMp.id),
     })
 
     return json({
@@ -117,8 +116,8 @@ Deno.serve(async (req) => {
       provider: 'mercadopago',
       amount: total,
       currency: 'PEN',
-      providerId: String(preferencia.id),
-      redirectUrl: String(url),
+      providerId: String(ordenMp.id),
+      redirectUrl: String(checkoutUrl),
     })
   } catch (err: any) {
     console.error('[mercadopago-pago-prod]', err)
