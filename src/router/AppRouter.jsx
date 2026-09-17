@@ -81,6 +81,7 @@ const TestPreparacionDigital = lazy(() => import('@/pages/10-briefs/1- Formulari
 
 // Proyectos (importación estática directa para máxima estabilidad y cero riesgo de carga diferida)
 import ProyectosPage from '@/pages/11-Proyectos/ProyectosPage.jsx'
+import ProyectosPageV2 from '@/pages/11-Proyectos/ProyectosPageV2.jsx'
 import TemplateDemo from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/TemplateDemo'
 import HorizontePage from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePage'
 import HorizontePageReal from '@/pages/11-Proyectos/2-Sistemas-digitales/3-Webs-y-landings/5-horizonte/HorizontePageReal'
@@ -424,6 +425,7 @@ export default function AppRouter() {
           <Route path="formularios/diagnostico-gamificado" element={<TestPreparacionDigital />} />
           <Route path="diagnostico" element={<DiagnosticoSplitStudio />} />
           <Route path="proyectos" element={renderRoute('proyectos', <ProyectosPage />)} />
+          <Route path="proyectos-v2" element={renderRoute('proyectos', <ProyectosPageV2 />)} />
           <Route path="proyectos/horizonte" element={renderRoute('proyectos', <HorizontePage />)} />
           <Route path="proyectos/horizonte-real" element={renderRoute('proyectos', <HorizontePageReal />)} />
           <Route path="proyectos/horizonte-backup" element={renderRoute('proyectos', <HorizonteBackupPage />)} />
