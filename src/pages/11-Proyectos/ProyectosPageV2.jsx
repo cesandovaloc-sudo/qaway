@@ -38,25 +38,23 @@ const categoriesNav = [
 
 const V2_FILTERS = [
   'Todos',
-  'Casos de Éxito',
   'Servicios Web',
+  'Casos de Éxito',
   'Productos Digitales',
-  'Cursos Academy',
-  'Estudio & Foto',
 ]
 
 const catalogItems = [
-  // ─── 1. SOLUCIONES WEB & PROYECTOS POR SECTOR (PRIORIDAD COMERCIAL) ───
+  // ─── 1. SOLUCIONES WEB (PRIORIDAD COMERCIAL) ───
   {
     id: 'caso-dental',
     to: '/proyectos/dental',
     image: showcaseDental,
-    ribbon: 'ONE WEB',
+    ribbon: 'WEB',
     ribbonBg: 'bg-[#ff4b0b]',
-    category: 'SALUD & CLÍNICA',
+    category: 'CLÍNICA DENTAL',
     badge: 'AGENDAMIENTO',
-    title: 'One Web para Clínica Dental & Salud',
-    desc: 'Sitio One Web para centro médico odontológico de alta credibilidad con presentación clara de tratamientos y captación directa de citas.',
+    title: 'Página de Alta Conversión',
+    desc: 'Página web completa que dirige a WhatsApp en un solo toque, con presentación clara de especialidades y alta credibilidad para captar pacientes.',
     ctaText: 'Ver proyecto',
     price: 'Desde S/ 79.90',
     oldPrice: 'S/ 149',
@@ -67,12 +65,12 @@ const catalogItems = [
     id: 'caso-panaderia-josue',
     to: '/proyectos/panaderia-josue',
     image: '/josue-images/showcase/1-josue-panaderia-hero-productos.webp',
-    ribbon: 'ONE WEB',
+    ribbon: 'WEB',
     ribbonBg: 'bg-[#ff4b0b]',
-    category: 'ONE WEB LOCAL',
-    badge: 'ALTA CONVERSIÓN',
-    title: 'One Web para Panadería & Gastronomía',
-    desc: 'Sitio One Web para comercio gastronómico con presentación de panes artesanales, horarios de horneado y pedidos directos a WhatsApp.',
+    category: 'PANADERÍA LOCAL',
+    badge: 'PEDIDOS RÁPIDOS',
+    title: 'Página de Alta Conversión',
+    desc: 'Página web completa que exhibe especialidades del día, horarios de horneado y centraliza pedidos directos a WhatsApp sin comisiones.',
     ctaText: 'Ver proyecto',
     price: 'Desde S/ 79.90',
     oldPrice: 'S/ 149',
@@ -83,12 +81,12 @@ const catalogItems = [
     id: 'caso-vallet',
     to: '/proyectos/vallet-inmobiliaria',
     image: showcaseVallet,
-    ribbon: 'WEB COMERCIAL',
-    ribbonBg: 'bg-[#18181b]',
+    ribbon: 'WEB',
+    ribbonBg: 'bg-[#ff4b0b]',
     category: 'INMOBILIARIA & TOURS',
     badge: 'CAPTACIÓN 24/7',
-    title: 'Web Comercial para Inmobiliaria & Bienes Raíces',
-    desc: 'Ecosistema web comercial para agencia de bienes raíces con buscador de inmuebles, recorridos virtuales y captación directa a WhatsApp.',
+    title: 'Web Comercial Multi-Página',
+    desc: 'Ecosistema corporativo multi-página con catálogo de propiedades, recorridos virtuales interactivos y captación automatizada de leads a WhatsApp.',
     ctaText: 'Ver proyecto',
     price: 'S/ 290.00',
     oldPrice: 'S/ 490',
@@ -99,12 +97,12 @@ const catalogItems = [
     id: 'caso-aurea',
     to: '/proyectos/aurea-skincare',
     image: '/aurea-images/showcase/1-aurea-skincare-showcase.webp',
-    ribbon: 'TIENDA ONLINE',
+    ribbon: 'WEB',
     ribbonBg: 'bg-[#ff4b0b]',
-    category: 'E-COMMERCE & BEAUTY',
-    badge: 'EN PRODUCCIÓN',
-    title: 'Tienda Online para Cosmética & Skincare',
-    desc: 'E-commerce editorial para marca de cosmética botánica con catálogo interactivo de sérums, diseño sensorial y checkout optimizado.',
+    category: 'COSMÉTICA & SKINCARE',
+    badge: 'VENTA DIRECTA',
+    title: 'Tienda Online & E-commerce',
+    desc: 'Catálogo interactivo con carrito de compras, pasarelas de pago integradas y checkout optimizado para venta directa de productos.',
     ctaText: 'Ver proyecto',
     price: 'S/ 490.00',
     oldPrice: 'S/ 890',
@@ -115,12 +113,12 @@ const catalogItems = [
     id: 'desarrollo-web-hub',
     to: '/landings/desarrollo-web',
     image: mockupSitiosWeb,
-    ribbon: 'SERVICIO WEB',
+    ribbon: 'WEB',
     ribbonBg: 'bg-[#fe6612]',
     category: 'DESARROLLO A MEDIDA',
     badge: 'LLAVE EN MANO',
     title: 'Desarrollo Web & Tiendas Online',
-    desc: 'Sitios corporativos y tiendas con catálogo interactivo, pasarelas de pago (Mercado Pago/Yape) y conexión directa a WhatsApp.',
+    desc: 'Sitios corporativos y tiendas llave en mano con pasarelas de pago (Mercado Pago/Yape), catálogo interactivo y conexión directa a WhatsApp.',
     ctaText: 'Ver planes',
     price: 'Desde S/ 79.90',
     oldPrice: 'S/ 149',
@@ -128,74 +126,22 @@ const catalogItems = [
     isMockup: true,
   },
 
-  // ─── 2. SISTEMAS DIGITALES (NOTION / OPERACIONES) ───
+  // ─── 2. SISTEMAS DIGITALES (OPERACIONES) ───
   {
     id: 'sistema-notion',
     to: '/landings/sistema-contenido-notion',
     image: '/assets/pages/8-landings/1-sistema-contenido-notion/notion_hero.webp',
-    ribbon: 'WORKSPACE NOTION',
+    ribbon: 'SISTEMAS',
     ribbonBg: 'bg-[#18181b]',
     category: 'PRODUCTIVIDAD',
     badge: 'DUPLICABLE 1-CLIC',
-    title: 'Sistema Estratégico de Contenido en Notion',
-    desc: 'Arquitectura completa con prompts estratégicos y calendario operativo para planificar 30 días de contenido en menos de una hora.',
+    title: 'Sistema Estratégico en Notion',
+    desc: 'Workspace operativo completo con prompts de IA y calendario automatizado para planificar y estructurar 30 días de contenido en minutos.',
     ctaText: 'Ver sistema',
     price: 'S/ 29.00',
     oldPrice: 'S/ 60',
     categories: ['Productos Digitales'],
     isMockup: false,
-  },
-
-  // ─── 3. FORMACIÓN ONLINE (QAWAY ACADEMY) ───
-  {
-    id: 'identidad-visual-curso',
-    to: '/landings/identidad-visual',
-    image: '/assets/pages/8-landings/2-identidad-visual/1.webp',
-    ribbon: 'DESTACADO',
-    ribbonBg: 'bg-[#ff4b0b]',
-    category: 'DISEÑO & IA',
-    badge: 'CURSO PRÁCTICO',
-    title: 'Identidad Visual con Inteligencia Artificial',
-    desc: 'Construye la identidad gráfica, manual de marca, paleta cromática y componentes de tu negocio con flujos guiados de IA.',
-    ctaText: 'Ver contenido',
-    price: 'S/ 29.00',
-    oldPrice: 'S/ 60',
-    categories: ['Cursos Academy'],
-    isMockup: false,
-  },
-
-  // ─── 4. ESTUDIO FOTOGRÁFICO & CONTENIDO ───
-  {
-    id: 'sesion-linkedin',
-    to: '/landings/fotografia-linkedin',
-    image: '/assets/pages/8-landings/5-fotografia-linkedin/galeria-ejecutivo.png',
-    ribbon: 'ESTUDIO FOTOGRÁFICO',
-    ribbonBg: 'bg-[#ff4b0b]',
-    category: 'DIRECCIÓN DE ARTE',
-    badge: 'LIMA ESTUDIO',
-    title: 'Sesión Fotográfica LinkedIn & Ejecutiva',
-    desc: 'Dirección de postura y expresión para proyectar solidez. 60 min de sesión, 2 cambios de vestuario y 8 fotografías finales retocadas.',
-    ctaText: 'Reservar sesión',
-    price: 'S/ 490.00',
-    oldPrice: null,
-    categories: ['Estudio & Foto'],
-    isMockup: false,
-  },
-  {
-    id: 'restauracion-foto',
-    to: '/landings/restauracion-fotografica2',
-    image: mockupGelato,
-    ribbon: 'RESTAURACIÓN',
-    ribbonBg: 'bg-[#18181b]',
-    category: 'ESTUDIO DIGITAL',
-    badge: 'ARCHIVO HISTÓRICO',
-    title: 'Restauración Digital de Fotografías Antiguas',
-    desc: 'Limpieza y reconstrucción de imágenes con manchas, quiebres o pérdida cromática. Respeto absoluto por la fisonomía original.',
-    ctaText: 'Evaluar fotografía',
-    price: 'Desde S/ 11.50',
-    oldPrice: null,
-    categories: ['Estudio & Foto'],
-    isMockup: true,
   },
 ]
 
@@ -570,26 +516,115 @@ export default function ProyectosPageV2() {
         </div>
       </section>
 
-      {/* ─── ÁREAS COMPLEMENTARIAS ─── */}
-      <section className="projects-areas overflow-hidden">
-        <div className="projects-shell projects-areas__grid">
-          {categoriesNav.map((category, idx) => (
+      {/* ─── TARJETAS DE APERTURA LATERAL (ESTUDIO & ACADEMY) ─── */}
+      <section className="py-16 sm:py-24 bg-[#fafaf9] border-t border-black/8 overflow-hidden">
+        <div className="projects-shell">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#ff4b0b]">
+              Ecosistema Qaway Lab
+            </span>
+            <h2 className="mt-2 text-[clamp(1.7rem,2.8vw,2.3rem)] font-bold text-[#111111] tracking-[-0.03em] leading-tight">
+              Otras áreas especializadas para tu marca
+            </h2>
+            <p className="mt-2.5 text-zinc-500 text-[0.92rem] leading-relaxed">
+              Explora nuestros servicios creativos presenciales y la academia de formación con Inteligencia Artificial.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 max-w-6xl mx-auto">
+            {/* Tarjeta Izquierda: Apertura desde la izquierda */}
             <motion.div
-              key={category.label}
-              initial={{ opacity: 0, x: idx === 0 ? -60 : 60 }}
+              initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
-              className="h-full flex flex-col pt-2"
+              className="group flex flex-col sm:flex-row overflow-hidden rounded-[16px] border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
             >
-              <Link to={category.path} className="projects-area-card h-full">
-                <span>Ecosistema / {category.label}</span>
-                <h2>{category.label}</h2>
-                <p>{category.detail}</p>
-                <small>{category.cta} <ArrowRight size={14} /></small>
-              </Link>
+              <div className="relative w-full sm:w-[42%] h-[210px] sm:h-auto shrink-0 overflow-hidden bg-zinc-900">
+                <img
+                  src="/assets/pages/8-landings/5-fotografia-linkedin/galeria-ejecutivo.png"
+                  alt="Qaway Estudio"
+                  className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                />
+                <span className="absolute left-3 top-3 bg-[#18181b] text-white text-[0.62rem] font-bold uppercase tracking-wider px-2.5 py-1">
+                  ESTUDIO
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <span className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
+                    DIRECCIÓN DE ARTE & RETOQUE
+                  </span>
+                  <h3 className="mt-2 text-[1.18rem] font-bold text-[#111111] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
+                    Fotografía Ejecutiva & Archivo Histórico
+                  </h3>
+                  <p className="mt-2.5 text-[0.82rem] leading-[1.55] text-zinc-600">
+                    Sesiones presenciales en Lima para retratos profesionales de autoridad en LinkedIn, y restauración digital de fotografías antiguas.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+                  <Link
+                    to="/estudio"
+                    className="inline-flex items-center gap-1.5 text-[0.84rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
+                  >
+                    <span>Explorar Estudio</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                  <span className="text-[0.92rem] font-extrabold text-[#111111]">
+                    Desde S/ 11.50
+                  </span>
+                </div>
+              </div>
             </motion.div>
-          ))}
+
+            {/* Tarjeta Derecha: Apertura desde la derecha */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="group flex flex-col sm:flex-row overflow-hidden rounded-[16px] border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
+            >
+              <div className="relative w-full sm:w-[42%] h-[210px] sm:h-auto shrink-0 overflow-hidden bg-zinc-100">
+                <img
+                  src="/assets/pages/8-landings/2-identidad-visual/1.webp"
+                  alt="Qaway Academy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <span className="absolute left-3 top-3 bg-[#ff4b0b] text-white text-[0.62rem] font-bold uppercase tracking-wider px-2.5 py-1">
+                  ACADEMY
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col justify-between p-6">
+                <div>
+                  <span className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
+                    FORMACIÓN CON IA
+                  </span>
+                  <h3 className="mt-2 text-[1.18rem] font-bold text-[#111111] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
+                    Aprende a Crear tu Identidad con IA
+                  </h3>
+                  <p className="mt-2.5 text-[0.82rem] leading-[1.55] text-zinc-600">
+                    Cursos prácticos para dominar flujos de diseño asistido por Inteligencia Artificial y crear tus propios activos de marca sin intermediarios.
+                  </p>
+                </div>
+                <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+                  <Link
+                    to="/academy"
+                    className="inline-flex items-center gap-1.5 text-[0.84rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
+                  >
+                    <span>Ver Cursos en Academy</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[0.70rem] text-zinc-400">Antes <span className="line-through">S/ 60</span></span>
+                    <span className="text-[1.05rem] font-extrabold text-[#111111]">
+                      S/ 29.00
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
