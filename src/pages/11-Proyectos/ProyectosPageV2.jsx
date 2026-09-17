@@ -150,10 +150,9 @@ function StandardProductCard({ item, delay = 0 }) {
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5, transition: { duration: 0.2, ease: 'easeOut' } }}
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.45, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
+      className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:-translate-y-1.5 hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out will-change-transform"
     >
       {/* Cabecera / Imagen Limpia con Escala Exacta de V1 */}
       <Link to={item.to} className="relative block overflow-hidden">
@@ -184,30 +183,37 @@ function StandardProductCard({ item, delay = 0 }) {
         <div className="flex flex-wrap items-center gap-2">
           {item.ribbon && (
             <span
-              className={`px-2.5 py-0.5 text-[0.62rem] font-extrabold uppercase tracking-wider text-white rounded-xs shadow-xs ${item.ribbonBg || 'bg-[#ff4b0b]'}`}
+              className={`rounded-[15px] border px-2.5 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider bg-transparent ${
+                item.ribbon === 'SISTEMAS'
+                  ? 'border-zinc-700 text-zinc-700'
+                  : 'border-[#ff4b0b] text-[#ff4b0b]'
+              }`}
             >
               {item.ribbon}
             </span>
           )}
-          <span className="text-[0.69rem] font-bold uppercase tracking-[0.08em] text-zinc-700">
+          <span className="text-[0.68rem] font-medium uppercase tracking-wider text-zinc-500">
             {item.category}
           </span>
           {item.badge && (
-            <span className="text-[0.65rem] font-semibold text-zinc-500 bg-zinc-100 px-2 py-0.5 uppercase tracking-wider rounded-xs">
-              {item.badge}
-            </span>
+            <>
+              <span className="text-zinc-300 text-[0.7rem] select-none">&bull;</span>
+              <span className="text-[0.68rem] font-medium uppercase tracking-wider text-zinc-400">
+                {item.badge}
+              </span>
+            </>
           )}
         </div>
 
-        {/* Título de la Tarjeta */}
-        <h3 className="mt-3.5 text-[1.18rem] sm:text-[1.26rem] font-bold leading-[1.12] tracking-[-0.03em] text-[#111111]">
-          <Link to={item.to} className="hover:text-[#ff4b0b] transition-colors">
+        {/* Título de la Tarjeta (Se enciende al pasar mouse por la tarjeta completa) */}
+        <h3 className="mt-3.5 text-[1.18rem] sm:text-[1.26rem] font-bold leading-[1.2] tracking-[-0.03em] text-[#222222] transition-colors duration-200 group-hover:text-[#ff4b0b]">
+          <Link to={item.to}>
             {item.title}
           </Link>
         </h3>
 
-        {/* Descripción de 2 líneas */}
-        <p className="mt-3 line-clamp-2 text-[0.82rem] leading-[1.5] text-zinc-600">
+        {/* Descripción de 2 líneas con separación exacta de 10px (V1) */}
+        <p className="mt-2.5 line-clamp-2 text-[0.83rem] leading-[1.55] text-zinc-600">
           {item.desc}
         </p>
 
@@ -221,7 +227,7 @@ function StandardProductCard({ item, delay = 0 }) {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
 
-          {/* Columna Derecha: Precio Aislado y Contundente */}
+          {/* Columna Derecha: Precio Suavizado al 88% Negro */}
           <div className="text-right shrink-0">
             {item.isStatusBadge ? (
               <span className="text-[0.68rem] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-xs border border-emerald-200 uppercase tracking-wider">
@@ -235,7 +241,7 @@ function StandardProductCard({ item, delay = 0 }) {
                     <span className="line-through decoration-zinc-400">{item.oldPrice}</span>
                   </span>
                 )}
-                <span className="text-[1.05rem] sm:text-[1.14rem] font-extrabold text-[#111111] tracking-tight">
+                <span className="text-[1.05rem] sm:text-[1.14rem] font-extrabold text-[#222222] tracking-tight">
                   {item.price}
                 </span>
               </div>
