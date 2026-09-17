@@ -155,19 +155,10 @@ function StandardProductCard({ item, delay = 0 }) {
       transition={{ duration: 0.45, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
       className="group flex flex-col overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
     >
-      {/* Cabecera / Imagen con Ribbon Rectangular Sólido estilo Academy */}
+      {/* Cabecera / Imagen Limpia con Escala Exacta de V1 */}
       <Link to={item.to} className="relative block overflow-hidden">
-        {/* Ribbon Rectangular Sólido */}
-        {item.ribbon && (
-          <span
-            className={`absolute left-[0.65rem] top-[0.65rem] z-10 ${item.ribbonBg || 'bg-[#ff4b0b]'} px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.06em] text-white shadow-xs`}
-          >
-            {item.ribbon}
-          </span>
-        )}
-
         {item.isMockup ? (
-          <div className="flex h-[240px] sm:h-[260px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
+          <div className="flex h-[260px] sm:h-[300px] items-end justify-center overflow-hidden bg-gradient-to-b from-[#edf0f5] to-[#f8f9fc] p-5 pb-0">
             <div className="h-full w-full overflow-hidden rounded-t-[8px] border border-b-0 border-black/6 bg-white shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
               <img
                 src={item.image}
@@ -177,7 +168,7 @@ function StandardProductCard({ item, delay = 0 }) {
             </div>
           </div>
         ) : (
-          <div className="relative h-[240px] sm:h-[260px] overflow-hidden bg-zinc-100">
+          <div className="relative h-[260px] sm:h-[300px] overflow-hidden bg-zinc-100">
             <img
               src={item.image}
               alt={item.title}
@@ -187,11 +178,18 @@ function StandardProductCard({ item, delay = 0 }) {
         )}
       </Link>
 
-      {/* Cuerpo de la Tarjeta (Anatomía idéntica al Benchmark Academy) */}
+      {/* Cuerpo de la Tarjeta con Kicker Encapsulado */}
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        {/* Fila de Categoría + Badge Formato */}
+        {/* Fila de Kicker Encapsulado con WEB / SISTEMAS */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[0.69rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
+          {item.ribbon && (
+            <span
+              className={`px-2.5 py-0.5 text-[0.62rem] font-extrabold uppercase tracking-wider text-white rounded-xs shadow-xs ${item.ribbonBg || 'bg-[#ff4b0b]'}`}
+            >
+              {item.ribbon}
+            </span>
+          )}
+          <span className="text-[0.69rem] font-bold uppercase tracking-[0.08em] text-zinc-700">
             {item.category}
           </span>
           {item.badge && (
