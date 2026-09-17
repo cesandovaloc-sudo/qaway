@@ -139,13 +139,13 @@ export default function DesarrolloWebQawayPage() {
         <meta property="og:url" content="https://www.qawaylab.com/landings/desarrollo-web-qaway" />
         <meta property="og:title" content="Desarrollo Web & Landings de Alta Conversión | Qaway Lab" />
         <meta property="og:description" content="Páginas web y tiendas digitales de alto impacto visual y conversión directa a WhatsApp. Planes desde S/ 79.90." />
-        <meta property="og:image" content="https://www.qawaylab.com/assets/og/home.png" />
+        <meta property="og:image" content="https://www.qawaylab.com/assets/og/desarrollo-web.png" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Desarrollo Web & Landings de Alta Conversión | Qaway Lab" />
         <meta name="twitter:description" content="Páginas web y tiendas online diseñadas para convertir visitas en ventas. Qaway Lab." />
-        <meta name="twitter:image" content="https://www.qawaylab.com/assets/og/home.png" />
+        <meta name="twitter:image" content="https://www.qawaylab.com/assets/og/desarrollo-web.png" />
         
         {/* Schema.org JSON-LD */}
         <script type="application/ld+json">

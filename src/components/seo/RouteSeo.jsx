@@ -17,14 +17,17 @@ const seoByPath = {
   '/estudio': {
     title: 'Estudio Qaway | Marca, contenido e identidad visual',
     description: 'Crea una presencia visual clara para tu marca con identidad, contenido, imagen profesional y direccion creativa aplicada.',
+    image: `${SITE_URL}/assets/og/estudio.png`,
   },
   '/proyectos': {
     title: 'Proyectos Qaway | Branding, contenido y sistemas digitales',
     description: 'Explora proyectos de branding, contenido visual, presencia digital, automatizacion, CRM, webs y sistemas digitales desarrollados por Qaway Lab.',
+    image: `${SITE_URL}/assets/og/proyectos.png`,
   },
   '/sistemas-digitales': {
     title: 'Sistemas Digitales | Automatizacion, CRM e IA para negocios',
     description: 'Implementa automatizacion, dashboards, CRM, canales digitales y sistemas con IA para ordenar la operacion de tu negocio.',
+    image: `${SITE_URL}/assets/og/sistemas.png`,
   },
   '/academy': {
     title: 'Qaway Academy | Formacion aplicada en IA y sistemas digitales',
@@ -45,6 +48,12 @@ const seoByPath = {
   '/blog': {
     title: 'Blog Qaway | Guias sobre IA, productividad y sistemas',
     description: 'Lee guias practicas de Qaway Lab sobre IA, productividad, automatizacion, marketing y sistemas digitales.',
+    image: `${SITE_URL}/assets/og/blog.png`,
+  },
+  '/hub': {
+    title: 'Qaway Hub | Plataforma y herramientas de productividad',
+    description: 'Accede a las herramientas, plataformas y módulos operativos de Qaway Lab.',
+    image: `${SITE_URL}/assets/og/hub.png`,
   },
   '/blog/articulo/google-calendar-dominado-guia-productividad': {
     title: 'Google Calendar Dominado | Guia de productividad e IA',
@@ -62,6 +71,12 @@ const seoByPath = {
   '/landings/desarrollo-web': {
     title: 'Desarrollo Web de Alto Impacto | Qaway Lab',
     description: 'Sitios web, plataformas y landings de conversion rapida, optimizadas con IA, SEO tecnico y arquitectura moderna.',
+    image: `${SITE_URL}/assets/og/desarrollo-web.png`,
+  },
+  '/landings/desarrollo-web-qaway': {
+    title: 'Desarrollo Web & Landings de Alta Conversión 2026 | Qaway Lab',
+    description: 'Creamos páginas web, landing pages y tiendas online que transmiten confianza, cargan en menos de 1 segundo y convierten visitantes en clientes por WhatsApp.',
+    image: `${SITE_URL}/assets/og/desarrollo-web.png`,
   },
   '/proyectos/horizonte': {
     title: 'Horizonte Inmobiliaria — Caso de Estudio | Qaway Lab',
