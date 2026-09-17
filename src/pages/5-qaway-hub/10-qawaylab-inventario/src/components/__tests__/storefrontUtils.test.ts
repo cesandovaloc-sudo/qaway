@@ -7,7 +7,7 @@ import {
   itemImage,
   itemCategory,
   money,
-} from '@qawaylab/pago/components/storefront/utils'
+} from '../checkout/storefront/utils'
 
 describe('storefront utils · itemId', () => {
   it('prioriza id sobre product_id y uid', () => {

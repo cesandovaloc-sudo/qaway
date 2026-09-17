@@ -1,1 +1,0 @@
-var e=`/assets/ChatGPT%20Image%201%20sept%202026_%2019_04_24-n9RptUIU.webp`;export{e as t};
