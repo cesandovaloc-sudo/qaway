@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { trackLead } from '@/lib/analytics/metaPixel'
 import './estudio.css'
 
@@ -708,38 +709,17 @@ function Diagnostic() {
       }])
       if (error) throw error
 
-      const apiKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || ''
-      if (apiKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: apiKey.trim(),
-            subject: `Nueva consulta Estudio: ${lead.interest || 'Orientación'}`,
-            from_name: 'Visual Lab Estudio',
-            name: lead.name,
-            phone: lead.phone,
-            email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
-            message: lead.message || 'Sin mensaje adicional',
-          }),
-        })
-      }
-
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
-      if (backupKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: backupKey.trim(),
-            subject: `[Copia] Nueva consulta Estudio: ${lead.interest || 'Orientación'}`,
-            from_name: 'Visual Lab Estudio',
-            to_email: 'qaway.myc@gmail.com',
-          }),
-        })
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'proyectos',
+        subject: `Nueva consulta Estudio: ${lead.interest || 'Orientación'} - ${lead.name}`,
+        nombre: lead.name,
+        telefono: lead.phone,
+        correo: lead.email,
+        perfil: lead.profile,
+        interes: lead.interest,
+        mensaje: lead.message || 'Sin mensaje adicional',
+      })
       setSubmitted(true)
       trackLead('Estudio - Formulario')
       formElement.reset()

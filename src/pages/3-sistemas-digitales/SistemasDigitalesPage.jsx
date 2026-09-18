@@ -38,6 +38,7 @@ import HeroPrimitive from "@/components/typography/HeroPrimitive";
 import '@/pages/4-academy/academy.css'
 import SEO from "@/components/seo/SEO";
 import { supabase } from "@/config/supabase";
+import { enviarFormularioContacto } from "@/services/contactoService";
 import { trackLead } from '@/lib/analytics/metaPixel';
 import { WHATSAPP_LINK } from "@/data/navigation";
 
@@ -696,38 +697,17 @@ export default function SistemasDigitalesPage() {
       }]);
       if (error) throw error;
 
-      const proyectosKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || '';
-      if (proyectosKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: proyectosKey.trim(),
-            subject: `Nueva consulta Sistemas Digitales: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Sistemas Digitales',
-            name: lead.name,
-            phone: lead.phone,
-            email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
-            message: lead.message || 'Sin mensaje adicional',
-          }),
-        });
-      }
-
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || '';
-      if (backupKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: backupKey.trim(),
-            subject: `[Copia] Nueva consulta Sistemas Digitales: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Sistemas Digitales',
-            to_email: 'qaway.myc@gmail.com',
-          }),
-        });
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'proyectos',
+        subject: `Nueva consulta Sistemas Digitales: ${lead.interest || 'Orientación'} - ${lead.name}`,
+        nombre: lead.name,
+        telefono: lead.phone,
+        correo: lead.email,
+        perfil: lead.profile,
+        interes: lead.interest,
+        mensaje: lead.message || 'Sin mensaje adicional',
+      });
 
       setFormSubmitted(true);
       trackLead('Sistemas Digitales - Formulario');

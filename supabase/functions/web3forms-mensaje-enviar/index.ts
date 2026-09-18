@@ -89,6 +89,7 @@ serve(async (req: Request) => {
     }
 
     // 3. Despachar a Web3Forms API desde el servidor de Supabase
+    // 3.1 Envío principal (proyectos@qawaylab.com)
     let web3Result: any = null
     try {
       const resp = await fetch('https://api.web3forms.com/submit', {
@@ -101,15 +102,27 @@ serve(async (req: Request) => {
       })
       web3Result = await resp.json()
     } catch (apiErr) {
-      console.warn('[web3forms-mensaje-enviar] Falló intento primario:', apiErr)
-      const backupKey = Deno.env.get('WEB3FORMS_BACKUP_KEY')
-      if (backupKey && backupKey !== accessKey) {
-        const respBackup = await fetch('https://api.web3forms.com/submit', {
+      console.warn('[web3forms-mensaje-enviar] Error en intento primario:', apiErr)
+    }
+
+    // 3.2 Envío de copia a cuenta de respaldo (qaway.myc@gmail.com)
+    const backupKey = Deno.env.get('WEB3FORMS_BACKUP_KEY')
+    if (backupKey && backupKey !== accessKey) {
+      try {
+        await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ ...web3Payload, access_key: backupKey })
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            ...web3Payload,
+            access_key: backupKey,
+            subject: `[Copia Respaldo] ${web3Payload.subject}`
+          })
         })
-        web3Result = await respBackup.json()
+      } catch (backupErr) {
+        console.warn('[web3forms-mensaje-enviar] Error en envío copia de respaldo:', backupErr)
       }
     }
 

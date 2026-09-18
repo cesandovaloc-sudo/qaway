@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { trackLead } from '@/lib/analytics/metaPixel'
 import heroImage from './ChatGPT Image 1 sept 2026, 19_04_24.webp'
 import pdfFile from './Guia_Qaway Lab_Primeros_Flujos_IA.pdf'
@@ -109,37 +110,16 @@ export default function PrimerosFlujosIAPage() {
     }
   }
 
-  // Notificación vía Web3Forms
+  // Notificación de correo mediante Edge Function en Supabase
   const sendEmailNotification = async (subject, messageDetails) => {
-    const primaryKey = import.meta.env.VITE_WEB3FORMS_MARKETING_KEY || ''
-    const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
-    
-    const keysToSend = []
-    if (primaryKey.trim()) keysToSend.push(primaryKey.trim())
-    if (backupKey.trim()) keysToSend.push(backupKey.trim())
-
-    if (keysToSend.length === 0) return
-
     try {
-      await Promise.all(
-        keysToSend.map(key =>
-          fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              access_key: key,
-              subject: subject,
-              from_name: 'Qaway Lab Recursos',
-              message: messageDetails
-            })
-          })
-        )
-      )
+      await enviarFormularioContacto({
+        origen: 'marketing',
+        subject: `[Primeros Flujos IA] ${subject}`,
+        mensaje: typeof messageDetails === 'object' ? JSON.stringify(messageDetails, null, 2) : String(messageDetails),
+      })
     } catch (err) {
-      console.error('Error al enviar notificaciones Web3Forms:', err)
+      console.warn('[PrimerosFlujosIAPage] Error al enviar notificaciones:', err)
     }
   }
 

@@ -40,6 +40,7 @@ import { getLocalFallbackCourseImage } from '@/integrations/academy'
 import '@/pages/4-academy/academy.css'
 import '@/pages/1-inicio/inicio.css'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { isPublicSiteMode } from '@/config/siteVisibility'
 
 const base = '/assets/pages/1-inicio/'
@@ -902,7 +903,7 @@ function AcademyFeature() {
   )
 }
 
-function AcademyContactSection({ submitted, submitting, submitError, onSubmit, onReset }) {
+function AcademyContactSection({ submitted, submitting, submitError, onSubmit, onReset, waUrl }) {
   return (
     <section id="formulario" className="flex min-h-[100dvh] items-center bg-[#f8f9fc] px-6 py-16 text-[#20201f] sm:px-10 lg:px-14">
       <div className="mx-auto w-full max-w-[96rem]">
@@ -932,7 +933,17 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                   <div><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-                  <button type="button" onClick={onReset}>Enviar otro mensaje</button>
+                  {waUrl && (
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center justify-center gap-2 rounded-[8px] bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#20ba5a]"
+                    >
+                      <MessageCircle size={18} /> Continuar en WhatsApp →
+                    </a>
+                  )}
+                  <button type="button" onClick={onReset} className="mt-2 text-xs text-[#20201f]/60 hover:underline">Enviar otro mensaje</button>
                 </div>
               ) : (
                 <>
@@ -1230,6 +1241,7 @@ export default function InicioPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [waUrl, setWaUrl] = useState('')
 
   async function submitInterest(event) {
     event.preventDefault()
@@ -1247,6 +1259,10 @@ export default function InicioPage() {
       message: String(form.get('message') || '').trim(),
     }
 
+    const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
+    const generatedWaUrl = `https://wa.me/51930756781?text=${contactMsg}`
+    setWaUrl(generatedWaUrl)
+
     try {
       const { error } = await supabase.from('leads').insert([{
         client_name: lead.name,
@@ -1262,51 +1278,28 @@ export default function InicioPage() {
       }])
       if (error) throw error
 
-      const academyKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || ''
-      if (academyKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: academyKey.trim(),
-            subject: `Nueva consulta Web: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Academy',
-            name: lead.name,
-            phone: lead.phone,
-            email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
-            message: lead.message || 'Sin mensaje adicional',
-          }),
-        })
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'proyectos',
+        subject: `Nueva consulta Web: ${lead.interest || 'Orientación'} - ${lead.name}`,
+        nombre: lead.name,
+        telefono: lead.phone,
+        correo: lead.email,
+        perfil: lead.profile,
+        interes: lead.interest,
+        mensaje: lead.message || 'Sin mensaje adicional',
+      })
 
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
-      if (backupKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: backupKey.trim(),
-            subject: `[Copia] Nueva consulta Web: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Web',
-            to_email: 'qaway.myc@gmail.com',
-          }),
-        })
-      }
-
-      setSubmitted(true);
-      trackLead('Inicio - Formulario Academy');
+      setSubmitted(true)
+      trackLead('Inicio - Formulario Academy')
       formElement.reset()
-      
-      const contactMsg = encodeURIComponent(`Hola Qaway, mi nombre es ${lead.name}, mi perfil es: ${lead.profile}. Me interesa: ${lead.interest}. ${lead.message ? 'Mensaje: ' + lead.message : ''}`)
-      const waUrl = `https://wa.me/51930756781?text=${contactMsg}`
-      // Espera defensiva: asegura que el beacon de Lead se despache antes de
-      // abandonar la pestana hacia WhatsApp (navegacion externa dura).
-      window.setTimeout(() => { window.location.href = waUrl }, 250)
+
+      // Intentar abrir WhatsApp en pestaña nueva de forma no intrusiva
+      try {
+        window.open(generatedWaUrl, '_blank', 'noopener,noreferrer')
+      } catch (waOpenErr) {
+        console.warn('[WhatsApp] Bloqueador activo al abrir pestaña:', waOpenErr)
+      }
     } catch (error) {
       console.error('Error al enviar consulta de Academy:', error)
       setSubmitError(error.message || 'No pudimos enviar tu consulta. Inténtalo nuevamente.')
@@ -1332,7 +1325,11 @@ export default function InicioPage() {
         submitting={submitting}
         submitError={submitError}
         onSubmit={submitInterest}
-        onReset={() => setSubmitted(false)}
+        onReset={() => {
+          setSubmitted(false)
+          setWaUrl('')
+        }}
+        waUrl={waUrl}
       />
     </>
   )

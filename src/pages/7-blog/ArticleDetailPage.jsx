@@ -27,6 +27,7 @@ import {
 import { visibleArticles } from './BlogPage'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { trackBlogVisit } from '@/services/analyticsTracker'
 
@@ -536,30 +537,16 @@ export default function ArticleDetailPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [article])
 
-  // Enviar correo de notificación a qaway.myc@gmail.com vía Web3Forms
+  // Notificar comentario por correo mediante Edge Function en Supabase
   const sendEmailNotification = async (subject, messageDetails) => {
-    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY
-    if (!accessKey) {
-      console.warn('[Web3Forms] No se pudo enviar la copia por correo porque VITE_WEB3FORMS_ACCESS_KEY no está configurado.')
-      return
-    }
     try {
-      await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          access_key: accessKey,
-          subject: subject,
-          from_name: 'Qaway Lab Web',
-          to_email: 'qaway.myc@gmail.com',
-          message: messageDetails
-        })
+      await enviarFormularioContacto({
+        origen: 'proyectos',
+        subject: `[Blog Comentario] ${subject}`,
+        mensaje: typeof messageDetails === 'object' ? JSON.stringify(messageDetails, null, 2) : String(messageDetails),
       })
     } catch (err) {
-      console.error('Error enviando notificación por correo:', err)
+      console.warn('[ArticleDetailPage] Error enviando notificación por correo:', err)
     }
   }
 

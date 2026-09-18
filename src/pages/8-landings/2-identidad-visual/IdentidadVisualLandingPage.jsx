@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { WHATSAPP_LINK, WHATSAPP_PHONE_LINK } from '@/data/navigation';
 import { supabase } from '@/config/supabase';
+import { enviarFormularioContacto } from '@/services/contactoService';
 import { trackLead } from '@/lib/analytics/metaPixel';
 import {
   Sparkles,
@@ -552,21 +553,14 @@ const ContactForm = () => {
         metadata: { mensaje: formData.mensaje }
       }]);
 
-      const apiKey = import.meta.env.VITE_WEB3FORMS_PROYECTOS_KEY || '';
-      if (apiKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: apiKey.trim(),
-            subject: `Nueva consulta Curso Identidad Visual`,
-            from_name: 'Qaway Lab Landing',
-            name: formData.nombre,
-            email: formData.email,
-            message: formData.mensaje || 'Sin mensaje adicional',
-          }),
-        });
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'proyectos',
+        subject: `Nueva consulta Curso Identidad Visual - ${formData.nombre}`,
+        nombre: formData.nombre,
+        correo: formData.email,
+        mensaje: formData.mensaje || 'Sin mensaje adicional',
+      });
     } catch (err) {
       console.error('Error al procesar formulario:', err);
     }

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { WHATSAPP_LINK } from '@/data/navigation'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { trackLead } from '@/lib/analytics/metaPixel'
 import { featuredCourses, courseCatalog } from '@/data/academyCourses'
 import './academy.css'
@@ -348,43 +349,17 @@ export default function AcademyPage() {
       }])
       if (error) throw error
 
-      const academyKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || ''
-      if (academyKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: academyKey.trim(),
-            subject: `Nueva consulta Web: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Academy',
-            name: lead.name,
-            phone: lead.phone,
-            email: lead.email,
-            profile: lead.profile,
-            interest: lead.interest,
-            message: lead.message || 'Sin mensaje adicional',
-            html: leadEmailHtml(lead),
-          }),
-        })
-      }
-
-      const backupKey = import.meta.env.VITE_WEB3FORMS_BACKUP_KEY || ''
-      if (backupKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: backupKey.trim(),
-            subject: `[Copia] Nueva consulta Web: ${lead.interest || 'Orientación'}`,
-            from_name: 'Qaway Lab Web',
-            to_email: 'qaway.myc@gmail.com',
-            html: leadEmailHtml(lead),
-          }),
-        })
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'academy',
+        subject: `Nueva consulta Web: ${lead.interest || 'Orientación'} - ${lead.name}`,
+        nombre: lead.name,
+        telefono: lead.phone,
+        correo: lead.email,
+        perfil: lead.profile,
+        interes: lead.interest,
+        mensaje: lead.message || 'Sin mensaje adicional',
+      })
 
       setSubmitted(true)
       trackLead('Academy - Formulario')

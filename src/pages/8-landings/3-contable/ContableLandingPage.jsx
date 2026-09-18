@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/config/supabase'
+import { enviarFormularioContacto } from '@/services/contactoService'
 import { trackLead } from '@/lib/analytics/metaPixel'
 import {
   ArrowRight, Check, ChevronDown, ShieldCheck, HelpCircle,
@@ -596,21 +597,14 @@ function ContableCTA() {
         metadata: { ruc: formData.ruc, mensaje: formData.mensaje }
       }]);
 
-      const apiKey = import.meta.env.VITE_WEB3FORMS_VENTAS_KEY || '';
-      if (apiKey.trim()) {
-        await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            access_key: apiKey.trim(),
-            subject: `Nueva consulta Landing Contable`,
-            from_name: 'Qaway Lab Landing',
-            name: formData.nombre,
-            phone: formData.celular,
-            message: `RUC: ${formData.ruc} | Mensaje: ${formData.mensaje || 'Sin mensaje adicional'}`,
-          }),
-        });
-      }
+      // Despachar correos (principal + copia) mediante Edge Function en Supabase
+      await enviarFormularioContacto({
+        origen: 'ventas',
+        subject: `Nueva consulta Landing Contable - ${formData.nombre}`,
+        nombre: formData.nombre,
+        telefono: formData.celular,
+        mensaje: `RUC: ${formData.ruc} | Mensaje: ${formData.mensaje || 'Sin mensaje adicional'}`,
+      });
     } catch (err) {
       console.error('Error al procesar formulario:', err);
     }
