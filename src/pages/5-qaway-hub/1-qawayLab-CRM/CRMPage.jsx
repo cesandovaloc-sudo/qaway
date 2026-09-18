@@ -94,6 +94,7 @@ const displayFont = {
 
 function CRMContent() {
   const { 
+    leads,
     simulateIncomingWebhook, 
     currentRole, 
     setCurrentRole, 
@@ -351,8 +352,8 @@ function CRMContent() {
           </div>
 
           {/* Search, CTA, Notifications & User (Reordenados según estándar) */}
-          <div className="flex items-center gap-3 lg:gap-5">
-            {/* 1. Buscador Omnibox (Ya optimizado y superior al anterior) */}
+          <div className="flex items-center gap-3 lg:gap-5 relative">
+            {/* 1. Buscador Omnibox con Command Palette */}
             <div className="relative block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input 
@@ -360,8 +361,12 @@ function CRMContent() {
                 type="text" 
                 value={globalSearchQuery}
                 onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                placeholder="Buscar contactos, empresas, oportunidades..." 
-                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[240px] lg:w-[300px] transition-colors" 
+                placeholder={
+                  activeTab === 'dashboard' ? "Buscar en toda la base de datos..." :
+                  activeTab === 'configuracion' ? "Buscar contactos globalmente..." :
+                  "Buscar contactos, empresas, oportunidades..."
+                } 
+                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[240px] lg:w-[320px] transition-colors" 
               />
               {globalSearchQuery ? (
                 <button 
@@ -376,6 +381,80 @@ function CRMContent() {
                   <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">K</kbd>
                 </div>
               )}
+
+              {/* Menú Flotante Global (Command Palette Dropdown) */}
+              <AnimatePresence>
+                {globalSearchQuery.trim() !== '' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full mt-2 left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden"
+                  >
+                    {(() => {
+                      const query = globalSearchQuery.toLowerCase();
+                      const searchResults = leads.filter(lead => 
+                        (lead.name && lead.name.toLowerCase().includes(query)) ||
+                        (lead.client_name && lead.client_name.toLowerCase().includes(query)) ||
+                        (lead.email && lead.email.toLowerCase().includes(query)) ||
+                        (lead.whatsapp && lead.whatsapp.includes(query))
+                      ).slice(0, 5); // Top 5 resultados rápidos
+
+                      if (searchResults.length === 0) {
+                        return (
+                          <div className="p-4 text-center">
+                            <p className="text-xs text-white/40 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="flex flex-col">
+                          <div className="px-3 py-2 border-b border-white/5 bg-white/5">
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Resultados Globales</span>
+                          </div>
+                          <ul className="py-1">
+                            {searchResults.map(lead => {
+                              const titleName = lead.client_name || lead.name || 'Empresa';
+                              const initials = titleName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'Q';
+                              return (
+                                <li key={lead.id}>
+                                  <button
+                                    onClick={() => {
+                                      // Al hacer clic: limpiar búsqueda y viajar al chat
+                                      setGlobalSearchQuery('');
+                                      if (setSelectedLeadId) setSelectedLeadId(lead.id);
+                                      setActiveTab('whatsapp');
+                                    }}
+                                    className="w-full px-3 py-2.5 hover:bg-white/5 transition-colors flex items-center gap-3 text-left group"
+                                  >
+                                    <div className="w-7 h-7 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[10px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">
+                                      {initials}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[12px] font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
+                                      <div className="flex items-center gap-2 text-[10px] text-white/40 mt-0.5">
+                                        <span className="truncate">{lead.whatsapp || lead.email}</span>
+                                        <span className="px-1.5 rounded-sm bg-white/5 text-white/50">{lead.status || lead.stage}</span>
+                                      </div>
+                                    </div>
+                                    <MessageSquare className="w-3.5 h-3.5 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                          <div className="px-3 py-2 bg-white/5 border-t border-white/5 flex items-center justify-between text-[10px] text-white/40">
+                            <span>Navega a los mensajes con 1 clic</span>
+                            <span>Esc para cerrar</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="h-6 w-px bg-white/10 mx-1" />
