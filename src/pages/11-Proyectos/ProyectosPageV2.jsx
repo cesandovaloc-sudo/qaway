@@ -522,20 +522,14 @@ export default function ProyectosPageV2() {
       {/* ─── TARJETAS DE APERTURA LATERAL (ESTUDIO & ACADEMY) ─── */}
       <section className="py-16 sm:py-24 bg-[#fafaf9] border-t border-black/8 overflow-hidden">
         <div className="projects-shell">
-          <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-[#ff4b0b]">
-              Ecosistema Qaway Lab
-            </span>
-            <h2 className="mt-2 text-[clamp(1.7rem,2.8vw,2.3rem)] font-bold text-[#111111] tracking-[-0.03em] leading-tight">
-              Otras áreas especializadas para tu marca
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-[clamp(1.75rem,2.8vw,2.35rem)] font-bold text-[#222222] tracking-[-0.03em] leading-tight">
+              Explora nuestras áreas especializadas para tu marca
             </h2>
-            <p className="mt-2.5 text-zinc-500 text-[0.92rem] leading-relaxed">
-              Explora nuestros servicios creativos presenciales y la academia de formación con Inteligencia Artificial.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 max-w-6xl mx-auto">
-            {/* Tarjeta Izquierda: Apertura desde la izquierda */}
+            {/* Tarjeta Izquierda: Qaway Estudio (Creamos) */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -543,7 +537,7 @@ export default function ProyectosPageV2() {
               transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
               className="group flex flex-col sm:flex-row overflow-hidden rounded-[16px] border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
             >
-              <div className="relative w-full sm:w-[42%] h-[210px] sm:h-auto shrink-0 overflow-hidden bg-zinc-900">
+              <div className="relative w-full sm:w-[40%] min-h-[220px] sm:min-h-full shrink-0 overflow-hidden bg-zinc-900">
                 <img
                   src="/assets/pages/8-landings/5-fotografia-linkedin/galeria-ejecutivo.png"
                   alt="Qaway Estudio"
@@ -553,34 +547,34 @@ export default function ProyectosPageV2() {
                   ESTUDIO
                 </span>
               </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
+              <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
                 <div>
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
-                    DIRECCIÓN DE ARTE & RETOQUE
+                    QAWAY ESTUDIO · CREAMOS PARA TI
                   </span>
-                  <h3 className="mt-2 text-[1.18rem] font-bold text-[#111111] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
-                    Fotografía Ejecutiva & Archivo Histórico
+                  <h3 className="mt-2.5 text-[1.32rem] sm:text-[1.42rem] font-bold text-[#222222] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
+                    Creamos tu Marca, Contenido & Presencia Digital
                   </h3>
-                  <p className="mt-2.5 text-[0.82rem] leading-[1.55] text-zinc-600">
-                    Sesiones presenciales en Lima para retratos profesionales de autoridad en LinkedIn, y restauración digital de fotografías antiguas.
+                  <p className="mt-3 text-[0.92rem] sm:text-[0.96rem] leading-[1.6] text-zinc-600">
+                    Diseñamos el branding, dirección de arte, contenido fotográfico y soluciones web llave en mano para tu negocio. Nos encargamos de todo el proceso.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-zinc-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
                   <Link
                     to="/estudio"
-                    className="inline-flex items-center gap-1.5 text-[0.84rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-[0.9rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
                   >
                     <span>Explorar Estudio</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
-                  <span className="text-[0.92rem] font-extrabold text-[#111111]">
-                    Desde S/ 11.50
+                  <span className="shrink-0 whitespace-nowrap text-[0.84rem] font-bold text-zinc-600 bg-zinc-100 px-2.5 py-1 rounded-sm">
+                    Soluciones a medida
                   </span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Tarjeta Derecha: Apertura desde la derecha */}
+            {/* Tarjeta Derecha: Qaway Academy (Enseñamos / Aprende a Hacer) */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -588,7 +582,7 @@ export default function ProyectosPageV2() {
               transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
               className="group flex flex-col sm:flex-row overflow-hidden rounded-[16px] border border-zinc-200 bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] transition-all duration-300"
             >
-              <div className="relative w-full sm:w-[42%] h-[210px] sm:h-auto shrink-0 overflow-hidden bg-zinc-100">
+              <div className="relative w-full sm:w-[40%] min-h-[220px] sm:min-h-full shrink-0 overflow-hidden bg-zinc-100">
                 <img
                   src="/assets/pages/8-landings/2-identidad-visual/1.webp"
                   alt="Qaway Academy"
@@ -598,29 +592,29 @@ export default function ProyectosPageV2() {
                   ACADEMY
                 </span>
               </div>
-              <div className="flex flex-1 flex-col justify-between p-6">
+              <div className="flex flex-1 flex-col justify-between p-6 sm:p-7">
                 <div>
                   <span className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-[#ff4b0b]">
-                    FORMACIÓN CON IA
+                    QAWAY ACADEMY · APRENDE A HACER
                   </span>
-                  <h3 className="mt-2 text-[1.18rem] font-bold text-[#111111] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
-                    Aprende a Crear tu Identidad con IA
+                  <h3 className="mt-2.5 text-[1.32rem] sm:text-[1.42rem] font-bold text-[#222222] leading-[1.25] tracking-tight group-hover:text-[#ff4b0b] transition-colors">
+                    Aprende a Diseñar y Crear con Inteligencia Artificial
                   </h3>
-                  <p className="mt-2.5 text-[0.82rem] leading-[1.55] text-zinc-600">
-                    Cursos prácticos para dominar flujos de diseño asistido por Inteligencia Artificial y crear tus propios activos de marca sin intermediarios.
+                  <p className="mt-3 text-[0.92rem] sm:text-[0.96rem] leading-[1.6] text-zinc-600">
+                    Cursos prácticos para dominar flujos de IA, crear tu propia identidad visual y diseñar páginas web paso a paso sin depender de intermediarios.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-zinc-100 flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-zinc-100 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
                   <Link
                     to="/academy"
-                    className="inline-flex items-center gap-1.5 text-[0.84rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-[0.9rem] font-bold text-[#ff4b0b] group-hover:text-[#fe6612] transition-colors"
                   >
                     <span>Ver Cursos en Academy</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-[0.70rem] text-zinc-400">Antes <span className="line-through">S/ 60</span></span>
-                    <span className="text-[1.05rem] font-extrabold text-[#111111]">
+                  <div className="shrink-0 whitespace-nowrap flex items-baseline gap-2">
+                    <span className="text-[0.74rem] text-zinc-400">Antes <span className="line-through">S/ 60</span></span>
+                    <span className="text-[1.12rem] font-extrabold text-[#222222] tracking-tight">
                       S/ 29.00
                     </span>
                   </div>
