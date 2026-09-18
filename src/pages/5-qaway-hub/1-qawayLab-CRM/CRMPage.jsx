@@ -251,25 +251,28 @@ function CRMContent() {
           </button>
         </nav>
 
-        {/* INSIGHTS WIDGET (From the design reference) */}
+        {/* INSIGHTS WIDGET COLLAPSIBLE */}
         <div className="p-4 shrink-0">
-          <div className="relative rounded-lg border border-white/10 p-4 bg-[#18181b] overflow-hidden group hover:border-white/20 transition-colors cursor-pointer">
-            {/* Decorative Corner Brackets */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4b0b] transition-all group-hover:w-3 group-hover:h-3" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4b0b] transition-all group-hover:w-3 group-hover:h-3" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff4b0b] transition-all group-hover:w-3 group-hover:h-3" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff4b0b] transition-all group-hover:w-3 group-hover:h-3" />
+          <div className="relative rounded-lg border border-white/10 bg-[#18181b] overflow-hidden group hover:border-white/20 transition-all duration-300 ease-in-out cursor-pointer max-h-12 hover:max-h-40">
+            {/* Decorative Corner Brackets (Only visible on hover) */}
+            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            <div className="flex items-center gap-2 mb-2">
-              <Zap className="w-3.5 h-3.5 text-[#ff4b0b]" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white">Insights con IA</span>
+            <div className="flex items-center gap-2 px-4 py-3.5">
+              <Zap className="w-4 h-4 text-[#ff4b0b] shrink-0" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-white truncate transition-colors group-hover:text-[#ff4b0b]">Insights con IA</span>
             </div>
-            <p className="text-xs text-white/50 leading-relaxed mb-3">
-              Activa recomendaciones inteligentes basadas en tus datos comerciales.
-            </p>
-            <span className="text-[#ff4b0b] text-xs font-semibold flex items-center gap-1">
-              Conocer más <ChevronRight className="w-3 h-3" />
-            </span>
+            
+            <div className="px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
+              <p className="text-xs text-white/50 leading-relaxed mb-3">
+                Activa recomendaciones inteligentes basadas en tus datos comerciales.
+              </p>
+              <span className="text-[#ff4b0b] text-xs font-semibold flex items-center gap-1">
+                Conocer más <ChevronRight className="w-3 h-3" />
+              </span>
+            </div>
           </div>
         </div>
       </aside>
@@ -277,22 +280,7 @@ function CRMContent() {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#111111]">
-          {/* Lado Izquierdo: Navegación Principal */}
-          <div className="flex items-center gap-8">
-            {/* Global Nav (Áreas del Hub) */}
-            <nav className="flex items-center gap-4 lg:gap-6">
-              <a href="/hub/crm" className="text-white text-[13px] font-medium relative h-16 flex items-center">
-                CRM
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#ff4b0b]"></span>
-              </a>
-              <a href="/hub/marketing" className="text-white/50 hover:text-white transition-colors text-[13px] font-medium h-16 flex items-center">Marketing App</a>
-              <a href="/hub/calculadoras" className="text-white/50 hover:text-white transition-colors text-[13px] font-medium h-16 flex items-center">Calculadoras Financieras</a>
-              <a href="/academy" className="text-white/50 hover:text-white transition-colors text-[13px] font-medium h-16 flex items-center">Academy</a>
-              <a href="/recursos" className="text-white/50 hover:text-white transition-colors text-[13px] font-medium h-16 flex items-center">Recursos</a>
-            </nav>
-          </div>
-
+        <header className="h-16 border-b border-white/5 flex items-center justify-end px-6 shrink-0 bg-[#111111]">
           {/* Search, Notifications, User & CTA */}
           <div className="flex items-center gap-3 lg:gap-5">
             <div className="relative block">
