@@ -92,7 +92,7 @@ const displayFont = {
 }
 
 function CRMContent() {
-  const { simulateIncomingWebhook, currentRole, setCurrentRole } = useCRM()
+  const { simulateIncomingWebhook, currentRole, setCurrentRole, setSelectedLeadId } = useCRM()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -346,7 +346,14 @@ function CRMContent() {
                 {activeTab === 'campaigns' && <CampaignsView />}
                 {activeTab === 'kanban'    && <KanbanView />}
                 {activeTab === 'whatsapp'  && <WhatsAppInboxView />}
-                {activeTab === 'leads'     && <LeadsView />}
+                {activeTab === 'leads'     && (
+                  <LeadsView 
+                    onNavigateToChat={(leadId) => {
+                      if (setSelectedLeadId) setSelectedLeadId(leadId)
+                      setActiveTab('whatsapp')
+                    }} 
+                  />
+                )}
                 {activeTab === 'clientes'  && <ClientesView />}
                 {activeTab === 'automatizaciones' && <AutomatizacionesView />}
                 {activeTab === 'tareas'    && <TareasView />}
