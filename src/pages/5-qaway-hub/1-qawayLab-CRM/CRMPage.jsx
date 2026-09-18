@@ -354,7 +354,14 @@ function CRMContent() {
                     }} 
                   />
                 )}
-                {activeTab === 'clientes'  && <ClientesView />}
+                {activeTab === 'clientes'  && (
+                  <ClientesView 
+                    onNavigateToChat={(leadId) => {
+                      if (setSelectedLeadId) setSelectedLeadId(leadId)
+                      setActiveTab('whatsapp')
+                    }} 
+                  />
+                )}
                 {activeTab === 'automatizaciones' && <AutomatizacionesView />}
                 {activeTab === 'tareas'    && <TareasView />}
                 {activeTab === 'configuracion' && <ConfiguracionView />}
