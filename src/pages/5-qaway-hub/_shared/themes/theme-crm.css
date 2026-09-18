@@ -1,0 +1,18 @@
+/* Theme Hub CRM — executive dark / naranja. Generado vía 6-qawaylab-theme (fábrica), consumido por Hub. */
+[data-theme='hub-crm'] {
+  --hub-bg: #111111;
+  --hub-surface: #1b1b1d;
+  --hub-surface-muted: #232326;
+  --hub-text: #f4f4f5;
+  --hub-text-secondary: #a1a1aa;
+  --hub-text-muted: #71717a;
+  --hub-border: #2a2a2e;
+  --hub-primary: #ff4b0b;
+  --hub-primary-hover: #dc3d00;
+  --hub-primary-soft: rgba(255, 75, 11, 0.12);
+  --hub-success: #16a34a;
+  --hub-warning: #f59e0b;
+  --hub-error: #ef4444;
+  --hub-radius: 12px;
+  --hub-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}

@@ -1,0 +1,1 @@
+import"./rolldown-runtime-B0Z9INg1.js";import{t as e}from"./react-CUdNIagt.js";import{t}from"./jsx-runtime-B74pBk57.js";e();var n=t(),r={size:18,strokeWidth:1.75};function i({icon:e,size:t=r.size,strokeWidth:i=r.strokeWidth,className:a=``,...o}){return e?(0,n.jsx)(e,{size:t,strokeWidth:i,className:a,...o}):null}export{r as HUB_ICON_DEFAULTS,i as HubIcon,i as default};

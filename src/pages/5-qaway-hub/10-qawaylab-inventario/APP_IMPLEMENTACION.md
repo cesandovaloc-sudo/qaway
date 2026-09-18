@@ -48,3 +48,28 @@ Conectar el catálogo comercial y motor de checkout (`@qawaylab/pago`) con los c
    - Verificación directa contra Supabase remoto exitosa (6 registros devueltos).
    - Cursos gratuitos de Academy preservados en su flujo directo (`is_free = true`).
    - Candado Visual 100% respetado.
+
+---
+
+## [2026-09-18 18:24] Fase 1 — Arquitectura de Suscripciones y Cobros Recurrentes Multi-Tenant
+
+### Objetivo
+Implementar el esquema de base de datos relacional para planes y suscripciones periódicas desacopladas del carrito unitario, con soporte de tabla intermedia para cursos incluidos, verificación RPC de alta velocidad y blindaje RLS multi-tenant.
+
+### Puntos Esenciales Implementados
+1. **Extensión de Esquema en Supabase Central (`qrusdsqgygfolxfrafyd`):**
+   - Migración `20260918150000_create_subscriptions_schema.sql` aplicada con `supabase db push`.
+   - Creación de `public.subscription_plans` (planes multi-tenant con frecuencia, precio y flag `is_all_courses`).
+   - Creación de `public.subscription_plan_courses` (tabla intermedia escalable para asociar cursos de Academy por UUID).
+   - Creación de `public.subscriptions` (ciclo de vida de suscripción: `active`, `paused`, `cancelled`, con `current_period_end` y `mp_preapproval_id`).
+   - Índices compuestos para consultas rápidas por usuario, tenant y pasarela.
+2. **Función RPC de Verificación de Acceso (`check_user_course_access`):**
+   - Función PostgreSQL `SECURITY DEFINER` que evalúa en tiempo récord si un `user_id` tiene suscripción activa que cubra un `course_id` (vía plan total o tabla intermedia), respetando la fecha de vigencia.
+3. **Siembra de Planes Base para Master Tenant (`00000000-0000-0000-0000-000000000001`):**
+   - *Pase Total Academy* (S/ 99.00 / mes, acceso ilimitado a todos los cursos).
+   - *Ruta Frontend & UI/UX Pro* (S/ 59.00 / mes, cursos asignados: JS Avanzado, React 19, UI/UX y Vue.js).
+4. **Validación:**
+   - Verificación directa contra Supabase remoto exitosa (2 planes devueltos con sus relaciones).
+   - Función RPC `check_user_course_access` probada.
+   - Políticas RLS verificadas (inserciones anónimas bloqueadas por seguridad).
+   - Candado Visual 100% preservado (cero modificaciones en UI/diseño).

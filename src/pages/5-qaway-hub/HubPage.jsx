@@ -12,16 +12,12 @@ import {
   MessageSquare,
   Calendar,
   Sparkles,
-  TrendingUp,
-  Layers,
   PenSquare,
   Star,
   FolderKanban,
   Target,
   FileImage,
   Search,
-  ChevronDown,
-  CheckCircle2,
   RotateCcw,
   Instagram,
   CreditCard,
@@ -37,77 +33,90 @@ const routes = [
   {
     icon: Bot,
     title: 'Agentes de IA Responsable (Ley 31814)',
-    description: 'Configuración, entrenamiento y simulación en vivo de Agentes IA Consultivos para WhatsApp y Web. Gobernanza ética en 3 capas, derivación humana y anti-alucinación.',
+    description: 'Configuracion, entrenamiento y simulacion en vivo de Agentes IA Consultivos para WhatsApp y Web. Gobernanza etica en 3 capas, derivacion humana y anti-alucinacion.',
     path: '/hub/agentes',
     access: 'pro',
     badge: 'Ley 31814 & PAIR',
     category: 'Inteligencia Artificial',
+    pillar: 'IA',
     tone: 'bg-indigo-600/10 text-indigo-600',
+    preview: '/assets/hub-previews/preview-agentes.png',
     published: true,
   },
   {
     icon: Calendar,
     title: 'Qaway Agenda & Sistema de Citas',
-    description: 'Software de reservas y calendario estilo Calendly: Agendamiento público, gestión de horarios, recordatorios y panel de control de citas.',
+    description: 'Software de reservas y calendario estilo Calendly: Agendamiento publico, gestion de horarios, recordatorios y panel de control de citas.',
     path: '/hub/agenda',
     access: 'pro',
     badge: 'Nuevo SaaS',
-    category: 'Gestión & Productividad',
+    category: 'Gestion & Productividad',
+    pillar: 'Automatizacion',
     tone: 'bg-indigo-500/10 text-indigo-500',
+    preview: '/assets/hub-previews/preview-agenda.png',
     published: true,
   },
   {
     icon: CreditCard,
-    title: 'Qaway Pagos & Checkout Multi-método',
-    description: 'Pasarela de pagos multi-método: Tarjeta Stripe, Yape, Plin, PagoEfectivo, transferencias, catálogo de productos y gestión de órdenes.',
+    title: 'Qaway Pagos & Checkout Multi-metodo',
+    description: 'Pasarela de pagos multi-metodo: Tarjeta Stripe, Yape, Plin, PagoEfectivo, transferencias, catalogo de productos y gestion de ordenes.',
     path: '/hub/pagos',
     access: 'pro',
-    badge: 'Módulo Pagos',
+    badge: 'Modulo Pagos',
     category: 'Comercio & Finanzas',
+    pillar: 'Marketing',
     tone: 'bg-emerald-500/10 text-emerald-500',
+    preview: '/assets/hub-previews/preview-pagos.png',
     published: true,
   },
   {
     icon: Package,
     title: 'Qaway Inventario & ERP Comercial',
-    description: 'Sistema integral de gestión de productos, stock, almacenes, movimientos Kardex, captura con IA, facturación y cotizaciones.',
+    description: 'Sistema integral de gestion de productos, stock, almacenes, movimientos Kardex, captura con IA, facturacion y cotizaciones.',
     path: '/hub/inventario',
     access: 'pro',
     badge: 'SaaS ERP',
-    category: 'Logística & Almacenes',
+    category: 'Logistica & Almacenes',
+    pillar: 'Automatizacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    preview: '/assets/hub-previews/preview-inventario.png',
     published: true,
   },
   {
     icon: Star,
     title: 'Qaway Academy (LMS Cursos & Certificaciones)',
-    description: 'Plataforma educativa integral: Catálogo de cursos, reproductor de lecciones, tareas, quizzes, certificados, panel de estudiante y docente.',
+    description: 'Plataforma educativa integral: Catalogo de cursos, reproductor de lecciones, tareas, quizzes, certificados, panel de estudiante y docente.',
     path: '/hub/academy',
     access: 'pro',
     badge: 'LMS Real',
-    category: 'Educación & Cursos',
+    category: 'Educacion & Cursos',
+    pillar: 'Creacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    preview: '/assets/hub-previews/preview-academy.png',
     published: true,
   },
   {
     icon: Sparkles,
     title: 'Creador de Contenido Modular (5 Skills)',
-    description: 'Fábrica de contenidos con IA: Radar viral, Guiones con retención medida, Matriz de hooks, Calendario 30 días, Diseñador de Carruseles, Blog y Posts.',
+    description: 'Fabrica de contenidos con IA: Radar viral, Guiones con retencion medida, Matriz de hooks, Calendario 30 dias, Disenador de Carruseles, Blog y Posts.',
     path: '/hub/creador-contenido',
     access: 'pro',
     badge: 'Nuevo',
-    category: 'Marketing & Creación',
+    category: 'Marketing & Creacion',
+    pillar: 'Creacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    preview: '/assets/hub-previews/preview-creador.png',
     published: true,
   },
   {
     icon: FileImage,
-    title: 'Optimizador de Imágenes WebP',
-    description: 'Herramienta interactiva para comprimir y convertir imágenes PNG y JPG a WebP con hasta 95% de ahorro en tu navegador.',
+    title: 'Optimizador de Imagenes WebP',
+    description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP con hasta 95% de ahorro en tu navegador.',
     path: '/hub/optimizador-webp',
     access: 'free',
     badge: 'Gratis',
     category: 'Herramientas',
+    pillar: 'Automatizacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
     published: false,
   },
@@ -119,6 +128,7 @@ const routes = [
     access: 'free',
     badge: 'Borrador',
     category: 'Herramientas',
+    pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     published: false,
   },
@@ -130,17 +140,19 @@ const routes = [
     access: 'pro',
     badge: 'Pro',
     category: 'Product Management',
+    pillar: 'Automatizacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
     published: false,
   },
   {
     icon: PenSquare,
     title: 'Editor de Blog',
-    description: 'Plataforma editorial para crear, estructurar y publicar artículos con categorías, portadas y CTAs en tiempo real.',
+    description: 'Plataforma editorial para crear, estructurar y publicar articulos con categorias, portadas y CTAs en tiempo real.',
     path: '/hub/blog-editor',
     access: 'pro',
     badge: 'Listo',
     category: 'Herramientas',
+    pillar: 'Creacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     published: true,
   },
@@ -152,6 +164,7 @@ const routes = [
     access: 'pro',
     badge: 'Destacado',
     category: 'Panel de control',
+    pillar: 'IA',
     tone: 'bg-[#191918] text-white',
     published: false,
   },
@@ -163,6 +176,7 @@ const routes = [
     access: 'pro',
     badge: 'Nuevo',
     category: 'Panel de control',
+    pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     published: false,
   },
@@ -174,6 +188,7 @@ const routes = [
     access: 'free',
     badge: null,
     category: 'Rutas de Marca',
+    pillar: 'Marketing',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
     published: false,
   },
@@ -185,6 +200,7 @@ const routes = [
     access: 'free',
     badge: null,
     category: 'Ruta Profesional',
+    pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
     published: false,
   },
@@ -196,6 +212,7 @@ const routes = [
     access: 'free',
     badge: null,
     category: 'Rutas de Marca',
+    pillar: 'IA',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
     published: false,
   },
@@ -207,28 +224,31 @@ const routes = [
     access: 'free',
     badge: null,
     category: 'Herramientas',
+    pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
     published: false,
   },
   {
     icon: BarChart3,
-    title: 'Centro de Analítica & Gráficos',
-    description: 'Suite de métricas estilo PowerBI y Google Analytics con galería Recharts completa y presets por industria.',
+    title: 'Centro de Analitica & Graficos',
+    description: 'Suite de metricas estilo PowerBI y Google Analytics con galeria Recharts completa y presets por industria.',
     path: '/hub/analytics',
     access: 'pro',
     badge: 'Pro',
     category: 'Herramientas',
+    pillar: 'Marketing',
     tone: 'bg-[#0080FF]/10 text-[#0080FF]',
     published: false,
   },
   {
     icon: Target,
     title: 'Marketing Studio OS (Revolut UI)',
-    description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping Editorial, Auditoría POEM y Simulador de Funnel.',
+    description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping Editorial, Auditoria POEM y Simulador de Funnel.',
     path: '/hub/marketing',
     access: 'pro',
     badge: 'v1.0',
     category: 'Herramientas',
+    pillar: 'Marketing',
     tone: 'bg-[#0075FF]/10 text-[#0075FF]',
     published: false,
   },
@@ -240,6 +260,7 @@ const routes = [
     access: 'free',
     badge: null,
     category: 'Herramientas',
+    pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
     published: false,
   },
@@ -250,27 +271,40 @@ const displayFont = {
   fontStretch: 'condensed',
 }
 
+// 5 pilares de marca
+const PILLARS = [
+  { label: 'Todas',                 match: null },
+  { label: 'Marketing',             match: 'Marketing' },
+  { label: 'Automatizacion',        match: 'Automatizacion' },
+  { label: 'IA',                    match: 'IA' },
+  { label: 'Creacion de Contenido', match: 'Creacion' },
+]
+
+const cardGradients = [
+  'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]',
+  'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]',
+  'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]',
+  'bg-[linear-gradient(135deg,#e0e7ff_0%,#c7d2fe_42%,#a5b4fc_100%)]',
+  'bg-[linear-gradient(135deg,#dcfce7_0%,#bbf7d0_42%,#86efac_100%)]',
+  'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]',
+  'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]',
+]
+
 export default function HubPage() {
   useSetNavbarVariant('transparent')
-  const [accessFilter, setAccessFilter] = useState('all') // 'all' | 'free' | 'pro'
-  const [categoryFilter, setCategoryFilter] = useState('Todas')
+  const [pillarFilter, setPillarFilter] = useState('Todas')
   const [searchQuery, setSearchQuery] = useState('')
 
   const activeRoutes = routes.filter((route) => {
-    if (isPublicSiteMode) {
-      return route.path === '/hub/blog-editor'
-    }
-    return true // En localhost se visualizan todas las aplicaciones del Hub
+    if (isPublicSiteMode) return route.path === '/hub/blog-editor'
+    return true
   })
 
-  const thematicFilters = [
-    'Todas',
-    ...Array.from(new Set(activeRoutes.map((r) => r.category).filter(Boolean))),
-  ]
-
   const filteredRoutes = activeRoutes.filter((route) => {
-    const matchAccess = accessFilter === 'all' || route.access === accessFilter
-    const matchCat = categoryFilter === 'Todas' || route.category === categoryFilter
+    const activePillar = PILLARS.find((p) => p.label === pillarFilter)
+    const matchPillar =
+      !activePillar?.match ||
+      (route.pillar && route.pillar.includes(activePillar.match))
     const q = searchQuery.toLowerCase().trim()
     const matchSearch =
       !q ||
@@ -278,42 +312,82 @@ export default function HubPage() {
       (route.description && route.description.toLowerCase().includes(q)) ||
       (route.category && route.category.toLowerCase().includes(q)) ||
       (route.badge && route.badge.toLowerCase().includes(q))
-    return matchAccess && matchCat && matchSearch
+    return matchPillar && matchSearch
   })
 
-  const cardGradients = [
-    'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]', // Lavender
-    'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]', // Cyan
-    'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]', // Amber
-    'bg-[linear-gradient(135deg,#e0e7ff_0%,#c7d2fe_42%,#a5b4fc_100%)]', // Indigo
-    'bg-[linear-gradient(135deg,#dcfce7_0%,#bbf7d0_42%,#86efac_100%)]', // Mint
-    'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]', // Rose
-    'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]', // Peach
-  ]
-
+  // Tarjeta con estilo calcado de Recursos: gradiente pastel, imagen flotante, texto oscuro impecable
+  // NOTA ARQUITECTURA: Borde unificado con /blog (rounded-[14px])
   const FeaturedCard = ({ route, idx }) => {
     const Icon = route.icon
     const gradient = cardGradients[idx % cardGradients.length]
+    // Solo las 2 primeras filas (índices 0 al 5) usan preview si existe
+    const hasPreview = idx < 6 && Boolean(route.preview)
+    const isSecondRow = idx >= 3 && idx < 6
+
+    /* =========================================================================
+       MAQUETAS VACÍAS OCULTAS PARA REUTILIZAR MAÑANA EN OTROS PROYECTOS:
+       
+       [MAQUETA A - FOTO 2]: Ventana flotante contenida centrada verticalmente
+       <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-[50%] max-w-[310px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]">
+         <div className="rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5">
+           <img src="TU_IMAGEN_AQUI" alt="Preview" className="aspect-[16/10] w-full rounded-lg object-cover object-left-top" />
+         </div>
+       </div>
+
+       [MAQUETA B - FOTO 3]: Icono flotante traslúcido en marca de agua 3D
+       <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
+         <Icon className="h-24 w-24" strokeWidth={1.4} />
+       </div>
+    ========================================================================= */
 
     return (
       <Link to={route.path} className="group block h-full">
         <motion.article
-          className={`relative flex h-full min-h-[290px] flex-col justify-end overflow-hidden rounded-2xl p-8 sm:p-10 ${gradient}`}
+          className={`relative flex h-full min-h-[310px] flex-col justify-end overflow-hidden rounded-[14px] p-7 sm:p-8 ${gradient}`}
           initial={false}
-          whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.10)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
+          whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
-          {/* Marca de agua translúcida con icono grande */}
-          <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
-            <Icon className="h-24 w-24" strokeWidth={1.4} />
-          </div>
+          {/* Mockup flotante estilo Recursos */}
+          {hasPreview ? (
+            isSecondRow ? (
+              /* Fila 2: imagen más grande, casi de borde superior a inferior, cubriendo la mitad derecha */
+              <div className="absolute right-0 top-3 bottom-3 w-[48%] flex items-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]">
+                <div className="h-full w-full rounded-l-2xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5 overflow-hidden">
+                  <img
+                    src={route.preview}
+                    alt={route.title}
+                    className="h-full w-full rounded-l-xl object-cover object-left-top"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            ) : (
+              /* Fila 1: ventana centrada verticalmente como en tu captura */
+              <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-[50%] max-w-[310px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]">
+                <div className="rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5">
+                  <img
+                    src={route.preview}
+                    alt={route.title}
+                    className="aspect-[16/10] w-full rounded-lg object-cover object-left-top"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            )
+          ) : (
+            /* Icono en marca de agua para las filas siguientes (FOTO 3) */
+            <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
+              <Icon className="h-24 w-24" strokeWidth={1.4} />
+            </div>
+          )}
 
-          {/* Contenido */}
-          <div className="relative z-10 max-w-[74%]">
+          {/* Contenido de texto: max-w-[48%] para garantizar que nunca colisione con la imagen */}
+          <div className="relative z-10 max-w-[48%]">
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#191918]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-[#191918]">
                 {route.access === 'free' ? (
                   <>
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                     <span>Gratis</span>
                   </>
                 ) : (
@@ -323,19 +397,19 @@ export default function HubPage() {
                   </>
                 )}
               </span>
-              <span className="text-[12px] font-semibold text-[#191918]/65">
+              <span className="text-[11px] font-semibold text-[#191918]/65 truncate">
                 {route.category}
               </span>
             </div>
 
-            <h3 className="text-[clamp(1.3rem,2.4vw,1.65rem)] font-bold leading-[1.2] text-[#191918]">
+            <h3 className="text-[clamp(1.15rem,2vw,1.4rem)] font-bold leading-[1.22] text-[#191918] break-words">
               {route.title}
             </h3>
-            <p className="mt-2.5 line-clamp-2 text-xs sm:text-sm leading-relaxed text-[#191918]/70">
+            <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-[#191918]/70">
               {route.description}
             </p>
 
-            <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#191918] transition-transform group-hover:translate-x-1">
+            <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#191918] transition-transform group-hover:translate-x-1">
               <span>Explorar</span>
               <ArrowRight size={14} />
             </div>
@@ -347,9 +421,7 @@ export default function HubPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] selection:bg-[#fe6612] selection:text-white">
-      {/* ========================================================================= */}
-      {/* HERO DE PROYECTOS (ESTILO LIMPIO Y TECNOLÓGICO) */}
-      {/* ========================================================================= */}
+      {/* HERO */}
       <section className="projects-hero border-b border-black/10">
         <div className="projects-shell">
           <motion.div
@@ -358,12 +430,10 @@ export default function HubPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Kicker en Cápsula Blanca translúcida */}
             <div className="mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/30 bg-white/15 text-white text-[11px] font-bold uppercase tracking-widest backdrop-blur-xs shadow-xs">
               <span>/ Hub</span>
             </div>
 
-            {/* Título Principal Centrado */}
             <h1
               className="text-[clamp(2.4rem,4vw,3.4rem)] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4 text-balance"
               style={{ fontWeight: 800 }}
@@ -371,20 +441,19 @@ export default function HubPage() {
               Qaway Hub<span className="text-white/70">.</span>
             </h1>
 
-            {/* Bajada Centrada */}
             <p className="text-white/90 text-base sm:text-lg max-w-2xl leading-relaxed mb-7 text-balance font-normal">
-              Accede a rutas, paneles y herramientas internas para organizar la operación digital de Qaway.
+              Accede a rutas, paneles y herramientas internas para organizar la operacion digital de Qaway.
             </p>
 
-            {/* Buscador Integrado Centrado */}
+            {/* Buscador: unificado a rounded-lg (estilo Blog) */}
             <div className="w-full max-w-xl">
-              <div className="flex items-center gap-3 rounded-[10px] border border-white/40 bg-white px-4 py-3.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] transition-all focus-within:ring-2 focus-within:ring-white">
+              <div className="flex items-center gap-3 rounded-lg border border-white/40 bg-white px-4 py-3.5 shadow-[0_10px_32px_rgba(0,0,0,0.14)] transition-all focus-within:ring-2 focus-within:ring-white">
                 <Search className="h-5 w-5 text-black/40" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar módulos, paneles o herramientas..."
+                  placeholder="Buscar modulos, paneles o herramientas..."
                   className="w-full bg-transparent text-sm text-[#191918] outline-none placeholder:text-black/40 font-medium"
                 />
                 {searchQuery && (
@@ -393,90 +462,41 @@ export default function HubPage() {
                     onClick={() => setSearchQuery('')}
                     className="text-xs font-bold text-black/40 hover:text-[#fe6612]"
                   >
-                    ✕
+                    x
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Botonera de Filtros Integrada (Acceso + Temática) */}
-            <div className="mt-8 flex flex-col items-start sm:items-center gap-3.5 w-full max-w-4xl text-left sm:text-center">
-              {/* Fila 1: Acceso */}
-              <div className="flex flex-wrap items-center justify-start sm:justify-center gap-2.5 w-full">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1 shrink-0">
-                  ACCESO:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setAccessFilter('all')}
-                  className={`rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
-                    accessFilter === 'all'
-                      ? 'bg-white text-[#191918] shadow-md'
-                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
-                  }`}
-                >
-                  Todos los módulos
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAccessFilter('free')}
-                  className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
-                    accessFilter === 'free'
-                      ? 'bg-white text-[#191918] shadow-md'
-                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <span className="h-2 w-2 rounded-full bg-emerald-400"></span>
-                  <span>Herramientas Gratuitas</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAccessFilter('pro')}
-                  className={`rounded-full px-5 py-2 text-[13px] font-bold transition-all ${
-                    accessFilter === 'pro'
-                      ? 'bg-white text-[#191918] shadow-md'
-                      : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
-                  }`}
-                >
-                  Suscripción Pro
-                </button>
-              </div>
-
-              {/* Fila 2: Temática */}
-              <div className="flex flex-wrap items-center justify-start sm:justify-center gap-2 w-full">
-                <span className="text-xs font-bold uppercase tracking-wider text-white/95 mr-1 shrink-0">
-                  TEMÁTICA:
-                </span>
-                {thematicFilters.map((filter) => {
-                  const isActive = categoryFilter === filter
-                  return (
-                    <button
-                      key={filter}
-                      type="button"
-                      onClick={() => setCategoryFilter(filter)}
-                      className={`rounded-full px-4 py-1.5 text-xs sm:text-[13px] font-semibold transition-all ${
-                        isActive
-                          ? 'bg-white text-[#191918] shadow-sm'
-                          : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
-                      }`}
-                    >
-                      {filter}
-                    </button>
-                  )
-                })}
-
-                {(accessFilter !== 'all' || categoryFilter !== 'Todas' || searchQuery) && (
+            {/* 5 Pilares de Marca: unificados a rounded-lg (estilo Blog) */}
+            <div className="mt-6 flex flex-wrap items-center justify-start sm:justify-center gap-2.5 w-full max-w-2xl">
+              {PILLARS.map((pillar) => {
+                const isActive = pillarFilter === pillar.label
+                return (
                   <button
+                    key={pillar.label}
                     type="button"
-                    onClick={() => { setAccessFilter('all'); setCategoryFilter('Todas'); setSearchQuery('') }}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-black/25 border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black/40 transition-colors"
-                    title="Restablecer filtros"
+                    onClick={() => setPillarFilter(pillar.label)}
+                    className={`rounded-lg px-4 py-2 text-[13px] font-semibold transition-all ${
+                      isActive
+                        ? 'bg-white text-[#191918] shadow-md'
+                        : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
+                    }`}
                   >
-                    <span>Limpiar</span>
-                    <RotateCcw size={11} className="text-white/80" />
+                    {pillar.label}
                   </button>
-                )}
-              </div>
+                )
+              })}
+              {(pillarFilter !== 'Todas' || searchQuery) && (
+                <button
+                  type="button"
+                  onClick={() => { setPillarFilter('Todas'); setSearchQuery('') }}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-black/25 border border-white/30 px-3.5 py-2 text-xs font-semibold text-white hover:bg-black/40 transition-colors"
+                >
+                  <span>Limpiar</span>
+                  <RotateCcw size={11} />
+                </button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -487,10 +507,10 @@ export default function HubPage() {
           {filteredRoutes.length === 0 ? (
             <div className="my-16 flex flex-col items-center justify-center text-center">
               <p className="text-base font-bold text-[#191918]">No se encontraron herramientas</p>
-              <p className="mt-1 text-sm text-[#191918]/60">Intenta con otro término de búsqueda o limpia los filtros.</p>
+              <p className="mt-1 text-sm text-[#191918]/60">Intenta con otro termino de busqueda o limpia los filtros.</p>
               <button
                 type="button"
-                onClick={() => { setAccessFilter('all'); setCategoryFilter('Todas'); setSearchQuery('') }}
+                onClick={() => { setPillarFilter('Todas'); setSearchQuery('') }}
                 className="mt-4 rounded-full bg-[#fe6612] px-5 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#e05508] transition-colors"
               >
                 Restablecer filtros
