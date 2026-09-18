@@ -218,6 +218,48 @@ Esta sección consolida las fallas reales encontradas durante la integración de
   ```
   Respuesta esperada: `{"success": true}`. Inmediatamente Meta comienza a despachar todos los mensajes reales entrantes hacia la URL del Webhook.
 
+---
+
+## 6. Matriz Oficial de Límites: Modo Sandbox (Pruebas) vs Modo Producción
+
+| Criterio | Modo Sandbox (Entorno de Pruebas Actual) | Modo Producción (Número Comercial Real) |
+|---|---|---|
+| **Número Emisor** | Número virtual de prueba de Meta (`+1 555 661-8147`). | Número oficial propio de Qaway Lab o del cliente comercial. |
+| **Destinatarios Permitidos** | **Máximo 5 números** autorizados previamente con código de 6 dígitos. | **Ilimitado**: cualquier usuario del mundo puede escribir directamente. |
+| **Inicio de Conversación** | Requiere una plantilla oficial de apertura previa de 24h para nuevos números. | Abierto: cualquier cliente puede iniciar conversación enviando cualquier texto. |
+| **Tipo de Token de Acceso** | Token temporal de consola (caduca a la medianoche PDT / 24h). | **Token Permanente de Usuario del Sistema (System User)**: Caducidad **Nunca (Never)**. |
+| **Costo de Mensajería** | **$0.00 USD** (100% gratuito para desarrollo y homologación). | Primeras **1,000 conversaciones de servicio al mes gratis** otorgadas por Meta. |
+| **Infraestructura de Backend** | Idéntica: Supabase Cloud + Edge Functions + Google Gemini 2.5 Flash. | Idéntica: Misma base de código, solo cambia el `phone_number_id` y credenciales. |
+| **Disponibilidad Horaria** | Con Token de System User: **24/7/365** continuo e ininterrumpido. | **24/7/365** continuo e ininterrumpido. |
+| **Verificación de Empresa** | No requerida para pruebas iniciales. | Recomendada en Meta Business Manager para ampliar límites de mensajería (Tier 1, 2, etc.). |
+
+---
+
+## 7. Procedimiento Oficial para Token Permanente en Modo Sandbox / Producción
+
+Para evitar la desconexión a la medianoche (`OAuthException 190 / subcódigo 463`) sin salir del modo de pruebas:
+
+1. **Ingreso a Business Settings:** Ir a `https://business.facebook.com/settings`.
+2. **Creación de System User:**
+   - Navegar a **Usuarios > Usuarios del sistema**.
+   - Clic en **Agregar**, asignar nombre técnico (ej. `QawayLab WABA Integration Bot`), rol: **Administrador**.
+3. **Asignación de Activos (Permissions & Assets):**
+   - Clic en **Agregar activos**.
+   - En **Apps**, seleccionar la App (`QawayLab WABA`) y marcar **Control total**.
+   - En **Cuentas de WhatsApp**, seleccionar la WABA (`997332209750356`) y marcar **Control total**.
+4. **Generación de Token Permanente:**
+   - Clic en **Generar nuevo token**.
+   - Seleccionar la App `QawayLab WABA`.
+   - Vigencia: **Nunca (Never)**.
+   - Permisos requeridos:
+     - `whatsapp_business_messaging`
+     - `whatsapp_business_management`
+5. **Inyección en Supabase:**
+   ```bash
+   npx supabase secrets set WHATSAPP_ACCESS_TOKEN=<token_permanente>
+   ```
+6. **Resultado:** La cuenta se mantiene en el Sandbox gratuito con el número de prueba, pero con conectividad perpetua 24/7 sin caídas nocturnas.
+
 
 
 
