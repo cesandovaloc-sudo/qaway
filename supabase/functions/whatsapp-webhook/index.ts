@@ -44,10 +44,38 @@ const DEFAULT_HUMAN_KEYWORDS = [
  */
 async function callGemini(apiKey: string, model: string, systemPrompt: string, history: any[], userMessage: string, temperature = 0.3): Promise<string | null> {
   try {
-    const recentHistory = (history || []).slice(-4).map((m: any) => ({
-      role: m.sender === 'agent' ? 'model' : 'user',
-      parts: [{ text: m.text || '' }]
-    }))
+    const contents: any[] = []
+    
+    // Add sanitized history (alternating user and model if valid)
+    const validHistory = (history || []).slice(-4)
+    for (const m of validHistory) {
+      if (m.text && typeof m.text === 'string') {
+        contents.push({
+          role: m.sender === 'agent' ? 'model' : 'user',
+          parts: [{ text: m.text }]
+        })
+      }
+    }
+
+    // Always append current user message
+    contents.push({
+      role: 'user',
+      parts: [{ text: userMessage }]
+    })
+
+    const payload: any = {
+      contents: contents,
+      generationConfig: {
+        temperature: temperature,
+        maxOutputTokens: 800
+      }
+    }
+
+    if (systemPrompt && systemPrompt.trim()) {
+      payload.systemInstruction = {
+        parts: [{ text: systemPrompt.trim() }]
+      }
+    }
 
     let targetModel = model || 'gemini-2.5-flash'
     let res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
@@ -57,6 +85,7 @@ async function callGemini(apiKey: string, model: string, systemPrompt: string, h
     })
 
     if (!res.ok && targetModel !== 'gemini-1.5-flash') {
+      console.warn(`[whatsapp-webhook] Fallback a gemini-1.5-flash tras error ${res.status} con ${targetModel}`)
       targetModel = 'gemini-1.5-flash'
       res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -71,7 +100,11 @@ async function callGemini(apiKey: string, model: string, systemPrompt: string, h
     }
 
     const data = await res.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const parts = data.candidates?.[0]?.content?.parts || []
+    const textParts = parts
+      .filter((p: any) => p.text && !p.thought)
+      .map((p: any) => p.text)
+    const text = textParts.length > 0 ? textParts.join('\n') : (parts.map((p: any) => p.text || '').join('\n'))
     return text ? text.trim() : null
   } catch (err) {
     console.error('[whatsapp-webhook] Excepción en callGemini:', err)
@@ -507,11 +540,14 @@ serve(async (req: Request) => {
                     console.error('[whatsapp-webhook] Falta WHATSAPP_ACCESS_TOKEN en variables de Supabase.')
                   } else {
                     try {
-                      const { data: currentLeadData } = await supabase
+                      const { data: currentLeadList } = await supabase
                         .from('leads')
                         .select('id, history')
-                        .eq('whatsapp', senderPhone)
-                        .single()
+                        .or(`whatsapp.eq.${senderPhone},contact_info.eq.${senderPhone}`)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+
+                      const currentLeadData = currentLeadList?.[0] || null
 
                       const activeHistory = currentLeadData?.history || [newMessageObj]
                       const aiReply = await dispatchMultiModelAi(aiSettings, messageText, activeHistory)
