@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X, Menu } from 'lucide-react'
+import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X, Menu, Home } from 'lucide-react'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
 import KanbanView from './components/KanbanView'
@@ -338,11 +338,15 @@ function CRMContent() {
 
             <div className="h-4 w-px bg-white/10 mx-1 hidden sm:block" />
 
-            {/* Home de la App Actual (Trello style: Te quedas en la app) */}
+            {/* Home de la App Actual (Icono en lugar de repetir texto) */}
             <div className="hidden sm:flex items-center">
-              <span className="text-white text-[13px] font-bold tracking-wide">
-                CRM Central
-              </span>
+              <button 
+                onClick={() => setActiveTab('dashboard')}
+                className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                title="Ir al inicio del CRM"
+              >
+                <Home className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
