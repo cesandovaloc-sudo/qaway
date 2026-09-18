@@ -242,8 +242,8 @@ async function dispatchMultiModelAi(
  * Despacha un mensaje de texto saliente por WhatsApp Cloud API
  */
 async function sendWhatsAppDirect(to: string, text: string, phoneNumberId: string, accessToken: string): Promise<string | null> {
-  const targetPhoneId = phoneNumberId || DEFAULT_PHONE_NUMBER_ID
-  const targetToken = accessToken || ACCESS_TOKEN
+  const targetPhoneId = phoneNumberId || Deno.env.get('WHATSAPP_PHONE_NUMBER_ID') || DEFAULT_PHONE_NUMBER_ID
+  const targetToken = accessToken || Deno.env.get('WHATSAPP_ACCESS_TOKEN') || ACCESS_TOKEN
   console.log(`[whatsapp-webhook] sendWhatsAppDirect: to=${to}, targetPhoneId=${targetPhoneId}, tokenPresent=${Boolean(targetToken)}`)
   if (!targetPhoneId || !targetToken) {
     console.error('[whatsapp-webhook] Falta targetPhoneId o targetToken para despachar')
