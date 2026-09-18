@@ -8,20 +8,26 @@ interface UseDataResult<T> {
   refetch: () => Promise<void>
 }
 
-export function useData<T>(fetcher: () => Promise<T>, deps: unknown[] = []): UseDataResult<T> {
-  const [data, setData] = useState<T | null>(null)
-  const [loading, setLoading] = useState(true)
+export function useData<T>(
+  fetcher: () => Promise<T>,
+  deps: unknown[] = [],
+  initialData?: T | null
+): UseDataResult<T> {
+  const [data, setData] = useState<T | null>(initialData ?? null)
+  const [loading, setLoading] = useState(initialData === undefined || initialData === null)
   const [error, setError] = useState<string | null>(null)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const execute = useCallback(async () => {
-    setLoading(true)
+    if (!data && (initialData === undefined || initialData === null)) {
+      setLoading(true)
+    }
     setError(null)
     try {
       const result = await fetcher()
       setData(result)
     } catch (err) {
-      const message = err instanceof Error ? err instanceof Error ? err.message : String(err) : 'Error al cargar datos'
+      const message = err instanceof Error ? err.message : String(err) || 'Error al cargar datos'
       setError(message)
       console.error('Data fetch error:', err)
       // Si el error es por sesión expirada, forzar cierre de sesión

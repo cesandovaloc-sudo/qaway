@@ -1,7 +1,19 @@
 import { supabase } from '@/lib/supabase'
 import type { Category } from '@/lib/types'
 
-export async function getCategories({ activeOnly = false } = {}): Promise<Category[]> {
+let _cachedCategories: Category[] | null = null
+let _categoriesCacheTime = 0
+const CATEGORIES_CACHE_TTL = 10 * 60 * 1000 // 10 minutos de vigencia
+
+export function getCachedCategoriesSync(): Category[] | null {
+  return _cachedCategories
+}
+
+export async function getCategories({ activeOnly = false } = {}, forceRefresh = false): Promise<Category[]> {
+  if (activeOnly && !forceRefresh && _cachedCategories && (Date.now() - _categoriesCacheTime < CATEGORIES_CACHE_TTL)) {
+    return _cachedCategories
+  }
+
   let query = supabase
     .from('categories')
     .select('*')
@@ -10,8 +22,16 @@ export async function getCategories({ activeOnly = false } = {}): Promise<Catego
   if (activeOnly) query = query.eq('is_active', true)
 
   const { data, error } = await query
-  if (error) throw error
-  return (data as Category[]) || []
+  if (error) {
+    if (_cachedCategories) return _cachedCategories
+    throw error
+  }
+  const result = (data as Category[]) || []
+  if (activeOnly) {
+    _cachedCategories = result
+    _categoriesCacheTime = Date.now()
+  }
+  return result
 }
 
 export async function getCategory(slug: string): Promise<Category | null> {

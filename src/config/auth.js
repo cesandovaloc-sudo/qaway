@@ -5,6 +5,7 @@
 export const ADMIN_EMAILS = [
   'proyectos@qawaylab.com',
   'admin@qawaylab.com',
+  'admin@qaway.test',
 ]
 
 /**

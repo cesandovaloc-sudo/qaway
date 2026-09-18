@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '@/hooks/useData'
-import { getCourses, getCategories } from '@/lib/services'
+import { getCourses, getCategories, getCachedCoursesSync, getCachedCategoriesSync } from '@/lib/services'
 import { academyRoutes } from '@/lib/routes'
 import type { Course } from '@/lib/types'
 
@@ -84,8 +84,9 @@ function WebStyleCourseCard({ course }: { course: Course }) {
 }
 
 export default function Courses() {
-  const { data: courses, loading, error } = useData(() => getCourses(), [])
-  const { data: dbCategories } = useData(() => getCategories({ activeOnly: true }), [])
+  const { data: courses, loading: coursesLoading, error } = useData(() => getCourses(), [], getCachedCoursesSync())
+  const { data: dbCategories } = useData(() => getCategories({ activeOnly: true }), [], getCachedCategoriesSync())
+  const loading = coursesLoading && !courses
 
   // Solo mostramos botones para categorías que tienen al menos un curso publicado.
   // El orden de referencia lo da la tabla categories (sort_order).

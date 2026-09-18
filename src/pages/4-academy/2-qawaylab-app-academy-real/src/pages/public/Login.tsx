@@ -4,6 +4,7 @@ import { CheckCircle2, Eye, EyeOff, GraduationCap, Loader2, Lock, LogIn, Mail } 
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useAuthGuard } from '@/hooks/useAuthGuard'
+import { isSuperAdmin } from '../../../../../../config/auth'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -36,8 +37,16 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const data = await signIn(email, password)
-      const userId = data?.user?.id
+      const cleanEmail = email.trim()
+      const data = await signIn(cleanEmail, password)
+      const userObj = data?.user
+
+      if (isSuperAdmin(cleanEmail) || (userObj?.email && isSuperAdmin(userObj.email))) {
+        navigate(safeRedirect || '/academy/app/admin', { replace: true })
+        return
+      }
+
+      const userId = userObj?.id
       if (userId) {
         const { data: profile } = await supabase
           .from('profiles')
@@ -52,9 +61,9 @@ export default function Login() {
           admin: '/academy/app/admin',
           support: '/academy/app/admin',
         }
-        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/academy/app/panel')
+        navigate(safeRedirect || roleRoutes[profile?.role || ''] || '/academy/app/panel', { replace: true })
       } else {
-        navigate(safeRedirect || '/academy/app/panel')
+        navigate(safeRedirect || '/academy/app/panel', { replace: true })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err) || 'Error al iniciar sesión')

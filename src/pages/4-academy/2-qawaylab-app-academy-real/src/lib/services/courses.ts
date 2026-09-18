@@ -8,7 +8,22 @@ export interface CourseFilters {
   status?: string
 }
 
-export async function getCourses({ category, level, search, status = 'published' }: CourseFilters = {}) {
+let _cachedCourses: Course[] | null = null
+let _coursesCacheTime = 0
+const COURSES_CACHE_TTL = 5 * 60 * 1000 // 5 minutos de vigencia en memoria
+
+export function getCachedCoursesSync(): Course[] | null {
+  return _cachedCourses
+}
+
+export async function getCourses({ category, level, search, status = 'published' }: CourseFilters = {}, forceRefresh = false) {
+  const isDefaultQuery = !category && !level && !search && status === 'published'
+
+  // Retornar de inmediato si la consulta por defecto ya esta en cache de memoria fresco
+  if (isDefaultQuery && !forceRefresh && _cachedCourses && (Date.now() - _coursesCacheTime < COURSES_CACHE_TTL)) {
+    return _cachedCourses
+  }
+
   let query = supabase
     .from('courses')
     .select(`
@@ -25,8 +40,17 @@ export async function getCourses({ category, level, search, status = 'published'
   query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
-  if (error) throw error
-  return data as unknown as Course[]
+  if (error) {
+    if (_cachedCourses) return _cachedCourses
+    throw error
+  }
+
+  const courses = data as unknown as Course[]
+  if (isDefaultQuery) {
+    _cachedCourses = courses
+    _coursesCacheTime = Date.now()
+  }
+  return courses
 }
 
 export async function getFeaturedCourses() {

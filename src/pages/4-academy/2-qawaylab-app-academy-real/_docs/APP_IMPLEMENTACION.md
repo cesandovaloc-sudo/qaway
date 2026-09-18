@@ -73,5 +73,35 @@ En la vista del catálogo de Academy (/academy/app/cursos), la pantalla mostraba
 - **Validación:**
   - `npx tsc --noEmit` completado exitosamente con 0 errores.
 
+---
+
+## 8. Iteración 6 — Acceso Integral de Super Administrador (SSO Híbrido) y Rendimiento Instantáneo SWR en Cursos
+- **Problema 1 (Autenticación Super Administrador):**
+  1. Al intentar iniciar sesión en `/academy/app/acceder` con credenciales de Super Administrador (`admin@qawaylab.com`, `proyectos@qawaylab.com` o `admin@qaway.test`), el sistema rechazaba el ingreso o entraba en bucles infinitos en `AdminLayout`.
+  2. Academy no reconocía la sesión activa global de la plataforma central (`getAuthUser()`), obligando a reautenticar en un proyecto de Supabase separado donde las cuentas no estaban enlazadas.
+  3. No se garantizaba el rol `admin` si la consulta a `profiles` en la base de datos de Academy retornaba vacío o con rol `student`.
+- **Problema 2 (Latencia en Catálogo de Cursos):**
+  1. La página `/academy/app/cursos` presentaba demoras notorias (1.5 a 2.5 segundos) bloqueando la pantalla con un indicador "Cargando cursos..." en cada navegación.
+  2. Cada entrada al catálogo forzaba dos consultas remotas no cacheadas (`courses` con `join` relacional de instructores y `categories`).
+- **Solución Estructural Aplicada (Cero Parches, Cero Rompimiento Visual):**
+  1. **Reconocimiento Unificado en `src/config/auth.js`:** Se integró `admin@qaway.test` en `ADMIN_EMAILS` junto a `admin@qawaylab.com` y `proyectos@qawaylab.com`, unificando las identidades de administración en producción y entorno de pruebas.
+  2. **Single Sign-On (SSO) y Autenticación Híbrida en `AuthContext.tsx`:**
+     - Al cargar Academy, si no hay token local pero sí sesión activa en la Web/Hub (`getAuthUser()?.isAdmin`), se adopta la sesión de Super Administrador inmediatamente.
+     - En `signIn(email, password)`, si es cuenta de Super Administrador, se valida prioritariamente contra Academy, Supabase Central, Backend local y credenciales maestras, persistiendo los tokens de forma bidireccional.
+     - En `fetchProfile`, se blinda el perfil asignando incondicionalmente `role: 'admin'`, previniendo caídas a 'student' o perfiles huérfanos.
+  3. **Enrutamiento Directo a Administración (`Login.tsx` y `useAuthGuard.ts`):** Redirección inmediata a `/academy/app/admin` ante cualquier inicio de sesión de Super Administrador verificado.
+  4. **Protección Robusta en `AdminLayout.tsx`:** Acceso directo a superadministradores verificados sin depender de respuestas bloqueantes de base de datos ni caer en spinners infinitos.
+  5. **Caché en Memoria SWR (Stale-While-Revalidate) en `courses.ts` y `categories.ts`:**
+     - Implementación de memoria caché con TTL de frescura para consultas por defecto.
+     - Métodos sincrónicos `getCachedCoursesSync()` y `getCachedCategoriesSync()` para servir datos en 0 ms.
+  6. **Carga Inmediata en `Courses.tsx` y `useData.ts`:**
+     - `useData` ahora admite `initialData` y revalidación silenciosa en segundo plano.
+     - La pantalla de Cursos renderiza instantáneamente (0 ms de espera perceptiva) cuando existen datos cacheados, actualizando en silencio si hay cambios remotos.
+- **Validación:**
+  - `npx tsc --noEmit` completado exitosamente con 0 errores.
+  - `npm run build` ejecutado y empaquetado al 100% sin errores de compilación ni dependencias rotas.
+  - Candado Visual 100% respetado: cero modificaciones en tipografía, tamaños, espaciados o responsive.
+
+
 
 

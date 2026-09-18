@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext'
+import { isSuperAdmin } from '../../../../../config/auth'
 
 const ROLE_ROUTES: Record<string, string> = {
   student: '/academy/app/panel',
@@ -11,12 +12,14 @@ const ROLE_ROUTES: Record<string, string> = {
 export function useAuthGuard() {
   const { user, profile, loading } = useAuth()
 
-  // Solo esperamos mientras la sesión se está resolviendo. Antes esta condición
-  // incluía también "usuario sin profile", y como el profile puede no existir
-  // (fila ausente o no legible), las páginas de acceso se quedaban girando para
-  // siempre, sin formulario y sin forma de salir.
+  // Solo esperamos mientras la sesión se está resolviendo
   if (loading) {
     return { guard: 'loading' }
+  }
+
+  // Superadministrador: pase directo e inmediato al panel de administración
+  if (user && isSuperAdmin(user.email)) {
+    return { guard: 'redirect', target: '/academy/app/admin' }
   }
 
   // Usuario autenticado con profile: redirigir al panel según rol

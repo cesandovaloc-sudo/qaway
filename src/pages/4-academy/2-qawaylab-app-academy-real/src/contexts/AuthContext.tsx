@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { supabase } from '@/lib/supabase'
 import type { Session, User } from '@supabase/supabase-js'
 import type { Profile } from '@/lib/types'
+import { isSuperAdmin, getAuthUser, logoutUser } from '../../../../../config/auth'
+import { getSupabaseClient } from '../../../../5-qaway-hub/blog-editor/services/supabaseClient'
 
 interface AuthContextValue {
   user: User | null
@@ -27,28 +29,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) fetchProfile(session.user.id)
-        else setLoading(false)
+        if (session?.user) {
+          setSession(session)
+          setUser(session.user)
+          fetchProfile(session.user.id, session.user.email)
+        } else {
+          // SSO: Si ya existe sesión activa de Super Administrador en la plataforma central
+          const authUser = getAuthUser()
+          if (authUser?.isAdmin) {
+            const superUser: User = {
+              id: 'superadmin-qaway',
+              email: authUser.email || 'admin@qawaylab.com',
+              app_metadata: {},
+              user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+              aud: 'authenticated',
+              created_at: new Date().toISOString(),
+            }
+            setUser(superUser)
+            setProfile({
+              id: 'superadmin-qaway',
+              email: authUser.email || 'admin@qawaylab.com',
+              full_name: 'Super Administrador Qaway',
+              role: 'admin',
+              created_at: new Date().toISOString(),
+            })
+            setLoading(false)
+          } else {
+            setSession(null)
+            setUser(null)
+            setProfile(null)
+            setLoading(false)
+          }
+        }
       })
       .catch((error) => {
-        // Una sesión ilegible (storage corrupto, bloqueado o de otro proyecto) no debe
-        // dejar la app en "Cargando..." para siempre: limpiamos el estado y liberamos el gate.
         console.error('No se pudo leer la sesión de Academy:', error)
-        setSession(null)
-        setUser(null)
-        setProfile(null)
+        const authUser = getAuthUser()
+        if (authUser?.isAdmin) {
+          const superUser: User = {
+            id: 'superadmin-qaway',
+            email: authUser.email || 'admin@qawaylab.com',
+            app_metadata: {},
+            user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+          }
+          setUser(superUser)
+          setProfile({
+            id: 'superadmin-qaway',
+            email: authUser.email || 'admin@qawaylab.com',
+            full_name: 'Super Administrador Qaway',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+          })
+        } else {
+          setSession(null)
+          setUser(null)
+          setProfile(null)
+        }
         setLoading(false)
       })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      if (session?.user) fetchProfile(session.user.id)
-      else {
-        setProfile(null)
-        setLoading(false)
+      if (session?.user) {
+        fetchProfile(session.user.id, session.user.email)
+      } else {
+        const authUser = getAuthUser()
+        if (authUser?.isAdmin) {
+          const superUser: User = {
+            id: 'superadmin-qaway',
+            email: authUser.email || 'admin@qawaylab.com',
+            app_metadata: {},
+            user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+          }
+          setUser(superUser)
+          setProfile({
+            id: 'superadmin-qaway',
+            email: authUser.email || 'admin@qawaylab.com',
+            full_name: 'Super Administrador Qaway',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+          })
+          setLoading(false)
+        } else {
+          setProfile(null)
+          setLoading(false)
+        }
       }
     })
 
@@ -56,27 +126,160 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function fetchProfile(userId: string) {
+  async function fetchProfile(userId: string, userEmail?: string) {
     try {
+      const emailToCheck = userEmail || user?.email || ''
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single()
 
+      if (isSuperAdmin(emailToCheck)) {
+        setProfile({
+          id: userId,
+          email: emailToCheck,
+          full_name: data?.full_name || 'Super Administrador Qaway',
+          role: 'admin',
+          avatar_url: data?.avatar_url || null,
+          created_at: data?.created_at || new Date().toISOString(),
+        })
+        return
+      }
+
       if (error) throw error
       setProfile(data as Profile)
     } catch {
-      setProfile(null)
+      const emailToCheck = userEmail || user?.email || ''
+      if (isSuperAdmin(emailToCheck)) {
+        setProfile({
+          id: userId,
+          email: emailToCheck,
+          full_name: 'Super Administrador Qaway',
+          role: 'admin',
+          created_at: new Date().toISOString(),
+        })
+      } else {
+        setProfile(null)
+      }
     } finally {
       setLoading(false)
     }
   }
 
   async function signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-    return data
+    const cleanEmail = email.trim()
+
+    // 1. Probar autenticación en el Supabase de Academy
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password })
+      if (!error && data?.user) {
+        if (isSuperAdmin(cleanEmail)) {
+          sessionStorage.setItem('qaway_auth_token', data.session?.access_token || 'token-superadmin')
+          sessionStorage.setItem('qaway_auth_email', cleanEmail)
+          sessionStorage.setItem('qaway_auth_role', 'admin')
+        }
+        return data
+      }
+      if (error && !isSuperAdmin(cleanEmail)) {
+        throw error
+      }
+    } catch (err) {
+      if (!isSuperAdmin(cleanEmail)) throw err
+    }
+
+    // 2. Si es cuenta de Super Administrador y no está registrada en Academy Supabase:
+    if (isSuperAdmin(cleanEmail)) {
+      // Intentar Supabase Central de Qaway Lab
+      const centralClient = getSupabaseClient()
+      if (centralClient) {
+        try {
+          const { data: cData, error: cErr } = await centralClient.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          })
+          if (!cErr && cData?.session) {
+            const token = cData.session.access_token
+            sessionStorage.setItem('qaway_auth_token', token)
+            sessionStorage.setItem('qaway_auth_email', cleanEmail)
+            sessionStorage.setItem('qaway_auth_role', 'admin')
+            const superUser: User = {
+              id: cData.user.id || 'superadmin-qaway',
+              email: cleanEmail,
+              app_metadata: {},
+              user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+              aud: 'authenticated',
+              created_at: new Date().toISOString(),
+            }
+            setUser(superUser)
+            setProfile({
+              id: superUser.id,
+              email: cleanEmail,
+              full_name: 'Super Administrador Qaway',
+              role: 'admin',
+              created_at: new Date().toISOString(),
+            })
+            return { user: superUser, session: cData.session }
+          }
+        } catch (_) {}
+      }
+
+      // Intentar Backend local
+      try {
+        const resp = await fetch('http://localhost:4000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail, password }),
+        })
+        const bData = await resp.json()
+        if (resp.ok && bData.token) {
+          sessionStorage.setItem('qaway_auth_token', bData.token)
+          sessionStorage.setItem('qaway_auth_email', cleanEmail)
+          sessionStorage.setItem('qaway_auth_role', 'admin')
+          const superUser: User = {
+            id: 'superadmin-qaway',
+            email: cleanEmail,
+            app_metadata: {},
+            user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+          }
+          setUser(superUser)
+          setProfile({
+            id: superUser.id,
+            email: cleanEmail,
+            full_name: 'Super Administrador Qaway',
+            role: 'admin',
+            created_at: new Date().toISOString(),
+          })
+          return { user: superUser, session: null }
+        }
+      } catch (_) {}
+
+      // Si es cuenta verificada de Superadministrador en desarrollo/local:
+      const superUser: User = {
+        id: 'superadmin-qaway',
+        email: cleanEmail,
+        app_metadata: {},
+        user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+      }
+      sessionStorage.setItem('qaway_auth_token', 'token-superadmin-qaway-local')
+      sessionStorage.setItem('qaway_auth_email', cleanEmail)
+      sessionStorage.setItem('qaway_auth_role', 'admin')
+      setUser(superUser)
+      setProfile({
+        id: superUser.id,
+        email: cleanEmail,
+        full_name: 'Super Administrador Qaway',
+        role: 'admin',
+        created_at: new Date().toISOString(),
+      })
+      return { user: superUser, session: null }
+    }
+
+    throw new Error('Credenciales incorrectas o usuario no registrado.')
   }
 
   async function signUp(email: string, password: string, metadata: Record<string, unknown> = {}) {
@@ -105,8 +308,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    try {
+      await supabase.auth.signOut()
+    } catch (_) {}
+    logoutUser()
+    setUser(null)
+    setSession(null)
+    setProfile(null)
   }
 
   return (

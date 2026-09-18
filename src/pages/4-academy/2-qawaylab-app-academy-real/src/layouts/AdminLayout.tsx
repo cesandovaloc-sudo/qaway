@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { Link, Outlet, useLocation, Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { isSuperAdmin } from '../../../../../config/auth'
 import GlobalSearch from '@/components/common/GlobalSearch'
 import UserMenu from '@/components/common/UserMenu'
 import RouteFallback from '@/components/common/RouteFallback'
@@ -29,14 +30,25 @@ export default function AdminLayout() {
   }
 
   if (!user) return <Navigate to="/academy/app/acceder" replace />
-  if (!profile) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
-      </div>
-    )
+
+  const isSuper = Boolean(user.email && isSuperAdmin(user.email))
+
+  if (!isSuper) {
+    if (!profile) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full" />
+        </div>
+      )
+    }
+    if (!ALLOWED_ROLES.includes(profile.role || '')) return <Navigate to="/academy/app/acceder" replace />
   }
-  if (!ALLOWED_ROLES.includes(profile.role || '')) return <Navigate to="/academy/app/acceder" replace />
+
+  const effectiveProfile = profile || {
+    id: user.id,
+    full_name: user.user_metadata?.full_name || 'Super Administrador Qaway',
+    role: 'admin',
+  }
 
   return (
     <div className="flex min-h-screen bg-surface-50">
@@ -76,7 +88,7 @@ export default function AdminLayout() {
             <GlobalSearch />
           </div>
           <div className="flex items-center gap-3">
-            <UserMenu user={user} profile={profile} signOut={signOut} />
+            <UserMenu user={user} profile={effectiveProfile} signOut={signOut} />
           </div>
         </header>
 
