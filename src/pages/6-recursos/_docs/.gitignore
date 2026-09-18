@@ -1,0 +1,8 @@
+﻿# Proteger secretos y credenciales en documentacion interna
+*.secret*
+*.key
+*.env*
+*.pem
+*credential*
+*token*
+*password*

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DOMPurify from 'dompurify'
 import { useTeacherPreview } from '@/contexts/TeacherPreviewContext'
 import { getResourceIcon } from '@/lib/services/resources'
 
@@ -104,9 +105,11 @@ export default function StudentPreviewPanel() {
             {previewLesson.content ? (
               <div className="text-surface-600 text-xs leading-relaxed space-y-2">
                 <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{
-                  __html: previewLesson.content.length > 800
-                    ? previewLesson.content.slice(0, 800) + '...'
-                    : previewLesson.content
+                  __html: DOMPurify.sanitize(
+                    previewLesson.content.length > 800
+                      ? previewLesson.content.slice(0, 800) + '...'
+                      : previewLesson.content
+                  )
                 }} />
               </div>
             ) : (

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import DOMPurify from 'dompurify'
 import { Link, useParams } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { getCourseBySlug } from '@/lib/services'
@@ -360,7 +361,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
                     </svg>
                     <h4 className="text-xs font-bold text-surface-900">Resumen de la lección</h4>
                   </div>
-                  <div className="text-xs text-surface-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+                  <div className="text-xs text-surface-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contentHtml) }} />
                 </div>
 
                 {/* Material descargable */}
