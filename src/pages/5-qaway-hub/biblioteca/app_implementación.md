@@ -78,3 +78,8 @@
 - Fix real: las rutas estaban dentro del `Layout` (abría en línea 338). Movidas fuera (líneas 340/344, `Layout` en 347). Ahora sí sin navbar. Recarga dura requerida.
 - Nuevo `BIB-015 tgrep (Microsoft)`: app CLI Rust, índice trigramas hasta 52x vs ripgrep, cliente/servidor + watcher, lo usa Copilot CLI, MIT ~3.2k estrellas, verificado, gratis, prioridad alta.
 - Seed v4 total 15, validado. Lint limpio (2 warnings preexistentes). Sin commit, sin push.
+
+## Iteración 16 — Matriz única de skills (2026-09-16)
+- Nuevo `skills-matrix.seed.json` v1: 38 entradas (SKL-001…038): 20 repo + 15 globales + 3 BIB-skills, con nivel, origen, uso, web y estado.
+- Marcadas `revisar` (4): SKL-007 gsap-frameworks, SKL-014/015 nodejs duplicadas, SKL-022 taste-v1. Resto vigentes.
+- Validado 38/38. Sin commit, sin push.
