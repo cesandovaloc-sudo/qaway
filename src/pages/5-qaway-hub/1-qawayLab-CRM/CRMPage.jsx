@@ -213,13 +213,13 @@ function CRMContent() {
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
         
-        {/* LOGO */}
+        {/* LOGO DE LA APP (Limpio y directo) */}
         <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0`}>
           <span className="text-xl font-bold tracking-tight">
             {isSidebarCollapsed ? (
               <span className="text-[#ff4b0b]">Q</span>
             ) : (
-              <>Qaway <span className="text-[#ff4b0b]">Lab</span><span className="text-[#ff4b0b] ml-0.5 text-xs align-top">⌝</span></>
+              <>Qaway <span className="text-[#ff4b0b]">CRM</span><span className="text-[#ff4b0b] ml-0.5 text-xs align-top">⌝</span></>
             )}
           </span>
         </div>
@@ -295,9 +295,9 @@ function CRMContent() {
       <div className="flex-1 flex flex-col min-w-0">
         
         <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#111111]">
-          {/* Lado Izquierdo: Toggle y Waffle */}
+          {/* Lado Izquierdo: Toggle Sidebar, Waffle y App Home */}
           <div className="flex items-center gap-4">
-            {/* Botón Toggle Sidebar */}
+            {/* Botón Toggle Sidebar - Usamos hamburguesa estilo Trello/Notion al principio del topbar */}
             <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
@@ -335,10 +335,20 @@ function CRMContent() {
                 onClose={() => setIsWaffleOpen(false)}
               />
             </div>
+
+            <div className="h-4 w-px bg-white/10 mx-1 hidden sm:block" />
+
+            {/* Home de la App Actual (Trello style: Te quedas en la app) */}
+            <div className="hidden sm:flex items-center">
+              <span className="text-white text-[13px] font-bold tracking-wide">
+                CRM Central
+              </span>
+            </div>
           </div>
 
-          {/* Search, Notifications, User & CTA */}
+          {/* Search, CTA, Notifications & User (Reordenados según estándar) */}
           <div className="flex items-center gap-3 lg:gap-5">
+            {/* 1. Buscador Omnibox (Ya optimizado y superior al anterior) */}
             <div className="relative block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input 
@@ -347,7 +357,7 @@ function CRMContent() {
                 value={globalSearchQuery}
                 onChange={(e) => setGlobalSearchQuery(e.target.value)}
                 placeholder="Buscar contactos, empresas, oportunidades..." 
-                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[300px] transition-colors" 
+                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[240px] lg:w-[300px] transition-colors" 
               />
               {globalSearchQuery ? (
                 <button 
@@ -363,22 +373,31 @@ function CRMContent() {
                 </div>
               )}
             </div>
+
+            <div className="h-6 w-px bg-white/10 mx-1" />
+
+            {/* 2. Botón Primario de Creación (+ Nuevo Proyecto / Nueva Oportunidad) */}
+            <button className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-4 py-1.5 rounded-md text-xs font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)]">
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nueva oportunidad</span>
+            </button>
             
-            <button className="relative text-white/50 hover:text-white transition-colors">
+            {/* 3. Campana / Notificaciones */}
+            <button className="relative text-white/50 hover:text-white transition-colors ml-1">
               <Bell className="w-5 h-5" />
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
             </button>
             
-            <div className="h-6 w-px bg-white/10 mx-2" />
+            <div className="h-6 w-px bg-white/10 mx-1" />
             
-            {/* Perfil del Usuario Dinámico */}
+            {/* 4. Perfil del Usuario Dinámico (Arrinconado a la derecha) */}
             <div className="flex items-center gap-3 relative cursor-pointer group">
-              <img src={currentProfile.avatar} alt={currentProfile.name} className="w-9 h-9 rounded-full border border-white/10 object-cover" />
-              <div className="flex flex-col justify-center">
-                <span className="text-white text-[13px] font-semibold leading-tight">{currentProfile.name}</span>
-                <span className="text-white/50 text-[11px] font-medium leading-tight">{currentProfile.title}</span>
+              <img src={currentProfile.avatar} alt={currentProfile.name} className="w-8 h-8 rounded-full border border-white/10 object-cover" />
+              <div className="hidden lg:flex flex-col justify-center">
+                <span className="text-white text-[12px] font-bold leading-tight">{currentProfile.name}</span>
+                <span className="text-white/50 text-[10px] font-medium leading-tight uppercase tracking-wider">{currentRole}</span>
               </div>
-              <ChevronDown className="w-4 h-4 text-white/50 ml-1" />
+              <ChevronDown className="w-3.5 h-3.5 text-white/50 ml-1" />
               
               {/* Fake Dropdown Selector (Invisible overlay over user profile) */}
               <select
@@ -392,11 +411,6 @@ function CRMContent() {
               </select>
             </div>
 
-            <div className="h-6 w-px bg-white/10 mx-2" />
-
-            <button className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-4 py-1.5 rounded-md text-xs font-semibold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)]">
-              <span>Nueva oportunidad</span>
-            </button>
           </div>
         </header>
 
