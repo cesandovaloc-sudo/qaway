@@ -30,6 +30,35 @@ export interface FaqItem {
   answer: string
 }
 
+export interface GoldenExample {
+  id: string
+  category: 'precio' | 'fuera_catalogo' | 'queja_insulto' | 'tecnica' | 'casual'
+  userQuestion: string
+  idealAnswer: string
+  rationale: string
+  isApproved: boolean
+}
+
+export interface CorrectionLogItem {
+  id: string
+  timestamp: number
+  dateString: string
+  userQuery: string
+  badAgentReply: string
+  humanCorrection: string
+  status: 'pendiente' | 'aplicado'
+}
+
+export interface StressTestCase {
+  id: string
+  round: '1_happy_path' | '2_fuera_catalogo' | '3_human_handoff' | '4_insultos_seguridad'
+  name: string
+  userPrompt: string
+  expectedBehavior: string
+  lastRunResult?: 'passed' | 'failed' | 'untested'
+  lastReply?: string
+}
+
 export interface AiSettingsPayload {
   enabled: boolean
   provider: ModelProvider
@@ -53,6 +82,8 @@ export interface TenantAgentWorkspace {
   aiSettings: AiSettingsPayload
   knowledgeBase: KnowledgeItem[]
   faqs: FaqItem[]
+  goldenExamples: GoldenExample[]
+  correctionLogs: CorrectionLogItem[]
   welcomeGreeting: string
   handoverMessage: string
   channel: 'whatsapp' | 'web'

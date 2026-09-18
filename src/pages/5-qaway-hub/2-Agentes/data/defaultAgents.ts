@@ -61,9 +61,46 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
         answer: 'Puedes escribir la palabra "asesor" en este chat o acceder a nuestro calendario público en /hub/agenda para reservar tu sesión de diagnóstico.'
       }
     ],
+    goldenExamples: [
+      {
+        id: 'gold-1',
+        category: 'precio',
+        userQuestion: '¿Me puedes dejar la plantilla Notion a mitad de precio si te pago ya?',
+        idealAnswer: 'Nuestros precios reflejan la estructura lista para operar y los SOPs probados que entregamos. El valor promocional oficial es de S/ 49 o $15 USD. Si tienes un equipo de más de 3 personas, con gusto coordinamos un paquete corporativo con un asesor.',
+        rationale: 'No regatear de forma arbitraria; mantener el valor de la solución sin ser grosero y ofrecer llamada corporativa.',
+        isApproved: true
+      },
+      {
+        id: 'gold-2',
+        category: 'fuera_catalogo',
+        userQuestion: '¿Hacen reparación física de laptops o computadoras?',
+        idealAnswer: 'En Qaway Lab nos especializamos exclusivamente en software: desarrollo web, SaaS, automatizaciones con IA y Notion Enterprise. No brindamos soporte de hardware físico. ¿Hay algún sistema digital o app que te gustaría evaluar?',
+        rationale: 'Declarar honestamente que no es nuestro rubro y reorientar al cliente hacia el catálogo oficial.',
+        isApproved: true
+      },
+      {
+        id: 'gold-3',
+        category: 'queja_insulto',
+        userQuestion: 'Son unos estafadores, nadie me responde en soporte',
+        idealAnswer: 'Lamento sinceramente cualquier demora o malestar ocasionado. En Qaway Lab nos tomamos muy en serio la satisfacción de nuestros clientes. Estoy elevando tu caso de inmediato con el área de soporte técnico para que te atiendan con prioridad.',
+        rationale: 'Desactivar la agresividad con empatía sin confrontar y activar escalamiento con prioridad.',
+        isApproved: true
+      }
+    ],
+    correctionLogs: [
+      {
+        id: 'corr-1',
+        timestamp: Date.now() - 3600000 * 2,
+        dateString: 'Hoy 10:15 AM',
+        userQuery: '¿Hacen apps móviles para iPhone y Android?',
+        badAgentReply: 'No, solo hacemos páginas web en React.',
+        humanCorrection: 'Sí desarrollamos aplicaciones web progresivas (PWA) e híbridas compatibles con iOS y Android utilizando React y Supabase con alta fluidez.',
+        status: 'aplicado'
+      }
+    ],
     metrics: {
       totalConversations: 1240,
-      simulationsRun: 48,
+      simulationsRun: 52,
       handoffCount: 32,
       complianceScore: 100
     }
@@ -116,6 +153,17 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
         answer: 'Sí, nuestra sede principal cuenta con médico veterinario de guardia las 24 horas del día, los 7 días de la semana.'
       }
     ],
+    goldenExamples: [
+      {
+        id: 'gold-c1',
+        category: 'queja_insulto',
+        userQuestion: 'Mi perro vomitó sangre, ¿qué remedio casero le puedo dar rápido?',
+        idealAnswer: '¡Atención prioritaria! El vómito con sangre es un síntoma de ALERTA CRÍTICA. No le des ningún remedio casero, ya que podría empeorar su cuadro. Acude DE INMEDIATO a nuestra sede de Urgencias 24h o avísanos si necesitas que recepción prepare el box de triaje.',
+        rationale: 'Priorizar la vida del animal ante síntomas de peligro; prohibido recetar o sugerir remedios caseros.',
+        isApproved: true
+      }
+    ],
+    correctionLogs: [],
     metrics: {
       totalConversations: 820,
       simulationsRun: 35,
@@ -163,6 +211,8 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
         answer: 'Sí, los departamentos de 1 y 2 dormitorios califican al Bono Mivivienda Verde con tasas preferenciales con los principales bancos.'
       }
     ],
+    goldenExamples: [],
+    correctionLogs: [],
     metrics: {
       totalConversations: 540,
       simulationsRun: 19,

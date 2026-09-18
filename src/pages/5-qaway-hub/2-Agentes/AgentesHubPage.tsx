@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from 'react'
 import { DEFAULT_AGENTS_DATA } from './data/defaultAgents'
-import { TenantAgentWorkspace, ToneArchetype } from './types/agent.types'
-import { AgentExecutiveDashboard } from './components/AgentExecutiveDashboard'
+import { TenantAgentWorkspace } from './types/agent.types'
+import { AgentTrainingStudio } from './components/AgentTrainingStudio'
+import { AgentStressTestStudio } from './components/AgentStressTestStudio'
+import { AgentCorrectionLogStudio } from './components/AgentCorrectionLogStudio'
+import { AgentPlaygroundSimulator } from './components/AgentPlaygroundSimulator'
+import { AgentKnowledgeStudio } from './components/AgentKnowledgeStudio'
 import { AgentIdentityStudio } from './components/AgentIdentityStudio'
 import { AgentVoiceStudio } from './components/AgentVoiceStudio'
-import { AgentKnowledgeStudio } from './components/AgentKnowledgeStudio'
-import { AgentPlaygroundSimulator } from './components/AgentPlaygroundSimulator'
 import { AgentDeploymentStudio } from './components/AgentDeploymentStudio'
+import { AgentExecutiveDashboard } from './components/AgentExecutiveDashboard'
 import { assembleCompleteSystemPrompt } from './services/promptEngine'
 import { supabase } from '@/config/supabase'
 import {
-  LayoutDashboard,
+  Sparkles,
+  Zap,
+  ShieldAlert,
+  FileEdit,
+  Database,
   Bot,
   Volume2,
-  Database,
-  Zap,
   Share2,
   Plus,
   ShieldCheck,
   Save,
   CheckCircle2,
-  Smartphone,
-  Globe,
-  Radio,
-  ExternalLink,
-  Lock,
-  User,
-  LogOut,
-  AlertCircle
+  BarChart2
 } from 'lucide-react'
 
-const STORAGE_KEY_AGENTS = 'qaway_responsible_agents_v1'
+const STORAGE_KEY_AGENTS = 'qaway_responsible_agents_v2'
 
 export default function AgentesHubPage() {
   // 1. Estados de Agentes y Tenants
@@ -47,9 +45,19 @@ export default function AgentesHubPage() {
     workspaces[0]?.id || 'tenant-qaway-master'
   )
 
-  // 2. Navegación por Pestañas (Espejo de Creador de Contenido)
-  type ActiveTab = 'dashboard' | 'identity' | 'voice' | 'knowledge' | 'playground' | 'deploy'
-  const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard')
+  // 2. Navegación por Pestañas Operativas (Prioridad al Entrenamiento & Pruebas)
+  type ActiveTab = 
+    | 'training' 
+    | 'playground' 
+    | 'stresstest' 
+    | 'corrections' 
+    | 'knowledge' 
+    | 'identity' 
+    | 'voice' 
+    | 'deploy' 
+    | 'dashboard'
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>('training')
 
   // 3. Estados de Guardado y Feedback
   const [isSaving, setIsSaving] = useState(false)
@@ -71,7 +79,7 @@ export default function AgentesHubPage() {
     }
   }, [workspaces])
 
-  // Intentar sincronizar con Supabase Cloud si existen tenants en la base de datos
+  // Intentar sincronizar con Supabase Cloud
   useEffect(() => {
     async function syncWithRemoteTenants() {
       try {
@@ -113,7 +121,7 @@ export default function AgentesHubPage() {
       aiSettings: updatedPayload
     }))
 
-    // 2. Persistir en Supabase Cloud si la tabla `tenants` existe
+    // 2. Persistir en Supabase Cloud si existe la tabla
     try {
       const { error } = await supabase
         .from('tenants')
@@ -123,13 +131,11 @@ export default function AgentesHubPage() {
         .eq('slug', activeWorkspace.slug)
 
       if (error) {
-        console.warn('[AgentesHub] Aviso al guardar en Supabase:', error.message)
-        setSaveToast('Configuración guardada en caché local (aviso Supabase).')
+        setSaveToast('Configuración y Ejemplos de Oro guardados en local.')
       } else {
         setSaveToast('¡Sincronizado con éxito con Supabase Cloud y WABA Webhook!')
       }
     } catch (err) {
-      console.warn('[AgentesHub] Guardado offline/local activo.')
       setSaveToast('¡Configuración guardada exitosamente!')
     } finally {
       setIsSaving(false)
@@ -167,6 +173,8 @@ export default function AgentesHubPage() {
       },
       knowledgeBase: [],
       faqs: [],
+      goldenExamples: [],
+      correctionLogs: [],
       metrics: {
         totalConversations: 0,
         simulationsRun: 0,
@@ -182,19 +190,43 @@ export default function AgentesHubPage() {
     setNewBrandIndustry('')
   }
 
-  // Ítems de navegación vertical
+  // Navegación enfocada en entrenamiento real y calibración
   const navItems = [
     {
-      key: 'dashboard' as ActiveTab,
-      label: 'Dashboard Ejecutivo',
-      icon: LayoutDashboard,
-      badge: undefined
+      key: 'training' as ActiveTab,
+      label: 'Entrenador de Oro (Few-Shot)',
+      icon: Sparkles,
+      badge: (activeWorkspace.goldenExamples || []).length
+    },
+    {
+      key: 'playground' as ActiveTab,
+      label: 'Simulador WhatsApp & Web',
+      icon: Zap,
+      badge: 'Play'
+    },
+    {
+      key: 'stresstest' as ActiveTab,
+      label: 'Batería de Estrés (Red Teaming)',
+      icon: ShieldAlert,
+      badge: '1 Día'
+    },
+    {
+      key: 'corrections' as ActiveTab,
+      label: 'Notas de Corrección',
+      icon: FileEdit,
+      badge: (activeWorkspace.correctionLogs || []).filter(c => c.status === 'pendiente').length || undefined
+    },
+    {
+      key: 'knowledge' as ActiveTab,
+      label: 'Catálogo & Traspaso Humano',
+      icon: Database,
+      badge: activeWorkspace.knowledgeBase.length
     },
     {
       key: 'identity' as ActiveTab,
-      label: 'Identidad & Capa 0',
+      label: 'Identidad & Motor LLM',
       icon: Bot,
-      badge: 'Ley 31814'
+      badge: undefined
     },
     {
       key: 'voice' as ActiveTab,
@@ -203,20 +235,8 @@ export default function AgentesHubPage() {
       badge: undefined
     },
     {
-      key: 'knowledge' as ActiveTab,
-      label: 'Conocimiento & Handoff',
-      icon: Database,
-      badge: activeWorkspace.knowledgeBase.length
-    },
-    {
-      key: 'playground' as ActiveTab,
-      label: 'Simulador en Vivo',
-      icon: Zap,
-      badge: 'Play'
-    },
-    {
       key: 'deploy' as ActiveTab,
-      label: 'Despliegue & WABA',
+      label: 'Despliegue WABA & Web',
       icon: Share2,
       badge: undefined
     }
@@ -226,11 +246,11 @@ export default function AgentesHubPage() {
     <div className="min-h-screen bg-[#f4f6fa] text-slate-800 selection:bg-[#4f46e5] selection:text-white font-sans flex flex-col">
       <div className="flex-1 flex flex-col lg:flex-row w-full">
         
-        {/* PANEL IZQUIERDO PURPURA/INDIGO (ESTILO CONTENT STUDIO EXACTO) */}
+        {/* PANEL IZQUIERDO PURPURA/INDIGO (CONTENT STUDIO ESQUELETO) */}
         <aside className="w-full lg:w-64 xl:w-72 shrink-0 bg-[#4f46e5] text-white lg:min-h-screen lg:sticky lg:top-0 self-start flex flex-col justify-between p-4 sm:p-5 z-20 shadow-xl">
           <div className="space-y-6">
             
-            {/* Cabecera del Sidebar con Logo Blanco Q */}
+            {/* Cabecera del Sidebar con Monograma Q */}
             <div className="flex items-center gap-3 pb-4 border-b border-white/15">
               <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-xs flex items-center justify-center text-white font-black text-lg shadow-sm border border-white/20 shrink-0">
                 Q
@@ -278,7 +298,7 @@ export default function AgentesHubPage() {
             {/* Menú de Navegación Vertical */}
             <nav className="space-y-1.5">
               <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-200/80 px-3 block mb-2">
-                Menú de Configuración
+                Entrenamiento & Calibración
               </span>
 
               {navItems.map(item => {
@@ -319,18 +339,30 @@ export default function AgentesHubPage() {
 
           {/* Pie de Usuario y Gobernanza */}
           <div className="pt-4 border-t border-white/15 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-black text-white border border-white/30">
-                LS
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-black text-white border border-white/30">
+                  LS
+                </div>
+                <div className="overflow-hidden">
+                  <span className="text-xs font-bold text-white block truncate">
+                    Leo Sandoval
+                  </span>
+                  <span className="text-[10px] text-indigo-200 block truncate">
+                    Architect & Prompt Engineer
+                  </span>
+                </div>
               </div>
-              <div className="overflow-hidden">
-                <span className="text-xs font-bold text-white block truncate">
-                  Leo Sandoval
-                </span>
-                <span className="text-[10px] text-indigo-200 block truncate">
-                  Architect & Prompt Engineer
-                </span>
-              </div>
+
+              {/* Botón para ver Métricas preservadas */}
+              <button
+                type="button"
+                onClick={() => setActiveTab(activeTab === 'dashboard' ? 'training' : 'dashboard')}
+                className="text-[11px] font-bold text-indigo-200 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-all cursor-pointer"
+                title="Alternar vista de métricas y dashboard"
+              >
+                <BarChart2 className="w-4 h-4" />
+              </button>
             </div>
 
             <div className="flex items-center justify-between text-[10px] text-indigo-200/80 pt-1">
@@ -364,11 +396,14 @@ export default function AgentesHubPage() {
                   <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200">
                     {activeWorkspace.agentName}
                   </span>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                    {(activeWorkspace.goldenExamples || []).length} Ejemplos de Oro
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Acciones y Semáforo de Guardrails */}
+            {/* Acciones Rápidas */}
             <div className="flex items-center gap-2 sm:gap-3">
               
               {/* Píldora de Gobernanza Ley 31814 */}
@@ -414,11 +449,39 @@ export default function AgentesHubPage() {
 
           {/* VISTAS MODULARES SEGÚN PESTAÑA */}
           <div className="p-4 sm:p-8 flex-1 max-w-7xl w-full">
-            {activeTab === 'dashboard' && (
-              <AgentExecutiveDashboard
+            {activeTab === 'training' && (
+              <AgentTrainingStudio
                 workspace={activeWorkspace}
-                onNavigateTab={tab => setActiveTab(tab)}
-                onRunSimulation={() => setActiveTab('playground')}
+                onUpdateWorkspace={updateActiveWorkspace}
+              />
+            )}
+
+            {activeTab === 'playground' && (
+              <AgentPlaygroundSimulator
+                workspace={activeWorkspace}
+                onUpdateWorkspace={updateActiveWorkspace}
+              />
+            )}
+
+            {activeTab === 'stresstest' && (
+              <AgentStressTestStudio
+                workspace={activeWorkspace}
+                onUpdateWorkspace={updateActiveWorkspace}
+                onNavigateToTraining={() => setActiveTab('training')}
+              />
+            )}
+
+            {activeTab === 'corrections' && (
+              <AgentCorrectionLogStudio
+                workspace={activeWorkspace}
+                onUpdateWorkspace={updateActiveWorkspace}
+              />
+            )}
+
+            {activeTab === 'knowledge' && (
+              <AgentKnowledgeStudio
+                workspace={activeWorkspace}
+                onUpdateWorkspace={updateActiveWorkspace}
               />
             )}
 
@@ -436,24 +499,18 @@ export default function AgentesHubPage() {
               />
             )}
 
-            {activeTab === 'knowledge' && (
-              <AgentKnowledgeStudio
-                workspace={activeWorkspace}
-                onUpdateWorkspace={updateActiveWorkspace}
-              />
-            )}
-
-            {activeTab === 'playground' && (
-              <AgentPlaygroundSimulator
-                workspace={activeWorkspace}
-                onUpdateWorkspace={updateActiveWorkspace}
-              />
-            )}
-
             {activeTab === 'deploy' && (
               <AgentDeploymentStudio
                 workspace={activeWorkspace}
                 onUpdateWorkspace={updateActiveWorkspace}
+              />
+            )}
+
+            {activeTab === 'dashboard' && (
+              <AgentExecutiveDashboard
+                workspace={activeWorkspace}
+                onNavigateTab={tab => setActiveTab(tab)}
+                onRunSimulation={() => setActiveTab('playground')}
               />
             )}
           </div>
@@ -507,7 +564,7 @@ export default function AgentesHubPage() {
               </div>
 
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                Se inicializarán automáticamente los guardrails de la Ley Nº 31814 y el esquema multi-tenant en 3 capas para esta nueva empresa.
+                Se inicializarán automáticamente los guardrails de la Ley Nº 31814, el motor de Ejemplos de Oro y la arquitectura multi-tenant en 3 capas.
               </p>
 
               <div className="flex gap-2 pt-2">

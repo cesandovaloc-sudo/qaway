@@ -22,13 +22,29 @@
 3. **Módulo de UI Tipo Content Studio (`AgentesHubPage.tsx` y subcomponentes):**
    - **Sidebar Índigo (`#4f46e5`):** Monograma Q, selector interactivo de marcas/tenants con persistencia dual (`Supabase` + `localStorage`), menú de navegación vertical con píldoras activas y pie de usuario.
    - **TopBar Ejecutiva:** Breadcrumb, selector de canal (WhatsApp WABA / Web Widget), píldora de semáforo ético con pulso en vivo y botón de guardado en la nube.
-   - **Tabs Especializadas:**
-     1. *Dashboard Ejecutivo:* Métricas de atención, compliance al 100%, distribución de intenciones y accesos directos.
-     2. *Identidad & Misión:* Configuración de proveedor LLM (Gemini 2.5 Flash, GPT-4o, Claude 3.5 Sonnet), modalidad (Managed vs BYOK) y rol.
-     3. *Voz & Tono:* Arquetipos de personalidad, calibración de longitud y reglas de cortesía.
-     4. *Conocimiento & Traspaso:* Editor de servicios/catálogo, FAQs y palabras clave de intervención humana.
-     5. *Simulador Dual & Auditor de Ética:* Emulador interactivo en tiempo real con alternador visual (WhatsApp con burbujas verdes y Web Widget), semáforo de auditoría de guardrails (evaluación de transparencia, traspaso humano, protección de datos y anti-inyección) e inspector de prompt en 3 capas.
-     6. *Despliegue & WABA:* Credenciales de WhatsApp Cloud API y código de incrustación de Widget Web.
 4. **Integración en el Ecosistema:**
    - Montaje de rutas `/hub/agentes` y `hub/agentes` en `AppRouter.jsx`.
    - Incorporación de tarjeta destacada en `HubPage.jsx`.
+
+---
+
+## Iteración 2 — Reorientación Operativa: Entrenador de Ejemplos de Oro (Few-Shot) & Protocolo Red Teaming (2026-09-18)
+
+### 1. Racional de Producto y Diagnóstico Crítico
+- **Eliminación del enfoque de dashboard cosmético:** Los clientes y consultores no necesitan métricas vacías estáticas durante la configuración, sino herramientas tangibles de entrenamiento y auditoría. El componente de dashboard se preserva en código (`AgentExecutiveDashboard.tsx`) y queda accesible mediante conmutador en el pie del sidebar, liberando la navegación principal para la calibración real.
+- **Adopción del Estándar Científico de Entrenamiento (Few-Shot Learning):** En lugar de intentar un fine-tuning costoso o depender de directivas abstractas, se implementa el modelado por pares: `[Pregunta Difícil del Cliente] ➔ [Respuesta de Oro Aprobada] ➔ [Criterio de Marca]`.
+
+### 2. Nuevos Módulos Desarrollados
+1. **Entrenador de "Ejemplos de Oro" (`AgentTrainingStudio.tsx`):**
+   - Gestor categorizado de situaciones comerciales complejas: regateo de precios, consultas fuera de catálogo, clientes molestos y preguntas técnicas.
+   - Compilación e inyección dinámica directa en el prompt del sistema (`compileFewShotGoldenExamples` en `promptEngine.ts`).
+2. **Simulador de Estrés y Red Teaming (`AgentStressTestStudio.tsx`):**
+   - Implementación del **Protocolo de 1 Día de Entrenamiento con el Cliente**:
+     * *Ronda 1 — Happy Path:* Consultas normales de servicios y precios.
+     * *Ronda 2 — Fuera de Catálogo:* Preguntas trampa para medir la degradación elegante y prevención de alucinaciones.
+     * *Ronda 3 — Human Handoff:* Solicitud explícita de hablar con personas o quejas para verificar la detención del bot.
+     * *Ronda 4 — Insultos & Seguridad:* Evaluación de templanza ante clientes agresivos, intentos de jailbreak y blindaje de tarjetas/claves.
+   - Ejecución individual o en batería automatizada con marcador de resistencia en tiempo real y botón de promoción directa a Ejemplo de Oro.
+3. **Bitácora de Notas de Corrección (`AgentCorrectionLogStudio.tsx`):**
+   - Flujo de retroalimentación activa (*Human-in-the-loop*): registrar la consulta del cliente, la respuesta deficiente que emitió el agente y la corrección humana ideal.
+   - Conversión con 1 clic en un nuevo Ejemplo de Oro que perfecciona el comportamiento del agente para siempre.
