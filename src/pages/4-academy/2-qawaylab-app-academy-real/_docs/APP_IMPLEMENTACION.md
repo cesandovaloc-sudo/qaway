@@ -121,7 +121,28 @@ En la vista del catálogo de Academy (/academy/app/cursos), la pantalla mostraba
   - `npm run build:dev` ejecutado exitosamente (`built in 16.43s`).
   - Candado Visual 100% preservado sin tocar CSS, layouts, componentes visuales ni responsive.
 
+---
 
-
-
-
+### [Iteración 08 — 2026-09-18]
+- **Objetivo:** Implementar la Fase 2 de Academy: verificación de acceso por suscripciones comerciales vía RPC central (`check_user_course_access`) y habilitar soporte para vistas previas (preview) granulares a nivel de lección y módulo.
+- **Acciones Realizadas:**
+  1. **Verificación de Suscripción en `commerceBridge.ts`:**
+     - Creación de `checkUserSubscriptionAccess(userId, courseId)` que conecta con Supabase Central (`qrusdsqgygfolxfrafyd`) y ejecuta la función `check_user_course_access`.
+     - Manejo de fallos silencioso y seguro (default a `false` si no hay sesión o conexión).
+  2. **Jerarquía Unificada de Acceso en `enrollments.ts`:**
+     - Creación de `resolveUserCourseAccess(studentId, course)` que valida el acceso en orden canónico:
+       1) **Gratis:** `course.is_free === true` $\rightarrow$ Matrícula y acceso directo.
+       2) **Matrícula Directa:** `enrollments` con estado `active` $\rightarrow$ Acceso completo.
+       3) **Suscripción Activa:** RPC comercial retorna `true` $\rightarrow$ Acceso por membresía recurrente.
+       4) **Sin Acceso:** Requiere compra o suscripción.
+  3. **Control de Compra y Acceso en `CourseDetail.tsx`:**
+     - `handlePrimaryAction` evalúa `resolveUserCourseAccess` antes de derivar al carrito.
+     - Si el usuario cuenta con suscripción activa que incluye el curso, se le redirige inmediatamente al aula `/aula`.
+     - Si no tiene acceso, añade el curso al carrito unificado (`qaway-cart-v1`) y navega a `/carrito/checkout`.
+  4. **Preview Granular en `CourseDetail.tsx` y `Lesson.tsx`:**
+     - Soporte para marcas `lesson.is_preview`, `module.is_preview` y el conteo secuencial `course.free_preview_lessons`.
+     - Las lecciones marcadas como preview se pueden visualizar abiertamente en el reproductor. Las lecciones bloqueadas exigen compra o suscripción activa.
+- **Validación:**
+  - `npx tsc --noEmit` completado con 0 errores.
+  - `npm run build:dev` ejecutado exitosamente sin advertencias ni errores.
+  - Candado Visual 100% respetado: cero modificaciones en CSS, dimensiones, layouts o responsive.
