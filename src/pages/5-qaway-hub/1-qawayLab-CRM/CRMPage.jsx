@@ -391,7 +391,14 @@ function CRMContent() {
                   />
                 )}
                 {activeTab === 'automatizaciones' && <AutomatizacionesView />}
-                {activeTab === 'tareas'    && <TareasView />}
+                {activeTab === 'tareas'    && (
+                  <TareasView 
+                    onNavigateToChat={(leadId) => {
+                      if (setSelectedLeadId) setSelectedLeadId(leadId)
+                      setActiveTab('whatsapp')
+                    }} 
+                  />
+                )}
                 {activeTab === 'configuracion' && <ConfiguracionView />}
               </motion.div>
             </AnimatePresence>
