@@ -14,33 +14,112 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts'
 
+const DEMO_CAMPAIGNS = [
+  {
+    id: 'camp-meta-1',
+    name: 'Qaway Lab_Ventas_Individuales',
+    platform: 'Meta Ads (Instagram & Facebook)',
+    status: 'Activa',
+    spend: 340.00,
+    revenue: 1490.00,
+    leadsCount: 38,
+    impressions: 24500,
+    clicks: 1280
+  },
+  {
+    id: 'camp-meta-2',
+    name: 'Identidad Visual & Branding Digital',
+    platform: 'Meta Ads (Click-to-WhatsApp CTWA)',
+    status: 'Activa',
+    spend: 210.00,
+    revenue: 890.00,
+    leadsCount: 24,
+    impressions: 18200,
+    clicks: 940
+  },
+  {
+    id: 'camp-b2b-notion',
+    name: 'Plantillas Notion B2B Enterprise',
+    platform: 'TikTok Ads & Google Search',
+    status: 'Pausada',
+    spend: 150.00,
+    revenue: 520.00,
+    leadsCount: 16,
+    impressions: 9800,
+    clicks: 410
+  }
+]
+
+const TIME_LABELS = {
+  realtime: 'Tiempo Real',
+  today: 'Hoy',
+  '7days': 'Últimos 7 días',
+  '30days': 'Últimos 30 días',
+  all: 'Histórico Completo'
+}
+
 export default function DashboardView() {
   const { campaigns, leads, currentRole, customMetrics, removeCustomMetric } = useCRM()
   
   // Estado para el filtro de campañas
   const [selectedCampaignId, setSelectedCampaignId] = useState('all')
+  const [timeRange, setTimeRange] = useState('realtime')
+  const [showTimeMenu, setShowTimeMenu] = useState(false)
+  const [channelFilter, setChannelFilter] = useState('all')
+  const [showFilterMenu, setShowFilterMenu] = useState(false)
 
   // Colores premium de la marca
   const COLORS = ['#ff4b0b', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563']
 
+  // Campañas efectivas (con fallback demostrativo si Supabase aún está vacío)
+  const effectiveCampaigns = (campaigns && campaigns.length > 0) ? campaigns : DEMO_CAMPAIGNS
+
   // ----------------------------------------------------
-  // LOGICA DINÁMICA DE KPIs (Reintegrada)
+  // LOGICA DINÁMICA DE KPIs (Reintegrada con filtros cruzados)
   // ----------------------------------------------------
   const filteredCampaigns = selectedCampaignId === 'all'
-    ? campaigns
-    : campaigns.filter(c => c.id === selectedCampaignId)
+    ? effectiveCampaigns
+    : effectiveCampaigns.filter(c => c.id === selectedCampaignId)
 
-  const filteredLeads = selectedCampaignId === 'all'
-    ? leads
-    : leads.filter(l => l.campaignId === selectedCampaignId)
+  const filteredLeads = leads.filter(l => {
+    // 1. Filtro por Campaña
+    if (selectedCampaignId !== 'all') {
+      const targetCamp = effectiveCampaigns.find(c => c.id === selectedCampaignId)
+      const leadCampId = l.campaignId || l.campaign_id
+      const leadCampName = (l.campaignName || l.campaign_name || '').toLowerCase()
+      const matchesId = leadCampId === selectedCampaignId
+      const matchesName = targetCamp && leadCampName.includes(targetCamp.name.toLowerCase())
+      if (!matchesId && !matchesName) return false
+    }
 
-  const totalSpend = filteredCampaigns.reduce((sum, c) => sum + c.spend, 0)
-  const totalRevenue = filteredCampaigns.reduce((sum, c) => sum + c.revenue, 0)
+    // 2. Filtro por Período de Tiempo
+    if (timeRange === 'today') {
+      const today = new Date().toDateString()
+      if (new Date(l.created_at || Date.now()).toDateString() !== today) return false
+    } else if (timeRange === '7days') {
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+      if (new Date(l.created_at || Date.now()).getTime() < weekAgo) return false
+    } else if (timeRange === '30days') {
+      const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+      if (new Date(l.created_at || Date.now()).getTime() < monthAgo) return false
+    }
+
+    // 3. Filtro por Canal
+    if (channelFilter !== 'all') {
+      const leadChan = (l.channel || l.metadata?.channel || (l.whatsapp ? 'whatsapp' : 'web')).toLowerCase()
+      if (!leadChan.includes(channelFilter.toLowerCase())) return false
+    }
+
+    return true
+  })
+
+  const totalSpend = filteredCampaigns.reduce((sum, c) => sum + (c.spend || 0), 0)
+  const totalRevenue = filteredCampaigns.reduce((sum, c) => sum + (c.revenue || 0), 0)
   const totalLeads = filteredLeads.length
   const wonLeads = filteredLeads.filter(l => l.status === 'ganado').length
   const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : '0.0'
-  const ticketPromedio = wonLeads > 0 ? (totalRevenue / wonLeads) : 0
-  const valorPipeline = filteredLeads.reduce((sum, l) => sum + (l.budget || 0), 0) // Asumiendo que budget es el valor
+  const ticketPromedio = wonLeads > 0 ? Math.round(totalRevenue / wonLeads) : 0
+  const valorPipeline = filteredLeads.reduce((sum, l) => sum + (Number(l.budget) || 0), 0)
 
   // Mock data para gráficos (mantenidos para la estética, pero adaptables)
   const rendimientoData = [
@@ -49,14 +128,14 @@ export default function DashboardView() {
     { name: 'Feb', ingresos: 600, ganadas: 400 },
     { name: 'Mar', ingresos: 500, ganadas: 300 },
     { name: 'Abr', ingresos: 900, ganadas: 700 },
-    { name: 'May', ingresos: totalRevenue / 1000, ganadas: wonLeads * 100 }, // Vinculado ligeramente a la data real
+    { name: 'May', ingresos: totalRevenue / 1000, ganadas: wonLeads * 100 },
   ]
 
   const channelData = [
     { name: 'Referidos', ganado: 420000, curso: 180000 },
     { name: 'Inbound / Web', ganado: 312000, curso: 100000 },
     { name: 'Email Marketing', ganado: 198000, curso: 50000 },
-    { name: 'Ads (Dinámico)', ganado: totalRevenue, curso: valorPipeline }, // Vinculado a Ads
+    { name: 'Ads (Dinámico)', ganado: totalRevenue, curso: valorPipeline },
   ]
 
   // Distribución dinámica por etapa real
@@ -92,7 +171,7 @@ export default function DashboardView() {
       >
         Todas las Campañas
       </button>
-      {campaigns.map(camp => (
+      {effectiveCampaigns.map(camp => (
         <button
           key={camp.id}
           onClick={() => setSelectedCampaignId(camp.id)}
@@ -126,16 +205,95 @@ export default function DashboardView() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 bg-white border border-black/10 text-sm font-semibold px-4 py-2 rounded-md hover:bg-zinc-50 transition-colors">
-              <Calendar className="w-4 h-4 text-black/40" />
-              <span>Tiempo Real</span>
-              <ChevronDown className="w-4 h-4 text-black/40" />
-            </button>
-            <button className="flex items-center gap-2 bg-white border border-black/10 text-sm font-semibold px-4 py-2 rounded-md hover:bg-zinc-50 transition-colors">
-              <Filter className="w-4 h-4 text-black/40" />
-              <span>Filtros</span>
-            </button>
+          <div className="flex items-center gap-3 relative">
+            {/* Selector de Rango de Tiempo Interactivo */}
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setShowTimeMenu(!showTimeMenu)
+                  setShowFilterMenu(false)
+                }}
+                className="flex items-center gap-2 bg-white border border-black/10 text-sm font-semibold px-4 py-2 rounded-md hover:bg-zinc-50 transition-colors shadow-xs"
+              >
+                <Calendar className="w-4 h-4 text-[#ff4b0b]" />
+                <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
+                <ChevronDown className="w-4 h-4 text-black/40" />
+              </button>
+
+              {showTimeMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 py-1 text-xs">
+                  {Object.entries(TIME_LABELS).map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setTimeRange(key)
+                        setShowTimeMenu(false)
+                      }}
+                      className={`w-full text-left px-3.5 py-2 font-medium transition-colors flex items-center justify-between ${
+                        timeRange === key ? 'bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold' : 'text-zinc-700 hover:bg-zinc-50'
+                      }`}
+                    >
+                      <span>{label}</span>
+                      {timeRange === key && <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b]" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Selector de Filtros Avanzados Interactivo */}
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setShowFilterMenu(!showFilterMenu)
+                  setShowTimeMenu(false)
+                }}
+                className={`flex items-center gap-2 border text-sm font-semibold px-4 py-2 rounded-md transition-colors shadow-xs ${
+                  channelFilter !== 'all'
+                    ? 'bg-[#ff4b0b]/10 border-[#ff4b0b] text-[#ff4b0b]'
+                    : 'bg-white border-black/10 text-zinc-800 hover:bg-zinc-50'
+                }`}
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filtros</span>
+                {channelFilter !== 'all' && (
+                  <span className="w-2 h-2 rounded-full bg-[#ff4b0b]" />
+                )}
+              </button>
+
+              {showFilterMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 p-3 text-xs space-y-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block mb-1">Canal de Origen</span>
+                    <select
+                      value={channelFilter}
+                      onChange={(e) => {
+                        setChannelFilter(e.target.value)
+                        setShowFilterMenu(false)
+                      }}
+                      className="w-full px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs text-zinc-800 focus:outline-none focus:border-[#ff4b0b]"
+                    >
+                      <option value="all">Todos los Canales</option>
+                      <option value="whatsapp">WhatsApp Cloud API</option>
+                      <option value="web">Formulario Web</option>
+                      <option value="meta_ads">Meta Ads (CTWA)</option>
+                    </select>
+                  </div>
+
+                  {channelFilter !== 'all' && (
+                    <button
+                      onClick={() => {
+                        setChannelFilter('all')
+                        setShowFilterMenu(false)
+                      }}
+                      className="w-full text-center py-1.5 text-[11px] font-semibold text-[#ff4b0b] hover:bg-[#ff4b0b]/10 rounded-md transition-colors"
+                    >
+                      Restablecer Filtros
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

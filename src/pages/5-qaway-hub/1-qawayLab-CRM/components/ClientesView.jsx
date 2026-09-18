@@ -8,6 +8,82 @@ import {
   FileText, Award, ArrowUpRight, Clock, Building2
 } from 'lucide-react'
 
+const DEMO_CLIENTS = [
+  {
+    id: 'client-vallet-1',
+    client_name: 'Vallet Inmobiliaria SAC',
+    name: 'Vallet Inmobiliaria SAC',
+    contact_info: '+51 984 112 233',
+    whatsapp: '+51 984 112 233',
+    email: 'gerencia@valletinmobiliaria.pe',
+    budget: 4800,
+    status: 'ganado',
+    campaignName: 'Desarrollo Web & Apps',
+    agent: 'Andrés Valencia',
+    created_at: '2026-08-15T10:30:00Z',
+    metadata: { service: 'Plataforma Web Inmobiliaria + CRM Sync' },
+    history: [
+      { sender: 'lead', text: 'Buenas tardes, requerimos integrar el catálogo de propiedades con WhatsApp.', time: '10:30' },
+      { sender: 'agent', text: '¡Excelente! Tenemos el módulo listo con filtros por zona y sincronización automática.', time: '10:32' },
+      { sender: 'lead', text: 'Perfecto, aprobamos la propuesta para iniciar el despliegue.', time: '11:15' }
+    ]
+  },
+  {
+    id: 'client-mesaselecta-2',
+    client_name: 'Mesa Selecta Gourmet',
+    name: 'Mesa Selecta Gourmet',
+    contact_info: '+51 977 456 789',
+    whatsapp: '+51 977 456 789',
+    email: 'contacto@mesaselecta.pe',
+    budget: 3200,
+    status: 'ganado',
+    campaignName: 'Agentes IA & Chatbots',
+    agent: 'Martín Rojas',
+    created_at: '2026-08-28T14:15:00Z',
+    metadata: { service: 'Agente IA Autónomo WABA para Reservas' },
+    history: [
+      { sender: 'lead', text: 'Hola, queremos que la IA tome reservas y confirme menús degustación.', time: '14:15' },
+      { sender: 'agent', text: 'Configurado con ventana de 24h y Google Calendar sincronizado.', time: '14:20' }
+    ]
+  },
+  {
+    id: 'client-coravet-3',
+    client_name: 'CoraVet Clínica Veterinaria',
+    name: 'CoraVet Clínica Veterinaria',
+    contact_info: '+51 961 889 900',
+    whatsapp: '+51 961 889 900',
+    email: 'administracion@coravet.pe',
+    budget: 2900,
+    status: 'ganado',
+    campaignName: 'SaaS & Automatización',
+    agent: 'Andrés Valencia',
+    created_at: '2026-09-05T09:00:00Z',
+    metadata: { service: 'Sistema de Citas Médicas e Historial Clínico' },
+    history: [
+      { sender: 'lead', text: 'Necesitamos recordatorios automáticos 2 horas antes de cada consulta médica.', time: '09:00' },
+      { sender: 'agent', text: 'Automatización desplegada con Cloud API y templates WABA.', time: '09:05' }
+    ]
+  },
+  {
+    id: 'client-aurea-4',
+    client_name: 'Aurea Skincare Lab',
+    name: 'Aurea Skincare Lab',
+    contact_info: '+51 955 221 144',
+    whatsapp: '+51 955 221 144',
+    email: 'ventas@aureaskincare.com',
+    budget: 3950,
+    status: 'ganado',
+    campaignName: 'Branding & Consultoría',
+    agent: 'Sofía Castillo',
+    created_at: '2026-09-10T16:40:00Z',
+    metadata: { service: 'Branding Digital, E-commerce y Meta Ads CTWA' },
+    history: [
+      { sender: 'lead', text: '¿Podemos rastrear el ROAS de las ventas desde los anuncios de Instagram?', time: '16:40' },
+      { sender: 'agent', text: 'Sí, mediante atribución nativa Click-to-WhatsApp en el CRM.', time: '16:45' }
+    ]
+  }
+]
+
 export default function ClientesView({ onNavigateToChat }) {
   const { leads, setSelectedLeadId } = useCRM()
 
@@ -16,23 +92,24 @@ export default function ClientesView({ onNavigateToChat }) {
   const [selectedClientDrawer, setSelectedClientDrawer] = useState(null)
 
   // 1. Filtrar prospectos que ya son Clientes (estado 'ganado' o acuerdos cerrados)
-  const clientsList = useMemo(() => {
-    // Si hay leads marcados expresamente como 'ganado', son la cartera oficial
-    const won = leads.filter(l => l.status === 'ganado' || l.stage === 'ganado')
-    if (won.length > 0) return won
-
-    // Fallback inteligente de visualización si recién se inicia el CRM y no hay 'ganado':
-    // Tomamos aquellos con presupuesto asignado o en negociación avanzada
-    return leads.filter(l => Number(l.budget) > 0 || l.status === 'negociacion')
+  const realWonClients = useMemo(() => {
+    return leads.filter(l => l.status === 'ganado' || l.stage === 'ganado')
   }, [leads])
+
+  const isUsingDemo = realWonClients.length === 0
+  const clientsList = useMemo(() => {
+    if (realWonClients.length > 0) return realWonClients
+    // Fallback con cuentas empresariales demostrativas de Qaway Lab
+    return DEMO_CLIENTS
+  }, [realWonClients])
 
   // 2. Métricas de Cartera y Facturación Acumulada
   const metrics = useMemo(() => {
     const totalClients = clientsList.length
     const totalRevenue = clientsList.reduce((acc, curr) => acc + (Number(curr.budget) || 0), 0)
     const avgTicket = totalClients > 0 ? Math.round(totalRevenue / totalClients) : 0
-    const totalLeads = leads.length || 1
-    const conversionRate = Math.round((clientsList.length / totalLeads) * 100)
+    const totalLeads = leads.length || clientsList.length || 1
+    const conversionRate = Math.min(100, Math.round((clientsList.length / totalLeads) * 100))
 
     return { totalClients, totalRevenue, avgTicket, conversionRate }
   }, [clientsList, leads])
@@ -77,7 +154,14 @@ export default function ClientesView({ onNavigateToChat }) {
               <Briefcase className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Cartera de Clientes & Cuentas Clave</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Cartera de Clientes & Cuentas Clave</h2>
+                {isUsingDemo && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Cuentas Demostrativas
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-zinc-500">Gestión de cuentas activas, facturación acumulada (LTV) y seguimiento de contratos.</p>
             </div>
           </div>
