@@ -42,6 +42,7 @@ const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizado
 const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'))
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
+const AgentesHubPage = lazy(() => import('@/pages/5-qaway-hub/2-Agentes/AgentesHubPage'))
 const MascotaPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructuras SaaS/3- Tutorial/qaway-mascota-react/MascotaPage'))
 const TutorialOnboardingPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructuras SaaS/3- Tutorial/TutorialOnboardingPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
@@ -364,6 +365,15 @@ export default function AppRouter() {
         <Route
           path="hub/creador-contenido"
           element={renderRoute('hub', <CreadorContenidoPage />)}
+        />
+        {/* Agentes de IA Responsable (Ley 31814 & Google PAIR): standalone FUERA del Layout */}
+        <Route
+          path="hub/agentes"
+          element={renderRoute('hub', <AgentesHubPage />)}
+        />
+        <Route
+          path="/hub/agentes"
+          element={renderRoute('hub', <AgentesHubPage />)}
         />
         {/* CRM: standalone FUERA del Layout → sin navbar de marca */}
         <Route

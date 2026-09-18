@@ -26,6 +26,7 @@ import {
   Instagram,
   CreditCard,
   Package,
+  Bot,
 } from 'lucide-react'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { WHATSAPP_LINK } from '@/data/navigation'
@@ -33,6 +34,17 @@ import { isPublicSiteMode } from '@/config/siteVisibility'
 import '@/pages/11-Proyectos/proyectos.css'
 
 const routes = [
+  {
+    icon: Bot,
+    title: 'Agentes de IA Responsable (Ley 31814)',
+    description: 'Configuración, entrenamiento y simulación en vivo de Agentes IA Consultivos para WhatsApp y Web. Gobernanza ética en 3 capas, derivación humana y anti-alucinación.',
+    path: '/hub/agentes',
+    access: 'pro',
+    badge: 'Ley 31814 & PAIR',
+    category: 'Inteligencia Artificial',
+    tone: 'bg-indigo-600/10 text-indigo-600',
+    published: true,
+  },
   {
     icon: Calendar,
     title: 'Qaway Agenda & Sistema de Citas',
