@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import DOMPurify from 'dompurify'
 import { Link, useParams } from 'react-router-dom'
 import { Lock } from 'lucide-react'
-import { getCourseBySlug } from '@/lib/services'
+import { getCourseBySlug, resolveUserCourseAccess } from '@/lib/services'
+import { useAuth } from '@/contexts/AuthContext'
 import { getLessonResources, getResourceIcon, type StudentResource } from '@/lib/services/resources'
 import { useCourseSidebar, type CourseSidebarState } from '@/contexts/CourseSidebarContext'
 import { useVideoProgress } from '@/hooks/useVideoProgress'
@@ -38,6 +39,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
   setCourseSidebar: (state: CourseSidebarState | null) => void
 }) {
   const { slug, lessonId } = useParams()
+  const { user } = useAuth()
   const isStudentView = accessMode === 'student'
   const [activeTab, setActiveTab] = useState('contenido')
   const [course, setCourse] = useState<Course | null>(null)
@@ -46,6 +48,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [isFreePreview, setIsFreePreview] = useState(false)
+  const [hasCommercialAccess, setHasCommercialAccess] = useState(false)
   const [viewMode, setViewMode] = useState('split')
   const [resources, setResources] = useState<StudentResource[]>([])
   const [loadingResources, setLoadingResources] = useState(false)
@@ -60,7 +63,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
   const stageRef = useRef<HTMLDivElement | null>(null)
   const playerHostRef = useRef<HTMLDivElement | null>(null)
   const settingsRef = useRef<HTMLElement | null>(null)
-  const canWatchLesson = isStudentView || isFreePreview
+  const canWatchLesson = isStudentView || isFreePreview || hasCommercialAccess || Boolean(course?.is_free)
 
   const handleTabClick = useCallback((tabId: string) => {
     setActiveTab(tabId)
@@ -125,6 +128,12 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
         setCurrentLessonIndex(targetIndex)
         setLesson(targetLesson || null)
         setIsFreePreview(Boolean(targetLesson?.isFreePreview))
+
+        if (user?.id && courseData?.id) {
+          resolveUserCourseAccess(user.id, courseData).then((res) => {
+            if (res.hasAccess) setHasCommercialAccess(true)
+          }).catch(() => {})
+        }
       } catch (err) {
         console.error('Error loading lesson:', err)
       } finally {
@@ -133,7 +142,7 @@ function LessonExperience({ accessMode, setCourseSidebar }: {
     }
 
     if (slug && lessonId) loadLesson()
-  }, [slug, lessonId])
+  }, [slug, lessonId, user?.id])
 
   // Fetch resources when lesson changes
   useEffect(() => {
@@ -750,11 +759,16 @@ function buildFlatLessons(course: Course): FlatLesson[] {
   for (const module of course.modules || []) {
     for (const lesson of module.lessons || []) {
       count += 1
+      const isPreview = Boolean(
+        (lesson as any).is_preview ||
+        (module as any).is_preview ||
+        count <= (course.free_preview_lessons || 1)
+      )
       const entry: FlatLesson = {
         ...lesson,
         number: count,
         moduleTitle: module.title,
-        isFreePreview: count <= (course.free_preview_lessons || 1),
+        isFreePreview: isPreview,
       }
       lessons.push(entry)
       ;(lesson as FlatLesson).number = count

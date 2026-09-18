@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useData } from '@/hooks/useData'
-import { addCourseToCart, enrollStudent, getCourseBySlug, getEnrollment } from '@/lib/services'
+import { addCourseToCart, enrollStudent, getCourseBySlug, getEnrollment, resolveUserCourseAccess } from '@/lib/services'
 import type { Course } from '@/lib/types'
 
 function formatPrice(course: Course | null | undefined) {
@@ -37,6 +37,12 @@ export default function CourseDetail() {
     if (!courseData?.is_free) {
       setEnrolling(true)
       try {
+        const access = await resolveUserCourseAccess(user.id, courseData)
+        if (access.hasAccess) {
+          navigate(`/academy/app/panel/cursos/${courseData.slug}`)
+          return
+        }
+
         await addCourseToCart(courseData, user.id)
         navigate('/carrito/checkout')
       } catch (err) {
@@ -199,7 +205,11 @@ export default function CourseDetail() {
                           <div className="border-t border-surface-100 px-5 py-3 space-y-2">
                             {(module.lessons || []).map((lesson, lessonIndex) => {
                               const globalLessonIdx = lessonIndexMap[moduleIndex]?.[lessonIndex]
-                              const isPreview = globalLessonIdx <= (courseData.free_preview_lessons || 0)
+                              const isPreview = Boolean(
+                                (lesson as any).is_preview ||
+                                (module as any).is_preview ||
+                                globalLessonIdx <= (courseData.free_preview_lessons || 0)
+                              )
                               const lessonContent = (
                                 <div className="flex items-center justify-between">
                                   <div>

@@ -40,3 +40,53 @@ export async function getEnrollment(studentId: string, courseId: string): Promis
   if (error && error.code !== 'PGRST116') throw error
   return (data as unknown as Enrollment) || null
 }
+
+export interface UserAccessResult {
+  hasAccess: boolean
+  accessType: 'free' | 'enrollment' | 'subscription' | 'none'
+}
+
+/**
+ * Resuelve de forma unificada si un estudiante tiene acceso a un curso:
+ * 1. Curso 100% gratuito (is_free = true)
+ * 2. Inscripción activa / compra individual en enrollments
+ * 3. Suscripción activa recurrente en Supabase Central (Commerce RPC)
+ */
+export async function resolveUserCourseAccess(
+  studentId: string | null | undefined,
+  course: { id: string; is_free?: boolean | null } | null | undefined
+): Promise<UserAccessResult> {
+  if (!course) return { hasAccess: false, accessType: 'none' }
+
+  // 1. Curso gratuito
+  if (course.is_free) {
+    return { hasAccess: true, accessType: 'free' }
+  }
+
+  if (!studentId) {
+    return { hasAccess: false, accessType: 'none' }
+  }
+
+  // 2. Inscripción directa
+  try {
+    const enrollment = await getEnrollment(studentId, course.id)
+    if (enrollment && enrollment.status === 'active') {
+      return { hasAccess: true, accessType: 'enrollment' }
+    }
+  } catch (err) {
+    console.warn('[resolveUserCourseAccess] Error verificando enrollment:', err)
+  }
+
+  // 3. Suscripción activa en Commerce
+  try {
+    const { checkUserSubscriptionAccess } = await import('./commerceBridge')
+    const hasSubAccess = await checkUserSubscriptionAccess(studentId, course.id)
+    if (hasSubAccess) {
+      return { hasAccess: true, accessType: 'subscription' }
+    }
+  } catch (err) {
+    console.warn('[resolveUserCourseAccess] Error verificando suscripción:', err)
+  }
+
+  return { hasAccess: false, accessType: 'none' }
+}

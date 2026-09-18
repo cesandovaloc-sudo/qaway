@@ -104,3 +104,43 @@ export async function addCourseToCart(course: Course, studentId?: string | null)
 
   return cartItem
 }
+
+/**
+ * Verifica si el usuario tiene acceso al curso mediante una suscripción activa
+ * en el Supabase Central (Commerce) mediante la función RPC check_user_course_access.
+ */
+export async function checkUserSubscriptionAccess(userId: string, courseId: string): Promise<boolean> {
+  if (!userId || !courseId) return false
+
+  try {
+    const mainUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qrusdsqgygfolxfrafyd.supabase.co'
+    const mainKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi'
+
+    const resp = await fetch(`${mainUrl}/rest/v1/rpc/check_user_course_access`, {
+      method: 'POST',
+      headers: {
+        apikey: mainKey,
+        Authorization: `Bearer ${mainKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        p_user_id: userId,
+        p_course_id: courseId,
+      }),
+    })
+
+    if (resp.ok) {
+      const hasAccess = await resp.json()
+      return Boolean(hasAccess)
+    }
+  } catch (err) {
+    console.warn('[commerceBridge] Error verificando suscripción:', err)
+  }
+
+  return false
+}
+
+export interface CourseAccessResolution {
+  hasAccess: boolean
+  accessType: 'free' | 'enrollment' | 'subscription' | 'none'
+}
