@@ -12,7 +12,7 @@ const COLUMNS = [
 ]
 
 export default function KanbanView() {
-  const { leads, updateLeadStatus, setSelectedLeadId, currentRole } = useCRM()
+  const { leads, updateLeadStatus, setSelectedLeadId, currentRole, globalSearchQuery } = useCRM()
   
   // Estados para columnas visibles y panel de configuración
   const [showColConfig, setShowColConfig] = useState(false)
@@ -34,7 +34,18 @@ export default function KanbanView() {
   }
 
   const getLeadsByStatus = (statusId) => {
-    return leads.filter(lead => lead.status === statusId)
+    return leads.filter(lead => {
+      const matchesStatus = lead.status === statusId
+      if (!matchesStatus) return false
+      if (globalSearchQuery) {
+        const query = globalSearchQuery.toLowerCase()
+        const name = (lead.client_name || lead.name || '').toLowerCase()
+        const phone = (lead.contact_info || lead.whatsapp || '').toLowerCase()
+        const email = (lead.email || '').toLowerCase()
+        return name.includes(query) || phone.includes(query) || email.includes(query)
+      }
+      return true
+    })
   }
 
   const handleMarkLost = (leadId) => {

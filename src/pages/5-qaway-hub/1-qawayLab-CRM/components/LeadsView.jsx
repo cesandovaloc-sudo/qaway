@@ -18,12 +18,14 @@ const STATUS_CONFIG = {
 }
 
 export default function LeadsView({ onNavigateToChat }) {
-  const { leads, updateLeadStatus, setSelectedLeadId } = useCRM()
+  const { leads, updateLeadStatus, setSelectedLeadId, globalSearchQuery, setGlobalSearchQuery } = useCRM()
   
   const [searchTerm, setSearchTerm] = useState('')
   const [channelFilter, setChannelFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedLeadDrawer, setSelectedLeadDrawer] = useState(null)
+
+  const effectiveSearch = globalSearchQuery || searchTerm
 
   // Métricas rápidas de cabecera
   const stats = useMemo(() => {
@@ -40,7 +42,7 @@ export default function LeadsView({ onNavigateToChat }) {
       const name = (lead.client_name || lead.name || '').toLowerCase()
       const phone = (lead.contact_info || lead.whatsapp || '').toLowerCase()
       const email = (lead.email || '').toLowerCase()
-      const query = searchTerm.toLowerCase()
+      const query = effectiveSearch.toLowerCase()
 
       const matchesSearch = !query || name.includes(query) || phone.includes(query) || email.includes(query)
       
@@ -52,7 +54,7 @@ export default function LeadsView({ onNavigateToChat }) {
 
       return matchesSearch && matchesChannel && matchesStatus
     })
-  }, [leads, searchTerm, channelFilter, statusFilter])
+  }, [leads, effectiveSearch, channelFilter, statusFilter])
 
   const handleOpenChat = (lead) => {
     if (setSelectedLeadId) setSelectedLeadId(lead.id)
@@ -105,13 +107,19 @@ export default function LeadsView({ onNavigateToChat }) {
           <input
             type="text"
             placeholder="Buscar por cliente, teléfono o correo..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={effectiveSearch}
+            onChange={(e) => {
+              setSearchTerm(e.target.value)
+              if (setGlobalSearchQuery) setGlobalSearchQuery(e.target.value)
+            }}
             className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 focus:border-[#ff4b0b] transition-all"
           />
-          {searchTerm && (
+          {effectiveSearch && (
             <button 
-              onClick={() => setSearchTerm('')} 
+              onClick={() => {
+                setSearchTerm('')
+                if (setGlobalSearchQuery) setGlobalSearchQuery('')
+              }} 
               className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
             >
               <X className="w-3.5 h-3.5" />

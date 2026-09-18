@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle } from 'lucide-react'
+import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X } from 'lucide-react'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
 import KanbanView from './components/KanbanView'
@@ -92,10 +92,28 @@ const displayFont = {
 }
 
 function CRMContent() {
-  const { simulateIncomingWebhook, currentRole, setCurrentRole, setSelectedLeadId } = useCRM()
+  const { 
+    simulateIncomingWebhook, 
+    currentRole, 
+    setCurrentRole, 
+    setSelectedLeadId,
+    globalSearchQuery,
+    setGlobalSearchQuery
+  } = useCRM()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const tabs = ALL_TABS.filter(t => ROLE_TABS[currentRole]?.includes(t.id))
 
@@ -280,16 +298,26 @@ function CRMContent() {
             <div className="relative block">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input 
+                ref={searchInputRef}
                 type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
                 placeholder="Buscar contactos, empresas, oportunidades..." 
-                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-12 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[300px] transition-colors" 
+                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[300px] transition-colors" 
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">⌘</kbd>
-                <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">K</kbd>
-              </div>
+              {globalSearchQuery ? (
+                <button 
+                  onClick={() => setGlobalSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">⌘</kbd>
+                  <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">K</kbd>
+                </div>
+              )}
             </div>
             
             <button className="relative text-white/50 hover:text-white transition-colors">
