@@ -397,11 +397,11 @@ serve(async (req: Request) => {
                   timestamp: timestampEpoch
                 }
 
-                // Buscar lead existente
+                // Buscar lead existente (por whatsapp o contact_info)
                 const { data: existingLeads } = await supabase
                   .from('leads')
                   .select('*')
-                  .eq('whatsapp', senderPhone)
+                  .or(`whatsapp.eq.${senderPhone},contact_info.eq.${senderPhone}`)
 
                 if (existingLeads && existingLeads.length > 0) {
                   const lead = existingLeads[0]
@@ -442,6 +442,7 @@ serve(async (req: Request) => {
                         unread_count: (lead.unread_count || 0) + 1,
                         is_human_requested: isHumanRequested ? true : (lead.is_human_requested || false),
                         status: isHumanRequested ? 'negociacion' : (lead.status === 'ganado' ? 'ganado' : 'contactado'),
+                        stage: isHumanRequested ? 'negociacion' : (lead.stage || 'contactado'),
                         metadata: metadataUpdate
                       })
                       .eq('id', lead.id)
@@ -451,7 +452,7 @@ serve(async (req: Request) => {
                     console.log(`[whatsapp-webhook] Mensaje duplicado omitido (${wamid})`)
                   }
                 } else {
-                  // Creación de Nuevo Lead
+                  // Creación de Nuevo Lead con compatibilidad dual
                   const metadataNew: Record<string, any> = {
                     tenant_id: activeTenant?.id || null,
                     tenant_slug: activeTenant?.slug || null,
@@ -469,14 +470,19 @@ serve(async (req: Request) => {
                     metadataNew.ctwa_expires_at = new Date(timestampEpoch + 72 * 3600 * 1000).toISOString()
                   }
 
-                  await supabase
+                  const { error: insertErr } = await supabase
                     .from('leads')
                     .insert([{
                       tenant_id: activeTenant?.id || null,
+                      client_name: senderName,
+                      contact_info: senderPhone,
+                      source: 'whatsapp_cloud_api',
+                      stage: isHumanRequested ? 'negociacion' : 'new',
                       name: senderName,
                       whatsapp: senderPhone,
                       email: 'No especificado',
                       status: isHumanRequested ? 'negociacion' : 'new',
+                      channel: 'whatsapp',
                       agent: isHumanRequested ? 'Asesor Humano Requerido' : (activeTenant ? `${activeTenant.name} Inbox` : 'Pendiente'),
                       last_message: messageText,
                       history: [newMessageObj],
@@ -485,7 +491,11 @@ serve(async (req: Request) => {
                       metadata: metadataNew
                     }])
 
-                  console.log(`[whatsapp-webhook] Nuevo lead creado ${senderPhone} (${activeTenant?.name || 'Qaway'}). CTWA: ${Boolean(referral)}`)
+                  if (insertErr) {
+                    console.error('[whatsapp-webhook] Error al insertar nuevo lead:', insertErr)
+                  } else {
+                    console.log(`[whatsapp-webhook] Nuevo lead creado ${senderPhone} (${activeTenant?.name || 'Qaway'}). CTWA: ${Boolean(referral)}`)
+                  }
                 }
 
                 // ── AUTO-RESPUESTA MULTI-MODELO IA (Si no se requiere humano y el tenant tiene IA activa) ──

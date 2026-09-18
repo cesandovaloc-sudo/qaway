@@ -930,25 +930,25 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
             >
               {submitted ? (
                 <div className="qw-form-success">
-                  <div><Check size={28} /></div>
+                  <div className="qw-form-success-icon"><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-                  <div className="mt-8 flex flex-row items-center gap-4 flex-wrap">
+                  <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
                     {waUrl && (
                       <a
                         href={waUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex h-12 items-center justify-center gap-2.5 rounded-lg bg-[#25D366] px-6 text-[0.92rem] font-semibold text-white shadow-sm transition-all hover:bg-[#20ba5a] whitespace-nowrap"
+                        className="inline-flex h-12 w-full sm:w-56 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 text-[0.92rem] font-semibold text-[#20201f] shadow-sm transition-all hover:bg-[#22c35e] whitespace-nowrap"
                       >
-                        <MessageCircle size={18} />
+                        <MessageCircle size={18} className="text-[#20201f]" />
                         <span>Continuar por WhatsApp</span>
                       </a>
                     )}
                     <button
                       type="button"
                       onClick={onReset}
-                      className="inline-flex h-12 items-center justify-center rounded-lg border border-[#20201f]/20 bg-white px-6 text-[0.92rem] font-semibold text-[#20201f] shadow-sm transition-all hover:bg-black/5 whitespace-nowrap"
+                      className="inline-flex h-12 w-full sm:w-56 items-center justify-center rounded-lg border border-[#20201f]/20 bg-white px-4 text-[0.92rem] font-semibold text-[#20201f] shadow-sm transition-all hover:bg-black/5 whitespace-nowrap"
                     >
                       Enviar otro mensaje
                     </button>
