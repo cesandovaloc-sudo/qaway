@@ -32,6 +32,8 @@ REGLAS CRÍTICAS DE NEGOCIO:
 - Si el cliente pregunta por la plantilla Notion Pro, su valor promocional es S/ 49 o $15 USD.
 - Si el cliente solicita hablar con un asesor o una cotización personalizada corporativa, responde amablemente que lo transfieres con el equipo especializado y mantén el mensaje breve.
 - Responde siempre de forma directa a la duda del prospecto sin rodeos.
+- Fluidez conversacional humana: NO repitas la misma pregunta de cierre en cada mensaje (evita decir siempre "¿Hay algo más en lo que te pueda ayudar?" o "¿Tienes alguna otra duda?"). Varía tus respuestas con naturalidad.
+- Si el usuario te hace preguntas casuales ("y como estás", "¿cómo te va?"), responde con calidez humana y simpatía brevemente, sin repetir menús de servicios.
 `
 
 const DEFAULT_HUMAN_KEYWORDS = [

@@ -149,6 +149,76 @@ graph TD
 ## 4. Registro de Tareas Pendientes (Mantenimiento y Depuración)
 - [x] **Depuración de compatibilidad (Completada):** Eliminada la función obsoleta `webhook-whatsapp/` tanto del proyecto local como de Supabase Cloud, unificando toda la arquitectura en `whatsapp-webhook` y `whatsapp-mensaje-enviar`.
 
+---
+
+## 5. Guía Maestra de Solución de Fallas (Troubleshooting WABA & AI Webhook)
+
+Esta sección consolida las fallas reales encontradas durante la integración de WhatsApp Cloud API (WABA Sandbox y Producción) con Supabase Edge Functions y Google Gemini 2.5 Flash, detallando su causa raíz, síntomas y solución técnica exacta.
+
+### Resumen de Errores Críticos y Diagnóstico Rápido
+
+| # | Error / Síntoma | Causa Raíz | Solución Técnica Inmediata |
+|---|---|---|---|
+| **1** | `violates not-null constraint "client_name"` | La tabla `public.leads` exige `client_name` y `contact_info` no nulos. El webhook enviaba `name` y `whatsapp`. | Mapear compatibilidad dual en el `insert`: `{ client_name: name, contact_info: phone, name, whatsapp, stage: 'new' }`. |
+| **2** | `column tenants.ai_settings does not exist` | La migración SQL `20260917170000_tenant_ai_settings_multimodel.sql` existía en local pero no se había ejecutado en Supabase Cloud. | Ejecutar `npx supabase db push` para aplicar las columnas e índices JSONB en la base remota. |
+| **3** | Respuesta cortada de IA (`"¡Hola! Soy tu Asistente..."`) | En `gemini-2.5-flash`, los tokens de razonamiento (*thinking*) consumían el límite `maxOutputTokens: 300` y solo se extraía `parts[0]`. | Aumentar `maxOutputTokens: 800` y concatenar todos los bloques de texto válidos filtrando pensamientos (`!p.thought`). |
+| **4** | `OAuthException: Code 190 (Subcode 463)` | El token temporal generado en Meta Developers caduca a las 24 horas exactas (o a las 20:00 PDT). | Inyectar nuevo token con `npx supabase secrets set WHATSAPP_ACCESS_TOKEN=...` o crear un Token Permanente de System User. |
+| **5** | El cliente escribe en WhatsApp pero nada llega a Supabase | La WABA (cuenta de WhatsApp) no tiene la orden de reenviar sus mensajes a la App en los servidores de Meta (`subscribed_apps` desvinculada). | Ejecutar `POST https://graph.facebook.com/v20.0/{WABA_ID}/subscribed_apps` con el Bearer Token para enlazar la App. |
+
+---
+
+### Detalle Técnico por Falla
+
+#### Falla 1: Restricción Not-Null en `public.leads`
+- **Síntoma:** El Webhook recibía el mensaje (HTTP 200), pero la fila no aparecía en el CRM y el flujo se abortaba antes de llamar a la IA.
+- **Diagnóstico:** Los logs de PostgreSQL arrojaban `null value in column "client_name" of relation "leads" violates not-null constraint`.
+- **Solución:** En `whatsapp-webhook/index.ts`, enviar simultáneamente ambos esquemas de columnas en la inserción y consulta (`.or('whatsapp.eq.X,contact_info.eq.X')`).
+
+#### Falla 2: Columna `ai_settings` faltante en Supabase Cloud
+- **Síntoma:** La función fallaba silenciosamente al resolver el tenant por `waba_phone_number_id` o fallback.
+- **Diagnóstico:** Error SQL `code: 42703 (column tenants.ai_settings does not exist)`.
+- **Solución:** Sincronizar la migración con `npx supabase db push`. Además, verificar que cada tenant tenga su objeto `ai_settings` inicializado (`enabled: true`, `provider`, `model`, `system_prompt`).
+
+#### Falla 3: Límite de Tokens y Fragmentación en Gemini 2.5 Flash
+- **Síntoma:** La IA generaba solo una frase introductoria y se truncaba en WhatsApp.
+- **Diagnóstico:** La API v1beta de Gemini incluye tokens de razonamiento interno dentro de `maxOutputTokens`. Si el límite era 300, el reasoning consumía ~270 tokens y solo dejaba 30 para el mensaje final.
+- **Solución:**
+  ```typescript
+  const payload = {
+    contents: contents,
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 800
+    }
+  }
+  // Extracción combinada de fragmentos limpios:
+  const parts = data.candidates?.[0]?.content?.parts || []
+  const text = parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join('\n')
+  ```
+
+#### Falla 4: Expiración de Token de Meta (Error 190)
+- **Síntoma:** Meta Graph API responde `401 Unauthorized`: `"Error validating access token: Session has expired"`.
+- **Diagnóstico:** El token de la pantalla *API Setup* de Meta es únicamente temporal (24h).
+- **Solución Temporal:** Renovar en Meta Developers > WhatsApp > API Setup > *Generar nuevo token* e inyectar con `npx supabase secrets set WHATSAPP_ACCESS_TOKEN=...`.
+- **Solución Definitiva (Producción):**
+  1. Ir a **Meta Business Suite > Configuración del Negocio > Usuarios del Sistema**.
+  2. Crear usuario del sistema con rol *Administrador*.
+  3. Asignar el activo de la App y WABA con control total.
+  4. Generar Token seleccionando permisos: `whatsapp_business_messaging` y `whatsapp_business_management`.
+  5. Configurar caducidad: **Nunca (Never)**.
+
+#### Falla 5: Cuenta WABA no vinculada a la App (`subscribed_apps`)
+- **Síntoma:** Los botones de prueba del panel de Meta funcionan, pero los mensajes reales enviados por usuarios desde sus celulares no generan peticiones en el Webhook.
+- **Diagnóstico:** Al consultar `GET https://graph.facebook.com/v20.0/{WABA_ID}/subscribed_apps`, la app `QawayLab WABA` no aparecía en el array de apps suscritas; solo estaba la app interna de simulación de Meta (`WA DevX Webhook Events 1P App`).
+- **Solución:**
+  Ejecutar una llamada POST a la Graph API para enlazar la WABA con la App:
+  ```bash
+  curl -X POST "https://graph.facebook.com/v20.0/{WABA_ID}/subscribed_apps" \
+    -H "Authorization: Bearer {WHATSAPP_ACCESS_TOKEN}"
+  ```
+  Respuesta esperada: `{"success": true}`. Inmediatamente Meta comienza a despachar todos los mensajes reales entrantes hacia la URL del Webhook.
+
+
 
 
 
