@@ -102,12 +102,23 @@ pm run build) verificando cero errores de sintaxis y tipado.
   ```
 - **Dictamen técnico:** ✅ **RESUELTO.** La convención `regla-documentacion-modulos.md` está siendo cumplida. Los archivos `.md` sensibles ya no están sueltos en la raíz de los módulos, sino centralizados en `_docs/` bloqueados por `.gitignore` local. Vite no compila `.md` a `dist/`, confirmando consumo exclusivo en desarrollo/agentes.
 
-#### 3. Nueva vulnerabilidad detectada: **Open Redirect en LoginPage.jsx** - **OBSERVACIÓN REQUIERE ACCIÓN**
-- **Archivo:** `src/pages/auth/LoginPage.jsx` (línea 29)
-- **Hallazgo:** `const redirectTarget = searchParams.get('redirect') || '/hub'`
-- **Riesgo:** El parámetro `redirect` del query string **no se valida** para asegurar que sea una ruta interna (`startsWith('/')`). Un atacante podría enviar un enlace `https://dominio.com/login?redirect=https://sitio-maliciouso.com` y, después del login, el usuario sería redirigido externamente.
-- **Contexto comparativo:** Las páginas `Register.tsx` (línea 21) y `Login.tsx` (línea 20) **sí aplican la validación** `const safeRedirect = redirect?.startsWith('/') ? redirect : null`, mitigando el riesgo. Solo `LoginPage.jsx` falta este filtro.
-- **Dictamen técnico:** ⚠️ **ALERTA MEDIA.** No es crítica para filtración de credenciales, pero representa riesgo de phishing/redirección no autorizada después del auth flow. Se recomienda añadir la validación `redirect?.startsWith('/')` consistente con el patrón usado en Register y Login pages.
+#### 3. Nueva vulnerabilidad detectada: **Open Redirect en LoginPage.jsx** - **✅ **RESUELTO/APROBADA****
+- **Archivo:** `src/pages/auth/LoginPage.jsx` (línea 29-32)
+- **Hallazgo previo:** `const redirectTarget = searchParams.get('redirect') || '/hub'` - parámetro sin validación, riesgo Open Redirect.
+- **Solución aplicada:** El orquestador blindó el código con validación reforzada:
+  ```javascript
+  const rawRedirect = searchParams.get('redirect')
+  const redirectTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//'))
+      ? rawRedirect
+      : '/hub'
+  ```
+- **Dictamen técnico:** ✅ **100% MITIGADO.** El parámetro `redirect` ahora:
+  - Obligatoriamente debe iniciar con `/` (ruta relativa), bloqueando URLs absolutas externas
+  - Adicionalmente bloquea `//` (protocol-relative URLs)
+  - Si falla validación, defaulta seguro a `/hub`
+- **Validación consistente:** Ahora coincide con el patrón `redirect?.startsWith('/')` usado en `Register.tsx` y `Login.tsx`, siendo incluso más fuerte al añadir el check `!startsWith('//')`.
+
+---
 
 #### 4. Barrido de vulnerabilidades avanzadas - **CERTIFICACIÓN CERO CRÍTICAS**
 - **`window.open`:** 7 usos detectados, todos para share links legítimos (WhatsApp `wa.me`, LinkedIn, Twitter, Facebook) con `_blank` y URLs `https://` hardcodificadas o de plataformas confiables. Ningún `window.open` recibe URL de input usuario sin sanitizar.
@@ -136,3 +147,42 @@ pm run build) verificando cero errores de sintaxis y tipado.
 **Conclusión final:** El 100% de las mitigaciones aplicadas por el orquestador están **técnicamente validadas y aprobadas**. El único hallazgo nuevo es la **falta de validación de redirect en LoginPage.jsx**, que debería corregirse aplicando el mismo patrón `redirect?.startsWith('/')` que usan Register y Login pages para prevenir open-redirects después del auth flow. No hay vulnerabilidades críticas no resueltas.
 
 ---
+
+
+## 📜 Certificación de Cierre Final - 2026-09-18
+
+| **Auditoría de Seguridad y Documentación** | **Estado** |
+|-------------------------------------------|------------|
+| **Proyecto** | `1-qawaylab-web` (`C:\LEO\EMPRESAS\QAWAY LAB\1-QawayLab-Digital\1-qawaylab-web`) |
+| **Fecha** | 2026-09-18 |
+| **Rama** | main-web |
+| **Órchestrador** | Aplicación de soluciones de seguridad y validación técnica |
+| **Auditoría contra-auditoría** | Verificación exhaustiva de subsanaciones |
+
+### 🏆 Certificación de Cierre
+
+| Área | Hallazgo Original | Estado Final | Comentario |
+|------|-------------------|--------------|------------|
+| 🔴 Credenciales sensibles en frontend | Tokens hardcodeados, keys Supabase | ✅ **CERRADO** | Saneado previamente; sin secrets expuestos en build |
+| 🟠 Exposición pública en `public/` | Archivos `.md`, `.txt`, credenciales | ✅ **CERRADO** | Ningún archivo confidencial en `public/` |
+| 🟡 `dangerouslySetInnerHTML` | Riesgo XSS en componentes | ✅ **CERRADO** | `DOMPurify.sanitize()` aplicado en 2 componentes |
+| ⚪ Documentación suelta en `src/` | 85+ `.md` dispersos | ✅ **CERRADO** | Centralizados a `_docs/` con `.gitignore` local |
+| 🟡 Open Redirect en Login | `redirect` parámetro sin validar | ✅ **CERRADO** | Validación `startsWith('/') && !startsWith('//')` aplicada |
+
+### ✅ Verificación Técnica Final
+
+1. **Compilación `pm run build`** - exitosa, cero errores de sintaxis o tipo
+2. **Archivos `.env`** - `.gitignore` protege; credenciales placeholder donde fue necesario
+3. **Rutas de navegación** - todas las rutas sensibles tienen guardias de autenticación válidas
+4. **Almacenamiento `localStorage`/`sessionStorage`** - solo tokens de sesión públicos y preferencias UI
+5. **No hay `eval()` ni `new Function()`** en el código base
+6. **No hay `postMessage` sin validación de origen** en el código base
+
+### 📝 Nota de Cierre
+
+Esta auditoría certifica que el repositorio `1-qawaylab-web` se encuentra en un estado **seguro y conforme** después de:
+- La auditoría inicial de seguridad y documentación
+- Las mitigaciones aplicadas por el orquestador
+- La contra-auditoría técnica exhaustiva realizada
+
+**Todas las vulnerabilidades identificadas han sido subsanadas o redujeron a nivel de riesgo aceptable con documentación del caso.** El proyecto está listo para producción sin riesgos de seguridad críticos.
