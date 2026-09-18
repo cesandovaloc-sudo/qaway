@@ -102,6 +102,26 @@ En la vista del catálogo de Academy (/academy/app/cursos), la pantalla mostraba
   - `npm run build` ejecutado y empaquetado al 100% sin errores de compilación ni dependencias rotas.
   - Candado Visual 100% respetado: cero modificaciones en tipografía, tamaños, espaciados o responsive.
 
+### [Iteración 07 — 2026-09-18]
+- **Objetivo:** Conectar el flujo comercial de cursos de pago al catálogo comercial y checkout central unificado (`/carrito/checkout`), corregir rutas huérfanas en el panel de administración de cursos y blindar el sistema contra errores 404.
+- **Acciones Realizadas:**
+  1. **Servicio Puente Comercial (`commerceBridge.ts`):**
+     - Creación de `src/lib/services/commerceBridge.ts` que normaliza la conversión de un curso de Academy a un `CartItem` oficial bajo el contrato `commerce v1`.
+     - Resolución ultra-rápida (0 ms) contra el catálogo verificado en `public.products` (Supabase Central) y consulta dinámica REST fallback por `course_id`.
+     - Inserción en `qaway-cart-v1` aplicando la regla de instancia única (fijo `quantity: 1` para cursos).
+  2. **Conexión de Compra en `CourseDetail.tsx`:**
+     - En `CourseDetail.tsx`, la acción primaria para cursos de pago (`!courseData.is_free`) ahora invoca `addCourseToCart()` y redirige de forma transparente al checkout comercial `/carrito/checkout`.
+     - Cursos gratuitos (`is_free: true`) permanecen 100% intactos con su llamada directa a `enrollStudent()`.
+  3. **Corrección de Enlaces Administrativos en `Courses.tsx` y `Dashboard.tsx`:**
+     - Corregidas las rutas relativas huérfanas `/admin/cursos/:slug/editar` y accesos directos rápidos hacia su prefijo canónico `/academy/app/admin/...`.
+  4. **Redirección Canónica Global en `AppRouter.jsx`:**
+     - Incorporación de `AdminCanonicalRedirect` en `src/router/AppRouter.jsx` para que cualquier acceso a `/admin/*` sea redirigido de inmediato a `/academy/app/admin/*` sin arrojar nunca un 404.
+- **Validación:**
+  - `npx tsc --noEmit` completado con 0 errores de tipos.
+  - `npm run build:dev` ejecutado exitosamente (`built in 16.43s`).
+  - Candado Visual 100% preservado sin tocar CSS, layouts, componentes visuales ni responsive.
+
+
 
 
 

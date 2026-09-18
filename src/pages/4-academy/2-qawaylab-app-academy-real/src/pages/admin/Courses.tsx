@@ -97,7 +97,7 @@ export default function AdminCourses() {
                 {filtered.map((c) => (
                   <tr key={c.id} className="hover:bg-surface-50 transition-colors">
                     <td className="px-6 py-4">
-                      <Link to={`/admin/cursos/${c.slug}/editar`} className="font-medium text-surface-900 hover:text-primary-600 transition-colors">
+                      <Link to={`/academy/app/admin/cursos/${c.slug}/editar`} className="font-medium text-surface-900 hover:text-primary-600 transition-colors">
                         {c.title}
                       </Link>
                     </td>
@@ -112,7 +112,7 @@ export default function AdminCourses() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link to={`/admin/cursos/${c.slug}/editar`} className="btn-ghost text-xs">Editar</Link>
+                        <Link to={`/academy/app/admin/cursos/${c.slug}/editar`} className="btn-ghost text-xs">Editar</Link>
                       </div>
                     </td>
                   </tr>

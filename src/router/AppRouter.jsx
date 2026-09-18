@@ -150,6 +150,12 @@ function CoursesCanonicalRedirect() {
   return <Navigate to={slug ? `/academy/app/cursos/${slug}` : '/academy/app/cursos'} replace />
 }
 
+function AdminCanonicalRedirect() {
+  const location = useLocation()
+  const subpath = location.pathname.replace(/^\/admin\/?/, '')
+  return <Navigate to={`/academy/app/admin/${subpath}${location.search}`} replace />
+}
+
 export default function AppRouter() {
   const notFoundElement = <NotFoundPage />
 
@@ -517,6 +523,8 @@ export default function AppRouter() {
           <Route path="hub/academy/*" element={renderRoute('academy', <AcademyRealAppPage />)} />
           <Route path="cursos" element={<Navigate to="/academy/app/cursos" replace />} />
           <Route path="cursos/:slug" element={<CoursesCanonicalRedirect />} />
+          <Route path="admin" element={<Navigate to="/academy/app/admin" replace />} />
+          <Route path="admin/*" element={<AdminCanonicalRedirect />} />
 
           <Route path="recursos" element={renderPublicPathRoute('recursos', '/recursos', <RecursosPage />)} />
           <Route path="recursos/:category" element={<PublicPathRoute routeKey="recursos" fallback="/recursos"><RecursosPage /></PublicPathRoute>} />

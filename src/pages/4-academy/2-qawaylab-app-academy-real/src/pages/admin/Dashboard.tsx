@@ -90,10 +90,10 @@ export default function AdminDashboard() {
       {/* Quick Links */}
       <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { to: '/admin/cursos/nuevo', label: 'Nuevo Curso', icon: '➕', color: 'bg-primary-50 text-primary-700' },
-          { to: '/admin/alumnos', label: 'Gestionar Alumnos', icon: '👥', color: 'bg-surface-100 text-surface-600' },
-          { to: '/admin/docentes', label: 'Gestionar Docentes', icon: '👨‍🏫', color: 'bg-surface-100 text-surface-600' },
-          { to: '/admin/permisos', label: 'Roles y Permisos', icon: '🔐', color: 'bg-surface-100 text-surface-600' },
+          { to: '/academy/app/admin/cursos/nuevo', label: 'Nuevo Curso', icon: '➕', color: 'bg-primary-50 text-primary-700' },
+          { to: '/academy/app/admin/alumnos', label: 'Gestionar Alumnos', icon: '👥', color: 'bg-surface-100 text-surface-600' },
+          { to: '/academy/app/admin/docentes', label: 'Gestionar Docentes', icon: '👨‍🏫', color: 'bg-surface-100 text-surface-600' },
+          { to: '/academy/app/admin/permisos', label: 'Roles y Permisos', icon: '🔐', color: 'bg-surface-100 text-surface-600' },
         ].map((link) => (
           <Link key={link.to} to={link.to} className="card-hover p-5 flex items-center gap-4">
             <div className={`flex h-12 w-12 items-center justify-center rounded-none ${link.color} text-xl`}>

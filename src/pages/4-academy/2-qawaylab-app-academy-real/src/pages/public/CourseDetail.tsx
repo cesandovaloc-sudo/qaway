@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useData } from '@/hooks/useData'
-import { enrollStudent, getCourseBySlug, getEnrollment } from '@/lib/services'
+import { addCourseToCart, enrollStudent, getCourseBySlug, getEnrollment } from '@/lib/services'
 import type { Course } from '@/lib/types'
 
 function formatPrice(course: Course | null | undefined) {
@@ -35,7 +35,15 @@ export default function CourseDetail() {
     }
 
     if (!courseData?.is_free) {
-      navigate(`/academy/app/checkout?curso=${courseData.slug}`)
+      setEnrolling(true)
+      try {
+        await addCourseToCart(courseData, user.id)
+        navigate('/carrito/checkout')
+      } catch (err) {
+        setEnrollError(err instanceof Error ? err.message : 'No pudimos transferir al checkout comercial')
+      } finally {
+        setEnrolling(false)
+      }
       return
     }
 
