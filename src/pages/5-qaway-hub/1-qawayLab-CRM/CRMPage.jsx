@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X } from 'lucide-react'
+import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X, Menu } from 'lucide-react'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
 import KanbanView from './components/KanbanView'
@@ -11,6 +11,7 @@ import ClientesView from './components/ClientesView'
 import AutomatizacionesView from './components/AutomatizacionesView'
 import TareasView from './components/TareasView'
 import ConfiguracionView from './components/ConfiguracionView'
+import { AppSwitcherDropdown } from '../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -102,6 +103,8 @@ function CRMContent() {
   } = useCRM()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const searchInputRef = useRef(null)
 
   useEffect(() => {
@@ -208,32 +211,36 @@ function CRMContent() {
     <div className="flex h-screen w-full bg-[#111111] overflow-hidden font-sans text-white selection:bg-[#ff4b0b] selection:text-white">
       
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
-      <aside className="w-64 shrink-0 flex flex-col border-r border-white/10 bg-[#111111]">
+      <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
         
         {/* LOGO */}
-        <div className="h-16 flex items-center px-6 border-b border-white/10 shrink-0">
+        <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0`}>
           <span className="text-xl font-bold tracking-tight">
-            Qaway <span className="text-[#ff4b0b]">Lab</span>
-            <span className="text-[#ff4b0b] ml-0.5 text-xs align-top">⌝</span>
+            {isSidebarCollapsed ? (
+              <span className="text-[#ff4b0b]">Q</span>
+            ) : (
+              <>Qaway <span className="text-[#ff4b0b]">Lab</span><span className="text-[#ff4b0b] ml-0.5 text-xs align-top">⌝</span></>
+            )}
           </span>
         </div>
 
         {/* NAVIGATION */}
-        <nav className="flex-1 py-6 px-4 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+        <nav className={`flex-1 py-6 ${isSidebarCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
           {tabs.map(tab => {
             const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all w-full text-left
+                title={isSidebarCollapsed ? tab.label : ''}
+                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left
                   ${isActive 
                     ? 'bg-white/10 text-white' 
                     : 'text-white/60 hover:text-white hover:bg-white/5'
                   }`}
               >
-                <tab.icon className={`w-4 h-4 ${isActive ? 'text-[#ff4b0b]' : ''}`} />
-                <span>{tab.label}</span>
+                <tab.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4b0b]' : ''}`} />
+                {!isSidebarCollapsed && <span className="truncate">{tab.label}</span>}
               </button>
             )
           })}
@@ -244,35 +251,42 @@ function CRMContent() {
           <button
             onClick={handleSimulate}
             disabled={simulating}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all w-full text-left text-white/60 hover:text-white hover:bg-white/5 disabled:opacity-50"
+            title={isSidebarCollapsed ? "Simular Webhook" : ""}
+            className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left text-white/60 hover:text-white hover:bg-white/5 disabled:opacity-50`}
           >
-            <RefreshCw className={`w-4 h-4 ${simulating ? 'animate-spin text-[#ff4b0b]' : ''}`} />
-            <span>Simular Webhook</span>
+            <RefreshCw className={`w-4 h-4 shrink-0 ${simulating ? 'animate-spin text-[#ff4b0b]' : ''}`} />
+            {!isSidebarCollapsed && <span className="truncate">Simular Webhook</span>}
           </button>
         </nav>
 
         {/* INSIGHTS WIDGET COLLAPSIBLE */}
-        <div className="p-4 shrink-0">
-          <div className="relative rounded-lg border border-white/10 bg-[#18181b] overflow-hidden group hover:border-white/20 transition-all duration-300 ease-in-out cursor-pointer max-h-12 hover:max-h-40">
-            {/* Decorative Corner Brackets (Only visible on hover) */}
-            <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className={`p-4 shrink-0 flex ${isSidebarCollapsed ? 'justify-center p-2' : ''}`}>
+          <div className={`relative rounded-lg border border-white/10 bg-[#18181b] overflow-hidden group hover:border-white/20 transition-all duration-300 ease-in-out cursor-pointer ${isSidebarCollapsed ? 'w-10 h-10 flex items-center justify-center p-0 hover:max-h-12' : 'max-h-12 hover:max-h-40 w-full'}`}>
+            {/* Decorative Corner Brackets (Only visible on hover and expanded) */}
+            {!isSidebarCollapsed && (
+              <>
+                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </>
+            )}
             
-            <div className="flex items-center gap-2 px-4 py-3.5">
-              <Zap className="w-4 h-4 text-[#ff4b0b] shrink-0" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white truncate transition-colors group-hover:text-[#ff4b0b]">Insights con IA</span>
+            <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center w-full h-full' : 'gap-2 px-4 py-3.5'}`}>
+              <Zap className={`text-[#ff4b0b] shrink-0 ${isSidebarCollapsed ? 'w-4 h-4' : 'w-4 h-4'}`} />
+              {!isSidebarCollapsed && <span className="text-[11px] font-bold uppercase tracking-widest text-white truncate transition-colors group-hover:text-[#ff4b0b]">Insights con IA</span>}
             </div>
             
-            <div className="px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
-              <p className="text-xs text-white/50 leading-relaxed mb-3">
-                Activa recomendaciones inteligentes basadas en tus datos comerciales.
-              </p>
-              <span className="text-[#ff4b0b] text-xs font-semibold flex items-center gap-1">
-                Conocer más <ChevronRight className="w-3 h-3" />
-              </span>
-            </div>
+            {!isSidebarCollapsed && (
+              <div className="px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
+                <p className="text-xs text-white/50 leading-relaxed mb-3">
+                  Activa recomendaciones inteligentes basadas en tus datos comerciales.
+                </p>
+                <span className="text-[#ff4b0b] text-xs font-semibold flex items-center gap-1">
+                  Conocer más <ChevronRight className="w-3 h-3" />
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </aside>
@@ -280,7 +294,49 @@ function CRMContent() {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         
-        <header className="h-16 border-b border-white/5 flex items-center justify-end px-6 shrink-0 bg-[#111111]">
+        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#111111]">
+          {/* Lado Izquierdo: Toggle y Waffle */}
+          <div className="flex items-center gap-4">
+            {/* Botón Toggle Sidebar */}
+            <button 
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            {/* Waffle App Switcher con animación de hover adaptado a fondo oscuro */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsWaffleOpen(!isWaffleOpen)}
+                className="group flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
+                title="Ecosistema de Aplicaciones"
+              >
+                {/* 9 Dots Grid Vector SVG */}
+                <div className="grid grid-cols-3 gap-0.5 w-4 h-4 place-items-center">
+                  {[...Array(9)].map((_, i) => (
+                    <span
+                      key={i}
+                      className="w-1 h-1 rounded-full bg-white/60 group-hover:bg-[#ff4b0b] transition-colors"
+                    />
+                  ))}
+                </div>
+                {/* Texto que se expande suavemente */}
+                <span className="text-xs font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
+                  Apps
+                </span>
+                <ChevronDown className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-transform duration-200" />
+              </button>
+
+              <AppSwitcherDropdown
+                isOpen={isWaffleOpen}
+                onClose={() => setIsWaffleOpen(false)}
+              />
+            </div>
+          </div>
+
           {/* Search, Notifications, User & CTA */}
           <div className="flex items-center gap-3 lg:gap-5">
             <div className="relative block">
