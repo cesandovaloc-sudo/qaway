@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle } from 'lucide-react'
-import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
 import KanbanView from './components/KanbanView'
@@ -188,7 +187,7 @@ function CRMContent() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#111111] overflow-hidden font-sans text-white selection:bg-[#ff4b0b] selection:text-white pt-[80px]">
+    <div className="flex h-screen w-full bg-[#111111] overflow-hidden font-sans text-white selection:bg-[#ff4b0b] selection:text-white">
       
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className="w-64 shrink-0 flex flex-col border-r border-white/10 bg-[#111111]">
@@ -363,7 +362,6 @@ function CRMContent() {
 }
 
 export default function CRMPage() {
-  useSetNavbarVariant('dark')
   return (
     <ErrorBoundary>
       <CRMProvider>

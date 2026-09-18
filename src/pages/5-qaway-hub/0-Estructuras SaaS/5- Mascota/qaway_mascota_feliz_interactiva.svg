@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640" role="img" aria-label="Mascota Qaway Lab: haz clic para cambiar entre estado normal y feliz">
+  <style>
+    .part{transform-box:fill-box;transform-origin:center;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+    .eye-open,.mouth-normal,.happy-eye,.happy-mouth,.spark{transition:opacity .22s ease}
+    .happy-eye,.happy-mouth,.spark{opacity:0}
+    .happy .eye-open,.happy .mouth-normal{opacity:0}
+    .happy .happy-eye,.happy .happy-mouth,.happy .spark{opacity:1}
+    .happy .body{animation:happyBody .7s cubic-bezier(.2,.8,.2,1)}
+    .happy .head{animation:happyHead .7s cubic-bezier(.2,.8,.2,1)}
+    .happy .tail{animation:tailWag .7s ease-in-out 2}
+    .happy .earL{animation:earL .7s ease-in-out}
+    .happy .earR{animation:earR .7s ease-in-out}
+    .happy .armL{animation:armL .7s cubic-bezier(.2,.8,.2,1)}
+    .happy .armR{animation:armR .7s cubic-bezier(.2,.8,.2,1)}
+    .happy .spark.s1{animation:spark .7s ease-out}
+    .happy .spark.s2{animation:spark .7s .08s ease-out}
+    .happy .spark.s3{animation:spark .7s .16s ease-out}
+    @keyframes happyBody{0%{transform:translateY(0)}35%{transform:translateY(-18px)}70%{transform:translateY(2px)}100%{transform:translateY(0)}}
+    @keyframes happyHead{0%{transform:rotate(0)}30%{transform:rotate(-3deg) scale(1.03)}60%{transform:rotate(3deg) scale(1.03)}100%{transform:rotate(0) scale(1)}}
+    @keyframes tailWag{0%,100%{transform:rotate(0)}25%{transform:rotate(12deg)}50%{transform:rotate(-10deg)}75%{transform:rotate(8deg)}}
+    @keyframes earL{0%,100%{transform:rotate(0)}35%{transform:rotate(-8deg)}65%{transform:rotate(3deg)}}
+    @keyframes earR{0%,100%{transform:rotate(0)}35%{transform:rotate(8deg)}65%{transform:rotate(-3deg)}}
+    @keyframes armL{0%,100%{transform:rotate(0)}45%{transform:rotate(-18deg) translateY(-8px)}}
+    @keyframes armR{0%,100%{transform:rotate(0)}45%{transform:rotate(18deg) translateY(-8px)}}
+    @keyframes spark{0%{opacity:0;transform:scale(.4) translateY(10px)}35%{opacity:1}100%{opacity:0;transform:scale(1.15) translateY(-25px)}}
+    @media (prefers-reduced-motion:reduce){
+      .part{transition:none}.happy .body,.happy .head,.happy .tail,.happy .earL,.happy .earR,.happy .armL,.happy .armR,.happy .spark{animation:none}
+    }
+  </style>
+
+  <defs>
+    <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".62" stop-color="#e9edf2"/>
+      <stop offset="1" stop-color="#b7c1cc"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff7a18"/>
+      <stop offset=".48" stop-color="#ff4b0b"/>
+      <stop offset="1" stop-color="#9b2c11"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-opacity=".16"/>
+    </filter>
+  </defs>
+
+  <!-- subtle stage -->
+  <ellipse cx="320" cy="570" rx="130" ry="22" fill="#dfe4e9" opacity=".65"/>
+
+  <!-- sparkles -->
+  <g class="spark" fill="#ff4b0b">
+    <path class="s1" d="M122 214l6 16 16 6-16 6-6 16-6-16-16-6 16-6z"/>
+    <path class="s2" d="M505 205l5 13 13 5-13 5-5 13-5-13-13-5 13-5z"/>
+    <path class="s3" d="M535 325l7 18 18 7-18 7-7 18-7-18-18-7 18-7z"/>
+  </g>
+
+  <!-- tail behind body -->
+  <g class="part tail" transform="translate(0 0)">
+    <path d="M426 430 C515 386 552 442 507 492 C478 524 442 505 425 478 C470 486 489 457 475 445 C463 435 447 439 426 452Z"
+          fill="url(#tail)" stroke="#0f172a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M475 445 C489 457 470 486 425 478" fill="none" stroke="#ffb04c" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+  </g>
+
+  <!-- body -->
+  <g class="part body">
+    <path d="M250 348 C231 384 226 457 247 507 C260 538 286 550 320 550 C354 550 380 538 393 507 C414 457 409 384 390 348 C363 326 277 326 250 348Z"
+          fill="url(#fur)" stroke="#0f172a" stroke-width="8"/>
+    <!-- chest emblem -->
+    <g transform="translate(320 425)">
+      <rect x="-31" y="-31" width="62" height="62" rx="15" fill="#fff" opacity=".72"/>
+      <path d="M-22-10 L-9-24 L4-10 L-9 4Z M9-10 L22-24 L35-10 L22 4Z M-9 8 L4-6 L17 8 L4 22Z M-35 8 L-22-6 L-9 8 L-22 22Z"
+            fill="#ff4b0b" transform="translate(-4 -1) scale(.72)"/>
+    </g>
+    <!-- legs -->
+    <path d="M265 493 C247 514 246 551 269 559 C286 565 300 553 301 534 L298 502Z"
+          fill="#d8dee5" stroke="#0f172a" stroke-width="7"/>
+    <path d="M375 493 C393 514 394 551 371 559 C354 565 340 553 339 534 L342 502Z"
+          fill="#d8dee5" stroke="#0f172a" stroke-width="7"/>
+    <ellipse cx="273" cy="558" rx="22" ry="10" fill="#0f172a"/>
+    <ellipse cx="367" cy="558" rx="22" ry="10" fill="#0f172a"/>
+  </g>
+
+  <!-- arms -->
+  <g class="part armL">
+    <path d="M250 370 C218 375 195 405 181 433" fill="none" stroke="#d8dee5" stroke-width="28" stroke-linecap="round"/>
+    <path d="M181 433 C168 445 169 462 184 470 C198 477 211 466 210 451" fill="#0f172a"/>
+  </g>
+  <g class="part armR">
+    <path d="M390 370 C422 375 445 405 459 433" fill="none" stroke="#d8dee5" stroke-width="28" stroke-linecap="round"/>
+    <path d="M459 433 C472 445 471 462 456 470 C442 477 429 466 430 451" fill="#0f172a"/>
+  </g>
+
+  <!-- head -->
+  <g class="part head">
+    <!-- ears -->
+    <g class="part earL">
+      <path d="M225 218 L199 92 C197 78 212 73 222 83 L283 151Z" fill="url(#fur)" stroke="#0f172a" stroke-width="8"/>
+      <path d="M218 158 L213 111 L248 150Z" fill="#ff4b0b"/>
+    </g>
+    <g class="part earR">
+      <path d="M415 218 L441 92 C443 78 428 73 418 83 L357 151Z" fill="url(#fur)" stroke="#0f172a" stroke-width="8"/>
+      <path d="M422 158 L427 111 L392 150Z" fill="#ff4b0b"/>
+    </g>
+
+    <!-- face -->
+    <rect x="205" y="145" width="230" height="190" rx="82" fill="#0f172a" stroke="#0f172a" stroke-width="8" filter="url(#shadow)"/>
+    <path d="M226 182 C249 151 391 151 414 182 C431 205 431 279 414 300 C391 328 249 328 226 300 C209 279 209 205 226 182Z"
+          fill="#111827"/>
+
+    <!-- open eyes -->
+    <g class="eye-open" fill="#ff7a18">
+      <ellipse cx="280" cy="235" rx="13" ry="25"/>
+      <ellipse cx="360" cy="235" rx="13" ry="25"/>
+      <circle cx="280" cy="232" r="5" fill="#fff"/>
+      <circle cx="360" cy="232" r="5" fill="#fff"/>
+    </g>
+
+    <!-- happy eyes -->
+    <g class="happy-eye" fill="none" stroke="#ff7a18" stroke-width="10" stroke-linecap="round">
+      <path d="M260 241 Q280 218 300 241"/>
+      <path d="M340 241 Q360 218 380 241"/>
+    </g>
+
+    <!-- normal mouth -->
+    <path class="mouth-normal" d="M308 274 Q320 281 332 274" fill="none" stroke="#ff7a18" stroke-width="7" stroke-linecap="round"/>
+
+    <!-- happy mouth -->
+    <path class="happy-mouth" d="M296 269 Q320 305 344 269 Q342 306 320 311 Q298 306 296 269Z" fill="#ff6f7e" stroke="#ff7a18" stroke-width="6"/>
+    <circle class="happy-mouth" cx="320" cy="289" r="5" fill="#fff" opacity=".8"/>
+  </g>
+
+  <!-- click target -->
+  <rect id="hit" x="80" y="55" width="480" height="515" rx="36" fill="transparent" style="cursor:pointer"/>
+  <text x="320" y="615" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="18" fill="#475569">
+    Haz clic para cambiar a FELIZ
+  </text>
+
+  <script><![CDATA[
+    const root = document.documentElement;
+    const hit = document.getElementById('hit');
+    hit.addEventListener('click', () => {
+      root.classList.toggle('happy');
+      const label = document.querySelector('text:last-of-type');
+      label.textContent = root.classList.contains('happy')
+        ? 'Haz clic para volver a NORMAL'
+        : 'Haz clic para cambiar a FELIZ';
+    });
+  ]]></script>
+</svg>

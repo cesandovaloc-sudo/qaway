@@ -26,7 +26,10 @@ export default function LoginPage() {
 
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const redirectTarget = searchParams.get('redirect') || '/hub'
+  const rawRedirect = searchParams.get('redirect')
+  const redirectTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//'))
+    ? rawRedirect
+    : '/hub'
 
   // ─── Guardar sesión según "Recordarme" ────────────────────────────────────
   const persistSession = (token, emailVal, role) => {

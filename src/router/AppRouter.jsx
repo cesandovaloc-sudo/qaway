@@ -42,6 +42,8 @@ const OptimizadorWebpHubPage = lazy(() => import('@/pages/5-qaway-hub/optimizado
 const InstagramExtractorPage = lazy(() => import('@/pages/5-qaway-hub/4-descargadores/1-IG/InstagramExtractorPage'))
 const MarketingStudioPage = lazy(() => import('@/pages/5-qaway-hub/6-marketing/MarketingStudioPage'))
 const CreadorContenidoPage = lazy(() => import('@/pages/5-qaway-hub/8-Creador de Contenido/CreadorContenidoPage'))
+const MascotaPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructuras SaaS/3- Tutorial/qaway-mascota-react/MascotaPage'))
+const TutorialOnboardingPage = lazy(() => import('@/pages/5-qaway-hub/0-Estructuras SaaS/3- Tutorial/TutorialOnboardingPage'))
 const AgendaAppPage = lazy(() => import('@/pages/5-qaway-hub/8-qawaylab-agenda/AgendaAppPage'))
 // PagosAppPage archivado como backup — checkout vive 100% en 10-qawaylab-inventario
 const InventarioAppPage = lazy(() => import('@/pages/5-qaway-hub/10-qawaylab-inventario/InventarioAppPage'))
@@ -344,6 +346,30 @@ export default function AppRouter() {
           path="hub/biblioteca"
           element={renderRoute('hub', <BibliotecaPage />)}
         />
+        {/* Mascota interactiva (React 19 + Framer Motion + SVG) */}
+        <Route
+          path="hub/mascota"
+          element={renderRoute('hub', <MascotaPage />)}
+        />
+        {/* Tutorial Onboarding Interactivo React (Recreación exacta de Trello & Qaway Lab) */}
+        <Route
+          path="hub/tutorial"
+          element={renderRoute('hub', <TutorialOnboardingPage />)}
+        />
+        <Route
+          path="hub/onboarding"
+          element={renderRoute('hub', <TutorialOnboardingPage />)}
+        />
+        {/* Creador de Contenido: standalone FUERA del Layout → sin navbar de marca */}
+        <Route
+          path="hub/creador-contenido"
+          element={renderRoute('hub', <CreadorContenidoPage />)}
+        />
+        {/* CRM: standalone FUERA del Layout → sin navbar de marca */}
+        <Route
+          path="hub/crm"
+          element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
+        />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
@@ -364,14 +390,6 @@ export default function AppRouter() {
           <Route
             path="hub"
             element={renderRoute('hub', <HubPage />)}
-          />
-          <Route
-            path="hub/creador-contenido"
-            element={renderRoute('hub', <CreadorContenidoPage />)}
-          />
-          <Route
-            path="hub/crm"
-            element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/waba-crm"

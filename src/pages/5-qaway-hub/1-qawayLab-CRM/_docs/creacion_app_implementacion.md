@@ -83,6 +83,14 @@ El módulo **1-qawayLab-CRM** es la solución centralizada de gestión de relaci
   - **Migración SQL Oficial (`20260917140000_crm_waba_omnichannel.sql`):** Script SQL idempotente con creación/actualización de `public.leads` (canales omnicanal, campos de Handover a humano, atribución CTWA en `metadata`), tabla `public.campaigns` con ROAS e índices de alto rendimiento en WhatsApp y `metadata` GIN.
   - **Feature Flags en Tenants:** Actualización de `public.tenants` con soporte nativo para los planes modulares (`crm_plan: 'starter' | 'pro' | 'enterprise'`, `has_ai_agent`, `has_custom_metrics`, `has_waba_sync`).
   - **Cerebro del Agente IA en `whatsapp-webhook`:** Integración del **System Prompt oficial de Qaway Lab** (identidad, servicios, Notion Pro a S/ 49 / $15 USD, desarrollo web y reglas estrictas de negocio).
+
+### [Iteración 11 - 2026-09-18]
+- **Desacoplamiento de Navbar y Pegado al Top (Full-Screen Standalone):**
+  - **Ruta Standalone en AppRouter:** Se movió `/hub/crm` fuera de `<Route element={<Layout />}>` al bloque de herramientas SaaS full-screen.
+  - **Eliminación de Hook de Navbar:** Se retiró `useSetNavbarVariant('dark')` y su import en [CRMPage.jsx].
+  - **Ajuste Espacial Superior:** Se retiró `pt-[80px]` en el contenedor raíz, permitiendo que la interfaz quede anclada exactamente a `top: 0` sin margen superior vacío.
+  - **Diseño Intacto:** Toda la estructura interna (Dark Shell sidebar, pestañas, roles y vistas) se preservó intacta.
+
   - **Auto-Respuesta Autónoma:** La función `whatsapp-webhook` invoca la API de Gemini para responder de inmediato al WhatsApp del prospecto cuando no requiere atención humana, guardando la respuesta de la IA en Supabase en tiempo real.
 
 ### [Iteración 11 - 2026-09-17]

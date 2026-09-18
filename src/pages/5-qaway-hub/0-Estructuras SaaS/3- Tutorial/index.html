@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>CRM Onboarding — Paso 01</title>
+<style>
+  :root{
+    --blue:#0f3d82;
+    --blue2:#16498f;
+    --blue3:#0b326c;
+    --sky:#78aef6;
+    --ink:#172b4d;
+    --white:#fff;
+    --panel:#172b4d;
+    --panel2:#1f3556;
+    --card:#202f45;
+    --purple:#c05ad5;
+    --purple2:#a44bc0;
+    --orange:#ff4b0b;
+    --muted:#d7e2f1;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;background:var(--blue)}
+  button{font:inherit}
+  .app{min-height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--blue) 0%,#174d96 100%);color:#fff}
+  .cookie{
+    min-height:106px;background:#321f3b;border-bottom:1px solid rgba(255,255,255,.12);
+    display:flex;align-items:center;gap:28px;padding:22px 18px 20px 10px;color:#eee;
+    font-size:16px;line-height:1.45
+  }
+  .cookie-copy{flex:1;max-width:980px}
+  .cookie a{color:#9fc2ff;text-decoration:underline}
+  .cookie-actions{display:flex;align-items:center;gap:10px;white-space:nowrap}
+  .cookie-actions button{height:38px;padding:0 16px;border:1px solid rgba(255,255,255,.18);border-radius:7px;background:transparent;color:#eee;cursor:pointer}
+  .cookie-actions .accept{background:rgba(255,255,255,.02)}
+  .topbar{
+    height:86px;background:#163c75;display:flex;align-items:center;padding:0 15px;
+    border-bottom:1px solid rgba(255,255,255,.06);position:relative
+  }
+  .brand{font-size:24px;display:flex;gap:9px;align-items:center;min-width:310px}
+  .brand-mark{width:19px;height:19px;border:3px solid #fff;border-radius:3px;position:relative}
+  .brand-mark:after{content:"";position:absolute;left:4px;top:3px;width:4px;height:9px;background:#fff;border-radius:1px}
+  .steps{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px}
+  .arrow{font-size:30px;line-height:1;color:#78aef6;font-weight:300}
+  .dot{width:53px;height:9px;border-radius:20px;background:#79aef5;opacity:.95}
+  .close{margin-left:auto;font-size:22px;color:#d7e2f1;background:none;border:0;cursor:pointer}
+  .hero{
+    min-height:calc(100vh - 192px);padding:64px 14px 70px;display:flex;flex-direction:column;align-items:center;
+    background:
+      radial-gradient(circle at 50% 40%,rgba(62,124,209,.16),transparent 45%),
+      linear-gradient(180deg,#123e81 0%,#174b92 100%);
+  }
+  h1{font-size:40px;line-height:1.15;font-weight:400;margin:0 0 36px;text-align:center;letter-spacing:-1.1px}
+  .primary{
+    border:0;background:#76aef7;color:#0b2347;font-size:16px;font-weight:600;
+    border-radius:7px;padding:10px 15px;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.18);
+    transition:.2s transform,.2s filter
+  }
+  .primary:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .scene{
+    width:min(1450px,100%);height:610px;margin-top:74px;position:relative;
+  }
+  .inbox{
+    position:absolute;left:0;top:0;width:372px;height:610px;border-radius:18px 18px 0 0;
+    background:#172b4d;border:2px solid rgba(0,0,0,.28);box-shadow:0 10px 30px rgba(0,0,0,.22);overflow:hidden;
+    animation:slideInLeft .8s cubic-bezier(.2,.75,.2,1) both
+  }
+  .inbox-head{height:61px;background:#232323;display:flex;align-items:center;gap:12px;padding:0 18px;font-size:18px;font-weight:700}
+  .tray-icon{width:18px;height:15px;border:2px solid #d5d9df;border-radius:3px;position:relative}
+  .tray-icon:before{content:"";position:absolute;left:3px;right:3px;top:4px;height:2px;background:#d5d9df}
+  .inbox-body{padding:20px}
+  .task{
+    height:42px;background:#242424;border-radius:8px;margin-bottom:13px;padding:0 14px;
+    display:flex;align-items:center;font-size:16px;color:#e6e9ef;box-shadow:0 2px 4px rgba(0,0,0,.3)
+  }
+  .task.secondary{height:76px;display:block;padding-top:13px;line-height:1.25}
+  .task-icons{display:flex;gap:14px;margin-top:10px;color:#aeb8c8;font-size:16px}
+  .board{
+    position:absolute;left:405px;right:0;top:0;height:610px;border-radius:18px 18px 0 0;overflow:hidden;
+    background:linear-gradient(110deg,var(--purple) 0%,#bb5dc9 45%,#a947a8 100%);
+    border:2px solid rgba(0,0,0,.2);box-shadow:0 10px 30px rgba(0,0,0,.2);
+    animation:riseIn .9s .1s cubic-bezier(.2,.75,.2,1) both
+  }
+  .board-head{height:60px;padding:0 25px;display:flex;align-items:center;font-size:18px;font-weight:600;color:#171321}
+  .ghosts{display:flex;gap:8px;margin-left:22px}
+  .ghost{width:88px;height:17px;border-radius:20px;background:rgba(255,255,255,.13)}
+  .board-menu{margin-left:auto;display:flex;gap:5px}
+  .board-menu i{display:block;width:25px;height:25px;border-radius:50%;background:rgba(255,255,255,.11)}
+  .lists{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px 12px}
+  .list{
+    height:98px;background:#2b2c2f;border-radius:14px;box-shadow:0 4px 9px rgba(0,0,0,.24);
+    padding:16px 20px;color:#ddd;position:relative
+  }
+  .list-title{font-weight:700;font-size:16px}
+  .more{position:absolute;right:18px;top:14px;letter-spacing:3px}
+  .fake-line{position:absolute;left:43px;right:35px;bottom:23px;height:13px;border-radius:15px;background:#3c3d40}
+  .plus{position:absolute;left:20px;bottom:20px;font-size:25px;font-weight:300}
+  .end-dot{position:absolute;right:18px;bottom:20px;width:17px;height:17px;border-radius:50%;background:#3b3c40}
+  .mascot-wrap{
+    position:absolute;left:50%;top:210px;transform:translateX(-50%);
+    width:155px;height:155px;border-radius:50%;background:#8038a5;display:grid;place-items:center;
+    animation:mascotPop .8s .9s cubic-bezier(.16,1,.3,1) both;box-shadow:0 5px 10px rgba(0,0,0,.15)
+  }
+  .mascot{width:122px;height:122px;overflow:visible}
+  .bubble{
+    position:absolute;left:calc(50% + 58px);top:247px;background:#222;color:#e8e8e8;border-radius:9px;
+    padding:10px 14px;font-size:16px;font-weight:600;min-width:137px;text-align:center;
+    box-shadow:0 5px 12px rgba(0,0,0,.25);animation:bubbleIn .55s 1.55s cubic-bezier(.2,.8,.2,1) both
+  }
+  .bubble:before{content:"";position:absolute;left:-9px;top:18px;border-width:8px 9px 8px 0;border-style:solid;border-color:transparent #222 transparent transparent}
+  .pulse{
+    position:absolute;inset:-10px;border-radius:50%;border:2px solid rgba(255,255,255,.35);opacity:0;
+    animation:pulse 1.7s 1.7s ease-out infinite
+  }
+  .cursor{
+    position:absolute;left:61%;top:440px;width:26px;height:34px;z-index:8;opacity:0;
+    animation:cursorMove 1.1s 2.05s ease-in-out forwards
+  }
+  .cursor svg{filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+  .tip{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:-43px;background:#222;padding:7px 11px;border-radius:7px;
+    font-size:12px;opacity:0;animation:tipIn .4s 2.8s ease forwards
+  }
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(-45px)}to{opacity:1;transform:none}}
+  @keyframes riseIn{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes mascotPop{from{opacity:0;transform:translateX(-50%) scale(.55)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+  @keyframes bubbleIn{from{opacity:0;transform:translateX(-12px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes pulse{0%{opacity:0;transform:scale(.75)}20%{opacity:.8}100%{opacity:0;transform:scale(1.2)}}
+  @keyframes cursorMove{
+    0%{opacity:0;transform:translate(0,0)}
+    15%{opacity:1}
+    70%{transform:translate(-115px,-205px)}
+    82%{transform:translate(-115px,-205px) scale(.82)}
+    92%{transform:translate(-115px,-205px) scale(1)}
+    100%{opacity:1;transform:translate(-115px,-205px)}
+  }
+  @keyframes tipIn{to{opacity:.9}}
+  @media (max-width:1050px){
+    .brand{min-width:auto}.cookie{font-size:13px}.cookie-actions{gap:5px}
+    .scene{height:auto;display:flex;flex-direction:column;gap:20px}
+    .inbox,.board{position:relative;left:auto;right:auto;top:auto;width:100%;height:420px}
+    .board{order:1}.inbox{order:2}
+    .lists{grid-template-columns:repeat(3,1fr)}
+    .mascot-wrap{top:170px}.bubble{top:207px}
+    .cursor{display:none}
+  }
+  @media (max-width:650px){
+    .cookie{display:none}.topbar{height:68px}.brand{font-size:19px}
+    .steps{gap:7px}.dot{width:26px;height:6px}.arrow{font-size:21px}
+    .hero{min-height:calc(100vh - 68px);padding:45px 10px}
+    h1{font-size:28px;margin-bottom:25px}.scene{margin-top:45px}
+    .inbox,.board{height:330px;border-radius:13px}
+    .inbox-head{height:52px;font-size:16px}.inbox-body{padding:14px}
+    .task{font-size:14px}.board-head{height:52px;padding:0 16px;font-size:15px}
+    .ghosts{display:none}.lists{gap:7px;padding:10px 8px}.list{padding:13px 11px;height:84px}
+    .list-title{font-size:13px}.more{right:10px}.fake-line{left:30px;right:22px;bottom:19px;height:9px}.plus{left:10px;bottom:15px;font-size:20px}.end-dot{right:10px;bottom:15px;width:13px;height:13px}
+    .mascot-wrap{width:112px;height:112px;top:130px}.mascot{width:90px;height:90px}
+    .bubble{left:calc(50% + 35px);top:168px;min-width:100px;font-size:13px;padding:7px 10px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="cookie" id="cookie">
+    <div class="cookie-copy">
+      Esta aplicación utiliza cookies para mejorar tu experiencia de navegación, realizar análisis y gestionar preferencias.
+      <a href="#" onclick="return false">Aviso de cookies y seguimiento</a>
+    </div>
+    <div class="cookie-actions">
+      <button>Preferencias</button>
+      <button>Solo necesarias</button>
+      <button class="accept" onclick="document.getElementById('cookie').style.display='none'">✓ Aceptar todas</button>
+    </div>
+  </header>
+
+  <nav class="topbar">
+    <div class="brand"><span class="brand-mark"></span>CRM</div>
+    <div class="steps">
+      <span class="arrow">←</span>
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <span class="arrow">→</span>
+    </div>
+    <button class="close" aria-label="Cerrar">×</button>
+  </nav>
+
+  <main class="hero">
+    <h1>¡Vas por el camino adecuado para mejorar tu productividad!</h1>
+    <button class="primary" id="startBtn">¡Una última cosa!</button>
+
+    <section class="scene" aria-label="Demostración interactiva del CRM">
+      <aside class="inbox">
+        <div class="inbox-head"><span class="tray-icon"></span> Bandeja de entrada</div>
+        <div class="inbox-body">
+          <div class="task">Proyecto contenido</div>
+          <div class="task secondary">
+            Míralo, envíalo, guárdalo para más tarde
+            <div class="task-icons">✉︎　☷</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="board">
+        <div class="board-head">
+          Mi tablero de CRM
+          <div class="ghosts"><span class="ghost"></span><span class="ghost"></span></div>
+          <div class="board-menu"><i></i><i></i></div>
+        </div>
+        <div class="lists">
+          <div class="list">
+            <span class="list-title">Hoy</span><span class="more">•••</span>
+            <span class="plus">＋</span><span class="fake-line"></span><span class="end-dot"></span>
+          </div>
+          <div class="list">
+            <span class="list-title">Esta semana</span><span class="more">•••</span>
+            <span class="plus">＋</span><span class="fake-line"></span><span class="end-dot"></span>
+          </div>
+          <div class="list">
+            <span class="list-title">Más tarde</span><span class="more">•••</span>
+            <span class="plus">＋</span><span class="fake-line"></span><span class="end-dot"></span>
+          </div>
+        </div>
+
+        <div class="mascot-wrap">
+          <div class="pulse"></div>
+          <!-- SVG original: mascota tipo husky, construida por vectores -->
+          <svg class="mascot" viewBox="0 0 160 160" aria-hidden="true">
+            <defs>
+              <linearGradient id="fur" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#f4f7fb"/>
+                <stop offset=".48" stop-color="#c7d0db"/>
+                <stop offset="1" stop-color="#8d9aa8"/>
+              </linearGradient>
+            </defs>
+            <path d="M42 53 L37 19 Q36 11 44 15 L65 34 Q80 27 95 34 L117 15 Q125 11 124 20 L120 54 Q134 70 130 91 Q125 120 80 126 Q35 120 30 91 Q26 70 42 53Z" fill="url(#fur)" stroke="#fff" stroke-width="4"/>
+            <path d="M44 55 Q62 38 80 41 Q98 38 116 55 L108 103 Q99 121 80 123 Q61 121 52 103Z" fill="#f8fbff"/>
+            <path d="M49 49 Q60 36 70 39 L62 69 L45 73Z" fill="#596b7d"/>
+            <path d="M111 49 Q100 36 90 39 L98 69 L115 73Z" fill="#596b7d"/>
+            <ellipse cx="60" cy="75" rx="7" ry="9" fill="#fff"/>
+            <ellipse cx="100" cy="75" rx="7" ry="9" fill="#fff"/>
+            <ellipse cx="61" cy="76" rx="3" ry="5" fill="#1592d0"/>
+            <ellipse cx="99" cy="76" rx="3" ry="5" fill="#1592d0"/>
+            <circle cx="61" cy="76" r="1.5" fill="#172b4d"/>
+            <circle cx="99" cy="76" r="1.5" fill="#172b4d"/>
+            <path d="M69 93 Q80 84 91 93 Q89 107 80 109 Q71 107 69 93Z" fill="#263746"/>
+            <path d="M72 99 Q80 104 88 99 Q86 111 80 113 Q74 111 72 99Z" fill="#ef6b79"/>
+            <path d="M50 104 Q80 119 110 104" fill="none" stroke="#6b7885" stroke-width="3" stroke-linecap="round"/>
+            <path d="M34 91 Q21 93 15 86" fill="none" stroke="#f4f7fb" stroke-width="7" stroke-linecap="round"/>
+            <path d="M126 91 Q139 93 145 86" fill="none" stroke="#f4f7fb" stroke-width="7" stroke-linecap="round"/>
+            <path d="M68 32 Q80 43 92 32" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="bubble">¡Guau!</div>
+        <div class="cursor" id="cursor">
+          <svg viewBox="0 0 28 38" width="28" height="38">
+            <path d="M3 2 L24 19 L15 20 L20 34 L15 36 L9 22 L3 28Z" fill="#fff" stroke="#172b4d" stroke-width="2"/>
+          </svg>
+          <div class="tip">Explora</div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  startBtn.addEventListener('click', () => {
+    document.querySelector('.mascot-wrap').animate(
+      [{transform:'translateX(-50%) scale(1)'},{transform:'translateX(-50%) scale(.92)'},{transform:'translateX(-50%) scale(1.05)'},{transform:'translateX(-50%) scale(1)'}],
+      {duration:520,easing:'cubic-bezier(.2,.8,.2,1)'}
+    );
+    document.querySelector('.bubble').textContent='¡Vamos!';
+  });
+
+  document.querySelector('.close').addEventListener('click', () => {
+    document.querySelector('.hero').innerHTML =
+      '<div style="margin:auto;text-align:center"><h2 style="font-size:32px;font-weight:400">Recorrido cerrado</h2><button class="primary" onclick="location.reload()">Volver al tutorial</button></div>';
+  });
+</script>
+</body>
+</html>

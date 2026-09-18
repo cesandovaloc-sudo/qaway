@@ -23,7 +23,6 @@ import { ScriptStudio } from './components/ScriptStudio'
 import { MatrixDistribution } from './components/MatrixDistribution'
 import { ContentCalendar } from './components/ContentCalendar'
 import { AssetStudio } from './components/AssetStudio'
-import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import {
   LayoutDashboard,
   Eye,
@@ -50,9 +49,6 @@ const STORAGE_KEY_COMPETITORS = 'qaway_creator_competitors_v4'
 const STORAGE_KEY_TASKS = 'qaway_creator_tasks_v4'
 
 export default function CreadorContenidoPage() {
-  // Conectar con el Navbar oficial de Qaway Lab
-  useSetNavbarVariant('brand')
-
   // 1. Marcas / Espacios de trabajo (Tenants)
   const [tenants, setTenants] = useState<TenantWorkspace[]>(() => {
     try {
@@ -301,11 +297,11 @@ export default function CreadorContenidoPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 selection:bg-[#4f46e5] selection:text-white pt-20 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#f4f6fa] text-slate-800 selection:bg-[#4f46e5] selection:text-white font-sans flex flex-col">
       <div className="flex-1 flex flex-col lg:flex-row w-full">
         
         {/* PANEL IZQUIERDO PURPURA/INDIGO (ESTRUCTURA EXACTA DE LA REFERENCIA media_1788864698245.jpg) */}
-        <aside className="w-full lg:w-64 xl:w-72 shrink-0 bg-[#4f46e5] text-white lg:min-h-[calc(100vh-5rem)] lg:sticky lg:top-20 self-start flex flex-col justify-between p-4 sm:p-5 z-20 shadow-xl">
+        <aside className="w-full lg:w-64 xl:w-72 shrink-0 bg-[#4f46e5] text-white lg:min-h-screen lg:sticky lg:top-0 self-start flex flex-col justify-between p-4 sm:p-5 z-20 shadow-xl">
           <div className="space-y-6">
             
             {/* Cabecera del Sidebar con Logo Blanco */}
