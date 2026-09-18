@@ -933,19 +933,23 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                   <div><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-                  <div className="qw-form-actions">
+                  <div className="mt-8 flex flex-row items-center gap-4 flex-wrap">
                     {waUrl && (
                       <a
                         href={waUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="qw-btn-wa"
+                        className="inline-flex h-12 items-center justify-center gap-2.5 rounded-lg bg-[#25D366] px-6 text-[0.92rem] font-semibold text-white shadow-sm transition-all hover:bg-[#20ba5a] whitespace-nowrap"
                       >
-                        <MessageCircle size={18} className="text-[#25D366]" />
-                        <span>Continuar en WhatsApp →</span>
+                        <MessageCircle size={18} />
+                        <span>Continuar por WhatsApp</span>
                       </a>
                     )}
-                    <button type="button" onClick={onReset} className="qw-btn-reset">
+                    <button
+                      type="button"
+                      onClick={onReset}
+                      className="inline-flex h-12 items-center justify-center rounded-lg border border-[#20201f]/20 bg-white px-6 text-[0.92rem] font-semibold text-[#20201f] shadow-sm transition-all hover:bg-black/5 whitespace-nowrap"
+                    >
                       Enviar otro mensaje
                     </button>
                   </div>

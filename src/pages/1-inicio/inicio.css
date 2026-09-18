@@ -32,10 +32,6 @@
 #formulario .qw-form-success > div { display: grid; width: 4rem; height: 4rem; place-items: center; background: #fe6612; color: white; border-radius: 8px; }
 #formulario .qw-form-success h3 { margin-top: 1.8rem; font-size: clamp(2rem, 3vw, 3rem); letter-spacing: -0.05em; }
 #formulario .qw-form-success p { max-width: 32rem; margin-top: 1rem; color: #6d6b68; line-height: 1.6; }
-#formulario .qw-form-success button { margin-top: 2rem; padding-bottom: 0.4rem; border-bottom: 2px solid #fe6612; color: #20201f; font-size: 0.78rem; font-weight: 700; }
-#formulario .qw-form-success .qw-form-actions { display: flex; align-items: center; gap: 0.85rem; margin-top: 2rem; flex-wrap: wrap; }
-#formulario .qw-form-success .qw-btn-wa { display: inline-flex; align-items: center; gap: 0.5rem; background: #20201f; color: #ffffff; padding: 0.72rem 1.25rem; border-radius: 8px; font-size: 0.88rem; font-weight: 550; text-decoration: none; transition: background 0.2s ease, transform 0.2s ease; }
-#formulario .qw-form-success .qw-btn-wa:hover { background: #333332; transform: translateY(-1px); }
-#formulario .qw-form-success .qw-btn-reset { display: inline-flex; align-items: center; padding: 0.72rem 1.15rem; border: 1px solid rgba(32, 32, 31, 0.16); background: #ffffff; color: #20201f; border-radius: 8px; font-size: 0.88rem; font-weight: 550; cursor: pointer; transition: all 0.2s ease; border-bottom: 1px solid rgba(32, 32, 31, 0.16); margin-top: 0; }
-#formulario .qw-form-success .qw-btn-reset:hover { background: rgba(0, 0, 0, 0.04); }
+#formulario .qw-form-success button { cursor: pointer; }
+
 
