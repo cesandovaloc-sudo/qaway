@@ -89,7 +89,11 @@ export default function Navbar({ variant: explicitVariant }) {
   const variant = explicitVariant || (isTransparentHero ? 'transparent' : contextVariant)
 
   // Visor / reader pages hide the global Navbar for immersive experience
-  if (variant === 'hidden') return null
+  const isAccederRoute =
+    location.pathname === '/academy/app/acceder' ||
+    location.pathname === '/academy/app/acceder/'
+
+  if (isAccederRoute || variant === 'hidden') return null
 
   const isProjectDock = variant === 'project-dock'
   const styles = variantStyles[variant] || variantStyles.light
