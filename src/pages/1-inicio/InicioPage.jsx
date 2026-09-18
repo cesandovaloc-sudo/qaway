@@ -933,17 +933,22 @@ function AcademyContactSection({ submitted, submitting, submitError, onSubmit, o
                   <div><Check size={28} /></div>
                   <h3>¡Consulta enviada!</h3>
                   <p>Te responderemos pronto para ayudarte a elegir lo que mejor necesitas.</p>
-                  {waUrl && (
-                    <a
-                      href={waUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center justify-center gap-2 rounded-[8px] bg-[#25D366] px-5 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#20ba5a]"
-                    >
-                      <MessageCircle size={18} /> Continuar en WhatsApp →
-                    </a>
-                  )}
-                  <button type="button" onClick={onReset} className="mt-2 text-xs text-[#20201f]/60 hover:underline">Enviar otro mensaje</button>
+                  <div className="qw-form-actions">
+                    {waUrl && (
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="qw-btn-wa"
+                      >
+                        <MessageCircle size={18} className="text-[#25D366]" />
+                        <span>Continuar en WhatsApp →</span>
+                      </a>
+                    )}
+                    <button type="button" onClick={onReset} className="qw-btn-reset">
+                      Enviar otro mensaje
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <>
@@ -1293,13 +1298,6 @@ export default function InicioPage() {
       setSubmitted(true)
       trackLead('Inicio - Formulario Academy')
       formElement.reset()
-
-      // Intentar abrir WhatsApp en pestaña nueva de forma no intrusiva
-      try {
-        window.open(generatedWaUrl, '_blank', 'noopener,noreferrer')
-      } catch (waOpenErr) {
-        console.warn('[WhatsApp] Bloqueador activo al abrir pestaña:', waOpenErr)
-      }
     } catch (error) {
       console.error('Error al enviar consulta de Academy:', error)
       setSubmitError(error.message || 'No pudimos enviar tu consulta. Inténtalo nuevamente.')

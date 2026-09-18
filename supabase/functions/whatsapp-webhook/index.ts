@@ -504,8 +504,9 @@ serve(async (req: Request) => {
             }
 
             // ── COEXISTENCIA HÍBRIDA: Eventos Message Echoes (Respuestas desde el Celular) ──
-            if (change.value && Array.isArray(change.value.message_echoes)) {
-              for (const echo of change.value.message_echoes) {
+            const echoes = change.value?.smb_message_echoes || change.value?.message_echoes
+            if (Array.isArray(echoes)) {
+              for (const echo of echoes) {
                 const wamid = echo.id || `echo_${Date.now()}_${Math.random().toString(36).substring(7)}`
                 const customerPhone = echo.to
                 const messageText = echo.type === 'text' ? echo.text.body : `[${echo.type || 'Multimedia'}]`
