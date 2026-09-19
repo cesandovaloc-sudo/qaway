@@ -1,2 +1,2 @@
-export { HubIcon, HUB_ICON_DEFAULTS } from './HubIcon'
-export { HUB_ICON_NAMES } from './hubIcons'
+// Compat Hub. Re-export fino al canónico v4.
+export * from '../../../../components/ui/icons/index'

@@ -83,3 +83,13 @@
 - Nuevo `skills-matrix.seed.json` v1: 38 entradas (SKL-001…038): 20 repo + 15 globales + 3 BIB-skills, con nivel, origen, uso, web y estado.
 - Marcadas `revisar` (4): SKL-007 gsap-frameworks, SKL-014/015 nodejs duplicadas, SKL-022 taste-v1. Resto vigentes.
 - Validado 38/38. Sin commit, sin push.
+
+## Iteración 17 — Veredicto globales (2026-09-16)
+- 15 globales verificadas: fechas 2026-05-26 (impeccable 2026-08-05, la más nueva). Sin obsolescencia: taste-v2 usa Tailwind v4 por defecto, `deprecated` en impeccable es solo un alias interno.
+- Sirven (12): taste-v2, impeccable, gpt-taste, high-end, imagegen-web, image-to-code, redesign, brandkit, minimalist, brutalist, find-skills, full-output.
+- Revisar (6 total matriz): + SKL-027 mobile (sin proyecto móvil) y SKL-033 stitch (sin uso Stitch). Sin commit, sin push.
+
+## Iteración 18 — Skills en página (2026-09-16)
+- Nueva sección `Skills instaladas — matriz única`: lee `skills-matrix.seed.json`, muestra 36 activas (oculta 2 descartadas), badge repo/global/biblioteca, origen y marca `revisar`. Misma arte.
+- SKL-007 y SKL-022 en `descartada` (borrado físico pendiente por dueño, fuera de repo en un caso).
+- Lint limpio. Sin commit, sin push.

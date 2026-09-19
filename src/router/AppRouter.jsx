@@ -31,6 +31,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
 const AcademyRealAppPage = lazy(() => import('@/pages/4-academy/2-qawaylab-app-academy-real/AcademyAppPage'))
 const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
+const HubWorkspacePage = lazy(() => import('@/pages/5-qaway-hub/HubWorkspacePage'))
 const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/1-qawayLab-CRM/CRMPage'))
 const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
@@ -386,6 +387,11 @@ export default function AppRouter() {
           path="hub/crm"
           element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
         />
+        {/* Hub Workspace Central: standalone FUERA del Layout → anillo central sin navbar/footer públicos */}
+        <Route
+          path="hub"
+          element={renderRoute('hub', <ProtectedRoute><HubWorkspacePage /></ProtectedRoute>)}
+        />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
@@ -404,7 +410,7 @@ export default function AppRouter() {
           <Route path="hub/pagos/*" element={<RedirectTo to="/carrito" />} />
           <Route path="hub/pagos" element={<RedirectTo to="/carrito" />} />
           <Route
-            path="hub"
+            path="hub/explorar"
             element={renderRoute('hub', <HubPage />)}
           />
           <Route

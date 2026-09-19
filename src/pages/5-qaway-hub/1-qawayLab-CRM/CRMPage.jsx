@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, Settings, Sparkles, ChevronDown, AlertCircle, X, Menu, Home, LayoutGrid } from 'lucide-react'
 import { CRMProvider, useCRM } from './context/CRMContext'
@@ -106,6 +107,7 @@ function CRMContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const navigate = useNavigate()
   const searchInputRef = useRef(null)
 
   useEffect(() => {
@@ -339,9 +341,9 @@ function CRMContent() {
             {/* Home Animado */}
             <div className="hidden sm:block">
               <button 
-                onClick={() => setActiveTab('dashboard')}
+                onClick={() => navigate('/hub')}
                 className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
-                title="Ir al Inicio (Dashboard)"
+                title="Volver al Hub Workspace Central (/hub)"
               >
                 <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
                 <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">

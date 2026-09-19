@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Search, LibraryBig, Sparkles, AppWindow, FolderGit2, ArrowUpRight, SlidersHorizontal, BookOpen } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import SEED from './biblioteca.seed.json'
+import MATRIX from './skills-matrix.seed.json'
 
 /**
  * BIBLIOTECA — Maqueta visual v2 con seed real
@@ -54,6 +55,7 @@ export default function BibliotecaPage() {
   }, [tipo, funcion, nicho, costo, q])
 
   const destacados = ITEMS.filter((it) => DESTACADOS_IDS.includes(it.id))
+  const skillsActivas = (MATRIX.skills || []).filter((s) => s.estado !== 'descartada')
 
   return (
     <div className="min-h-screen" style={{ background: '#0E0E11', color: '#F2EFE6' }}>
@@ -121,6 +123,33 @@ export default function BibliotecaPage() {
               <button onClick={() => setSelectedId(d.id)} className="mt-4 flex items-center gap-1 text-sm font-medium" style={{ color: '#D8FF3E' }}>
                 Abrir ficha <ArrowUpRight size={16} />
               </button>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      {/* Skills instaladas — matriz única */}
+      <div className="mx-auto max-w-6xl px-6 pt-6">
+        <div className="mb-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: '#8B8B93' }}>
+          <span>Skills instaladas — matriz única</span>
+          <span>{skillsActivas.length} activas</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {skillsActivas.map((s) => (
+            <article
+              key={s.id}
+              className="rounded-[18px] border p-4"
+              style={{ borderColor: 'rgba(255,255,255,0.12)', background: '#131316' }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs" style={{ color: '#8B8B93' }}>{s.id}</span>
+                <span className="rounded-full px-3 py-1 font-mono text-[11px] uppercase tracking-widest" style={s.nivel === 'repo' ? { background: '#D8FF3E', color: '#0E0E11' } : { border: '1px solid rgba(255,255,255,0.2)', color: '#C9C9CF' }}>
+                  {s.nivel}
+                </span>
+              </div>
+              <h4 className="mt-2 text-[17px] leading-tight" style={{ fontFamily: 'Georgia, serif' }}>{s.nombre}</h4>
+              <p className="mt-1 text-[13px]" style={{ color: '#8B8B93' }}>{s.uso}</p>
+              <p className="mt-2 truncate font-mono text-[11px]" style={{ color: '#5c5c64' }}>{s.origen}{s.estado === 'revisar' ? ' · revisar' : ''}</p>
             </article>
           ))}
         </div>
