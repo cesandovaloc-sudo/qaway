@@ -62,45 +62,42 @@ export default function LeadsView({ onNavigateToChat }) {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-5 bg-white text-zinc-900 rounded-2xl border border-zinc-200/70 p-6 shadow-xs relative overflow-hidden">
+    <div className="bg-transparent text-zinc-900 max-w-7xl mx-auto space-y-6">
       
-      {/* ── 1. CABECERA & TARJETAS DE RESUMEN ──────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+      {/* ── 1. ENCABEZADO LIBRE SOBRE EL LIENZO ────────────────────── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#ff4b0b]/10 text-[#ff4b0b] flex items-center justify-center font-bold">
-              <Users className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Gestión Maestra de Leads</h2>
-              <p className="text-xs text-zinc-500">Base centralizada de prospectos sincronizada con Supabase Cloud y WhatsApp WABA.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Métricas Compactas */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Total Leads</span>
-            <p className="text-base font-black text-zinc-900">{stats.total}</p>
-          </div>
-          <div className="bg-cyan-50/50 border border-cyan-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-600">Por Atender</span>
-            <p className="text-base font-black text-cyan-800">{stats.nuevos}</p>
-          </div>
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Negociación</span>
-            <p className="text-base font-black text-blue-800">{stats.enNegociacion}</p>
-          </div>
-          <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Ganados</span>
-            <p className="text-base font-black text-emerald-800">{stats.ganados}</p>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+            Gestión Maestra de Leads
+          </h1>
+          <p className="text-[14px] text-zinc-500 font-medium mt-1">
+            Base centralizada de prospectos sincronizada con Supabase Cloud y WhatsApp WABA.
+          </p>
         </div>
       </div>
 
-      {/* ── 2. BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS ──────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* ── 2. CUATRO TARJETAS KPI INDEPENDIENTES ──────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5">
+          <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Total Leads</span>
+          <p className="text-2xl lg:text-3xl font-bold text-zinc-900 tracking-tight mt-1">{stats.total}</p>
+        </div>
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5">
+          <span className="text-xs font-semibold text-cyan-600 uppercase tracking-wider">Por Atender</span>
+          <p className="text-2xl lg:text-3xl font-bold text-cyan-700 tracking-tight mt-1">{stats.nuevos}</p>
+        </div>
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5">
+          <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Negociación</span>
+          <p className="text-2xl lg:text-3xl font-bold text-blue-700 tracking-tight mt-1">{stats.enNegociacion}</p>
+        </div>
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5">
+          <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Ganados</span>
+          <p className="text-2xl lg:text-3xl font-bold text-emerald-700 tracking-tight mt-1">{stats.ganados}</p>
+        </div>
+      </div>
+
+      {/* ── 3. BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS ──────────── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         {/* Buscador */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -133,7 +130,7 @@ export default function LeadsView({ onNavigateToChat }) {
           <select
             value={channelFilter}
             onChange={(e) => setChannelFilter(e.target.value)}
-            className="px-3 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-700 focus:outline-none focus:border-[#ff4b0b] cursor-pointer"
+            className="px-3 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-700 focus:outline-none focus:border-zinc-400 cursor-pointer font-medium"
           >
             <option value="all">Todos los Canales</option>
             <option value="whatsapp">WhatsApp Cloud API</option>
@@ -145,7 +142,7 @@ export default function LeadsView({ onNavigateToChat }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-700 focus:outline-none focus:border-[#ff4b0b] cursor-pointer"
+            className="px-3 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-700 focus:outline-none focus:border-zinc-400 cursor-pointer font-medium"
           >
             <option value="all">Todas las Etapas</option>
             <option value="new">Nuevos</option>
@@ -158,9 +155,10 @@ export default function LeadsView({ onNavigateToChat }) {
         </div>
       </div>
 
-      {/* ── 3. TABLA PRINCIPAL DE DATOS ────────────────────────────── */}
-      <div className="flex-1 overflow-x-auto rounded-xl border border-zinc-200/60 bg-white">
-        <table className="w-full text-left border-collapse text-xs">
+      {/* ── 4. TABLA PRINCIPAL DE DATOS ────────────────────────────── */}
+      <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-zinc-50/80 border-b border-zinc-200/60 text-[11px] font-bold text-zinc-500 uppercase tracking-wider select-none">
               <th className="py-3 px-4">Cliente / Contacto</th>
@@ -303,6 +301,7 @@ export default function LeadsView({ onNavigateToChat }) {
           </tbody>
         </table>
       </div>
+    </div>
 
       {/* ── 4. DRAWER LATERAL DE DETALLE COMPLETO (SLIDE-OVER) ─────── */}
       <AnimatePresence>
