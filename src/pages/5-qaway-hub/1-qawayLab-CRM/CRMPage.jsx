@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, ChevronDown, AlertCircle, X, Menu, Home } from 'lucide-react'
+import { BarChart3, MessageSquare, RefreshCw, Layers, ShieldCheck, Target, Briefcase, Search, Bell, Plus, Zap, ChevronRight, Users, Settings2, Settings, Sparkles, ChevronDown, AlertCircle, X, Menu, Home, LayoutGrid } from 'lucide-react'
 import { CRMProvider, useCRM } from './context/CRMContext'
 import DashboardView from './components/DashboardView'
 import KanbanView from './components/KanbanView'
@@ -258,19 +258,16 @@ function CRMContent() {
           {/* Módulo de Configuración */}
           <button 
             onClick={() => setActiveTab('configuracion')}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium",
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium ${
               activeTab === 'configuracion'
                 ? "bg-white/10 text-white shadow-sm" 
-                : "text-white/60 hover:text-white hover:bg-white/5",
-              isSidebarCollapsed && "justify-center"
-            )}
+                : "text-white/60 hover:text-white hover:bg-white/5"
+            } ${isSidebarCollapsed ? "justify-center" : ""}`}
             title={isSidebarCollapsed ? "Configuración" : undefined}
           >
-            <Settings className={cn(
-              "w-5 h-5 transition-colors",
+            <Settings className={`w-5 h-5 transition-colors ${
               activeTab === 'configuracion' ? "text-white" : "text-white/40 group-hover:text-white/80"
-            )} />
+            }`} />
             {!isSidebarCollapsed && (
               <span className="truncate">Configuración</span>
             )}
@@ -280,16 +277,14 @@ function CRMContent() {
           <button 
             onClick={handleSimulate}
             disabled={simulating}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group",
-              isSidebarCollapsed && "justify-center"
-            )}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
+              isSidebarCollapsed ? "justify-center" : ""
+            }`}
             title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
           >
-            <RefreshCw className={cn(
-              "w-4 h-4 group-hover:text-[#ff4b0b] transition-colors",
-              simulating && "animate-spin text-[#ff4b0b]"
-            )} />
+            <RefreshCw className={`w-4 h-4 group-hover:text-[#ff4b0b] transition-colors ${
+              simulating ? "animate-spin text-[#ff4b0b]" : ""
+            }`} />
             {!isSidebarCollapsed && (
               <span className="truncate">Simular Webhook</span>
             )}
