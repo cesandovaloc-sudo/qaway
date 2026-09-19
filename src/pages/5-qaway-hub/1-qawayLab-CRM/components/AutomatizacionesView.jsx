@@ -243,7 +243,7 @@ export default function AutomatizacionesView() {
       </div>
 
       {/* ── 3. SELECTOR DE SUB-PESTAÑAS STICKY ──────────────────────── */}
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1.5 rounded-2xl shadow-xs flex items-center gap-2 overflow-x-auto">
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1.5 rounded-2xl shadow-xs flex items-center gap-2 overflow-x-auto">
         <button
           onClick={() => setActiveSubTab('flows')}
           className={`px-4 py-2 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${

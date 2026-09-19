@@ -160,7 +160,7 @@ export default function LeadsView({ onNavigateToChat }) {
       </div>
 
       {/* ── 3. BARRA DE HERRAMIENTAS STICKY: BÚSQUEDA Y FILTROS ──────────── */}
-      <div className="sticky top-0 z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-4 py-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
+      <div className="sticky top-0 z-30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-4 py-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         {/* Buscador */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
