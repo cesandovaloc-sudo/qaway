@@ -181,99 +181,108 @@ export default function AutomatizacionesView() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-5 bg-white text-zinc-900 rounded-2xl border border-zinc-200/70 p-6 shadow-xs relative overflow-hidden">
+    <div className="space-y-6 bg-transparent text-zinc-900 max-w-7xl mx-auto">
       
-      {/* ── 1. CABECERA & TARJETAS DE MÉTRICAS ──────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+      {/* ── 1. CABECERA DESENCAPSULADA ─────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#ff4b0b]/10 text-[#ff4b0b] flex items-center justify-center font-bold">
-              <Zap className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Centro de Automatizaciones & Agentes IA</h2>
-              <p className="text-xs text-zinc-500">Gestión de disparadores autónomos, auto-respuestas 24/7 y reglas de embudo.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tarjetas de Métricas de Automatización */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Flujos Activos</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-zinc-900">{metrics.activeFlows}</p>
-              <span className="text-[10px] text-zinc-400 font-medium">de {metrics.totalFlows}</span>
-            </div>
-          </div>
-
-          <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Disparos Hoy</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-emerald-800">{metrics.totalExecutions}</p>
-              <span className="text-[10px] text-emerald-600 font-semibold">eventos</span>
-            </div>
-          </div>
-
-          <div className="bg-purple-50/50 border border-purple-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600">Tasa de Éxito</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-purple-800">{metrics.successRate}</p>
-              <span className="text-[10px] text-purple-600 font-semibold">uptime</span>
-            </div>
-          </div>
-
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Ahorro de Tiempo</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-blue-800">~{metrics.hoursSaved}h</p>
-              <span className="text-[10px] text-blue-600 font-semibold">estimadas</span>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Automatizaciones & Reglas</h1>
+          <p className="text-[14px] text-zinc-500 font-medium mt-1">Gestión de disparadores autónomos, auto-respuestas 24/7 y agentes inteligentes.</p>
         </div>
       </div>
 
-      {/* ── 2. SELECTOR DE SUB-PESTAÑAS ────────────────────────────── */}
-      <div className="flex items-center gap-1.5 border-b border-zinc-100 pb-2">
+      {/* ── 2. CUADRO DE 4 KPIS CON SPARKLINES ───────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1 */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Flujos Activos</span>
+            <div className="text-3xl font-extrabold text-zinc-900 tracking-tight">{metrics.activeFlows}</div>
+            <p className="text-[12px] text-zinc-400 font-medium">de {metrics.totalFlows} configurados</p>
+          </div>
+          <svg className="w-16 h-8 text-[#ff4b0b] shrink-0" viewBox="0 0 64 32">
+            <polyline fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points="2,24 16,18 30,22 44,10 62,6" />
+          </svg>
+        </div>
+
+        {/* KPI 2 */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Disparos Hoy</span>
+            <div className="text-3xl font-extrabold text-zinc-900 tracking-tight">{metrics.totalExecutions}</div>
+            <p className="text-[12px] text-emerald-600 font-bold">eventos ejecutados</p>
+          </div>
+          <svg className="w-16 h-8 text-emerald-500 shrink-0" viewBox="0 0 64 32">
+            <polyline fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points="2,28 18,20 32,22 46,12 62,4" />
+          </svg>
+        </div>
+
+        {/* KPI 3 */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Tasa de Éxito</span>
+            <div className="text-3xl font-extrabold text-zinc-900 tracking-tight">{metrics.successRate}</div>
+            <p className="text-[12px] text-purple-600 font-bold">uptime del sistema</p>
+          </div>
+          <svg className="w-16 h-8 text-purple-500 shrink-0" viewBox="0 0 64 32">
+            <polyline fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points="2,16 16,14 30,12 46,8 62,6" />
+          </svg>
+        </div>
+
+        {/* KPI 4 */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-5 shadow-xs flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Ahorro de Tiempo</span>
+            <div className="text-3xl font-extrabold text-zinc-900 tracking-tight">~{metrics.hoursSaved}h</div>
+            <p className="text-[12px] text-blue-600 font-bold">horas estimadas</p>
+          </div>
+          <svg className="w-16 h-8 text-blue-500 shrink-0" viewBox="0 0 64 32">
+            <polyline fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" points="2,26 18,22 34,14 48,16 62,4" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ── 3. SELECTOR DE SUB-PESTAÑAS STICKY ──────────────────────── */}
+      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1.5 rounded-2xl shadow-xs flex items-center gap-2 overflow-x-auto">
         <button
           onClick={() => setActiveSubTab('flows')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
             activeSubTab === 'flows'
               ? 'bg-[#ff4b0b] text-white shadow-xs'
-              : 'text-zinc-600 hover:bg-zinc-100'
+              : 'text-zinc-600 hover:bg-zinc-100/80'
           }`}
         >
-          <Bot className="w-3.5 h-3.5" />
+          <Bot className="w-4 h-4" />
           <span>Reglas & Flujos ({metrics.activeFlows} activos)</span>
         </button>
 
         <button
           onClick={() => setActiveSubTab('logs')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
             activeSubTab === 'logs'
               ? 'bg-[#ff4b0b] text-white shadow-xs'
-              : 'text-zinc-600 hover:bg-zinc-100'
+              : 'text-zinc-600 hover:bg-zinc-100/80'
           }`}
         >
-          <Terminal className="w-3.5 h-3.5" />
+          <Terminal className="w-4 h-4" />
           <span>Registro en Vivo (Logs)</span>
         </button>
 
         <button
           onClick={() => setActiveSubTab('endpoints')}
-          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-[13px] font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
             activeSubTab === 'endpoints'
               ? 'bg-[#ff4b0b] text-white shadow-xs'
-              : 'text-zinc-600 hover:bg-zinc-100'
+              : 'text-zinc-600 hover:bg-zinc-100/80'
           }`}
         >
-          <ShieldCheck className="w-3.5 h-3.5" />
+          <ShieldCheck className="w-4 h-4" />
           <span>Endpoints & Webhooks</span>
         </button>
       </div>
 
-      {/* ── 3. CONTENIDO SEGÚN SUB-PESTAÑA ─────────────────────────── */}
-      <div className="flex-1 overflow-y-auto pr-1">
+      {/* ── 4. CONTENIDO SEGÚN SUB-PESTAÑA ─────────────────────────── */}
+      <div>
         
         {/* VISTA 1: FLUJOS Y REGLAS */}
         {activeSubTab === 'flows' && (

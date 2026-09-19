@@ -56,37 +56,37 @@ export default function KanbanView() {
   const activeColumns = COLUMNS.filter(col => visibleCols[col.id])
 
   return (
-    <div className="space-y-4 bg-white text-zinc-900">
+    <div className="space-y-6 bg-transparent text-zinc-900 max-w-7xl mx-auto">
       
-      {/* CABECERA Y PANEL DE CONFIGURACIÓN DE COLUMNAS */}
-      <div className="flex justify-between items-center bg-zinc-50 p-5 rounded-[15px] border border-zinc-200/60 shadow-xs">
+      {/* CABECERA DESENCAPSULADA Y CONFIGURACIÓN */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h4 className="text-sm font-bold text-zinc-800 uppercase tracking-wider">Embudo Comercial</h4>
-          <p className="text-[11px] text-zinc-400 mt-0.5">Control visual y progresión de los prospectos en el proceso de ventas.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Embudo Comercial</h1>
+          <p className="text-[14px] text-zinc-500 font-medium mt-1">Control visual y progresión de los prospectos en el proceso de ventas.</p>
         </div>
 
         {/* Botón de Configurar Columnas */}
         <div className="relative">
           <button
             onClick={() => setShowColConfig(!showColConfig)}
-            className="flex items-center justify-center gap-1.5 py-1.5 px-3.5 text-xs font-bold rounded-[15px] border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 active:scale-95 transition-all shadow-2xs"
+            className="flex items-center justify-center gap-2 py-2 px-4 text-[13px] font-semibold rounded-xl border border-zinc-200/80 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 active:scale-95 transition-all shadow-xs"
           >
-            <Settings2 className="w-3.5 h-3.5" />
+            <Settings2 className="w-4 h-4 text-zinc-500" />
             <span>Configurar Columnas</span>
           </button>
           
           {showColConfig && (
-            <div className="absolute right-0 mt-2.5 w-60 bg-white border border-zinc-200 rounded-[15px] shadow-lg p-4 z-50 space-y-3">
-              <h5 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 pb-2">Mostrar / Ocultar Columnas</h5>
-              <div className="space-y-2">
+            <div className="absolute right-0 mt-2.5 w-64 bg-white border border-zinc-200/80 rounded-2xl shadow-xl p-4 z-50 space-y-3">
+              <h5 className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 pb-2">Mostrar / Ocultar Columnas</h5>
+              <div className="space-y-1.5">
                 {COLUMNS.map(col => (
                   <button
                     key={col.id}
                     onClick={() => toggleCol(col.id)}
-                    className="w-full flex items-center justify-between text-xs text-zinc-700 hover:text-zinc-950 py-1 font-semibold"
+                    className="w-full flex items-center justify-between text-[13px] text-zinc-700 hover:text-zinc-950 py-1.5 px-2 rounded-lg hover:bg-zinc-50 font-medium transition-colors"
                   >
                     <span>{col.title}</span>
-                    {visibleCols[col.id] ? <Eye className="w-4 h-4 text-green-500" /> : <EyeOff className="w-4 h-4 text-zinc-400" />}
+                    {visibleCols[col.id] ? <Eye className="w-4 h-4 text-emerald-500" /> : <EyeOff className="w-4 h-4 text-zinc-400" />}
                   </button>
                 ))}
               </div>
@@ -95,8 +95,8 @@ export default function KanbanView() {
         </div>
       </div>
 
-      {/* Grid de Columnas del Kanban en Gris/Blanco Minimalista */}
-      <div className={`grid grid-cols-1 gap-4 overflow-x-auto pb-4`} style={{ gridTemplateColumns: `repeat(${activeColumns.length}, minmax(230px, 1fr))` }}>
+      {/* Grid de Columnas del Kanban en Lienzo Limpio */}
+      <div className="grid grid-cols-1 gap-4 overflow-x-auto pb-6" style={{ gridTemplateColumns: `repeat(${activeColumns.length}, minmax(260px, 1fr))` }}>
         {activeColumns.map(col => {
           const colLeads = getLeadsByStatus(col.id)
           const totalBudget = colLeads.reduce((sum, l) => sum + Number(l.budget || 0), 0)
@@ -104,55 +104,55 @@ export default function KanbanView() {
           return (
             <div
               key={col.id}
-              className="bg-zinc-50 border border-zinc-100 rounded-[15px] p-4 flex flex-col min-w-[230px] max-h-[75vh]"
+              className="bg-zinc-100/70 border border-zinc-200/80 rounded-2xl p-3.5 flex flex-col min-w-[270px] max-h-[78vh]"
             >
               {/* Encabezado de la columna */}
-              <div className="flex justify-between items-center mb-4">
-                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${col.color} uppercase tracking-wider`}>
+              <div className="flex justify-between items-center mb-3 px-1">
+                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${col.color} uppercase tracking-wider`}>
                   {col.title} ({colLeads.length})
                 </span>
-                <span className="text-[10px] text-zinc-400 font-bold">${totalBudget.toFixed(0)}</span>
+                <span className="text-[12px] text-zinc-500 font-bold">${totalBudget.toFixed(0)}</span>
               </div>
 
               {/* Lista de Tarjetas en Blanco Puro */}
               <div className="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
                 {colLeads.length === 0 ? (
-                  <div className="border border-dashed border-zinc-200 rounded-[15px] py-10 text-center text-[10px] text-zinc-400 font-medium bg-white/40">
-                    Sin leads
+                  <div className="border border-dashed border-zinc-200 rounded-xl py-12 text-center text-[12px] text-zinc-400 font-medium bg-white/50">
+                    Sin prospectos
                   </div>
                 ) : (
                   colLeads.map(lead => (
                     <motion.div
                       key={lead.id}
                       layoutId={lead.id}
-                      whileHover={{ y: -3, boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}
+                      whileHover={{ y: -2, boxShadow: '0 6px 20px rgba(0,0,0,0.05)' }}
                       onClick={() => {
                         setSelectedLeadId(lead.id)
                         setDrawerLeadId(lead.id)
                       }}
-                      className="bg-white border border-zinc-200/80 rounded-[15px] p-4 cursor-pointer transition-all duration-300 relative group"
+                      className="bg-white border border-zinc-200/80 rounded-xl p-4 cursor-pointer hover:border-zinc-300 transition-all duration-200 relative group shadow-xs"
                     >
                       {/* Atribución de campaña */}
-                      <span className="text-[8px] bg-zinc-50 text-zinc-400 font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider block mb-2 max-w-fit truncate border border-zinc-100">
-                        {lead.campaignName}
+                      <span className="text-[10px] bg-zinc-100/80 text-zinc-600 font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider block mb-2 max-w-fit truncate border border-zinc-200/50">
+                        {lead.campaignName || 'General'}
                       </span>
 
                       {/* Nombre del Lead */}
                       <div className="flex justify-between items-start mb-1">
-                        <h5 className="text-sm font-bold text-zinc-950 group-hover:text-green-600 transition-colors">
+                        <h5 className="text-[14px] font-bold text-zinc-900 group-hover:text-[#ff4b0b] transition-colors leading-snug">
                           {lead.name}
                         </h5>
                         {lead.priority === 'high' && (
-                          <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 shrink-0" />
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0 mt-0.5" />
                         )}
                       </div>
 
                       {/* WhatsApp */}
-                      <p className="text-[10px] text-zinc-400 font-semibold">{lead.whatsapp}</p>
+                      <p className="text-[12px] text-zinc-500 font-mono">{lead.whatsapp}</p>
 
                       {/* Selector de Etapa Directa & Presupuesto */}
-                      <div className="flex justify-between items-center mt-3.5 pt-3 border-t border-zinc-100 gap-2">
-                        <span className="text-xs font-black text-zinc-950">
+                      <div className="flex justify-between items-center mt-3 pt-3 border-t border-zinc-100 gap-2">
+                        <span className="text-[14px] font-extrabold text-zinc-900">
                           ${Number(lead.budget || 0).toFixed(0)}
                         </span>
                         
@@ -162,7 +162,7 @@ export default function KanbanView() {
                               value={lead.status}
                               onClick={(e) => e.stopPropagation()}
                               onChange={(e) => updateLeadStatus(lead.id, e.target.value)}
-                              className="text-[9px] font-bold uppercase bg-zinc-50 border border-zinc-200/80 rounded-md px-1 py-0.5 text-zinc-600 focus:outline-none focus:border-zinc-300"
+                              className="text-[11px] font-semibold bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1 text-zinc-700 focus:outline-none focus:border-[#ff4b0b]"
                             >
                               <option value="new">Nuevo</option>
                               <option value="contactado">Contactado</option>
@@ -177,13 +177,13 @@ export default function KanbanView() {
                                 handleMarkLost(lead.id)
                               }}
                               title="Marcar como perdido"
-                              className="p-1 hover:bg-red-50 rounded-md text-zinc-400 hover:text-red-500 transition-colors"
+                              className="p-1 hover:bg-red-50 rounded-lg text-zinc-400 hover:text-red-500 transition-colors"
                             >
-                              <XCircle className="w-3.5 h-3.5" />
+                              <XCircle className="w-4 h-4" />
                             </button>
                           </div>
                         ) : (
-                          <span className="text-[9px] font-bold uppercase bg-zinc-50 border border-zinc-200/80 rounded-md px-2 py-0.5 text-zinc-400 cursor-not-allowed">
+                          <span className="text-[11px] font-semibold bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-0.5 text-zinc-400 cursor-not-allowed">
                             Sólo Lectura
                           </span>
                         )}
