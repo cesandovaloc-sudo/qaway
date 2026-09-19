@@ -4,7 +4,7 @@ import {
   DollarSign, TrendingUp, Users, Percent,
   ArrowUpRight, Award, Megaphone, Settings2, Eye, EyeOff,
   Target, MessageSquare, Clock, BarChart3, Plus, Activity, X,
-  FileText, Filter, MoreVertical, Calendar, ChevronDown, Search, Check, Layers, Video
+  FileText, Filter, MoreVertical, Calendar, ChevronDown, Search, Check, Layers, Video, Globe
 } from 'lucide-react'
 import { useCRM } from '../context/CRMContext'
 import MetricBuilderModal from './MetricBuilderModal'
