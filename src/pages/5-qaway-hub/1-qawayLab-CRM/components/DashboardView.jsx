@@ -156,26 +156,26 @@ export default function DashboardView() {
 
   // Componente de Filtro de Campañas
   const renderCampaignFilter = () => (
-    <div className="flex flex-wrap items-center gap-2 mb-8 bg-white border border-zinc-200/60 p-2 rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-      <span className="text-[11px] font-semibold text-zinc-400 ml-2 mr-2">Filtrar por campaña:</span>
+    <div className="flex flex-wrap items-center gap-1.5 mb-7 bg-white border border-zinc-200/80 p-1.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <span className="text-xs font-semibold text-zinc-400 ml-2.5 mr-2">Filtrar por:</span>
       <button
         onClick={() => setSelectedCampaignId('all')}
-        className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+        className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg active:scale-[0.98] transition-all duration-150 ${
           selectedCampaignId === 'all'
-            ? 'bg-zinc-900 text-white shadow-sm'
-            : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
+            ? 'bg-zinc-900 text-white shadow-xs'
+            : 'bg-transparent text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
         }`}
       >
-        Todas
+        Todas las Campañas
       </button>
       {effectiveCampaigns.map(camp => (
         <button
           key={camp.id}
           onClick={() => setSelectedCampaignId(camp.id)}
-          className={`px-4 py-1.5 text-xs font-semibold rounded-xl transition-all duration-200 ${
+          className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg active:scale-[0.98] transition-all duration-150 ${
             selectedCampaignId === camp.id
-              ? 'bg-zinc-900 text-white shadow-sm'
-              : 'bg-transparent text-zinc-600 hover:bg-zinc-100'
+              ? 'bg-zinc-900 text-white shadow-xs'
+              : 'bg-transparent text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
           }`}
         >
           {camp.name}
@@ -300,83 +300,98 @@ export default function DashboardView() {
         {/* ── KPIs SUPERIORES DINÁMICOS ───────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
           {/* Leads Nuevos */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-orange-50 text-[#ff4b0b]">
+                <div className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
                   <Users className="w-4 h-4" />
                 </div>
-                <span className="text-[12px] font-semibold text-zinc-500">Leads totales</span>
+                <span className="text-xs font-semibold text-zinc-600">Leads totales</span>
               </div>
             </div>
-            <h3 className="text-[32px] font-bold tracking-tight text-zinc-900">{totalLeads}</h3>
-            <p className="text-sm font-medium text-zinc-500 mt-1 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Data en vivo
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">{totalLeads}</h3>
+            <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse"></span> Data en vivo
             </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+            </svg>
           </div>
 
           {/* Ingresos del Mes */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
                   <DollarSign className="w-4 h-4" />
                 </div>
-                <span className="text-[12px] font-semibold text-zinc-500">Ingresos generados</span>
+                <span className="text-xs font-semibold text-zinc-600">Ingresos generados</span>
               </div>
             </div>
-            <h3 className="text-[32px] font-bold tracking-tight text-zinc-900">S/ {(totalRevenue).toLocaleString('es-PE')}</h3>
-            <p className="text-sm font-medium text-emerald-600 mt-1 flex items-center gap-1">
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(totalRevenue).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1">
               Gasto total: S/ {(totalSpend).toLocaleString('es-PE')}
             </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+            </svg>
           </div>
 
           {/* Tasa Conversión */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
                   <Target className="w-4 h-4" />
                 </div>
-                <span className="text-[12px] font-semibold text-zinc-500">Tasa conversión</span>
+                <span className="text-xs font-semibold text-zinc-600">Tasa conversión</span>
               </div>
             </div>
-            <h3 className="text-[32px] font-bold tracking-tight text-zinc-900">{conversionRate}%</h3>
-            <p className="text-sm font-medium text-zinc-400 mt-1 flex items-center gap-1">
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">{conversionRate}%</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
               De lead a cierre
             </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,12 20,15 40,8 60,10 80,4 100,2" />
+            </svg>
           </div>
 
           {/* Ticket Promedio */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+                <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
                   <FileText className="w-4 h-4" />
                 </div>
-                <span className="text-[12px] font-semibold text-zinc-500">Ticket promedio</span>
+                <span className="text-xs font-semibold text-zinc-600">Ticket promedio</span>
               </div>
             </div>
-            <h3 className="text-[32px] font-bold tracking-tight text-zinc-900">S/ {(ticketPromedio).toLocaleString('es-PE')}</h3>
-            <p className="text-sm font-medium text-zinc-400 mt-1 flex items-center gap-1">
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(ticketPromedio).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
               Por venta exitosa
             </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,9 80,10 100,4" />
+            </svg>
           </div>
 
           {/* Valor Pipeline */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
                   <Activity className="w-4 h-4" />
                 </div>
-                <span className="text-[12px] font-semibold text-zinc-500">Valor en pipeline</span>
+                <span className="text-xs font-semibold text-zinc-600">Valor en pipeline</span>
               </div>
             </div>
-            <h3 className="text-[32px] font-bold tracking-tight text-zinc-900">S/ {(valorPipeline).toLocaleString('es-PE')}</h3>
-            <p className="text-sm font-medium text-zinc-400 mt-1 flex items-center gap-1">
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">S/ {(valorPipeline).toLocaleString('es-PE')}</h3>
+            <p className="text-xs font-semibold text-zinc-500 mt-1.5 flex items-center gap-1">
               Oportunidades activas
             </p>
+            <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,20 20,15 40,10 60,12 80,4 100,2" />
+            </svg>
           </div>
         </div>
 
@@ -384,58 +399,58 @@ export default function DashboardView() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           
           {/* Rendimiento Comercial (LineChart) */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-[14px] font-bold text-zinc-800 tracking-tight">Rendimiento mensual</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg">Mensual <ChevronDown className="w-3 h-3" /></button>
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
+            <div className="flex justify-between items-center mb-5">
+              <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento mensual</h4>
+              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Mensual <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
             </div>
-            <div className="flex items-center gap-4 mb-4 text-[11px] font-semibold text-zinc-500">
+            <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-[#ff4b0b]"></div> Ingresos (k)</div>
               <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-zinc-900"></div> Cierres</div>
             </div>
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={rendimientoData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
+                <LineChart data={rendimientoData} margin={{ top: 5, right: 0, left: -15, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f4" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a1a1aa' }} dy={10} />
-                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a1a1aa' }} tickFormatter={(val) => `$${val}`} />
-                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a1a1aa' }} />
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Line yAxisId="left" type="monotone" dataKey="ingresos" stroke="#ff4b0b" strokeWidth={3} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#ff4b0b' }} />
-                  <Line yAxisId="right" type="monotone" dataKey="ganadas" stroke="#18181b" strokeWidth={3} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#18181b' }} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} dy={10} />
+                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={(val) => `$${val}`} />
+                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
+                  <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.08)' }} />
+                  <Line yAxisId="left" type="monotone" dataKey="ingresos" stroke="#ff4b0b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#ff4b0b' }} />
+                  <Line yAxisId="right" type="monotone" dataKey="ganadas" stroke="#18181b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 6, strokeWidth: 0, fill: '#18181b' }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Ingresos por Canal (BarChart Horizontal) */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-[14px] font-bold text-zinc-800 tracking-tight">Ingresos por canal</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg">Este mes <ChevronDown className="w-3 h-3" /></button>
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
+            <div className="flex justify-between items-center mb-5">
+              <h4 className="text-base font-bold text-zinc-900 tracking-tight">Ingresos por canal</h4>
+              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Este mes <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
             </div>
-            <div className="flex items-center gap-4 mb-4 text-[11px] font-semibold text-zinc-500">
+            <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-[#ff4b0b]"></div> Ganado</div>
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-zinc-200"></div> En curso</div>
             </div>
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={channelData} layout="vertical" margin={{ top: 0, right: 20, left: 20, bottom: 0 }}>
+                <BarChart data={channelData} layout="vertical" margin={{ top: 0, right: 20, left: 10, bottom: 0 }}>
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#52525b', fontWeight: 500 }} width={90} />
-                  <Tooltip cursor={{ fill: '#f4f4f5' }} contentStyle={{ borderRadius: '12px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#52525b', fontWeight: 500 }} width={95} />
+                  <Tooltip cursor={{ fill: '#f4f4f5' }} contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.08)' }} />
                   <Bar dataKey="ganado" stackId="a" fill="#ff4b0b" barSize={16} radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="curso" stackId="a" fill="#e4e4e7" barSize={16} radius={[0, 6, 6, 0]} />
+                  <Bar dataKey="curso" stackId="a" fill="#e4e4e7" barSize={16} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Distribución PieChart */}
-          <div className="bg-white border border-zinc-200/60 rounded-2xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-6">
-              <h4 className="text-[14px] font-bold text-zinc-800 tracking-tight">Oportunidades por etapa</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg">Este mes <ChevronDown className="w-3 h-3" /></button>
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
+            <div className="flex justify-between items-center mb-5">
+              <h4 className="text-base font-bold text-zinc-900 tracking-tight">Oportunidades por etapa</h4>
+              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Este mes <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
             </div>
             <div className="flex items-center justify-between h-56">
               <div className="relative w-1/2 h-full flex items-center justify-center">
@@ -449,18 +464,18 @@ export default function DashboardView() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-[11px] font-semibold text-zinc-400">Total</span>
-                  <span className="text-3xl font-bold tracking-tight text-zinc-900">{filteredLeads.length}</span>
+                  <span className="text-xs font-semibold text-zinc-400">Total</span>
+                  <span className="text-3xl font-extrabold tracking-tight text-zinc-900">{filteredLeads.length}</span>
                 </div>
               </div>
               <div className="w-1/2 pl-4 flex flex-col gap-3 justify-center">
                 {pieData.map((d, i) => (
-                  <div key={d.name} className="flex items-center justify-between text-[12px]">
+                  <div key={d.name} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                      <span className="font-semibold text-zinc-700 truncate max-w-[80px]">{d.name}</span>
+                      <span className="font-semibold text-zinc-700 truncate max-w-[85px]">{d.name}</span>
                     </div>
-                    <span className="text-zinc-500 font-medium">{((d.value/filteredLeads.length)*100).toFixed(1)}%</span>
+                    <span className="text-zinc-600 font-semibold">{((d.value/filteredLeads.length)*100).toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
