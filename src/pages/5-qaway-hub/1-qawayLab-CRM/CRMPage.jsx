@@ -215,16 +215,21 @@ function CRMContent() {
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
         
-        {/* LOGO DE LA APP (Limpio y directo) */}
-        <div className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0`}>
-          <span className="text-xl font-bold tracking-tight">
-            {isSidebarCollapsed ? (
-              <span className="text-[#ff4b0b]">Q</span>
-            ) : (
-              <>Qaway <span className="text-[#ff4b0b]">CRM</span><span className="text-[#ff4b0b] ml-0.5 text-xs align-top">⌝</span></>
-            )}
-          </span>
-        </div>
+        {/* LOGO - Redirección a Inicio */}
+        <button 
+          onClick={() => setActiveTab('dashboard')}
+          className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white tracking-wide text-lg">
+              {isSidebarCollapsed ? (
+                <span className="text-[#ff4b0b]">Q</span>
+              ) : (
+                <>{currentProfile.company || "Qaway"} <span className="text-[#ff4b0b]">CRM</span></>
+              )}
+            </span>
+          </div>
+        </button>
 
         {/* NAVIGATION */}
         <nav className={`flex-1 py-6 ${isSidebarCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
@@ -246,19 +251,35 @@ function CRMContent() {
               </button>
             )
           })}
+        </nav>
 
-          <div className="my-6 mx-3 border-t border-white/10" />
+        {/* ZONA INFERIOR DEL SIDEBAR (Configuración & Webhook) */}
+        <div className="p-4 border-t border-white/5 flex flex-col gap-2">
+          {/* Módulo de Configuración */}
+          <button 
+            onClick={() => setActiveTab('configuracion')}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium",
+              activeTab === 'configuracion'
+                ? "bg-white/10 text-white shadow-sm" 
+                : "text-white/60 hover:text-white hover:bg-white/5",
+              isSidebarCollapsed && "justify-center"
+            )}
+            title={isSidebarCollapsed ? "Configuración" : undefined}
+          >
+            <Settings className={cn(
+              "w-5 h-5 transition-colors",
+              activeTab === 'configuracion' ? "text-white" : "text-white/40 group-hover:text-white/80"
+            )} />
+            {!isSidebarCollapsed && (
+              <span className="truncate">Configuración</span>
+            )}
+          </button>
 
-          {/* SIMULATOR BUTTON */}
-          <button
+          {/* Simular Webhook (Dev Tools) */}
+          <button 
             onClick={handleSimulate}
             disabled={simulating}
-            title={isSidebarCollapsed ? "Simular Webhook" : ""}
-            className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left text-white/60 hover:text-white hover:bg-white/5 disabled:opacity-50`}
-          >
-            <RefreshCw className={`w-4 h-4 shrink-0 ${simulating ? 'animate-spin text-[#ff4b0b]' : ''}`} />
-            {!isSidebarCollapsed && <span className="truncate">Simular Webhook</span>}
-          </button>
         </nav>
 
         {/* INSIGHTS WIDGET COLLAPSIBLE */}
@@ -516,12 +537,27 @@ function CRMContent() {
                           <p className="text-xs text-white/50 truncate mt-0.5">admin@qaway.pe</p>
                         </div>
                       </div>
+                      
+                      {/* Opciones CRM Reales */}
                       <div className="p-2 flex flex-col gap-1">
-                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-colors font-medium">Gestionar tu cuenta</button>
-                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-colors font-medium">Preferencias de CRM</button>
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                          Preferencias de Cuenta
+                        </button>
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                          Usuarios y Roles
+                        </button>
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                          Integraciones (Meta/WA)
+                        </button>
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                          Suscripción y Pagos
+                        </button>
                       </div>
+                      
                       <div className="p-2 border-t border-white/5 bg-black/20">
-                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl transition-colors font-bold">Cerrar Sesión</button>
+                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold">
+                          Cerrar Sesión
+                        </button>
                       </div>
                     </motion.div>
                   </>
@@ -580,6 +616,35 @@ function CRMContent() {
             </AnimatePresence>
           </div>
         </main>
+
+        {/* FLOATING ACTION BUTTONS (IA & Chatbot) en la Esquina Inferior Derecha */}
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+          
+          {/* Botón de Asistente IA (Insights Flotante) */}
+          <button
+            onClick={() => alert("Próximamente: Panel de Insights y Asistente Predictivo con Inteligencia Artificial.")}
+            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 text-white shadow-[0_8px_30px_rgba(79,70,229,0.4)] hover:shadow-[0_8px_40px_rgba(79,70,229,0.6)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/10"
+            title="Qaway IA Insights"
+          >
+            <Sparkles className="w-6 h-6 animate-pulse" />
+            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
+              Insights con IA
+            </span>
+          </button>
+
+          {/* Botón de Chatbot de Soporte */}
+          <button
+            onClick={() => alert("Próximamente: Chatbot de Soporte y Ayuda Integrado.")}
+            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-[#18181b] text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.8)] hover:-translate-y-1 hover:bg-[#202024] transition-all duration-300 ease-out border border-white/10"
+            title="Chatbot de Ayuda"
+          >
+            <MessageSquare className="w-6 h-6 text-[#ff4b0b]" />
+            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
+              Soporte / Chatbot
+            </span>
+          </button>
+
+        </div>
 
       </div>
     </div>
