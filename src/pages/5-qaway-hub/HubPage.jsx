@@ -279,15 +279,14 @@ const PILLARS = [
   { label: 'Creacion de Contenido', match: 'Creacion' },
 ]
 
-const cardGradients = [
-  'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]',
-  'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]',
-  'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]',
-  'bg-[linear-gradient(135deg,#e0e7ff_0%,#c7d2fe_42%,#a5b4fc_100%)]',
-  'bg-[linear-gradient(135deg,#dcfce7_0%,#bbf7d0_42%,#86efac_100%)]',
-  'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]',
-  'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]',
-]
+// Gradientes armónicos asignados por Eje Temático (reconocimiento visual pasivo)
+const PILLAR_GRADIENTS = {
+  'IA': 'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]', // Lavanda suave
+  'Automatizacion': 'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]', // Cyan suave
+  'Marketing': 'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]', // Melocotón suave
+  'Creacion': 'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]', // Rosa pastel
+  'Herramientas': 'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]', // Ámbar suave
+}
 
 export default function HubPage() {
   useSetNavbarVariant('transparent')
@@ -314,29 +313,12 @@ export default function HubPage() {
     return matchPillar && matchSearch
   })
 
-  // Tarjeta con estilo calcado de Recursos: gradiente pastel, imagen flotante, texto oscuro impecable
-  // NOTA ARQUITECTURA: Borde unificado con /blog (rounded-[14px])
+  // Tarjeta con estilo calcado de Recursos: gradiente por pilar, imagen flotante, texto oscuro impecable
   const FeaturedCard = ({ route, idx }) => {
     const Icon = route.icon
-    const gradient = cardGradients[idx % cardGradients.length]
-    // Solo las 2 primeras filas (índices 0 al 5) usan preview si existe
+    // Asignación de color según el eje temático (o fallback secuencial)
+    const gradient = PILLAR_GRADIENTS[route.pillar] || cardGradients[idx % cardGradients.length]
     const hasPreview = idx < 6 && Boolean(route.preview)
-
-    /* =========================================================================
-       MAQUETAS VACÍAS OCULTAS PARA REUTILIZAR MAÑANA EN OTROS PROYECTOS:
-       
-       [MAQUETA A - FOTO 2]: Ventana flotante contenida centrada verticalmente
-       <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-[50%] max-w-[310px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]">
-         <div className="rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5">
-           <img src="TU_IMAGEN_AQUI" alt="Preview" className="aspect-[16/10] w-full rounded-lg object-cover object-left-top" />
-         </div>
-       </div>
-
-       [MAQUETA B - FOTO 3]: Icono flotante traslúcido en marca de agua 3D
-       <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
-         <Icon className="h-24 w-24" strokeWidth={1.4} />
-       </div>
-    ========================================================================= */
 
     return (
       <Link to={route.path} className="group block h-full">
@@ -345,10 +327,10 @@ export default function HubPage() {
           initial={false}
           whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
-          {/* Mockup flotante estilo seleccionado en azul (columna vertical alta de borde a borde) */}
+          {/* Mockup vertical alto: Marco ultra aclarado casi imperceptible (border-black/[0.03]) y sin zoom jitter */}
           {hasPreview ? (
-            <div className="absolute right-0 top-3 bottom-3 w-[48%] flex items-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]">
-              <div className="h-full w-full rounded-l-2xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5 overflow-hidden">
+            <div className="absolute right-0 top-3 bottom-3 w-[48%] flex items-center">
+              <div className="h-full w-full rounded-l-2xl bg-white p-1.5 shadow-xl border-y border-l border-black/[0.03] overflow-hidden">
                 <img
                   src={route.preview}
                   alt={route.title}
@@ -497,7 +479,38 @@ export default function HubPage() {
                 Restablecer filtros
               </button>
             </div>
+          ) : pillarFilter === 'Todas' && !searchQuery ? (
+            /* VISTA PRINCIPAL AGRUPADA POR EJE TEMÁTICO CON SUBTÍTULOS CLAROS */
+            <div className="mb-16 space-y-12">
+              {PILLARS.filter(p => p.match !== null).map((pillar) => {
+                const routesInPillar = filteredRoutes.filter(r => r.pillar && r.pillar.includes(pillar.match))
+                if (routesInPillar.length === 0) return null
+
+                return (
+                  <div key={pillar.label} className="space-y-4">
+                    {/* Encabezado del Eje Temático */}
+                    <div className="flex items-center gap-3 border-b border-black/[0.06] pb-3">
+                      <div className="h-2 w-2 rounded-full bg-[#ff4b0b]" />
+                      <h2 className="text-lg sm:text-xl font-bold tracking-tight text-[#191918]" style={displayFont}>
+                        {pillar.label.toUpperCase()}
+                      </h2>
+                      <span className="text-[11px] font-mono text-black/40">
+                        ({routesInPillar.length})
+                      </span>
+                    </div>
+
+                    {/* Grid del Eje */}
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                      {routesInPillar.map((route, idx) => (
+                        <FeaturedCard key={route.title} route={route} idx={idx} />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           ) : (
+            /* VISTA FILTRADA DIRECTA */
             <div className="mb-16 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filteredRoutes.map((route, idx) => (
                 <FeaturedCard key={route.title} route={route} idx={idx} />
