@@ -4,7 +4,7 @@ import {
   DollarSign, TrendingUp, Users, Percent,
   ArrowUpRight, Award, Megaphone, Settings2, Eye, EyeOff,
   Target, MessageSquare, Clock, BarChart3, Plus, Activity, X,
-  FileText, Filter, MoreVertical, Calendar, ChevronDown
+  FileText, Filter, MoreVertical, Calendar, ChevronDown, Search
 } from 'lucide-react'
 import { useCRM } from '../context/CRMContext'
 import MetricBuilderModal from './MetricBuilderModal'
@@ -63,10 +63,27 @@ export default function DashboardView() {
   
   // Estado para el filtro de campañas
   const [selectedCampaignId, setSelectedCampaignId] = useState('all')
+  const [showCampaignMenu, setShowCampaignMenu] = useState(false)
+  const [campaignSearch, setCampaignSearch] = useState('')
+  
+  // Estado para filtros temporales globales y canales
   const [timeRange, setTimeRange] = useState('realtime')
   const [showTimeMenu, setShowTimeMenu] = useState(false)
   const [channelFilter, setChannelFilter] = useState('all')
   const [showFilterMenu, setShowFilterMenu] = useState(false)
+
+  // Estado para el modal de métricas personalizadas (Administrador)
+  const [isMetricBuilderOpen, setIsMetricBuilderOpen] = useState(false)
+
+  // Estados interactivos para los dropdowns de los 3 gráficos inferiores
+  const [rendimientoPeriod, setRendimientoPeriod] = useState('Mensual')
+  const [showRendimientoMenu, setShowRendimientoMenu] = useState(false)
+  
+  const [canalTimeframe, setCanalTimeframe] = useState('Este mes')
+  const [showCanalMenu, setShowCanalMenu] = useState(false)
+  
+  const [etapaTimeframe, setEtapaTimeframe] = useState('Este mes')
+  const [showEtapaMenu, setShowEtapaMenu] = useState(false)
 
   // Colores premium de la marca
   const COLORS = ['#ff4b0b', '#d1d5db', '#9ca3af', '#6b7280', '#4b5563']
@@ -154,35 +171,120 @@ export default function DashboardView() {
 
 
 
-  // Componente de Filtro de Campañas
-  const renderCampaignFilter = () => (
-    <div className="flex flex-wrap items-center gap-1.5 mb-7 bg-white border border-zinc-200/80 p-1.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-      <span className="text-xs font-semibold text-zinc-400 ml-2.5 mr-2">Filtrar por:</span>
-      <button
-        onClick={() => setSelectedCampaignId('all')}
-        className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg active:scale-[0.98] transition-all duration-150 ${
-          selectedCampaignId === 'all'
-            ? 'bg-zinc-900 text-white shadow-xs'
-            : 'bg-transparent text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
-        }`}
-      >
-        Todas las Campañas
-      </button>
-      {effectiveCampaigns.map(camp => (
-        <button
-          key={camp.id}
-          onClick={() => setSelectedCampaignId(camp.id)}
-          className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg active:scale-[0.98] transition-all duration-150 ${
-            selectedCampaignId === camp.id
-              ? 'bg-zinc-900 text-white shadow-xs'
-              : 'bg-transparent text-zinc-600 hover:bg-zinc-100/80 hover:text-zinc-900'
-          }`}
-        >
-          {camp.name}
-        </button>
-      ))}
-    </div>
-  )
+  // Componente de Selector Inteligente de Campañas (Escalable a N campañas)
+  const renderCampaignSelector = () => {
+    const activeCamp = effectiveCampaigns.find(c => c.id === selectedCampaignId)
+    const activeCount = effectiveCampaigns.filter(c => c.status === 'Activa').length
+
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center gap-2.5 relative">
+          <span className="text-xs font-semibold text-zinc-400">Campaña:</span>
+          
+          {/* Combobox Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowCampaignMenu(!showCampaignMenu)}
+              className="flex items-center gap-2 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-800 transition-all active:scale-[0.98]"
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${selectedCampaignId === 'all' ? 'bg-emerald-500' : 'bg-[#ff4b0b]'}`} />
+              <span className="max-w-[220px] truncate text-left">
+                {selectedCampaignId === 'all' ? 'Todas las Campañas' : activeCamp?.name}
+              </span>
+              <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+            </button>
+
+            {/* Menu Desplegable con Buscador */}
+            {showCampaignMenu && (
+              <div className="absolute left-0 top-[calc(100%+6px)] w-80 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2.5 text-xs animate-in fade-in duration-150">
+                <div className="relative mb-2">
+                  <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="Buscar campaña por nombre o canal..."
+                    value={campaignSearch}
+                    onChange={(e) => setCampaignSearch(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-800 outline-none focus:border-zinc-400 font-medium"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="max-h-56 overflow-y-auto space-y-1 custom-scrollbar">
+                  <button
+                    onClick={() => {
+                      setSelectedCampaignId('all')
+                      setShowCampaignMenu(false)
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                      selectedCampaignId === 'all' ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span>Todas las Campañas</span>
+                    </div>
+                    <span className="text-[11px] opacity-70">({effectiveCampaigns.length})</span>
+                  </button>
+
+                  {effectiveCampaigns
+                    .filter(c => c.name.toLowerCase().includes(campaignSearch.toLowerCase()) || (c.platform && c.platform.toLowerCase().includes(campaignSearch.toLowerCase())))
+                    .map(camp => (
+                      <button
+                        key={camp.id}
+                        onClick={() => {
+                          setSelectedCampaignId(camp.id)
+                          setShowCampaignMenu(false)
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                          selectedCampaignId === camp.id ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <div className="flex flex-col min-w-0 pr-2">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${camp.status === 'Activa' ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                            <span className="truncate font-semibold">{camp.name}</span>
+                          </div>
+                          <span className={`text-[10px] truncate ${selectedCampaignId === camp.id ? 'text-white/70' : 'text-zinc-400'}`}>
+                            {camp.platform}
+                          </span>
+                        </div>
+                        <span className={`text-[11px] shrink-0 font-semibold ${selectedCampaignId === camp.id ? 'text-white/90' : 'text-zinc-500'}`}>
+                          S/ {camp.spend}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Chip de limpieza cuando hay filtro activo */}
+          {selectedCampaignId !== 'all' && (
+            <button
+              onClick={() => setSelectedCampaignId('all')}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-lg text-xs font-semibold transition-colors"
+              title="Restablecer a todas las campañas"
+            >
+              <span>Restablecer</span>
+              <X className="w-3 h-3" />
+            </button>
+          )}
+        </div>
+
+        {/* Resumen inteligente a la derecha */}
+        <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <strong className="text-zinc-800 font-bold">{activeCount}</strong> activas
+          </span>
+          <span className="text-zinc-300">|</span>
+          <span>
+            Leads: <strong className="text-zinc-800 font-bold">{filteredLeads.length}</strong>
+          </span>
+        </div>
+      </div>
+    )
+  }
 
   // =========================================================================
   // VISTA 1: DASHBOARD
@@ -202,7 +304,18 @@ export default function DashboardView() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 relative">
+          <div className="flex items-center gap-2.5 relative">
+            {/* Botón Nueva Métrica (Solo Administrador / Management) */}
+            {currentRole === 'management' && (
+              <button
+                onClick={() => setIsMetricBuilderOpen(true)}
+                className="flex items-center gap-1.5 bg-[#ff4b0b] hover:bg-[#e04108] text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_10px_rgba(255,75,11,0.25)] active:scale-[0.98]"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Nueva Métrica</span>
+              </button>
+            )}
+
             {/* Selector de Rango de Tiempo Interactivo */}
             <div className="relative">
               <button 
@@ -210,7 +323,7 @@ export default function DashboardView() {
                   setShowTimeMenu(!showTimeMenu)
                   setShowFilterMenu(false)
                 }}
-                className="flex items-center gap-2 bg-white border border-zinc-200/80 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                className="flex items-center gap-2 bg-white border border-zinc-200/80 text-xs font-semibold px-3.5 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
               >
                 <Calendar className="w-4 h-4 text-zinc-500" />
                 <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
@@ -245,14 +358,14 @@ export default function DashboardView() {
                   setShowFilterMenu(!showFilterMenu)
                   setShowTimeMenu(false)
                 }}
-                className={`flex items-center gap-2 border text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
+                className={`flex items-center gap-2 border text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
                   channelFilter !== 'all'
                     ? 'bg-zinc-900 border-zinc-900 text-white'
                     : 'bg-white border-zinc-200/80 text-zinc-700 hover:bg-zinc-50'
                 }`}
               >
                 <Filter className="w-4 h-4" />
-                <span>Filtros</span>
+                <span>Canales</span>
                 {channelFilter !== 'all' && (
                   <span className="w-2 h-2 rounded-full bg-white" />
                 )}
@@ -294,8 +407,8 @@ export default function DashboardView() {
           </div>
         </div>
 
-        {/* CONTROLES INTEGRADOS: Selector de Campañas devuelto a la vista */}
-        {renderCampaignFilter()}
+        {/* CONTROLES INTEGRADOS: Selector Inteligente de Campañas */}
+        {renderCampaignSelector()}
 
         {/* ── KPIs SUPERIORES DINÁMICOS ───────────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
@@ -393,17 +506,97 @@ export default function DashboardView() {
               <polyline fill="none" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,20 20,15 40,10 60,12 80,4 100,2" />
             </svg>
           </div>
+
+          {/* MÉTRICAS PERSONALIZADAS (Creadas por el Administrador) */}
+          {customMetrics && customMetrics.map(cm => {
+            let val = 0
+            if (cm.dataSource === 'leads') {
+              if (cm.aggregation === 'sum') val = filteredLeads.reduce((acc, l) => acc + (Number(l[cm.field]) || 0), 0)
+              else if (cm.aggregation === 'average') {
+                const total = filteredLeads.reduce((acc, l) => acc + (Number(l[cm.field]) || 0), 0)
+                val = filteredLeads.length > 0 ? (total / filteredLeads.length).toFixed(1) : 0
+              } else if (cm.aggregation === 'count') val = filteredLeads.length
+            } else if (cm.dataSource === 'campaigns') {
+              if (cm.aggregation === 'sum') val = filteredCampaigns.reduce((acc, c) => acc + (Number(c[cm.field]) || 0), 0)
+              else if (cm.aggregation === 'count') val = filteredCampaigns.length
+            }
+
+            return (
+              <div key={cm.id} className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700">
+                      <Activity className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-semibold text-zinc-600 truncate max-w-[120px]">{cm.name}</span>
+                  </div>
+                  {currentRole === 'management' && (
+                    <button 
+                      onClick={() => removeCustomMetric(cm.id)}
+                      className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-all p-1"
+                      title="Eliminar métrica"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">
+                  {typeof val === 'number' ? val.toLocaleString('es-PE') : val}
+                </h3>
+                <p className="text-xs font-semibold text-zinc-400 mt-1.5 flex items-center gap-1.5">
+                  Personalizada por Admin
+                </p>
+                <svg className="w-full h-8 mt-2.5" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <polyline fill="none" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 25,8 50,14 75,6 100,2" />
+                </svg>
+              </div>
+            )
+          })}
         </div>
 
         {/* ── GRAFICOS CENTRALES ─────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           
           {/* Rendimiento Comercial (LineChart) */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-5">
-              <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento mensual</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Mensual <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 lg:col-span-1 xl:col-span-1 cursor-default">
+            <div className="flex justify-between items-center mb-5 relative">
+              <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento comercial</h4>
+              
+              {/* Dropdown Interactivo */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowRendimientoMenu(!showRendimientoMenu)
+                    setShowCanalMenu(false)
+                    setShowEtapaMenu(false)
+                  }}
+                  className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+                >
+                  <span>{rendimientoPeriod}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                </button>
+
+                {showRendimientoMenu && (
+                  <div className="absolute right-0 mt-1.5 w-36 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                    {['Diario', 'Semanal', 'Mensual', 'Trimestral'].map(p => (
+                      <button
+                        key={p}
+                        onClick={() => {
+                          setRendimientoPeriod(p)
+                          setShowRendimientoMenu(false)
+                        }}
+                        className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                          rendimientoPeriod === p ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-[#ff4b0b]"></div> Ingresos (k)</div>
               <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-zinc-900"></div> Cierres</div>
@@ -424,11 +617,45 @@ export default function DashboardView() {
           </div>
 
           {/* Ingresos por Canal (BarChart Horizontal) */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-5">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 lg:col-span-1 xl:col-span-1 cursor-default">
+            <div className="flex justify-between items-center mb-5 relative">
               <h4 className="text-base font-bold text-zinc-900 tracking-tight">Ingresos por canal</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Este mes <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
+              
+              {/* Dropdown Interactivo */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowCanalMenu(!showCanalMenu)
+                    setShowRendimientoMenu(false)
+                    setShowEtapaMenu(false)
+                  }}
+                  className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+                >
+                  <span>{canalTimeframe}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                </button>
+
+                {showCanalMenu && (
+                  <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                    {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Año actual'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => {
+                          setCanalTimeframe(t)
+                          setShowCanalMenu(false)
+                        }}
+                        className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                          canalTimeframe === t ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-[#ff4b0b]"></div> Ganado</div>
               <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-zinc-200"></div> En curso</div>
@@ -447,11 +674,45 @@ export default function DashboardView() {
           </div>
 
           {/* Distribución PieChart */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.05)] transition-all duration-200 lg:col-span-1 xl:col-span-1">
-            <div className="flex justify-between items-center mb-5">
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 lg:col-span-1 xl:col-span-1 cursor-default">
+            <div className="flex justify-between items-center mb-5 relative">
               <h4 className="text-base font-bold text-zinc-900 tracking-tight">Oportunidades por etapa</h4>
-              <button className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]">Este mes <ChevronDown className="w-3.5 h-3.5 text-zinc-500" /></button>
+              
+              {/* Dropdown Interactivo */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    setShowEtapaMenu(!showEtapaMenu)
+                    setShowRendimientoMenu(false)
+                    setShowCanalMenu(false)
+                  }}
+                  className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+                >
+                  <span>{etapaTimeframe}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                </button>
+
+                {showEtapaMenu && (
+                  <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                    {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Todo el histórico'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => {
+                          setEtapaTimeframe(t)
+                          setShowEtapaMenu(false)
+                        }}
+                        className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                          etapaTimeframe === t ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                        }`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="flex items-center justify-between h-56">
               <div className="relative w-1/2 h-full flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
@@ -483,6 +744,11 @@ export default function DashboardView() {
           </div>
 
         </div>
+
+        {/* MODAL DE CONSTRUCTOR DE MÉTRICAS (Administrador) */}
+        {isMetricBuilderOpen && (
+          <MetricBuilderModal onClose={() => setIsMetricBuilderOpen(false)} />
+        )}
 
       </div>
     )
