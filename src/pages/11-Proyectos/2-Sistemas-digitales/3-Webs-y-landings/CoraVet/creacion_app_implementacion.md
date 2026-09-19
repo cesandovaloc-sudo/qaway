@@ -120,6 +120,60 @@
     - Total: 35 registros conviviendo en la misma tabla `public.products` con filtrado estricto por `tenant_id` y cero fuga de datos.
   - **Compilación Limpia:** Ejecución de `npm run build:dev` exitosa (`✓ built in 12.65s`).
 
+---
 
+### [Iteración 07 — 2026-09-18]
+- **Modelado de Suscripciones y Desacoplamiento de Academy:**
+  - **Doble Base de Datos Física:** Consolidación de la arquitectura de 2 bases independientes:
+    1. **BD Central (`qrusdsqgygfolxfrafyd.supabase.co`):** Núcleo comercial, usuarios, pagos, suscripciones, CRM y multi-tenancy maestro.
+    2. **BD Academy (`jkstekoaiwdjpivkrsil.supabase.co`):** LMS educativo, cursos, módulos, lecciones, cuestionarios y matrículas.
+  - **Acoplamiento Lógico:** Las bases no comparten claves foráneas físicas de PostgreSQL. El enlace se realiza mediante `course_id` (UUID) gestionado desde el motor comercial central.
+  - **Migración SQL Ejecutada:** `supabase/migrations/20260918170000_subscription_plans_multi_tenant.sql`.
+  - **Tablas Creadas:** `public.subscription_plans`, `public.subscription_plan_courses` y `public.subscriptions`, todas con columna `tenant_id` y RLS habilitado.
 
+---
 
+### [Iteración 08 — 2026-09-19 15:30]
+- **Auditoría de Multi-Tenancy en Usuarios & CRM — Blindaje RLS en `users`, `leads` y `campaigns`:**
+  - **Omisión Inicial Detectada y Auditada:**
+    - Se identificó que la tabla `public.users` en PostgreSQL no poseía la columna `tenant_id`, lo que significaba que los usuarios autenticados no estaban asignados a una marca o tenant específico a nivel de base de datos.
+    - Asimismo, las políticas RLS iniciales de `public.leads` y `public.campaigns` se encontraban configuradas de forma permisiva con `using (true)` o `using (auth.role() = 'authenticated')`, lo que permitía que cualquier usuario del CRM de una empresa pudiera consultar o filtrar los leads de otra empresa.
+  - **Solución y Blindaje de Datos (Migración `20260919153000_strict_tenant_users_rls.sql`):**
+    1. **Columna `tenant_id` en `public.users`:** Agregada como `tenant_id uuid references public.tenants(id) default '00000000-0000-0000-0000-000000000001'`.
+    2. **Función de Seguridad en PostgreSQL:** Creación de `public.get_auth_tenant_id() security definer` para resolver de manera confiable y hermética el tenant del usuario autenticado actual (`auth.uid()`).
+    3. **Sanitización de Datos Históricos:** 49 leads existentes huérfanos fueron asignados y aislados bajo el Master Tenant de Qaway Lab.
+    4. **Políticas RLS Estrictas:**
+       - `leads_tenant_isolation`: Permite lectura/modificación únicamente al administrador global (`public.is_admin()`) o a usuarios cuyo `tenant_id` coincida exactamente con el del lead (`tenant_id = public.get_auth_tenant_id()`).
+       - `leads_anon_insert`: Permite la captación anónima pública de leads desde formularios web de cada marca etiquetándolos con su `tenant_id`.
+       - `campaigns_tenant_isolation`: Mismo blindaje estricto para las campañas de marketing.
+  - **Adaptación Frontend del CRM (`/hub/crm`):**
+    - Actualización de `crmAdapter.js` para consultar y registrar leads filtrando estrictamente por `tenant_id`.
+    - Integración de `activeTenant` en `CRMContext.jsx` con persistencia en `localStorage`.
+    - Selector dinámico de tenants en la barra superior (`TopBar`) de `CRMPage.jsx` para alternar fluidamente entre marcas (Qaway Lab, CoraVet, EPC Contable, Vallet Inmobiliaria) filtrando leads, métricas y analíticas en tiempo real.
+  - **Validación:** Build Vite dev exitoso (`✓ built in 21.75s`), carga HTTP 200 en `/hub/crm` y commit `940` registrado.
+
+---
+
+### [Iteración 09 — 2026-09-19 16:00]
+- **Auditoría de Seguridad Externa de Tablas Legacy (El Paso Pasado por el Segundo Agente):**
+  - **Contexto del Hallazgo Externo:**
+    - Un agente auditor externo ejecutó un escaneo de seguridad en base a los archivos estáticos del repositorio (tomando como base histórica la migración `20260813000001_baseline_inventario.sql`).
+    - **Reporte del Auditor:** Notificó que existían 19 tablas secundarias (de un catálogo/inventario ERP redactado en agosto: `customers`, `quotations`, `quotation_items`, `inventory_movements`, `bundles`, `catalogs`, `price_lists`, `pricing_rules`, `liquidation_campaigns`, `inventory_locations`, `shared_access_links`, `ai_suggestions`, etc.) que no tenían `alter table ... enable row level security;`.
+    - **Riesgo:** Si un atacante utilizara la clave pública `anon` de Supabase, podría leer tablas de cotizaciones o clientes de almacén en caso de estar expuestas.
+    - **Propuesta del Auditor:** Redactó el archivo `supabase/migrations/20260919160000_hardening_rls_public_catalog.sql` para forzar `ENABLE ROW LEVEL SECURITY` en esas 19 tablas.
+
+---
+
+### [Iteración 10 — 2026-09-19 16:45]
+- **Aplicación en Producción y Migración Idempotente Defensiva (db push exitoso):**
+  - **Obstáculo Encontrado al Aplicar:**
+    - Al intentar ejecutar `npx supabase db push`, PostgreSQL devolvió: `ERROR: relation "public.ai_suggestions" does not exist (SQLSTATE 42P01)`.
+    - **Causa Real:** La auditoría externa asumió que las 19 tablas de la migración de agosto ya existían físicamente en la base remota viva (`qrusdsqgygfolxfrafyd`), cuando en realidad en la base remota solo existía `public.categories` y el resto de tablas correspondían a un borrador local no desplegado.
+  - **Ingeniería Defensiva Aplicada (Sin Parches, Solución Definitiva):**
+    - Se refactorizó la migración `supabase/migrations/20260919160000_hardening_rls_public_catalog.sql` transformándola en un bloque PL/pgSQL dinámico condicional (`DO $$ BEGIN ... END $$;`).
+    - Cada tabla es inspeccionada en `information_schema.tables`: si la tabla existe en la base remota, se le habilita RLS, se le crean sus políticas y sus grants; si no existe, la migración emite un aviso informativo (`RAISE NOTICE`) y continúa sin romper el despliegue.
+  - **Resultado del Despliegue en Base Viva:**
+    - Ejecución de `npx supabase db push`: **Éxito total (`Finished supabase db push`)**.
+    - RLS y políticas aplicadas con éxito en `public.categories`.
+    - Las tablas ausentes fueron omitidas con seguridad y el pipeline de migraciones quedó 100% limpio y sincronizado.
+  - **Alineación de UI:** Enlace de retorno en `CRMPage.jsx` normalizado hacia `/hub`.
