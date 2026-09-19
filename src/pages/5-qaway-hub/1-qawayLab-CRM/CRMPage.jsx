@@ -553,7 +553,7 @@ function CRMContent() {
           <div className={`absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] ${
             activeTab === 'dashboard' 
               ? 'opacity-[0.02] bg-[size:40px_40px]' 
-              : 'opacity-[0.025] bg-[size:32px_32px]'
+              : 'opacity-[0.007] bg-[size:32px_32px]'
           }`} />
           
           <div className="relative z-10 p-6 md:p-8 min-h-full">
