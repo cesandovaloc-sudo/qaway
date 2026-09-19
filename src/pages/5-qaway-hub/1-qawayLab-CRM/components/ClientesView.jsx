@@ -146,67 +146,124 @@ export default function ClientesView({ onNavigateToChat }) {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-5 bg-white text-zinc-900 rounded-2xl border border-zinc-200/70 p-6 shadow-xs relative overflow-hidden">
+    <div className="bg-transparent text-zinc-900 max-w-7xl mx-auto space-y-6">
       
-      {/* ── 1. CABECERA & TARJETAS DE CARTERA FINANCIERA ────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+      {/* ── 1. CABECERA LIBRE SOBRE EL LIENZO ────────────────────── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#ff4b0b]/10 text-[#ff4b0b] flex items-center justify-center font-bold">
-              <Briefcase className="w-4 h-4" />
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
+              Cartera de Clientes & Cuentas Clave
+            </h1>
+            {isUsingDemo && (
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2.5 py-0.5 rounded-full flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Cuentas Demostrativas
+              </span>
+            )}
+          </div>
+          <p className="text-[14px] text-zinc-500 font-medium mt-1">
+            Gestión de cuentas activas, facturación acumulada (LTV) y seguimiento de contratos.
+          </p>
+        </div>
+      </div>
+
+      {/* ── 2. CUATRO TARJETAS KPI INDEPENDIENTES CON LÍNEA DE TENDENCIA ──────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        {/* Clientes Activos */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 flex flex-col justify-between">
+          <div>
+            <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Clientes Activos</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <p className="text-3xl font-extrabold text-zinc-900 tracking-tight">{metrics.totalClients}</p>
+              <span className="text-xs text-emerald-600 font-bold">Cerrados</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-zinc-900 tracking-tight">Cartera de Clientes & Cuentas Clave</h2>
-                {isUsingDemo && (
-                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/70 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" /> Cuentas Demostrativas
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-zinc-500">Gestión de cuentas activas, facturación acumulada (LTV) y seguimiento de contratos.</p>
-            </div>
+          </div>
+          <div className="h-8 w-full mt-3 -mb-1">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke="#ff4b0b"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="0,22 15,20 30,23 45,15 60,17 75,10 90,13 100,6"
+              />
+            </svg>
           </div>
         </div>
 
-        {/* KPIs Financieros */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          <div className="bg-zinc-50 border border-zinc-200/60 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Clientes Activos</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-zinc-900">{metrics.totalClients}</p>
-              <span className="text-[10px] text-emerald-600 font-semibold">Cerrados</span>
+        {/* Cartera Total */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 flex flex-col justify-between">
+          <div>
+            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Cartera Total</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <p className="text-3xl font-extrabold text-emerald-800 tracking-tight">${metrics.totalRevenue.toLocaleString()}</p>
+              <span className="text-xs text-emerald-600 font-bold">USD</span>
             </div>
           </div>
+          <div className="h-8 w-full mt-3 -mb-1">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="0,23 15,22 30,18 45,20 60,14 75,16 90,9 100,5"
+              />
+            </svg>
+          </div>
+        </div>
 
-          <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Cartera Total</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-emerald-800">${metrics.totalRevenue.toLocaleString()}</p>
-              <span className="text-[10px] text-emerald-600 font-bold">USD</span>
+        {/* Ticket Promedio */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 flex flex-col justify-between">
+          <div>
+            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Ticket Promedio</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <p className="text-3xl font-extrabold text-blue-800 tracking-tight">${metrics.avgTicket.toLocaleString()}</p>
+              <span className="text-xs text-blue-600 font-bold">USD</span>
             </div>
           </div>
+          <div className="h-8 w-full mt-3 -mb-1">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke="#3b82f6"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="0,24 15,21 30,22 45,17 60,18 75,12 90,14 100,9"
+              />
+            </svg>
+          </div>
+        </div>
 
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Ticket Promedio</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-blue-800">${metrics.avgTicket.toLocaleString()}</p>
-              <span className="text-[10px] text-blue-600">USD</span>
+        {/* Tasa de Cierre */}
+        <div className="bg-white border border-zinc-200/80 rounded-2xl p-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-0.5 flex flex-col justify-between">
+          <div>
+            <span className="text-xs font-semibold text-purple-600 uppercase tracking-wider">Tasa de Cierre</span>
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <p className="text-3xl font-extrabold text-purple-800 tracking-tight">{metrics.conversionRate}%</p>
+              <span className="text-xs text-purple-500 font-medium">del embudo</span>
             </div>
           </div>
-
-          <div className="bg-purple-50/50 border border-purple-100 rounded-xl px-3.5 py-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600">Tasa de Cierre</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <p className="text-base font-black text-purple-800">{metrics.conversionRate}%</p>
-              <span className="text-[10px] text-purple-500">del embudo</span>
-            </div>
+          <div className="h-8 w-full mt-3 -mb-1">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 100 28" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke="#8b5cf6"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points="0,25 15,22 30,24 45,19 60,20 75,15 90,16 100,11"
+              />
+            </svg>
           </div>
         </div>
       </div>
 
-      {/* ── 2. BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS ──────────── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      {/* ── 3. BARRA DE HERRAMIENTAS STICKY: BÚSQUEDA Y FILTROS ──────────── */}
+      <div className="sticky top-0 z-20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-4 py-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         {/* Buscador */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -218,7 +275,7 @@ export default function ClientesView({ onNavigateToChat }) {
               setSearchTerm(e.target.value)
               if (setGlobalSearchQuery) setGlobalSearchQuery(e.target.value)
             }}
-            className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 focus:border-[#ff4b0b] transition-all"
+            className="w-full pl-9 pr-4 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs sm:text-[13px] text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 focus:border-[#ff4b0b] transition-all"
           />
           {effectiveSearch && (
             <button 
@@ -238,7 +295,7 @@ export default function ClientesView({ onNavigateToChat }) {
           <select
             value={serviceFilter}
             onChange={(e) => setServiceFilter(e.target.value)}
-            className="px-3 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs text-zinc-700 focus:outline-none focus:border-[#ff4b0b] cursor-pointer"
+            className="px-3.5 py-2 bg-zinc-50 border border-zinc-200/80 rounded-xl text-xs sm:text-[13px] text-zinc-700 focus:outline-none focus:border-zinc-400 cursor-pointer font-semibold"
           >
             <option value="all">Todos los Servicios</option>
             <option value="web">Desarrollo Web & Apps</option>
@@ -250,18 +307,19 @@ export default function ClientesView({ onNavigateToChat }) {
         </div>
       </div>
 
-      {/* ── 3. TABLA DE CLIENTES CONVERTIDOS ───────────────────────── */}
-      <div className="flex-1 overflow-x-auto border border-zinc-200/70 rounded-xl bg-white">
-        <table className="w-full text-left border-collapse text-xs">
+      {/* ── 4. TABLA MODULAR DE CLIENTES CONVERTIDOS ─────────────────── */}
+      <div className="bg-white border border-zinc-200/80 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-zinc-50/80 border-b border-zinc-200/70 text-zinc-500 font-semibold uppercase tracking-wider text-[10px]">
-              <th className="py-3 px-4">Cliente / Cuenta</th>
-              <th className="py-3 px-4">Contacto Directo</th>
-              <th className="py-3 px-4">Servicio Contratado</th>
-              <th className="py-3 px-4">Valor de Cuenta</th>
-              <th className="py-3 px-4">Estado de Entrega</th>
-              <th className="py-3 px-4">Asesor Asignado</th>
-              <th className="py-3 px-4 text-right">Acciones</th>
+            <tr className="bg-zinc-50/80 border-b border-zinc-200/60 text-zinc-500 font-bold uppercase tracking-wider text-[12px] select-none">
+              <th className="py-3.5 px-4">Cliente / Cuenta</th>
+              <th className="py-3.5 px-4">Contacto Directo</th>
+              <th className="py-3.5 px-4">Servicio Contratado</th>
+              <th className="py-3.5 px-4">Valor de Cuenta</th>
+              <th className="py-3.5 px-4">Estado de Entrega</th>
+              <th className="py-3.5 px-4">Asesor Asignado</th>
+              <th className="py-3.5 px-4 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
@@ -305,16 +363,16 @@ export default function ClientesView({ onNavigateToChat }) {
                     onClick={() => setSelectedClientDrawer(client)}
                   >
                     {/* Cliente / Cuenta */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-4 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#ff4b0b]/15 to-[#ff4b0b]/30 text-[#ff4b0b] font-bold flex items-center justify-center text-xs shrink-0 border border-[#ff4b0b]/20">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#ff4b0b]/15 to-[#ff4b0b]/30 text-[#ff4b0b] font-bold flex items-center justify-center text-[13px] shrink-0 border border-[#ff4b0b]/20">
                           {initials}
                         </div>
                         <div>
-                          <p className="font-semibold text-zinc-900 leading-tight group-hover:text-[#ff4b0b] transition-colors">
+                          <p className="text-[14px] font-bold text-zinc-900 leading-tight group-hover:text-[#ff4b0b] transition-colors">
                             {clientName}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-zinc-400">
+                          <div className="flex items-center gap-1.5 mt-0.5 text-[11.5px] text-zinc-400 font-medium">
                             <Building2 className="w-3 h-3 text-zinc-400" />
                             <span>Cuenta Verificada</span>
                           </div>
@@ -323,75 +381,75 @@ export default function ClientesView({ onNavigateToChat }) {
                     </td>
 
                     {/* Contacto Directo */}
-                    <td className="py-3.5 px-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex flex-col space-y-0.5">
                         <a 
                           href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center gap-1.5 text-zinc-700 hover:text-[#ff4b0b] font-mono text-[11px] transition-colors"
+                          className="flex items-center gap-1.5 text-zinc-800 hover:text-[#ff4b0b] font-mono text-[12px] font-semibold transition-colors"
                         >
-                          <Phone className="w-3 h-3 text-emerald-600" />
+                          <Phone className="w-3.5 h-3.5 text-emerald-600" />
                           <span>{phone}</span>
                         </a>
-                        <span className="flex items-center gap-1 text-[11px] text-zinc-400">
+                        <span className="flex items-center gap-1 text-[11.5px] text-zinc-400">
                           <Mail className="w-3 h-3" />
-                          <span className="truncate max-w-[140px]">{email}</span>
+                          <span className="truncate max-w-[150px]">{email}</span>
                         </span>
                       </div>
                     </td>
 
                     {/* Servicio Contratado */}
-                    <td className="py-3.5 px-4">
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100/80 border border-zinc-200/60 text-zinc-700 text-[11px] font-medium">
-                        <Layers className="w-3 h-3 text-[#ff4b0b]" />
-                        <span className="truncate max-w-[150px]">{service}</span>
+                    <td className="py-4 px-4">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100/80 border border-zinc-200/70 text-zinc-800 text-[12px] font-semibold">
+                        <Layers className="w-3.5 h-3.5 text-[#ff4b0b]" />
+                        <span className="truncate max-w-[160px]">{service}</span>
                       </div>
                     </td>
 
                     {/* Valor de Cuenta */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1 font-bold text-zinc-900 text-sm">
-                        <span className="text-emerald-700 font-black">${budget.toLocaleString()}</span>
-                        <span className="text-[10px] text-zinc-400 font-normal">USD</span>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-1 font-bold text-zinc-900">
+                        <span className="text-emerald-700 font-extrabold text-[15px]">${budget.toLocaleString()}</span>
+                        <span className="text-xs text-zinc-400 font-normal">USD</span>
                       </div>
-                      <span className="text-[10px] text-zinc-400">Alta: {formattedDate}</span>
+                      <span className="text-[11px] text-zinc-400 font-medium">Alta: {formattedDate}</span>
                     </td>
 
                     {/* Estado de Entrega */}
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <CheckCircle2 className="w-3 h-3" />
+                    <td className="py-4 px-4">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Activo / Ganado</span>
                       </span>
                     </td>
 
                     {/* Asesor Asignado */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-1.5 text-zinc-600">
-                        <div className="w-5 h-5 rounded-full bg-zinc-200 flex items-center justify-center text-[10px] font-bold text-zinc-600">
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2 text-zinc-700 font-medium text-[12.5px]">
+                        <div className="w-6 h-6 rounded-full bg-zinc-200 flex items-center justify-center text-[11px] font-bold text-zinc-700">
                           {agent[0] || 'Q'}
                         </div>
-                        <span className="truncate max-w-[110px]">{agent}</span>
+                        <span className="truncate max-w-[120px]">{agent}</span>
                       </div>
                     </td>
 
                     {/* Acciones */}
-                    <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleOpenChat(client.id)}
                           title="Abrir chat en WhatsApp Cloud"
-                          className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-colors border border-emerald-200/60"
+                          className="p-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 transition-colors border border-emerald-200/60"
                         >
-                          <MessageSquare className="w-3.5 h-3.5" />
+                          <MessageSquare className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setSelectedClientDrawer(client)}
                           title="Ver Expediente Completo"
-                          className="p-1.5 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
+                          className="p-2 rounded-lg bg-zinc-100 text-zinc-700 hover:bg-zinc-200 transition-colors"
                         >
-                          <ChevronRight className="w-3.5 h-3.5" />
+                          <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -402,6 +460,7 @@ export default function ClientesView({ onNavigateToChat }) {
           </tbody>
         </table>
       </div>
+    </div>
 
       {/* ── 4. DRAWER LATERAL: EXPEDIENTE COMPLETO DEL CLIENTE ───────── */}
       <AnimatePresence>
