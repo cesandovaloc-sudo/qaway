@@ -56,6 +56,12 @@ export {
   KanbanSquare,
   ArrowRight,
   ArrowUpRight,
+  Send,
+  Paperclip,
+  Phone,
+  Filter,
+  ArrowUpDown,
+  Flame,
 } from 'lucide-react'
 
 export const HUB_ICON_NAMES = {
