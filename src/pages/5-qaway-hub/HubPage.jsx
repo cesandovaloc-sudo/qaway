@@ -18,7 +18,6 @@ import {
   Target,
   FileImage,
   Search,
-  RotateCcw,
   Instagram,
   CreditCard,
   Package,
@@ -322,7 +321,6 @@ export default function HubPage() {
     const gradient = cardGradients[idx % cardGradients.length]
     // Solo las 2 primeras filas (índices 0 al 5) usan preview si existe
     const hasPreview = idx < 6 && Boolean(route.preview)
-    const isSecondRow = idx >= 3 && idx < 6
 
     /* =========================================================================
        MAQUETAS VACÍAS OCULTAS PARA REUTILIZAR MAÑANA EN OTROS PROYECTOS:
@@ -343,37 +341,22 @@ export default function HubPage() {
     return (
       <Link to={route.path} className="group block h-full">
         <motion.article
-          className={`relative flex h-full min-h-[310px] flex-col justify-end overflow-hidden rounded-[14px] p-7 sm:p-8 ${gradient}`}
+          className={`relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-[14px] p-7 sm:p-9 ${gradient}`}
           initial={false}
           whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
-          {/* Mockup flotante estilo Recursos */}
+          {/* Mockup flotante estilo seleccionado en azul (columna vertical alta de borde a borde) */}
           {hasPreview ? (
-            isSecondRow ? (
-              /* Fila 2: imagen más grande, casi de borde superior a inferior, cubriendo la mitad derecha */
-              <div className="absolute right-0 top-3 bottom-3 w-[48%] flex items-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]">
-                <div className="h-full w-full rounded-l-2xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5 overflow-hidden">
-                  <img
-                    src={route.preview}
-                    alt={route.title}
-                    className="h-full w-full rounded-l-xl object-cover object-left-top"
-                    loading="lazy"
-                  />
-                </div>
+            <div className="absolute right-0 top-3 bottom-3 w-[48%] flex items-center transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.02]">
+              <div className="h-full w-full rounded-l-2xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5 overflow-hidden">
+                <img
+                  src={route.preview}
+                  alt={route.title}
+                  className="h-full w-full rounded-l-xl object-cover object-left-top"
+                  loading="lazy"
+                />
               </div>
-            ) : (
-              /* Fila 1: ventana centrada verticalmente como en tu captura */
-              <div className="absolute -right-4 top-1/2 -translate-y-1/2 w-[50%] max-w-[310px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]">
-                <div className="rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-black/5">
-                  <img
-                    src={route.preview}
-                    alt={route.title}
-                    className="aspect-[16/10] w-full rounded-lg object-cover object-left-top"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            )
+            </div>
           ) : (
             /* Icono en marca de agua para las filas siguientes (FOTO 3) */
             <div className="absolute -right-8 top-1/2 flex h-52 w-52 -translate-y-1/2 rotate-2 items-center justify-center rounded-2xl border border-white/25 bg-white/20 text-[#191918]/25 shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-translate-y-1/2 group-hover:rotate-0 group-hover:scale-[1.02]">
@@ -467,42 +450,40 @@ export default function HubPage() {
                 )}
               </div>
             </div>
-
-            {/* 5 Pilares de Marca: unificados a rounded-lg (estilo Blog) */}
-            <div className="mt-6 flex flex-wrap items-center justify-start sm:justify-center gap-2.5 w-full max-w-2xl">
-              {PILLARS.map((pillar) => {
-                const isActive = pillarFilter === pillar.label
-                return (
-                  <button
-                    key={pillar.label}
-                    type="button"
-                    onClick={() => setPillarFilter(pillar.label)}
-                    className={`rounded-lg px-4 py-2 text-[13px] font-semibold transition-all ${
-                      isActive
-                        ? 'bg-white text-[#191918] shadow-md'
-                        : 'bg-white/20 border border-white/30 text-white hover:bg-white/30'
-                    }`}
-                  >
-                    {pillar.label}
-                  </button>
-                )
-              })}
-              {(pillarFilter !== 'Todas' || searchQuery) && (
-                <button
-                  type="button"
-                  onClick={() => { setPillarFilter('Todas'); setSearchQuery('') }}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-black/25 border border-white/30 px-3.5 py-2 text-xs font-semibold text-white hover:bg-black/40 transition-colors"
-                >
-                  <span>Limpiar</span>
-                  <RotateCcw size={11} />
-                </button>
-              )}
-            </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="pb-12 pt-6 sm:pt-8 lg:pb-20 lg:pt-10">
+      {/* ENCABEZADO STICKY EN SCROLL: Filtro de 5 Pilares anclado al tope con backdrop-blur limpio */}
+      <div className="sticky top-0 z-30 border-b border-black/[0.06] bg-[#f8f9fc]/95 py-3 backdrop-blur-md transition-all">
+        <div className="mx-auto flex max-w-[94rem] items-center justify-between px-6 sm:px-10 lg:px-14">
+          <div className="flex flex-wrap items-center gap-2 overflow-x-auto py-0.5 scrollbar-none">
+            {PILLARS.map((pillar) => {
+              const isActive = pillarFilter === pillar.label
+              return (
+                <button
+                  key={pillar.label}
+                  type="button"
+                  onClick={() => setPillarFilter(pillar.label)}
+                  className={`shrink-0 rounded-lg px-3.5 py-1.5 text-xs sm:text-[13px] font-semibold transition-all ${
+                    isActive
+                      ? 'bg-[#191918] text-white shadow-sm'
+                      : 'border border-black/10 bg-white text-[#191918]/80 hover:border-black/20 hover:text-[#191918]'
+                  }`}
+                >
+                  {pillar.label}
+                </button>
+              )
+            })}
+          </div>
+
+          <span className="hidden sm:block text-[11px] font-mono font-medium text-black/40">
+            {filteredRoutes.length} herramientas
+          </span>
+        </div>
+      </div>
+
+      <section className="pb-12 pt-6 sm:pt-8 lg:pb-20 lg:pt-8">
         <div className="mx-auto max-w-[94rem] px-6 sm:px-10 lg:px-14">
           {filteredRoutes.length === 0 ? (
             <div className="my-16 flex flex-col items-center justify-center text-center">
