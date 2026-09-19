@@ -545,10 +545,10 @@ function CRMContent() {
           </div>
         </header>
 
-        {/* ── MAIN CONTENT (Light Gray Canvas) ────────────────────────── */}
-        <main className="flex-1 bg-[#f5f5f4] overflow-y-auto text-[#191918] relative">
-          {/* Subtle grid pattern for the background */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.02] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:40px_40px]" />
+        {/* ── MAIN CONTENT (Cool Chrome Slate Canvas) ────────────────── */}
+        <main className="flex-1 bg-[#f8fafc] overflow-y-auto text-zinc-900 relative">
+          {/* Cuadrícula milimetrada técnica tipo cuaderno sobre fondo cromo frío */}
+          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:32px_32px]" />
           
           <div className="relative z-10 p-6 md:p-8 min-h-full">
             <AnimatePresence mode="wait">
