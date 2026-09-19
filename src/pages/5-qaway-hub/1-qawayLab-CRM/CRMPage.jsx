@@ -280,37 +280,20 @@ function CRMContent() {
           <button 
             onClick={handleSimulate}
             disabled={simulating}
-        </nav>
-
-        {/* INSIGHTS WIDGET COLLAPSIBLE */}
-        <div className={`p-4 shrink-0 flex ${isSidebarCollapsed ? 'justify-center p-2' : ''}`}>
-          <div className={`relative rounded-lg border border-white/10 bg-[#18181b] overflow-hidden group hover:border-white/20 transition-all duration-300 ease-in-out cursor-pointer ${isSidebarCollapsed ? 'w-10 h-10 flex items-center justify-center p-0 hover:max-h-12' : 'max-h-12 hover:max-h-40 w-full'}`}>
-            {/* Decorative Corner Brackets (Only visible on hover and expanded) */}
-            {!isSidebarCollapsed && (
-              <>
-                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </>
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group",
+              isSidebarCollapsed && "justify-center"
             )}
-            
-            <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center w-full h-full' : 'gap-2 px-4 py-3.5'}`}>
-              <Zap className={`text-[#ff4b0b] shrink-0 ${isSidebarCollapsed ? 'w-4 h-4' : 'w-4 h-4'}`} />
-              {!isSidebarCollapsed && <span className="text-[11px] font-bold uppercase tracking-widest text-white truncate transition-colors group-hover:text-[#ff4b0b]">Insights con IA</span>}
-            </div>
-            
+            title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
+          >
+            <RefreshCw className={cn(
+              "w-4 h-4 group-hover:text-[#ff4b0b] transition-colors",
+              simulating && "animate-spin text-[#ff4b0b]"
+            )} />
             {!isSidebarCollapsed && (
-              <div className="px-4 pb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-75">
-                <p className="text-xs text-white/50 leading-relaxed mb-3">
-                  Activa recomendaciones inteligentes basadas en tus datos comerciales.
-                </p>
-                <span className="text-[#ff4b0b] text-xs font-semibold flex items-center gap-1">
-                  Conocer más <ChevronRight className="w-3 h-3" />
-                </span>
-              </div>
+              <span className="truncate">Simular Webhook</span>
             )}
-          </div>
+          </button>
         </div>
       </aside>
 
