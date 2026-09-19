@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime-B74pBk57.js";var t=e(),n={size:18,strokeWidth:1.75};function r({icon:e,size:r=n.size,strokeWidth:i=n.strokeWidth,className:a=``,...o}){return e?(0,t.jsx)(e,{size:r,strokeWidth:i,className:a,...o}):null}export{n as HUB_ICON_DEFAULTS,r as HubIcon};

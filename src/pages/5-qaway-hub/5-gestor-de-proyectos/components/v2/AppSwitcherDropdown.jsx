@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { HubIcon } from "@/components/ui/icons";
 import {
   Globe,
   LayoutGrid,
@@ -9,8 +10,7 @@ import {
   Video,
   GraduationCap,
   ExternalLink,
-  Sparkles,
-} from "lucide-react";
+} from "@/components/ui/icons/hubIcons";
 
 export function AppSwitcherDropdown({ isOpen, onClose }) {
   const dropdownRef = useRef(null);
@@ -95,11 +95,11 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
         >
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
-              <Globe className="w-4 h-4" />
+              <HubIcon icon={Globe} size={16} className="w-4 h-4" />
             </div>
             <span>Web Pública (www.qawaylab.com)</span>
           </div>
-          <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+          <HubIcon icon={ExternalLink} size={14} className="w-3.5 h-3.5 text-zinc-400" />
         </a>
 
         <Link
@@ -109,7 +109,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
         >
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-zinc-100 text-zinc-700 flex items-center justify-center">
-              <LayoutGrid className="w-4 h-4" />
+              <HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" />
             </div>
             <span>Hub Central de Aplicaciones</span>
           </div>
@@ -142,7 +142,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
                       : "bg-zinc-100 text-zinc-700"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <HubIcon icon={Icon} size={16} className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
