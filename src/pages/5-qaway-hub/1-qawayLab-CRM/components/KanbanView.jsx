@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCRM } from '../context/CRMContext'
-import { XCircle, Star, Settings2, Eye, EyeOff, X, Mail, Phone, Calendar } from 'lucide-react'
+import { XCircle, Star, Settings2, Eye, EyeOff, X, Mail, Phone, Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 
 const COLUMNS = [
   { id: 'new', title: 'Nuevos', color: 'bg-cyan-50 text-cyan-700 border-cyan-100' },
@@ -16,6 +16,11 @@ export default function KanbanView() {
   
   // Estados para columnas visibles y panel de configuración
   const [showColConfig, setShowColConfig] = useState(false)
+  const [collapsedCols, setCollapsedCols] = useState({}) // { [colId]: boolean }
+
+  const toggleCollapse = (colId) => {
+    setCollapsedCols(prev => ({ ...prev, [colId]: !prev[colId] }))
+  }
 
   // Inspector lateral del lead (patrón Twenty/Notion): abre el detalle apoyado
   // sobre el tablero, para mover la etapa sin perder el contexto del embudo.
@@ -56,7 +61,7 @@ export default function KanbanView() {
   const activeColumns = COLUMNS.filter(col => visibleCols[col.id])
 
   return (
-    <div className="space-y-6 bg-transparent text-zinc-900 max-w-7xl mx-auto">
+    <div className="space-y-6 bg-transparent text-zinc-900 w-full">
       
       {/* CABECERA DESENCAPSULADA Y CONFIGURACIÓN */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -95,23 +100,80 @@ export default function KanbanView() {
         </div>
       </div>
 
-      {/* Grid de Columnas del Kanban en Lienzo Limpio */}
-      <div className="grid grid-cols-1 gap-4 overflow-x-auto pb-6" style={{ gridTemplateColumns: `repeat(${activeColumns.length}, minmax(260px, 1fr))` }}>
+      {/* Grid de Columnas del Kanban con Ancho Optimizado y Reducción por Columna */}
+      <div 
+        className="grid gap-3 overflow-x-auto pb-6 transition-all duration-300" 
+        style={{ 
+          gridTemplateColumns: activeColumns.map(col => collapsedCols[col.id] ? '46px' : 'minmax(215px, 1fr)').join(' ') 
+        }}
+      >
         {activeColumns.map(col => {
           const colLeads = getLeadsByStatus(col.id)
           const totalBudget = colLeads.reduce((sum, l) => sum + Number(l.budget || 0), 0)
+          const isCollapsed = Boolean(collapsedCols[col.id])
 
+          {/* VISTA COLAPSADA DE LA COLUMNA (Modo Reducción) */}
+          if (isCollapsed) {
+            return (
+              <div
+                key={col.id}
+                onClick={() => toggleCollapse(col.id)}
+                className="bg-zinc-100/80 hover:bg-zinc-200/60 border border-zinc-200/80 rounded-2xl py-4 px-2 flex flex-col items-center justify-between cursor-pointer transition-all min-w-[46px] max-w-[46px] select-none group shadow-2xs"
+                title={`Expandir columna ${col.title}`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleCollapse(col.id)
+                    }}
+                    className="p-1 rounded-lg text-zinc-400 group-hover:text-zinc-800 hover:bg-zinc-200/70 transition-colors"
+                    title="Expandir columna"
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-2 h-2 rounded-full bg-zinc-400 group-hover:bg-[#ff4b0b] transition-colors" />
+                </div>
+
+                <div className="[writing-mode:vertical-rl] rotate-180 flex items-center gap-2 py-4">
+                  <span className="text-[12px] font-bold text-zinc-600 group-hover:text-zinc-900 uppercase tracking-wider whitespace-nowrap">
+                    {col.title}
+                  </span>
+                  <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-white border border-zinc-200 text-zinc-700 shadow-2xs">
+                    {colLeads.length}
+                  </span>
+                </div>
+
+                <span className="text-[11px] font-bold text-zinc-400">
+                  ${totalBudget.toFixed(0)}
+                </span>
+              </div>
+            )
+          }
+
+          {/* VISTA COMPLETA DE LA COLUMNA */}
           return (
             <div
               key={col.id}
-              className="bg-zinc-100/70 border border-zinc-200/80 rounded-2xl p-3.5 flex flex-col min-w-[270px] max-h-[78vh]"
+              className="bg-zinc-100/70 border border-zinc-200/80 rounded-2xl p-3 flex flex-col min-w-[215px] max-h-[78vh] transition-all"
             >
-              {/* Encabezado de la columna */}
+              {/* Encabezado de la columna con botón de reducción */}
               <div className="flex justify-between items-center mb-3 px-1">
-                <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${col.color} uppercase tracking-wider`}>
-                  {col.title} ({colLeads.length})
-                </span>
-                <span className="text-[12px] text-zinc-500 font-bold">${totalBudget.toFixed(0)}</span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${col.color} uppercase tracking-wider truncate`}>
+                    {col.title} ({colLeads.length})
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-[12px] text-zinc-500 font-bold">${totalBudget.toFixed(0)}</span>
+                  <button
+                    onClick={() => toggleCollapse(col.id)}
+                    title="Reducir columna"
+                    className="p-1 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200/60 transition-colors ml-0.5"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               {/* Lista de Tarjetas en Blanco Puro */}
