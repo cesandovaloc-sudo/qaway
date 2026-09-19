@@ -461,10 +461,10 @@ function CRMContent() {
 
             <div className="h-6 w-px bg-white/10" />
 
-            {/* 2. Botón Primario de Creación */}
+            {/* 2. Botón Primario de Creación (Equilibrado) */}
             <button 
               onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-3.5 py-2 rounded-lg text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="hidden sm:block">Nueva oportunidad</span>
