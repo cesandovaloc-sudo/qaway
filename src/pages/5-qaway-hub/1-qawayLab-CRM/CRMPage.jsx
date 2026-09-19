@@ -106,6 +106,7 @@ function CRMContent() {
   const [simulating, setSimulating] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const searchInputRef = useRef(null)
 
   useEffect(() => {
@@ -295,18 +296,18 @@ function CRMContent() {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         
-        {/* HEADER TOPBAR (Estandarizado a 56px de alto, estilo Linear/Atlassian) */}
-        <header className="h-14 border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
+        {/* HEADER TOPBAR (Escalado al estilo Google Workspace / Altura amplia) */}
+        <header className="h-[68px] border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
           
           {/* Lado Izquierdo: Toggle Sidebar, Waffle y App Home */}
-          <div className="flex items-center gap-1.5 lg:gap-2">
+          <div className="flex items-center gap-2 lg:gap-3">
             {/* Botón Toggle Sidebar */}
             <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
               title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}
             >
-              <Menu className="w-4 h-4 lg:w-5 lg:h-5" />
+              <Menu className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
             </button>
 
             {/* Waffle App Switcher */}
@@ -314,21 +315,21 @@ function CRMContent() {
               <button
                 type="button"
                 onClick={() => setIsWaffleOpen(!isWaffleOpen)}
-                className="group flex items-center gap-1.5 h-8 lg:h-9 px-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
+                className="group flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
                 title="Ecosistema de Aplicaciones"
               >
-                <div className="grid grid-cols-3 gap-0.5 w-3.5 h-3.5 place-items-center">
+                <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
                   {[...Array(9)].map((_, i) => (
-                    <span
+                     <span
                       key={i}
-                      className="w-1 h-1 rounded-full bg-white/60 group-hover:bg-[#ff4b0b] transition-colors"
+                      className="w-[3px] h-[3px] rounded-full bg-white/70 group-hover:bg-[#ff4b0b] transition-colors"
                     />
                   ))}
                 </div>
-                <span className="text-[13px] font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
+                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
                   Apps
                 </span>
-                <ChevronDown className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-transform duration-200" />
+                <ChevronDown className="w-3.5 h-3.5 text-white/40 group-hover:text-white/80 transition-transform duration-200" />
               </button>
 
               <AppSwitcherDropdown
@@ -337,15 +338,15 @@ function CRMContent() {
               />
             </div>
 
-            {/* Home Animado (Se retrae igual que el waffle) */}
-            <div className="hidden sm:block ml-0.5">
+            {/* Home Animado */}
+            <div className="hidden sm:block">
               <button 
                 onClick={() => setActiveTab('dashboard')}
-                className="group flex items-center gap-1.5 h-8 lg:h-9 px-2.5 rounded-xl border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
+                className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
                 title="Ir al Inicio (Dashboard)"
               >
-                <Home className="w-4 h-4 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
-                <span className="text-[13px] font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[44px] transition-all duration-350 ease-out whitespace-nowrap">
+                <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
+                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
                   Inicio
                 </span>
               </button>
@@ -353,11 +354,11 @@ function CRMContent() {
           </div>
 
           {/* Search, CTA, Notifications & User */}
-          <div className="flex items-center gap-2.5 lg:gap-4 relative">
+          <div className="flex items-center gap-3 lg:gap-5 relative">
             
             {/* 1. Buscador Omnibox con Command Palette */}
             <div className="relative block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/40" />
               <input 
                 ref={searchInputRef}
                 type="text" 
@@ -368,19 +369,19 @@ function CRMContent() {
                   activeTab === 'configuracion' ? "Buscar contactos globalmente..." :
                   "Buscar clientes u oportunidades..."
                 } 
-                className="bg-[#18181b] border border-white/10 rounded-lg pl-9 pr-14 py-1.5 lg:py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[200px] md:w-[260px] lg:w-[320px] transition-colors" 
+                className="bg-[#18181b] border border-white/10 rounded-full pl-10 pr-16 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff4b0b]/50 focus:bg-[#202024] w-[240px] md:w-[320px] lg:w-[420px] transition-all shadow-inner" 
               />
               {globalSearchQuery ? (
                 <button 
                   onClick={() => setGlobalSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               ) : (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 lg:gap-1">
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/40 border border-white/5 shadow-xs">⌘</kbd>
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/40 border border-white/5 shadow-xs">K</kbd>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-white/10 rounded-md text-white/50 border border-white/5">⌘</kbd>
+                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-white/10 rounded-md text-white/50 border border-white/5">K</kbd>
                 </div>
               )}
 
@@ -392,7 +393,7 @@ function CRMContent() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
+                    className="absolute top-[calc(100%+12px)] left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
                   >
                     {(() => {
                       const query = globalSearchQuery.toLowerCase();
@@ -405,18 +406,18 @@ function CRMContent() {
 
                       if (searchResults.length === 0) {
                         return (
-                          <div className="p-4 text-center">
-                            <p className="text-[13px] text-white/40 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
+                          <div className="p-6 text-center">
+                            <p className="text-sm text-white/50 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
                           </div>
                         );
                       }
 
                       return (
                         <div className="flex flex-col">
-                          <div className="px-3 py-2 border-b border-white/5 bg-white/5">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Resultados Rápidos</span>
+                          <div className="px-4 py-3 border-b border-white/5 bg-white/5">
+                            <span className="text-xs font-bold text-white/50 uppercase tracking-wider">Resultados Rápidos</span>
                           </div>
-                          <ul className="py-1">
+                          <ul className="py-2">
                             {searchResults.map(lead => {
                               const titleName = lead.client_name || lead.name || 'Empresa';
                               const initials = titleName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'Q';
@@ -428,25 +429,25 @@ function CRMContent() {
                                       if (setSelectedLeadId) setSelectedLeadId(lead.id);
                                       setActiveTab('whatsapp');
                                     }}
-                                    className="w-full px-3 py-2.5 hover:bg-white/5 transition-colors flex items-center gap-3 text-left group"
+                                    className="w-full px-4 py-3 hover:bg-white/5 transition-colors flex items-center gap-4 text-left group"
                                   >
-                                    <div className="w-7 h-7 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[10px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">
+                                    <div className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[13px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">
                                       {initials}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[13px] font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
-                                      <div className="flex items-center gap-2 text-[11px] text-white/40 mt-0.5">
+                                      <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
+                                      <div className="flex items-center gap-2 text-xs text-white/40 mt-1">
                                         <span className="truncate">{lead.whatsapp || lead.email}</span>
-                                        <span className="px-1.5 rounded-sm bg-white/5 text-white/50">{lead.status || lead.stage}</span>
+                                        <span className="px-1.5 py-0.5 rounded-sm bg-white/5 text-white/50">{lead.status || lead.stage}</span>
                                       </div>
                                     </div>
-                                    <MessageSquare className="w-4 h-4 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                                    <MessageSquare className="w-5 h-5 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
                                   </button>
                                 </li>
                               );
                             })}
                           </ul>
-                          <div className="px-3 py-2 bg-white/5 border-t border-white/5 flex items-center justify-between text-[10px] text-white/40">
+                          <div className="px-4 py-3 bg-white/5 border-t border-white/5 flex items-center justify-between text-xs text-white/40">
                             <span>Saltar directo al chat</span>
                             <span>Esc para cerrar</span>
                           </div>
@@ -458,12 +459,12 @@ function CRMContent() {
               </AnimatePresence>
             </div>
 
-            <div className="h-5 lg:h-6 w-px bg-white/10" />
+            <div className="h-6 w-px bg-white/10" />
 
             {/* 2. Botón Primario de Creación */}
             <button 
               onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="hidden sm:block">Nueva oportunidad</span>
@@ -472,41 +473,60 @@ function CRMContent() {
             {/* 3. Campana / Notificaciones */}
             <button 
               onClick={() => alert("Centro de Notificaciones:\nAquí recibirás alertas cuando un nuevo Lead entre por Webhook, o cuando tu equipo te asigne una Tarea.")}
-              className="relative p-1.5 text-white/50 hover:text-white hover:bg-white/5 rounded-lg transition-colors ml-0.5 lg:ml-1 cursor-pointer"
+              className="relative p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors ml-1 cursor-pointer"
               title="Notificaciones (0)"
             >
-              <Bell className="w-[18px] h-[18px] lg:w-5 lg:h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
+              <Bell className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
             </button>
             
-            <div className="h-5 lg:h-6 w-px bg-white/10" />
-            
-            {/* 4. Perfil del Usuario Estándar */}
-            <div className="relative group z-[100]">
-              <button className="flex items-center gap-2.5 lg:gap-3 cursor-pointer p-1 lg:p-1.5 rounded-xl hover:bg-white/5 transition-colors text-left border border-transparent group-hover:border-white/5">
-                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-7 h-7 lg:w-8 lg:h-8 rounded-full border border-white/10 object-cover" />
+            {/* 4. Perfil del Usuario Estándar (Estilo Google) */}
+            <div className="relative z-[100] ml-1">
+              <button 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center gap-3 cursor-pointer p-1 lg:p-1.5 rounded-full hover:bg-white/5 transition-colors text-left border border-transparent focus:outline-none"
+              >
+                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/10 object-cover" />
                 <div className="hidden lg:flex flex-col justify-center">
-                  <span className="text-white text-[13px] font-bold leading-tight">{currentProfile.name}</span>
-                  <span className="text-white/50 text-[10px] font-medium leading-tight uppercase tracking-wider">Activo ahora</span>
+                  <span className="text-white text-sm font-bold leading-none">{currentProfile.name}</span>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-white/50 hidden lg:block group-hover:text-white transition-colors" />
+                <ChevronDown className={`w-4 h-4 text-white/50 hidden lg:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-white' : ''}`} />
               </button>
 
-              {/* Dropdown de Perfil Estándar */}
-              <div className="absolute right-0 top-[calc(100%+4px)] w-56 bg-[#18181b] border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right z-[100] overflow-hidden">
-                <div className="p-4 border-b border-white/5 bg-white/5">
-                  <p className="text-[13px] font-bold text-white truncate">{currentProfile.name}</p>
-                  <p className="text-[11px] text-white/50 truncate mt-0.5">admin@qaway.pe</p>
-                </div>
-                <div className="p-2 flex flex-col gap-1">
-                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Mi Perfil Público</button>
-                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Preferencias de CRM</button>
-                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Gestión de Roles</button>
-                </div>
-                <div className="p-2 border-t border-white/5 bg-black/20">
-                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold">Cerrar Sesión</button>
-                </div>
-              </div>
+              {/* Dropdown de Perfil Estándar (Manejado por Clic) */}
+              <AnimatePresence>
+                {isProfileOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsProfileOpen(false)}
+                      aria-label="Cerrar perfil"
+                    />
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, originY: 0, originX: 1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[#18181b] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                    >
+                      <div className="p-5 border-b border-white/5 bg-white/5 flex items-center gap-4">
+                        <img src={currentProfile.avatar} alt={currentProfile.name} className="w-12 h-12 rounded-full border border-white/10 object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white truncate">{currentProfile.name}</p>
+                          <p className="text-xs text-white/50 truncate mt-0.5">admin@qaway.pe</p>
+                        </div>
+                      </div>
+                      <div className="p-2 flex flex-col gap-1">
+                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-colors font-medium">Gestionar tu cuenta</button>
+                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-xl transition-colors font-medium">Preferencias de CRM</button>
+                      </div>
+                      <div className="p-2 border-t border-white/5 bg-black/20">
+                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl transition-colors font-bold">Cerrar Sesión</button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
 
           </div>
