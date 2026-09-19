@@ -117,6 +117,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Automatizacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    preview: '/assets/hub-previews/preview-inventario.png',
     published: false,
   },
   {
@@ -129,6 +130,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    preview: '/assets/hub-previews/preview-creador.png',
     published: false,
   },
   {
@@ -141,6 +143,7 @@ const routes = [
     category: 'Product Management',
     pillar: 'Automatizacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
+    preview: '/assets/hub-previews/preview-agenda.png',
     published: false,
   },
   {
@@ -153,6 +156,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Creacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    preview: '/assets/hub-previews/preview-academy.png',
     published: true,
   },
   {
@@ -165,6 +169,7 @@ const routes = [
     category: 'Panel de control',
     pillar: 'IA',
     tone: 'bg-[#191918] text-white',
+    preview: '/assets/hub-previews/preview-agentes.png',
     published: false,
   },
   {
@@ -177,6 +182,7 @@ const routes = [
     category: 'Panel de control',
     pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
+    preview: '/assets/hub-previews/preview-pagos.png',
     published: false,
   },
   {
@@ -189,6 +195,7 @@ const routes = [
     category: 'Rutas de Marca',
     pillar: 'Marketing',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-creador.png',
     published: false,
   },
   {
@@ -201,6 +208,7 @@ const routes = [
     category: 'Ruta Profesional',
     pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-inventario.png',
     published: false,
   },
   {
@@ -213,6 +221,7 @@ const routes = [
     category: 'Rutas de Marca',
     pillar: 'IA',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-agentes.png',
     published: false,
   },
   {
@@ -225,6 +234,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-agenda.png',
     published: false,
   },
   {
@@ -237,6 +247,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Marketing',
     tone: 'bg-[#0080FF]/10 text-[#0080FF]',
+    preview: '/assets/hub-previews/preview-pagos.png',
     published: false,
   },
   {
@@ -249,6 +260,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Marketing',
     tone: 'bg-[#0075FF]/10 text-[#0075FF]',
+    preview: '/assets/hub-previews/preview-creador.png',
     published: false,
   },
   {
@@ -261,6 +273,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Automatizacion',
     tone: 'bg-[#191918]/5 text-[#191918]/70',
+    preview: '/assets/hub-previews/preview-agenda.png',
     published: false,
   },
 ]
@@ -279,13 +292,19 @@ const PILLARS = [
   { label: 'Creacion de Contenido', match: 'Creacion' },
 ]
 
-// Gradientes armónicos asignados por Eje Temático (reconocimiento visual pasivo)
+// Gama Arquitectónica con Presencia Visual: Tonos pasteles refinados y sedosos (no blancos)
+// Garantiza que la tarjeta se distinga de inmediato sobre el fondo #f8f9fc de la página
 const PILLAR_GRADIENTS = {
-  'IA': 'bg-[linear-gradient(135deg,#ede9fe_0%,#ddd6fe_42%,#c4b5fd_100%)]', // Lavanda suave
-  'Automatizacion': 'bg-[linear-gradient(135deg,#e0f7fa_0%,#b2ebf2_42%,#80deea_100%)]', // Cyan suave
-  'Marketing': 'bg-[linear-gradient(135deg,#ffedd5_0%,#fed7aa_42%,#fdba74_100%)]', // Melocotón suave
-  'Creacion': 'bg-[linear-gradient(135deg,#fee2e2_0%,#fecaca_42%,#fca5a5_100%)]', // Rosa pastel
-  'Herramientas': 'bg-[linear-gradient(135deg,#fef3c7_0%,#fde68a_42%,#fcd34d_100%)]', // Ámbar suave
+  // IA: Lavanda técnico / Slate frío sofisticado
+  'IA': 'bg-[linear-gradient(135deg,#f1f0fb_0%,#e4e1f7_45%,#d5d0f3_100%)]',
+  // Automatización: Menta / Sage técnico ultra limpio
+  'Automatizacion': 'bg-[linear-gradient(135deg,#eef8f6_0%,#dcf1ec_45%,#cbeae3_100%)]',
+  // Marketing: Arena cálida / Crema suave
+  'Marketing': 'bg-[linear-gradient(135deg,#fdf6ec_0%,#f9ebd4_45%,#f3dec0_100%)]',
+  // Creación de Contenido: Rosa perla / Muted Berry editorial
+  'Creacion': 'bg-[linear-gradient(135deg,#faf0f4_0%,#f5dee8_45%,#eeccdc_100%)]',
+  // Herramientas generales: Zinc cálido arquitectónico
+  'Herramientas': 'bg-[linear-gradient(135deg,#f4f4f5_0%,#e4e4e7_45%,#d4d4d8_100%)]',
 }
 
 export default function HubPage() {
@@ -313,17 +332,17 @@ export default function HubPage() {
     return matchPillar && matchSearch
   })
 
-  // Tarjeta con estilo calcado de Recursos: gradiente por pilar, imagen flotante, texto oscuro impecable
-  const FeaturedCard = ({ route, idx }) => {
+  // Tarjeta con estilo calcado de Recursos: delimitación perimetral clara, gradiente sedoso, imagen flotante
+  const FeaturedCard = ({ route }) => {
     const Icon = route.icon
-    // Asignación de color según el eje temático (o fallback secuencial)
-    const gradient = PILLAR_GRADIENTS[route.pillar] || cardGradients[idx % cardGradients.length]
-    const hasPreview = idx < 6 && Boolean(route.preview)
+    // Asignación de tono distintivo según el eje temático
+    const gradient = PILLAR_GRADIENTS[route.pillar] || PILLAR_GRADIENTS['Herramientas']
+    const hasPreview = Boolean(route.preview)
 
     return (
       <Link to={route.path} className="group block h-full">
         <motion.article
-          className={`relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-[14px] p-7 sm:p-9 ${gradient}`}
+          className={`relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-[14px] border border-black/[0.06] p-7 sm:p-9 shadow-sm ${gradient}`}
           initial={false}
           whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >

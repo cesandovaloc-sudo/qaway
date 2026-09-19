@@ -280,7 +280,7 @@ export default function DashboardView() {
     const hasAnyFilter = channelFilter !== 'all' || !isAllCampaignsSelected || selectedAdSetId !== 'all' || selectedAdId !== 'all'
 
     return (
-      <div className="flex items-center gap-2 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative z-20">
+      <div className="sticky top-0 z-30 flex items-center gap-2 mb-7 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         <div className="flex items-center gap-2 relative shrink-0">
           
           {/* 1. CANAL DE ORIGEN */}
