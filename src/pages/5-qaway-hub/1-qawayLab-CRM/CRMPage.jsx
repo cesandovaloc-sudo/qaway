@@ -545,10 +545,16 @@ function CRMContent() {
           </div>
         </header>
 
-        {/* ── MAIN CONTENT (Cool Chrome Slate Canvas) ────────────────── */}
-        <main className="flex-1 bg-[#f8fafc] overflow-y-auto text-zinc-900 relative">
-          {/* Cuadrícula milimetrada técnica tipo cuaderno sobre fondo cromo frío */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.035] bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:32px_32px]" />
+        {/* ── MAIN CONTENT (Lienzo dinámico para comparación A/B) ────────────────── */}
+        <main className={`flex-1 overflow-y-auto text-zinc-900 relative transition-colors duration-200 ${
+          activeTab === 'dashboard' ? 'bg-[#f5f5f4]' : 'bg-[#fafafa]'
+        }`}>
+          {/* Cuadrícula técnica (neutra, cero azul) */}
+          <div className={`absolute inset-0 z-0 pointer-events-none bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] ${
+            activeTab === 'dashboard' 
+              ? 'opacity-[0.02] bg-[size:40px_40px]' 
+              : 'opacity-[0.025] bg-[size:32px_32px]'
+          }`} />
           
           <div className="relative z-10 p-6 md:p-8 min-h-full">
             <AnimatePresence mode="wait">
