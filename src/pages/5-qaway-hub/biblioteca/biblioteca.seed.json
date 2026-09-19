@@ -351,7 +351,7 @@
       "costo": "gratis",
       "plataforma": ["local"],
       "nivel": "dev",
-      "popularidad": { "estrellas": "~6,682", "nota": "Repo oficial Cloudflare, MIT" },
+      "popularidad": { "estrellas": "~16,000", "nota": "Repo oficial Cloudflare, MIT" },
       "integraciones": ["cli", "plugin"],
       "nichos": ["Desarrolladores", "Equipos de seguridad", "DevSecOps"],
       "funcionalidad_corta": "Convierte tu IA en auditor que encuentra y ayuda a corregir vulnerabilidades",

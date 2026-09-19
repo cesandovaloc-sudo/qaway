@@ -32,6 +32,7 @@ const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
 const AcademyRealAppPage = lazy(() => import('@/pages/4-academy/2-qawaylab-app-academy-real/AcademyAppPage'))
 const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
 const HubWorkspacePage = lazy(() => import('@/pages/5-qaway-hub/HubWorkspacePage'))
+const HubWorkspacePageV2 = lazy(() => import('@/pages/5-qaway-hub/HubWorkspacePageV2'))
 const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/1-qawayLab-CRM/CRMPage'))
 const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
@@ -391,6 +392,11 @@ export default function AppRouter() {
         <Route
           path="hub"
           element={renderRoute('hub', <ProtectedRoute><HubWorkspacePage /></ProtectedRoute>)}
+        />
+        {/* Hub V2 carcasa literal CRM (temporal comparativa, no rompe /hub ni /hub/crm) */}
+        <Route
+          path="hub/v2"
+          element={renderRoute('hub', <ProtectedRoute><HubWorkspacePageV2 /></ProtectedRoute>)}
         />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />

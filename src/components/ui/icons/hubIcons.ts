@@ -42,6 +42,20 @@ export {
   FileEdit,
   Video,
   GraduationCap,
+  RefreshCw,
+  ShieldCheck,
+  Menu,
+  Home,
+  Bot,
+  CalendarDays,
+  Package,
+  Clapperboard,
+  PenLine,
+  MessageSquareText,
+  CreditCard,
+  KanbanSquare,
+  ArrowRight,
+  ArrowUpRight,
 } from 'lucide-react'
 
 export const HUB_ICON_NAMES = {
