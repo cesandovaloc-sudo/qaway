@@ -297,7 +297,7 @@ function CRMContent() {
       <div className="flex-1 flex flex-col min-w-0 relative">
         
         {/* HEADER TOPBAR (Escalado al estilo Google Workspace / Altura amplia) */}
-        <header className="h-[68px] border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
+        <header className="h-[72px] border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
           
           {/* Lado Izquierdo: Toggle Sidebar, Waffle y App Home */}
           <div className="flex items-center gap-2 lg:gap-3">
