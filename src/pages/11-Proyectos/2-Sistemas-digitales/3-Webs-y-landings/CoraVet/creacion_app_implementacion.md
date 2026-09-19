@@ -177,3 +177,26 @@
     - RLS y políticas aplicadas con éxito en `public.categories`.
     - Las tablas ausentes fueron omitidas con seguridad y el pipeline de migraciones quedó 100% limpio y sincronizado.
   - **Alineación de UI:** Enlace de retorno en `CRMPage.jsx` normalizado hacia `/hub`.
+
+---
+
+### [Iteración 11 — 2026-09-19 17:15]
+- **Segunda Auditoría Externa y Corrección de Regresión en Políticas SELECT de Catálogo:**
+  - **Hallazgo de la Segunda Auditoría (agente externo, contexto commit 942):**
+    - El auditor externo identificó una **regresión** introducida al refactorizar la migración `20260919160000_hardening_rls_public_catalog.sql` a bloque PL/pgSQL condicional (Iteración 10): al generalizar el loop de catálogo con un `USING (true)` uniforme, se perdieron los filtros específicos que la versión original del auditor sí incluía.
+    - **Impacto de la regresión:** Las tablas `bundles`, `catalogs`, `price_lists`, `pricing_rules` y `liquidation_campaigns`, cuando existan en producción, habrían quedado con SELECT completamente abierto al usuario anónimo — exponiendo borradores, catálogos privados, reglas de precio internas y campañas de liquidación inactivas.
+    - **Puntos confirmados sin regresión por el auditor:** tablas sensibles solo staff, DELETE solo admin, links de invitado acotados a vigentes, `service_role` solo server, Academy 21/21 sin cambios, `.env` sin secretos expuestos.
+  - **Corrección Aplicada (Migración `20260919171700_fix_catalog_select_gates.sql`):**
+    - Cada tabla de catálogo con riesgo de exposición recibió su propio bloque `IF EXISTS ... THEN` con la política SELECT correcta:
+      - `bundles` → `status = 'active' OR auth.role() = 'authenticated'`
+      - `catalogs` → `is_public = true OR auth.role() = 'authenticated'`
+      - `price_lists` → `is_active = true OR auth.role() = 'authenticated'`
+      - `pricing_rules` → `is_active = true OR auth.role() = 'authenticated'`
+      - `liquidation_campaigns` → `status = 'active' OR auth.role() = 'authenticated'`
+      - `inventory_locations` → `auth.role() = 'authenticated'` (nunca acceso anon)
+    - Las tablas de items/hijos (`bundle_items`, `catalog_items`, `product_images`, `product_variants`, `product_prices`, `liquidation_items`, `categories`) conservan `USING(true)` legítimamente porque no tienen estado propio y su acceso depende del objeto padre.
+  - **Despliegue en Base Viva:**
+    - `npx supabase db push` con migración `20260919171700_fix_catalog_select_gates.sql`: **Éxito total (`Finished supabase db push`)**.
+    - Todas las tablas corregidas aún no existen en producción → emitieron `RAISE NOTICE` correctamente y el pipeline finalizó limpio.
+  - **Deuda Estructural Registrada (pendiente de esquema futuro):**
+    - Las 19 tablas legacy no tienen columna `tenant_id`. El aislamiento por cliente a nivel de fila es imposible con el esquema actual; el modelo real es catálogo compartido + roles. Si en el futuro EPC Contable o Vallet requieren catálogos propios en estas tablas, se deberá agregar `tenant_id` como primera prioridad antes de insertar datos.
