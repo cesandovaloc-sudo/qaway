@@ -182,7 +182,7 @@ const routes = [
     category: 'Panel de control',
     pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
-    preview: '/assets/hub-previews/preview-pagos.png',
+    preview: '/assets/hub-previews/preview-crm.jpg',
     published: false,
   },
   {
@@ -292,19 +292,19 @@ const PILLARS = [
   { label: 'Creacion de Contenido', match: 'Creacion' },
 ]
 
-// Gama Arquitectónica con Presencia Visual: Tonos pasteles refinados y sedosos (no blancos)
-// Garantiza que la tarjeta se distinga de inmediato sobre el fondo #f8f9fc de la página
+// Gama SaaS Moderna: Azules, índigos y slate tenues inspirados en Qaway Agenda / Stripe
+// Acabado de software empresarial: limpio, tecnológico y sin saturación de color
 const PILLAR_GRADIENTS = {
-  // IA: Lavanda técnico / Slate frío sofisticado
-  'IA': 'bg-[linear-gradient(135deg,#f1f0fb_0%,#e4e1f7_45%,#d5d0f3_100%)]',
-  // Automatización: Menta / Sage técnico ultra limpio
-  'Automatizacion': 'bg-[linear-gradient(135deg,#eef8f6_0%,#dcf1ec_45%,#cbeae3_100%)]',
-  // Marketing: Arena cálida / Crema suave
-  'Marketing': 'bg-[linear-gradient(135deg,#fdf6ec_0%,#f9ebd4_45%,#f3dec0_100%)]',
-  // Creación de Contenido: Rosa perla / Muted Berry editorial
-  'Creacion': 'bg-[linear-gradient(135deg,#faf0f4_0%,#f5dee8_45%,#eeccdc_100%)]',
-  // Herramientas generales: Zinc cálido arquitectónico
-  'Herramientas': 'bg-[linear-gradient(135deg,#f4f4f5_0%,#e4e4e7_45%,#d4d4d8_100%)]',
+  // IA: Indigo SaaS tenue
+  'IA': 'bg-[linear-gradient(135deg,#ffffff_0%,#f5f7ff_50%,#eef2ff_100%)]',
+  // Automatización: Sky / Cyan moderno
+  'Automatizacion': 'bg-[linear-gradient(135deg,#ffffff_0%,#f0f9ff_50%,#e0f2fe_100%)]',
+  // Marketing: Cobalto / Azul negocio suave
+  'Marketing': 'bg-[linear-gradient(135deg,#ffffff_0%,#f8faff_50%,#e8f0fe_100%)]',
+  // Creación de Contenido: Violet / Lavanda suave
+  'Creacion': 'bg-[linear-gradient(135deg,#ffffff_0%,#faf5ff_50%,#f3e8ff_100%)]',
+  // Herramientas generales: Slate / Zinc tecnológico
+  'Herramientas': 'bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_50%,#f1f5f9_100%)]',
 }
 
 export default function HubPage() {
@@ -332,19 +332,18 @@ export default function HubPage() {
     return matchPillar && matchSearch
   })
 
-  // Tarjeta con estilo calcado de Recursos: delimitación perimetral clara, gradiente sedoso, imagen flotante
+  // Tarjeta estilo SaaS Moderno: borde definido, gradiente azulado tenue, mockup integrado
   const FeaturedCard = ({ route }) => {
     const Icon = route.icon
-    // Asignación de tono distintivo según el eje temático
     const gradient = PILLAR_GRADIENTS[route.pillar] || PILLAR_GRADIENTS['Herramientas']
     const hasPreview = Boolean(route.preview)
 
     return (
       <Link to={route.path} className="group block h-full">
         <motion.article
-          className={`relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-[14px] border border-black/[0.06] p-7 sm:p-9 shadow-sm ${gradient}`}
+          className={`relative flex h-full min-h-[300px] flex-col justify-end overflow-hidden rounded-[14px] border border-slate-200/90 p-7 sm:p-9 shadow-[0_4px_20px_rgba(0,0,0,0.03)] ${gradient}`}
           initial={false}
-          whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
+          whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(15,23,42,0.08)', transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }}
         >
           {/* Mockup vertical alto: Marco ultra aclarado casi imperceptible (border-black/[0.03]) y sin zoom jitter */}
           {hasPreview ? (
