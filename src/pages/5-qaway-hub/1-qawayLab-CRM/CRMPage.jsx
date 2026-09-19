@@ -293,18 +293,20 @@ function CRMContent() {
       </aside>
 
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         
-        <header className="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-[#111111] z-10">
+        {/* HEADER TOPBAR (Estandarizado a 56px de alto, estilo Linear/Atlassian) */}
+        <header className="h-14 border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
+          
           {/* Lado Izquierdo: Toggle Sidebar, Waffle y App Home */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 lg:gap-2">
             {/* Botón Toggle Sidebar */}
             <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors"
               title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4 lg:w-5 lg:h-5" />
             </button>
 
             {/* Waffle App Switcher */}
@@ -312,10 +314,10 @@ function CRMContent() {
               <button
                 type="button"
                 onClick={() => setIsWaffleOpen(!isWaffleOpen)}
-                className="group flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
+                className="group flex items-center gap-1.5 h-8 lg:h-9 px-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
                 title="Ecosistema de Aplicaciones"
               >
-                <div className="grid grid-cols-3 gap-0.5 w-4 h-4 place-items-center">
+                <div className="grid grid-cols-3 gap-0.5 w-3.5 h-3.5 place-items-center">
                   {[...Array(9)].map((_, i) => (
                     <span
                       key={i}
@@ -323,7 +325,7 @@ function CRMContent() {
                     />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
+                <span className="text-[13px] font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
                   Apps
                 </span>
                 <ChevronDown className="w-3 h-3 text-white/40 group-hover:text-white/80 transition-transform duration-200" />
@@ -335,34 +337,38 @@ function CRMContent() {
               />
             </div>
 
-            {/* Home de la App Actual (Icono + Texto) */}
-            <div className="hidden sm:block ml-1">
+            {/* Home Animado (Se retrae igual que el waffle) */}
+            <div className="hidden sm:block ml-0.5">
               <button 
                 onClick={() => setActiveTab('dashboard')}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors group"
+                className="group flex items-center gap-1.5 h-8 lg:h-9 px-2.5 rounded-xl border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
+                title="Ir al Inicio (Dashboard)"
               >
-                <Home className="w-4 h-4 group-hover:text-[#ff4b0b] transition-colors" />
-                <span className="text-xs font-semibold tracking-wide">Inicio</span>
+                <Home className="w-4 h-4 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
+                <span className="text-[13px] font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[44px] transition-all duration-350 ease-out whitespace-nowrap">
+                  Inicio
+                </span>
               </button>
             </div>
           </div>
 
           {/* Search, CTA, Notifications & User */}
-          <div className="flex items-center gap-3 lg:gap-5 relative">
+          <div className="flex items-center gap-2.5 lg:gap-4 relative">
+            
             {/* 1. Buscador Omnibox con Command Palette */}
             <div className="relative block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
               <input 
                 ref={searchInputRef}
                 type="text" 
                 value={globalSearchQuery}
                 onChange={(e) => setGlobalSearchQuery(e.target.value)}
                 placeholder={
-                  activeTab === 'dashboard' ? "Buscar en toda la base de datos..." :
+                  activeTab === 'dashboard' ? "Buscar en base de datos..." :
                   activeTab === 'configuracion' ? "Buscar contactos globalmente..." :
-                  "Buscar contactos, empresas, oportunidades..."
+                  "Buscar clientes u oportunidades..."
                 } 
-                className="bg-[#18181b] border border-white/10 rounded-md pl-9 pr-14 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[240px] lg:w-[320px] transition-colors" 
+                className="bg-[#18181b] border border-white/10 rounded-lg pl-9 pr-14 py-1.5 lg:py-2 text-[13px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff4b0b]/50 w-[200px] md:w-[260px] lg:w-[320px] transition-colors" 
               />
               {globalSearchQuery ? (
                 <button 
@@ -372,9 +378,9 @@ function CRMContent() {
                   <X className="w-3.5 h-3.5" />
                 </button>
               ) : (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">⌘</kbd>
-                  <kbd className="px-1.5 py-0.5 text-[9px] font-mono bg-white/10 rounded text-white/40">K</kbd>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 lg:gap-1">
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/40 border border-white/5 shadow-xs">⌘</kbd>
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/40 border border-white/5 shadow-xs">K</kbd>
                 </div>
               )}
 
@@ -386,7 +392,7 @@ function CRMContent() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full mt-2 left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden"
+                    className="absolute top-[calc(100%+8px)] left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden"
                   >
                     {(() => {
                       const query = globalSearchQuery.toLowerCase();
@@ -400,7 +406,7 @@ function CRMContent() {
                       if (searchResults.length === 0) {
                         return (
                           <div className="p-4 text-center">
-                            <p className="text-xs text-white/40 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
+                            <p className="text-[13px] text-white/40 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
                           </div>
                         );
                       }
@@ -408,7 +414,7 @@ function CRMContent() {
                       return (
                         <div className="flex flex-col">
                           <div className="px-3 py-2 border-b border-white/5 bg-white/5">
-                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Resultados Globales</span>
+                            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider">Resultados Rápidos</span>
                           </div>
                           <ul className="py-1">
                             {searchResults.map(lead => {
@@ -428,20 +434,20 @@ function CRMContent() {
                                       {initials}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[12px] font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
-                                      <div className="flex items-center gap-2 text-[10px] text-white/40 mt-0.5">
+                                      <p className="text-[13px] font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
+                                      <div className="flex items-center gap-2 text-[11px] text-white/40 mt-0.5">
                                         <span className="truncate">{lead.whatsapp || lead.email}</span>
                                         <span className="px-1.5 rounded-sm bg-white/5 text-white/50">{lead.status || lead.stage}</span>
                                       </div>
                                     </div>
-                                    <MessageSquare className="w-3.5 h-3.5 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                                    <MessageSquare className="w-4 h-4 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
                                   </button>
                                 </li>
                               );
                             })}
                           </ul>
                           <div className="px-3 py-2 bg-white/5 border-t border-white/5 flex items-center justify-between text-[10px] text-white/40">
-                            <span>Navega a los mensajes con 1 clic</span>
+                            <span>Saltar directo al chat</span>
                             <span>Esc para cerrar</span>
                           </div>
                         </div>
@@ -452,48 +458,53 @@ function CRMContent() {
               </AnimatePresence>
             </div>
 
-            <div className="h-6 w-px bg-white/10 mx-1" />
+            <div className="h-5 lg:h-6 w-px bg-white/10" />
 
-            {/* 2. Botón Primario de Creación (+ Nueva oportunidad) */}
+            {/* 2. Botón Primario de Creación */}
             <button 
-              onClick={() => alert("Modal: Nueva Oportunidad (Desarrollo en curso)")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-4 py-1.5 rounded-md text-xs font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)]"
+              onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Nueva oportunidad</span>
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:block">Nueva oportunidad</span>
             </button>
             
             {/* 3. Campana / Notificaciones */}
-            <button className="relative text-white/50 hover:text-white transition-colors ml-1">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
+            <button 
+              onClick={() => alert("Centro de Notificaciones:\nAquí recibirás alertas cuando un nuevo Lead entre por Webhook, o cuando tu equipo te asigne una Tarea.")}
+              className="relative p-1.5 text-white/50 hover:text-white hover:bg-white/5 rounded-lg transition-colors ml-0.5 lg:ml-1 cursor-pointer"
+              title="Notificaciones (0)"
+            >
+              <Bell className="w-[18px] h-[18px] lg:w-5 lg:h-5" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
             </button>
             
-            <div className="h-6 w-px bg-white/10 mx-1" />
+            <div className="h-5 lg:h-6 w-px bg-white/10" />
             
             {/* 4. Perfil del Usuario Estándar */}
-            <div className="relative group">
-              <button className="flex items-center gap-3 cursor-pointer p-1 rounded-lg hover:bg-white/5 transition-colors text-left">
-                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-8 h-8 rounded-full border border-white/10 object-cover" />
+            <div className="relative group z-[100]">
+              <button className="flex items-center gap-2.5 lg:gap-3 cursor-pointer p-1 lg:p-1.5 rounded-xl hover:bg-white/5 transition-colors text-left border border-transparent group-hover:border-white/5">
+                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-7 h-7 lg:w-8 lg:h-8 rounded-full border border-white/10 object-cover" />
                 <div className="hidden lg:flex flex-col justify-center">
-                  <span className="text-white text-[12px] font-bold leading-tight">{currentProfile.name}</span>
-                  <span className="text-white/50 text-[10px] font-medium leading-tight uppercase tracking-wider">Perfil Activo</span>
+                  <span className="text-white text-[13px] font-bold leading-tight">{currentProfile.name}</span>
+                  <span className="text-white/50 text-[10px] font-medium leading-tight uppercase tracking-wider">Activo ahora</span>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-white/50 ml-1 hidden lg:block" />
+                <ChevronDown className="w-3.5 h-3.5 text-white/50 hidden lg:block group-hover:text-white transition-colors" />
               </button>
 
               {/* Dropdown de Perfil Estándar */}
-              <div className="absolute right-0 top-full mt-1 w-48 bg-[#18181b] border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right">
-                <div className="p-3 border-b border-white/5">
-                  <p className="text-xs font-bold text-white truncate">{currentProfile.name}</p>
-                  <p className="text-[10px] text-white/50 truncate">admin@qaway.pe</p>
+              <div className="absolute right-0 top-[calc(100%+4px)] w-56 bg-[#18181b] border border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right z-[100] overflow-hidden">
+                <div className="p-4 border-b border-white/5 bg-white/5">
+                  <p className="text-[13px] font-bold text-white truncate">{currentProfile.name}</p>
+                  <p className="text-[11px] text-white/50 truncate mt-0.5">admin@qaway.pe</p>
                 </div>
-                <div className="p-1.5 flex flex-col gap-0.5">
-                  <button className="w-full text-left px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors">Mi Perfil</button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-white/70 hover:text-white hover:bg-white/5 rounded-md transition-colors">Ajustes de Cuenta</button>
+                <div className="p-2 flex flex-col gap-1">
+                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Mi Perfil Público</button>
+                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Preferencias de CRM</button>
+                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">Gestión de Roles</button>
                 </div>
-                <div className="p-1.5 border-t border-white/5">
-                  <button className="w-full text-left px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-md transition-colors font-medium">Cerrar Sesión</button>
+                <div className="p-2 border-t border-white/5 bg-black/20">
+                  <button className="w-full flex items-center px-3 py-2 text-[13px] text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold">Cerrar Sesión</button>
                 </div>
               </div>
             </div>
