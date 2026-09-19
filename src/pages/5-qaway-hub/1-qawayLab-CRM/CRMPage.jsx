@@ -78,11 +78,10 @@ const ALL_TABS = [
   { id: 'tareas',          label: 'Tareas',            icon: Target       },
   { id: 'whatsapp',        label: 'Mensajes',          icon: MessageSquare },
   { id: 'campaigns',       label: 'Reportes',          icon: BarChart3    },
-  { id: 'configuracion',   label: 'Configuración',     icon: Settings2    },
 ]
 
 const ROLE_TABS = {
-  management: ['dashboard', 'leads', 'kanban', 'clientes', 'automatizaciones', 'tareas', 'whatsapp', 'campaigns', 'configuracion'],
+  management: ['dashboard', 'leads', 'kanban', 'clientes', 'automatizaciones', 'tareas', 'whatsapp', 'campaigns'],
   marketing:  ['dashboard', 'leads', 'campaigns', 'automatizaciones', 'reportes'],
   sales:      ['dashboard', 'leads', 'kanban', 'clientes', 'tareas', 'whatsapp'],
 }
@@ -255,6 +254,23 @@ function CRMContent() {
 
         {/* ZONA INFERIOR DEL SIDEBAR (Configuración & Webhook) */}
         <div className="p-4 border-t border-white/5 flex flex-col gap-2">
+          {/* Simular Webhook (Dev Tools) */}
+          <button 
+            onClick={handleSimulate}
+            disabled={simulating}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
+              isSidebarCollapsed ? "justify-center" : ""
+            }`}
+            title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
+          >
+            <RefreshCw className={`w-4 h-4 group-hover:text-[#ff4b0b] transition-colors ${
+              simulating ? "animate-spin text-[#ff4b0b]" : ""
+            }`} />
+            {!isSidebarCollapsed && (
+              <span className="truncate">Simular Webhook</span>
+            )}
+          </button>
+
           {/* Módulo de Configuración */}
           <button 
             onClick={() => setActiveTab('configuracion')}
@@ -270,23 +286,6 @@ function CRMContent() {
             }`} />
             {!isSidebarCollapsed && (
               <span className="truncate">Configuración</span>
-            )}
-          </button>
-
-          {/* Simular Webhook (Dev Tools) */}
-          <button 
-            onClick={handleSimulate}
-            disabled={simulating}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
-              isSidebarCollapsed ? "justify-center" : ""
-            }`}
-            title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
-          >
-            <RefreshCw className={`w-4 h-4 group-hover:text-[#ff4b0b] transition-colors ${
-              simulating ? "animate-spin text-[#ff4b0b]" : ""
-            }`} />
-            {!isSidebarCollapsed && (
-              <span className="truncate">Simular Webhook</span>
             )}
           </button>
         </div>
@@ -613,10 +612,10 @@ function CRMContent() {
           {/* Botón de Chatbot de Soporte */}
           <button
             onClick={() => alert("Próximamente: Chatbot de Soporte y Ayuda Integrado.")}
-            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-[#18181b] text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_8px_40px_rgba(0,0,0,0.8)] hover:-translate-y-1 hover:bg-[#202024] transition-all duration-300 ease-out border border-white/10"
+            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff8c00] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:shadow-[0_8px_40px_rgba(255,75,11,0.6)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/20"
             title="Chatbot de Ayuda"
           >
-            <MessageSquare className="w-6 h-6 text-[#ff4b0b]" />
+            <MessageSquare className="w-6 h-6 text-white" />
             <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
               Soporte / Chatbot
             </span>
