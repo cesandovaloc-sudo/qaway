@@ -280,8 +280,8 @@ export default function DashboardView() {
     const hasAnyFilter = channelFilter !== 'all' || !isAllCampaignsSelected || selectedAdSetId !== 'all' || selectedAdId !== 'all'
 
     return (
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <div className="flex flex-wrap items-center gap-2 relative">
+      <div className="flex items-center gap-2 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 relative shrink-0">
           
           {/* 1. CANAL DE ORIGEN */}
           <div className="relative" ref={channelMenuRef}>
@@ -292,10 +292,10 @@ export default function DashboardView() {
                 setShowAdSetMenu(false)
                 setShowAdMenu(false)
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 channelFilter !== 'all' 
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs' 
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-800'
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs' 
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
               }`}
             >
               <Globe className="w-3.5 h-3.5 opacity-70" />
@@ -327,7 +327,7 @@ export default function DashboardView() {
             )}
           </div>
 
-          <span className="text-zinc-300 font-light hidden sm:inline">/</span>
+          <span className="text-zinc-300 font-light">/</span>
 
           {/* 2. CAMPAÑAS (MULTISELECT) */}
           <div className="relative" ref={campaignMenuRef}>
@@ -338,10 +338,10 @@ export default function DashboardView() {
                 setShowAdSetMenu(false)
                 setShowAdMenu(false)
               }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 !isAllCampaignsSelected
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-800'
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
               }`}
             >
               <span className={`w-2 h-2 rounded-full shrink-0 ${isAllCampaignsSelected ? 'bg-emerald-500' : 'bg-[#ff4b0b]'}`} />
@@ -421,7 +421,7 @@ export default function DashboardView() {
           {/* 3. CONJUNTO DE ANUNCIOS (ADSETS) - Progresivo */}
           {availableAdSets.length > 0 && (
             <>
-              <span className="text-zinc-300 font-light hidden sm:inline">/</span>
+              <span className="text-zinc-300 font-light">/</span>
               <div className="relative" ref={adSetMenuRef}>
                 <button
                   onClick={() => {
@@ -430,10 +430,10 @@ export default function DashboardView() {
                     setShowCampaignMenu(false)
                     setShowAdMenu(false)
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-[0.98] ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                     selectedAdSetId !== 'all'
-                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                      : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-800'
+                      ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                      : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5 opacity-70" />
@@ -486,7 +486,7 @@ export default function DashboardView() {
           {/* 4. ANUNCIOS / CREATIVOS - Progresivo */}
           {selectedAdSetId !== 'all' && availableAds.length > 0 && (
             <>
-              <span className="text-zinc-300 font-light hidden sm:inline">/</span>
+              <span className="text-zinc-300 font-light">/</span>
               <div className="relative" ref={adMenuRef}>
                 <button
                   onClick={() => {
@@ -495,10 +495,10 @@ export default function DashboardView() {
                     setShowCampaignMenu(false)
                     setShowAdSetMenu(false)
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all active:scale-[0.98] ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                     selectedAdId !== 'all'
-                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                      : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-800'
+                      ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                      : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
                   }`}
                 >
                   <Video className="w-3.5 h-3.5 opacity-70" />
@@ -555,7 +555,7 @@ export default function DashboardView() {
                 setSelectedAdSetId('all')
                 setSelectedAdId('all')
               }}
-              className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-lg text-xs font-semibold transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-lg text-xs font-semibold transition-colors ml-1"
               title="Restablecer todos los filtros"
             >
               <span>Restablecer</span>
@@ -563,18 +563,6 @@ export default function DashboardView() {
             </button>
           )}
 
-        </div>
-
-        {/* Resumen a la derecha */}
-        <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <strong className="text-zinc-800 font-bold">{activeCount}</strong> activas
-          </span>
-          <span className="text-zinc-300">|</span>
-          <span>
-            Leads filtrados: <strong className="text-zinc-800 font-bold">{filteredLeads.length}</strong>
-          </span>
         </div>
       </div>
     )
@@ -584,18 +572,28 @@ export default function DashboardView() {
   // VISTA 1: DASHBOARD
   // =========================================================================
   if (currentRole === 'management' || currentRole === 'marketing' || currentRole === 'sales') {
+    const activeCount = activeCampaignsList.filter(c => c.status === 'Activa').length
+
     return (
       <div className="bg-transparent text-zinc-900 max-w-7xl mx-auto">
         
-        {/* ENCABEZADO: Título y Botones Auxiliares */}
+        {/* ENCABEZADO: Título, Telemetría y Botones Auxiliares */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
               Resumen de Rendimiento
             </h1>
-            <p className="text-[14px] text-zinc-500 mt-1 font-medium">
-              Analiza las métricas clave y el estado general de tu ecosistema comercial.
-            </p>
+            <div className="flex flex-wrap items-center gap-2.5 mt-1">
+              <p className="text-[14px] text-zinc-500 font-medium">
+                Analiza las métricas clave y el estado general de tu ecosistema comercial.
+              </p>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{activeCount} {activeCount === 1 ? 'activa' : 'activas'}</span>
+                <span className="text-zinc-300">·</span>
+                <span>{filteredLeads.length} {filteredLeads.length === 1 ? 'lead filtrado' : 'leads filtrados'}</span>
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2.5 relative">
