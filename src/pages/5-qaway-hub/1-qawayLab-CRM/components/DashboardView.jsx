@@ -280,7 +280,7 @@ export default function DashboardView() {
     const hasAnyFilter = channelFilter !== 'all' || !isAllCampaignsSelected || selectedAdSetId !== 'all' || selectedAdId !== 'all'
 
     return (
-      <div className="flex items-center gap-2 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-2 mb-7 bg-white border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.02)] relative z-20">
         <div className="flex items-center gap-2 relative shrink-0">
           
           {/* 1. CANAL DE ORIGEN */}
@@ -583,20 +583,20 @@ export default function DashboardView() {
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
               Resumen de Rendimiento
             </h1>
-            <div className="flex flex-wrap items-center gap-2.5 mt-1">
-              <p className="text-[14px] text-zinc-500 font-medium">
-                Analiza las métricas clave y el estado general de tu ecosistema comercial.
-              </p>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>{activeCount} {activeCount === 1 ? 'activa' : 'activas'}</span>
-                <span className="text-zinc-300">·</span>
-                <span>{filteredLeads.length} {filteredLeads.length === 1 ? 'lead filtrado' : 'leads filtrados'}</span>
-              </span>
-            </div>
+            <p className="text-[14px] text-zinc-500 font-medium mt-1">
+              Analiza las métricas clave y el estado general de tu ecosistema comercial.
+            </p>
           </div>
 
           <div className="flex items-center gap-2.5 relative">
+            {/* Cápsula de telemetría */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{activeCount} {activeCount === 1 ? 'activa' : 'activas'}</span>
+              <span className="text-zinc-300">·</span>
+              <span>{filteredLeads.length} {filteredLeads.length === 1 ? 'lead filtrado' : 'leads filtrados'}</span>
+            </span>
+
             {/* Botón Nueva Métrica (Solo Administrador / Management) */}
             {currentRole === 'management' && (
               <button
