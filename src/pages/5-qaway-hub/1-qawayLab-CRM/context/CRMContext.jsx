@@ -4,6 +4,10 @@ import { crmAdapter, checkIs24hWindowActive } from '../adapters/crmAdapter'
 const CRMContext = createContext()
 
 export function CRMProvider({ children }) {
+  const [tenants, setTenants] = useState([])
+  const [selectedTenantId, setSelectedTenantId] = useState(() => {
+    return localStorage.getItem('qaway_crm_selected_tenant') || '00000000-0000-0000-0000-000000000001'
+  })
   const [leads, setLeads] = useState([])
   const [campaigns, setCampaigns] = useState([])
   const [selectedLeadId, setSelectedLeadId] = useState(null)
@@ -11,6 +15,22 @@ export function CRMProvider({ children }) {
   const [currentRole, setCurrentRole] = useState('management')
   const [customMetrics, setCustomMetrics] = useState([])
   const [globalSearchQuery, setGlobalSearchQuery] = useState('')
+
+  // Persistir el tenant seleccionado
+  useEffect(() => {
+    if (selectedTenantId) {
+      localStorage.setItem('qaway_crm_selected_tenant', selectedTenantId)
+    }
+  }, [selectedTenantId])
+
+  // Carga inicial de tenants
+  useEffect(() => {
+    async function loadTenants() {
+      const data = await crmAdapter.getTenants()
+      setTenants(data)
+    }
+    loadTenants()
+  }, [])
 
   const addCustomMetric = useCallback((metric) => {
     if (currentRole === 'management') setCustomMetrics(prev => [...prev, metric])
@@ -20,27 +40,33 @@ export function CRMProvider({ children }) {
     if (currentRole === 'management') setCustomMetrics(prev => prev.filter(m => m.id !== id))
   }, [currentRole])
 
-  // Carga inicial y Suscripción Realtime desacoplada vía Adaptador
+  // Carga reactiva de Leads y Campañas según el Tenant seleccionado
   useEffect(() => {
     async function loadData() {
-      // 1. Cargar Campañas
-      const campsData = await crmAdapter.getCampaigns()
+      // 1. Cargar Campañas del tenant
+      const campsData = await crmAdapter.getCampaigns(selectedTenantId)
       setCampaigns(campsData)
 
-      // 2. Cargar Leads
-      const leadsData = await crmAdapter.getLeads()
+      // 2. Cargar Leads del tenant
+      const leadsData = await crmAdapter.getLeads(selectedTenantId)
       setLeads(leadsData)
-      if (leadsData.length > 0 && !selectedLeadId) {
+      if (leadsData.length > 0) {
         setSelectedLeadId(leadsData[0].id)
+      } else {
+        setSelectedLeadId(null)
       }
     }
     
     loadData()
+  }, [selectedTenantId])
 
-    // 3. Suscripción en Tiempo Real para nuevos Leads (Webhook Hostinger / Meta -> Supabase -> CRM)
+  // Suscripción Realtime desacoplada vía Adaptador
+  useEffect(() => {
     const unsubscribe = crmAdapter.subscribeToLeads({
       onInsert: (newMappedLead) => {
-        setLeads(prev => [newMappedLead, ...prev])
+        if (!selectedTenantId || selectedTenantId === 'all' || newMappedLead.tenant_id === selectedTenantId) {
+          setLeads(prev => [newMappedLead, ...prev])
+        }
       },
       onUpdate: (updatedMappedLead) => {
         setLeads(prev => prev.map(l => l.id === updatedMappedLead.id ? updatedMappedLead : l))
@@ -53,7 +79,7 @@ export function CRMProvider({ children }) {
     return () => {
       unsubscribe()
     }
-  }, []) // Se ejecuta una sola vez al montar
+  }, [selectedTenantId])
 
   const visibleLeads = currentRole === 'sales'
     ? leads.filter(l => l.agent === 'Agente Qaway A')
@@ -153,6 +179,7 @@ export function CRMProvider({ children }) {
         referral: newLead.referral || null,
         is_human_requested: Boolean(newLead.isHumanRequested)
       },
+      tenant_id: (selectedTenantId && selectedTenantId !== 'all') ? selectedTenantId : '00000000-0000-0000-0000-000000000001',
       unread_count: 1
     }
 
@@ -170,7 +197,7 @@ export function CRMProvider({ children }) {
         return [leadToInsert, ...prev]
       })
     }
-  }, [])
+  }, [selectedTenantId])
 
   // Obtener estadísticas globales
   const getGlobalStats = useCallback(() => {
@@ -193,7 +220,15 @@ export function CRMProvider({ children }) {
     return checkIs24hWindowActive(lead.lastCustomerMessageTimestamp)
   }, [])
 
+  const activeTenant = useMemo(() => {
+    return tenants.find(t => t.id === selectedTenantId) || null
+  }, [tenants, selectedTenantId])
+
   const contextValue = useMemo(() => ({
+    tenants,
+    selectedTenantId,
+    setSelectedTenantId,
+    activeTenant,
     leads: visibleLeads,
     campaigns,
     selectedLeadId,
@@ -212,6 +247,9 @@ export function CRMProvider({ children }) {
     addCustomMetric,
     removeCustomMetric
   }), [
+    tenants,
+    selectedTenantId,
+    activeTenant,
     visibleLeads,
     campaigns,
     selectedLeadId,

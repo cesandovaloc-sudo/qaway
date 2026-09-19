@@ -94,6 +94,10 @@ const displayFont = {
 
 function CRMContent() {
   const { 
+    tenants,
+    selectedTenantId,
+    setSelectedTenantId,
+    activeTenant,
     leads,
     simulateIncomingWebhook, 
     currentRole, 
@@ -226,7 +230,7 @@ function CRMContent() {
               {isSidebarCollapsed ? (
                 <span className="text-[#ff4b0b]">Q</span>
               ) : (
-                <>{currentProfile.company || "Qaway"} <span className="text-[#ff4b0b]">CRM</span></>
+                <>{activeTenant?.name || currentProfile.company || "Qaway Lab"} <span className="text-[#ff4b0b]">CRM</span></>
               )}
             </span>
           </div>
@@ -351,6 +355,26 @@ function CRMContent() {
                 </span>
               </button>
             </div>
+
+            {/* Selector Multi-Tenant de Marca / Empresa */}
+            {tenants && tenants.length > 0 && (
+              <div className="relative">
+                <select
+                  value={selectedTenantId}
+                  onChange={(e) => setSelectedTenantId(e.target.value)}
+                  className="h-10 pl-3 pr-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all appearance-none"
+                  title="Cambiar Marca / Tenant Activo"
+                >
+                  <option value="all" className="bg-[#18181b] text-white">🏢 Todas las Marcas</option>
+                  {tenants.map(t => (
+                    <option key={t.id} value={t.id} className="bg-[#18181b] text-white">
+                      {t.name} ({t.client_code})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+            )}
           </div>
 
           {/* Search, CTA, Notifications & User */}

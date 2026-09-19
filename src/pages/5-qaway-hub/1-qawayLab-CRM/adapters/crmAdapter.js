@@ -73,12 +73,39 @@ export function mapLeadToFrontend(rawLead) {
  */
 export const crmAdapter = {
   /**
-   * Obtiene la lista completa de campañas
+   * Obtiene la lista de tenants/marcas activas
    * @returns {Promise<Array>}
    */
-  async getCampaigns() {
+  async getTenants() {
     try {
-      const { data, error } = await supabase.from('campaigns').select('*')
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('id, client_code, slug, name, status, branding')
+        .eq('status', 'active')
+        .order('name', { ascending: true })
+      if (error) {
+        console.error('[CRM Adapter] Error al obtener tenants:', error)
+        return []
+      }
+      return data || []
+    } catch (err) {
+      console.error('[CRM Adapter] Error inesperado en getTenants:', err)
+      return []
+    }
+  },
+
+  /**
+   * Obtiene la lista completa de campañas (filtradas opcionalmente por tenant)
+   * @param {string|null} tenantId 
+   * @returns {Promise<Array>}
+   */
+  async getCampaigns(tenantId = null) {
+    try {
+      let query = supabase.from('campaigns').select('*')
+      if (tenantId && tenantId !== 'all') {
+        query = query.eq('tenant_id', tenantId)
+      }
+      const { data, error } = await query
       if (error) {
         console.error('[CRM Adapter] Error al obtener campañas:', error)
         return []
@@ -91,15 +118,20 @@ export const crmAdapter = {
   },
 
   /**
-   * Obtiene todos los leads ordenados cronológicamente
+   * Obtiene todos los leads ordenados cronológicamente (filtrados opcionalmente por tenant)
+   * @param {string|null} tenantId
    * @returns {Promise<Array>}
    */
-  async getLeads() {
+  async getLeads(tenantId = null) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false })
+      if (tenantId && tenantId !== 'all') {
+        query = query.eq('tenant_id', tenantId)
+      }
+      const { data, error } = await query
       if (error) {
         console.error('[CRM Adapter] Error al obtener leads:', error)
         return []
@@ -158,13 +190,17 @@ export const crmAdapter = {
   },
 
   /**
-   * Inserta un nuevo lead en Supabase
+   * Inserta un nuevo lead en Supabase con tenant_id obligatorio
    * @param {Object} leadPayload 
    * @returns {Promise<{data: any, error: any}>}
    */
   async insertLead(leadPayload) {
     try {
-      const { data, error } = await supabase.from('leads').insert([leadPayload])
+      const payloadWithTenant = {
+        ...leadPayload,
+        tenant_id: leadPayload.tenant_id || '00000000-0000-0000-0000-000000000001'
+      }
+      const { data, error } = await supabase.from('leads').insert([payloadWithTenant])
       return { data, error }
     } catch (err) {
       console.error('[CRM Adapter] Error inesperado en insertLead:', err)
