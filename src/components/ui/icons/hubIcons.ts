@@ -62,6 +62,13 @@ export {
   Filter,
   ArrowUpDown,
   Flame,
+  Star,
+  FileImage,
+  Instagram,
+  PenSquare,
+  Route,
+  FlaskConical,
+  Wrench,
 } from 'lucide-react'
 
 export const HUB_ICON_NAMES = {

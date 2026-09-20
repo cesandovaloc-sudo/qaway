@@ -31,8 +31,7 @@ import NotFoundPage from '@/pages/NotFoundPage'
 const AcademyPage = lazy(() => import('@/pages/4-academy/AcademyPage'))
 const AcademyRealAppPage = lazy(() => import('@/pages/4-academy/2-qawaylab-app-academy-real/AcademyAppPage'))
 const HubPage = lazy(() => import('@/pages/5-qaway-hub/HubPage'))
-const HubWorkspacePage = lazy(() => import('@/pages/5-qaway-hub/HubWorkspacePage'))
-const HubWorkspacePageV2 = lazy(() => import('@/pages/5-qaway-hub/HubWorkspacePageV2'))
+const HubPanelPage = lazy(() => import('@/pages/5-qaway-hub/HubPanelPage'))
 const BlogEditorPage = lazy(() => import('@/pages/5-qaway-hub/blog-editor/BlogEditorPage'))
 const CRMPage = lazy(() => import('@/pages/5-qaway-hub/1-qawayLab-CRM/CRMPage'))
 const WabaCrmConsolePage = lazy(() => import('@/pages/5-qaway-hub/waba-crm/WabaCrmConsolePage'))
@@ -388,15 +387,10 @@ export default function AppRouter() {
           path="hub/crm"
           element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
         />
-        {/* Hub Workspace Central: standalone FUERA del Layout → anillo central sin navbar/footer públicos */}
+        {/* Hub Panel portada (carcasa CRM, sin navbar/footer públicos) */}
         <Route
-          path="hub"
-          element={renderRoute('hub', <ProtectedRoute><HubWorkspacePage /></ProtectedRoute>)}
-        />
-        {/* Hub V2 carcasa literal CRM (temporal comparativa, no rompe /hub ni /hub/crm) */}
-        <Route
-          path="hub/v2"
-          element={renderRoute('hub', <ProtectedRoute><HubWorkspacePageV2 /></ProtectedRoute>)}
+          path="hub/panel"
+          element={renderRoute('hub', <ProtectedRoute><HubPanelPage /></ProtectedRoute>)}
         />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
@@ -416,7 +410,7 @@ export default function AppRouter() {
           <Route path="hub/pagos/*" element={<RedirectTo to="/carrito" />} />
           <Route path="hub/pagos" element={<RedirectTo to="/carrito" />} />
           <Route
-            path="hub/explorar"
+            path="hub"
             element={renderRoute('hub', <HubPage />)}
           />
           <Route
@@ -454,10 +448,6 @@ export default function AppRouter() {
           <Route
             path="proyectos/recorrido/:slug"
             element={<ProjectTimelineViewerPage isPortalMode={false} />}
-          />
-          <Route
-            path="hub/*"
-            element={renderRoute('hub', <ProtectedRoute><HubPage /></ProtectedRoute>)}
           />
 
           <Route path="estudio" element={renderRoute('estudio', <EstudioLayout />)}>

@@ -345,9 +345,9 @@ function CRMContent() {
             {/* Home Animado */}
             <div className="hidden sm:block">
               <button 
-                onClick={() => navigate('/hub')}
+                onClick={() => navigate('/hub/panel')}
                 className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
-                title="Volver al Hub Workspace Central (/hub)"
+                title="Volver al Panel del Hub (/hub/panel)"
               >
                 <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
                 <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
