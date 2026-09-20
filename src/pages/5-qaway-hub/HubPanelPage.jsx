@@ -109,12 +109,13 @@ function HubPanelContent() {
     const activePillar = PILLARS.find((p) => p.label === activeTab)
     const q = globalSearchQuery.trim().toLowerCase()
     return ROUTES.filter((route) => {
-      const okPillar = !activePillar?.match || (route.pillar && route.pillar.includes(activePillar.match))
       const okQ = !q ||
         (route.title && route.title.toLowerCase().includes(q)) ||
         (route.description && route.description.toLowerCase().includes(q)) ||
         (route.category && route.category.toLowerCase().includes(q)) ||
         (route.badge && route.badge.toLowerCase().includes(q))
+      // Si hay término de búsqueda, ignoramos la pestaña actual
+      const okPillar = q ? true : (!activePillar?.match || (route.pillar && route.pillar.includes(activePillar.match)))
       return okPillar && okQ
     })
   }, [globalSearchQuery, activeTab])
@@ -242,10 +243,6 @@ function HubPanelContent() {
                 )}
               </AnimatePresence>
             </div>
-            <div className="h-6 w-px bg-white/10" />
-            <Link to="/hub/crm" className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-3.5 py-2 rounded-lg text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap">
-              <HubIcon icon={Plus} size={16} className="w-4 h-4 shrink-0" /><span className="hidden sm:block">Nueva oportunidad</span>
-            </Link>
             <button className="relative p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors ml-1 cursor-pointer" title="Notificaciones (0)">
               <HubIcon icon={Bell} size={20} className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
@@ -287,10 +284,10 @@ function HubPanelContent() {
                 <h1 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-950">Hola de nuevo, {name}</h1>
                 <p className="mt-2 text-[15px] text-zinc-600 max-w-[62ch]">Tu anillo central para operar todo Qaway Lab sin friccion. Entra a cualquier app con un clic.</p>
                 {/* Tarjetas literales de HubPage en presentación disminuida */}
-                <div className="mt-8 flex flex-wrap items-center gap-2">
+                <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-[#fafafa]/90 backdrop-blur-md py-4 -mx-6 px-6 md:-mx-8 md:px-8 border-b border-zinc-200/50 mt-4 mb-2">
                   {PILLARS.map((p) => (
                     <button key={p.label} onClick={() => setActiveTab(p.label)}
-                      className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-300 ${activeTab === p.label ? 'bg-zinc-950 text-white border-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'}`}>{p.label}</button>
+                      className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-300 outline-none focus:outline-none focus:ring-0 select-none [-webkit-tap-highlight-color:transparent] ${activeTab === p.label ? 'bg-zinc-950 text-white border-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'}`}>{p.label}</button>
                   ))}
                   <span className="ml-auto text-xs font-mono text-zinc-400">{filtered.length} herramientas</span>
                 </div>
