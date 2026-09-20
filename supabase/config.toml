@@ -428,3 +428,8 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/web3forms-mensaje-enviar/index.ts"
 
+[functions.agenda-send-notifications]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/agenda-send-notifications/index.ts"
+

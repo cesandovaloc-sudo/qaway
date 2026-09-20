@@ -1,4 +1,3 @@
+# Agenda vive en la web central: sus funciones desplegan desde supabase/functions
+# (agenda-send-notifications). Este config queda solo como referencia de desacople futuro.
 project_id = "qawaylab-agenda"
-
-[functions.send-notifications]
-verify_jwt = false

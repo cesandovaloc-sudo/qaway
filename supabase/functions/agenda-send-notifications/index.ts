@@ -6,7 +6,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const RESEND_KEY = Deno.env.get('RESEND_API_KEY')
-const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_TOKEN')
+// Acople central: acepta ambos nombres (agenda WHATSAPP_TOKEN, central WHATSAPP_ACCESS_TOKEN).
+const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_TOKEN') || Deno.env.get('WHATSAPP_ACCESS_TOKEN')
 const WHATSAPP_PHONE_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
 const APP_URL = Deno.env.get('PUBLIC_APP_URL') || 'http://localhost:8500'
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'Citas Qaway <no-reply@qawaylab.com>'
