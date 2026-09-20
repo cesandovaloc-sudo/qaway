@@ -374,7 +374,7 @@ function HubPanelContent() {
                       )
                     })}
                   </div>
-                )}
+                ))}
             </div>
           </div>
         </main>
