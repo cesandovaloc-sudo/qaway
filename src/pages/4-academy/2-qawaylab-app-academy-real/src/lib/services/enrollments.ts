@@ -18,11 +18,11 @@ export async function getEnrollments(studentId: string): Promise<Enrollment[]> {
   return (data as unknown as Enrollment[]) || []
 }
 
-export async function enrollStudent(studentId: string, courseId: string): Promise<Enrollment> {
+export async function enrollStudent(_studentId: string, courseId: string): Promise<Enrollment> {
+  // F-08: la inscripción pasa por RPC que exige curso gratis o pago completed.
+  // El servidor usa auth.uid(); el studentId del cliente no es confiable.
   const { data, error } = await supabase
-    .from('enrollments')
-    .insert({ student_id: studentId, course_id: courseId })
-    .select()
+    .rpc('enroll_after_payment', { p_course_id: courseId })
     .single()
 
   if (error) throw error
