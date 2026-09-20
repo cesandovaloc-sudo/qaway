@@ -81,8 +81,12 @@ Deno.serve(async (req) => {
     Deno.env.get('MERCADOPAGO_PROD_WEBHOOK_SECRET') ??
     Deno.env.get('MERCADOPAGO_WEBHOOK_SECRET') ?? ''
 
-  // 2. R3: Verificar firma criptográfica si viene secret
-  if (secret) {
+  // 2. R3: firma obligatoria (fail-closed run-2). Sin secret no se procesa nada.
+  if (!secret) {
+    console.error('[Webhook MP Prod] Secreto sin configurar. Rechazado.')
+    return json({ error: 'Webhook sin configurar' }, 500)
+  }
+  {
     const valida = await firmaMpValida(req, dataId, secret)
     if (!valida) {
       console.warn('[Webhook MP Prod] Firma inválida para data.id:', dataId)

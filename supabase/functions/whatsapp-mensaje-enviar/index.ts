@@ -29,6 +29,28 @@ serve(async (req: Request) => {
       })
     }
 
+    // F-AUTH run-2: el llamante debe ser usuario autenticado de un tenant.
+    // Sin JWT válido o sin tenant, no se envía nada.
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
+    const callerClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
+    })
+    const { data: { user } } = await callerClient.auth.getUser()
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    const cleanToEarly = String(to).replace(/[^0-9]/g, '')
+    if (cleanToEarly.length < 7 || cleanToEarly.length > 15) {
+      return new Response(JSON.stringify({ error: 'Destino inválido' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
     const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
 
@@ -93,12 +115,19 @@ serve(async (req: Request) => {
     const wamid = metaData.messages?.[0]?.id || `msg_out_${Date.now()}`
 
     // Si se especificó leadId, actualizar en Supabase el historial con el nuevo mensaje saliente
+    // F-AUTH run-2: el lead debe pertenecer al tenant del llamante.
     if (leadId) {
-      const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
       const supabase = createClient(supabaseUrl, supabaseKey)
 
-      const { data: lead } = await supabase.from('leads').select('history').eq('id', leadId).single()
+      const { data: me } = await supabase.from('users').select('tenant_id').eq('id', user.id).single()
+      const { data: lead } = await supabase.from('leads').select('history, tenant_id').eq('id', leadId).single()
+      if (!lead || !me || lead.tenant_id !== me.tenant_id) {
+        return new Response(JSON.stringify({ error: 'Lead fuera de tu tenant' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        })
+      }
       if (lead) {
         const history = Array.isArray(lead.history) ? lead.history : []
         history.push({

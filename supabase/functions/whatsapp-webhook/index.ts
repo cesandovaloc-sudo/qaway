@@ -1,7 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
-const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN') || 'QAWAY_VERIFY_TOKEN_123'
+// F-FAILCLOSED run-2: sin defaults públicos. Si falta secreto, se rechaza (500/401), nunca permisivo.
+const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN') || ''
 const APP_SECRET = Deno.env.get('WHATSAPP_APP_SECRET') || ''
 const MASTER_GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
 const MASTER_OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') || ''
@@ -281,11 +282,11 @@ async function sendWhatsAppDirect(to: string, text: string, phoneNumberId: strin
 async function verifySignature(rawBody: string, signatureHeader: string | null, appSecret: string): Promise<boolean> {
   const cleanSecret = (appSecret || '').trim()
   if (!signatureHeader || !cleanSecret) {
-    return true
+    return false
   }
 
   const [prefix, signature] = signatureHeader.split('=')
-  if (prefix !== 'sha256' || !signature) return true
+  if (prefix !== 'sha256' || !signature) return false
 
   try {
     const encoder = new TextEncoder()
@@ -303,12 +304,12 @@ async function verifySignature(rawBody: string, signatureHeader: string | null, 
 
     const matches = computedHex.toLowerCase() === signature.toLowerCase().trim()
     if (!matches) {
-      console.warn(`[whatsapp-webhook] Firma x-hub no coincide (recibida: ${signature}, calculada: ${computedHex}). Continuando en modo permisivo para pruebas.`)
+      console.warn('[whatsapp-webhook] Firma x-hub no coincide. Rechazado.')
     }
-    return true
+    return matches
   } catch (err) {
     console.error('[whatsapp-webhook] Error verificando firma:', err)
-    return true
+    return false
   }
 }
 
@@ -338,7 +339,11 @@ serve(async (req: Request) => {
       console.log('[whatsapp-webhook] POST recibido de Meta!')
       console.log('[whatsapp-webhook] Raw Body:', rawBody)
 
-      await verifySignature(rawBody, signatureHeader, APP_SECRET)
+      const signatureOk = await verifySignature(rawBody, signatureHeader, APP_SECRET)
+      if (!signatureOk) {
+        console.warn('[whatsapp-webhook] POST rechazado: firma inválida o secreto sin configurar.')
+        return new Response('Firma inválida', { status: 401 })
+      }
       const payload = JSON.parse(rawBody)
 
       // Normalizamos la lista de cambios soportando producción, webhooks directos y el modal de prueba de Meta

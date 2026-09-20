@@ -224,69 +224,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (_) {}
       }
 
-      // Intentar Backend local
-      try {
-        const resp = await fetch('http://localhost:4000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail, password }),
-        })
-        const bData = await resp.json()
-        if (resp.ok && bData.token) {
-          sessionStorage.setItem('qaway_auth_token', bData.token)
-          sessionStorage.setItem('qaway_auth_email', cleanEmail)
-          sessionStorage.setItem('qaway_auth_role', 'admin')
-          const superUser: User = {
-            id: 'superadmin-qaway',
-            email: cleanEmail,
-            app_metadata: {},
-            user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
-            aud: 'authenticated',
-            created_at: new Date().toISOString(),
-          }
-          setUser(superUser)
-          setProfile({
-            id: superUser.id,
-            email: cleanEmail,
-            full_name: 'Super Administrador Qaway',
-            role: 'admin',
-            created_at: new Date().toISOString(),
-          })
-          return { user: superUser, session: null }
-        }
-      } catch (_) {}
-
-      // Si es cuenta verificada de Superadministrador en desarrollo/local:
-      const superUser: User = {
-        id: 'superadmin-qaway',
-        email: cleanEmail,
-        app_metadata: {},
-        user_metadata: { role: 'admin', full_name: 'Super Administrador Qaway' },
-        aud: 'authenticated',
-        created_at: new Date().toISOString(),
-      }
-      sessionStorage.setItem('qaway_auth_token', 'token-superadmin-qaway-local')
-      sessionStorage.setItem('qaway_auth_email', cleanEmail)
-      sessionStorage.setItem('qaway_auth_role', 'admin')
-      setUser(superUser)
-      setProfile({
-        id: superUser.id,
-        email: cleanEmail,
-        full_name: 'Super Administrador Qaway',
-        role: 'admin',
-        created_at: new Date().toISOString(),
-      })
-      return { user: superUser, session: null }
+      // F-AUTH run-2: eliminados fallback localhost:4000 y concesión local
+      // incondicional (otorgaban admin sin validar password). Solo sesiones
+      // reales de Supabase (academy o central) autentican.
     }
 
     throw new Error('Credenciales incorrectas o usuario no registrado.')
   }
 
   async function signUp(email: string, password: string, metadata: Record<string, unknown> = {}) {
+    // F-AUTH run-2: allowlist estricta. role/tenant_id nunca desde el cliente
+    // (el trigger los fija en viewer/NULL; solo admin los asigna vía RPC).
+    const safeData: Record<string, unknown> = {}
+    if (typeof metadata.full_name === 'string') safeData.full_name = metadata.full_name.slice(0, 120)
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: metadata },
+      options: { data: safeData },
     })
     if (error) throw error
     return data

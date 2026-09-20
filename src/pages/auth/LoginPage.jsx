@@ -64,29 +64,16 @@ export default function LoginPage() {
         })
 
         if (!supaError && supaData?.session) {
-          const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'admin')
+          // F-AUTH run-2: default viewer (antes 'admin'). El rol real lo da el servidor.
+          const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'viewer')
           persistSession(supaData.session.access_token, cleanEmail, role)
           navigate(redirectTarget, { replace: true })
           return
         }
       }
 
-      // Fallback Backend local
-      try {
-        const response = await fetch('http://localhost:4000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: cleanEmail, password }),
-        })
-        const data = await response.json()
-        if (response.ok && data.token) {
-          const role = isSuperAdmin(cleanEmail) ? 'admin' : 'user'
-          persistSession(data.token, cleanEmail, role)
-          navigate(redirectTarget, { replace: true })
-          return
-        }
-      } catch (_) { /* Backend local no disponible */ }
-
+      // F-AUTH run-2: eliminado fallback localhost:4000 (aceptaba tokens
+      // locales sin validación real). Solo Supabase autentica.
       setError('Credenciales incorrectas o usuario no registrado.')
     } catch (err) {
       console.error('[Auth Error]', err)
