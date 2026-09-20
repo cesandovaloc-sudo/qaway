@@ -200,3 +200,30 @@
     - Todas las tablas corregidas aún no existen en producción → emitieron `RAISE NOTICE` correctamente y el pipeline finalizó limpio.
   - **Deuda Estructural Registrada (pendiente de esquema futuro):**
     - Las 19 tablas legacy no tienen columna `tenant_id`. El aislamiento por cliente a nivel de fila es imposible con el esquema actual; el modelo real es catálogo compartido + roles. Si en el futuro EPC Contable o Vallet requieren catálogos propios en estas tablas, se deberá agregar `tenant_id` como primera prioridad antes de insertar datos.
+
+---
+
+### [Iteración 12 — 2026-09-19 22:55]
+- **Auditoría run-1 completa (15 hallazgos) y corrección de 5 vulnerabilidades confirmadas:**
+  - **Contexto de la Auditoría:** Auditoría de seguridad de 6 fases (recon + caza + validación adversarial) sobre commit `c13a0a93`. 15 confirmados, 1 needs_validation, 11 rechazados con prueba.
+  - **F-01 CRÍTICO RESUELTO — orders expuesto a anon:**
+    - `orders_public_read USING(true)` (migración 20260917143000:52-53) + `GRANT SELECT, INSERT ON orders TO anon` (20260812000001:185) permitían leer todos los pedidos sin autenticación.
+    - **Corrección:** `20260919224500_fix_f01_orders_anon_exposure.sql` — DROP policy abierta, nueva policy `orders_read_own_or_admin` (solo dueño o admin), REVOKE SELECT TO anon en orders/order_items/payments, INSERT anon acotado a `status='pending' AND user_id IS NULL`.
+  - **F-03 ALTO RESUELTO — leads/campaigns SELECT anon:**
+    - Rama `(auth.uid() IS NULL AND tenant_id IS NOT NULL)` en SELECT de leads y campaigns permitía enumerar PII de leads de cualquier tenant conociendo su UUID.
+    - **Corrección:** `20260919224600_fix_f03_leads_campaigns_anon_select.sql` — Eliminada la rama anon de SELECT. INSERT anon mantenido para formularios públicos.
+  - **F-04 + F-07 ALTOS RESUELTOS — trigger handle_new_user sin allowlist:**
+    - El trigger leía `role` y `tenant_id` de `raw_user_meta_data` sin validación: `signUp({ data: { role: 'admin', tenant_id: 'uuid-victima' } })` asignaba rol admin y tenant arbitrario al registrarse.
+    - La función `get_user_role()` en commerce.sql tenía fallback a metadata si `public.users.role` era NULL.
+    - **Corrección:** `20260919224700_fix_f04_f07_trigger_no_metadata_tenant_role.sql` — Trigger reescrito: `role` siempre `'viewer'`, `tenant_id` siempre `NULL`. Nueva RPC `admin_assign_user_tenant(user_id, tenant_id, role)` con allowlist de roles y verificación `is_admin()`. Solo `authenticated` puede ejecutarla.
+  - **F-05 ALTO RESUELTO — XSS en blog sin DOMPurify:**
+    - `sanitizeAndDecodeContent()` en `ArticleDetailPage.jsx` solo decodificaba entidades HTML (convirtiendo `&lt;script&gt;` en `<script>` activo) sin sanitizar. DOMPurify ausente en package.json.
+    - **Corrección:** `npm install dompurify @types/dompurify`. Función actualizada para sanitizar con `DOMPurify.sanitize()` con perfil HTML estricto (FORBID_TAGS: script, iframe, object, embed, form; FORBID_ATTR: onerror, onload, onclick, etc.).
+  - **Migraciones legacy refactorizadas a bloques defensivos:**
+    - Migraciones `20260919173000`, `20260919174000`, `20260919175000` (tenant_id en tablas ERP) refactorizadas de SQL estático a bloques `DO $$ IF EXISTS ... END $$` — mismo patrón que hardening (Iter. 10). Corrige error 42P01 en base remota viva donde esas tablas no existen.
+  - **Despliegue en base viva:** `npx supabase db push` con las 5 migraciones de seguridad: **Éxito total**.
+  - **Build:** ✓ 20.10s — DOMPurify visible como `purify.es-B1ZDZv49.js` en bundle.
+  - **Pendientes registrados (Fase 5 no bloqueante):**
+    - F-02 (precio desde cliente sin trigger server-side): requiere trigger PostgreSQL en `order_items` que valide `unit_price` contra `products.price`.
+    - F-06/F-08 (Academy USING(true) en profiles/modules + self-enroll sin pago): requiere migraciones en BD Academy (`jkstekoaiwdjpivkrsil`).
+    - F-12 (webhook MP fail-open): verificar `supabase secrets list` para confirmar `MERCADOPAGO_WEBHOOK_SECRET`.
