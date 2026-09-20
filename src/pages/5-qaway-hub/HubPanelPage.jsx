@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { HubIcon } from '@/components/ui/icons'
 import {
-  BarChart3, MessageSquare, Layers, Briefcase, Search, Bell, Plus,
-  Settings, ChevronDown, AlertCircle, X, Menu, Home,
-  Bot, CalendarDays, Package, Clapperboard, PenLine, GraduationCap,
-  MessageSquareText, CreditCard, KanbanSquare, ArrowRight, ArrowUpRight, Sparkles,
+  AlertCircle, ArrowRight, BarChart3, Bell, Bot, Briefcase, Calendar, CreditCard,
+  FileImage, FlaskConical, FolderKanban, Home, Instagram, Menu, MessageSquare,
+  Package, PenSquare, Plus, Route, Search, Settings, ChevronDown, Sparkles,
+  Star, Target, Wrench, X, Zap,
 } from '@/components/ui/icons/hubIcons'
 import { getAuthUser, logoutUser } from '@/config/auth'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
@@ -36,29 +36,46 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const APPS = [
-  { id: 'crm', title: 'Qaway CRM Comercial & Leads', desc: 'WhatsApp multiagente, atribucion Meta Ads, pipeline kanban y tareas.', path: '/hub/crm', badge: 'Pro', category: 'Ventas', pillar: 'Ventas & CRM', icon: BarChart3, tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', metric: '14 Leads activos' },
-  { id: 'gestor', title: 'Gestor de Proyectos & Entregas V2', desc: 'Frameworks Agile, hitos PMB, SOW y entregas trazables.', path: '/hub/gestor-proyectos-v2', badge: 'V2 Activa', category: 'Gestión', pillar: 'Operaciones & Proyectos', icon: KanbanSquare, tone: 'bg-blue-500/10 text-blue-600', metric: '3 Proyectos en curso' },
-  { id: 'agentes', title: 'Agentes de IA Responsable', desc: 'Agentes consultivos para WhatsApp con Ley 31814 y Google PAIR.', path: '/hub/agentes', badge: 'Nuevo', category: 'IA', pillar: 'Inteligencia Artificial', icon: Bot, tone: 'bg-indigo-500/10 text-indigo-600', metric: '5 Agentes listos' },
-  { id: 'agenda', title: 'Qaway Agenda & Sistema de Citas', desc: 'Reservas estilo Calendly con recordatorios y panel de citas.', path: '/hub/agenda', badge: 'Nuevo', category: 'Gestión', pillar: 'Operaciones & Proyectos', icon: CalendarDays, tone: 'bg-indigo-500/10 text-indigo-600', metric: 'Hoy: 6 citas' },
-  { id: 'inventario', title: 'Qaway Inventario & ERP Comercial', desc: 'Stock, almacenes, Kardex, captura con IA y cotizaciones.', path: '/hub/inventario', badge: 'Pro', category: 'Finanzas', pillar: 'Comercio & Finanzas', icon: Package, tone: 'bg-amber-500/10 text-amber-600', metric: 'Stock al 92%' },
-  { id: 'creador', title: 'Creador de Contenido Modular', desc: 'Radar viral, guiones con retencion, matriz de hooks y carruseles.', path: '/hub/creador-contenido', badge: 'Nuevo', category: 'Contenido', pillar: 'Creacion & Contenidos', icon: Clapperboard, tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', metric: '12 Guiones este mes' },
-  { id: 'blog', title: 'Editor de Blog & Articulos', desc: 'Redactor visual Tiptap con SEO, metadatos y publicacion directa.', path: '/hub/blog-editor', badge: 'Pro', category: 'Contenido', pillar: 'Creacion & Contenidos', icon: PenLine, tone: 'bg-emerald-500/10 text-emerald-600', metric: '4 Borradores' },
-  { id: 'academy', title: 'Qaway Academy', desc: 'LMS de cursos, lecciones interactivas y certificados.', path: '/hub/academy', badge: 'LMS', category: 'Contenido', pillar: 'Creacion & Contenidos', icon: GraduationCap, tone: 'bg-blue-500/10 text-blue-600', metric: '8 Cursos activos' },
-  { id: 'waba', title: 'Consola WABA + CRM', desc: 'Integracion WhatsApp Cloud API y checklist de pruebas.', path: '/hub/waba-crm', badge: '72h Gratis', category: 'Ventas', pillar: 'Ventas & CRM', icon: MessageSquareText, tone: 'bg-emerald-500/10 text-emerald-600', metric: 'API conectada' },
-  { id: 'pagos', title: 'Qaway Pagos & Carrito', desc: 'Checkout multi metodo, catalogo y gestion de ordenes.', path: '/carrito', badge: 'Nuevo', category: 'Finanzas', pillar: 'Comercio & Finanzas', icon: CreditCard, tone: 'bg-amber-500/10 text-amber-600', metric: 'Pagos al dia' },
+// Catálogo literal de HubPage: mismas tarjetas con preview y gradiente de pilar.
+const ROUTES = [
+  { icon: Bot, title: 'Agentes de IA Responsable (Ley 31814)', description: 'Configuracion, entrenamiento y simulacion en vivo de Agentes IA Consultivos para WhatsApp y Web. Gobernanza etica en 3 capas, derivacion humana y anti-alucinacion.', path: '/hub/agentes', access: 'pro', badge: 'Ley 31814 & PAIR', category: 'Inteligencia Artificial', pillar: 'IA', tone: 'bg-indigo-600/10 text-indigo-600', preview: '/assets/hub-previews/preview-agentes.png', published: true },
+  { icon: Calendar, title: 'Qaway Agenda & Sistema de Citas', description: 'Software de reservas y calendario estilo Calendly: Agendamiento publico, gestion de horarios, recordatorios y panel de control de citas.', path: '/hub/agenda', access: 'pro', badge: 'Nuevo SaaS', category: 'Gestion & Productividad', pillar: 'Automatizacion', tone: 'bg-indigo-500/10 text-indigo-500', preview: '/assets/hub-previews/preview-agenda.png', published: true },
+  { icon: CreditCard, title: 'Qaway Pagos & Checkout Multi-metodo', description: 'Pasarela de pagos multi-metodo: Tarjeta Stripe, Yape, Plin, PagoEfectivo, transferencias, catalogo de productos y gestion de ordenes.', path: '/hub/pagos', access: 'pro', badge: 'Modulo Pagos', category: 'Comercio & Finanzas', pillar: 'Marketing', tone: 'bg-emerald-500/10 text-emerald-500', preview: '/assets/hub-previews/preview-pagos.png', published: true },
+  { icon: Package, title: 'Qaway Inventario & ERP Comercial', description: 'Sistema integral de gestion de productos, stock, almacenes, movimientos Kardex, captura con IA, facturacion y cotizaciones.', path: '/hub/inventario', access: 'pro', badge: 'SaaS ERP', category: 'Logistica & Almacenes', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-inventario.png', published: true },
+  { icon: Star, title: 'Qaway Academy (LMS Cursos & Certificaciones)', description: 'Plataforma educativa integral: Catalogo de cursos, reproductor de lecciones, tareas, quizzes, certificados, panel de estudiante y docente.', path: '/hub/academy', access: 'pro', badge: 'LMS Real', category: 'Educacion & Cursos', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-academy.png', published: true },
+  { icon: Sparkles, title: 'Creador de Contenido Modular (5 Skills)', description: 'Fabrica de contenidos con IA: Radar viral, Guiones con retencion medida, Matriz de hooks, Calendario 30 dias, Disenador de Carruseles, Blog y Posts.', path: '/hub/creador-contenido', access: 'pro', badge: 'Nuevo', category: 'Marketing & Creacion', pillar: 'Creacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-creador.png', published: true },
+  { icon: FileImage, title: 'Optimizador de Imagenes WebP', description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP con hasta 95% de ahorro en tu navegador.', path: '/hub/optimizador-webp', access: 'free', badge: 'Gratis', category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-inventario.png', published: false },
+  { icon: Instagram, title: 'Descargador & Extractor de Instagram', description: 'Extractor y descargador multimedia de publicaciones, carruseles y reels de Instagram en alta calidad.', path: '/hub/descargador-ig', access: 'free', badge: 'Borrador', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: false },
+  { icon: FolderKanban, title: 'Gestor de Proyectos & Entregas', description: 'Trazabilidad y portal de cliente: ciclo de 6 hitos para Desarrollo Web, Branding, CRM y Marketing.', path: '/hub/gestor-proyectos', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-agenda.png', published: false },
+  { icon: PenSquare, title: 'Editor de Blog', description: 'Plataforma editorial para crear, estructurar y publicar articulos con categorias, portadas y CTAs en tiempo real.', path: '/hub/blog-editor', access: 'pro', badge: 'Listo', category: 'Herramientas', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-academy.png', published: true },
+  { icon: Calendar, title: 'Consola WABA + CRM', description: 'Panel ejecutivo para campana: integracion WhatsApp API, payloads, checklist y pruebas E2E en un solo lugar.', path: '/hub/waba-crm', access: 'pro', badge: 'Destacado', category: 'Panel de control', pillar: 'IA', tone: 'bg-[#191918] text-white', preview: '/assets/hub-previews/preview-agentes.png', published: false },
+  { icon: MessageSquare, title: 'Consola CRM Comercial', description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real de Meta Ads y analiticas estilo Power BI.', path: '/hub/crm', access: 'pro', badge: 'Nuevo', category: 'Panel de control', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-crm.jpg', published: false },
+  { icon: Route, title: 'Ruta Marca / Emprendimiento', description: 'Desde la idea hasta tu estructura digital basica. Naming, logo, identidad, redes, landing y captacion.', path: '/hub/ruta-marca', access: 'free', badge: null, category: 'Rutas de Marca', pillar: 'Marketing', tone: 'bg-[#191918]/5 text-[#191918]/70', preview: '/assets/hub-previews/preview-creador.png', published: false },
+  { icon: Briefcase, title: 'Ruta Profesional / Oficina', description: 'Organizacion, reportes, dashboards, automatizacion y productividad para equipos y oficinas.', path: '/hub/ruta-profesional', access: 'free', badge: null, category: 'Ruta Profesional', pillar: 'Automatizacion', tone: 'bg-[#191918]/5 text-[#191918]/70', preview: '/assets/hub-previews/preview-inventario.png', published: false },
+  { icon: FlaskConical, title: 'Ruta Incubadora', description: 'Acompanamiento para validar ideas, proyectos o negocios con herramientas y modulos progresivos.', path: '/hub/ruta-incubadora', access: 'free', badge: null, category: 'Rutas de Marca', pillar: 'IA', tone: 'bg-[#191918]/5 text-[#191918]/70', preview: '/assets/hub-previews/preview-agentes.png', published: false },
+  { icon: Wrench, title: 'Herramientas Guiadas', description: 'Soluciones modulares paso a paso para construir, organizar y mejorar tu operacion digital.', path: '/hub/herramientas', access: 'free', badge: null, category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#191918]/5 text-[#191918]/70', preview: '/assets/hub-previews/preview-agenda.png', published: false },
+  { icon: BarChart3, title: 'Centro de Analitica & Graficos', description: 'Suite de metricas estilo PowerBI y Google Analytics con galeria Recharts completa y presets por industria.', path: '/hub/analytics', access: 'pro', badge: 'Pro', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#0080FF]/10 text-[#0080FF]', preview: '/assets/hub-previews/preview-pagos.png', published: false },
+  { icon: Target, title: 'Marketing Studio OS (Revolut UI)', description: 'Estrategia y arquitectura: Buyer Persona (JTBD), Content Mapping Editorial, Auditoria POEM y Simulador de Funnel.', path: '/hub/marketing', access: 'pro', badge: 'v1.0', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#0075FF]/10 text-[#0075FF]', preview: '/assets/hub-previews/preview-creador.png', published: false },
+  { icon: Zap, title: 'Automatizaciones', description: 'Flujos automaticos y conectores para optimizar procesos repetitivos y ganar productividad.', path: '/hub/automatizaciones', access: 'free', badge: null, category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#191918]/5 text-[#191918]/70', preview: '/assets/hub-previews/preview-agenda.png', published: false },
 ]
 
-const HUB_TABS = [
-  { id: 'inicio', label: 'Inicio', icon: Home },
-  { id: 'ventas', label: 'Ventas & CRM', icon: BarChart3 },
-  { id: 'proyectos', label: 'Proyectos', icon: Layers },
-  { id: 'ia', label: 'IA', icon: Bot },
-  { id: 'contenidos', label: 'Contenidos', icon: Clapperboard },
-  { id: 'finanzas', label: 'Finanzas', icon: Briefcase },
+// Pilares literales de HubPage.
+const PILLARS = [
+  { label: 'Todas', match: null },
+  { label: 'Marketing', match: 'Marketing' },
+  { label: 'Automatizacion', match: 'Automatizacion' },
+  { label: 'IA', match: 'IA' },
+  { label: 'Creacion de Contenido', match: 'Creacion' },
 ]
 
-const TAB_FILTER = { inicio: null, ventas: 'Ventas', proyectos: 'Gestión', ia: 'IA', contenidos: 'Contenido', finanzas: 'Finanzas' }
+// Gradientes de pilar: misma paleta que HubPage (SaaS azulado tenue)
+const PILLAR_GRADIENTS = {
+  'IA':            'bg-[linear-gradient(135deg,#ffffff_0%,#f5f7ff_50%,#eef2ff_100%)]',
+  'Automatizacion':'bg-[linear-gradient(135deg,#ffffff_0%,#f0f9ff_50%,#e0f2fe_100%)]',
+  'Marketing':     'bg-[linear-gradient(135deg,#ffffff_0%,#f8faff_50%,#e8f0fe_100%)]',
+  'Creacion':      'bg-[linear-gradient(135deg,#ffffff_0%,#faf5ff_50%,#f3e8ff_100%)]',
+  'Herramientas':  'bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_50%,#f1f5f9_100%)]',
+}
 
 function displayName(email) {
   if (!email) return 'Equipo Qaway'
@@ -67,10 +84,10 @@ function displayName(email) {
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
-function HubV2Content() {
+function HubPanelContent() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('inicio')
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [activeTab, setActiveTab] = useState('Todas')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [globalSearchQuery, setGlobalSearchQuery] = useState('')
@@ -89,12 +106,16 @@ function HubV2Content() {
   }, [])
 
   const filtered = useMemo(() => {
+    const activePillar = PILLARS.find((p) => p.label === activeTab)
     const q = globalSearchQuery.trim().toLowerCase()
-    const cat = TAB_FILTER[activeTab]
-    return APPS.filter((a) => {
-      const okTab = !cat || a.category === cat
-      const okQ = !q || a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) || a.pillar.toLowerCase().includes(q)
-      return okTab && okQ
+    return ROUTES.filter((route) => {
+      const okPillar = !activePillar?.match || (route.pillar && route.pillar.includes(activePillar.match))
+      const okQ = !q ||
+        (route.title && route.title.toLowerCase().includes(q)) ||
+        (route.description && route.description.toLowerCase().includes(q)) ||
+        (route.category && route.category.toLowerCase().includes(q)) ||
+        (route.badge && route.badge.toLowerCase().includes(q))
+      return okPillar && okQ
     })
   }, [globalSearchQuery, activeTab])
 
@@ -105,7 +126,7 @@ function HubV2Content() {
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
         {/* LOGO - Redirección a Inicio */}
-        <button onClick={() => setActiveTab('inicio')} className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full`}>
+        <button onClick={() => setActiveTab('Todas')} className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full`}>
           <div className="flex items-center gap-2">
             <span className="font-bold text-white tracking-wide text-lg">
               {isSidebarCollapsed ? (<span className="text-[#ff4b0b]">Q</span>) : (<>Qaway <span className="text-[#ff4b0b]">Hub</span></>)}
@@ -114,20 +135,34 @@ function HubV2Content() {
         </button>
         {/* NAVIGATION */}
         <nav className={`flex-1 py-6 ${isSidebarCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
-          {HUB_TABS.map(tab => {
-            const isActive = activeTab === tab.id
+          <button onClick={() => setActiveTab('Todas')} title={isSidebarCollapsed ? 'Panel' : ''}
+            className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left ${activeTab === 'Todas' ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
+            <HubIcon icon={Home} size={16} className={`w-4 h-4 shrink-0 ${activeTab === 'Todas' ? 'text-[#ff4b0b]' : ''}`} />
+            {!isSidebarCollapsed && <span className="truncate">Panel</span>}
+          </button>
+          {PILLARS.filter(p => p.match !== null).map(pillar => {
+            const items = ROUTES.filter(r => r.pillar && r.pillar.includes(pillar.match))
+            if (items.length === 0) return null
             return (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id)} title={isSidebarCollapsed ? tab.label : ''}
-                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left ${isActive ? 'bg-white/10 text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-                <HubIcon icon={tab.icon} size={16} className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4b0b]' : ''}`} />
-                {!isSidebarCollapsed && <span className="truncate">{tab.label}</span>}
-              </button>
+              <div key={pillar.label}>
+                {!isSidebarCollapsed && <p className="px-3 pt-3 pb-1 text-xs font-semibold text-white/45 truncate">{pillar.label}</p>}
+                {items.map((route) => {
+                  const Icon = route.icon
+                  return (
+                    <Link key={route.path} to={route.path} title={route.title}
+                      className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2'} rounded-lg text-sm font-medium transition-all w-full text-left text-white/60 hover:text-white hover:bg-white/5`}>
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${route.tone}`}><HubIcon icon={Icon} size={16} className="w-4 h-4" /></span>
+                      {!isSidebarCollapsed && <span className="truncate">{route.title}</span>}
+                    </Link>
+                  )
+                })}
+              </div>
             )
           })}
         </nav>
         {/* ZONA INFERIOR DEL SIDEBAR */}
         <div className="p-4 border-t border-white/5 flex flex-col gap-2">
-          <button onClick={() => setActiveTab('inicio')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 ${isSidebarCollapsed ? "justify-center" : ""}`} title={isSidebarCollapsed ? "Configuración" : undefined}>
+          <button onClick={() => setActiveTab('Todas')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 ${isSidebarCollapsed ? "justify-center" : ""}`} title={isSidebarCollapsed ? "Configuración" : undefined}>
             <HubIcon icon={Settings} size={20} className="w-5 h-5 transition-colors text-white/40 group-hover:text-white/80" />
             {!isSidebarCollapsed && (<span className="truncate">Configuración</span>)}
           </button>
@@ -154,7 +189,7 @@ function HubV2Content() {
               <AppSwitcherDropdown isOpen={isWaffleOpen} onClose={() => setIsWaffleOpen(false)} />
             </div>
             <div className="hidden sm:block">
-              <button onClick={() => setActiveTab('inicio')} className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer" title="Ir al Inicio del Hub">
+              <button onClick={() => setActiveTab('Todas')} className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer" title="Ir al Inicio del Hub">
                 <HubIcon icon={Home} size={20} className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
                 <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">Inicio</span>
               </button>
@@ -187,12 +222,12 @@ function HubV2Content() {
                           {filtered.slice(0, 5).map(app => {
                             const Icon = app.icon
                             return (
-                              <li key={app.id}>
+                              <li key={route.path}>
                                 <Link to={app.path} onClick={() => setGlobalSearchQuery('')} className="w-full px-4 py-3 hover:bg-white/5 transition-colors flex items-center gap-4 text-left group">
                                   <div className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[13px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20"><HubIcon icon={Icon} size={16} className="w-4 h-4" /></div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{app.title}</p>
-                                    <div className="flex items-center gap-2 text-xs text-white/40 mt-1"><span className="truncate">{app.pillar}</span><span className="px-1.5 py-0.5 rounded-sm bg-white/5 text-white/50">{app.badge}</span></div>
+                                    <div className="flex items-center gap-2 text-xs text-white/40 mt-1"><span className="truncate">{app.pillar}</span><span className="px-1.5 py-0.5 rounded-sm bg-white/5 text-white/50">{app.badge || 'Pro'}</span></div>
                                   </div>
                                   <HubIcon icon={MessageSquare} size={20} className="w-5 h-5 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
                                 </Link>
@@ -252,7 +287,7 @@ function HubV2Content() {
                 <h1 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-950">Hola de nuevo, {name}</h1>
                 <p className="mt-2 text-[15px] text-zinc-600 max-w-[62ch]">Tu anillo central para operar todo Qaway Lab sin friccion. Entra a cualquier app con un clic.</p>
                 <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 text-sm font-semibold text-emerald-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Todos los sistemas operativos • 10 aplicaciones conectadas
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Todos los sistemas operativos • {ROUTES.length} herramientas conectadas
                 </div>
                 <div className="mt-6 rounded-3xl border border-orange-500/25 bg-gradient-to-br from-[#1a0e06] via-[#141414] to-[#101828] p-6 text-white">
                   <p className="text-xs font-bold uppercase tracking-widest text-[#ff8a3d]">Destacado del ecosistema</p>
@@ -262,29 +297,121 @@ function HubV2Content() {
                     <Link to="/hub/waba-crm" className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 font-semibold text-[15px] transition-all duration-300">Ver checklist WABA</Link>
                   </div>
                 </div>
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {filtered.map((app) => {
-                    const Icon = app.icon
-                    return (
-                      <article key={app.id} className="rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col shadow-sm">
-                        <div className="flex items-start justify-between gap-3">
-                          <span className={`w-11 h-11 rounded-2xl flex items-center justify-center ${app.tone}`}><HubIcon icon={Icon} size={20} className="w-5 h-5" /></span>
-                          <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-600 shrink-0">{app.badge}</span>
-                        </div>
-                        <h3 className="mt-4 text-[17px] font-bold text-zinc-950">{app.title}</h3>
-                        <p className="mt-1.5 text-[15px] text-zinc-600">{app.desc}</p>
-                        <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">{app.pillar} • {app.metric}</p>
-                        <Link to={app.path} className="mt-4 inline-flex items-center justify-between h-11 px-4 rounded-xl bg-zinc-950 text-white hover:bg-[#ff4b0b] font-bold text-[15px] transition-all duration-300 group">Abrir aplicacion<HubIcon icon={ArrowUpRight} size={16} className="w-4 h-4" /></Link>
-                      </article>
-                    )
-                  })}
+                {/* Tarjetas literales de HubPage en presentación disminuida */}
+                <div className="mt-8 flex flex-wrap items-center gap-2">
+                  {PILLARS.map((p) => (
+                    <button key={p.label} onClick={() => setActiveTab(p.label)}
+                      className={`h-9 px-4 rounded-full text-sm font-semibold border transition-all duration-300 ${activeTab === p.label ? 'bg-zinc-950 text-white border-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'}`}>{p.label}</button>
+                  ))}
+                  <span className="ml-auto text-xs font-mono text-zinc-400">{filtered.length} herramientas</span>
                 </div>
-                {filtered.length === 0 && (
+                {filtered.length === 0 ? (
                   <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-8 text-center">
                     <p className="text-[15px] font-semibold text-zinc-900">Sin resultados</p>
-                    <button onClick={() => { setGlobalSearchQuery(''); setActiveTab('inicio') }} className="mt-4 h-10 px-5 rounded-full bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
+                    <button onClick={() => { setGlobalSearchQuery(''); setActiveTab('Todas') }} className="mt-4 h-10 px-5 rounded-full bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
                   </div>
-                )}
+                ) : (activeTab === 'Todas' && !globalSearchQuery.trim() ? (
+                  <div className="mt-6 space-y-8">
+                    {PILLARS.filter(p => p.match !== null).map((pillar) => {
+                      const items = filtered.filter(r => r.pillar && r.pillar.includes(pillar.match))
+                      if (items.length === 0) return null
+                      return (
+                        <div key={pillar.label}>
+                          <div className="flex items-center gap-2.5 pb-3">
+                            <span className="h-2 w-2 rounded-full bg-[#ff4b0b]" />
+                            <h2 className="text-base font-bold tracking-tight text-zinc-950">{pillar.label.toUpperCase()}</h2>
+                            <span className="text-[11px] font-mono text-zinc-400">({items.length})</span>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                            {items.map((route) => {
+                              const Icon = route.icon
+                              const gradient = PILLAR_GRADIENTS[route.pillar] || PILLAR_GRADIENTS['Herramientas']
+                              const hasPreview = Boolean(route.preview)
+                              return (
+                                <Link key={route.path} to={route.path} className="group block">
+                                  <article className={`relative flex min-h-[120px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
+                                    {/* Preview image — right side */}
+                                    {hasPreview ? (
+                                      <div className="absolute right-0 top-0 bottom-0 w-[42%] pointer-events-none">
+                                        <div className="h-full w-full rounded-l-xl bg-white/60 overflow-hidden border-l border-black/[0.04]">
+                                          <img src={route.preview} alt={route.title} className="h-full w-full object-cover object-left-top" loading="lazy" />
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center opacity-10">
+                                        <Icon className="w-6 h-6 text-zinc-900" strokeWidth={1.5} />
+                                      </div>
+                                    )}
+                                    {/* Text content — left side, max-w to avoid overlap */}
+                                    <div className="relative z-10 flex flex-col justify-between p-4 max-w-[58%]">
+                                      <div>
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${route.tone}`}>
+                                            <HubIcon icon={Icon} size={14} className="w-3.5 h-3.5" />
+                                          </span>
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-zinc-800 truncate">
+                                            {route.access === 'free' ? (<><span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0" /><span>Gratis</span></>) : (<><HubIcon icon={Star} size={9} className="w-2 h-2 shrink-0" /><span className="truncate">{route.badge || 'Pro'}</span></>)}
+                                          </span>
+                                        </div>
+                                        <h3 className="text-[13px] font-bold leading-snug text-zinc-950 line-clamp-2">{route.title}</h3>
+                                        <p className="mt-0.5 text-[10px] text-zinc-500 truncate">{route.category}</p>
+                                      </div>
+                                      <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-700 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
+                                        Abrir <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+                                      </span>
+                                    </div>
+                                  </article>
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {filtered.map((route) => {
+                      const Icon = route.icon
+                      const gradient = PILLAR_GRADIENTS[route.pillar] || PILLAR_GRADIENTS['Herramientas']
+                      const hasPreview = Boolean(route.preview)
+                      return (
+                        <Link key={route.path} to={route.path} className="group block">
+                          <article className={`relative flex min-h-[120px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
+                            {hasPreview ? (
+                              <div className="absolute right-0 top-0 bottom-0 w-[42%] pointer-events-none">
+                                <div className="h-full w-full rounded-l-xl bg-white/60 overflow-hidden border-l border-black/[0.04]">
+                                  <img src={route.preview} alt={route.title} className="h-full w-full object-cover object-left-top" loading="lazy" />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl flex items-center justify-center opacity-10">
+                                <Icon className="w-6 h-6 text-zinc-900" strokeWidth={1.5} />
+                              </div>
+                            )}
+                            <div className="relative z-10 flex flex-col justify-between p-4 max-w-[58%]">
+                              <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${route.tone}`}>
+                                    <HubIcon icon={Icon} size={14} className="w-3.5 h-3.5" />
+                                  </span>
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-zinc-800 truncate">
+                                    {route.access === 'free' ? (<><span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0" /><span>Gratis</span></>) : (<><HubIcon icon={Star} size={9} className="w-2 h-2 shrink-0" /><span className="truncate">{route.badge || 'Pro'}</span></>)}
+                                  </span>
+                                </div>
+                                <h3 className="text-[13px] font-bold leading-snug text-zinc-950 line-clamp-2">{route.title}</h3>
+                                <p className="mt-0.5 text-[10px] text-zinc-500 truncate">{route.category}</p>
+                              </div>
+                              <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-700 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
+                                Abrir <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+                              </span>
+                            </div>
+                          </article>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                ))}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -304,6 +431,6 @@ function HubV2Content() {
   )
 }
 
-export default function HubWorkspacePageV2() {
-  return (<ErrorBoundary><HubV2Content /></ErrorBoundary>)
+export default function HubPanelPage() {
+  return (<ErrorBoundary><HubPanelContent /></ErrorBoundary>)
 }
