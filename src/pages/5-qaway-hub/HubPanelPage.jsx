@@ -286,17 +286,6 @@ function HubPanelContent() {
                 <p className="text-sm text-zinc-500 capitalize">{fecha}</p>
                 <h1 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-950">Hola de nuevo, {name}</h1>
                 <p className="mt-2 text-[15px] text-zinc-600 max-w-[62ch]">Tu anillo central para operar todo Qaway Lab sin friccion. Entra a cualquier app con un clic.</p>
-                <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-full border border-emerald-500/25 bg-emerald-500/10 text-sm font-semibold text-emerald-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />Todos los sistemas operativos • {ROUTES.length} herramientas conectadas
-                </div>
-                <div className="mt-6 rounded-3xl border border-orange-500/25 bg-gradient-to-br from-[#1a0e06] via-[#141414] to-[#101828] p-6 text-white">
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#ff8a3d]">Destacado del ecosistema</p>
-                  <h2 className="mt-2 text-xl font-bold max-w-[38ch]">Potencia tu conversion: conecta WhatsApp Cloud API con el CRM y automatiza hasta el 70% de tus consultas.</h2>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <Link to="/hub/crm" className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-[#ff4b0b] hover:bg-[#ff5c1f] font-bold text-[15px] transition-all duration-300">Ir al CRM <HubIcon icon={ArrowRight} size={16} className="w-4 h-4" /></Link>
-                    <Link to="/hub/waba-crm" className="inline-flex items-center gap-2 h-11 px-5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 font-semibold text-[15px] transition-all duration-300">Ver checklist WABA</Link>
-                  </div>
-                </div>
                 {/* Tarjetas literales de HubPage en presentación disminuida */}
                 <div className="mt-8 flex flex-wrap items-center gap-2">
                   {PILLARS.map((p) => (
@@ -329,7 +318,7 @@ function HubPanelContent() {
                               const hasPreview = Boolean(route.preview)
                               return (
                                 <Link key={route.path} to={route.path} className="group block">
-                                  <article className={`relative flex min-h-[120px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
+                                  <article className={`relative flex min-h-[156px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
                                     {/* Preview image — right side */}
                                     {hasPreview ? (
                                       <div className="absolute right-0 top-0 bottom-0 w-[42%] pointer-events-none">
@@ -343,22 +332,11 @@ function HubPanelContent() {
                                       </div>
                                     )}
                                     {/* Text content — left side, max-w to avoid overlap */}
-                                    <div className="relative z-10 flex flex-col justify-between p-4 max-w-[58%]">
-                                      <div>
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${route.tone}`}>
-                                            <HubIcon icon={Icon} size={14} className="w-3.5 h-3.5" />
-                                          </span>
-                                          <span className="inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-zinc-800 truncate">
-                                            {route.access === 'free' ? (<><span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0" /><span>Gratis</span></>) : (<><HubIcon icon={Star} size={9} className="w-2 h-2 shrink-0" /><span className="truncate">{route.badge || 'Pro'}</span></>)}
-                                          </span>
-                                        </div>
-                                        <h3 className="text-[13px] font-bold leading-snug text-zinc-950 line-clamp-2">{route.title}</h3>
-                                        <p className="mt-0.5 text-[10px] text-zinc-500 truncate">{route.category}</p>
-                                      </div>
-                                      <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-700 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
-                                        Abrir <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+                                    <div className="relative z-10 flex flex-col p-5 max-w-[58%]">
+                                      <span className={`w-8 h-8 mb-3 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-black/[0.03] ${route.tone}`}>
+                                        <HubIcon icon={Icon} size={16} className="w-4 h-4" />
                                       </span>
+                                      <h3 className="text-[14px] font-extrabold leading-snug text-zinc-900 tracking-tight pr-2">{route.title}</h3>
                                     </div>
                                   </article>
                                 </Link>
@@ -377,7 +355,7 @@ function HubPanelContent() {
                       const hasPreview = Boolean(route.preview)
                       return (
                         <Link key={route.path} to={route.path} className="group block">
-                          <article className={`relative flex min-h-[120px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
+                          <article className={`relative flex min-h-[156px] overflow-hidden rounded-2xl border border-slate-200/90 shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-[3px] hover:shadow-[0_12px_28px_rgba(15,23,42,0.09)] ${gradient}`}>
                             {hasPreview ? (
                               <div className="absolute right-0 top-0 bottom-0 w-[42%] pointer-events-none">
                                 <div className="h-full w-full rounded-l-xl bg-white/60 overflow-hidden border-l border-black/[0.04]">
@@ -389,22 +367,11 @@ function HubPanelContent() {
                                 <Icon className="w-6 h-6 text-zinc-900" strokeWidth={1.5} />
                               </div>
                             )}
-                            <div className="relative z-10 flex flex-col justify-between p-4 max-w-[58%]">
-                              <div>
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${route.tone}`}>
-                                    <HubIcon icon={Icon} size={14} className="w-3.5 h-3.5" />
-                                  </span>
-                                  <span className="inline-flex items-center gap-1 rounded-full bg-black/[0.06] px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-zinc-800 truncate">
-                                    {route.access === 'free' ? (<><span className="h-1.5 w-1.5 rounded-full bg-emerald-600 shrink-0" /><span>Gratis</span></>) : (<><HubIcon icon={Star} size={9} className="w-2 h-2 shrink-0" /><span className="truncate">{route.badge || 'Pro'}</span></>)}
-                                  </span>
-                                </div>
-                                <h3 className="text-[13px] font-bold leading-snug text-zinc-950 line-clamp-2">{route.title}</h3>
-                                <p className="mt-0.5 text-[10px] text-zinc-500 truncate">{route.category}</p>
-                              </div>
-                              <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-zinc-700 opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:translate-x-0.5">
-                                Abrir <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+                            <div className="relative z-10 flex flex-col p-5 max-w-[58%]">
+                              <span className={`w-8 h-8 mb-3 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-black/[0.03] ${route.tone}`}>
+                                <HubIcon icon={Icon} size={16} className="w-4 h-4" />
                               </span>
+                              <h3 className="text-[14px] font-extrabold leading-snug text-zinc-900 tracking-tight pr-2">{route.title}</h3>
                             </div>
                           </article>
                         </Link>
