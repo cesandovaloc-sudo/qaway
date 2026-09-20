@@ -163,19 +163,10 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
     let paymentStatus = 'pending'
     let paymentIntentId: string | null = null
 
+    // Sin Stripe (no opera en Peru): las reservas con precio se coordinan
+    // por WhatsApp/manual y el staff las confirma en el panel.
     if (Number(eventType.price) > 0) {
-      try {
-        const payment = await agendaAdapter.createPayment(
-          Math.round(Number(eventType.price) * 100),
-          eventType.currency || 'PEN',
-          eventType.title,
-        )
-        if (payment.error || !payment.clientSecret) return { error: 'No se pudo iniciar el pago: ' + (payment.error || 'intenta de nuevo') }
-        paymentIntentId = payment.paymentIntentId || null
-        paymentStatus = 'pending'
-      } catch (e) {
-        return { error: 'Error de pago: ' + (e as Error).message }
-      }
+      return { error: 'Evento con precio: coordina tu pago por WhatsApp y el staff confirmará tu reserva.' }
     }
 
     const booking: Record<string, unknown> = {

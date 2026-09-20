@@ -127,7 +127,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-muted text-base sm:text-lg max-w-xl leading-relaxed">
-            Comparte tu enlace de reserva personalizado, recibe pagos opcionales con Stripe, bloquea horarios automáticamente y sincroniza con Google Calendar y WhatsApp.
+            Comparte tu enlace de reserva personalizado, recibe pagos por Yape/transferencia, bloquea horarios automáticamente y sincroniza con Google Calendar y WhatsApp.
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
@@ -163,7 +163,7 @@ export default function HomePage() {
               <span className="font-bold text-sm text-main flex items-center gap-1.5">
                 <CreditCard className="w-4 h-4 text-purple-600" /> Pagos Online
               </span>
-              <p className="text-[11px] text-muted mt-0.5">Integración opcional con Stripe para cobrar anticipos.</p>
+              <p className="text-[11px] text-muted mt-0.5">Cobro de anticipos por Yape/transferencia con confirmación del staff.</p>
             </div>
           </div>
         </div>

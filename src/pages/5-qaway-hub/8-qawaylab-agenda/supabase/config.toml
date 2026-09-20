@@ -2,9 +2,3 @@ project_id = "qawaylab-agenda"
 
 [functions.send-notifications]
 verify_jwt = false
-
-[functions.create-payment]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false

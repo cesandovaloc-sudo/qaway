@@ -1,6 +1,6 @@
 {
   "version": "seed-v4",
-  "total": 15,
+  "total": 16,
   "vocabulario": {
     "tipo": ["skill", "app", "repo", "infra", "os", "lib"],
     "instalacion_metodo": ["1-comando", "clone", "iso", "lib", "app", "vps"],
@@ -416,6 +416,33 @@
       "prioridad_qaway": "alta",
       "tags": ["busqueda", "codigo", "rust", "agentes", "ripgrep", "open-source"],
       "alias_busqueda": ["buscar codigo", "grep", "ripgrep", "tgrep", "indexar", "monorepo"],
+      "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
+    },
+    {
+      "id": "BIB-016",
+      "slug": "typesafe-jev",
+      "nombre": "Jev (TypeSafe)",
+      "nombre_simple": "Micro-decisiones rápidas para tus IAs",
+      "tipo": "infra",
+      "categoria": "Infraestructura e IA",
+      "subcategoria": "Modelo de decisiones",
+      "instalacion": { "metodo": "app", "formato": "API (OpenRouter / Vercel Gateway)", "comando_ejemplo": "" },
+      "stack": { "lenguaje": "", "rendimiento": "70-500 ms, 32k contexto", "entorno": "API" },
+      "acceso": { "requiere_key": true, "tipo_key": "propia", "es_gratis": false, "costo_ref": "$0.042/M entrada, salida gratis" },
+      "costo": "pago",
+      "plataforma": ["cloud"],
+      "nivel": "dev",
+      "popularidad": { "estrellas": "", "nota": "Lanzado 15-sep-2026, early access" },
+      "integraciones": ["plugin"],
+      "nichos": ["Desarrolladores de IA", "Creadores de Agentes"],
+      "funcionalidad_corta": "Decide sin escribir: choices y scores tipados en milisegundos",
+      "caso_uso": "Elegir qué skill cargar de tus 38, clasificar errores, guardrails y rerank sin pagar un LLM. Mapeado a futuro, sin implementar.",
+      "url_repo": "",
+      "licencia": "desconocida",
+      "estado": "por-verificar",
+      "prioridad_qaway": "media",
+      "tags": ["jev", "decisiones", "typesafe", "skills", "guardrails", "agentes"],
+      "alias_busqueda": ["jev", "decisiones", "typesafe", "system one", "ruteo skills", "micro-decisiones"],
       "curso_repo": { "usar_en_curso": false, "curso": "", "modulo": "", "leccion": "", "orden": 0, "rol": "", "prerequisitos": [], "resultado_esperado": "" }
     }
   ]

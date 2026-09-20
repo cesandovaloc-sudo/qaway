@@ -12,7 +12,7 @@ App independiente y vendible de reservas en línea (estilo Cal.com) con Supabase
 1. `npm install`
 2. Crear proyecto Supabase propio y ejecutar `supabase/migrations/0001_agenda_schema.sql` (tablas + RLS + anti doble-reserva).
 3. Desplegar edge functions: `send-notifications` y `create-payment` (ver `supabase/functions/`).
-4. Configurar claves en `.env`: Supabase, Resend, WhatsApp (Meta), Stripe.
+4. Configurar claves en `.env`: Supabase, Resend, WhatsApp (Meta). Sin Stripe (no opera en Perú).
 5. Activar el cron de recordatorios (comentado al final de la migración).
 6. `npm run dev` → http://localhost:8500
 

@@ -93,3 +93,7 @@
 - Nueva sección `Skills instaladas — matriz única`: lee `skills-matrix.seed.json`, muestra 36 activas (oculta 2 descartadas), badge repo/global/biblioteca, origen y marca `revisar`. Misma arte.
 - SKL-007 y SKL-022 en `descartada` (borrado físico pendiente por dueño, fuera de repo en un caso).
 - Lint limpio. Sin commit, sin push.
+
+## Iteración 19 — BIB-016 Jev mapeado (2026-09-20)
+- TypeSafe Jev (System One, 15-sep-2026): decisiones tipadas 70-500ms, $0.042/M, vía OpenRouter/Vercel. Uso futuro: ruteo de tus 38 skills, guardrails, rerank.
+- Solo mapeado (`por-verificar`, prioridad media), sin implementar. Seed total 16, validado. Sin commit, sin push.

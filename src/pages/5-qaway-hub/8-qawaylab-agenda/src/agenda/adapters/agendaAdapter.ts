@@ -13,7 +13,6 @@ export interface AgendaAdapter {
   getOrCreateBusiness(ownerId: string, email: string | null | undefined): Promise<Business | null>
   loadBusinessData(businessId: string): Promise<{ eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookings: Booking[] }>
   loadPublicData(slug: string): Promise<{ business: Business | null; eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookedSlots: unknown[] }>
-  createPayment(amount: number, currency: string, description: string): Promise<{ paymentIntentId?: string; clientSecret?: string; error?: string }>
   insertBooking(booking: Record<string, unknown>): Promise<{ data?: Booking; error?: { code?: string; message?: string } | null }>
   insertReminders(reminders: Record<string, unknown>[]): Promise<void>
   getBookingByToken(token: string): Promise<Booking | null>
@@ -168,13 +167,6 @@ export const agendaAdapter: AgendaAdapter = {
       exceptions: [],
       bookedSlots: [],
     }
-  },
-  async createPayment(amount, currency, description) {
-    const { data, error } = await supabase.functions.invoke('create-payment', {
-      body: { amount, currency, description },
-    })
-    if (error || !data || !data.clientSecret) return { error: error?.message || 'intenta de nuevo' }
-    return { paymentIntentId: data.paymentIntentId as string, clientSecret: data.clientSecret as string }
   },
   async insertBooking(booking) {
     const { data, error } = await supabase.from('bookings').insert(booking).select().single()

@@ -19,7 +19,7 @@ Que un negocio comparta un link y sus clientes reserven al instante, con confirm
 
 ## Positioning
 
-Multi-negocio con aislamiento real de datos (RLS): cada cliente tiene su propia base sin compartir información. Cobro opcional por servicio (Stripe) integrado al flujo de reserva.
+Multi-negocio con aislamiento real de datos (RLS): cada cliente tiene su propia base sin compartir información. Cobro opcional por servicio (Yape/transferencia con confirmación staff) integrado al flujo de reserva.
 
 ## Operating Context
 
@@ -28,7 +28,7 @@ Flujo público (link del negocio): selección de servicio, calendario con dispon
 ## Capabilities and Constraints
 
 - Constraint: el negocio no necesita cuenta pública para el cliente; el cliente nunca ve el panel.
-- Stack: React 19 + Vite 8 + TypeScript + Tailwind v4, Supabase (Auth + Postgres + RLS), Stripe opcional, recordatorios por Edge Function (Resend + WhatsApp).
+- Stack: React 19 + Vite 8 + TypeScript + Tailwind v4, Supabase (Auth + Postgres + RLS), cobros Yape/transferencia, recordatorios por Edge Function (Resend + WhatsApp).
 - Constraint de diseño: identidad white-label configurable (VITE_APP_NAME), lista para revender sin acoplar a Qaway Lab.
 - Cancelación/reprogramación vía token en email.
 
