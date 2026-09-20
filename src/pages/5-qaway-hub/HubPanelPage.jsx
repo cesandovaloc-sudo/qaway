@@ -223,7 +223,7 @@ function HubPanelContent() {
                           {filtered.slice(0, 5).map(app => {
                             const Icon = app.icon
                             return (
-                              <li key={route.path}>
+                              <li key={app.path}>
                                 <Link to={app.path} onClick={() => setGlobalSearchQuery('')} className="w-full px-4 py-3 hover:bg-white/5 transition-colors flex items-center gap-4 text-left group">
                                   <div className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[13px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20"><HubIcon icon={Icon} size={16} className="w-4 h-4" /></div>
                                   <div className="flex-1 min-w-0">
@@ -278,9 +278,8 @@ function HubPanelContent() {
         <main className="flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative">
           <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
           <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1200px] mx-auto">
-            <AnimatePresence mode="wait">
-              <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ transform: 'none' }}>
-                <p className="text-sm text-zinc-500 capitalize">{fecha}</p>
+            <div>
+              <p className="text-sm text-zinc-500 capitalize">{fecha}</p>
                 <h1 className="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight text-zinc-950">Hola de nuevo, {name}</h1>
                 <p className="mt-2 text-[15px] text-zinc-600 max-w-[62ch]">Tu anillo central para operar todo Qaway Lab sin friccion. Entra a cualquier app con un clic.</p>
                 {/* Tarjetas literales de HubPage en presentación disminuida */}
@@ -375,9 +374,8 @@ function HubPanelContent() {
                       )
                     })}
                   </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                )}
+            </div>
           </div>
         </main>
 
