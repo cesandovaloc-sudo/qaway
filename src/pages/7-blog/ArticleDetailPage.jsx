@@ -31,6 +31,11 @@ import { enviarFormularioContacto } from '@/services/contactoService'
 import { useSetNavbarVariant } from '@/components/layout/Navbar'
 import { trackBlogVisit } from '@/services/analyticsTracker'
 
+import DOMPurify from 'dompurify'
+
+// F-05 FIX: Sanitizacion XSS via DOMPurify (2026-09-19)
+// La funcion anterior solo decodificaba entidades (convirtiendo &lt;script&gt; en <script> activo).
+// Ahora se descodifica Y se sanitiza antes de pasar a dangerouslySetInnerHTML.
 function sanitizeAndDecodeContent(htmlContent) {
   if (!htmlContent) return ''
   let decoded = htmlContent
@@ -43,8 +48,14 @@ function sanitizeAndDecodeContent(htmlContent) {
       .replace(/&#39;/g, "'")
       .replace(/&amp;/g, '&')
   }
-  return decoded
+  // Sanitizar con DOMPurify antes de renderizar — elimina <script>, on*, data:, etc.
+  return DOMPurify.sanitize(decoded, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'action'],
+  })
 }
+
 
 export default function ArticleDetailPage() {
   useSetNavbarVariant('light')
