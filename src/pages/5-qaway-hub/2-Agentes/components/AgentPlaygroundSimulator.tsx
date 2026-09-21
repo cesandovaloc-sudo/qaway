@@ -23,7 +23,12 @@ import {
   Lock,
   ChevronDown,
   ChevronUp,
-  CheckCheck
+  CheckCheck,
+  Database,
+  Search,
+  List,
+  Key,
+  Link
 } from 'lucide-react'
 
 interface Props {
@@ -97,34 +102,6 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
       
       // 4. Simular respuesta usando el prompt con contexto
       const simResult = simulateAgentResponse(text, workspace)
-      
-      const agentMsg: ChatMessage = {
-        id: `agent-${Date.now()}`,
-        sender: 'agent',
-        text: simResult.reply,
-        timestamp: Date.now(),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        complianceFlag: {
-          isHumanRequested: simResult.isHumanRequested,
-          isSensitiveDataBlocked: simResult.isSensitiveBlocked,
-          isAntiInjectionBlocked: simResult.isInjectionBlocked
-        }
-      }
-
-      setMessages(prev => [...prev, agentMsg])
-      setIsTyping(false)
-
-      // Actualizar contador de simulaciones
-      onUpdateWorkspace(prev => ({
-        ...prev,
-        metrics: {
-          ...prev.metrics,
-          simulationsRun: prev.metrics.simulationsRun + 1,
-          handoffCount: simResult.isHumanRequested ? prev.metrics.handoffCount + 1 : prev.metrics.handoffCount
-        }
-      }))
-    }, 500)
-  }
       
       const agentMsg: ChatMessage = {
         id: `agent-${Date.now()}`,
@@ -551,6 +528,115 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
                 <pre className="text-[10px] font-mono text-slate-300 bg-slate-950 p-3 rounded-xl max-h-60 overflow-y-auto whitespace-pre-wrap leading-relaxed">
                   {compiledPrompt}
                 </pre>
+              </div>
+            )}
+          </div>
+
+          {/* Inspector Colapsable del Contexto Recuperado (Context Engine) */}
+          <div className="bg-emerald-950/50 text-emerald-100 rounded-2xl p-5 shadow-xs space-y-3 border border-emerald-800/50">
+            <button
+              onClick={() => setShowContextInspector(!showContextInspector)}
+              className="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-emerald-300 hover:text-emerald-100 transition-all cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400" />
+                Inspeccionar Contexto Recuperado (Context Engine)
+                {lastContextInspection && (
+                  <span className="text-[10px] font-mono bg-emerald-900/50 px-1.5 py-0.5 rounded border border-emerald-700">
+                    {lastContextInspection.tenantId}
+                  </span>
+                )}
+              </span>
+              {showContextInspector ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            {showContextInspector && (
+              <div className="mt-3 pt-3 border-t border-emerald-800/50 space-y-3">
+                {lastContextInspection ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                      <div className="bg-emerald-900/30 p-2 rounded border border-emerald-800/30">
+                        <span className="text-emerald-400">Tenant ID:</span>
+                        <span className="font-mono ml-1">{lastContextInspection.tenantId}</span>
+                      </div>
+                      <div className="bg-emerald-900/30 p-2 rounded border border-emerald-800/30">
+                        <span className="text-emerald-400">Consulta:</span>
+                        <span className="font-mono ml-1 truncate block">{lastContextInspection.query}</span>
+                      </div>
+                      <div className="bg-emerald-900/30 p-2 rounded border border-emerald-800/30">
+                        <span className="text-emerald-400">Knowledge chunks:</span>
+                        <span className="font-mono ml-1">{lastContextInspection.knowledgeResults.length}</span>
+                      </div>
+                      <div className="bg-emerald-900/30 p-2 rounded border border-emerald-800/30">
+                        <span className="text-emerald-400">Memory turns:</span>
+                        <span className="font-mono ml-1">{lastContextInspection.memoryTurns}</span>
+                      </div>
+                    </div>
+
+                    {lastContextInspection.knowledgeResults.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Search className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                            Knowledge Recuperado (Top-{lastContextInspection.knowledgeResults.length})
+                          </span>
+                        </div>
+                        <div className="space-y-1.5 ml-5">
+                          {lastContextInspection.knowledgeResults.map((k, i) => (
+                            <div key={k.id} className="bg-emerald-900/20 p-2 rounded border border-emerald-800/30">
+                              <div className="flex items-center gap-1.5 text-[10px]">
+                                <span className="text-emerald-400 font-mono">#{i + 1}</span>
+                                <span className="bg-emerald-800/50 px-1.5 py-0.5 rounded text-[9px] font-mono">{k.source}</span>
+                                <span className="text-emerald-300 font-bold">{k.title}</span>
+                                <span className="text-emerald-500 font-mono">score: {k.score.toFixed(2)}</span>
+                              </div>
+                              <p className="text-[11px] text-emerald-200/80 mt-1 line-clamp-2">{k.description}</p>
+                              {k.referencePrice && (
+                                <p className="text-[10px] text-emerald-400 font-medium mt-1">Precio: {k.referencePrice}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <List className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                          Herramientas Disponibles ({lastContextInspection.toolsAvailable.length})
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 ml-5">
+                        {lastContextInspection.toolsAvailable.map(t => (
+                          <span key={t} className="bg-emerald-800/50 px-2 py-0.5 rounded text-[10px] font-mono text-emerald-200 border border-emerald-700/50">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="bg-emerald-900/30 p-2 rounded border border-emerald-800/30">
+                      <div className="flex items-center gap-2">
+                        <Key className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[10px] font-bold text-emerald-300">
+                          Aislamiento Validado
+                        </span>
+                        <span className="ml-auto text-[10px] text-emerald-500 font-mono bg-emerald-900/50 px-1.5 py-0.5 rounded border border-emerald-700">
+                          ✓ Tenant-scoped
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-200/70 mt-1">
+                        Este contexto fue recuperado exclusivamente para el tenant resuelto por backend.
+                        No hay filtros post-recuperación ni separación por prompt.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-4 text-emerald-400/60 text-xs">
+                    Envía un mensaje en el chat para ver el contexto recuperado en tiempo real
+                  </div>
+                )}
               </div>
             )}
           </div>
