@@ -9,7 +9,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const MASTER_TENANT = '00000000-0000-0000-0000-000000000001'
 const ROLES = ['admin', 'editor', 'viewer', 'guest']
 
 function json(body: unknown, status = 200) {
@@ -33,9 +32,10 @@ serve(async (req: Request) => {
   if (!caller) return json({ error: 'No autorizado' }, 401)
 
   const admin = createClient(url, serviceKey)
-  const { data: callerRow } = await admin.from('users').select('role, tenant_id').eq('id', caller.id).single()
+  const { data: callerRow } = await admin.from('users').select('role, tenant_id, is_platform_admin').eq('id', caller.id).single()
   if (!callerRow) return json({ error: 'Sin perfil' }, 403)
-  const isGlobalAdmin = callerRow.role === 'admin' && callerRow.tenant_id === MASTER_TENANT
+  // Plataforma global vs admin de marca (ver migración platform_vs_brand_admin).
+  const isGlobalAdmin = callerRow.role === 'admin' && callerRow.is_platform_admin === true
   const isBrandAdmin = callerRow.role === 'admin' && callerRow.tenant_id !== null
   if (!isGlobalAdmin && !isBrandAdmin) return json({ error: 'Solo administradores invitan' }, 403)
 
