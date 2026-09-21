@@ -69,6 +69,11 @@ export {
   Route,
   FlaskConical,
   Wrench,
+  HelpCircle,
+  Tag,
+  Receipt,
+  Shield,
+  UserPlus,
 } from 'lucide-react'
 
 export const HUB_ICON_NAMES = {
