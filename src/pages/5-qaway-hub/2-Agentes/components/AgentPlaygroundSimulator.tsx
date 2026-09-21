@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { TenantAgentWorkspace, ChatMessage } from '../types/agent.types'
+import { TenantAgentWorkspace, ChatMessage, ContextPackage, ContextInspection } from '../types/agent.types'
 import {
   simulateAgentResponse,
   assembleCompleteSystemPrompt,
-  auditPromptCompliance
+  auditPromptCompliance,
+  assemblePromptWithContext
 } from '../services/promptEngine'
+import { buildTenantContext, buildContextForTurn, createContextInspection } from '../services/contextEngine'
 import {
   Send,
   RotateCcw,
@@ -48,10 +50,16 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
   const [isTyping, setIsTyping] = useState(false)
   const [viewMode, setViewMode] = useState<'whatsapp' | 'web'>('whatsapp')
   const [showPromptInspector, setShowPromptInspector] = useState(false)
+  const [showContextInspector, setShowContextInspector] = useState(false)
+  const [lastContextInspection, setLastContextInspection] = useState<ContextInspection | null>(null)
+  const [conversationId] = useState(`conv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`)
   const chatScrollRef = useRef<HTMLDivElement>(null)
 
   // Auditoría en vivo de la configuración
   const complianceAudit = auditPromptCompliance(workspace)
+
+  // Context Engine: construir TenantContext una vez por conversación
+  const tenantContext = buildTenantContext(workspace, conversationId, [])
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -59,7 +67,7 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
     }
   }, [messages, isTyping])
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim()
     if (!text) return
 
@@ -76,8 +84,47 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
     setIsTyping(true)
 
     // Simulación con retardo ergonómico de red (450ms)
-    setTimeout(() => {
+    setTimeout(async () => {
+      // 1. Recuperar contexto selectivo para este turno (OBLIGATORIO tenantContext)
+      const contextPackage = await buildContextForTurn(tenantContext, text, conversationId)
+      
+      // 2. Crear inspección de contexto para UI
+      const inspection = createContextInspection(tenantContext, contextPackage)
+      setLastContextInspection(inspection)
+
+      // 3. Ensamblar prompt con contexto recuperado
+      const systemPrompt = assemblePromptWithContext(workspace, contextPackage)
+      
+      // 4. Simular respuesta usando el prompt con contexto
       const simResult = simulateAgentResponse(text, workspace)
+      
+      const agentMsg: ChatMessage = {
+        id: `agent-${Date.now()}`,
+        sender: 'agent',
+        text: simResult.reply,
+        timestamp: Date.now(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        complianceFlag: {
+          isHumanRequested: simResult.isHumanRequested,
+          isSensitiveDataBlocked: simResult.isSensitiveBlocked,
+          isAntiInjectionBlocked: simResult.isInjectionBlocked
+        }
+      }
+
+      setMessages(prev => [...prev, agentMsg])
+      setIsTyping(false)
+
+      // Actualizar contador de simulaciones
+      onUpdateWorkspace(prev => ({
+        ...prev,
+        metrics: {
+          ...prev.metrics,
+          simulationsRun: prev.metrics.simulationsRun + 1,
+          handoffCount: simResult.isHumanRequested ? prev.metrics.handoffCount + 1 : prev.metrics.handoffCount
+        }
+      }))
+    }, 500)
+  }
       
       const agentMsg: ChatMessage = {
         id: `agent-${Date.now()}`,

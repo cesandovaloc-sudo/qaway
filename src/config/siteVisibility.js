@@ -21,6 +21,7 @@ export const routeVisibility = {
   landings: true,
   auth: true,
   pruebas: false,
+  onboarding: true,
 }
 
 const publicPathAllowList = new Set([
@@ -46,6 +47,7 @@ const publicPathAllowList = new Set([
   '/landings/identidad-visual',
   '/landings/sistema-contenido-notion',
   '/login',
+  '/onboarding',
   '/portal/:slug',
   '/proyectos',
   '/proyectos/aurea-skincare',

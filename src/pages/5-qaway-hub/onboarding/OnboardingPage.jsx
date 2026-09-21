@@ -18,6 +18,7 @@ export default function OnboardingPage() {
   const [chosen, setChosen] = useState({})
   const [msg, setMsg] = useState('')
   const [done, setDone] = useState(null)
+  const [pay, setPay] = useState(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session || null))
@@ -52,6 +53,21 @@ export default function OnboardingPage() {
       return
     }
     setDone(data.tenant)
+    // Cobro recurrente con precios reales de BD (si existen; si no, queda trial/pending).
+    try {
+      const items = plans.map((p) => ({ app_slug: p.slug, plan: p.plan }))
+      const { data: payData } = await supabase.functions.invoke('mp-subscription-init', {
+        body: { tenant_id: data.tenant.id, items },
+      })
+      if (payData?.init_point) {
+        setPay(payData)
+        setMsg('Marca creada. Completa tu suscripción para activar el cobro recurrente.')
+      } else if (payData?.error) {
+        setMsg('Marca creada (' + payData.error + '). Tus trials activos ya funcionan.')
+      }
+    } catch {
+      setMsg('Marca creada. El pago se configurará al publicar precios.')
+    }
     setStep(6)
   }
 
@@ -130,10 +146,16 @@ export default function OnboardingPage() {
         <section className="mt-6">
           <h2 className="text-xl font-semibold">5. Pago</h2>
           <p className="mt-2 text-sm text-zinc-400">
-            El cobro recurrente (Mercado Pago) se habilita aquí. Mientras tanto tu marca se crea en borrador
-            y las apps con trial se activan de inmediato; el resto queda pendiente de pago.
+            Primero se crea tu marca en borrador. Si tus planes tienen precio vigente,
+            se genera el cobro recurrente en Mercado Pago; si tienen trial, se activan
+            de inmediato y el resto queda pendiente de pago.
           </p>
           <button onClick={finish} className="mt-4 rounded-xl bg-white px-5 py-3 font-bold text-black">Crear mi espacio</button>
+          {pay?.init_point && (
+            <a href={pay.init_point} className="mt-3 block rounded-xl border border-zinc-700 px-5 py-3 text-center text-sm font-bold">
+              Pagar suscripción ({pay.currency} {pay.total}) en Mercado Pago →
+            </a>
+          )}
         </section>
       )}
 
@@ -141,6 +163,11 @@ export default function OnboardingPage() {
         <section className="mt-6">
           <h2 className="text-xl font-semibold">¡Tu espacio está listo!</h2>
           <p className="mt-2 text-sm text-zinc-400">Marca: {done.slug} · Invita a tu equipo y entra al Hub.</p>
+          {pay?.init_point && (
+            <a href={pay.init_point} className="mt-3 block rounded-xl border border-zinc-700 px-5 py-3 text-center text-sm font-bold">
+              Pagar suscripción ({pay.currency} {pay.total}) en Mercado Pago →
+            </a>
+          )}
           <div className="mt-4 flex gap-3">
             <Link to="/hub/usuarios" className="rounded-xl border border-zinc-700 px-5 py-3 text-sm">Invitar equipo</Link>
             <button onClick={() => navigate('/hub/panel')} className="rounded-xl bg-white px-5 py-3 font-bold text-black">Entrar al Hub</button>

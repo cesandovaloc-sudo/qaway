@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/config/supabase";
 
 const steps = ["Tu cuenta", "Tu empresa", "Tu Hub", "Tu equipo", "Listo"];
 
@@ -9,22 +11,142 @@ const apps = [
   ["marketing", "Marketing Studio", "Campañas y herramientas de marketing."],
 ];
 
-function Field({ label, placeholder, type = "text" }) {
-  return <label className="field"><span>{label}</span><input type={type} placeholder={placeholder} /></label>;
+function Field({ label, placeholder, type = "text", value, onChange }) {
+  return <label className="field"><span>{label}</span><input type={type} placeholder={placeholder} value={value} onChange={onChange} /></label>;
 }
 
 export default function HubOnboardingPage() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selected, setSelected] = useState(["crm", "agenda"]);
+  // Cableado SaaS (solo comportamiento; diseño intacto).
+  const [session, setSession] = useState(null);
+  const [tenant, setTenant] = useState(null);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [appsDb, setAppsDb] = useState([]);
+  const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "", rubro: "", phone: "", email: "" });
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [note, setNote] = useState("");
 
   const next = () => setStep(s => Math.min(5, s + 1));
   const back = () => setStep(s => Math.max(1, s - 1));
+  const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  useEffect(() => {
+    (async () => {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      setSession(s || null);
+      if (s?.user?.email) setAdminEmail(s.user.email);
+      if (!s) return;
+      const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
+      if (me?.tenant_id) {
+        const { data: t } = await supabase.from("tenants").select("*").eq("id", me.tenant_id).single();
+        if (t) {
+          setTenant(t);
+          const c = t.content || {};
+          const contact = c.contact || {};
+          setForm({
+            name: t.name || "", legal: t.legal_name || "", ruc: "",
+            country: contact.country || "", rubro: (t.features || {}).rubro || "",
+            phone: contact.phone || "", email: contact.email || "",
+          });
+        }
+      }
+      const { data: catalog } = await supabase.from("app_catalog").select("slug");
+      if (catalog) setAppsDb(catalog.map((a) => a.slug));
+    })();
+  }, []);
+
+  async function saveEmpresa(goNext) {
+    setNote("");
+    try {
+      if (!tenant) {
+        // Sin marca: crearla (quedo admin). Slug derivado del nombre.
+        const slug = form.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        const { data, error } = await supabase.functions.invoke("register-brand", {
+          body: { name: form.name, slug, plans: [] },
+        });
+        if (error || data?.error) throw new Error(data?.error || error.message);
+        setTenant(data.tenant);
+      } else {
+        const contact = { email: form.email, phone: form.phone, address: "", country: form.country };
+        const { error } = await supabase.from("tenants").update({
+          name: form.name,
+          legal_name: form.legal || null,
+          content: { tagline: "", contact },
+          features: { ...(tenant.features || {}), rubro: form.rubro },
+        }).eq("id", tenant.id);
+        if (error) throw error;
+        setTenant({ ...tenant, name: form.name });
+      }
+      if (goNext) next();
+    } catch (e) {
+      setNote("No se pudo guardar: " + e.message);
+    }
+  }
+
+  async function saveApps(goNext) {
+    setNote("");
+    try {
+      if (!tenant) throw new Error("Primero registra tu empresa.");
+      void appsDb;
+      const alias = { inventory: "inventario" };
+      for (const raw of selected) {
+        const slug = alias[raw] || raw;
+        const { data: app } = await supabase.from("app_catalog").select("id").eq("slug", slug).single();
+        if (!app) continue;
+        await supabase.from("tenant_app_subscriptions").upsert(
+          { tenant_id: tenant.id, app_id: app.id, plan: "basico", status: "pending" },
+          { onConflict: "tenant_id,app_id" },
+        );
+      }
+      if (goNext) next();
+    } catch (e) {
+      setNote("No se pudo guardar: " + e.message);
+    }
+  }
+
+  async function sendInvite() {
+    setNote("");
+    if (!inviteEmail || !tenant) {
+      setNote("Escribe un correo válido.");
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("invite-user", {
+      body: { email: inviteEmail, tenant_id: tenant.id, role: "viewer", app_slugs: selected },
+    });
+    if (error || data?.error) {
+      setNote("No se pudo invitar: " + (data?.error || error.message));
+      return;
+    }
+    setNote("Invitación enviada a " + inviteEmail + ".");
+    setInviteEmail("");
+  }
+
+  async function uploadLogo(file) {
+    if (!file || !tenant) return;
+    setNote("");
+    try {
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const path = `logos/${tenant.id}/logo.${ext}`;
+      const { error: upErr } = await supabase.storage.from("resources").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("resources").getPublicUrl(path);
+      const branding = { ...(tenant.branding || {}), logo_url: data.publicUrl };
+      const { error } = await supabase.from("tenants").update({ branding }).eq("id", tenant.id);
+      if (error) throw error;
+      setTenant({ ...tenant, branding });
+      setNote("Logo actualizado.");
+    } catch (e) {
+      setNote("No se pudo subir el logo: " + e.message);
+    }
+  }
 
   return (
     <div className="onboarding">
       <header>
         <div className="logo">Qaway<span>Lab</span></div>
-        <div className="login">¿Ya tienes una cuenta? <b>Acceder</b></div>
+        <div className="login">¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></div>
       </header>
 
       <main>
@@ -51,7 +173,7 @@ export default function HubOnboardingPage() {
             <Field label="Correo electrónico" placeholder="nombre@empresa.com" type="email" />
             <Field label="Contraseña" placeholder="Crea una contraseña segura" type="password" />
             <label className="check"><input type="checkbox" /> Acepto los términos y condiciones.</label>
-            <button className="primary" onClick={next}>Continuar →</button>
+            <button className="primary" onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
           </section>
         )}
 
@@ -63,19 +185,22 @@ export default function HubOnboardingPage() {
 
             <div className="logoUpload">
               <div>+</div><section><b>Logo de tu empresa</b><small>Opcional · PNG, JPG o SVG</small></section>
-              <button>Subir logo</button>
+              <button onClick={() => document.getElementById("hb-logo-file").click()}>Subir logo</button>
+              <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.svg" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
             </div>
 
             <div className="grid">
-              <Field label="Nombre comercial" placeholder="Ej. CoraVet" />
-              <Field label="Razón social" placeholder="Nombre legal de la empresa" />
-              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" />
-              <Field label="País" placeholder="Perú" />
-              <Field label="Rubro / actividad" placeholder="Ej. Veterinaria" />
-              <Field label="Teléfono / WhatsApp" placeholder="+51 ..." />
+              <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} />
+              <Field label="Razón social" placeholder="Nombre legal de la empresa" value={form.legal} onChange={setF("legal")} />
+              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={setF("ruc")} />
+              <Field label="País" placeholder="Perú" value={form.country} onChange={setF("country")} />
+              <Field label="Rubro / actividad" placeholder="Ej. Veterinaria" value={form.rubro} onChange={setF("rubro")} />
+              <Field label="Teléfono / WhatsApp" placeholder="+51 ..." value={form.phone} onChange={setF("phone")} />
             </div>
+            <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} />
 
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Continuar →</button></div>
+            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
+            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveEmpresa(true)}>Continuar →</button></div>
           </section>
         )}
 
@@ -97,7 +222,8 @@ export default function HubOnboardingPage() {
             </div>
 
             <div className="note"><b>Tu espacio se adapta a ti.</b><span>Podrás ampliar tus aplicaciones posteriormente.</span></div>
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Continuar →</button></div>
+            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
+            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveApps(true)}>Continuar →</button></div>
           </section>
         )}
 
@@ -107,9 +233,10 @@ export default function HubOnboardingPage() {
             <h1>¿Trabajarás con otras personas?</h1>
             <p>Puedes invitar a tu equipo ahora o hacerlo después desde el panel de administración.</p>
             <div className="invite">
-              <input placeholder="correo@empresa.com" />
-              <button>+ Añadir otra persona</button>
+              <input placeholder="correo@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+              <button onClick={sendInvite}>+ Añadir otra persona</button>
             </div>
+            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
             <div className="note"><b>Tú serás el administrador de la empresa.</b><span>Después podrás asignar aplicaciones, roles y permisos.</span></div>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Crear mi espacio →</button></div>
           </section>
@@ -122,11 +249,11 @@ export default function HubOnboardingPage() {
             <h1>Bienvenido a Qaway Hub.</h1>
             <p>Tu espacio de trabajo está preparado. Desde aquí podrás gestionar tus aplicaciones, equipo y operación digital.</p>
             <div className="summary">
-              <div><span>Empresa</span><b>Tu empresa</b></div>
-              <div><span>Administrador</span><b>Tú</b></div>
-              <div><span>Aplicaciones</span><b>CRM Comercial · Agenda</b></div>
+              <div><span>Empresa</span><b>{tenant?.name || form.name || "Tu empresa"}</b></div>
+              <div><span>Administrador</span><b>{adminEmail || "Tú"}</b></div>
+              <div><span>Aplicaciones</span><b>{selected.join(" · ")}</b></div>
             </div>
-            <button className="primary full">Entrar a mi Hub →</button>
+            <button className="primary full" onClick={() => navigate("/hub/panel")}>Entrar a mi Hub →</button>
           </section>
         )}
       </main>

@@ -122,3 +122,83 @@ export interface ComplianceAuditResult {
   }
   feedback: string[]
 }
+
+/**
+ * CONTEXT ENGINE TYPES
+ * 
+ * TenantContext es OBLIGATORIO para cualquier recuperación de knowledge, memoria o tools.
+ * El Context Engine consulta únicamente el tenant resuelto por backend.
+ * No depende de filtros posteriores ni del prompt para separar empresas.
+ */
+
+export interface VectorSearchResult {
+  id: string
+  title: string
+  category: string
+  description: string
+  referencePrice?: string
+  score: number
+  source: 'knowledgeBase' | 'faqs'
+}
+
+export interface ToolDefinition {
+  name: string
+  description: string
+  parameters: Record<string, unknown>
+  required?: string[]
+  tenantScoped: boolean
+}
+
+export interface ConversationMemory {
+  conversationId: string
+  recentTurns: Array<{
+    role: 'user' | 'agent'
+    content: string
+    timestamp: number
+  }>
+  summary?: string
+  entities?: Record<string, unknown>
+}
+
+export interface TenantContext {
+  tenantId: string
+  config: {
+    agentName: string
+    tone: ToneArchetype
+    role: AgentRole
+    channel: 'whatsapp' | 'web'
+    aiSettings: {
+      provider: ModelProvider
+      model: string
+      temperature: number
+      human_handoff_keywords: string[]
+    }
+  }
+  knowledgeIndex: {
+    search: (query: string, options?: { topK?: number }) => Promise<VectorSearchResult[]>
+  }
+  memory: ConversationMemory
+  allowedTools: ToolDefinition[]
+  rlsContext: {
+    userId: string
+    tenantId: string
+  }
+}
+
+export interface ContextPackage {
+  config: TenantContext['config']
+  relevantKnowledge: VectorSearchResult[]
+  memory: ConversationMemory
+  allowedTools: ToolDefinition[]
+  retrievedAt: number
+  query: string
+}
+
+export interface ContextInspection {
+  tenantId: string
+  query: string
+  knowledgeResults: VectorSearchResult[]
+  memoryTurns: number
+  toolsAvailable: string[]
+  retrievedAt: number
+}

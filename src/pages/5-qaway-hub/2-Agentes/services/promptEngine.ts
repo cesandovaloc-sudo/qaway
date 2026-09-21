@@ -1,4 +1,5 @@
-import { TenantAgentWorkspace, ComplianceAuditResult } from '../types/agent.types'
+import { TenantAgentWorkspace, ComplianceAuditResult, ContextPackage } from '../types/agent.types'
+import { formatContextForPrompt } from './contextEngine'
 
 /**
  * CAPA 0: Core de Seguridad, Ética y Cumplimiento Legal Inviolable
@@ -292,4 +293,46 @@ export function simulateAgentResponse(
     isSensitiveBlocked: false,
     isInjectionBlocked: false
   }
+}
+
+/**
+ * CONTEXT-AWARE PROMPT ASSEMBLY
+ * 
+ * Nueva función que usa ContextPackage (recuperación selectiva) en lugar de
+ * enviar todo el workspace. Mantiene Capa 0 y Capa 1 inmutables,
+ * inyecta Capa 2 dinámica desde ContextPackage.
+ */
+
+export function assemblePromptWithContext(
+  workspace: TenantAgentWorkspace,
+  contextPackage: ContextPackage
+): string {
+  const parts = [
+    `Eres ${workspace.agentName}, el Asistente Virtual Oficial de ${workspace.name}.`,
+    CAPA_0_CORE_INVIOLABLE.trim(),
+    compileCapa1Voice(workspace).trim()
+  ]
+
+  const fewShot = compileFewShotGoldenExamples(workspace).trim()
+  if (fewShot) parts.push(fewShot)
+
+  const dynamicContext = formatContextForPrompt(contextPackage)
+  if (dynamicContext) {
+    parts.push(`[CAPA 2 — CONTEXTO DINÁMICO RECUPERADO PARA ESTA CONSULTA]\n${dynamicContext}`)
+  } else {
+    parts.push(compileCapa2Knowledge(workspace).trim())
+  }
+
+  return parts.join('\n\n')
+}
+
+export function compileCapa2KnowledgeFromContext(
+  workspace: TenantAgentWorkspace,
+  contextPackage: ContextPackage
+): string {
+  const dynamicContext = formatContextForPrompt(contextPackage)
+  if (dynamicContext) {
+    return `[CAPA 2 — CONTEXTO DINÁMICO RECUPERADO PARA ESTA CONSULTA]\n${dynamicContext}`
+  }
+  return compileCapa2Knowledge(workspace)
 }

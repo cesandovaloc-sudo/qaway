@@ -438,6 +438,16 @@ enabled = true
 verify_jwt = true
 entrypoint = "./functions/invite-user/index.ts"
 
+[functions.mp-subscription-init]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/mp-subscription-init/index.ts"
+
+[functions.mp-subscription-webhook]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/mp-subscription-webhook/index.ts"
+
 [functions.register-brand]
 enabled = true
 verify_jwt = true
