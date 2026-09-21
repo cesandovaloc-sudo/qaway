@@ -74,6 +74,7 @@ const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
 import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
+import OnboardingPage from '@/pages/5-qaway-hub/onboarding/OnboardingPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
@@ -566,6 +567,7 @@ export default function AppRouter() {
           <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
 
           <Route path="rutas" element={<RutasPage />} />
+          <Route path="onboarding" element={<OnboardingPage />} />
 
           <Route path="*" element={notFoundElement} />
         </Route>

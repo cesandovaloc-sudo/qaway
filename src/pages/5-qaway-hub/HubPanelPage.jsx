@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate } from 'react-router-dom'
 import { HubIcon } from '@/components/ui/icons'
 import {
-  AlertCircle, ArrowRight, BarChart3, Bell, Bot, Briefcase, Building2, Calendar, Clock, CreditCard,
+  AlertCircle, ArrowRight, BarChart3, Bell, Bot, Briefcase, Building2, Calendar, ChevronDown, Clock, CreditCard,
   FileImage, FlaskConical, FolderKanban, HelpCircle, Home, Instagram, LayoutGrid, Menu, MessageSquare,
   Package, PenSquare, Plus, Receipt, RefreshCw, Route, Search, Settings, Shield, Sparkles,
   Star, Tag, Target, TrendingUp, User, UserPlus, Users, Wrench, X, Zap,
