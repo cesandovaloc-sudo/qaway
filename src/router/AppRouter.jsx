@@ -5,6 +5,7 @@ import ScrollToTop from '@/components/layout/ScrollToTop'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
+import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage'
 import {
   EstudioPage,
   EstudioLayout,
@@ -72,6 +73,7 @@ const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
+import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
@@ -369,10 +371,14 @@ export default function AppRouter() {
           element={renderRoute('hub', <TutorialOnboardingPage />)}
         />
         {/* Creador de Contenido: standalone FUERA del Layout → sin navbar de marca */}
-        <Route
-          path="hub/creador-contenido"
-          element={renderRoute('hub', <CreadorContenidoPage />)}
-        />
+          <Route
+            path="hub/creador-contenido"
+            element={renderRoute('hub', <CreadorContenidoPage />)}
+          />
+          <Route
+            path="hub/usuarios"
+            element={renderRoute('hub', <ProtectedRoute><UsuariosPage /></ProtectedRoute>)}
+          />
         {/* Agentes de IA Responsable (Ley 31814 & Google PAIR): standalone FUERA del Layout */}
         <Route
           path="hub/agentes"
@@ -565,6 +571,7 @@ export default function AppRouter() {
         </Route>
 
         <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
+        <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
       </Suspense>

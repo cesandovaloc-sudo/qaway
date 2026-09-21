@@ -433,3 +433,13 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/agenda-send-notifications/index.ts"
 
+[functions.invite-user]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/invite-user/index.ts"
+
+[functions.register-brand]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/register-brand/index.ts"
+
