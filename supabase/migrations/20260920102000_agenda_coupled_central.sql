@@ -6,8 +6,8 @@
 -- Anon: lectura pública + reserva solo eventos gratuitos.
 -- Staff: su marca (owner + tenant). IDEMPOTENTE. Sin commit.
 -- ============================================================
-create extension if not exists "uuid-ossp";
-create extension if not exists "btree_gist";
+create extension if not exists "uuid-ossp" with schema extensions;
+create extension if not exists "btree_gist" with schema extensions;
 
 create table if not exists public.businesses (
   id uuid primary key default gen_random_uuid(),
@@ -70,7 +70,7 @@ create table if not exists public.bookings (
   payment_status text not null default 'pending' check (payment_status in ('pending','paid','refunded')),
   payment_intent_id text,
   cancel_token uuid default gen_random_uuid(),
-  slot_range tsrange generated always as (tsrange(start_at, end_at, '[)')) stored,
+  slot_range tstzrange generated always as (tstzrange(start_at, end_at, '[)')) stored,
   created_at timestamptz default now(),
   exclude using gist (business_id with =, slot_range with &&) where (status in ('confirmed','pending_payment'))
 );
