@@ -14,8 +14,11 @@ import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSw
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null } }
-  static getDerivedStateFromError() { return { hasError: true } }
-  componentDidCatch(error, errorInfo) { this.setState({ error, errorInfo }) }
+  static getDerivedStateFromError(error) { return { hasError: true, error } }
+  componentDidCatch(error, errorInfo) {
+    console.error('HubPanel Error:', error, errorInfo)
+    this.setState({ error, errorInfo })
+  }
   render() {
     if (this.state.hasError) {
       return (
@@ -25,6 +28,12 @@ class ErrorBoundary extends React.Component {
               <HubIcon icon={AlertCircle} size={24} className="w-6 h-6" />
             </div>
             <h2 className="text-lg font-bold text-white mb-2">Ocurrió un inconveniente temporal en el Hub</h2>
+            {this.state.error && (
+              <div className="text-left bg-black/60 border border-red-500/30 rounded-xl p-3 mb-4 text-xs font-mono text-red-400 overflow-auto max-h-48 select-text">
+                <p className="font-bold text-red-300 mb-1">{this.state.error.name}: {this.state.error.message}</p>
+                {this.state.error.stack && <p className="text-[10px] text-zinc-400 whitespace-pre-wrap">{this.state.error.stack.slice(0, 300)}</p>}
+              </div>
+            )}
             <div className="flex items-center justify-center gap-3 mb-4">
               <button type="button" onClick={() => window.location.reload()} className="px-4 py-2 bg-white text-zinc-950 text-xs font-bold rounded-xl hover:bg-zinc-200 transition-colors shadow-xs">Recargar módulo</button>
               <a href="/hub" className="px-4 py-2 bg-zinc-800 text-zinc-300 text-xs font-semibold rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700/50">Volver al Hub</a>
@@ -415,7 +424,7 @@ function HubPanelContent() {
     const activePillar = PILLARS.find((p) => p.label === activeTab)
     const q = globalSearchQuery.trim().toLowerCase()
     return ROUTES.filter((route) => {
-      const okApp = !route.app || !denied.has(route.app)
+      const okApp = !route.app || (denied && typeof denied.has === 'function' ? !denied.has(route.app) : true)
       const okQ = !q ||
         (route.title && route.title.toLowerCase().includes(q)) ||
         (route.description && route.description.toLowerCase().includes(q)) ||
