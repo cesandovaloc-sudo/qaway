@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu } from 'lucide-react'
 import { WHATSAPP_LINK, navItems } from '@/data/navigation'
+import { getAuthUser } from '@/config/auth'
 import { getNavbarLinks } from '@/config/siteVisibility'
 import { useRecordingMode } from '@/config/recordingMode'
 
@@ -89,22 +90,48 @@ export default function Navbar({ variant: explicitVariant }) {
   const variant = explicitVariant || (isTransparentHero ? 'transparent' : contextVariant)
 
   // Visor / reader pages hide the global Navbar for immersive experience
+  // Rutas de auth Academy sin navbar (evita el salto visual entre acceder/registro).
   const isAccederRoute =
     location.pathname === '/academy/app/acceder' ||
-    location.pathname === '/academy/app/acceder/'
+    location.pathname === '/academy/app/acceder/' ||
+    location.pathname === '/academy/app/registro' ||
+    location.pathname === '/academy/app/registro/' ||
+    location.pathname === '/academy/app/recuperar' ||
+    location.pathname === '/academy/app/recuperar/'
 
   if (isAccederRoute || variant === 'hidden') return null
 
   const isProjectDock = variant === 'project-dock'
   const styles = variantStyles[variant] || variantStyles.light
   
+  // Sesión para dropdowns (solo visual; la seguridad real es RLS + ProtectedRoute).
+  const [logged, setLogged] = useState(() => Boolean(getAuthUser()))
+  useEffect(() => {
+    const refresh = () => setLogged(Boolean(getAuthUser()))
+    refresh()
+    window.addEventListener('storage', refresh)
+    window.addEventListener('focus', refresh)
+    return () => {
+      window.removeEventListener('storage', refresh)
+      window.removeEventListener('focus', refresh)
+    }
+  }, [location.pathname])
+
   const visibleLinks = getNavbarLinks()
   const navLinks = visibleLinks.map(vLink => {
-    const isAcademy = vLink.key === 'academy' || vLink.label === 'Academy'
-    const sourceItem = isAcademy ? navItems.find(item => item.label === vLink.label || item.path === vLink.path) : null
+    const sourceItem = navItems.find(item => item.label === vLink.label || item.path === vLink.path)
+    let items = sourceItem?.items || []
+    // Logueado: Acceder/Registrarse se convierten en Mi panel.
+    if (logged && (vLink.key === 'hub' || vLink.key === 'academy')) {
+      const panelPath = vLink.key === 'hub' ? '/hub/panel' : '/academy/app/panel'
+      items = [
+        { label: 'Mi panel', path: panelPath },
+        ...items.filter(i => !/^(acceder|registrarse)$/i.test(i.label)),
+      ]
+    }
     return {
       ...vLink,
-      items: sourceItem?.items || []
+      items,
     }
   })
 

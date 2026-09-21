@@ -19,7 +19,6 @@ export const navItems = [
     path: '/academy',
     items: [
       { label: 'Acceder', path: '/academy/app/acceder' },
-      { label: 'Registrarse', path: '/academy/app/registro' },
       { label: 'Cursos', path: '/academy/app/cursos' },
     ],
   },
@@ -27,11 +26,7 @@ export const navItems = [
     label: 'Qaway Hub',
     path: '/hub',
     items: [
-      { label: 'Ruta Marca', path: '/hub/ruta-marca' },
-      { label: 'Ruta Profesional', path: '/hub/ruta-profesional' },
-      { label: 'Ruta Incubadora', path: '/hub/ruta-incubadora' },
-      { label: 'Herramientas', path: '/hub/herramientas' },
-      { label: 'Dashboards', path: '/hub/dashboards' },
+      { label: 'Acceder', path: '/login?redirect=/hub/panel' },
     ],
   },
   {

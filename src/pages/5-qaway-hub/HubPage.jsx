@@ -449,6 +449,12 @@ export default function HubPage() {
                   </button>
                 )}
               </div>
+              <p className="mt-3 text-sm text-white/70">
+                ¿Ya tienes una cuenta?{' '}
+                <Link to="/login?redirect=/hub/panel" className="font-bold text-white underline underline-offset-2 hover:text-white">
+                  Acceder al Hub →
+                </Link>
+              </p>
             </div>
           </motion.div>
         </div>

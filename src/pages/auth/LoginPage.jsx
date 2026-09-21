@@ -368,10 +368,18 @@ export default function LoginPage() {
               <p className="mt-6 text-center text-sm text-zinc-600">
                 ¿No tienes cuenta?{' '}
                 <a
-                  href="mailto:hola@qaway.pe?subject=Solicitud%20de%20acceso%20al%20Hub"
+                  href="/onboarding"
                   className="text-zinc-400 hover:text-white font-semibold transition-colors"
                 >
-                  Solicita acceso a tu administrador →
+                  Crear cuenta →
+                </a>
+              </p>
+              <p className="mt-2 text-center text-sm text-zinc-600">
+                <a
+                  href="mailto:hola@qaway.pe?subject=Solicitud%20de%20acceso%20al%20Hub"
+                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                >
+                  o solicita acceso a tu administrador
                 </a>
               </p>
 

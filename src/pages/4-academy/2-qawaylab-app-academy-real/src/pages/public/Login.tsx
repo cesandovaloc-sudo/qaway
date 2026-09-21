@@ -91,7 +91,7 @@ export default function Login() {
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ff4b0b] to-[#df3900] inline-flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-[#ff4b0b]/25 mb-4">
           <GraduationCap className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-surface-900 tracking-tight">Qaway Lab · Academy</h1>
+        <h1 className="text-2xl font-bold text-surface-900 tracking-tight">Inicia sesión</h1>
         <p className="mt-1 text-sm text-surface-500">
           Accede a tus cursos, lecciones y certificaciones
         </p>
