@@ -320,9 +320,9 @@ export default function ConfiguracionPanel({
   );
 
   return (
-    <div className="min-h-screen bg-[#f7f8fa] text-slate-900">
+    <div className="min-h-full bg-[#f7f8fa] text-slate-900">
       {/* Top header */}
-      <div className="sticky top-0 z-20 h-16 border-b border-slate-800 bg-[#111314] text-white">
+      <div className="hidden text-white">
         <div className="flex h-full items-center">
           <div className="flex w-[214px] items-center border-r border-white/10 px-4">
             <div>
@@ -376,7 +376,7 @@ export default function ConfiguracionPanel({
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="fixed bottom-0 left-0 top-16 z-10 hidden w-[214px] border-r border-slate-800 bg-[#111314] lg:block">
+        <aside className="hidden w-[214px] border-r border-slate-800 bg-[#111314]">
           <nav className="space-y-1 px-2 py-3">
             {[
               ["Inicio", BarChart3],
@@ -426,7 +426,7 @@ export default function ConfiguracionPanel({
         </aside>
 
         {/* Main */}
-        <main className="min-w-0 flex-1 lg:ml-[214px]">
+        <main className="min-w-0 flex-1">
           <div className="mx-auto max-w-[1510px] px-5 py-5">
             {/* Breadcrumb / heading */}
             <div className="mb-4">

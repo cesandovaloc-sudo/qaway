@@ -101,6 +101,10 @@ const SUPER_ADMIN_NAV = [
   { id: 'Configuracion', label: 'Configuración', icon: Settings },
 ]
 
+// Navegación del Tenant Admin: mismo shell y mismo diseño, solo los módulos permitidos
+// para su empresa (se excluye el listado global de Empresas). No se duplica el panel.
+const TENANT_ADMIN_NAV = SUPER_ADMIN_NAV.filter((nav) => nav.id !== 'Empresas')
+
 // Rutas internas del panel (30.X): mismo archivo, enlace propio por punto.
 // /hub/panel[/empresas|/usuarios|/aplicaciones|/planes|/suscripciones|/pagos|/reportes|/soporte|/configuracion|/marketing|/automatizacion|/ia|/creacion][?q=texto]
 const PANEL_SLUGS = {
@@ -118,6 +122,152 @@ function displayName(email) {
   const base = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
   if (!base) return 'Carlos Sandoval'
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+}
+
+function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
+  const [company, setCompany] = useState(null)
+  const [subs, setSubs] = useState([])
+  const [appNames, setAppNames] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      if (!tenantId) {
+        if (alive) setLoading(false)
+        return
+      }
+      const [tenantRes, subsRes, appsRes] = await Promise.all([
+        supabase.from('tenants').select('name, client_code, status').eq('id', tenantId).maybeSingle(),
+        supabase.from('tenant_app_subscriptions').select('app_id, plan, status').eq('tenant_id', tenantId),
+        supabase.from('app_catalog').select('id, name'),
+      ])
+      if (!alive) return
+      setCompany(tenantRes.data)
+      setSubs(subsRes.data || [])
+      setAppNames(Object.fromEntries((appsRes.data || []).map((a) => [a.id, a.name])))
+      setLoading(false)
+    })()
+    return () => { alive = false }
+  }, [tenantId])
+
+  const activeApps = subs.filter((s) => s.status === 'active')
+  const plans = [...new Set(activeApps.map((s) => s.plan).filter(Boolean))]
+  const statusMeta = {
+    active: ['Activo', 'bg-emerald-50 text-emerald-600'],
+    suspended: ['Suspendido', 'bg-amber-50 text-amber-600'],
+    cancelled: ['Cancelado', 'bg-red-50 text-red-600'],
+  }
+  const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const displayCompany = company?.name || tenantName || 'Mi empresa'
+
+  return (
+    <div className="space-y-6 pb-12">
+      {/* Top Banner / Header Greeting */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
+          <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">{displayCompany}</h1>
+          <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona los usuarios, aplicaciones, suscripciones y soporte de tu empresa desde un solo lugar.</p>
+        </div>
+        <div className="hidden lg:block text-right">
+          <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
+        </div>
+      </div>
+
+      {/* KPIs (misma tarjeta visual que el resumen global) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><HubIcon icon={Building2} size={16} className="w-4 h-4" /></span>
+            <span className="text-xs font-bold text-zinc-500">Código de empresa</span>
+          </div>
+          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : (company?.client_code || '—')}</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
+            <span className="text-xs font-bold text-zinc-500">Aplicaciones contratadas</span>
+          </div>
+          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : subs.length}</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-8 h-8 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0"><HubIcon icon={Zap} size={16} className="w-4 h-4" /></span>
+            <span className="text-xs font-bold text-zinc-500">Aplicaciones activas</span>
+          </div>
+          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : activeApps.length}</div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><HubIcon icon={CreditCard} size={16} className="w-4 h-4" /></span>
+            <span className="text-xs font-bold text-zinc-500">Plan contratado</span>
+          </div>
+          <div className="text-xl font-extrabold text-zinc-950 capitalize truncate">{loading ? '—' : (plans[0] ? plans.join(', ') : '—')}</div>
+        </div>
+      </div>
+
+      {/* Row 2: Apps contratadas + Acciones rápidas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
+          <div className="border-b border-zinc-100 px-5 py-5">
+            <h2 className="text-base font-bold">Aplicaciones contratadas</h2>
+            <p className="mt-1 text-xs text-zinc-500">Estado de tus apps y el plan de cada una.</p>
+          </div>
+          {subs.length === 0 ? (
+            <div className="px-5 py-8 text-center">
+              <p className="text-sm font-semibold text-zinc-600">{loading ? 'Cargando aplicaciones…' : 'Aún no tienes aplicaciones contratadas.'}</p>
+              <button type="button" onClick={() => setActiveTab('Aplicaciones')} className="mt-4 h-10 px-5 rounded-xl bg-[#ff4b0b] text-white text-sm font-bold transition hover:bg-[#e94308]">Ver aplicaciones disponibles</button>
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-50 px-5">
+              {subs.map((sub) => {
+                const [label, classes] = statusMeta[sub.status] || [sub.status, 'bg-zinc-100 text-zinc-600']
+                return (
+                  <div key={sub.app_id} className="flex items-center justify-between py-3.5">
+                    <div className="flex items-center gap-3">
+                      <span className="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-600 flex items-center justify-center shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900">{appNames[sub.app_id] || 'Aplicación'}</p>
+                        <p className="text-[11px] text-zinc-500 capitalize">Plan {sub.plan || '—'}</p>
+                      </div>
+                    </div>
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${classes}`}>{label}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Acciones rápidas */}
+        <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
+          <h2 className="text-base font-bold">Acciones rápidas</h2>
+          <p className="mt-1 text-xs text-zinc-500">Atajos a las secciones de tu panel.</p>
+          <div className="mt-4 flex flex-col gap-2">
+            {[
+              ['Usuarios', Users, 'Administra el equipo de tu empresa'],
+              ['Aplicaciones', LayoutGrid, 'Revisa tus apps contratadas'],
+              ['Suscripciones', Clock, 'Estado y renovaciones'],
+              ['Soporte', HelpCircle, 'Tickets y ayuda'],
+            ].map(([tab, Icon, desc]) => (
+              <button key={tab} type="button" onClick={() => setActiveTab(tab)} className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-left transition-colors hover:border-zinc-300 hover:bg-white">
+                <span className="w-8 h-8 rounded-lg bg-white border border-zinc-200 text-zinc-600 flex items-center justify-center shrink-0"><HubIcon icon={Icon} size={15} className="w-3.5 h-3.5" /></span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-bold text-zinc-900">{tab}</span>
+                  <span className="block text-[11px] text-zinc-500 truncate">{desc}</span>
+                </span>
+                <HubIcon icon={ArrowRight} size={14} className="w-3.5 h-3.5 ml-auto text-zinc-400" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function SuperAdminDashboard({ setActiveTab, navigate }) {
@@ -457,11 +607,34 @@ function HubPanelContent() {
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session || !alive) return
-      const { data: me } = await supabase.from('users').select('tenant_id').eq('id', session.user.id).single()
-      if (alive) setPanelAuth({ session, tenantId: me?.tenant_id || null })
+      const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin').eq('id', session.user.id).single()
+      if (!alive) return
+      const metaIsPlatform = session.user.app_metadata?.role === 'platform_admin' || session.user.user_metadata?.role === 'platform_admin'
+      const dbIsPlatform = me?.role === 'admin' && me?.is_platform_admin === true
+      const isPlatformAdmin = dbIsPlatform || metaIsPlatform
+      const role = isPlatformAdmin
+        ? 'platform_admin'
+        : (me?.role === 'admin' || me?.tenant_id ? 'tenant_admin' : (me?.role || 'user'))
+      let tenantName = null
+      if (me?.tenant_id) {
+        const { data: tenant } = await supabase.from('tenants').select('name').eq('id', me.tenant_id).maybeSingle()
+        tenantName = tenant?.name || null
+      }
+      if (alive) setPanelAuth({ session, tenantId: me?.tenant_id || null, role, isPlatformAdmin, tenantName })
     })()
     return () => { alive = false }
   }, [])
+
+  // Rol resuelto: platform_admin → nav global; tenant_admin → solo módulos de su empresa (mismo shell).
+  const isPlatformAdmin = !panelAuth || panelAuth.isPlatformAdmin
+  const navItems = isPlatformAdmin ? SUPER_ADMIN_NAV : TENANT_ADMIN_NAV
+
+  // Tenant Admin: si la URL apunta a una sección no permitida, se vuelve a Inicio.
+  useEffect(() => {
+    if (!panelAuth || panelAuth.isPlatformAdmin) return
+    if (!TENANT_ADMIN_NAV.some((nav) => nav.id === activeTab)) navigate('/hub/panel')
+  }, [panelAuth, activeTab, navigate])
+
   const name = displayName(authUser?.email)
   const avatar = 'https://i.pravatar.cc/150?img=11'
 
@@ -503,7 +676,7 @@ function HubPanelContent() {
               ) : (
                 <div className="flex flex-col">
                   <span>Qaway <span className="text-[#ff4b0b]">Lab</span></span>
-                  <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">Super Administrador</span>
+                  <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">{isPlatformAdmin ? 'Super Administrador' : 'Administración de empresa'}</span>
                 </div>
               )}
             </span>
@@ -512,7 +685,7 @@ function HubPanelContent() {
 
         {/* NAVIGATION (10 Modules) */}
         <nav className={`flex-1 py-4 ${isSidebarCollapsed ? 'px-2' : 'px-3'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
-          {SUPER_ADMIN_NAV.map((nav) => {
+          {navItems.map((nav) => {
             const Icon = nav.icon
             const isActive = activeTab === nav.id
             return (
@@ -560,7 +733,7 @@ function HubPanelContent() {
             <div className="relative">
               <button type="button" className="flex items-center gap-2 h-9 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-all cursor-pointer">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Qaway Lab (Global)</span>
+                <span>{panelAuth && !panelAuth.isPlatformAdmin ? (panelAuth.tenantName || 'Mi empresa') : 'Qaway Lab (Global)'}</span>
                 <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-white/50" />
               </button>
             </div>
@@ -637,7 +810,7 @@ function HubPanelContent() {
                 <img src={avatar} alt={name} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/10 object-cover" />
                 <div className="hidden lg:flex flex-col justify-center">
                   <span className="text-white text-xs font-bold leading-none">{name}</span>
-                  <span className="text-[10px] text-white/50 leading-none mt-1">Super Administrador</span>
+                  <span className="text-[10px] text-white/50 leading-none mt-1">{isPlatformAdmin ? 'Super Administrador' : 'Administrador de empresa'}</span>
                 </div>
                 <HubIcon icon={ChevronDown} size={16} className={`w-4 h-4 text-white/50 hidden lg:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-white' : ''}`} />
               </button>
@@ -776,8 +949,12 @@ function HubPanelContent() {
                 )}
               </div>
             ) : (
-              /* Dashboard Principal de Super Administrador */
-              <SuperAdminDashboard setActiveTab={goTab} navigate={navigate} />
+              /* Inicio por rol: resumen global (platform_admin) o de la empresa (tenant_admin). Mismo shell. */
+              panelAuth && !panelAuth.isPlatformAdmin ? (
+                <TenantAdminDashboard tenantId={panelAuth.tenantId} tenantName={panelAuth.tenantName} setActiveTab={goTab} />
+              ) : (
+                <SuperAdminDashboard setActiveTab={goTab} navigate={navigate} />
+              )
             )}
           </div>
         </main>
