@@ -13,6 +13,9 @@ import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
 import EmpresasModule from './HubSuperEmpresasModule'
+import UsersModule from './HubSuperUsersModule'
+import AplicacionesModule from './HubsuperAplicacionesModule'
+import PlanesPreciosPage from './HubSuperPlanesPreciosPage'
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null } }
@@ -672,6 +675,36 @@ function HubPanelContent() {
                   <p className="text-sm font-semibold text-zinc-400">Cargando módulo de empresas...</p>
                 </div>
               )
+            ) : activeTab === 'Usuarios' && !globalSearchQuery.trim() ? (
+              /* Sección Usuarios dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              panelAuth ? (
+                <UsersModule
+                  tenantId={panelAuth.tenantId}
+                  session={panelAuth.session}
+                  supabase={supabase}
+                  onInviteUser={() => navigate('/hub/invitar')}
+                  onOpenUser={(user) => user?.id && navigate(`/hub/panel/usuarios?usuario=${user.id}`)}
+                />
+              ) : (
+                <div className="py-24 text-center">
+                  <p className="text-sm font-semibold text-zinc-400">Cargando módulo de usuarios...</p>
+                </div>
+              )
+            ) : activeTab === 'Aplicaciones' && !globalSearchQuery.trim() ? (
+              /* Sección Aplicaciones dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              panelAuth ? (
+                <AplicacionesModule
+                  tenantId={panelAuth.tenantId}
+                  session={panelAuth.session}
+                />
+              ) : (
+                <div className="py-24 text-center">
+                  <p className="text-sm font-semibold text-zinc-400">Cargando módulo de aplicaciones...</p>
+                </div>
+              )
+            ) : activeTab === 'Planes' && !globalSearchQuery.trim() ? (
+              /* Sección Planes y Precios dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <PlanesPreciosPage />
             ) : globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
               /* Explorer Grid de Aplicaciones */
               <div>

@@ -19,5 +19,14 @@
 
 ## Pendiente
 
-- E2E en vivo contra Central con Service Role (caso EPC Contable).
-- Inventario: conectar `user_app_role('inventario')` con `rolePermissions`.
+- E2E en vivo contra Central con Service Role (caso EPC Contable) — **PASS** (rama `main`).
+- Inventario: conectar `user_app_role('inventario')` con `rolePermissions` — **hecho**.
+
+## Caso B (correo ya cuenta Qaway) — edge `invite-user` v2
+
+- `inviteUserByEmail` rechaza correos ya registrados → antes: 500 genérico ("non-2xx").
+- Ahora detecta "already registered" y responde **error claro en español** (HTTP 200 con `{error}`) para que el módulo lo muestre:
+  "X ya es una cuenta de Qaway. Asígnalo desde Usuarios en la empresa destino, o usa otro correo."
+- OBJETIVO: invitar es para quien NO tiene cuenta; usuarios existentes se asignan desde Usuarios. **Sin auto-asignación silenciosa.**
+- **Todos los errores de negocio vuelven HTTP 200 con `{error}` en español** (sesión caducada, solo admin, correo inválido, rol inválido, marca inválida, sin apps, ya es cuenta, correo no enviado) + try/catch final con mensaje — la UI nunca debe mostrar "non-2xx" genérico.
+- **Requiere redeplegar `invite-user`** para surtir efecto en vivo.
