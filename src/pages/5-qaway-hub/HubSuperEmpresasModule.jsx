@@ -205,6 +205,7 @@ function CompanyAvatar({ company }) {
 export default function EmpresasModule({
   tenantId,
   session,
+  isPlatformAdmin = false,
   onCreateCompany,
   onOpenCompany,
   onCompanyAction,
@@ -218,6 +219,15 @@ export default function EmpresasModule({
   const [openMenu, setOpenMenu] = useState(null);
 
   /*
+   * El listado global de empresas es exclusivo del Super Administrador
+   * (panelAuth.isPlatformAdmin — BD users.role='admin' AND is_platform_admin).
+   * El nav del tenant_admin ya excluye la sección; este gate es defensa en
+   * profundidad: sin isPlatformAdmin no se emite la consulta global (que la
+   * RLS de tenants, con la corrección aprobada, deja en is_admin() + tenant).
+   */
+  const canAccess = isPlatformAdmin === true;
+
+  /*
    * Carga de empresas.
    *
    * Se usa select("*") deliberadamente para que el módulo no invente
@@ -228,6 +238,12 @@ export default function EmpresasModule({
     let mounted = true;
 
     async function loadCompanies() {
+      if (!canAccess) {
+        setCompanies([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError("");
 
@@ -285,7 +301,7 @@ export default function EmpresasModule({
     return () => {
       mounted = false;
     };
-  }, [tenantId, session?.user?.id]);
+  }, [canAccess, tenantId, session?.user?.id]);
 
   const filteredCompanies = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -344,6 +360,20 @@ export default function EmpresasModule({
 
   return (
     <div className="min-w-0 space-y-5 font-sans text-zinc-950">
+      {/* Gate: el listado global es exclusivo del Super Administrador */}
+      {!canAccess && (
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-10 text-center">
+          <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-zinc-100 text-zinc-500">
+            <ShieldAlert size={18} />
+          </div>
+          <p className="mt-3 text-sm font-extrabold text-zinc-900">
+            Acceso restringido
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">
+            El listado global de empresas es exclusivo del Super Administrador.
+          </p>
+        </div>
+      )}
       {/* Encabezado */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>

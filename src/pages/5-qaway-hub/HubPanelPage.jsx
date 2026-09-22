@@ -845,6 +845,7 @@ function HubPanelContent() {
                 <EmpresasModule
                   tenantId={panelAuth.tenantId}
                   session={panelAuth.session}
+                  isPlatformAdmin={panelAuth.isPlatformAdmin}
                   onCreateCompany={() => navigate('/hub/bienvenida')}
                   onOpenCompany={(company) => company?.id && navigate(`/hub/panel/empresas?empresa=${company.id}`)}
                 />
@@ -860,6 +861,8 @@ function HubPanelContent() {
                   tenantId={panelAuth.tenantId}
                   session={panelAuth.session}
                   supabase={supabase}
+                  isPlatformAdmin={panelAuth.isPlatformAdmin}
+                  tenantName={panelAuth.tenantName}
                   onInviteUser={() => navigate('/hub/invitar')}
                   onOpenUser={(user) => user?.id && navigate(`/hub/panel/usuarios?usuario=${user.id}`)}
                 />

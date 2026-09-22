@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Search,
   SlidersHorizontal,
@@ -17,22 +18,28 @@ import {
 } from "lucide-react";
 
 /**
- * Qaway Lab — Super Admin / Usuarios
+ * Qaway Lab — Panel / Usuarios (rol + tenant)
  *
  * Acoplamiento:
  * - Este módulo NO contiene router, layout ni autenticación.
  * - El shell del Hub sigue siendo responsabilidad del panel padre.
- * - Recibe tenantId/session y utiliza el cliente Supabase central.
+ * - Recibe el rol resuelto por el panel (isPlatformAdmin) como fuente de
+ *   verdad (BD: users.role='admin' AND is_platform_admin), NO se re-deriva
+ *   aquí a partir del JWT.
  *
  * Props:
  *   tenantId: string
  *   session: object
  *   supabase: cliente Supabase central
- *   onInviteUser?: () => void
- *   onOpenUser?: (user) => void
+ *   isPlatformAdmin: boolean (panelAuth.isPlatformAdmin — BD, no emails)
+ *   tenantName: string (marca del tenant_admin, para la columna Empresa)
+ *   onInviteUser?: () => void (dirige a /hub/invitar)
+ *   onOpenUser?: (user) => void (navega a /hub/panel/usuarios?usuario=id)
  *
- * Si tu cliente Supabase ya está importado de forma central en el proyecto,
- * puedes reemplazar la prop `supabase` por ese import sin modificar la UI.
+ * Soporte de detalle:
+ *   - El deep-link /hub/panel/usuarios?usuario=id resalta y centra la fila
+ *     del usuario en el listado (siempre dentro del alcance permitido: el
+ *     tenant_admin solo puede llegar a usuarios de SU marca vía RLS/filtro).
  */
 
 const PAGE_SIZE = 10;
@@ -53,9 +60,10 @@ const MOCK_USERS = [
 const ROLE_META = {
   "Super Admin": { dot: "#ef4444", bg: "bg-red-50", text: "text-red-500" },
   Admin: { dot: "#3b82f6", bg: "bg-blue-50", text: "text-blue-600" },
-  Usuario: { dot: "#9ca3af", bg: "bg-zinc-100", text: "text-zinc-600" },
   Editor: { dot: "#f59e0b", bg: "bg-amber-50", text: "text-amber-600" },
-  Soporte: { dot: "#8b5cf6", bg: "bg-violet-50", text: "text-violet-600" },
+  Visor: { dot: "#10b981", bg: "bg-emerald-50", text: "text-emerald-600" },
+  Invitado: { dot: "#8b5cf6", bg: "bg-violet-50", text: "text-violet-600" },
+  Usuario: { dot: "#9ca3af", bg: "bg-zinc-100", text: "text-zinc-600" },
 };
 
 function Icon({ children, size = 16, className = "" }) {
@@ -76,7 +84,7 @@ function initials(name = "") {
     .toUpperCase();
 }
 
-function normalizeUser(row) {
+function normalizeUser(row, { tenantName = "", isPlatformAdmin = false } = {}) {
   const fullName =
     row.full_name ||
     row.name ||
@@ -84,30 +92,44 @@ function normalizeUser(row) {
     row.email ||
     "Usuario";
 
+  // Rol real del modelo BD: admin+is_platform_admin = Super Admin (plataforma);
+  // admin con tenant = Admin de marca; editor/viewer/guest = roles de la marca.
+  const role =
+    row.role === "admin"
+      ? row.is_platform_admin
+        ? "Super Admin"
+        : "Admin"
+      : row.role === "editor"
+        ? "Editor"
+        : row.role === "viewer"
+          ? "Visor"
+          : row.role === "guest"
+            ? "Invitado"
+            : row.role || "Usuario";
+
+  const company =
+    row.company_name ||
+    row.tenant_name ||
+    row.company ||
+    row.tenant?.name ||
+    (!isPlatformAdmin && tenantName) ||
+    "—";
+
   return {
     id: row.id,
     name: fullName,
     email: row.email || "—",
-    company:
-      row.company_name ||
-      row.tenant_name ||
-      row.company ||
-      row.tenant?.name ||
-      "—",
-    role:
-      row.role === "platform_admin"
-        ? "Super Admin"
-        : row.role === "tenant_admin"
-          ? "Admin"
-          : row.role || "Usuario",
+    company,
+    role,
     status:
       row.status ||
       (row.is_active === false ? "Inactivo" : "Activo"),
     lastAccess:
+      row.last_active_at ||
       row.last_access ||
-      row.last_sign_in_at ||
       row.updated_at ||
       "—",
+    createdAt: row.created_at || null,
   };
 }
 
@@ -115,10 +137,14 @@ export default function UsersModule({
   tenantId,
   session,
   supabase,
+  isPlatformAdmin = false,
+  tenantName,
   onInviteUser,
   onOpenUser,
 }) {
-  const [users, setUsers] = useState(MOCK_USERS);
+  // Los datos de ejemplo solo aplican en contexto plataforma (listado global).
+  // Un tenant_admin nunca parte de filas ajenas a su marca.
+  const [users, setUsers] = useState(() => (isPlatformAdmin ? MOCK_USERS : []));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -128,16 +154,63 @@ export default function UsersModule({
   const [showFilters, setShowFilters] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
 
+  // Soporte del detalle: deep-link /hub/panel/usuarios?usuario=id
+  const location = useLocation();
+  const [selectedId, setSelectedId] = useState(
+    () => new URLSearchParams(location.search).get("usuario") || ""
+  );
+
+  useEffect(() => {
+    const next = new URLSearchParams(location.search).get("usuario") || "";
+    setSelectedId((prev) => (prev === next ? prev : next));
+  }, [location.search]);
+
+  // Resalta/centra la fila del usuario abierto por el deep-link.
+  useEffect(() => {
+    if (!selectedId || loading) return;
+    if (!users.some((user) => user.id === selectedId)) return;
+    const row = document.getElementById(`user-row-${selectedId}`);
+    row?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [selectedId, users, loading]);
+
+  // Roles disponibles según el contexto: plataforma ve el universo completo;
+  // el tenant_admin ve los roles de SU marca (nunca "Super Admin").
+  const availableRoles = useMemo(
+    () =>
+      isPlatformAdmin
+        ? Object.keys(ROLE_META)
+        : Object.keys(ROLE_META).filter((r) => r !== "Super Admin"),
+    [isPlatformAdmin]
+  );
+
+  useEffect(() => {
+    if (roleFilter !== "Todos" && !availableRoles.includes(roleFilter)) {
+      setRoleFilter("Todos");
+    }
+  }, [roleFilter, availableRoles]);
+
   /*
-   * El Super Admin puede consultar el universo de usuarios.
-   * Si este módulo se monta como Tenant Admin, la consulta queda limitada
-   * por tenant_id. RLS debe ser la autoridad final.
+   * El rol revelado por el panel (panelAuth.isPlatformAdmin) es la fuente
+   * de verdad (BD: users.role='admin' AND is_platform_admin).
+   *   - platform_admin: universo de usuarios (is_admin() en BD).
+   *   - tenant_admin/viewer de marca: SOLO su tenant_id.
+   *   - sin rol ni tenant: no se consulta el universo global.
+   * RLS (users_select_own_or_admin + users_tenant_read) es la autoridad final.
    */
   useEffect(() => {
     let cancelled = false;
 
     async function loadUsers() {
       if (!supabase?.from) return;
+
+      const platform = isPlatformAdmin === true;
+      const canQuery = platform || Boolean(tenantId);
+
+      if (!canQuery) {
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
       setError("");
@@ -148,14 +221,7 @@ export default function UsersModule({
           .select("*")
           .order("created_at", { ascending: false });
 
-        // Para un tenant normal se limita al tenant recibido.
-        // Para Super Admin, el RLS/política central determina el alcance.
-        const isPlatformAdmin =
-          session?.user?.app_metadata?.role === "platform_admin" ||
-          session?.user?.user_metadata?.role === "platform_admin" ||
-          session?.role === "platform_admin";
-
-        if (!isPlatformAdmin && tenantId) {
+        if (!platform) {
           request = request.eq("tenant_id", tenantId);
         }
 
@@ -163,8 +229,27 @@ export default function UsersModule({
 
         if (queryError) throw queryError;
 
-        if (!cancelled && Array.isArray(data)) {
-          setUsers(data.map(normalizeUser));
+        let rows = Array.isArray(data) ? data : [];
+
+        // Plataforma: enriquece la columna Empresa con el nombre real del tenant.
+        if (platform && rows.length) {
+          const tenantIds = [...new Set(rows.map((r) => r.tenant_id).filter(Boolean))];
+          if (tenantIds.length) {
+            const { data: tenants } = await supabase
+              .from("tenants")
+              .select("id, name")
+              .in("id", tenantIds);
+            const nameById = Object.fromEntries(
+              (tenants || []).map((t) => [t.id, t.name])
+            );
+            rows = rows.map((r) =>
+              r.tenant_id ? { ...r, tenant_name: nameById[r.tenant_id] } : r
+            );
+          }
+        }
+
+        if (!cancelled) {
+          setUsers(rows.map((row) => normalizeUser(row, { tenantName, isPlatformAdmin: platform })));
         }
       } catch (err) {
         if (!cancelled) {
@@ -181,7 +266,7 @@ export default function UsersModule({
     return () => {
       cancelled = true;
     };
-  }, [supabase, tenantId, session]);
+  }, [supabase, tenantId, isPlatformAdmin, session, tenantName]);
 
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -336,8 +421,9 @@ export default function UsersModule({
             </h1>
 
             <p className="mt-1 text-sm text-zinc-500">
-              Gestiona los usuarios del ecosistema Qaway Lab. Asigna roles,
-              controla accesos y supervisa su actividad.
+              {isPlatformAdmin
+                ? "Gestiona los usuarios del ecosistema Qaway Lab. Asigna roles, controla accesos y supervisa su actividad."
+                : "Gestiona los usuarios de tu empresa. Asigna roles a tu equipo y controla su actividad."}
             </p>
           </div>
 
@@ -424,7 +510,9 @@ export default function UsersModule({
                       Listado de usuarios
                     </h2>
                     <p className="mt-1 text-sm text-zinc-500">
-                      Administra los usuarios registrados en todas las empresas.
+                      {isPlatformAdmin
+                        ? "Administra los usuarios registrados en todas las empresas."
+                        : "Administra los usuarios registrados de tu empresa."}
                     </p>
                   </div>
 
@@ -473,7 +561,7 @@ export default function UsersModule({
                         className="mt-1 block h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-800 outline-none"
                       >
                         <option>Todos</option>
-                        {Object.keys(ROLE_META).map((role) => (
+                        {availableRoles.map((role) => (
                           <option key={role}>{role}</option>
                         ))}
                       </select>
@@ -560,7 +648,10 @@ export default function UsersModule({
                         return (
                           <tr
                             key={user.id}
-                            className="group transition hover:bg-zinc-50/70"
+                            id={user.id ? `user-row-${user.id}` : undefined}
+                            className={`group transition hover:bg-zinc-50/70 ${
+                              selectedId === user.id ? "bg-amber-50/60" : ""
+                            }`}
                           >
                             <td className="px-5 py-3 md:px-6">
                               <input
@@ -760,7 +851,8 @@ export default function UsersModule({
                 </div>
 
                 <div className="min-w-0 space-y-2.5">
-                  {Object.entries(ROLE_META).map(([role, meta]) => {
+                  {availableRoles.map((role) => {
+                    const meta = ROLE_META[role];
                     const count = roleCounts[role] || 0;
                     const percentage = users.length
                       ? Math.round((count / users.length) * 100)
