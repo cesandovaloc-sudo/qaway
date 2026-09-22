@@ -10,6 +10,7 @@ import { AgentIdentityStudio } from './components/AgentIdentityStudio'
 import { AgentVoiceStudio } from './components/AgentVoiceStudio'
 import { AgentDeploymentStudio } from './components/AgentDeploymentStudio'
 import { AgentExecutiveDashboard } from './components/AgentExecutiveDashboard'
+import { AgentLiveTrainingStudio } from './components/AgentLiveTrainingStudio'
 import { assembleCompleteSystemPrompt } from './services/promptEngine'
 import { supabase } from '@/config/supabase'
 import {
@@ -56,6 +57,7 @@ export default function AgentesHubPage() {
     | 'voice' 
     | 'deploy' 
     | 'dashboard'
+    | 'livetraining'
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('training')
 
@@ -239,6 +241,12 @@ export default function AgentesHubPage() {
       label: 'Despliegue WABA & Web',
       icon: Share2,
       badge: undefined
+    },
+    {
+      key: 'livetraining' as ActiveTab,
+      label: 'Entrenamiento en Vivo',
+      icon: User,
+      badge: activeWorkspace.aiSettings.trainingMode ? 'ACTIVO' : undefined
     }
   ]
 
@@ -511,6 +519,13 @@ export default function AgentesHubPage() {
                 workspace={activeWorkspace}
                 onNavigateTab={tab => setActiveTab(tab)}
                 onRunSimulation={() => setActiveTab('playground')}
+              />
+            )}
+
+            {activeTab === 'livetraining' && (
+              <AgentLiveTrainingStudio
+                workspace={activeWorkspace}
+                onUpdateWorkspace={updateActiveWorkspace}
               />
             )}
           </div>
