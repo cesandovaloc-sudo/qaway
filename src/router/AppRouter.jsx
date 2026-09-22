@@ -75,6 +75,8 @@ const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
 import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
+import InvitarPage from '@/pages/5-qaway-hub/invitar/InvitarPage.jsx'
+import EmpresasPage from '@/pages/5-qaway-hub/empresas/EmpresasPage.jsx'
 import HubOnboardingPage from '@/pages/5-qaway-hub/HubOnboardingPage.jsx'
 import OnboardingPage from '@/pages/5-qaway-hub/onboarding/OnboardingPage.jsx'
 
@@ -381,6 +383,14 @@ export default function AppRouter() {
           <Route
             path="hub/usuarios"
             element={renderRoute('hub', <ProtectedRoute><UsuariosPage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/invitar"
+            element={renderRoute('hub', <ProtectedRoute><InvitarPage /></ProtectedRoute>)}
+          />
+          <Route
+            path="hub/empresas"
+            element={renderRoute('hub', <ProtectedRoute><EmpresasPage /></ProtectedRoute>)}
           />
           <Route
             path="hub/bienvenida"

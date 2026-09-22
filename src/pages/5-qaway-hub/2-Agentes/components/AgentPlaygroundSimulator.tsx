@@ -58,13 +58,16 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
   const [showContextInspector, setShowContextInspector] = useState(false)
   const [lastContextInspection, setLastContextInspection] = useState<ContextInspection | null>(null)
   const [conversationId] = useState(`conv-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`)
+  const [tenantContext, setTenantContext] = useState<TenantContext | null>(null)
   const chatScrollRef = useRef<HTMLDivElement>(null)
 
   // Auditoría en vivo de la configuración
   const complianceAudit = auditPromptCompliance(workspace)
 
   // Context Engine: construir TenantContext una vez por conversación
-  const tenantContext = buildTenantContext(workspace, conversationId, [])
+  useEffect(() => {
+    buildTenantContext(workspace, conversationId, []).then(setTenantContext)
+  }, [workspace, conversationId])
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -75,6 +78,11 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim()
     if (!text) return
+
+    if (!tenantContext) {
+      console.warn('TenantContext no listo aún')
+      return
+    }
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,

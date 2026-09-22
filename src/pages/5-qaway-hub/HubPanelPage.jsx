@@ -9,8 +9,10 @@ import {
   Star, Tag, Target, TrendingUp, User, UserPlus, Users, Wrench, X, Zap,
 } from '@/components/ui/icons/hubIcons'
 import { getAuthUser, logoutUser } from '@/config/auth'
+import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
+import EmpresasModule from './HubSuperEmpresasModule'
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null } }
@@ -302,7 +304,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <div className="space-y-2">
               {[
                 { icon: Building2, title: 'Crear nueva empresa', to: '/hub/bienvenida' },
-                { icon: UserPlus, title: 'Invitar usuario', to: '/hub/usuarios' },
+                { icon: UserPlus, title: 'Invitar usuario', to: '/hub/invitar' },
                 { icon: Tag, title: 'Gestionar planes', tab: 'Planes' },
                 { icon: CreditCard, title: 'Ver suscripciones', tab: 'Suscripciones' },
                 { icon: BarChart3, title: 'Generar reporte', tab: 'Reportes' },
@@ -440,6 +442,18 @@ function HubPanelContent() {
   const searchInputRef = useRef(null)
   const authUser = useMemo(() => getAuthUser(), [])
   const { denied } = useAppAccess()
+  // Contexto real (sesion + tenant) para las vistas que viven dentro del shell (30.X).
+  const [panelAuth, setPanelAuth] = useState(null)
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session || !alive) return
+      const { data: me } = await supabase.from('users').select('tenant_id').eq('id', session.user.id).single()
+      if (alive) setPanelAuth({ session, tenantId: me?.tenant_id || null })
+    })()
+    return () => { alive = false }
+  }, [])
   const name = displayName(authUser?.email)
   const avatar = 'https://i.pravatar.cc/150?img=11'
 
@@ -644,7 +658,21 @@ function HubPanelContent() {
         <main className="flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative">
           <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
           <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1300px] mx-auto">
-            {globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
+            {activeTab === 'Empresas' && !globalSearchQuery.trim() ? (
+              /* Sección Empresas dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              panelAuth ? (
+                <EmpresasModule
+                  tenantId={panelAuth.tenantId}
+                  session={panelAuth.session}
+                  onCreateCompany={() => navigate('/hub/bienvenida')}
+                  onOpenCompany={(company) => company?.id && navigate(`/hub/panel/empresas?empresa=${company.id}`)}
+                />
+              ) : (
+                <div className="py-24 text-center">
+                  <p className="text-sm font-semibold text-zinc-400">Cargando módulo de empresas...</p>
+                </div>
+              )
+            ) : globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
               /* Explorer Grid de Aplicaciones */
               <div>
                 <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-[#fafafa]/90 backdrop-blur-md py-4 -mx-6 px-6 md:-mx-8 md:px-8 border-b border-zinc-200/50 mb-6">

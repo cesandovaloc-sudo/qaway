@@ -35,7 +35,25 @@ export const userService = {
         updated_at: profileData?.updated_at || new Date().toISOString(),
       }
     }
-    return data
+
+    // Rol autoritativo de ESTA app: user_app_roles (SaaS). Si no hay fila
+    // (acceso legacy/plataforma), se conserva users.role (comportamiento actual).
+    let effectiveRole = data.role as UserRole
+    try {
+      const { data: appRole } = await supabase.rpc('user_app_role', { p_app_slug: 'inventario' })
+      const isPlatformAdmin = data.is_platform_admin === true
+      if (appRole && !isPlatformAdmin && ['admin', 'editor', 'viewer', 'guest'].includes(appRole)) {
+        effectiveRole = appRole as UserRole
+      }
+    } catch {
+      // Sin RPC disponible (legacy/offline): mantener users.role.
+    }
+
+    return {
+      ...data,
+      role: effectiveRole,
+      permissions: resolvePermissions(effectiveRole, (data.permissions as Partial<UserPermissions>) || {}),
+    }
   },
 
   // Get all users (admin only)
