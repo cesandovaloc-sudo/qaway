@@ -16,6 +16,11 @@ import EmpresasModule from './HubSuperEmpresasModule'
 import UsersModule from './HubSuperUsersModule'
 import AplicacionesModule from './HubsuperAplicacionesModule'
 import PlanesPreciosPage from './HubSuperPlanesPreciosPage'
+import SuscripcionesPanel from './HubSuperSuscripcionesPanel'
+import PagosPanel from './HubSuperPagosPanel'
+import ReportesPanel from './HubSuperReportesPanel'
+import SupportPanel from './HubSuperSupportPanel'
+import ConfiguracionPanel from './HubSuperConfiguracionPanel'
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null } }
@@ -705,6 +710,21 @@ function HubPanelContent() {
             ) : activeTab === 'Planes' && !globalSearchQuery.trim() ? (
               /* Sección Planes y Precios dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
               <PlanesPreciosPage />
+            ) : activeTab === 'Suscripciones' && !globalSearchQuery.trim() ? (
+              /* Sección Suscripciones dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <SuscripcionesPanel />
+            ) : activeTab === 'Pagos' && !globalSearchQuery.trim() ? (
+              /* Sección Pagos dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <PagosPanel />
+            ) : activeTab === 'Reportes' && !globalSearchQuery.trim() ? (
+              /* Sección Reportes dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <ReportesPanel />
+            ) : activeTab === 'Soporte' && !globalSearchQuery.trim() ? (
+              /* Sección Soporte dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <SupportPanel />
+            ) : activeTab === 'Configuracion' && !globalSearchQuery.trim() ? (
+              /* Sección Configuración dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
+              <ConfiguracionPanel />
             ) : globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
               /* Explorer Grid de Aplicaciones */
               <div>

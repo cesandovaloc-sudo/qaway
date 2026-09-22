@@ -1,6 +1,7 @@
 // Invita personal por correo (Supabase Auth nativo). Solo admins.
-// El invitado fija su password con el link; el trigger lo vincula
-// a marca+rol+apps. Fail-closed. 2026-09-21.
+// Flujo: upsert user_invites → inviteUserByEmail → trigger vincula a marca+rol+apps.
+// Manejo de errores: estados estructurados + mensajes humanos; detalle técnico solo en logs.
+// 2026-09-21.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
@@ -23,9 +24,9 @@ serve(async (req: Request) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
     const siteUrl = Deno.env.get('PUBLIC_SITE_URL') || ''
-    if (!url || !serviceKey || !anonKey || !siteUrl) return json({ error: 'Función sin configurar' })
+    if (!url || !serviceKey || !anonKey || !siteUrl) return json({ error: 'No se pudo enviar la invitación. Intenta nuevamente.' })
 
-    if (req.method !== 'POST') return json({ error: 'Método no permitido' })
+    if (req.method !== 'POST') return json({ error: 'No se pudo enviar la invitación. Intenta nuevamente.' })
 
     const callerClient = createClient(url, anonKey, {
       global: { headers: { Authorization: req.headers.get('Authorization') || '' } },
@@ -39,14 +40,14 @@ serve(async (req: Request) => {
     // Plataforma global vs admin de marca (ver migración platform_vs_brand_admin).
     const isGlobalAdmin = callerRow.role === 'admin' && callerRow.is_platform_admin === true
     const isBrandAdmin = callerRow.role === 'admin' && callerRow.tenant_id !== null
-    if (!isGlobalAdmin && !isBrandAdmin) return json({ error: 'Solo los administradores pueden invitar.' })
+    if (!isGlobalAdmin && !isBrandAdmin) return json({ error: 'No tienes permisos para realizar esta acción.' })
 
     const { email, tenant_id, role = 'viewer', app_slugs = [] } = await req.json()
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) return json({ error: 'Introduce un correo válido.' })
     if (!ROLES.includes(role)) return json({ error: 'Rol inválido.' })
     // Solo el global puede crear otros admin; el de marca invita viewer/editor/guest en SU marca.
     if (!isGlobalAdmin && (role === 'admin' || tenant_id !== callerRow.tenant_id)) {
-      return json({ error: 'Fuera de tu marca o rol no permitido.' })
+      return json({ error: 'No tienes permisos para realizar esta acción.' })
     }
 
     const { data: tenant } = await admin.from('tenants').select('id, status').eq('id', tenant_id).single()
@@ -62,30 +63,45 @@ serve(async (req: Request) => {
       { email: inviteEmail, tenant_id, role, app_slugs: validSlugs, expires_at: new Date(Date.now() + 7 * 864e5).toISOString(), accepted_at: null, created_by: caller.id },
       { onConflict: 'email,tenant_id' },
     )
-    if (invErr) return json({ error: 'No se pudo registrar la invitación.' })
+    if (invErr) return json({ error: 'No se pudo enviar la invitación. Intenta nuevamente.' })
 
     const { error: mailErr } = await admin.auth.admin.inviteUserByEmail(inviteEmail, {
       redirectTo: `${siteUrl}/login`,
     })
 
     if (mailErr) {
-      const detail = `${mailErr.message || ''} ${mailErr.code || ''}`.toLowerCase()
-      const alreadyExists = detail.includes('already registered')
+      // Clasificación por código estructurado (user_already_exists) con respaldo
+      // sobre el texto para versiones del SDK sin código.
+      const code = mailErr.code || ''
+      const detail = `${mailErr.message || ''} ${mailErr.status ?? ''}`.toLowerCase()
+      const alreadyExists = code === 'user_already_exists'
+        || detail.includes('already registered')
+        || detail.includes('already exists')
         || detail.includes('user_already_exists')
         || detail.includes('email taken')
         || detail.includes('duplicate')
 
       if (alreadyExists) {
-        // Fallo informativo: el correo ya es cuenta Qaway. Invitar es para quien
-        // NO tiene cuenta; un usuario existente se asigna desde Usuarios.
-        return json({ error: `${inviteEmail} ya es una cuenta de Qaway. Asígnalo desde Usuarios en la empresa destino, o usa otro correo.` })
+        // Sin segunda invitación ni cuenta nueva: el correo ya pertenece a Qaway.
+        // Se elimina la fila de invitación huérfana (no habrá envío a un existente).
+        await admin.from('user_invites').delete().eq('email', inviteEmail).eq('tenant_id', tenant_id)
+
+        const { data: existingUser } = await admin.from('users').select('id, tenant_id').eq('email', inviteEmail).maybeSingle()
+        if (existingUser) {
+          const { data: roleRows } = await admin.from('user_app_roles').select('id').eq('user_id', existingUser.id).eq('tenant_id', tenant_id).limit(1)
+          const alreadyMember = existingUser.tenant_id === tenant_id || (roleRows && roleRows.length > 0)
+          if (alreadyMember) return json({ status: 'already_member' })
+        }
+        return json({ status: 'existing_account' })
       }
 
-      return json({ error: 'No se pudo enviar el correo de invitación.' })
+      console.error('[invite-user] email_error', JSON.stringify({ email: inviteEmail, code: mailErr.code || null, status: mailErr.status || null, message: mailErr.message || null }))
+      return json({ error: 'No se pudo enviar la invitación. Intenta nuevamente.' })
     }
 
     return json({ ok: true })
   } catch (err) {
-    return json({ error: `Ocurrió un error inesperado: ${(err as Error).message || 'inténtalo de nuevo'}` })
+    console.error('[invite-user] unexpected', (err as Error)?.message || String(err))
+    return json({ error: 'Ocurrió un error inesperado. Intenta nuevamente.' })
   }
 })

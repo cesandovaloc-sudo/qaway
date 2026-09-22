@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   BarChart3,
@@ -19,6 +19,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { supabase } from "@/config/supabase";
 
 /**
  * AplicacionesModule
@@ -269,6 +270,12 @@ function DonutChart({ apps }) {
   );
 }
 
+const PLAN_LABEL = { basico: "Básico", intermedio: "Intermedio", premium: "Premium" };
+
+const EXTRA_META = {
+  blog: { description: "Contenido y publicaciones digitales.", icon: BookOpen, tone: "slate" },
+};
+
 export default function AplicacionesModule({ tenantId, session }) {
   const [apps, setApps] = useState(INITIAL_APPS);
   const [query, setQuery] = useState("");
@@ -278,6 +285,75 @@ export default function AplicacionesModule({ tenantId, session }) {
   const [showFilters, setShowFilters] = useState(false);
   const [showNewApp, setShowNewApp] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      const { data: catalog, error: catalogError } = await supabase
+        .from("app_catalog")
+        .select("id, slug, name")
+        .order("name");
+      const { data: subs, error: subsError } = await supabase
+        .from("tenant_app_subscriptions")
+        .select("app_id, plan, status, updated_at");
+
+      if (!mounted || catalogError || subsError) return;
+
+      const activeByApp = {};
+      const planByApp = {};
+      const latestByApp = {};
+      (subs || []).forEach((s) => {
+        activeByApp[s.app_id] = (activeByApp[s.app_id] || 0) + 1;
+        if (!planByApp[s.app_id]) planByApp[s.app_id] = s.plan;
+        const t = s.updated_at;
+        if (t && (!latestByApp[s.app_id] || new Date(t) > new Date(latestByApp[s.app_id])))
+          latestByApp[s.app_id] = t;
+      });
+
+      const merged = INITIAL_APPS.map((app) => {
+        const row = (catalog || []).find((c) => c.slug === app.slug);
+        const id = row?.id || app.id;
+        return {
+          ...app,
+          id,
+          activeCompanies: activeByApp[id] ?? app.activeCompanies,
+          basePlan: planByApp[id] ? PLAN_LABEL[planByApp[id]] || planByApp[id] : app.basePlan,
+          updatedAt: latestByApp[id]
+            ? new Date(latestByApp[id]).toLocaleDateString("es-PE", { day: "numeric", month: "short" })
+            : app.updatedAt,
+        };
+      });
+
+      const extra = (catalog || [])
+        .filter((c) => !INITIAL_APPS.some((a) => a.slug === c.slug))
+        .map((c) => {
+          const meta = EXTRA_META[c.slug];
+          return {
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            description: meta?.description || "Aplicación del ecosistema Qaway Lab.",
+            status: activeByApp[c.id] ? "active" : "development",
+            activeCompanies: activeByApp[c.id] || 0,
+            basePlan: planByApp[c.id] ? PLAN_LABEL[planByApp[c.id]] || planByApp[c.id] : "Intermedio",
+            updatedAt: latestByApp[c.id]
+              ? new Date(latestByApp[c.id]).toLocaleDateString("es-PE", { day: "numeric", month: "short" })
+              : "—",
+            icon: meta?.icon || Link2,
+            tone: meta?.tone || "slate",
+          };
+        });
+
+      if (!mounted) return;
+      if (extra.length) setApps(extra.concat(merged));
+      else setApps(merged);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const pageSize = 8;
 

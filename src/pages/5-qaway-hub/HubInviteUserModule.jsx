@@ -34,6 +34,7 @@ export default function InviteUserModule({
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(null);
   // Super Admin elige la empresa destino; Tenant Admin queda atado a la suya.
   const [inviteTenantId, setInviteTenantId] = useState(tenantId || null);
   const [inviteTenantName, setInviteTenantName] = useState(tenantName || null);
@@ -126,6 +127,7 @@ export default function InviteUserModule({
 
   async function sendInvite() {
     setError("");
+    setNotice(null);
 
     if (!inviteTenantId) return setError("Selecciona la empresa destino de la invitación.");
     if (!session?.user) return setError("Tu sesión no está disponible.");
@@ -146,12 +148,34 @@ export default function InviteUserModule({
       }
     );
 
-    if (invokeError || data?.error) {
-      setError(
-        data?.error ||
-        invokeError?.message ||
-        "No se pudo enviar la invitación."
-      );
+    if (invokeError && !data?.error && !data?.status) {
+      setError("Ocurrió un error inesperado. Intenta nuevamente.");
+      setSending(false);
+      return;
+    }
+
+    if (data?.status === "existing_account") {
+      setNotice({
+        title: "Esta cuenta ya existe en Qaway",
+        body: "El correo ingresado ya tiene una cuenta registrada. No es necesario crear otra cuenta.",
+      });
+      setSending(false);
+      setStep(4);
+      return;
+    }
+
+    if (data?.status === "already_member") {
+      setNotice({
+        title: "Este usuario ya pertenece a esta empresa",
+        body: "Ya tiene acceso asignado dentro de esta empresa. Revisa Usuarios si necesitas ajustar su rol o aplicaciones.",
+      });
+      setSending(false);
+      setStep(4);
+      return;
+    }
+
+    if (data?.error) {
+      setError(data.error);
       setSending(false);
       return;
     }
@@ -471,6 +495,13 @@ export default function InviteUserModule({
                 </div>
               </div>
             </section>
+          )}
+
+          {notice && (
+            <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
+              <p className="text-xs font-extrabold text-blue-800">{notice.title}</p>
+              <p className="mt-1 text-xs leading-5 text-blue-700">{notice.body}</p>
+            </div>
           )}
 
           {error && (
