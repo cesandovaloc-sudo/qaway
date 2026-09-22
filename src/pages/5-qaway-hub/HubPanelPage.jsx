@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { HubIcon } from '@/components/ui/icons'
 import {
   AlertCircle, ArrowRight, BarChart3, Bell, Bot, Briefcase, Building2, Calendar, ChevronDown, Clock, CreditCard,
@@ -91,6 +91,18 @@ const SUPER_ADMIN_NAV = [
   { id: 'Configuracion', label: 'Configuración', icon: Settings },
 ]
 
+// Rutas internas del panel (30.X): mismo archivo, enlace propio por punto.
+// /hub/panel[/empresas|/usuarios|/aplicaciones|/planes|/suscripciones|/pagos|/reportes|/soporte|/configuracion|/marketing|/automatizacion|/ia|/creacion][?q=texto]
+const PANEL_SLUGS = {
+  Inicio: '', Empresas: 'empresas', Usuarios: 'usuarios', Aplicaciones: 'aplicaciones',
+  Planes: 'planes', Suscripciones: 'suscripciones', Pagos: 'pagos', Reportes: 'reportes',
+  Soporte: 'soporte', Configuracion: 'configuracion', Todas: '',
+  Marketing: 'marketing', Automatizacion: 'automatizacion', IA: 'ia', 'Creacion de Contenido': 'creacion',
+}
+const PANEL_TABS = Object.fromEntries(
+  Object.entries(PANEL_SLUGS).filter(([, s]) => s).map(([t, s]) => [s, t]),
+)
+
 function displayName(email) {
   if (!email) return 'Carlos Sandoval'
   const base = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
@@ -98,7 +110,7 @@ function displayName(email) {
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
-function SuperAdminDashboard({ setActiveTab }) {
+function SuperAdminDashboard({ setActiveTab, navigate }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner / Header Greeting */}
@@ -289,13 +301,13 @@ function SuperAdminDashboard({ setActiveTab }) {
             </div>
             <div className="space-y-2">
               {[
-                { icon: Building2, title: 'Crear nueva empresa' },
-                { icon: UserPlus, title: 'Invitar usuario' },
-                { icon: Tag, title: 'Gestionar planes' },
-                { icon: CreditCard, title: 'Ver suscripciones' },
-                { icon: BarChart3, title: 'Generar reporte' },
+                { icon: Building2, title: 'Crear nueva empresa', to: '/hub/bienvenida' },
+                { icon: UserPlus, title: 'Invitar usuario', to: '/hub/usuarios' },
+                { icon: Tag, title: 'Gestionar planes', tab: 'Planes' },
+                { icon: CreditCard, title: 'Ver suscripciones', tab: 'Suscripciones' },
+                { icon: BarChart3, title: 'Generar reporte', tab: 'Reportes' },
               ].map((act, i) => (
-                <button key={i} className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/80 text-left transition-colors text-xs font-semibold text-zinc-800 group">
+                <button key={i} onClick={() => (act.to ? navigate(act.to) : setActiveTab(act.tab))} className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/80 text-left transition-colors text-xs font-semibold text-zinc-800 group">
                   <span className="w-7 h-7 rounded-lg bg-white border border-zinc-200/60 flex items-center justify-center text-zinc-600 group-hover:text-zinc-950 transition-colors shadow-2xs">
                     <HubIcon icon={act.icon} size={14} className="w-3.5 h-3.5" />
                   </span>
@@ -357,7 +369,7 @@ function SuperAdminDashboard({ setActiveTab }) {
             <h3 className="text-base font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
             <p className="text-xs text-zinc-500 mt-0.5">Estado general de las aplicaciones en todas las empresas.</p>
           </div>
-          <button onClick={() => setActiveTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
+          <button onClick={() => goTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
             Gestionar aplicaciones <HubIcon icon={ArrowRight} size={14} className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -401,11 +413,30 @@ function SuperAdminDashboard({ setActiveTab }) {
 
 function HubPanelContent() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState('Inicio')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(() => {
+    const seg = (location.pathname.split('/').filter(Boolean).pop() || '').toLowerCase()
+    if (!seg || seg === 'panel') return 'Inicio'
+    return PANEL_TABS[seg] || 'Inicio'
+  })
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [globalSearchQuery, setGlobalSearchQuery] = useState('')
+  const [globalSearchQuery, setGlobalSearchQuery] = useState(
+    () => new URLSearchParams(location.search).get('q') || '',
+  )
+  // Navegación con enlace: cada punto actualiza la ruta (push normal para que Atrás funcione).
+  const goTab = (t) => {
+    setActiveTab(t)
+    const slug = PANEL_SLUGS[t]
+    navigate(slug ? `/hub/panel/${slug}` : '/hub/panel')
+  }
+  // Atrás/Adelante del navegador: el tab sigue a la URL (el estado inicial solo corre al montar).
+  useEffect(() => {
+    const seg = (location.pathname.split('/').filter(Boolean).pop() || '').toLowerCase()
+    const tab = !seg || seg === 'panel' ? 'Inicio' : (PANEL_TABS[seg] || 'Inicio')
+    setActiveTab((prev) => (prev === tab ? prev : tab))
+  }, [location.pathname])
   const searchInputRef = useRef(null)
   const authUser = useMemo(() => getAuthUser(), [])
   const { denied } = useAppAccess()
@@ -442,7 +473,7 @@ function HubPanelContent() {
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
         {/* LOGO */}
-        <button onClick={() => setActiveTab('Inicio')} className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full text-left`}>
+        <button onClick={() => goTab('Inicio')} className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full text-left`}>
           <div className="flex items-center gap-3">
             <span className="font-bold text-white tracking-wide text-lg leading-tight">
               {isSidebarCollapsed ? (
@@ -465,7 +496,7 @@ function HubPanelContent() {
             return (
               <button
                 key={nav.id}
-                onClick={() => setActiveTab(nav.id)}
+                onClick={() => goTab(nav.id)}
                 title={isSidebarCollapsed ? nav.label : ''}
                 className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-xl text-xs font-semibold transition-all w-full text-left ${isActive ? 'bg-[#ff4b0b] text-white shadow-lg shadow-[#ff4b0b]/20 font-bold' : 'text-white/65 hover:text-white hover:bg-white/5'}`}
               >
@@ -618,17 +649,17 @@ function HubPanelContent() {
               <div>
                 <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-[#fafafa]/90 backdrop-blur-md py-4 -mx-6 px-6 md:-mx-8 md:px-8 border-b border-zinc-200/50 mb-6">
                   {PILLARS.map((p) => (
-                    <button key={p.label} onClick={() => setActiveTab(p.label)}
+                    <button key={p.label} onClick={() => goTab(p.label)}
                       className={`h-9 px-4 rounded-xl text-sm font-semibold border transition-all duration-300 outline-none focus:outline-none focus:ring-0 select-none [-webkit-tap-highlight-color:transparent] ${activeTab === p.label ? 'bg-zinc-950 text-white border-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'}`}>{p.label}</button>
                   ))}
-                  <button onClick={() => setActiveTab('Inicio')} className="ml-auto text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1">
+                  <button onClick={() => goTab('Inicio')} className="ml-auto text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1">
                     ← Volver a Inicio
                   </button>
                 </div>
                 {filtered.length === 0 ? (
                   <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-8 text-center">
                     <p className="text-[15px] font-semibold text-zinc-900">Sin resultados</p>
-                    <button onClick={() => { setGlobalSearchQuery(''); setActiveTab('Inicio') }} className="mt-4 h-10 px-5 rounded-full bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
+                    <button onClick={() => { setGlobalSearchQuery(''); goTab('Inicio') }} className="mt-4 h-10 px-5 rounded-full bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -665,7 +696,7 @@ function HubPanelContent() {
               </div>
             ) : (
               /* Dashboard Principal de Super Administrador */
-              <SuperAdminDashboard setActiveTab={setActiveTab} />
+              <SuperAdminDashboard setActiveTab={goTab} navigate={navigate} />
             )}
           </div>
         </main>

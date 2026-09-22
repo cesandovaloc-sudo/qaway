@@ -6,6 +6,7 @@ import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage'
+import RegisterPage from '@/pages/auth/RegisterPage'
 import {
   EstudioPage,
   EstudioLayout,
@@ -400,10 +401,10 @@ export default function AppRouter() {
           element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
         />
         {/* Hub Panel portada (carcasa CRM, sin navbar/footer públicos) */}
-        <Route
-          path="hub/panel"
-          element={renderRoute('hub', <ProtectedRoute><HubPanelPage /></ProtectedRoute>)}
-        />
+          <Route
+            path="hub/panel/*"
+            element={renderRoute('hub', <ProtectedRoute><HubPanelPage /></ProtectedRoute>)}
+          />
         <Route element={<Layout />}>
           <Route index element={<InicioPage />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
@@ -579,6 +580,7 @@ export default function AppRouter() {
 
         <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
         <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
+        <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
       </Suspense>

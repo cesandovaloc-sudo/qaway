@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { isSuperAdmin } from '@/config/auth'
@@ -218,6 +218,22 @@ export default function LoginPage() {
               <div className="mb-8 text-center lg:text-left">
                 <h2 className="text-3xl font-black text-white mb-2">Iniciar Sesión</h2>
                 <p className="text-zinc-400">Ingresa al ecosistema de trabajo Qaway Lab.</p>
+              </div>
+
+              {/* Selector: Iniciar Sesión / Crear Cuenta (como Academy, estilo Hub) */}
+              <div className="flex bg-zinc-900 p-1 rounded-2xl border border-zinc-800 mb-6">
+                <button
+                  type="button"
+                  className="flex-1 py-2.5 text-xs font-bold rounded-xl bg-white text-black shadow-sm"
+                >
+                  Iniciar Sesión
+                </button>
+                <Link
+                  to={redirectTarget && redirectTarget !== '/hub' ? `/registrarse?redirect=${encodeURIComponent(redirectTarget)}` : '/registrarse'}
+                  className="flex-1 py-2.5 text-xs font-bold rounded-xl text-zinc-500 hover:text-white text-center"
+                >
+                  Crear Cuenta
+                </Link>
               </div>
 
               {/* OAuth */}
