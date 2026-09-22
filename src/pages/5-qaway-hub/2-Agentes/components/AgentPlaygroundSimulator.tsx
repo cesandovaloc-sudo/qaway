@@ -6,7 +6,7 @@ import {
   auditPromptCompliance,
   assemblePromptWithContext
 } from '../services/promptEngine'
-import { buildTenantContext, buildContextForTurn, createContextInspection } from '../services/contextEngine'
+import { buildTenantContext, buildContextForTurn, createContextInspection, DEMO_VECTOR_768 } from '../services/contextEngine'
 import {
   Send,
   RotateCcw,
@@ -61,12 +61,22 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
   const [tenantContext, setTenantContext] = useState<TenantContext | null>(null)
   const chatScrollRef = useRef<HTMLDivElement>(null)
 
+  // Mapeo de workspace.id demo → tenant_id real (según BD Central)
+  const WORKSPACE_TO_TENANT: Record<string, string> = {
+    'tenant-qaway-master': '00000000-0000-0000-0000-000000000001',      // qaway-lab
+    'tenant-coravet': '06bacf31-6699-4ef5-9843-e58b835c6b2b',          // coravet
+    'tenant-vallet': '00000000-0000-0000-0000-000000000003',           // vallet-inmobiliaria (placeholder)
+  }
+
   // Auditoría en vivo de la configuración
   const complianceAudit = auditPromptCompliance(workspace)
 
   // Context Engine: construir TenantContext una vez por conversación
   useEffect(() => {
-    buildTenantContext(workspace, conversationId, []).then(setTenantContext)
+    const tenantId = WORKSPACE_TO_TENANT[workspace.id]
+    if (tenantId) {
+      buildTenantContext(tenantId, workspace, conversationId, []).then(setTenantContext)
+    }
   }, [workspace, conversationId])
 
   useEffect(() => {

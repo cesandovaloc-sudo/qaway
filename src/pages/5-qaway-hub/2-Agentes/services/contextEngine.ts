@@ -8,64 +8,48 @@ import {
   KnowledgeItem,
   FaqItem
 } from '../types/agent.types'
+import { supabase } from '@/config/supabase'
 
 /**
  * CONTEXT ENGINE
  * 
  * Recupera contexto selectivo por tenant resuelto.
  * TenantContext es OBLIGATORIO - no hay fallback a workspace global.
- * Vector store es implementación intercambiable (mock por ahora).
+ * Vector store: en Fase 1 usa RPC real search_unified_context con vector demo determinista.
+ * En Fase 2+ usa pgvector real via Edge Function generate-embeddings.
  */
 
 const DEFAULT_TOP_K = 3
 const DEFAULT_MEMORY_TURNS = 8
 
-function buildMockVectorIndex(workspace: TenantAgentWorkspace) {
-  const allItems: VectorSearchResult[] = [
-    ...workspace.knowledgeBase.map((k: KnowledgeItem) => ({
-      id: k.id,
-      title: k.title,
-      category: k.category,
-      description: k.description,
-      referencePrice: k.referencePrice,
-      score: 0,
-      source: 'knowledgeBase' as const
-    })),
-    ...workspace.faqs.map((f: FaqItem) => ({
-      id: f.id,
-      title: f.question,
-      category: 'FAQ',
-      description: f.answer,
-      score: 0,
-      source: 'faqs' as const
-    }))
-  ]
+// Vector demo DETERMINISTA (768 dims, idéntico al seed SQL)
+export const DEMO_VECTOR_768 = new Array(768).fill(0.01)
 
-  return {
-    async search(query: string, options?: { topK?: number }): Promise<VectorSearchResult[]> {
-      const topK = options?.topK ?? DEFAULT_TOP_K
-      const lowerQuery = query.toLowerCase()
+async function searchUnifiedContext(
+  tenantId: string,
+  query: string,
+  topK: number
+): Promise<VectorSearchResult[]> {
+  const { data, error } = await supabase.rpc('search_unified_context', {
+    p_tenant_id: tenantId,
+    p_query_embedding: DEMO_VECTOR_768,
+    p_top_k: topK,
+  })
 
-      const scored = allItems.map(item => {
-        let score = 0
-        const searchableText = `${item.title} ${item.category} ${item.description}`.toLowerCase()
-
-        const queryWords = lowerQuery.split(' ').filter(w => w.length > 2)
-        for (const word of queryWords) {
-          if (searchableText.includes(word)) score += 1
-          if (item.title.toLowerCase().includes(word)) score += 2
-          if (item.category.toLowerCase().includes(word)) score += 1.5
-        }
-
-        return { ...item, score }
-      })
-
-      return scored
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, topK)
-    }
+  if (error) {
+    console.warn('[ContextEngine] search_unified_context error:', error.message)
+    return []
   }
+
+  return (data || []).map(r => ({
+    id: r.id,
+    title: r.title,
+    category: r.category || 'general',
+    description: r.content,
+    referencePrice: r.reference_price,
+    score: r.similarity,
+    source: r.source
+  }))
 }
 
 function buildAllowedTools(workspace: TenantAgentWorkspace): ToolDefinition[] {
@@ -143,16 +127,20 @@ function buildConversationMemory(
 }
 
 export async function buildTenantContext(
+  tenantId: string,
   workspace: TenantAgentWorkspace,
   conversationId: string,
   conversationHistory: Array<{ role: 'user' | 'agent'; content: string; timestamp: number }>
 ): Promise<TenantContext> {
+  if (!tenantId) {
+    throw new Error('TenantContext requiere tenantId real (public.get_auth_tenant_id())')
+  }
   if (!workspace || !workspace.id) {
-    throw new Error('TenantContext requiere workspace válido con tenantId')
+    throw new Error('TenantContext requiere workspace válido')
   }
 
   return {
-    tenantId: workspace.id,
+    tenantId,
     config: {
       agentName: workspace.agentName,
       tone: workspace.tone,
@@ -165,12 +153,16 @@ export async function buildTenantContext(
         human_handoff_keywords: workspace.aiSettings.human_handoff_keywords || []
       }
     },
-    knowledgeIndex: buildMockVectorIndex(workspace),
+    knowledgeIndex: {
+      async search(query: string, options?: { topK?: number }): Promise<VectorSearchResult[]> {
+        return searchUnifiedContext(tenantId, query, options?.topK ?? DEFAULT_TOP_K)
+      }
+    },
     memory: buildConversationMemory(conversationId, conversationHistory),
     allowedTools: buildAllowedTools(workspace),
     rlsContext: {
       userId: `user-${conversationId}`,
-      tenantId: workspace.id
+      tenantId
     }
   }
 }

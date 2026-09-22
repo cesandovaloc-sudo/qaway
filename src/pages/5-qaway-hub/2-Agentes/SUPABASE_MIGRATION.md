@@ -1,9 +1,9 @@
 # MIGRACIÓN SUPABASE — Agentes de IA Responsable (Multi-Tenant)
 
 **Para:** Agente Supabase / Database Engineer  
-**Versión:** 1.0 — Septiembre 2026  
+**Versión:** 1.1 — Septiembre 2026  
 **Contexto:** Hub Qaway Lab — Módulo 2-Agentes  
-**Objetivo:** Persistencia real + RLS estricto + pgvector para RAG + Webhook WhatsApp
+**Objetivo:** Persistencia real + RLS estricto (public.get_auth_tenant_id()) + pgvector para RAG + Webhook WhatsApp
 
 ---
 
@@ -77,11 +77,11 @@ CREATE TABLE IF NOT EXISTS conversations (
   closed_at TIMESTAMPTZ
 );
 
--- RLS: Cada tenant solo ve sus conversaciones
+-- RLS: Cada tenant solo ve sus conversaciones (usa public.get_auth_tenant_id() security definer)
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_conversations" ON conversations
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_conversations_tenant ON conversations(tenant_id);
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS messages (
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_messages" ON messages
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS message_embeddings (
   message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
   conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   content TEXT NOT NULL, -- texto original para referencia
-  embedding VECTOR(768), -- dimensión según modelo (Gemini 768, OpenAI 1536)
+  embedding VECTOR(768), -- dimensión 768 (Gemini text-embedding-004)
   metadata JSONB DEFAULT '{}'::jsonb, -- {type: 'user'|'agent', topic: '...'}
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS message_embeddings (
 ALTER TABLE message_embeddings ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_embeddings" ON message_embeddings
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 -- Índice vectorial (HNSW para búsqueda aproximada rápida)
 CREATE INDEX IF NOT EXISTS idx_message_embeddings_vector 
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
   reference_price TEXT,
   source_url TEXT,
   embedding VECTOR(768),
-  metadata JSONB DEFAULT '{}'::jsonb, -- {tags: [], priority: 1, ...}
+  metadata JSONB DEFAULT '{}'::jsonb, -- {tags: [], priority: 1, is_demo: boolean}
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS knowledge_base (
 ALTER TABLE knowledge_base ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_kb" ON knowledge_base
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 -- Índice vectorial
 CREATE INDEX IF NOT EXISTS idx_kb_embedding 
@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS faqs (
 ALTER TABLE faqs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_faqs" ON faqs
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 CREATE INDEX IF NOT EXISTS idx_faqs_embedding 
   ON faqs USING hnsw (embedding vector_cosine_ops);
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS golden_examples (
 ALTER TABLE golden_examples ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_golden" ON golden_examples
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 CREATE INDEX IF NOT EXISTS idx_golden_tenant ON golden_examples(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_golden_approved ON golden_examples(tenant_id, is_approved);
@@ -242,7 +242,7 @@ CREATE TABLE IF NOT EXISTS correction_logs (
 ALTER TABLE correction_logs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_corrections" ON correction_logs
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 CREATE INDEX IF NOT EXISTS idx_corrections_tenant ON correction_logs(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_corrections_status ON correction_logs(tenant_id, status);
@@ -266,7 +266,7 @@ CREATE TABLE IF NOT EXISTS stress_test_results (
 ALTER TABLE stress_test_results ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_stress" ON stress_test_results
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 CREATE INDEX IF NOT EXISTS idx_stress_tenant ON stress_test_results(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_stress_result ON stress_test_results(tenant_id, result);
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS training_sessions (
 ALTER TABLE training_sessions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "tenant_isolation_training" ON training_sessions
-  FOR ALL USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+  FOR ALL USING (tenant_id = public.get_auth_tenant_id());
 
 CREATE INDEX IF NOT EXISTS idx_training_tenant ON training_sessions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_training_status ON training_sessions(tenant_id, status);
@@ -619,15 +619,15 @@ Procesa CSV/JSON exportado de CRM anterior:
 | Tabla | Policy | Condición |
 |-------|--------|-----------|
 | `tenants` | Solo owners/admins | `auth.uid() IN (SELECT supervisor_ids FROM tenants WHERE id = tenants.id)` |
-| `conversations` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `messages` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `message_embeddings` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `knowledge_base` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `faqs` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `golden_examples` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `correction_logs` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `stress_test_results` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
-| `training_sessions` | Tenant isolation | `tenant_id = current_setting('app.current_tenant_id')::uuid` |
+| `conversations` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `messages` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `message_embeddings` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `knowledge_base` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `faqs` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `golden_examples` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `correction_logs` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `stress_test_results` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
+| `training_sessions` | Tenant isolation | `tenant_id = public.get_auth_tenant_id()` |
 
 **Crítico:** En Edge Functions, **SIEMPRE** hacer:
 ```typescript
@@ -639,32 +639,49 @@ await supabase.rpc('set_config', {
 ```
 Antes de cualquier query.
 
+**Nota:** `public.get_auth_tenant_id()` es security definer y resuelve el tenant del JWT sin confiar en input del cliente. El GUC `app.current_tenant_id` solo se usa DENTRO de Edge Functions con rol de servicio (SET LOCAL antes de cada query). Tu app/cliente NUNCA setea GUCs; tu frontend habla con su sesión normal.
+
 ---
 
 ## 7. MIGRACIÓN DE DATOS INICIALES (Seeds)
 
+**Tenants REALES (ya existen en BD Central — NO crear):**
+| Tenant | UUID | slug |
+|--------|------|------|
+| Qaway Lab | `00000000-0000-0000-0000-000000000001` | `qaway-lab` |
+| CoraVet | `06bacf31-6699-4ef5-9843-e58b835c6b2b` | `coravet` |
+| Estudio Contable | *(existe)* | `epc-contable` |
+| Vallet Inmobiliaria | *(existe)* | `vallet-inmobiliaria` |
+
+**Seeds DEMO (solo en `qaway-lab` / `00000000-0000-0000-0000-000000000001`):**
 ```sql
--- Insertar tenants semilla (ya existen en defaultAgents.ts)
-INSERT INTO tenants (id, slug, name, industry, ai_settings, agent_config) VALUES
--- Qaway Master
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'qaway-lab', 'Qaway Lab Digital (Master)', 'Tecnología, SaaS y Sistemas Web',
-  '{"enabled":true,"provider":"gemini","model":"gemini-2.5-flash","mode":"managed","temperature":0.3,"waba_phone_number_id":"10987654321","human_handoff_keywords":["humano","asesor","queja"],"training_mode":false,"supervisor_ids":["leo-sandoval"],"llm_provider":"gemini"}'::jsonb,
-  '{"agent_name":"QawayBot Consultor","tone":"ejecutivo_formal","role":"consultoria_ventas","welcome_greeting":"¡Hola! Soy el Asistente Virtual Oficial de Qaway Lab Digital (IA). ¿En qué proyecto o solución digital podemos orientarte hoy?","handover_message":"He registrado tu solicitud...","channel":"whatsapp"}'::jsonb
-),
--- CoraVet
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'coravet', 'CoraVet Clínica Veterinaria', 'Salud Animal y Pet Shop',
-  '{"enabled":true,"provider":"gemini","model":"gemini-2.5-flash","mode":"managed","temperature":0.25,"waba_phone_number_id":"10987654322","human_handoff_keywords":["doctor","veterinario","emergencia","urgencia","humano","asesor"],"training_mode":false,"supervisor_ids":["leo-sandoval"],"llm_provider":"gemini"}'::jsonb,
-  '{"agent_name":"Luna CoraVet","tone":"clinico_profesional","role":"agendamiento_citas","welcome_greeting":"¡Hola! Soy Luna, la Asistente Virtual de CoraVet Clínica Veterinaria (IA). ¿En qué puedo cuidar a tu mascota hoy?","handover_message":"Derivando a equipo médico...","channel":"whatsapp"}'::jsonb
-),
--- Vallet
-('cccccccc-cccc-cccc-cccc-cccccccccccc', 'vallet', 'Vallet Grupo Inmobiliario', 'Bienes Raíces y Proyectos Residenciales',
-  '{"enabled":true,"provider":"openai","model":"gpt-4o-mini","mode":"byok","temperature":0.2,"waba_phone_number_id":null,"human_handoff_keywords":["asesor","agente","visita","humano"],"training_mode":false,"supervisor_ids":["leo-sandoval"],"llm_provider":"openai"}'::jsonb,
-  '{"agent_name":"Vallet Advisor","tone":"ejecutivo_formal","role":"calificacion_leads","welcome_greeting":"Estimado/a, soy el Asesor Digital de Vallet Inmobiliaria (IA). ¿En qué proyecto te gustaría invertir?","handover_message":"Asesor Senior te contactará...","channel":"web"}'::jsonb
-)
-ON CONFLICT (slug) DO UPDATE SET
-  ai_settings = EXCLUDED.ai_settings,
-  agent_config = EXCLUDED.agent_config,
-  updated_at = NOW();
+-- Vector demo DETERMINISTA (768 dims, idéntico al cliente)
+-- const DEMO_VECTOR_768 = new Array(768).fill(0.01)
+-- En SQL: ARRAY_FILL(0.01::float, ARRAY[768])::vector(768)
+
+-- knowledge_base demo
+INSERT INTO knowledge_base (tenant_id, title, category, content, reference_price, embedding, metadata) VALUES
+('00000000-0000-0000-0000-000000000001', 'Sistemas Web y Apps a Medida', 'Desarrollo', 'Arquitecturas SaaS completas en React 19, Vite, Supabase, Tailwind v4 y PostgreSQL con alta disponibilidad y UX ergonómico.', 'Cotización sujeta a alcance tras diagnóstico técnico', ARRAY_FILL(0.01::float, ARRAY[768])::vector(768), '{"is_demo": true, "source": "seed"}'),
+('00000000-0000-0000-0000-000000000001', 'Notion Enterprise & SOPs de Negocio', 'Operaciones', 'Sistemas operativos completos para empresas, gestión de procesos, CRM interno y tableros operativos en Notion.', 'Plantilla Pro oficial: S/ 49 o $15 USD', ARRAY_FILL(0.01::float, ARRAY[768])::vector(768), '{"is_demo": true, "source": "seed"}'),
+('00000000-0000-0000-0000-000000000001', 'Comercio Conversacional & WhatsApp CRM WABA', 'Comercio', 'Integración oficial de WhatsApp Business API, flujos nativos de catálogo, cobros y agentes inteligentes multi-tenant.', 'Planes desde $49 USD/mes según volumen', ARRAY_FILL(0.01::float, ARRAY[768])::vector(768), '{"is_demo": true, "source": "seed"}')
+ON CONFLICT DO NOTHING;
+
+-- faqs demo
+INSERT INTO faqs (tenant_id, question, answer, embedding, category) VALUES
+('00000000-0000-0000-0000-000000000001', '¿Qué garantía tienen los desarrollos de Qaway Lab?', 'Todos nuestros proyectos cuentan con garantía técnica de estabilización, soporte continuo y trazabilidad de código con commits y despliegues auditados.', ARRAY_FILL(0.01::float, ARRAY[768])::vector(768), 'general'),
+('00000000-0000-0000-0000-000000000001', '¿Cómo puedo agendar una llamada con un asesor?', 'Puedes escribir la palabra "asesor" en este chat o acceder a nuestro calendario público en /hub/agenda para reservar tu sesión de diagnóstico.', ARRAY_FILL(0.01::float, ARRAY[768])::vector(768), 'general')
+ON CONFLICT DO NOTHING;
+
+-- golden_examples demo (is_approved = true para aparecer en search_unified_context)
+INSERT INTO golden_examples (tenant_id, category, user_question, ideal_answer, rationale, is_approved, source) VALUES
+('00000000-0000-0000-0000-000000000001', 'precio', '¿Me puedes dejar la plantilla Notion a mitad de precio si te pago ya?', 'Nuestros precios reflejan la estructura lista para operar y los SOPs probados que entregamos. El valor promocional oficial es de S/ 49 o $15 USD. Si tienes un equipo de más de 3 personas, con gusto coordinamos un paquete corporativo con un asesor.', 'No regatear de forma arbitraria; mantener el valor de la solución sin ser grosero y ofrecer llamada corporativa.', true, 'seed'),
+('00000000-0000-0000-0000-000000000001', 'fuera_catalogo', '¿Hacen reparación física de laptops o computadoras?', 'En Qaway Lab nos especializamos exclusivamente en software: desarrollo web, SaaS, automatizaciones con IA y Notion Enterprise. No brindamos soporte de hardware físico. ¿Hay algún sistema digital o app que te gustaría evaluar?', 'Declarar honestamente que no es nuestro rubro y reorientar al cliente hacia el catálogo oficial.', true, 'seed'),
+('00000000-0000-0000-0000-000000000001', 'queja_insulto', 'Son unos estafadores, nadie me responde en soporte', 'Lamento sinceramente cualquier demora o malestar ocasionado. En Qaway Lab nos tomamos muy en serio la satisfacción de nuestros clientes. Estoy elevando tu caso de inmediato con el área de soporte técnico para que te atiendan con prioridad.', 'Desactivar la agresividad con empatía sin confrontar y activar escalamiento con prioridad.', true, 'seed')
+ON CONFLICT DO NOTHING;
+
+-- Limpieza de demo: DELETE FROM knowledge_base WHERE metadata->>'is_demo' = 'true';
+-- DELETE FROM faqs WHERE metadata->>'is_demo' = 'true' (si se añade el flag);
+-- DELETE FROM golden_examples WHERE source = 'seed';
 ```
 
 ---
@@ -698,13 +715,15 @@ ON CONFLICT (slug) DO UPDATE SET
 ## 9. NOTAS PARA EL AGENTE SUPABASE
 
 1. **RLS es obligatorio** — Ninguna tabla multi-tenant sin policy.
-2. **`app.current_tenant_id`** — Setear en CADA request Edge Function antes de queries.
-3. **pgvector HNSW** — Usar `vector_cosine_ops` para similitud coseno (semántica).
-4. **Vault** — Tokens WhatsApp y LLM API Keys NUNCA en tablas, solo Vault.
-5. **Batch embeddings** — No generar embeddings en request sincrónico; job nocturno.
+2. **`public.get_auth_tenant_id()`** — Security definer, resuelve el tenant del JWT sin confiar en input del cliente. El GUC `app.current_tenant_id` solo se usa DENTRO de Edge Functions con rol de servicio (SET LOCAL antes de cada query). Tu app/cliente NUNCA setea GUCs; tu frontend habla con su sesión normal.
+3. **pgvector HNSW** — Usar `vector_cosine_ops` para similitud coseno (semántica). Dimensión fija 768 (Gemini text-embedding-004).
+4. **Vault** — Tokens WhatsApp y LLM API Keys NUNCA en tablas, solo Vault. En BD solo guardo REFERENCIA al secret (nombre/namespace).
+5. **Batch embeddings** — No generar embeddings en request sincrónico; job nocturno (Fase 2). En Fase 1 los triggers son no-op; seeds demo llevan vector fijo `ARRAY_FILL(0.01::float, ARRAY[768])`.
 6. **Graduación automática** — Cron job cada hora evalúa 24h + compliance ≥ 90% + 0 fallos críticos.
 7. **Training mode** — Flag en `tenants.ai_settings.training_mode` fuerza handoff en webhook.
 8. **Webhook idempotencia** — Usar `message_id` de Meta para evitar duplicados.
+9. **Escritura/Supervisión** — Lectura = cualquier miembro del tenant (o plataforma). Escribir KB/FAQ/golden/supervisar conversaciones = tenant admin o plataforma.
+10. **Tenants reales** — NO crear tenants nuevos. Operan los existentes: Qaway Lab, CoraVet, Estudio Contable, Vallet. El panel obtiene tenant via `public.get_auth_tenant_id()`.
 
 ---
 
@@ -717,14 +736,14 @@ supabase db push
 # Verificar RLS
 SELECT * FROM pg_policies WHERE tablename = 'conversations';
 
-# Test búsqueda vectorial
+# Test búsqueda vectorial (usa DEMO_VECTOR_768 = ARRAY_FILL(0.01::float, ARRAY[768])::vector(768))
 SELECT * FROM search_unified_context(
-  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid,
-  '[0.1,0.2,...]'::vector(768), -- embedding real
+  '00000000-0000-0000-0000-000000000001'::uuid,
+  ARRAY_FILL(0.01::float, ARRAY[768])::vector(768),
   5
 );
 
-# Verificar tenant resuelto
+# Verificar tenant resuelto por WABA
 SELECT * FROM resolve_tenant_by_waba('10987654321');
 ```
 

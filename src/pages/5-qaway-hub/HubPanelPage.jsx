@@ -281,13 +281,153 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
   )
 }
 
+function timeAgo(iso) {
+  if (!iso) return '—'
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return '—'
+  const seconds = Math.round((Date.now() - date.getTime()) / 1000)
+  if (seconds < 45) return 'hace un momento'
+  if (seconds < 3600) return `hace ${Math.round(seconds / 60)} min`
+  const hours = Math.round(seconds / 3600)
+  if (hours < 24) return `hace ${hours} h`
+  const days = Math.round(hours / 24)
+  if (days < 30) return `hace ${days} d`
+  return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
+}
+
+function ecosystemIcon(slug) {
+  const s = String(slug || '').toLowerCase()
+  if (s.includes('crm') || s.includes('waba')) return MessageSquare
+  if (s.includes('agenda') || s.includes('cita')) return Calendar
+  if (s.includes('invent')) return Package
+  if (s.includes('marketing') || s.includes('instagram')) return Instagram
+  if (s.includes('automat')) return Zap
+  if (s.includes('creaci') || s.includes('contenido') || s.includes('creador')) return Sparkles
+  if (s.includes('analit') || s.includes('reporte')) return BarChart3
+  if (s.includes('pago') || s.includes('checkout') || s.includes('cobro')) return CreditCard
+  if (s.includes('blog')) return PenSquare
+  return LayoutGrid
+}
+
+const ECOSYSTEM_TONES = [
+  'bg-[#ff4b0b]', 'bg-indigo-600', 'bg-orange-500',
+  'bg-gradient-to-tr from-purple-600 to-pink-500', 'bg-zinc-900',
+  'bg-purple-600', 'bg-blue-600', 'bg-blue-500',
+]
+
 function SuperAdminDashboard({ setActiveTab, navigate }) {
+  const [live, setLive] = useState(null)
+
+  // Datos globales reales (plataforma = is_admin). Consultas guardadas:
+  // si algo falla se muestra "—", nunca se inventan cifras.
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      let data = { tenants: [], users: [], subs: [], apps: [], pays: [], roles: [] }
+      try {
+        const [t, u, s, a, p, r] = await Promise.all([
+          supabase.from('tenants').select('id, name, status, deleted_at, created_at'),
+          supabase.from('users').select('id, full_name, email, created_at'),
+          supabase.from('tenant_app_subscriptions').select('tenant_id, app_id, plan, status'),
+          supabase.from('app_catalog').select('id, name, slug'),
+          supabase.from('payments').select('amount, created_at, status'),
+          supabase.from('user_app_roles').select('app_id'),
+        ])
+        data = {
+          tenants: t.data || [],
+          users: u.data || [],
+          subs: s.data || [],
+          apps: a.data || [],
+          pays: p.data || [],
+          roles: r.data || [],
+        }
+      } catch {
+        data = { tenants: [], users: [], subs: [], apps: [], pays: [], roles: [] }
+      }
+      if (!alive) return
+
+      const activeTenants = data.tenants.filter((x) => String(x.status) === 'active' && !x.deleted_at).length
+      const activeSubs = data.subs.filter((x) => String(x.status) === 'active')
+      const activeApps = new Set(activeSubs.map((x) => x.app_id)).size
+      const earned = data.pays.filter((x) => x.status === 'completed' || x.status === 'paid')
+      const revenue = earned.reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
+      const revFmt = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 })
+
+      // Donut por plan (desde suscripciones activas reales).
+      const planCounts = { Premium: 0, Intermedio: 0, Básico: 0, 'Sin plan': 0 }
+      activeSubs.forEach((x) => {
+        const plan = String(x.plan || '').toLowerCase().trim()
+        if (plan.includes('premi')) planCounts.Premium += 1
+        else if (plan.includes('inter')) planCounts.Intermedio += 1
+        else planCounts.Básico += 1
+      })
+      const withSub = new Set(activeSubs.map((x) => x.tenant_id))
+      data.tenants.forEach((x) => { if (!withSub.has(x.id)) planCounts['Sin plan'] += 1 })
+      const planTotal = Math.max(data.tenants.length, 1)
+      const planColors = { Premium: '#f97316', Intermedio: '#3b82f6', Básico: '#eab308', 'Sin plan': '#d4d4d8' }
+      let cursor = 0
+      const donut = Object.keys(planCounts).map((label) => {
+        const from = (cursor / planTotal) * 360
+        cursor += planCounts[label]
+        return planCounts[label] ? `${planColors[label]} ${from}deg ${(cursor / planTotal) * 360}deg` : null
+      }).filter(Boolean)
+
+      // Ingresos por mes (últimos 9 meses) para el gráfico.
+      const monthSum = new Map()
+      earned.forEach((p) => {
+        const d = new Date(p.created_at)
+        if (Number.isNaN(d.getTime())) return
+        const key = `${d.getFullYear()}-${d.getMonth()}`
+        monthSum.set(key, (monthSum.get(key) || 0) + (Number(p.amount) || 0))
+      })
+      const now = new Date()
+      const months = []
+      for (let i = 8; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        months.push({
+          month: d.toLocaleDateString('es-PE', { month: 'short' }),
+          val: monthSum.get(`${d.getFullYear()}-${d.getMonth()}`) || 0,
+        })
+      }
+      const hasRevenue = months.some((m) => m.val > 0)
+      const maxVal = Math.max(...months.map((m) => m.val), 1)
+      const bars = months.map((m) => ({ ...m, height: `${Math.round((m.val / maxVal) * 100)}%`, label: revFmt.format(m.val) }))
+
+      // Ecosistema: apps reales (top 8 por suscripciones activas).
+      const rolesByApp = {}
+      data.roles.forEach((r) => { rolesByApp[r.app_id] = (rolesByApp[r.app_id] || 0) + 1 })
+      const ecosystem = data.apps.map((a, i) => ({
+        title: a.name || a.slug || 'Aplicación',
+        slug: a.slug || '',
+        active: activeSubs.filter((x) => x.app_id === a.id).length,
+        users: rolesByApp[a.id] || 0,
+        tone: ECOSYSTEM_TONES[i % ECOSYSTEM_TONES.length],
+        path: a.slug ? `/hub/${a.slug}` : '/hub',
+      })).sort((x, y) => y.active - x.active).slice(0, 8)
+
+      // Actividad reciente real (tenants y usuarios más nuevos).
+      const recent = [
+        ...data.tenants.map((x) => ({ title: 'Nueva empresa registrada', detail: x.name || '—', time: x.created_at, color: 'text-blue-500 bg-blue-50' })),
+        ...data.users.map((x) => ({ title: 'Nuevo usuario registrado', detail: x.full_name || x.email || '—', time: x.created_at, color: 'text-orange-500 bg-orange-50' })),
+      ].filter((x) => x.time).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5)
+
+      if (alive) setLive({
+        activeTenants, totalUsers: data.users.length, activeApps, revenue, revFmt,
+        planCounts, planTotal, donut, bars, hasRevenue, ecosystem, recent,
+      })
+    })()
+    return () => { alive = false }
+  }, [])
+
+  const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  const money = live ? (live.revenue > 0 ? live.revFmt.format(live.revenue) : 'S/ 0') : '—'
+
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner / Header Greeting */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold text-zinc-400">Sábado, 20 de Septiembre de 2026</p>
+          <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
           <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Super Administrador</h1>
           <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona empresas, usuarios, aplicaciones y el crecimiento de Qaway Lab desde un solo lugar.</p>
         </div>
@@ -296,7 +436,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         </div>
       </div>
 
-      {/* Row 1: 4 KPI Cards */}
+      {/* Row 1: 4 KPI Cards (datos reales, sin cifras inventadas) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Empresas Activas */}
         <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
@@ -308,8 +448,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-xs font-bold text-zinc-500">Empresas activas</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">4</span>
-              <span className="inline-flex items-center text-[11px] font-bold text-emerald-600">↑ 0%</span>
+              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.activeTenants : '—'}</span>
             </div>
           </div>
           <div className="w-16 h-8 opacity-80">
@@ -329,8 +468,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-xs font-bold text-zinc-500">Usuarios totales</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">12</span>
-              <span className="inline-flex items-center text-[11px] font-bold text-emerald-600">↑ 20%</span>
+              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.totalUsers : '—'}</span>
             </div>
           </div>
           <div className="w-16 h-8 opacity-80">
@@ -350,8 +488,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-xs font-bold text-zinc-500">Aplicaciones activas</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">8</span>
-              <span className="inline-flex items-center text-[11px] font-bold text-emerald-600">↑ 33%</span>
+              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.activeApps : '—'}</span>
             </div>
           </div>
           <div className="w-16 h-8 opacity-80">
@@ -361,18 +498,17 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
         </div>
 
-        {/* KPI 4: Ingresos MRR */}
+        {/* KPI 4: Ingresos */}
         <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <HubIcon icon={CreditCard} size={16} className="w-4 h-4" />
               </span>
-              <span className="text-xs font-bold text-zinc-500">Ingresos MRR</span>
+              <span className="text-xs font-bold text-zinc-500">Ingresos</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">S/ 2,900</span>
-              <span className="inline-flex items-center text-[11px] font-bold text-emerald-600">↑ 15%</span>
+              <span className="text-2xl font-extrabold text-zinc-950">{money}</span>
             </div>
           </div>
           <div className="w-16 h-8 opacity-80">
@@ -392,34 +528,27 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-base font-bold text-zinc-950">Crecimiento de ingresos</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Ingresos recurrentes mensuales (MRR)</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Pagos completados por mes</p>
               </div>
-              <select className="text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-700 outline-none">
-                <option>Últimos 9 meses</option>
-                <option>Año 2026</option>
-              </select>
+              <span className="text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-700">Últimos 9 meses</span>
             </div>
-            <div className="h-48 flex items-end justify-between gap-2 pt-4 px-2">
-              {[
-                { month: 'Ene', val: 'S/ 1,000', height: '35%' },
-                { month: 'Feb', val: 'S/ 1,150', height: '40%' },
-                { month: 'Mar', val: 'S/ 1,400', height: '48%' },
-                { month: 'Abr', val: 'S/ 1,950', height: '62%' },
-                { month: 'May', val: 'S/ 2,300', height: '74%' },
-                { month: 'Jun', val: 'S/ 2,150', height: '68%' },
-                { month: 'Jul', val: 'S/ 2,500', height: '80%' },
-                { month: 'Ago', val: 'S/ 2,850', height: '90%' },
-                { month: 'Set', val: 'S/ 3,100', height: '100%' },
-              ].map((b, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-                  <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10">
-                    {b.val}
+            {live && live.hasRevenue ? (
+              <div className="h-48 flex items-end justify-between gap-1.5 pt-4 px-2">
+                {live.bars.map((b, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                    <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10">
+                      {b.label}
+                    </div>
+                    <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 group-hover:brightness-110" style={{ height: b.height }} />
+                    <span className="text-[11px] font-medium text-zinc-400 mt-2">{b.month}</span>
                   </div>
-                  <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 group-hover:brightness-110" style={{ height: b.height }} />
-                  <span className="text-[11px] font-medium text-zinc-400 mt-2">{b.month}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-48 flex items-center justify-center rounded-xl bg-zinc-50/70 border border-dashed border-zinc-200">
+                <p className="text-xs text-zinc-400 font-medium">{live ? 'Sin ingresos registrados todavía.' : 'Cargando…'}</p>
+              </div>
+            )}
           </div>
 
           {/* Companies by Plan Donut Chart */}
@@ -427,35 +556,26 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <h3 className="text-base font-bold text-zinc-950 mb-4">Empresas por plan</h3>
             <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
               <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                  <path className="text-zinc-100" strokeWidth="4.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path stroke="#f97316" strokeWidth="4.5" strokeDasharray="50, 100" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path stroke="#3b82f6" strokeWidth="4.5" strokeDasharray="25, 100" strokeDashoffset="-50" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path stroke="#eab308" strokeWidth="4.5" strokeDasharray="25, 100" strokeDashoffset="-75" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                </svg>
-                <div className="absolute text-center">
-                  <span className="block text-[10px] text-zinc-400 font-medium">Total</span>
-                  <span className="block text-lg font-extrabold text-zinc-950">4</span>
-                  <span className="block text-[9px] text-zinc-400">empresas</span>
+                <div className="w-40 h-40 rounded-full" style={{ background: live && live.donut.length ? `conic-gradient(${live.donut.join(', ')})` : 'conic-gradient(#e4e4e7 0deg 360deg)' }} />
+                <div className="absolute w-[72%] h-[72%] bg-white rounded-full flex items-center justify-center">
+                  <div className="text-center">
+                    <span className="block text-[10px] text-zinc-400 font-medium">Total</span>
+                    <span className="block text-lg font-extrabold text-zinc-950">{live ? live.planTotal : '—'}</span>
+                    <span className="block text-[9px] text-zinc-400">empresas</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-3 w-full sm:w-auto">
-                <div className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-orange-500" /><span className="text-zinc-700">Premium</span></div>
-                  <span className="text-zinc-500">2 <span className="text-zinc-400">(50%)</span></span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500" /><span className="text-zinc-700">Intermedio</span></div>
-                  <span className="text-zinc-500">1 <span className="text-zinc-400">(25%)</span></span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-yellow-500" /><span className="text-zinc-700">Básico</span></div>
-                  <span className="text-zinc-500">1 <span className="text-zinc-400">(25%)</span></span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
-                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-zinc-300" /><span className="text-zinc-700">Sin plan</span></div>
-                  <span className="text-zinc-500">0 <span className="text-zinc-400">(0%)</span></span>
-                </div>
+                {(live ? Object.entries(live.planCounts) : []).map(([label, count]) => {
+                  const pct = live ? Math.round((count / live.planTotal) * 100) : 0
+                  const color = label === 'Premium' ? '#f97316' : label === 'Intermedio' ? '#3b82f6' : label === 'Básico' ? '#eab308' : '#d4d4d8'
+                  return (
+                    <div key={label} className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
+                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: color }} /><span className="text-zinc-700">{label}</span></div>
+                      <span className="text-zinc-500">{live ? count : '—'} <span className="text-zinc-400">({pct}%)</span></span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -496,24 +616,21 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               </button>
             </div>
             <div className="space-y-3">
-              {[
-                { title: 'Nueva empresa registrada', detail: 'Vallet Inmobiliaria', time: 'hace 2 horas', icon: User, color: 'text-blue-500 bg-blue-50' },
-                { title: 'Usuario invitado', detail: 'ana@epc.pe', time: 'hace 4 horas', icon: User, color: 'text-purple-500 bg-purple-50' },
-                { title: 'Suscripción actualizada', detail: 'EPC Contable → CRM Premium', time: 'hace 6 horas', icon: Tag, color: 'text-orange-500 bg-orange-50' },
-                { title: 'Nuevo pago recibido', detail: 'S/ 650.00', time: 'hace 1 día', icon: Plus, color: 'text-emerald-500 bg-emerald-50' },
-                { title: 'Aplicación activada', detail: 'Agenda → CoraVet', time: 'hace 1 día', icon: Calendar, color: 'text-indigo-500 bg-indigo-50' },
-              ].map((act, i) => (
+              {(live ? live.recent : []).map((act, i) => (
                 <div key={i} className="flex items-start gap-3 text-xs">
                   <span className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${act.color}`}>
-                    <HubIcon icon={act.icon} size={13} className="w-3.5 h-3.5" />
+                    <HubIcon icon={act.title.includes('empresa') ? Building2 : User} size={13} className="w-3.5 h-3.5" />
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-zinc-900 truncate">{act.title}</p>
                     <p className="text-zinc-500 text-[11px] truncate">{act.detail}</p>
                   </div>
-                  <span className="text-[10px] text-zinc-400 whitespace-nowrap">{act.time}</span>
+                  <span className="text-[10px] text-zinc-400 whitespace-nowrap">{timeAgo(act.time)}</span>
                 </div>
               ))}
+              {live && live.recent.length === 0 && (
+                <p className="text-xs text-zinc-400 py-2">Sin actividad registrada todavía.</p>
+              )}
             </div>
           </div>
 
@@ -540,42 +657,43 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <h3 className="text-base font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
             <p className="text-xs text-zinc-500 mt-0.5">Estado general de las aplicaciones en todas las empresas.</p>
           </div>
-          <button onClick={() => goTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
+          <button onClick={() => setActiveTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
             Gestionar aplicaciones <HubIcon icon={ArrowRight} size={14} className="w-3.5 h-3.5" />
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { title: 'CRM Comercial', activeCount: '3 empresas activas', users: '12 usuarios', icon: MessageSquare, bg: 'bg-[#ff4b0b]', path: '/hub/crm' },
-            { title: 'Qaway Agenda', activeCount: '2 empresas activas', users: '8 usuarios', icon: Calendar, bg: 'bg-indigo-600', path: '/hub/agenda' },
-            { title: 'Inventario & ERP', activeCount: '2 empresas activas', users: '6 usuarios', icon: Package, bg: 'bg-orange-500', path: '/hub/inventario' },
-            { title: 'Marketing Studio', activeCount: '1 empresa activa', users: '4 usuarios', icon: Instagram, bg: 'bg-gradient-to-tr from-purple-600 to-pink-500', path: '/hub/marketing' },
-            { title: 'Automatizaciones', activeCount: '1 empresa activa', users: '3 usuarios', icon: Zap, bg: 'bg-zinc-900', path: '/hub/automatizaciones' },
-            { title: 'Creación de Contenido', activeCount: '1 empresa activa', users: '2 usuarios', icon: Sparkles, bg: 'bg-purple-600', path: '/hub/creador-contenido' },
-            { title: 'Analítica & Reportes', activeCount: '2 empresas activas', users: '5 usuarios', icon: BarChart3, bg: 'bg-blue-600', path: '/hub/analytics' },
-            { title: 'Pagos & Facturación', activeCount: '2 empresas activas', users: '3 usuarios', icon: CreditCard, bg: 'bg-blue-500', path: '/hub/pagos' },
-          ].map((app, i) => (
+          {(live ? live.ecosystem : []).map((app, i) => (
             <div key={i} className="rounded-xl border border-zinc-200/80 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all group">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <span className={`w-9 h-9 rounded-xl ${app.bg} text-white flex items-center justify-center shadow-xs`}>
-                    <HubIcon icon={app.icon} size={18} className="w-4.5 h-4.5" />
+                  <span className={`w-9 h-9 rounded-xl ${app.tone} text-white flex items-center justify-center shadow-xs`}>
+                    <HubIcon icon={ecosystemIcon(app.slug)} size={18} className="w-4.5 h-4.5" />
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Activo
-                  </span>
+                  {app.active > 0 ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Activo
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
+                      Sin activos
+                    </span>
+                  )}
                 </div>
                 <h4 className="text-xs font-bold text-zinc-950 group-hover:text-[#ff4b0b] transition-colors">{app.title}</h4>
-                <p className="text-[11px] text-zinc-500 mt-1">{app.activeCount}</p>
-                <p className="text-[10px] text-zinc-400">{app.users}</p>
+                <p className="text-[11px] text-zinc-500 mt-1">{app.active} {app.active === 1 ? 'empresa activa' : 'empresas activas'}</p>
+                <p className="text-[10px] text-zinc-400">{app.users} usuarios</p>
               </div>
               <Link to={app.path} className="mt-4 inline-flex items-center gap-1 text-[11px] font-bold text-zinc-700 hover:text-zinc-950 transition-colors">
                 Ver detalles <HubIcon icon={ArrowRight} size={12} className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           ))}
+          {live && live.ecosystem.length === 0 && (
+            <p className="text-xs text-zinc-400 col-span-full py-2">Sin aplicaciones en el catálogo todavía.</p>
+          )}
         </div>
       </div>
     </div>
