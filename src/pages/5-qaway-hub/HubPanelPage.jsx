@@ -175,6 +175,17 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
         </div>
       </div>
 
+      {/* Cuenta sin marca asignada: aviso honesto, sin datos de ejemplo. */}
+      {!tenantId && (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+          <HubIcon icon={HelpCircle} size={16} className="w-4 h-4 mt-0.5 shrink-0" />
+          <p>
+            Tu cuenta aún no está vinculada a una empresa. La administración de la plataforma
+            debe asignar tu marca para activar las secciones del panel.
+          </p>
+        </div>
+      )}
+
       {/* KPIs (misma tarjeta visual que el resumen global) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
@@ -626,8 +637,9 @@ function HubPanelContent() {
   }, [])
 
   // Rol resuelto: platform_admin → nav global; tenant_admin → solo módulos de su empresa (mismo shell).
-  const isPlatformAdmin = !panelAuth || panelAuth.isPlatformAdmin
-  const navItems = isPlatformAdmin ? SUPER_ADMIN_NAV : TENANT_ADMIN_NAV
+  // Mientras panelAuth carga NO se asume ningún rol (evita flash del Super Admin).
+  const isPlatformAdmin = panelAuth ? panelAuth.isPlatformAdmin : false
+  const navItems = !panelAuth ? [] : (isPlatformAdmin ? SUPER_ADMIN_NAV : TENANT_ADMIN_NAV)
 
   // Tenant Admin: si la URL apunta a una sección no permitida, se vuelve a Inicio.
   useEffect(() => {
@@ -950,6 +962,13 @@ function HubPanelContent() {
                     })}
                   </div>
                 )}
+              </div>
+            ) : !panelAuth ? (
+              /* Carga del contexto rol/tenant: nunca se pinta un dashboard (ni datos hardcodeados)
+                 antes de saber quién es. Elimina el flash del Super Admin en accesos nuevos. */
+              <div className="py-24 text-center">
+                <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-zinc-300 border-t-[#ff4b0b]" />
+                <p className="mt-3 text-sm font-semibold text-zinc-400">Cargando panel…</p>
               </div>
             ) : (
               /* Inicio por rol: resumen global (platform_admin) o de la empresa (tenant_admin). Mismo shell. */
