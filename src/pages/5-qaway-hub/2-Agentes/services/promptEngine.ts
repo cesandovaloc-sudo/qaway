@@ -286,9 +286,14 @@ export function simulateAgentResponse(
     }
   }
 
-  // 9. Degradación Elegante (Google PAIR)
+  // 9. Degradación Elegante Contextual (Google PAIR)
+  // Usa Capa 1 (identidad) para responder fuera de catálogo con honestidad y reorientación
+  const industry = workspace.industry || 'nuestro sector'
+  const agentName = workspace.agentName || 'nuestro asistente'
+  const companyName = workspace.name || 'nuestra empresa'
+  
   return {
-    reply: `Muchas gracias por tu consulta sobre "${userText.slice(0, 35)}...". Para brindarte el dato exacto y validado por la empresa, ¿te gustaría que te conecte con un asesor especializado o prefieres revisar las opciones de nuestro portafolio?`,
+    reply: `En ${companyName} nos especializamos en ${industry.toLowerCase()}. No contamos con información sobre "${userText.slice(0, 40)}...". Nuestros servicios son: ${workspace.knowledgeBase.slice(0, 3).map(k => k.title).join(', ') || 'consultas generales'}. ¿Te interesa alguno de estos temas o prefieres que te conecte con un asesor?`,
     isHumanRequested: false,
     isSensitiveBlocked: false,
     isInjectionBlocked: false

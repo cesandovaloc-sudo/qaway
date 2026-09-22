@@ -24,7 +24,11 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
         'humano', 'asesor', 'persona', 'hablar con alguien',
         'queja', 'reclamo', 'cotizacion personalizada', 'ejecutivo'
       ],
-      system_prompt: ''
+      system_prompt: '',
+      trainingMode: false,
+      supervisorIds: ['leo-sandoval'],
+      llmProvider: 'gemini',
+      llmApiKey: null
     },
     knowledgeBase: [
       {
@@ -128,7 +132,11 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
         'doctor', 'veterinario', 'emergencia', 'urgencia',
         'humano', 'asesor', 'grave', 'sangre', 'convulsion'
       ],
-      system_prompt: ''
+      system_prompt: '',
+      trainingMode: false,
+      supervisorIds: ['leo-sandoval'],
+      llmProvider: 'gemini',
+      llmApiKey: null
     },
     knowledgeBase: [
       {
@@ -193,7 +201,11 @@ export const DEFAULT_AGENTS_DATA: TenantAgentWorkspace[] = [
       human_handoff_keywords: [
         'asesor', 'agente', 'visita', 'separacion', 'humano', 'llamada'
       ],
-      system_prompt: ''
+      system_prompt: '',
+      trainingMode: false,
+      supervisorIds: ['leo-sandoval'],
+      llmProvider: 'openai',
+      llmApiKey: null
     },
     knowledgeBase: [
       {

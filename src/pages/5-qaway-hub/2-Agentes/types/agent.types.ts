@@ -69,6 +69,13 @@ export interface AiSettingsPayload {
   system_prompt: string
   waba_phone_number_id: string | null
   human_handoff_keywords: string[]
+  // Modo entrenamiento 24h obligatorio
+  trainingMode?: boolean
+  trainingStartedAt?: number
+  supervisorIds?: string[]
+  // LLM configuración explícita
+  llmProvider?: ModelProvider
+  llmApiKey?: string
 }
 
 export interface TenantAgentWorkspace {

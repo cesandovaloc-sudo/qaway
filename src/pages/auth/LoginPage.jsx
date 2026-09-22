@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
@@ -26,10 +26,20 @@ export default function LoginPage() {
 
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const justRegistered = searchParams.get('registered') === '1'
+  const verified = searchParams.get('verified') === '1'
   const rawRedirect = searchParams.get('redirect')
   const redirectTarget = (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//'))
     ? rawRedirect
-    : '/hub'
+    : '/hub/panel'
+  const regEmail = searchParams.get('email') || ''
+  const mailHref = (() => {
+    const e = regEmail.trim().toLowerCase()
+    if (e.endsWith('@gmail.com')) return 'https://mail.google.com/mail/'
+    if (/@(outlook|hotmail|live|msn)\./.test(e)) return 'https://outlook.live.com/mail/'
+    if (e.endsWith('@yahoo.com')) return 'https://mail.yahoo.com/'
+    return 'https://mail.google.com/mail/'
+  })()
 
   // ─── Guardar sesión según "Recordarme" ────────────────────────────────────
   const persistSession = (token, emailVal, role) => {
@@ -68,6 +78,14 @@ export default function LoginPage() {
           const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'viewer')
           persistSession(supaData.session.access_token, cleanEmail, role)
           navigate(redirectTarget, { replace: true })
+          return
+        }
+
+        if (supaError && (
+          supaError.code === 'email_not_confirmed' ||
+          String(supaError.message || '').toLowerCase().includes('confirm')
+        )) {
+          setError('Te falta confirmar tu correo.')
           return
         }
       }
@@ -120,6 +138,17 @@ export default function LoginPage() {
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
+  // Tras confirmar el correo (verified=1): si Supabase ya dejó sesión activa al
+  // abrir el link, no hacemos que el usuario "vuelva a ingresar" — al panel.
+  useEffect(() => {
+    if (!verified) return
+    const supabase = getSupabaseClient()
+    if (!supabase) return
+    supabase.auth.getUser()
+      .then(({ data }) => { if (data?.user) navigate('/hub/panel', { replace: true }) })
+      .catch(() => {})
+  }, [verified])
+
   return (
     <div className="min-h-screen bg-zinc-950 flex font-sans">
 
@@ -219,6 +248,12 @@ export default function LoginPage() {
                 <h2 className="text-3xl font-black text-white mb-2">Iniciar Sesión</h2>
                 <p className="text-zinc-400">Ingresa al ecosistema de trabajo Qaway Lab.</p>
               </div>
+
+              {verified && (
+                <div className="mb-6 bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-4 rounded-xl text-sm font-medium leading-relaxed text-center">
+                  ✓ Correo verificado. Tu cuenta está activa. Ya puedes iniciar sesión.
+                </div>
+              )}
 
               {/* Selector: Iniciar Sesión / Crear Cuenta (como Academy, estilo Hub) */}
               <div className="flex bg-zinc-900 p-1 rounded-2xl border border-zinc-800 mb-6">
@@ -363,47 +398,50 @@ export default function LoginPage() {
                   </div>
                 )}
 
+                {/* Registro exitoso: mensaje justo encima del botón (lejos de la burbuja
+                    "Guardar contraseña" de Chrome) + botón blanco = atajo al correo */}
+                {justRegistered && (
+                  <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-4 rounded-xl text-sm font-medium leading-relaxed text-center">
+                    ✓ Cuenta creada correctamente. Revisa tu correo para confirmar tu registro y luego inicia sesión.
+                  </div>
+                )}
+
                 {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <span className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      Ingresar al Hub
+                {justRegistered ? (
+                  <>
+                    <a
+                      href={mailHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                    >
+                      Verificar mi cuenta
                       <ArrowRight className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
+                    </a>
+                    <p className="text-sm text-zinc-500 text-center">
+                      ¿Ya confirmaste tu correo?{' '}
+                      <Link to="/login" className="font-semibold text-white underline underline-offset-2 hover:text-green-400 transition-colors">
+                        Iniciar sesión
+                      </Link>
+                    </p>
+                  </>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <span className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        Ingresar al Hub
+                        <ArrowRight className="w-5 h-5" />
+                      </>
+                    )}
+                  </button>
+                )}
               </form>
-
-              {/* Solicitar acceso */}
-              <p className="mt-6 text-center text-sm text-zinc-600">
-                ¿No tienes cuenta?{' '}
-                <a
-                  href="/onboarding"
-                  className="text-zinc-400 hover:text-white font-semibold transition-colors"
-                >
-                  Crear cuenta →
-                </a>
-              </p>
-              <p className="mt-2 text-center text-sm text-zinc-600">
-                <a
-                  href="mailto:hola@qaway.pe?subject=Solicitud%20de%20acceso%20al%20Hub"
-                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
-                >
-                  o solicita acceso a tu administrador
-                </a>
-              </p>
-
-              <div className="mt-8 text-center">
-                <p className="text-xs text-zinc-700 font-medium">
-                  V2.0 · Plataforma protegida por encriptación de extremo a extremo.
-                </p>
-              </div>
             </>
           )}
         </div>
