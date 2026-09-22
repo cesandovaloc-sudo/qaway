@@ -19,6 +19,7 @@
 
 drop policy if exists "tenants_select_active_public" on public.tenants;
 drop policy if exists "tenants_select_admin_all" on public.tenants;
+drop policy if exists "tenants_select_scope" on public.tenants;
 
 create policy "tenants_select_scope" on public.tenants
   for select
