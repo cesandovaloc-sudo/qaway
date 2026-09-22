@@ -65,7 +65,7 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
   const WORKSPACE_TO_TENANT: Record<string, string> = {
     'tenant-qaway-master': '00000000-0000-0000-0000-000000000001',      // qaway-lab
     'tenant-coravet': '06bacf31-6699-4ef5-9843-e58b835c6b2b',          // coravet
-    'tenant-vallet': '00000000-0000-0000-0000-000000000003',           // vallet-inmobiliaria (placeholder)
+    'tenant-vallet': '22222222-3333-4444-5555-666666666666',           // vallet-inmobiliaria (UUID real, seed 20260917144000)
   }
 
   // Auditoría en vivo de la configuración
