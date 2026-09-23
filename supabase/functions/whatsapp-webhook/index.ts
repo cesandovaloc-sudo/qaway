@@ -2,6 +2,14 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 // F-FAILCLOSED run-2: sin defaults públicos. Si falta secreto, se rechaza (500/401), nunca permisivo.
+//
+// v31 [2026-09-23 · agente-supabase] — upgrade RAG + doble escritura (transición):
+//   • Retrieval multi-tenant vía RPC search_unified_context (módulo 2-Agentes).
+//   • Embedding del query con Gemini text-embedding-004 (768d). Sin key → RAG degrada
+//     a prompt estático; el chat NUNCA se bloquea (fail-open solo para el contexto).
+//   • Doble escritura: además de leads (flujo v30 intacto), sincroniza conversations/
+//     messages del módulo agents. Nunca rompe el flujo principal (try/catch).
+//   • Config por tenant: ai_settings.rag_enabled === false desactiva retrieval.
 const VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN') || ''
 const APP_SECRET = Deno.env.get('WHATSAPP_APP_SECRET') || ''
 const MASTER_GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || ''
@@ -313,6 +321,150 @@ async function verifySignature(rawBody: string, signatureHeader: string | null, 
   }
 }
 
+/**
+ * v31 (RAG): Embedding del query con Gemini text-embedding-004 (768d).
+ * Fail-closed: sin key o error → null (el retrieval se omite, no el chat).
+ */
+async function embedTextRag(text: string): Promise<number[] | null> {
+  const key = Deno.env.get('GEMINI_API_KEY') || ''
+  if (!key) return null
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: { parts: [{ text: text.slice(0, 4000) }] },
+        outputDimensionality: 768
+      })
+    })
+    if (!res.ok) {
+      console.warn(`[whatsapp-webhook] Embedding API ${res.status}`)
+      return null
+    }
+    const data = await res.json()
+    const values = data.embedding?.values as number[] | undefined
+    return Array.isArray(values) && values.length === 768 ? values : null
+  } catch (err) {
+    console.error('[whatsapp-webhook] embedTextRag:', err)
+    return null
+  }
+}
+
+/**
+ * v31 (RAG): Retrieval sobre el módulo 2-Agentes (search_unified_context RPC).
+ * Devuelve contexto con fuentes; cadena vacía si no hay key/resultados → prompt estático.
+ */
+async function retrieveRagContext(
+  supabase: any,
+  tenantId: string,
+  query: string,
+  topK = 3
+): Promise<string> {
+  try {
+    const embedding = await embedTextRag(query)
+    if (!embedding) return ''
+    const { data, error } = await supabase.rpc('search_unified_context', {
+      p_tenant_id: tenantId,
+      p_query_embedding: embedding,
+      p_top_k: topK
+    })
+    if (error) {
+      console.warn('[whatsapp-webhook] search_unified_context:', error.message)
+      return ''
+    }
+    const rows: any[] = Array.isArray(data) ? data : []
+    if (rows.length === 0) return ''
+    return rows
+      .map((r, i) => `### Fuente ${i + 1} (${r.source || '?'}) — título: ${r.title || ''} — sim ${(r.similarity || 0).toFixed(3)}\n${r.content || ''}`)
+      .join('\n\n')
+  } catch (err) {
+    console.error('[whatsapp-webhook] retrieveRagContext:', err)
+    return ''
+  }
+}
+
+/**
+ * Inyecta el contexto interno en el system prompt (si hay retrieval) SIN pisar
+ * el system_prompt que el tenant ya configure.
+ */
+function enrichSystemPrompt(systemPrompt: string, ragContext: string): string {
+  if (!ragContext) return systemPrompt
+  return `${systemPrompt}\n\nCONTEXTO INTERNO DE LA EMPRESA (úsalo SOLO si responde la duda del cliente; si no aplica, ignóralo):\n${ragContext}`
+}
+
+/**
+ * v31: Doble escritura al módulo 2-Agentes (conversations + messages).
+ * No sustituye a leads (transición). Errores logueados, nunca rompen el flujo v30.
+ */
+async function syncAgentsConversation(
+  supabase: any,
+  payload: {
+    tenantId: string
+    userId: string
+    userName?: string | null
+    wamid: string
+    text: string
+    sender: 'user' | 'agent'
+    status?: 'active' | 'handoff' | 'closed'
+  }
+): Promise<void> {
+  try {
+    const { tenantId, userId, userName, wamid, text, sender } = payload
+    if (!tenantId || !userId) return
+
+    let conversationId: string | null = null
+    const { data: existing } = await supabase
+      .from('conversations')
+      .select('id, status')
+      .eq('tenant_id', tenantId)
+      .eq('user_id', userId)
+      .eq('channel', 'whatsapp')
+      .order('last_activity_at', { ascending: false })
+      .limit(1)
+
+    if (existing && existing.length > 0) {
+      conversationId = existing[0].id
+      await supabase
+        .from('conversations')
+        .update({
+          last_activity_at: new Date().toISOString(),
+          status: payload.status || existing[0].status
+        })
+        .eq('id', conversationId)
+    } else {
+      const { data: created, error: cErr } = await supabase
+        .from('conversations')
+        .insert({
+          tenant_id: tenantId,
+          user_id: userId,
+          user_name: userName || 'Nuevo Contacto WA',
+          channel: 'whatsapp',
+          status: payload.status || 'active',
+          metadata: { wamid, dual_write: true, source: 'whatsapp-cloud-api' }
+        })
+        .select('id')
+        .single()
+      if (cErr) {
+        console.warn('[whatsapp-webhook] conversations insert:', cErr.message)
+        return
+      }
+      conversationId = created?.id || null
+    }
+
+    if (!conversationId) return
+
+    await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      tenant_id: tenantId,
+      sender,
+      text,
+      metadata: { wamid, channel: 'whatsapp' }
+    })
+  } catch (err) {
+    console.error('[whatsapp-webhook] syncAgentsConversation:', err)
+  }
+}
+
 serve(async (req: Request) => {
   const url = new URL(req.url)
 
@@ -538,6 +690,17 @@ serve(async (req: Request) => {
                   }
                 }
 
+                // ── DOBLE ESCRITURA v31: sincronizar mensaje del cliente al módulo 2-Agentes ──
+                await syncAgentsConversation(supabase, {
+                  tenantId: activeTenant?.id,
+                  userId: senderPhone,
+                  userName: senderName,
+                  wamid,
+                  text: messageText,
+                  sender: 'user',
+                  status: isHumanRequested ? 'handoff' : 'active'
+                })
+
                 // ── AUTO-RESPUESTA MULTI-MODELO IA (Si no se requiere humano y el tenant tiene IA activa) ──
                 const activeToken = ACCESS_TOKEN || Deno.env.get('WHATSAPP_ACCESS_TOKEN') || ''
                 console.log(`[whatsapp-webhook] Verificando auto-respuesta: isHumanRequested=${isHumanRequested}, aiEnabled=${Boolean(aiSettings?.enabled)}, hasToken=${Boolean(activeToken)}`)
@@ -557,7 +720,16 @@ serve(async (req: Request) => {
                       const currentLeadData = currentLeadList?.[0] || null
 
                       const activeHistory = currentLeadData?.history || [newMessageObj]
-                      const aiReply = await dispatchMultiModelAi(aiSettings, messageText, activeHistory)
+
+                      // v31 RAG: retrieval multi-tenant sobre search_unified_context (opcional por tenant)
+                      const ragContext = aiSettings.rag_enabled === false
+                        ? ''
+                        : await retrieveRagContext(supabase, activeTenant?.id, messageText, 3)
+                      const richSettings = ragContext
+                        ? { ...aiSettings, system_prompt: enrichSystemPrompt(aiSettings.system_prompt || DEFAULT_SYSTEM_PROMPT, ragContext) }
+                        : aiSettings
+
+                      const aiReply = await dispatchMultiModelAi(richSettings, messageText, activeHistory)
 
                       if (aiReply) {
                         console.log(`[whatsapp-webhook] Auto-respuesta despachada para ${senderPhone} vía ${aiSettings.provider || 'gemini'} (${aiSettings.mode || 'managed'})`)
@@ -581,6 +753,15 @@ serve(async (req: Request) => {
                           agent: agentTitle
                         }).eq('id', currentLeadData.id)
                       }
+                      // v31: reflejar la respuesta del agente en conversations/messages
+                      await syncAgentsConversation(supabase, {
+                        tenantId: activeTenant?.id,
+                        userId: senderPhone,
+                        userName: senderName,
+                        wamid: outWamid || `ai_${Date.now()}`,
+                        text: aiReply,
+                        sender: 'agent'
+                      })
                     }
                   } catch (aiErr) {
                     console.error('[whatsapp-webhook] Error ejecutando auto-respuesta Multi-Modelo:', aiErr)

@@ -62,14 +62,34 @@ Deno.serve(async (req) => {
 });
 
 // Fail-closed: sin credenciales NO se escribe NADA (evita polución de 0.01
-// sobre datos reales). Con credenciales, Fase 2.2 implementa HTTP a Gemini/OpenAI.
+// sobre datos reales). Key leída de GEMINI_API_KEY (mismo secret del webhook v30+).
 async function embed(text: string): Promise<number[] | null> {
-  const key = Deno.env.get("LLM_API_KEY");
+  const key = Deno.env.get("GEMINI_API_KEY") ?? "";
   if (!key) {
-    console.warn("LLM_API_KEY ausente — batch omitido (fail-closed)");
+    console.warn("GEMINI_API_KEY ausente — batch omitido (fail-closed)");
     return null;
   }
-  // TODO(Fase 2.2): llamada real al proveedor (EMBEDDING_PROVIDER/MODEL).
-  void text;
-  return null;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${Deno.env.get("EMBEDDING_MODEL") ?? "text-embedding-004"}:embedContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: { parts: [{ text: text.slice(0, 4000) }] },
+          outputDimensionality: DIM,
+        }),
+      },
+    );
+    if (!res.ok) {
+      console.warn(`generate-embeddings · Gemini ${res.status}`);
+      return null;
+    }
+    const data = await res.json();
+    const values = data.embedding?.values as number[] | undefined;
+    return Array.isArray(values) && values.length === DIM ? values : null;
+  } catch (err) {
+    console.error("generate-embeddings · embed:", err);
+    return null;
+  }
 }
