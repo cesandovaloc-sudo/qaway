@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, useEffect, useState } from 'react'
+import { RouteSuspense, RouteLoading } from './RouteSuspense'
 import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
@@ -131,7 +132,7 @@ function ProtectedRoute({ children }) {
     return () => { alive = false }
   }, [])
 
-  if (checking) return null
+  if (checking) return <RouteLoading />
   if (!authed) {
     return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
   }
@@ -139,18 +140,18 @@ function ProtectedRoute({ children }) {
 }
 
 function renderRoute(routeKey, element) {
-  if (isRouteEnabled(routeKey)) return element
+  if (isRouteEnabled(routeKey)) return <RouteSuspense>{element}</RouteSuspense>
   return <Navigate to="/" replace />
 }
 
 function renderPublicPathRoute(routeKey, pathname, element) {
-  if (isRouteEnabled(routeKey) && isPublicPathAllowed(pathname)) return element
+  if (isRouteEnabled(routeKey) && isPublicPathAllowed(pathname)) return <RouteSuspense>{element}</RouteSuspense>
   return <Navigate to="/" replace />
 }
 
 function PublicPathRoute({ routeKey, children, fallback = '/' }) {
   const location = useLocation()
-  if (isRouteEnabled(routeKey) && isPublicPathAllowed(location.pathname)) return children
+  if (isRouteEnabled(routeKey) && isPublicPathAllowed(location.pathname)) return <RouteSuspense>{children}</RouteSuspense>
   return <Navigate to={fallback} replace />
 }
 
@@ -168,7 +169,7 @@ function RedirectTo({ to }) {
 
 /** Envuelve una página de la tienda con el AuthProvider que `useAuth` exige. */
 function Tienda({ children }) {
-  return <TiendaClientePage>{children}</TiendaClientePage>
+  return <RouteSuspense><TiendaClientePage>{children}</TiendaClientePage></RouteSuspense>
 }
 
 function CoursesCanonicalRedirect() {
@@ -188,8 +189,7 @@ export default function AppRouter() {
   return (
     <>
       <ScrollToTop />
-      <Suspense fallback={null}>
-        <Routes>
+      <Routes>
         <Route
           path="/landings/sistema-contenido-notion"
           element={renderPublicPathRoute('landings', '/landings/sistema-contenido-notion', <SistemaContenidosNotionLandingPage />)}
@@ -611,7 +611,6 @@ export default function AppRouter() {
         <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
-      </Suspense>
     </>
   )
 }
