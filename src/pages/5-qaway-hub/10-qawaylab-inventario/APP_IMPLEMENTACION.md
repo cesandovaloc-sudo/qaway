@@ -18,6 +18,7 @@ Elevar la infraestructura funcional y de seguridad de la caratula de autenticaci
    - Checkbox estilizado integrado junto al enlace de recuperacion.
 5. **Aislamiento de Sesion:**
    - Preservacion de storageKey: 'qaway_inventario_auth_token'.
+   - **SUPERSEDIDO [2026-09-23]** — ver entrada "Unificacion de Sesion y Login Centralizado".
 6. **Sello de Confianza y Seguridad:**
    - Badge inferior discreto de Acceso Seguro - Encriptacion SSL/TLS.
 7. **Verificacion:**
@@ -73,3 +74,35 @@ Implementar el esquema de base de datos relacional para planes y suscripciones p
    - Función RPC `check_user_course_access` probada.
    - Políticas RLS verificadas (inserciones anónimas bloqueadas por seguridad).
    - Candado Visual 100% preservado (cero modificaciones en UI/diseño).
+
+---
+
+## [2026-09-23] Unificacion de Sesion y Login Centralizado (modo modulo /hub/inventario)
+
+### Objetivo (decision de arquitectura aprobada)
+Login unico y centralizado del Hub (/)login) tambien para el modulo de Inventario cuando se ejecuta integrado como modulo nativo (/hub/inventario/*). Sesion unica nativa compartida con el Hub/Web principal.
+
+### Decisiones de Arquitectura
+1. **Login unico y centralizado (/login):**
+   - En modo modulo (/hub/inventario/*), sin sesion se redirige a /login?redirect=<ruta+query> con retorno automatico tras autenticacion.
+   - No se muestra caratula minimalista intermedia de Inventario en modo modulo.
+   - La caratula LoginPage.tsx de Inventario queda intacta en frio para el modo independiente (sin prefijo /hub/inventario).
+2. **Sesion unica nativa:**
+   - Eliminado storageKey custom 'qaway_inventario_auth_token' en src/config/supabase.ts.
+   - Se usa la llave default de @supabase/supabase-js (sb-<ref>-auth-token), la misma que el Hub/Web principal (mismo proyecto qrusdsqgygfolxfrafyd y misma anon key).
+   - Resultado: una sola sesion compartida entre Inventario y Hub.
+3. **Limpieza de residuos:**
+   - Al inicializar, se elimina condicionalmente la storageKey vieja 'qaway_inventario_auth_token' huerfana de localStorage (higiene).
+4. **RequireAuth.tsx (contrato final):**
+   - Modo modulo: location.pathname.startsWith('/hub/inventario') -> /login?redirect=encodeURIComponent(pathname + search).
+   - Modo standalone: /login absoluto con state.from (contrato previo preservado).
+
+### Puntos Esenciales Implementados
+1. src/config/supabase.ts: storageKey custom eliminado (+ limpieza condicional de la key huerfana).
+2. src/app/router/RequireAuth.tsx: delegacion al /login central con retorno en modo modulo; contrato standalone intacto.
+3. RequireAuth.test.tsx: nueva cobertura del branch /hub/inventario (redirect con path + search) sobre los 3 casos previos.
+
+### Verificacion
+- Compilacion limpia con TypeScript (npx tsc --noEmit: 0 errores).
+- Suite de tests del modulo en verde (incluye el nuevo caso de modo modulo).
+- oxlint limpio.

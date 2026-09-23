@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-B74pBk57.js";import{t}from"./AuthContext-B0K9gG8D.js";var n=e();function r({children:e}){return(0,n.jsx)(t,{children:e})}export{r as default};

@@ -39,6 +39,7 @@ function LoginProbe() {
   return (
     <div data-testid="login">
       login-page from:{location.state?.from?.pathname ?? 'none'}
+      login-page search:{location.search ?? ''}
     </div>
   )
 }
@@ -51,6 +52,19 @@ function renderProtected() {
           <Route path="protegida" element={<div>CONTENIDO PROTEGIDO</div>} />
         </Route>
         <Route path="login" element={<LoginProbe />} />
+      </Routes>
+    </MemoryRouter>,
+  )
+}
+
+function renderProtectedHub() {
+  return render(
+    <MemoryRouter initialEntries={['/hub/inventario/panel?tab=ofertas']}>
+      <Routes>
+        <Route element={<RequireAuth />}>
+          <Route path="/hub/inventario/panel" element={<div>CONTENIDO HUB</div>} />
+        </Route>
+        <Route path="/login" element={<LoginProbe />} />
       </Routes>
     </MemoryRouter>,
   )
@@ -78,6 +92,25 @@ describe('RequireAuth', () => {
     expect(login).toBeInTheDocument()
     expect(login).toHaveTextContent('login-page from:/protegida')
     expect(screen.queryByText('CONTENIDO PROTEGIDO')).not.toBeInTheDocument()
+  })
+
+  it('modo módulo sin sesión redirige a /login?redirect= con path + search codificados', () => {
+    mockAuth({ session: null, loading: false })
+    renderProtectedHub()
+
+    const login = screen.getByTestId('login')
+    expect(login).toBeInTheDocument()
+    expect(login).toHaveTextContent('search:?redirect=%2Fhub%2Finventario%2Fpanel%3Ftab%3Dofertas')
+    expect(login).toHaveTextContent('from:none')
+    expect(screen.queryByText('CONTENIDO HUB')).not.toBeInTheDocument()
+  })
+
+  it('modo módulo con sesión renderiza el contenido protegido (Outlet)', () => {
+    mockAuth({ session, loading: false })
+    renderProtectedHub()
+
+    expect(screen.getByText('CONTENIDO HUB')).toBeInTheDocument()
+    expect(screen.queryByTestId('login')).not.toBeInTheDocument()
   })
 
   it('con sesión renderiza el contenido protegido (Outlet)', () => {

@@ -15,8 +15,13 @@ export default function RequireAuth() {
   }
 
   if (!session) {
-    const loginPath = location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/login' : '/login'
-    return <Navigate to={loginPath} replace state={{ from: location }} />
+    // Módulo nativo del Hub: delegar al /login central con retorno.
+    // Standalone (sin prefijo /hub/inventario): login propio relativo.
+    if (location.pathname.startsWith('/hub/inventario')) {
+      const redirect = encodeURIComponent(location.pathname + location.search)
+      return <Navigate to={`/login?redirect=${redirect}`} replace />
+    }
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return <Outlet />

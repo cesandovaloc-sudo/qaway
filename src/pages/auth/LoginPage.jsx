@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [resetSent, setResetSent]       = useState(false)
   const [showReset, setShowReset]       = useState(false)
   const [resetEmail, setResetEmail]     = useState('')
+  const [checking, setChecking]         = useState(true)
 
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -157,15 +158,21 @@ export default function LoginPage() {
   useEffect(() => {
     let alive = true
     const supabase = getSupabaseClient()
-    if (!supabase) return
+    if (!supabase) {
+      if (alive) setChecking(false)
+      return
+    }
     supabase.auth.getSession()
       .then(async ({ data }) => {
-        if (alive && data.session) {
+        if (!alive) return
+        if (data.session) {
           const target = await resolvePostLoginTarget(supabase, data.session.user.id)
           if (alive) navigate(target, { replace: true })
+          return
         }
+        setChecking(false)
       })
-      .catch(() => {})
+      .catch(() => { if (alive) setChecking(false) })
     return () => { alive = false }
   }, [redirectTarget, navigate])
 
@@ -173,17 +180,40 @@ export default function LoginPage() {
   // abrir el link, no hacemos que el usuario "vuelva a ingresar" — al panel.
   useEffect(() => {
     if (!verified) return
+    let alive = true
     const supabase = getSupabaseClient()
-    if (!supabase) return
+    if (!supabase) {
+      if (alive) setChecking(false)
+      return
+    }
     supabase.auth.getUser()
       .then(async ({ data }) => {
+        if (!alive) return
         if (data?.user) {
           const target = await resolvePostLoginTarget(supabase, data.user.id)
-          navigate(target, { replace: true })
+          if (alive) navigate(target, { replace: true })
+          return
         }
+        setChecking(false)
       })
-      .catch(() => {})
-  }, [verified])
+      .catch(() => { if (alive) setChecking(false) })
+    return () => { alive = false }
+  }, [verified, navigate])
+
+  // Mientras se verifica una sesión viva (pestaña nueva / correo confirmado) se
+  // muestra un loader: evita el "flash" del formulario de login ya estando adentro.
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
+            <span className="text-3xl font-black text-zinc-950">Q</span>
+          </div>
+          <div className="w-7 h-7 border-2 border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex font-sans">

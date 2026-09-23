@@ -11,8 +11,13 @@ const apps = [
   ["marketing", "Marketing Studio", "Campañas y herramientas de marketing."],
 ];
 
-function Field({ label, placeholder, type = "text", value, onChange }) {
-  return <label className="field"><span>{label}</span><input type={type} placeholder={placeholder} value={value} onChange={onChange} /></label>;
+function Field({ label, placeholder, type = "text", value, onChange, lock }) {
+  return (
+    <label className="field">
+      <span>{label}{lock ? " 🔒" : ""}</span>
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange} readOnly={lock} className={lock ? "locked" : ""} />
+    </label>
+  );
 }
 
 export default function HubOnboardingPage() {
@@ -27,16 +32,30 @@ export default function HubOnboardingPage() {
   const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "", rubro: "", phone: "", email: "" });
   const [inviteEmail, setInviteEmail] = useState("");
   const [note, setNote] = useState("");
+  const [terms, setTerms] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const next = () => setStep(s => Math.min(5, s + 1));
-  const back = () => setStep(s => Math.max(1, s - 1));
+  const back = () => setStep(s => Math.max(session ? 2 : 1, s - 1));
   const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  // Identidad del usuario autenticado (para la carátula "Tu cuenta" bloqueada).
+  const meta = (session?.user?.user_metadata) || {};
+  const fullName = meta.full_name || "";
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  const identity = {
+    first: nameParts[0] || "",
+    last: meta.last_name || nameParts.slice(1).join(" ") || "",
+    email: session?.user?.email || "",
+  };
 
   useEffect(() => {
     (async () => {
       const { data: { session: s } } = await supabase.auth.getSession();
       setSession(s || null);
       if (s?.user?.email) setAdminEmail(s.user.email);
+      // Ya autenticado: la carátula "Tu cuenta" no aplica, se salta directo a "Tu empresa".
+      if (s) setStep((st) => Math.max(st, 2));
+      setLoading(false);
       if (!s) return;
       const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
       if (me?.tenant_id) {
@@ -146,7 +165,7 @@ export default function HubOnboardingPage() {
     <div className="onboarding">
       <header>
         <div className="logo">Qaway<span>Lab</span></div>
-        <div className="login">¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></div>
+        <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
       </header>
 
       <main>
@@ -161,19 +180,25 @@ export default function HubOnboardingPage() {
           ))}
         </div>
 
-        {step === 1 && (
+        {loading && <div style={{ textAlign: "center", padding: "60px 0 30px", color: "#999", fontSize: 14 }}>Cargando…</div>}
+
+        {!loading && step === 1 && (
           <section className="card">
-            <small className="eyebrow">EMPECEMOS</small>
-            <h1>Crea tu cuenta.</h1>
-            <p>Primero necesitamos tus datos personales. Después registrarás tu empresa y crearás tu espacio en Qaway Hub.</p>
+            <small className="eyebrow">{session ? "TU CUENTA" : "EMPECEMOS"}</small>
+            <h1>{session ? "Tu cuenta" : "Crea tu cuenta."}</h1>
+            <p>{session
+              ? "Estos datos se leen de tu cuenta y están bloqueados. No se pueden modificar desde aquí."
+              : "Primero necesitamos tus datos personales. Después registrarás tu empresa y crearás tu espacio en Qaway Hub."}</p>
             <div className="grid">
-              <Field label="Nombre" placeholder="Carlos" />
-              <Field label="Apellidos" placeholder="Tu apellido" />
+              <Field label="Nombre" placeholder="Carlos" value={session ? identity.first : undefined} lock={!!session} />
+              <Field label="Apellidos" placeholder="Tu apellido" value={session ? identity.last : undefined} lock={!!session} />
             </div>
-            <Field label="Correo electrónico" placeholder="nombre@empresa.com" type="email" />
-            <Field label="Contraseña" placeholder="Crea una contraseña segura" type="password" />
-            <label className="check"><input type="checkbox" /> Acepto los términos y condiciones.</label>
-            <button className="primary" onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
+            <Field label="Correo electrónico" placeholder="nombre@empresa.com" type="email" value={session ? identity.email : undefined} lock={!!session} />
+            <Field label="Contraseña" placeholder="Crea una contraseña segura" type="password" value={session ? "••••••••" : undefined} lock={!!session} />
+            {!session && (
+              <label className="check"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} /> Acepto los términos y condiciones.</label>
+            )}
+            <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
           </section>
         )}
 
@@ -271,9 +296,9 @@ export default function HubOnboardingPage() {
         .card{background:#fff;border:1px solid #e5e5e9;border-radius:20px;padding:40px;box-shadow:0 15px 45px rgba(0,0,0,.045)}.card.wide{max-width:800px}.card.wider{max-width:900px}.card.done{text-align:center}
         .eyebrow{display:block;color:#ff4b0b;font-size:10px;font-weight:800;letter-spacing:1.6px;margin-bottom:12px}
         h1{font-size:38px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 12px}p{color:#73737b;font-size:14px;line-height:1.65;margin:0 0 27px;max-width:650px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:11px;font-weight:800;margin-bottom:7px}.field input,.invite input{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 13px;outline:none}.field input:focus,.invite input:focus{border-color:#111}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:11px;font-weight:800;margin-bottom:7px}.field input,.invite input{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 13px;outline:none}.field input:focus,.invite input:focus{border-color:#111}.field input.locked{background:#f6f6f7;color:#555;cursor:not-allowed;border-color:#e7e7eb}
         .check{display:flex;gap:8px;font-size:11px;color:#666;margin:5px 0 23px}.check input{accent-color:#ff4b0b}
-        .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+        .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#a9a9ad;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #d6d6db;border-radius:12px;padding:13px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f3f3f5;display:grid;place-items:center;font-size:22px;color:#999}.logoUpload section{display:flex;flex-direction:column;gap:3px}.logoUpload section b{font-size:12px}.logoUpload section small{font-size:10px;color:#999}.logoUpload button{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700}
         .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e0e0e5;border-radius:12px;padding:15px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:35px;height:35px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:12px}.app span small{font-size:10px;color:#85858c;line-height:1.4}.app>i{margin-left:auto;width:19px;height:19px;border:1px solid #ccc;border-radius:50%;font-style:normal;font-size:10px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
         .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px}.note span{font-size:10px;color:#777}

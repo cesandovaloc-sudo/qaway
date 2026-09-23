@@ -14,6 +14,7 @@ const CLIENT_LOGOS = [
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,6 +36,10 @@ export default function RegisterPage() {
       setError('Escribe tu nombre.')
       return
     }
+    if (lastName.trim().length < 2) {
+      setError('Escribe tus apellidos.')
+      return
+    }
     if (password.length < 8) {
       setError('Mínimo 8 caracteres.')
       return
@@ -46,11 +51,12 @@ export default function RegisterPage() {
         setError('Servicio de autenticación no disponible.')
         return
       }
+      const composedName = `${name.trim()} ${lastName.trim()}`.replace(/\s+/g, ' ').trim()
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
-          data: { full_name: name.trim() },
+          data: { full_name: composedName, last_name: lastName.trim() },
           emailRedirectTo: `${APP_BASE_URL}/login?verified=1`,
         },
       })
@@ -196,24 +202,44 @@ export default function RegisterPage() {
 
           {/* Formulario nombre + correo + contraseña */}
           <form onSubmit={handleRegister} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                Nombre
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-zinc-600" />
+            <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                      Nombre
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <User className="h-5 w-5 text-zinc-600" />
+                      </div>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all font-medium placeholder:text-zinc-600"
+                        placeholder="Tu nombre"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                      Apellidos
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <User className="h-5 w-5 text-zinc-600" />
+                      </div>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all font-medium placeholder:text-zinc-600"
+                        placeholder="Tus apellidos"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all font-medium placeholder:text-zinc-600"
-                  placeholder="Tu nombre"
-                  required
-                />
-              </div>
-            </div>
 
             <div className="space-y-2">
               <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
