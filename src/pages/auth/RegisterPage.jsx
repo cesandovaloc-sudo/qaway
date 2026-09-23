@@ -56,7 +56,17 @@ export default function RegisterPage() {
       })
       if (error) throw error
       if (data.session) {
-        navigate(redirectTarget, { replace: true })
+        // Ruta canónica (aprobado 2026-09-23): ?redirect= explícito gana SOLO si el
+        // usuario ya tiene marca (invitado). Cuenta nueva sin marca → /onboarding.
+        let target = rawRedirect || null
+        try {
+          const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', data.user.id).maybeSingle()
+          if (!target) target = (me && me.tenant_id !== null) ? '/hub/panel' : '/onboarding'
+        } catch (_) {
+          target = target || '/onboarding'
+        }
+        navigate(target, { replace: true })
+        return
       } else {
         navigate(`/login?registered=1&email=${encodeURIComponent(email.trim())}`, { replace: true })
       }

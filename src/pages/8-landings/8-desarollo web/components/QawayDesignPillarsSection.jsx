@@ -381,6 +381,46 @@ export function QawayDesignPillarsSection() {
             </button>
           </div>
         </motion.div>
+
+        {/* Botón CTA Minimalista centrado al pie de la sección completa */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.21, 0.47, 0.32, 0.98] }}
+          style={{ marginTop: "48px", textAlign: "center" }}
+        >
+          <a
+            href="#precios"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "12px 28px",
+              borderRadius: "9999px",
+              background: "transparent",
+              border: "1.5px solid #fe6612",
+              color: "#fe6612",
+              fontSize: "14.5px",
+              fontWeight: 600,
+              textDecoration: "none",
+              transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#fe6612";
+              e.currentTarget.style.color = "#ffffff";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(254, 102, 18, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = "#fe6612";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            <span>Comenzar ahora</span>
+            <span style={{ fontSize: "16px", lineHeight: 1 }}>→</span>
+          </a>
+        </motion.div>
       </div>
     </section>
   );

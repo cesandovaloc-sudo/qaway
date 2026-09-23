@@ -79,7 +79,6 @@ import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
 import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
 import InvitarPage from '@/pages/5-qaway-hub/invitar/InvitarPage.jsx'
 import EmpresasPage from '@/pages/5-qaway-hub/empresas/EmpresasPage.jsx'
-import HubOnboardingPage from '@/pages/5-qaway-hub/HubOnboardingPage.jsx'
 import OnboardingPage from '@/pages/5-qaway-hub/onboarding/OnboardingPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
@@ -410,9 +409,11 @@ export default function AppRouter() {
             path="hub/empresas"
             element={renderRoute('hub', <ProtectedRoute><EmpresasPage /></ProtectedRoute>)}
           />
+          {/* Onboarding canónico ÚNICO (aprobado 2026-09-23): /onboarding es el comercial.
+              /hub/bienvenida redirige ahí (conserva query) y no duplica flujos. */}
           <Route
             path="hub/bienvenida"
-            element={renderRoute('hub', <ProtectedRoute><HubOnboardingPage /></ProtectedRoute>)}
+            element={<RedirectTo to="/onboarding" />}
           />
         {/* Agentes de IA Responsable (Ley 31814 & Google PAIR): standalone FUERA del Layout */}
         <Route

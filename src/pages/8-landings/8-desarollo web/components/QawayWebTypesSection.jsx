@@ -29,10 +29,11 @@ export function QawayWebTypesSection() {
           </motion.div>
 
           <div className="h-three-cards-grid">
-            {/* Tarjeta 1: Landing Pages */}
-            <motion.div
+            {/* Tarjeta 1: Landing Pages (Enlace a Vallet) */}
+            <motion.a
+              href="/proyectos/vallet"
               className="h-ai-feature-card"
-              style={{ background: "#ffffff", cursor: "pointer" }}
+              style={{ background: "#ffffff", cursor: "pointer", textDecoration: "none", color: "inherit" }}
               initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ y: -6, boxShadow: "0 18px 45px rgba(0,0,0,0.1)", transition: { duration: 0.2, ease: "easeOut" } }}
@@ -55,7 +56,7 @@ export function QawayWebTypesSection() {
                   Páginas de una sola sección optimizadas para tráfico publicitario, carga instantánea y conversión directa a correo o tu WhatsApp.
                 </p>
               </div>
-            </motion.div>
+            </motion.a>
 
             {/* Tarjeta 2: Sitios Corporativos */}
             <motion.div
@@ -117,11 +118,12 @@ export function QawayWebTypesSection() {
           {/* Botón CTA */}
           <div style={{ marginTop: "46px", textAlign: "center" }}>
             <a
-              href="#precios"
+              href="/proyectos"
               className="h-btn-cta-purple h-btn-cta-orange"
-              style={{ padding: "14px 42px", fontSize: "15px" }}
+              style={{ padding: "14px 38px", fontSize: "15px", display: "inline-flex", alignItems: "center", gap: "8px" }}
             >
-              Comenzar ahora
+              <span>Ver proyectos en vivo</span>
+              <span style={{ fontSize: "16px", lineHeight: 1 }}>→</span>
             </a>
           </div>
         </div>

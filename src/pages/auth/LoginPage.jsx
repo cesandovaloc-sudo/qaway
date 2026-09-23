@@ -33,6 +33,19 @@ export default function LoginPage() {
     ? rawRedirect
     : '/hub/panel'
   const regEmail = searchParams.get('email') || ''
+  // Ruta canónica post-login (aprobado 2026-09-23):
+  //   ?redirect= explícito     → gana (prioridad).
+  //   sin marca (tenant_id NULL y NO es plataforma) → /onboarding (continuar empresa).
+  //   con marca / plataforma   → /hub/panel.
+  // Solo DECIDE la ruta de onboarding; la autorización sigue en Supabase/RLS.
+  const resolvePostLoginTarget = async (supabase, userId) => {
+    if (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) return rawRedirect
+    try {
+      const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
+      if (me && me.tenant_id === null && !me.is_platform_admin) return '/onboarding'
+    } catch (_) { /* error de lectura: cae al destino normal */ }
+    return '/hub/panel'
+  }
   const mailHref = (() => {
     const e = regEmail.trim().toLowerCase()
     if (e.endsWith('@gmail.com')) return 'https://mail.google.com/mail/'
@@ -77,7 +90,8 @@ export default function LoginPage() {
           // F-AUTH run-2: default viewer (antes 'admin'). El rol real lo da el servidor.
           const role = isSuperAdmin(cleanEmail) ? 'admin' : (supaData.user?.user_metadata?.role || 'viewer')
           persistSession(supaData.session.access_token, cleanEmail, role)
-          navigate(redirectTarget, { replace: true })
+          const target = await resolvePostLoginTarget(supabase, supaData.session.user.id)
+          navigate(target, { replace: true })
           return
         }
 
@@ -145,7 +159,12 @@ export default function LoginPage() {
     const supabase = getSupabaseClient()
     if (!supabase) return
     supabase.auth.getSession()
-      .then(({ data }) => { if (alive && data.session) navigate(redirectTarget, { replace: true }) })
+      .then(async ({ data }) => {
+        if (alive && data.session) {
+          const target = await resolvePostLoginTarget(supabase, data.session.user.id)
+          if (alive) navigate(target, { replace: true })
+        }
+      })
       .catch(() => {})
     return () => { alive = false }
   }, [redirectTarget, navigate])
@@ -157,7 +176,12 @@ export default function LoginPage() {
     const supabase = getSupabaseClient()
     if (!supabase) return
     supabase.auth.getUser()
-      .then(({ data }) => { if (data?.user) navigate('/hub/panel', { replace: true }) })
+      .then(async ({ data }) => {
+        if (data?.user) {
+          const target = await resolvePostLoginTarget(supabase, data.user.id)
+          navigate(target, { replace: true })
+        }
+      })
       .catch(() => {})
   }, [verified])
 
@@ -276,7 +300,7 @@ export default function LoginPage() {
                   Iniciar Sesión
                 </button>
                 <Link
-                  to={redirectTarget && redirectTarget !== '/hub' ? `/registrarse?redirect=${encodeURIComponent(redirectTarget)}` : '/registrarse'}
+                  to={rawRedirect ? `/registrarse?redirect=${encodeURIComponent(rawRedirect)}` : '/registrarse'}
                   className="flex-1 py-2.5 text-xs font-bold rounded-xl text-zinc-500 hover:text-white text-center"
                 >
                   Crear Cuenta
