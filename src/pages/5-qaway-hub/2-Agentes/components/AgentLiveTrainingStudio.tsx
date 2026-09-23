@@ -38,7 +38,7 @@ export const AgentLiveTrainingStudio: React.FC<Props> = ({
   const [correctionDraft, setCorrectionDraft] = useState({ userQuery: '', badReply: '', humanCorrection: '' })
 
   // Simular conversaciones en vivo (en producción: Supabase Realtime + conversations table)
-  const [liveConversations] = useState<LiveConversation[]>(() => generateMockConversations(workspace))
+  const [liveConversations, setLiveConversations] = useState<LiveConversation[]>(() => generateMockConversations(workspace))
 
   const updateConversation = (id: string, updates: Partial<LiveConversation>) => {
     // En producción: update Supabase conversations table

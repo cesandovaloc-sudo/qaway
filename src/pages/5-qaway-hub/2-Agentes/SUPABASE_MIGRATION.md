@@ -1,9 +1,9 @@
 # MIGRACIÓN SUPABASE — Agentes de IA Responsable (Multi-Tenant)
 
 **Para:** Agente Supabase / Database Engineer  
-**Versión:** 1.1 — Septiembre 2026  
+**Versión:** 2.0 — Septiembre 2026  
 **Contexto:** Hub Qaway Lab — Módulo 2-Agentes  
-**Objetivo:** Persistencia real + RLS estricto (public.get_auth_tenant_id()) + pgvector para RAG + Webhook WhatsApp
+**Objetivo:** Persistencia real + RLS estricto (public.get_auth_tenant_id()) + pgvector para RAG + Webhook WhatsApp + Fase 2 (Edge Functions + Vault + Cron + Admin RPCs)
 
 ---
 

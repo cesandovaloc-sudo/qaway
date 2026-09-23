@@ -15,6 +15,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   X,
+  Save,
+  ShieldCheck,
 } from "lucide-react";
 
 /**
@@ -133,6 +135,194 @@ function normalizeUser(row, { tenantName = "", isPlatformAdmin = false } = {}) {
   };
 }
 
+// Secciones administrativas OTORGABLES a un trabajador. Usuarios y Configuración
+// quedan fuera a propósito (exclusivas del administrador de la marca).
+const GRANTABLE_PANEL = [
+  { id: "Reportes", label: "Reportes" },
+  { id: "Pagos", label: "Pagos" },
+  { id: "Suscripciones", label: "Suscripciones" },
+  { id: "Planes", label: "Planes" },
+  { id: "Soporte", label: "Soporte" },
+];
+
+const APP_ROLES = ["admin", "editor", "viewer", "guest"];
+
+/*
+ * Editor de accesos por usuario (roles de app + secciones del panel).
+ * RLS de Supabase ya permite escritura directa para ambos administradores:
+ *  - platform_admin: user_app_roles (uar_admin_all) y users.permissions (is_admin()).
+ *  - tenant_admin    : user_app_roles (uar_tenant_admin_manage) y users.permissions
+ *    (users_tenant_admin_update). prevent_role_escalation v3 solo bloquea cambios
+ *    de tenant/is_platform_admin/role, no permissions.
+ */
+function UserAccessEditor({ userId, userName, tenantId, isPlatformAdmin, supabase }) {
+  const [apps, setApps] = useState([]);
+  const [appState, setAppState] = useState({});
+  const [roleByApp, setRoleByApp] = useState({});
+  const [sections, setSections] = useState([]);
+  const [basePermissions, setBasePermissions] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [backendNote, setBackendNote] = useState("");
+  const [saveMsg, setSaveMsg] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    setSaveMsg("");
+    (async () => {
+      try {
+        const [{ data: catalog }, { data: meRow }, { data: rows, error: rolesErr }] = await Promise.all([
+          supabase.from("app_catalog").select("id, name, slug").order("name"),
+          supabase.from("users").select("permissions").eq("id", userId).single(),
+          supabase.from("user_app_roles").select("app_id, role").eq("user_id", userId),
+        ]);
+        if (!alive) return;
+        const catalogList = catalog || [];
+        setApps(catalogList);
+        setBasePermissions(meRow?.permissions || {});
+        setSections((meRow?.permissions?.panel || []).filter((s) => GRANTABLE_PANEL.some((g) => g.id === s)));
+
+        let active = {};
+        let roles = {};
+        let note = "";
+        if (rolesErr) note = "No se pudieron leer las apps asignadas: " + rolesErr.message;
+        else rows.forEach((r) => { active[r.app_id] = true; roles[r.app_id] = r.role || "viewer"; });
+        catalogList.forEach((a) => { if (!roles[a.id]) roles[a.id] = "viewer"; });
+        if (alive) {
+          setAppState(active);
+          setRoleByApp(roles);
+          setBackendNote(note);
+        }
+      } catch (err) {
+        if (alive) setBackendNote(err?.message || "No se pudieron cargar los accesos.");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [userId]);
+
+  async function saveAll() {
+    setSaveMsg("");
+    let msg = "";
+    const selected = Object.entries(appState)
+      .filter(([, on]) => on)
+      .map(([appId]) => ({ user_id: userId, tenant_id: tenantId, app_id: appId, role: roleByApp[appId] || "viewer" }));
+    if (selected.length) {
+      const { error } = await supabase.from("user_app_roles").upsert(selected, { onConflict: "user_id,tenant_id,app_id" });
+      if (error) msg = "Apps: " + error.message;
+    }
+    const off = Object.entries(appState).filter(([, on]) => !on).map(([appId]) => appId);
+    if (!msg && off.length) {
+      const { error } = await supabase.from("user_app_roles").delete().eq("user_id", userId).in("app_id", off);
+      if (error) msg = "Apps: " + error.message;
+    }
+    if (!msg) {
+      const { error: permErr } = await supabase
+        .from("users")
+        .update({ permissions: { ...basePermissions, panel: sections } })
+        .eq("id", userId);
+      if (permErr) msg = "Secciones: " + permErr.message;
+    }
+    setSaveMsg(msg || "Accesos guardados correctamente.");
+  }
+
+  return (
+    <div className="border-t border-zinc-100 bg-zinc-50/60 px-5 py-4 md:px-6">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1.5 text-sm font-extrabold text-zinc-900">
+          <Icon size={15}><ShieldCheck /></Icon>
+          Accesos · {userName}
+        </p>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          {isPlatformAdmin ? "Vista global (plataforma)" : "Solo tu empresa (RLS)"}
+        </span>
+      </div>
+
+      {backendNote && (
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+          {backendNote}
+        </div>
+      )}
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div>
+          <p className="mb-2 text-xs font-bold text-zinc-700">Aplicaciones</p>
+          {loading ? (
+            <div className="space-y-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-10 animate-pulse rounded-lg border border-zinc-200 bg-white" />
+              ))}
+            </div>
+          ) : apps.length ? (
+            <div className="space-y-2">
+              {apps.map((app) => (
+                <label key={app.id} className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={!!appState[app.id]}
+                    onChange={() => setAppState((s) => ({ ...s, [app.id]: !s[app.id] }))}
+                    className="h-4 w-4 rounded accent-[#ff4b0b]"
+                  />
+                  <span className="flex-1 text-xs font-bold text-zinc-800">{app.name}</span>
+                  <select
+                    value={roleByApp[app.id] || "viewer"}
+                    disabled={!appState[app.id]}
+                    onChange={(e) => setRoleByApp((r) => ({ ...r, [app.id]: e.target.value }))}
+                    className="h-7 rounded-lg border border-zinc-200 bg-white px-2 text-[11px] font-medium outline-none disabled:opacity-50"
+                  >
+                    {APP_ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-zinc-400">Sin aplicaciones en el catálogo.</p>
+          )}
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-bold text-zinc-700">Secciones del panel (otorgables)</p>
+          <div className="space-y-2">
+            {GRANTABLE_PANEL.map((g) => (
+              <label key={g.id} className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={sections.includes(g.id)}
+                  onChange={() => setSections((s) => (s.includes(g.id) ? s.filter((x) => x !== g.id) : [...s, g.id]))}
+                  className="h-4 w-4 rounded accent-[#ff4b0b]"
+                />
+                <span className="text-xs font-bold text-zinc-800">{g.label}</span>
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] text-zinc-400">
+            Usuarios y Configuración son exclusivos del administrador y nunca se otorgan.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={saveAll}
+          className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-xs font-bold text-white transition hover:bg-[#e94408]"
+        >
+          <Save size={14} />
+          Guardar accesos
+        </button>
+        {saveMsg && (
+          <span className={`text-xs font-bold ${saveMsg.includes("Error") ? "text-red-500" : "text-emerald-600"}`}>
+            {saveMsg}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function UsersModule({
   tenantId,
   session,
@@ -153,6 +343,7 @@ export default function UsersModule({
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
+  const [permUserId, setPermUserId] = useState(null);
 
   // Soporte del detalle: deep-link /hub/panel/usuarios?usuario=id
   const location = useLocation();
@@ -646,12 +837,12 @@ export default function UsersModule({
                         const role = ROLE_META[user.role] || ROLE_META.Usuario;
 
                         return (
+                        <React.Fragment key={user.id}>
                           <tr
-                            key={user.id}
                             id={user.id ? `user-row-${user.id}` : undefined}
                             className={`group transition hover:bg-zinc-50/70 ${
                               selectedId === user.id ? "bg-amber-50/60" : ""
-                            }`}
+                            } ${permUserId === user.id ? "bg-zinc-50/80" : ""}`}
                           >
                             <td className="px-5 py-3 md:px-6">
                               <input
@@ -744,6 +935,10 @@ export default function UsersModule({
                                     </button>
                                     <button
                                       type="button"
+                                      onClick={() => {
+                                        setPermUserId((p) => (p === user.id ? null : user.id));
+                                        setOpenMenu(null);
+                                      }}
                                       className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50"
                                     >
                                       Gestionar permisos
@@ -753,7 +948,22 @@ export default function UsersModule({
                               </div>
                             </td>
                           </tr>
-                        );
+                          {user.id && permUserId === user.id && (
+                            <tr>
+                              <td colSpan={8} className="p-0">
+                                <UserAccessEditor
+                                  key={user.id}
+                                  userId={user.id}
+                                  userName={user.name}
+                                  tenantId={tenantId}
+                                  isPlatformAdmin={isPlatformAdmin === true}
+                                  supabase={supabase}
+                                />
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
                       })
                     ) : (
                       <tr>
