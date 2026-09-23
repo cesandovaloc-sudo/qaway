@@ -93,6 +93,55 @@ function ActionRow({ icon, label, onClick }) {
   );
 }
 
+function SeguridadSection({ onOpenSecurity }) {
+  return (
+    <SectionCard
+      title="Seguridad"
+      description="Mantén tu cuenta protegida. Estas opciones se conectarán al sistema de autenticación de la plataforma."
+    >
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500"><Lock size={16} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold text-gray-800">Contraseña</p>
+            <p className="mt-0.5 text-[10px] text-gray-500">Cambiar la contraseña de acceso a tu cuenta.</p>
+          </div>
+          <button type="button" onClick={onOpenSecurity}
+            className="flex h-8 shrink-0 items-center gap-1 rounded-lg border border-gray-200 bg-white px-3 text-[10px] font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+            Administrar <ChevronRight size={13} className="text-gray-300" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500"><Shield size={16} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold text-gray-800">Verificación en dos pasos (2FA)</p>
+            <p className="mt-0.5 text-[10px] text-gray-500">Añade una capa extra de seguridad al iniciar sesión.</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[9px] font-semibold text-gray-500">Próximamente</span>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-4">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-500"><LogIn size={16} /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold text-gray-800">Sesiones activas</p>
+            <p className="mt-0.5 text-[10px] text-gray-500">Dispositivos y sesiones donde tu cuenta está iniciada.</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-1 text-[9px] font-semibold text-gray-500">Próximamente</span>
+        </div>
+
+        <div className="flex gap-3 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
+          <Info size={15} className="mt-0.5 shrink-0 text-blue-500" />
+          <p className="text-[10px] leading-4 text-gray-600">
+            La contraseña, la verificación y las sesiones se gestionan desde el sistema de autenticación (Supabase Auth), coordinado
+            con el backend de Qaway. Estas secciones se habilitarán al conectar ese flujo.
+          </p>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
 export default function HubProfilePanel({
   profile = DEFAULT_PROFILE,
   activity = DEFAULT_ACTIVITY,
@@ -111,6 +160,7 @@ export default function HubProfilePanel({
   const [timezone, setTimezone] = useState(data.timezone);
   const [language, setLanguage] = useState(data.language);
   const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl || "");
+  const [section, setSection] = useState("cuenta");
   const [selectedFile, setSelectedFile] = useState(null);
   const [savingPersonal, setSavingPersonal] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
@@ -200,15 +250,21 @@ export default function HubProfilePanel({
         </div>
 
         <div className="mb-4 flex border-b border-gray-200">
-          <button type="button" className="relative px-5 pb-3 pt-2 text-[12px] font-semibold text-[#ff4b0b]">
+          <button type="button" onClick={() => setSection("cuenta")}
+            className={cn("relative px-5 pb-3 pt-2 text-[12px] font-semibold transition-colors", section === "cuenta" ? "text-[#ff4b0b]" : "text-gray-500 hover:text-gray-800")}>
             Mi cuenta
-            <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] rounded-full bg-[#ff4b0b]" />
+            {section === "cuenta" && <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] rounded-full bg-[#ff4b0b]" />}
           </button>
-          <button type="button" onClick={onOpenSecurity} className="px-5 pb-3 pt-2 text-[12px] font-medium text-gray-500 hover:text-gray-800">
+          <button type="button" onClick={() => setSection("seguridad")}
+            className={cn("relative px-5 pb-3 pt-2 text-[12px] font-semibold transition-colors", section === "seguridad" ? "text-[#ff4b0b]" : "text-gray-500 hover:text-gray-800")}>
             Seguridad
+            {section === "seguridad" && <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] rounded-full bg-[#ff4b0b]" />}
           </button>
         </div>
 
+        {section === "seguridad" ? (
+          <SeguridadSection onOpenSecurity={onOpenSecurity} />
+        ) : (
         <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-3">
           <div className="min-w-0 space-y-3">
 
@@ -388,6 +444,7 @@ export default function HubProfilePanel({
             </SectionCard>
           </aside>
         </div>
+        )}
       </main>
     </div>
   );
