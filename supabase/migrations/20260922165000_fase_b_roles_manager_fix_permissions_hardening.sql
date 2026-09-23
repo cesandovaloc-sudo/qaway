@@ -9,9 +9,9 @@
 -- 2) prevent_role_escalation v4: además de role/tenant/is_platform_admin,
 --    rechazar que un trabajador se auto-cambie permissions (secciones de
 --    panel) vía users_update_own_or_admin; solo admin del tenant o plataforma.
--- 3) [DECISIÓN PENDIENTE] Directorio: users_tenant_read queda como está
---    (visible para miembros) hasta que el usuario decida restringirlo a
---    is_tenant_admin(). Bloque comentado al final, listo para activar.
+-- 3) Directorio de tenant POR MEMBRESÍA: miembros internos (admin/editor/
+--    viewer) lo ven (colaboración, menciones, chat), guests NO (externos),
+--    plataforma vía is_admin(). Aprobado 2026-09-22.
 -- Idempotente. Sin push (protocolo: dry-run + OK del usuario).
 -- ============================================================
 
@@ -97,11 +97,28 @@ create trigger users_prevent_role_escalation
   before update on public.users
   for each row execute procedure public.prevent_role_escalation();
 
--- ─── 3. [DECISIÓN PENDIENTE] Directorio solo para administración ───
--- Si el usuario confirma, activar: miembros viewer/editor/guest NO verían
--- el listado completo de usuarios del tenant (solo admins).
--- drop policy if exists "users_tenant_read" on public.users;
--- create policy "users_tenant_read" on public.users
---   for select using (
---     public.is_tenant_admin() and tenant_id = public.get_auth_tenant_id()
---   );
+-- ─── 3. Directorio por MEMBRESÍA (decisión aprobada 2026-09-22) ───
+-- Modelo industria (Trello/Slack/Google): miembros internos ven el roster
+-- del tenant (colaboración/mentions/chats); guests (externos: proveedor,
+-- becario, cliente puntual) NO ven el directorio — solo su propia fila
+-- (cubierta por users_select_own_or_admin ya existente). Plataforma ve todo
+-- vía is_admin(). Clientes/chats no viven en users (son contactos WabaCrm,
+-- gobernados por user_app_roles) → nada que acotar aquí.
+create or replace function public.is_tenant_member()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.users
+    where id = auth.uid() and role <> 'guest' and tenant_id is not null
+  );
+$$;
+
+drop policy if exists "users_tenant_read" on public.users;
+create policy "users_tenant_read" on public.users
+  for select using (
+    public.is_tenant_member() and tenant_id = public.get_auth_tenant_id()
+  );
