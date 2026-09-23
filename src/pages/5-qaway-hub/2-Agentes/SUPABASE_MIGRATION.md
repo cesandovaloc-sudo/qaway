@@ -3,7 +3,7 @@
 **Para:** Agente Supabase / Database Engineer  
 **Versión:** 2.0 — Septiembre 2026  
 **Contexto:** Hub Qaway Lab — Módulo 2-Agentes  
-**Objetivo:** Persistencia real + RLS estricto (public.get_auth_tenant_id()) + pgvector para RAG + Webhook WhatsApp + Fase 2 (Edge Functions + Vault + Cron + Admin RPCs)
+**Objetivo:** Persistencia real + RLS estricto (public.get_auth_tenant_id()) + pgvector para RAG + Webhook WhatsApp + Fase 2 (Edge Functions + Vault + Cron)
 
 ---
 
@@ -709,6 +709,361 @@ ON CONFLICT DO NOTHING;
 | Vault secrets config | ☐ Pendiente | Dashboard Supabase |
 | Seeds 3 tenants | ☐ Pendiente | `99_seeds.sql` |
 | pg_cron jobs (graduación, embeddings) | ☐ Pendiente | `13_cron.sql` |
+
+---
+
+## FASE 2 — CONTRATO EDGE FUNCTIONS + VAULT + CRON
+
+> **NOTA:** Este documento es solo ESPECIFICACIÓN/CONTRATO. La implementación y despliegue la realiza **exclusivamente** el agente Supabase (1-agente-supabase). Fase 1 (schema + RLS + RPCs + seeds) debe estar completada y verificada antes de iniciar Fase 2.
+
+---
+
+### 1. EDGE FUNCTIONS (3 endpoints)
+
+#### 1.1 `whatsapp-webhook` — Meta Cloud API → Agente
+**Endpoint:** `POST /functions/v1/whatsapp-webhook`
+**Auth:** `X-Hub-Signature-256` (HMAC SHA256 con App Secret)
+**Rate limit:** Meta maneja (reintentos exponenciales)
+
+**Input (Meta webhook payload):**
+```json
+{
+  "object": "whatsapp_business_account",
+  "entry": [{
+    "id": "WABA_ID",
+    "changes": [{
+      "value": {
+        "messaging_product": "whatsapp",
+        "metadata": {
+          "display_phone_number": "+51999888777",
+          "phone_number_id": "10987654321"
+        },
+        "contacts": [{ "profile": { "name": "Juan Pérez" }, "wa_id": "51999888777" }],
+        "messages": [{
+          "from": "51999888777",
+          "id": "wamid.xxxxx",
+          "timestamp": "1726900000",
+          "type": "text",
+          "text": { "body": "Hola, ¿cuánto cuesta la consulta?" }
+        }]
+      },
+      "field": "messages"
+    }]
+  }]
+}
+```
+
+**Flujo interno (server-side):**
+```typescript
+// 1. Validar HMAC (App Secret desde Vault global)
+const valid = await verifyHmac(payload, headers['x-hub-signature-256'], appSecret)
+if (!valid) return new Response('Invalid signature', { status: 403 })
+
+// 2. Extraer datos clave
+const entry = payload.entry[0]
+const change = entry.changes[0]
+const wabaPhoneNumberId = change.value.metadata.phone_number_id
+const messages = change.value.messages || []
+const contacts = change.value.contacts || []
+
+// 3. Resolver tenant por WABA Phone Number ID
+const { data: tenant } = await supabase.rpc('resolve_tenant_by_waba', {
+  p_waba_phone_number_id: wabaPhoneNumberId
+})
+if (!tenant) return new Response('Tenant not found', { status: 404 })
+
+// 4. SET LOCAL RLS context (service_role)
+await supabase.rpc('set_config', {
+  setting_name: 'app.current_tenant_id',
+  setting_value: tenant.id,
+  is_local: true
+})
+
+// 5. Para cada mensaje entrante
+for (const msg of messages) {
+  const userPhone = msg.from
+  const userName = contacts.find(c => c.wa_id === userPhone)?.profile?.name
+  const msgText = msg.text?.body || ''
+  const metaMsgId = msg.id
+
+  // 4.1 Upsert conversation (por user_phone + tenant_id)
+  const { data: conv } = await supabase.rpc('upsert_conversation_by_phone', {
+    p_tenant_id: tenant.id,
+    p_user_phone: userPhone,
+    p_user_name: userName,
+    p_channel: 'whatsapp'
+  })
+
+  // 4.2 Insert user message (idempotente por meta_msg_id)
+  await supabase.from('messages').insert({
+    conversation_id: conv.id,
+    tenant_id: tenant.id,
+    sender: 'user',
+    text: msgText,
+    metadata: { meta_msg_id: metaMsgId, meta_timestamp: msg.timestamp }
+  }).select('id').single()
+
+  // 4.3 Generar embedding (Edge Function async, no bloquea respuesta)
+  supabase.functions.invoke('generate-single-embedding', {
+    body: { tenant_id: tenant.id, text: msgText, type: 'user', source_id: messageId }
+  })
+
+  // 4.4 Recuperar contexto RAG
+  const queryEmbedding = await generateEmbedding(msgText) // llama a Edge Function interna
+  const { data: context } = await supabase.rpc('search_unified_context', {
+    p_tenant_id: tenant.id,
+    p_query_embedding: queryEmbedding,
+    p_top_k: 5
+  })
+
+  // 4.5 Compilar prompt (Capa 0/1/2 + Few-Shot)
+  const systemPrompt = compilePrompt(tenant, context)
+
+  // 4.6 Llamar LLM (según tenant.ai_settings.llm_provider + llm_api_key de Vault)
+  const llmResponse = await callLLM({
+    provider: tenant.ai_settings.llm_provider,
+    model: tenant.ai_settings.model,
+    apiKey: await getVaultSecret('llm_api_key', tenant.id),
+    systemPrompt,
+    userMessage: msgText,
+    temperature: tenant.ai_settings.temperature,
+    tools: getAllowedTools(tenant)
+  })
+
+  // 4.7 Compliance checks (Capa 0)
+  const compliance = checkCompliance(llmResponse, tenant)
+  if (compliance.isHumanRequested) {
+    await forceHandoff(conv.id, tenant)
+  }
+
+  // 4.8 Insert agent message
+  const { data: agentMsg } = await supabase.from('messages').insert({
+    conversation_id: conv.id,
+    tenant_id: tenant.id,
+    sender: 'agent',
+    text: llmResponse.text,
+    metadata: { compliance, toolCalls: llmResponse.toolCalls }
+  }).select('id').single()
+
+  // 4.9 Generar embedding respuesta agente (async)
+  supabase.functions.invoke('generate-single-embedding', {
+    body: { tenant_id: tenant.id, text: llmResponse.text, type: 'agent', source_id: agentMsg.id }
+  })
+
+  // 4.10 Responder a Meta (Send Message API)
+  await sendWhatsAppMessage({
+    phoneNumberId: wabaPhoneNumberId,
+    accessToken: await getVaultSecret('waba_access_token', tenant.id),
+    to: userPhone,
+    text: llmResponse.text
+  })
+
+  // 4.11 Si training_mode = true Y no handoff: forzar handoff + notificar supervisores
+  if (tenant.ai_settings?.training_mode && !compliance.isHumanRequested) {
+    await forceHandoff(conv.id, tenant)
+    await notifySupervisors(tenant.ai_settings.supervisor_ids, {
+      conversationId: conv.id,
+      userPhone,
+      reason: 'training_mode_active'
+    })
+  }
+}
+```
+
+**Output:** `200 OK` (Meta espera respuesta rápida; procesamiento async)
+
+---
+
+#### 1.2 `generate-embeddings` — Batch nocturno
+**Endpoint:** `POST /functions/v1/generate-embeddings`
+**Schedule:** `0 3 * * *` (diario 03:00 AM via pg_cron)
+**Auth:** `service_role` key
+
+**Input (opcional):**
+```json
+{ "tenant_id": "uuid-opcional", "batch_size": 100 }
+```
+
+**Lógica:**
+```typescript
+const { tenant_id, batch_size = 100 } = body
+const tenants = tenant_id 
+  ? [tenant_id] 
+  : (await supabase.from('tenants').select('id').eq('ai_settings->enabled', true)).data.map(t => t.id)
+
+for (const tid of tenants) {
+  const apiKey = await getVaultSecret('llm_api_key', tid)
+  const provider = (await supabase.from('tenants').select('ai_settings->llm_provider').eq('id', tid).single()).data?.ai_settings?.llm_provider || 'gemini'
+
+  // 1. knowledge_base
+  const { data: kb } = await supabase
+    .from('knowledge_base')
+    .select('id, content')
+    .eq('tenant_id', tid)
+    .is('embedding', null)
+    .limit(batch_size)
+  for (const row of kb) {
+    const emb = await generateEmbedding(provider, apiKey, row.content)
+    await supabase.from('knowledge_base').update({ embedding: emb }).eq('id', row.id)
+  }
+
+  // 2. faqs
+  const { data: faqs } = await supabase
+    .from('faqs')
+    .select('id, question, answer')
+    .eq('tenant_id', tid)
+    .is('embedding', null)
+    .limit(batch_size)
+  for (const row of faqs) {
+    const emb = await generateEmbedding(provider, apiKey, row.question + ' ' + row.answer)
+    await supabase.from('faqs').update({ embedding: emb }).eq('id', row.id)
+  }
+
+  // 3. golden_examples (solo aprobados)
+  const { data: gold } = await supabase
+    .from('golden_examples')
+    .select('id, user_question, ideal_answer')
+    .eq('tenant_id', tid)
+    .eq('is_approved', true)
+    .is('embedding', null)
+    .limit(batch_size)
+  for (const row of gold) {
+    const emb = await generateEmbedding(provider, apiKey, row.user_question + ' ' + row.ideal_answer)
+    await supabase.from('golden_examples').update({ embedding: emb }).eq('id', row.id)
+  }
+
+  // 4. messages (últimas 24h sin embedding)
+  const { data: msgs } = await supabase
+    .from('messages')
+    .select('id, text')
+    .eq('tenant_id', tid)
+    .is('embedding', null)
+    .gte('created_at', new Date(Date.now() - 86400000).toISOString())
+    .limit(batch_size)
+  for (const row of msgs) {
+    const emb = await generateEmbedding(provider, apiKey, row.text)
+    await supabase.from('messages').update({ embedding: emb }).eq('id', row.id)
+  }
+}
+```
+
+**pg_cron:**
+```sql
+SELECT cron.schedule('generate-embeddings-daily', '0 3 * * *', $$
+  SELECT net.http_post(
+    url := 'https://<project-ref>.supabase.co/functions/v1/generate-embeddings',
+    headers := '{"Content-Type": "application/json", "Authorization": "Bearer <service_role>"}'::jsonb,
+    body := '{}'::jsonb
+  );
+$$);
+```
+
+---
+
+#### 1.3 `ingest-historical-data` — Onboarding masivo
+**Endpoint:** `POST /functions/v1/ingest-historical-data`
+**Auth:** `service_role` (invocado desde panel admin tras onboarding)
+
+**Input:**
+```json
+{
+  "tenant_id": "00000000-0000-0000-0000-000000000001",
+  "csv_url": "https://bucket.supabase.co/uploads/history-client-xyz.csv",
+  "mapping": {
+    "conversation_id_col": "conv_id",
+    "user_phone_col": "phone",
+    "user_name_col": "name",
+    "timestamp_col": "ts",
+    "sender_col": "role",
+    "text_col": "message",
+    "metadata_cols": ["campaign_id"]
+  }
+}
+```
+
+**Lógica:**
+```typescript
+// 1. Descargar CSV (signed URL o bucket privado)
+const csv = await downloadCSV(csv_url)
+
+// 2. Parsear y validar columnas
+const rows = parseCSV(csv, mapping)
+
+// 3. Agrupar por conversation_id
+const groups = groupBy(rows, mapping.conversation_id_col)
+
+// 4. Para cada conversación
+for (const [convId, msgs] of Object.entries(groups)) {
+  const first = msgs[0]
+  const userPhone = first[mapping.user_phone_col]
+  const userName = first[mapping.user_name_col]
+
+  // 4.1 Upsert conversation
+  const { data: conv } = await supabase.rpc('upsert_conversation_by_phone', {
+    p_tenant_id: tenant_id,
+    p_user_phone: userPhone,
+    p_user_name: userName,
+    p_channel: 'whatsapp'
+  })
+
+  // 4.2 Insert mensajes en orden
+  for (const row of msgs.sort((a,b) => a.ts - b.ts)) {
+    const sender = row[mapping.sender_col] === 'user' ? 'user' : 'agent'
+    await supabase.from('messages').insert({
+      conversation_id: conv.id,
+      tenant_id,
+      sender,
+      text: row[mapping.text_col],
+      metadata: { historical: true, ...pick(row, mapping.metadata_cols) },
+      created_at: new Date(row[mapping.timestamp_col]).toISOString()
+    })
+  }
+}
+
+// 5. Disparar generate-embeddings para este tenant
+await supabase.functions.invoke('generate-embeddings', { body: { tenant_id, batch_size: 500 } })
+```
+
+---
+
+### 2. VAULT SECRETS (por tenant, namespace = tenant_id)
+
+| Secret | Nombre en Vault | Descripción | Quién escribe |
+|--------|-----------------|-------------|---------------|
+| WhatsApp Access Token | `waba_access_token` | Token permanente Meta (60 días renovable) | Panel admin / onboarding |
+| LLM API Key (BYOK) | `llm_api_key` | `sk-...` OpenAI / `GEMINI_KEY` / `ANTHROPIC_KEY` | Panel admin / onboarding |
+| Meta App Secret | `meta_app_secret` | Para validar HMAC webhook (global, namespace `global`) | Plataforma |
+
+**Acceso en Edge Functions (service_role):**
+```typescript
+const { data: secret } = await supabase.vault.getSecret('waba_access_token', { namespace: tenantId })
+if (!secret) throw new Error('WABA token no configurado para tenant ' + tenantId)
+```
+
+---
+
+### 3. PG_CRON JOBS
+
+| Job | Schedule | Función SQL / HTTP |
+|-----|----------|-------------------|
+| `graduate-training-hourly` | `0 * * * *` | `SELECT graduate_training_sessions();` |
+| `generate-embeddings-daily` | `0 3 * * *` | `net.http_post` a `/functions/v1/generate-embeddings` |
+| `cleanup-expired-tokens` | `0 4 * * *` | `DELETE FROM waba_tokens WHERE expires_at < NOW();` (si se usa tabla tokens) |
+
+---
+
+### 4. CHECKLIST FASE 2 (entregable agente Supabase)
+
+| Item | Estado | Archivo/Ubicación |
+|------|--------|-------------------|
+| Edge Function `whatsapp-webhook` | ☐ | `/supabase/functions/whatsapp-webhook/` |
+| Edge Function `generate-embeddings` | ☐ | `/supabase/functions/generate-embeddings/` |
+| Edge Function `generate-single-embedding` (invocación interna) | ☐ | `/supabase/functions/generate-single-embedding/` |
+| Edge Function `ingest-historical-data` | ☐ | `/supabase/functions/ingest-historical-data/` |
+| Vault secrets `waba_access_token` / `llm_api_key` / `meta_app_secret` | ☐ | Dashboard Vault |
+| pg_cron `graduate-training-hourly` | ☐ | `13_cron.sql` |
+| pg_cron `generate-embeddings-daily` | ☐ | `13_cron.sql` |
+| Documentación API Edge Functions (OpenAPI) | ☐ | `docs/edge-functions-api.md` |
 
 ---
 

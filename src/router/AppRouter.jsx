@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
@@ -112,9 +113,26 @@ import { isPublicSiteMode, isRouteEnabled, isPublicPathAllowed } from '@/config/
 
 function ProtectedRoute({ children }) {
   const location = useLocation()
-  const token = sessionStorage.getItem('qaway_auth_token') || localStorage.getItem('qaway_auth_token')
+  const [checking, setChecking] = useState(true)
+  const [authed, setAuthed] = useState(false)
 
-  if (!token) {
+  useEffect(() => {
+    let alive = true
+    const resolve = (ok) => { if (alive) { setAuthed(ok); setChecking(false) } }
+    const sb = getSupabaseClient()
+    if (!sb) {
+      const token = sessionStorage.getItem('qaway_auth_token') || localStorage.getItem('qaway_auth_token')
+      resolve(Boolean(token))
+      return
+    }
+    sb.auth.getSession()
+      .then(({ data }) => resolve(Boolean(data.session)))
+      .catch(() => resolve(false))
+    return () => { alive = false }
+  }, [])
+
+  if (checking) return null
+  if (!authed) {
     return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} replace />
   }
   return children

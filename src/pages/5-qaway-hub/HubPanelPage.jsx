@@ -9,6 +9,7 @@ import {
   Star, Tag, Target, TrendingUp, User, UserPlus, Users, Wrench, X, Zap,
 } from '@/components/ui/icons/hubIcons'
 import { getAuthUser, logoutUser } from '@/config/auth'
+import { avatarFor } from '@/lib/userAvatar'
 import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
@@ -747,7 +748,7 @@ function appWorkerRoute(slug) {
 // Inicio del trabajador (editor/viewer/guest): "Mi espacio", sin datos
 // administrativos de la empresa. Solo sus apps asignadas (user_app_roles
 // propias, RLS uar_own_read) y los accesos que su administrador le otorgó.
-function WorkerHome({ panelAuth, name }) {
+function WorkerHome({ panelAuth, name, avatar }) {
   const [apps, setApps] = useState(null) // null = cargando
 
   useEffect(() => {
@@ -794,8 +795,11 @@ function WorkerHome({ panelAuth, name }) {
       {/* Estado personal */}
       <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-3">
-          <span className="w-10 h-10 rounded-full bg-zinc-950 text-white flex items-center justify-center font-extrabold text-xs shrink-0">
+          <span className="relative flex w-10 h-10 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white font-extrabold text-xs overflow-hidden">
             {initials || '?'}
+            {avatar && (
+              <img src={avatar} alt="" onError={(e) => e.currentTarget.remove()} className="absolute inset-0 h-full w-full object-cover" />
+            )}
           </span>
           <div>
             <p className="text-sm font-extrabold text-zinc-950">{name}</p>
@@ -921,7 +925,6 @@ function HubPanelContent() {
     setActiveTab((prev) => (prev === tab ? prev : tab))
   }, [location.pathname])
   const searchInputRef = useRef(null)
-  const authUser = useMemo(() => getAuthUser(), [])
   const { denied } = useAppAccess()
   // Contexto real (sesion + tenant) para las vistas que viven dentro del shell (30.X).
   const [panelAuth, setPanelAuth] = useState(null)
@@ -955,6 +958,56 @@ function HubPanelContent() {
     })()
     return () => { alive = false }
   }, [])
+
+  // Identidad para mostrar (nombre/email/foto): fuente de verdad = sesión Supabase;
+  // el fallback qaway_auth_* solo cubre el caso de Supabase no configurado.
+  const authUser = useMemo(() => {
+    const cached = getAuthUser()
+    const u = panelAuth?.session?.user
+    if (!u) return cached
+    return {
+      ...cached,
+      id: u.id,
+      email: u.email || cached?.email,
+      role: panelAuth.role || cached?.role,
+    }
+  }, [panelAuth])
+
+  // Sincronización de sesión multi-tab: si en el mismo perfil otro usuario inicia
+  // sesión (o la cierra), este tab recarga/redirige para no mostrar datos del
+  // usuario anterior ni quedarse con una sesión reemplazada.
+  useEffect(() => {
+    const currentUserId = () => panelAuth?.session?.user?.id
+    const onHubPath = () => window.location.pathname.startsWith('/hub/panel')
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        sessionStorage.removeItem('qaway.scopedTenant')
+        setScopedTenant(null)
+        setPanelAuth(null)
+        navigate('/login', { replace: true })
+        return
+      }
+      // 'INITIAL_SESSION' se emite al suscribirse: no es un cambio de sesión real,
+      // ignorarlo para no recargar la página en bucle en cada montaje.
+      if (event === 'INITIAL_SESSION') return
+      const sid = session?.user?.id
+      const otherUser = sid && sid !== currentUserId()
+      if (otherUser && onHubPath()) {
+        window.location.reload()
+      }
+    })
+    const onStorage = (e) => {
+      if (!e.key || !e.key.includes('-auth-token')) return
+      if (e.newValue !== e.oldValue && onHubPath()) {
+        window.location.reload()
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => {
+      sub?.subscription?.unsubscribe()
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [panelAuth, navigate])
 
   // Rol resuelto (BD = fuente de verdad; mientras panelAuth carga NO se asume ningún rol):
   //   platform_admin → nav global; admin de marca (dueño o co-admin) → nav de empresa;
@@ -1004,7 +1057,8 @@ function HubPanelContent() {
   }, [panelAuth, activeTab, navigate, allowedTabIds])
 
   const name = displayName(authUser?.email)
-  const avatar = 'https://i.pravatar.cc/150?img=11'
+  // Foto estable por usuario: cada cuenta distinta tiene su propia foto de stock.
+  const avatar = avatarFor(authUser?.email)
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1029,7 +1083,13 @@ function HubPanelContent() {
     })
   }, [globalSearchQuery, activeTab, denied])
 
-  const handleLogout = () => { sessionStorage.removeItem('qaway.scopedTenant'); setScopedTenant(null); logoutUser(); navigate('/login', { replace: true }) }
+  const handleLogout = async () => {
+    sessionStorage.removeItem('qaway.scopedTenant')
+    setScopedTenant(null)
+    logoutUser()
+    try { await supabase.auth.signOut() } catch (_) {}
+    navigate('/login', { replace: true })
+  }
 
   const currentTabLabel = (TENANT_ADMIN_NAV.find((nav) => nav.id === activeTab) || SUPER_ADMIN_NAV.find((nav) => nav.id === activeTab))?.label || activeTab
 
@@ -1412,7 +1472,7 @@ function HubPanelContent() {
               ) : panelAuth?.isTenantAdmin ? (
                 <TenantAdminDashboard tenantId={panelAuth.tenantId} tenantName={panelAuth.tenantName} setActiveTab={goTab} />
               ) : (
-                <WorkerHome panelAuth={panelAuth} name={name} />
+                <WorkerHome panelAuth={panelAuth} name={name} avatar={avatar} />
               )
             )}
           </div>

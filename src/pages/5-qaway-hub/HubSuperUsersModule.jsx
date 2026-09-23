@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { avatarForSize } from "@/lib/userAvatar";
 import {
   Search,
   SlidersHorizontal,
@@ -858,8 +859,15 @@ export default function UsersModule({
                                 onClick={() => onOpenUser?.(user)}
                                 className="flex items-center gap-3 text-left"
                               >
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-extrabold text-zinc-600">
+                                <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-extrabold text-zinc-600 overflow-hidden">
                                   {initials(user.name)}
+                                  <img
+                                    src={avatarForSize(user.email, 64)}
+                                    alt=""
+                                    loading="lazy"
+                                    onError={(e) => e.currentTarget.remove()}
+                                    className="absolute inset-0 h-full w-full object-cover"
+                                  />
                                 </span>
                                 <span className="font-bold text-zinc-900">
                                   {user.name}

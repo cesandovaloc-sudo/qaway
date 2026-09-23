@@ -138,6 +138,18 @@ export default function LoginPage() {
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
+  // Si ya hay una sesión Supabase válida (pestaña nueva con sesión global viva,
+  // o tras confirmar correo), no mostramos el formulario: al panel directamente.
+  useEffect(() => {
+    let alive = true
+    const supabase = getSupabaseClient()
+    if (!supabase) return
+    supabase.auth.getSession()
+      .then(({ data }) => { if (alive && data.session) navigate(redirectTarget, { replace: true }) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [redirectTarget, navigate])
+
   // Tras confirmar el correo (verified=1): si Supabase ya dejó sesión activa al
   // abrir el link, no hacemos que el usuario "vuelva a ingresar" — al panel.
   useEffect(() => {
