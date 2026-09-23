@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, ShieldCheck, User, Eye, EyeOff } from 'lucide-react'
-import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 
 // Registro Hub: MISMO diseño del login (dos paneles), solo suma el campo
 // Nombre hacia abajo. Crea la cuenta y continúa a /onboarding.
@@ -51,7 +51,7 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: name.trim() },
-          emailRedirectTo: `${window.location.origin}/login?verified=1`,
+          emailRedirectTo: `${APP_BASE_URL}/login?verified=1`,
         },
       })
       if (error) throw error
@@ -88,7 +88,7 @@ export default function RegisterPage() {
       }
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}${redirectTarget}` },
+        options: { redirectTo: `${APP_BASE_URL}${redirectTarget}` },
       })
       if (error) throw error
     } catch (err) {

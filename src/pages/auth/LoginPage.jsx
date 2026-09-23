@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react'
-import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { isSuperAdmin } from '@/config/auth'
 
 // Logos de proyectos activos (prueba social)
@@ -124,7 +124,7 @@ export default function LoginPage() {
       if (!supabase) { setError('Servicio de autenticación no disponible.'); return }
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}${redirectTarget}` },
+        options: { redirectTo: `${APP_BASE_URL}${redirectTarget}` },
       })
       if (oauthError) setError(`Error al conectar con ${provider}. Intenta de nuevo.`)
     } catch (_) {
@@ -142,7 +142,7 @@ export default function LoginPage() {
       const supabase = getSupabaseClient()
       if (!supabase) { setError('Servicio no disponible.'); return }
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: `${APP_BASE_URL}/update-password`,
       })
       if (resetError) setError('No se pudo enviar el correo de recuperación.')
       else setResetSent(true)

@@ -1,1 +1,0 @@
-import{t as e}from"./dist-CV0_D-zB.js";var t=`https://qrusdsqgygfolxfrafyd.supabase.co`,n=`sb_publishable_k6LYbA5uAOOMBYsP-4NNLA_dKvYh8Yi`,r=()=>!t.includes(`placeholder`),i=null;function a(){return r()?(i||=e(t,n),i):null}export{r as n,a as t};
