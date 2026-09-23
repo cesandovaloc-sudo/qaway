@@ -8,6 +8,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
+    // El submódulo 10-qawaylab-inventario es un proyecto standalone con su propio
+    // vitest.config, node_modules y paquete file: @qawaylab/pago: se valida con su
+    // propio `npm test`. El runner raíz NO debe absorber sus tests.
+    exclude: ['src/pages/5-qaway-hub/10-qawaylab-inventario/**', 'node_modules', 'dist'],
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
   },

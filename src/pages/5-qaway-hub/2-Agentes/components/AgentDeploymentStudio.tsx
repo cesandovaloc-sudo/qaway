@@ -33,6 +33,10 @@ interface Props {
 
 type SignupStep = 1 | 2 | 3
 
+export const DEFAULT_VERIFY_TOKEN = 'QAWAY_WB_VT_9f3a7c2e5b81d4a0'
+
+const WEBHOOK_URL = 'https://qrusdsqgygfolxfrafyd.supabase.co/functions/v1/whatsapp-webhook'
+
 export const AgentDeploymentStudio: React.FC<Props> = ({
   workspace,
   onUpdateWorkspace
@@ -45,7 +49,7 @@ export const AgentDeploymentStudio: React.FC<Props> = ({
   const [authPending, setAuthPending] = useState(false)
   const [testPing, setTestPing] = useState<'idle' | 'testing' | 'ok' | 'fail'>('idle')
   const [verifyToken, setVerifyToken] = useState(
-    workspace.aiSettings.waba_verify_token || 'QAWAY_VERIFY_TOKEN_123'
+    workspace.aiSettings.waba_verify_token || DEFAULT_VERIFY_TOKEN
   )
 
   const wabaPhoneId = workspace.aiSettings.waba_phone_number_id
@@ -104,9 +108,8 @@ export const AgentDeploymentStudio: React.FC<Props> = ({
     }))
   }
 
-  const handleRegenerateToken = () => {
-    const random = Math.random().toString(36).slice(2, 10).toUpperCase()
-    const next = `QAWAY_VERIFY_${random}`
+  const handleResetToken = () => {
+    const next = DEFAULT_VERIFY_TOKEN
     setVerifyToken(next)
     onUpdateWorkspace(prev => ({
       ...prev,
@@ -118,9 +121,18 @@ export const AgentDeploymentStudio: React.FC<Props> = ({
     setCopiedVerify(false)
   }
 
-  const handleTestWebhook = () => {
+  const handleTestWebhook = async () => {
     setTestPing('testing')
-    setTimeout(() => setTestPing(isConnected ? 'ok' : 'fail'), 1200)
+    const challenge = `qaway_challenge_${Date.now()}`
+    try {
+      const res = await fetch(
+        `${WEBHOOK_URL}?hub.mode=subscribe&hub.verify_token=${encodeURIComponent(verifyToken)}&hub.challenge=${challenge}`
+      )
+      const text = await res.text()
+      setTestPing(res.ok && text.trim() === challenge ? 'ok' : 'fail')
+    } catch {
+      setTestPing('fail')
+    }
   }
 
   const handleDisconnect = () => {
@@ -137,7 +149,7 @@ export const AgentDeploymentStudio: React.FC<Props> = ({
     setTestPing('idle')
   }
 
-  const webhookUrl = 'https://YOUR_SUPABASE_PROJECT.supabase.co/functions/v1/whatsapp-webhook'
+  const webhookUrl = WEBHOOK_URL
   const webWidgetSnippet = `<script 
   src="https://qawaylab.com/widget/agent.js" 
   data-tenant="${workspace.slug}" 
@@ -449,11 +461,11 @@ export const AgentDeploymentStudio: React.FC<Props> = ({
               </span>
               <button
                 type="button"
-                onClick={handleRegenerateToken}
+                onClick={handleResetToken}
                 className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" />
-                Regenerar
+                Restablecer
               </button>
             </div>
             <div className="flex gap-2 items-center">
