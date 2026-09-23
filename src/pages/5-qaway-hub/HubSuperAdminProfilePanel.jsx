@@ -235,7 +235,7 @@ export default function HubProfilePanel({
 
                     <div className="mt-3 flex gap-2">
                       <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207]">
+                        className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207]">
                         <ImagePlus size={13} /> Cambiar foto
                       </button>
                       <button type="button" onClick={deleteAvatar} disabled={!avatarUrl}
@@ -264,7 +264,7 @@ export default function HubProfilePanel({
                   <div className="flex items-center justify-end gap-2 pt-1">
                     {personalSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
                     <button type="button" onClick={savePersonal} disabled={savingPersonal}
-                      className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+                      className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
                       <Save size={13} /> {savingPersonal ? "Guardando..." : "Guardar cambios"}
                     </button>
                   </div>
@@ -322,7 +322,7 @@ export default function HubProfilePanel({
                 <div className="flex items-center justify-end gap-2 pt-4">
                   {preferencesSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
                   <button type="button" onClick={savePreferences} disabled={savingPreferences}
-                    className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+                    className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
                     <Save size={13} /> {savingPreferences ? "Guardando..." : "Guardar cambios"}
                   </button>
                 </div>
@@ -369,8 +369,8 @@ export default function HubProfilePanel({
 
             <SectionCard title="Actividad reciente">
               <div className="mb-4 flex items-center justify-between">
-                <span className="text-[10px] text-gray-400">Últimos movimientos</span>
-                <button type="button" onClick={onOpenActivity} className="text-[10px] font-medium text-gray-500 hover:text-gray-900">Ver todas →</button>
+                <span className="text-[11px] text-gray-400">Últimos movimientos</span>
+                <button type="button" onClick={onOpenActivity} className="text-[11px] font-medium text-gray-500 hover:text-gray-900">Ver todas →</button>
               </div>
 
               <div className="space-y-4">
@@ -378,10 +378,10 @@ export default function HubProfilePanel({
                   <div key={`${item[0]}-${index}`} className="flex gap-3">
                     <ActivityIcon tone={item[3]}>{item[4]}</ActivityIcon>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-semibold text-gray-800">{item[0]}</p>
-                      <p className="truncate text-[9px] text-gray-500">{item[1]}</p>
+                      <p className="text-[11px] font-semibold text-gray-800">{item[0]}</p>
+                      <p className="truncate text-[10px] text-gray-500">{item[1]}</p>
                     </div>
-                    <span className="whitespace-nowrap text-[9px] text-gray-400">{item[2]}</span>
+                    <span className="whitespace-nowrap text-[10px] text-gray-400">{item[2]}</span>
                   </div>
                 ))}
               </div>
