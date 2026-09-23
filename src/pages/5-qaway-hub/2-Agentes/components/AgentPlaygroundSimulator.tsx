@@ -352,6 +352,7 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={!inputText.trim()}
+                  aria-label="Enviar mensaje"
                   className="w-8 h-8 rounded-full bg-[#075e54] text-white flex items-center justify-center hover:bg-[#128c7e] transition-all disabled:opacity-50 cursor-pointer shrink-0"
                 >
                   <Send className="w-4 h-4" />
@@ -437,6 +438,7 @@ export const AgentPlaygroundSimulator: React.FC<Props> = ({
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={!inputText.trim()}
+                  aria-label="Enviar mensaje"
                   className="bg-[#4f46e5] text-white p-2 rounded-xl hover:bg-[#4338ca] transition-all disabled:opacity-50 cursor-pointer shrink-0"
                 >
                   <Send className="w-4 h-4" />

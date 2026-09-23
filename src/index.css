@@ -1001,3 +1001,67 @@
   line-height: 1.5;
 }
 
+/* ── Hub: modos de tema del shell (claro / contraste [actual] / oscuro) ────────────
+   El chrome del Hub (sidebar + topbar + dropdowns) lee estas variables. El contenido
+   de los módulos (lienzos claros) no cambia: así se conserva el "claro-oscuro".      */
+.hub-shell {
+  --hub-bg: #111111;
+  --hub-surface: #18181b;
+  --hub-surface-strong: #202024;
+  --hub-pop: #1c1c1f;
+  --hub-chip: rgba(255, 255, 255, 0.05);
+  --hub-hover: rgba(255, 255, 255, 0.10);
+  --hub-hover-strong: rgba(255, 255, 255, 0.15);
+  --hub-border: rgba(255, 255, 255, 0.10);
+  --hub-border-soft: rgba(255, 255, 255, 0.05);
+  --hub-text: #ffffff;
+  --hub-text-soft: rgba(255, 255, 255, 0.60);
+  --hub-dim: rgba(255, 255, 255, 0.50);
+  --hub-faint: rgba(255, 255, 255, 0.40);
+  --hub-footer: rgba(0, 0, 0, 0.20);
+}
+.hub-shell[data-mode='claro'] {
+  --hub-bg: #f6f6f7;
+  --hub-surface: #ffffff;
+  --hub-surface-strong: #f0f0f2;
+  --hub-pop: #ffffff;
+  --hub-chip: rgba(0, 0, 0, 0.04);
+  --hub-hover: rgba(0, 0, 0, 0.05);
+  --hub-hover-strong: rgba(0, 0, 0, 0.09);
+  --hub-border: rgba(0, 0, 0, 0.10);
+  --hub-border-soft: rgba(0, 0, 0, 0.06);
+  --hub-text: #18181b;
+  --hub-text-soft: rgba(0, 0, 0, 0.65);
+  --hub-dim: rgba(0, 0, 0, 0.55);
+  --hub-faint: rgba(0, 0, 0, 0.42);
+  --hub-footer: rgba(0, 0, 0, 0.03);
+}
+.hub-shell[data-mode='oscuro'] {
+  --hub-bg: #000000;
+  --hub-surface: #0b0b0d;
+  --hub-surface-strong: #151518;
+  --hub-pop: #0d0d10;
+  --hub-chip: rgba(255, 255, 255, 0.06);
+  --hub-hover: rgba(255, 255, 255, 0.12);
+  --hub-hover-strong: rgba(255, 255, 255, 0.18);
+  --hub-border: rgba(255, 255, 255, 0.16);
+  --hub-border-soft: rgba(255, 255, 255, 0.08);
+  --hub-text: #ffffff;
+  --hub-text-soft: rgba(255, 255, 255, 0.68);
+  --hub-dim: rgba(255, 255, 255, 0.55);
+  --hub-faint: rgba(255, 255, 255, 0.46);
+  --hub-footer: rgba(0, 0, 0, 0.35);
+}
+/* En modo claro, el texto del chrome pasa a negro (los acentos mantienen su matiz). */
+.hub-shell[data-mode='claro'] .hub-chrome * {
+  color: var(--hub-text);
+}
+.hub-shell[data-mode='claro'] .hub-chrome .text-orange-300 { color: #f59e0b; }
+.hub-shell[data-mode='claro'] .hub-chrome .text-orange-400 { color: #e05508; }
+.hub-shell[data-mode='claro'] .hub-chrome .text-red-400 { color: #ef4444; }
+.hub-shell[data-mode='claro'] .hub-chrome .text-red-300 { color: #fca5a5; }
+/* Píldora/acción activa naranja: su texto sigue en blanco en cualquier modo. */
+.hub-shell[data-mode='claro'] .hub-chrome .bg-\[\#ff4b0b\],
+.hub-shell[data-mode='claro'] .hub-chrome .bg-\[\#ff4b0b\] *,
+.hub-shell[data-mode='claro'] .hub-chrome .bg-\[var\(--hub-accent\)\] * { color: #ffffff; }
+

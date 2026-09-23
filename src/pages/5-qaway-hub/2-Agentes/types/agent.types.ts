@@ -68,6 +68,10 @@ export interface AiSettingsPayload {
   temperature: number
   system_prompt: string
   waba_phone_number_id: string | null
+  waba_business_account_id?: string | null
+  waba_verify_token?: string
+  waba_connected?: boolean
+  waba_connected_at?: number | null
   human_handoff_keywords: string[]
   // Modo entrenamiento 24h obligatorio
   trainingMode?: boolean
@@ -75,7 +79,7 @@ export interface AiSettingsPayload {
   supervisorIds?: string[]
   // LLM configuración explícita
   llmProvider?: ModelProvider
-  llmApiKey?: string
+  llmApiKey?: string | null
 }
 
 export interface TenantAgentWorkspace {

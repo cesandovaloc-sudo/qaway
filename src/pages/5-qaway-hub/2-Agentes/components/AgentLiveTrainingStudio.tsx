@@ -240,7 +240,7 @@ export const AgentLiveTrainingStudio: React.FC<Props> = ({
       {/* Modal detalle conversación */}
       {selectedConversation && (
         <LiveConversationModal
-          conversation={selectedConversation}
+          conversation={liveConversations.find(c => c.id === selectedConversation.id) || selectedConversation}
           onClose={() => setSelectedConversation(null)}
           onApprove={handleApproveMessage}
           onReject={handleRejectMessage}
@@ -274,7 +274,7 @@ interface LiveConversation {
 }
 
 interface LiveMessage extends ChatMessage {
-  status: 'pending' | 'approved' | 'rejected' | 'corrected'
+  status: 'pending' | 'approved' | 'rejected' | 'corrected' | 'needs_review'
   reviewBy?: string
   reviewAt?: number
 }
@@ -347,6 +347,7 @@ function generateMockConversations(workspace: TenantAgentWorkspace): LiveConvers
     lastActivity: c.messages[c.messages.length - 1].timestamp,
     messages: c.messages.map((m, idx) => ({
       ...m,
+      sender: m.sender as LiveMessage['sender'],
       id: m.id || `msg-${Date.now()}-${idx}`,
       status: m.status || 'pending'
     })),
