@@ -114,6 +114,22 @@ export const AgentLiveTrainingStudio: React.FC<Props> = ({
   const pendingCount = liveConversations.reduce((acc, c) => acc + c.messages.filter(m => m.status === 'pending').length, 0)
   const approvedCount = liveConversations.reduce((acc, c) => acc + c.messages.filter(m => m.status === 'approved').length, 0)
 
+  // Filtrado local
+  const filteredConversations = useMemo(() => {
+    return liveConversations.filter(conv => {
+      if (filterStatus !== 'all') {
+        const hasStatus = conv.messages.some(m => m.status === filterStatus)
+        if (!hasStatus) return false
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase()
+        const hay = `${conv.userName} ${conv.messages.map(m => m.text).join(' ')}`.toLowerCase()
+        if (!hay.includes(q)) return false
+      }
+      return true
+    })
+  }, [liveConversations, filterStatus, searchQuery])
+
   return (
     <div className="space-y-6">
       {/* Cabecera */}
@@ -243,28 +259,6 @@ export const AgentLiveTrainingStudio: React.FC<Props> = ({
       )}
     </div>
   )
-
-  // Filtrado local
-  const filteredConversations = useMemo(() => {
-    return liveConversations.filter(conv => {
-      if (filterStatus !== 'all') {
-        const hasStatus = conv.messages.some(m => m.status === filterStatus)
-        if (!hasStatus) return false
-      }
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase()
-        const hay = `${conv.userName} ${conv.messages.map(m => m.text).join(' ')}`.toLowerCase()
-        if (!hay.includes(q)) return false
-      }
-      return true
-    })
-  }, [liveConversations, filterStatus, searchQuery])
-
-  // Helper para actualizar estado local (mock)
-  const [, forceUpdate] = useState({})
-  const setLiveConversations = (fn: (prev: LiveConversation[]) => LiveConversation[]) => {
-    forceUpdate(prev => ({ ...prev, data: fn(prev.data || liveConversations) }))
-  }
 }
 
 // Tipos internos
