@@ -1,0 +1,394 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  User, Mail, Shield, Building2, CalendarDays, Camera, Upload, Trash2,
+  Save, Lock, Clock3, Globe2, CircleHelp, ChevronRight, CheckCircle2,
+  Info, Activity, LogIn, ImagePlus
+} from "lucide-react";
+
+/**
+ * HubProfilePanel
+ * Panel "Mi cuenta / Mi perfil" para acoplar al Hub de Qaway Lab.
+ *
+ * UI preparada siguiendo el mismo lenguaje visual de HubSuperSupportPanel:
+ * fondo #f8f9fb, cards blancas, bordes suaves, layout horizontal,
+ * sidebar externo del Hub y acento Qaway #ff4b0b.
+ *
+ * La persistencia real queda preparada mediante callbacks:
+ * onSaveProfile, onUploadAvatar, onDeleteAvatar.
+ * No ejecuta Supabase directamente.
+ */
+
+const DEFAULT_PROFILE = {
+  fullName: "Carlos Sandoval",
+  email: "carlos.sandoval@qawaylab.com",
+  roleLabel: "Super Administrador",
+  tenantName: "Qaway Lab (Global)",
+  memberSince: "12 Ene 2026",
+  avatarUrl: "",
+  timezone: "(GMT-05:00) Lima - Perú",
+  language: "Español",
+};
+
+const DEFAULT_ACTIVITY = [
+  ["Datos de perfil actualizados", "Información personal modificada", "hace 2 horas", "blue", <User size={13} />],
+  ["Inicio de sesión", "Lima, Perú · Chrome", "hace 5 horas", "green", <LogIn size={13} />],
+  ["Foto de perfil actualizada", "Avatar de cuenta", "hace 2 días", "purple", <Camera size={13} />],
+  ["Cambio de contraseña", "Seguridad de la cuenta", "hace 12 días", "red", <Lock size={13} />],
+];
+
+function cn(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function Avatar({ src, name, large = false }) {
+  const initials = useMemo(
+    () => (name || "U").trim().split(/\s+/).slice(0, 2).map((x) => x[0]).join("").toUpperCase(),
+    [name]
+  );
+
+  return (
+    <div className={cn(
+      "flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-100 font-bold text-gray-600",
+      large ? "h-[118px] w-[118px] text-[28px]" : "h-10 w-10 text-[13px]"
+    )}>
+      {src ? <img src={src} alt={`Foto de perfil de ${name || "usuario"}`} className="h-full w-full object-cover" /> : initials}
+    </div>
+  );
+}
+
+function SectionCard({ title, description, children, className = "" }) {
+  return (
+    <section className={cn("rounded-xl border border-gray-200 bg-white p-5", className)}>
+      <div className="mb-4">
+        <h2 className="text-[14px] font-bold text-gray-900">{title}</h2>
+        {description && <p className="mt-1 text-[11px] leading-4 text-gray-500">{description}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ActivityIcon({ tone, children }) {
+  return (
+    <div className={cn(
+      "flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+      tone === "blue" && "bg-blue-50 text-blue-500",
+      tone === "green" && "bg-emerald-50 text-emerald-500",
+      tone === "purple" && "bg-purple-50 text-purple-500",
+      tone === "red" && "bg-red-50 text-red-500"
+    )}>
+      {children}
+    </div>
+  );
+}
+
+function ActionRow({ icon, label, onClick }) {
+  return (
+    <button type="button" onClick={onClick}
+      className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-gray-50">
+      <span className="flex h-7 w-7 items-center justify-center rounded-md bg-gray-50 text-gray-500">{icon}</span>
+      <span className="flex-1 text-[11px] font-semibold text-gray-700">{label}</span>
+      <ChevronRight size={14} className="text-gray-300 group-hover:translate-x-0.5" />
+    </button>
+  );
+}
+
+export default function HubProfilePanel({
+  profile = DEFAULT_PROFILE,
+  activity = DEFAULT_ACTIVITY,
+  onSaveProfile,
+  onUploadAvatar,
+  onDeleteAvatar,
+  onOpenSecurity,
+  onOpenActivity,
+  onOpenHelp,
+}) {
+  const fileInputRef = useRef(null);
+  const data = { ...DEFAULT_PROFILE, ...profile };
+
+  const [fullName, setFullName] = useState(data.fullName);
+  const [roleLabel, setRoleLabel] = useState(data.roleLabel);
+  const [timezone, setTimezone] = useState(data.timezone);
+  const [language, setLanguage] = useState(data.language);
+  const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl || "");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [savingPersonal, setSavingPersonal] = useState(false);
+  const [savingPreferences, setSavingPreferences] = useState(false);
+  const [personalSaved, setPersonalSaved] = useState(false);
+  const [preferencesSaved, setPreferencesSaved] = useState(false);
+
+  useEffect(() => {
+    setFullName(data.fullName);
+    setRoleLabel(data.roleLabel);
+    setTimezone(data.timezone);
+    setLanguage(data.language);
+    setAvatarUrl(data.avatarUrl || "");
+    setSelectedFile(null);
+  }, [data.fullName, data.roleLabel, data.timezone, data.language, data.avatarUrl]);
+
+  const selectAvatar = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      window.alert("Selecciona una imagen JPG, PNG o WebP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      window.alert("La imagen no debe superar los 5 MB.");
+      return;
+    }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setAvatarUrl(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  };
+
+  const savePersonal = async () => {
+    setSavingPersonal(true);
+    try {
+      if (selectedFile && onUploadAvatar) await onUploadAvatar(selectedFile);
+      if (onSaveProfile) await onSaveProfile({ fullName: fullName.trim(), roleLabel });
+      setSelectedFile(null);
+      setPersonalSaved(true);
+      setTimeout(() => setPersonalSaved(false), 2500);
+    } finally {
+      setSavingPersonal(false);
+    }
+  };
+
+  const savePreferences = async () => {
+    setSavingPreferences(true);
+    try {
+      if (onSaveProfile) await onSaveProfile({ timezone, language });
+      setPreferencesSaved(true);
+      setTimeout(() => setPreferencesSaved(false), 2500);
+    } finally {
+      setSavingPreferences(false);
+    }
+  };
+
+  const deleteAvatar = async () => {
+    setAvatarUrl("");
+    setSelectedFile(null);
+    if (onDeleteAvatar) await onDeleteAvatar();
+  };
+
+  return (
+    <div className="min-h-full bg-[#f8f9fb] text-gray-950">
+      <main className="mx-auto w-full max-w-[1500px] px-7 py-5">
+
+        <div className="mb-3 flex items-start justify-between">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-[12px] text-gray-500">
+              <span>Inicio</span><span>›</span><span>Mi cuenta</span>
+            </div>
+            <h1 className="text-[29px] font-bold tracking-[-0.7px]">Mi cuenta</h1>
+            <p className="mt-1 text-[14px] text-gray-500">
+              Administra tu información personal, seguridad y preferencias de cuenta.
+            </p>
+          </div>
+
+          <div className="mt-1 flex items-center gap-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600"><User size={15} /></div>
+            <div>
+              <p className="text-[11px] font-bold text-gray-800">Tu información personal</p>
+              <p className="mt-0.5 text-[10px] text-gray-500">Mantén tus datos actualizados para una mejor experiencia.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4 flex border-b border-gray-200">
+          <button type="button" className="relative px-5 pb-3 pt-2 text-[12px] font-semibold text-[#ff4b0b]">
+            Mi cuenta
+            <span className="absolute bottom-[-1px] left-0 right-0 h-[2px] rounded-full bg-[#ff4b0b]" />
+          </button>
+          <button type="button" onClick={onOpenSecurity} className="px-5 pb-3 pt-2 text-[12px] font-medium text-gray-500 hover:text-gray-800">
+            Seguridad
+          </button>
+        </div>
+
+        <div className="grid grid-cols-[minmax(0,1fr)_380px] gap-3">
+          <div className="min-w-0 space-y-3">
+
+            <div className="grid grid-cols-2 gap-3">
+              <SectionCard title="Foto de perfil" description="Personaliza tu foto de perfil. Se recomienda una imagen cuadrada.">
+                <div className="flex items-center gap-5">
+                  <div className="relative shrink-0">
+                    <Avatar src={avatarUrl} name={fullName} large />
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                      className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50">
+                      <Camera size={14} />
+                    </button>
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                      className="flex h-[102px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50/60 text-center hover:border-[#ff4b0b] hover:bg-orange-50/30">
+                      <Upload size={19} className="mb-2 text-gray-500" />
+                      <span className="text-[11px] font-semibold text-gray-700">Arrastra una imagen aquí</span>
+                      <span className="mt-1 text-[10px] text-gray-400">o haz clic para seleccionar</span>
+                      <span className="mt-0.5 text-[9px] text-gray-400">JPG, PNG o WebP</span>
+                    </button>
+                    <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={selectAvatar} className="hidden" />
+
+                    <div className="mt-3 flex gap-2">
+                      <button type="button" onClick={() => fileInputRef.current?.click()}
+                        className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207]">
+                        <ImagePlus size={13} /> Cambiar foto
+                      </button>
+                      <button type="button" onClick={deleteAvatar} disabled={!avatarUrl}
+                        className="flex h-9 items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+                        <Trash2 size={13} /> Eliminar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Información personal" description="Esta es la información que se mostrará en la plataforma.">
+                <div className="space-y-3">
+                  <label className="block">
+                    <span className="mb-1.5 block text-[10px] font-semibold text-gray-700">Nombre completo</span>
+                    <input value={fullName} onChange={(e) => setFullName(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-[11px] text-gray-800 outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-orange-100" />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-[10px] font-semibold text-gray-700">Cargo (opcional)</span>
+                    <input value={roleLabel} onChange={(e) => setRoleLabel(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-[11px] text-gray-800 outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-orange-100" />
+                  </label>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    {personalSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
+                    <button type="button" onClick={savePersonal} disabled={savingPersonal}
+                      className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+                      <Save size={13} /> {savingPersonal ? "Guardando..." : "Guardar cambios"}
+                    </button>
+                  </div>
+                </div>
+              </SectionCard>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <SectionCard title="Correo electrónico" description="Este correo se utiliza para iniciar sesión en tu cuenta.">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input value={data.email} readOnly className="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-9 pr-10 text-[11px] text-gray-600 outline-none" />
+                    <Lock size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[9px] font-semibold text-gray-500">Solo lectura</span>
+                </div>
+
+                <div className="mt-3 flex gap-3 rounded-lg border border-blue-100 bg-blue-50/60 p-3">
+                  <Info size={15} className="mt-0.5 shrink-0 text-blue-500" />
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-700">¿Necesitas cambiar tu correo?</p>
+                    <p className="mt-1 text-[9px] leading-4 text-gray-500">
+                      El cambio de correo se gestiona desde el sistema de autenticación. Contacta con soporte si lo necesitas.
+                    </p>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Preferencias" description="Personaliza tu experiencia en la plataforma.">
+                <div className="grid grid-cols-2 gap-3">
+                  <label>
+                    <span className="mb-1.5 block text-[10px] font-semibold text-gray-700">Zona horaria</span>
+                    <div className="relative">
+                      <Clock3 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <select value={timezone} onChange={(e) => setTimezone(e.target.value)}
+                        className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-[10px] text-gray-700 outline-none focus:border-[#ff4b0b]">
+                        <option>(GMT-05:00) Lima - Perú</option><option>(GMT-05:00) Bogotá</option><option>(GMT-05:00) Quito</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  <label>
+                    <span className="mb-1.5 block text-[10px] font-semibold text-gray-700">Idioma</span>
+                    <div className="relative">
+                      <Globe2 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <select value={language} onChange={(e) => setLanguage(e.target.value)}
+                        className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-[10px] text-gray-700 outline-none focus:border-[#ff4b0b]">
+                        <option>Español</option><option>English</option>
+                      </select>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-4">
+                  {preferencesSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
+                  <button type="button" onClick={savePreferences} disabled={savingPreferences}
+                    className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[10px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+                    <Save size={13} /> {savingPreferences ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                </div>
+              </SectionCard>
+            </div>
+
+            <section className="rounded-xl border border-orange-100 bg-orange-50/70 px-5 py-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500"><Shield size={18} /></div>
+                <div>
+                  <h2 className="text-[13px] font-bold text-orange-700">Cuenta de {data.roleLabel}</h2>
+                  <p className="mt-1 text-[10px] text-gray-600">
+                    Tu cuenta mantiene los permisos definidos por tu rol y organización dentro del ecosistema Qaway Lab.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside className="space-y-3">
+            <SectionCard title="Tu perfil">
+              <div className="mb-4 flex items-start justify-between">
+                <Avatar src={avatarUrl} name={fullName} />
+                <button type="button" onClick={() => fileInputRef.current?.click()}
+                  className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-[10px] font-semibold text-gray-600 hover:bg-gray-50">
+                  <User size={12} /> Editar
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3"><User size={14} className="text-gray-400" /><span className="truncate text-[11px] font-semibold text-gray-800">{fullName || "Sin nombre"}</span></div>
+                <div className="flex items-center gap-3"><Mail size={14} className="text-gray-400" /><span className="truncate text-[10px] text-gray-600">{data.email}</span></div>
+                <div className="flex items-center gap-3"><Shield size={14} className="text-gray-400" /><span className="text-[10px] text-gray-600">{data.roleLabel}</span></div>
+                <div className="flex items-center gap-3"><Building2 size={14} className="text-gray-400" /><span className="text-[10px] text-gray-600">{data.tenantName}</span></div>
+                <div className="flex items-start gap-3"><CalendarDays size={14} className="mt-0.5 text-gray-400" /><div><p className="text-[10px] text-gray-600">Miembro desde</p><p className="mt-0.5 text-[10px] font-semibold text-gray-700">{data.memberSince}</p></div></div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Acciones rápidas" className="p-3">
+              <ActionRow icon={<Activity size={14} />} label="Ver actividad de la cuenta" onClick={onOpenActivity} />
+              <ActionRow icon={<Shield size={14} />} label="Administrar seguridad" onClick={onOpenSecurity} />
+              <ActionRow icon={<CircleHelp size={14} />} label="Centro de ayuda" onClick={onOpenHelp} />
+            </SectionCard>
+
+            <SectionCard title="Actividad reciente">
+              <div className="mb-4 flex items-center justify-between">
+                <span className="text-[10px] text-gray-400">Últimos movimientos</span>
+                <button type="button" onClick={onOpenActivity} className="text-[10px] font-medium text-gray-500 hover:text-gray-900">Ver todas →</button>
+              </div>
+
+              <div className="space-y-4">
+                {activity.map((item, index) => (
+                  <div key={`${item[0]}-${index}`} className="flex gap-3">
+                    <ActivityIcon tone={item[3]}>{item[4]}</ActivityIcon>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-semibold text-gray-800">{item[0]}</p>
+                      <p className="truncate text-[9px] text-gray-500">{item[1]}</p>
+                    </div>
+                    <span className="whitespace-nowrap text-[9px] text-gray-400">{item[2]}</span>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}

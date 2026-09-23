@@ -8,7 +8,7 @@ import {
   Package, PenSquare, Plus, Receipt, RefreshCw, Route, Search, Settings, Shield, Sparkles,
   Star, Tag, Target, TrendingUp, User, UserPlus, Users, Wrench, X, Zap,
 } from '@/components/ui/icons/hubIcons'
-import { getAuthUser, logoutUser } from '@/config/auth'
+import { logoutUser } from '@/config/auth'
 import { avatarFor } from '@/lib/userAvatar'
 import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
@@ -22,6 +22,7 @@ import PagosPanel from './HubSuperPagosPanel'
 import ReportesPanel from './HubSuperReportesPanel'
 import SupportPanel from './HubSuperSupportPanel'
 import ConfiguracionPanel from './HubSuperConfiguracionPanel'
+import HubProfilePanel from './HubSuperAdminProfilePanel'
 
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { hasError: false, error: null, errorInfo: null } }
@@ -100,6 +101,7 @@ const SUPER_ADMIN_NAV = [
   { id: 'Reportes', label: 'Reportes', icon: BarChart3 },
   { id: 'Soporte', label: 'Soporte', icon: HelpCircle },
   { id: 'Configuracion', label: 'Configuración', icon: Settings },
+  { id: 'Mi cuenta', label: 'Mi cuenta', icon: User },
 ]
 
 // Navegación del Tenant Admin: mismo shell y mismo diseño, solo los módulos permitidos
@@ -113,6 +115,7 @@ const TENANT_ADMIN_NAV = SUPER_ADMIN_NAV.filter((nav) => nav.id !== 'Empresas')
 const WORKER_BASE_NAV = [
   { id: 'Inicio', label: 'Inicio', icon: Home },
   { id: 'Aplicaciones', label: 'Aplicaciones', icon: LayoutGrid },
+  { id: 'Mi cuenta', label: 'Mi cuenta', icon: User },
 ]
 const ADMIN_ONLY_NAV = new Set(['Usuarios', 'Configuracion'])
 const MODULE_TABS = ['Usuarios', 'Aplicaciones', 'Planes', 'Suscripciones', 'Pagos', 'Reportes', 'Soporte', 'Configuracion']
@@ -123,6 +126,7 @@ const PANEL_SLUGS = {
   Inicio: '', Empresas: 'empresas', Usuarios: 'usuarios', Aplicaciones: 'aplicaciones',
   Planes: 'planes', Suscripciones: 'suscripciones', Pagos: 'pagos', Reportes: 'reportes',
   Soporte: 'soporte', Configuracion: 'configuracion', Todas: '',
+  'Mi cuenta': 'mi-cuenta',
   Marketing: 'marketing', Automatizacion: 'automatizacion', IA: 'ia', 'Creacion de Contenido': 'creacion',
 }
 const PANEL_TABS = Object.fromEntries(
@@ -130,10 +134,45 @@ const PANEL_TABS = Object.fromEntries(
 )
 
 function displayName(email) {
-  if (!email) return 'Carlos Sandoval'
+  if (!email) return null
   const base = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
-  if (!base) return 'Carlos Sandoval'
+  if (!base) return null
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+// Optimización local del avatar antes de Storage: recorte cuadrado centrado + WebP comprimido.
+// Evita subir PNG/JPG pesados (causa del flash y la lentitud del avatar) al mantener ~512px y
+// WebP < 200 KB. No toca el modelo de usuarios: solo alimenta el upload.
+async function optimizeAvatar(file, maxSize = 512) {
+  const dataUrl = await fileToDataUrl(file)
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('La imagen no pudo procesarse.'))
+    image.src = dataUrl
+  })
+  const side = Math.min(img.width, img.height)
+  const sx = (img.width - side) / 2
+  const sy = (img.height - side) / 2
+  const canvas = document.createElement('canvas')
+  canvas.width = maxSize
+  canvas.height = maxSize
+  const ctx = canvas.getContext('2d')
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(img, sx, sy, side, side, 0, 0, maxSize, maxSize)
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo generar la imagen optimizada.'))), 'image/webp', 0.85)
+  })
+  return blob
 }
 
 function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
@@ -775,7 +814,8 @@ function WorkerHome({ panelAuth, name, avatar }) {
   const granted = (panelAuth?.permissions?.panel || [])
     .filter((s) => TENANT_ADMIN_NAV.some((n) => n.id === s) && !ADMIN_ONLY_NAV.has(s))
   const roleLabel = WORKER_ROLE_LABEL[panelAuth?.role] || panelAuth?.role || 'Usuario'
-  const initials = name.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase()
+  const safeName = name || ''
+  const initials = safeName.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase()
 
   return (
     <div className="space-y-6 pb-12">
@@ -785,7 +825,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
             {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
           <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Mi espacio</h1>
-          <p className="mt-1 text-xs md:text-sm text-zinc-500">Bienvenido, {name}. Aquí están las aplicaciones que tu administrador habilitó para ti.</p>
+          <p className="mt-1 text-xs md:text-sm text-zinc-500">Bienvenido{name ? `, ${name}` : ''}. Aquí están las aplicaciones que tu administrador habilitó para ti.</p>
         </div>
         <div className="hidden lg:block text-right">
           <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
@@ -798,11 +838,11 @@ function WorkerHome({ panelAuth, name, avatar }) {
           <span className="relative flex w-10 h-10 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white font-extrabold text-xs overflow-hidden">
             {initials || '?'}
             {avatar && (
-              <img src={avatar} alt="" onError={(e) => e.currentTarget.remove()} className="absolute inset-0 h-full w-full object-cover" />
+              <img key={avatar} src={avatar} alt="" onError={(e) => e.currentTarget.remove()} className="absolute inset-0 h-full w-full object-cover" />
             )}
           </span>
           <div>
-            <p className="text-sm font-extrabold text-zinc-950">{name}</p>
+            <p className="text-sm font-extrabold text-zinc-950">{name || 'Cargando…'}</p>
             <p className="text-xs text-zinc-500">{roleLabel}</p>
           </div>
         </div>
@@ -933,7 +973,7 @@ function HubPanelContent() {
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session || !alive) return
-      const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin, permissions').eq('id', session.user.id).single()
+      const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin, permissions, full_name, avatar_url, created_at').eq('id', session.user.id).single()
       if (!alive) return
       const metaIsPlatform = session.user.app_metadata?.role === 'platform_admin' || session.user.user_metadata?.role === 'platform_admin'
       const dbIsPlatform = me?.role === 'admin' && me?.is_platform_admin === true
@@ -954,22 +994,24 @@ function HubPanelContent() {
         isTenantAdmin,
         tenantName,
         permissions: me?.permissions || {},
+        fullName: me?.full_name || null,
+        avatarUrl: me?.avatar_url || null,
+        createdAt: me?.created_at || null,
       })
     })()
     return () => { alive = false }
   }, [])
 
-  // Identidad para mostrar (nombre/email/foto): fuente de verdad = sesión Supabase;
-  // el fallback qaway_auth_* solo cubre el caso de Supabase no configurado.
+  // Identidad para mostrar (nombre/email/foto): fuente única de verdad = sesión Supabase.
+  // Mientras panelAuth no está resuelto, NO se deriva identidad legacy: estado neutro.
+  const identityResolved = Boolean(panelAuth?.session?.user)
   const authUser = useMemo(() => {
-    const cached = getAuthUser()
     const u = panelAuth?.session?.user
-    if (!u) return cached
+    if (!u) return null
     return {
-      ...cached,
       id: u.id,
-      email: u.email || cached?.email,
-      role: panelAuth.role || cached?.role,
+      email: u.email || null,
+      role: panelAuth.role || null,
     }
   }, [panelAuth])
 
@@ -1056,9 +1098,84 @@ function HubPanelContent() {
     if (!allowedTabIds.has(activeTab) && activeTab !== 'Todas') navigate('/hub/panel')
   }, [panelAuth, activeTab, navigate, allowedTabIds])
 
-  const name = displayName(authUser?.email)
-  // Foto estable por usuario: cada cuenta distinta tiene su propia foto de stock.
-  const avatar = avatarFor(authUser?.email)
+  const name = identityResolved ? (panelAuth?.fullName || displayName(authUser?.email)) : null
+  // Foto estable por usuario: avatar subido (users.avatar_url) o foto de stock por cuenta.
+  // Neutra (null) hasta que la identidad actual esté resuelta: nunca pinta avatar anterior.
+  const avatar = identityResolved ? (panelAuth?.avatarUrl || avatarFor(authUser?.email, panelAuth?.isPlatformAdmin)) : null
+
+  // ── Mi cuenta / perfil (30.X): persistencia SOLO de identidad personal ──
+  // Alcance aprobado: nombre completo → users.full_name; foto → users.avatar_url vía
+  // Storage. Email, 2FA, sesiones, preferencias, empresa/usuarios/apps NO se persisten aquí.
+  const selfId = panelAuth?.session?.user?.id
+  const memberSince = panelAuth?.createdAt
+    ? new Date(panelAuth.createdAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+    : null
+
+  const updateSelf = async (fields) => {
+    if (!selfId) return
+    const { error } = await supabase.from('users').update(fields).eq('id', selfId)
+    if (error) throw error
+  }
+
+  const handleSaveProfile = async (payload = {}) => {
+    const fullName = String(payload?.fullName || '').trim()
+    if (!fullName || !selfId) return
+    try {
+      await updateSelf({ full_name: fullName })
+      setPanelAuth((p) => (p ? { ...p, fullName } : p))
+    } catch (e) {
+      console.error('Mi cuenta · guardar perfil:', e)
+      window.alert('No se pudo guardar el nombre. Inténtalo de nuevo.')
+    }
+  }
+
+  const handleUploadAvatar = async (file) => {
+    try {
+      if (!selfId) throw new Error('Tu sesión no está disponible.')
+      const blob = await optimizeAvatar(file)
+      const path = `avatars/${selfId}.webp`
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, blob, { upsert: true, contentType: 'image/webp', cacheControl: '3600' })
+      if (upErr) throw new Error('No se pudo subir la foto. Verifica que exista el bucket "avatars" en Supabase Storage.')
+      const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
+      await updateSelf({ avatar_url: pub.publicUrl })
+      setPanelAuth((p) => (p ? { ...p, avatarUrl: pub.publicUrl } : p))
+      return pub.publicUrl
+    } catch (e) {
+      console.error('Mi cuenta · subir foto:', e)
+      window.alert(e?.message || 'No se pudo subir la foto. Inténtalo de nuevo.')
+      return null
+    }
+  }
+
+  const handleDeleteAvatar = async () => {
+    if (!selfId) return
+    try { await supabase.storage.from('avatars').remove([`avatars/${selfId}.webp`]) }
+    catch (e) { console.error('Mi cuenta · borrar foto (storage):', e) }
+    try {
+      await updateSelf({ avatar_url: null })
+      setPanelAuth((p) => (p ? { ...p, avatarUrl: null } : p))
+    } catch (e) {
+      console.error('Mi cuenta · limpiar foto:', e)
+      window.alert('No se pudo quitar la foto. Inténtalo de nuevo.')
+    }
+  }
+
+  const profileProps = useMemo(() => {
+    if (!panelAuth) return null
+    const roleLabel = panelAuth.isPlatformAdmin
+      ? 'Super Administrador'
+      : (panelAuth.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')
+    return {
+      fullName: panelAuth.fullName || '',
+      email: authUser?.email || '',
+      roleLabel,
+      tenantName: effectiveTenantName || '—',
+      avatarUrl: panelAuth.avatarUrl || '',
+      memberSince: memberSince || '—',
+    }
+  }, [panelAuth, authUser, effectiveTenantName, memberSince])
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1106,7 +1223,7 @@ function HubPanelContent() {
               ) : (
                 <div className="flex flex-col">
                   <span>Qaway <span className="text-[#ff4b0b]">Lab</span></span>
-                  <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">{actingAsBrand ? `Ver como ${scopedTenant.name}` : (isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administración de empresa' : 'Mi espacio'))}</span>
+                  <span className="text-[10px] font-semibold text-zinc-400 tracking-wider">{!panelAuth ? 'Cargando…' : (actingAsBrand ? `Ver como ${scopedTenant.name}` : (isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administración de empresa' : 'Mi espacio')))}</span>
                 </div>
               )}
             </span>
@@ -1304,13 +1421,26 @@ function HubPanelContent() {
               <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
             </button>
 
-            {/* User Profile Dropdown */}
+            {/* User Profile Dropdown: neutro hasta resolver identidad actual; jamás pinta identidad anterior */}
             <div className="relative z-[100] ml-1">
-              <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 cursor-pointer p-1 lg:p-1.5 rounded-full hover:bg-white/5 transition-colors text-left border border-transparent focus:outline-none">
-                <img src={avatar} alt={name} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/10 object-cover" />
+              <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 cursor-pointer p-1 lg:p-1.5 rounded-full hover:bg-white/5 transition-colors text-left border border-transparent focus:outline-none" aria-label={identityResolved ? name : 'Cargando identidad'}>
+                {identityResolved && avatar ? (
+                  <img key={avatar} src={avatar} alt={name} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/10 object-cover" />
+                ) : (
+                  <span className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/10 bg-white/10 animate-pulse" aria-hidden="true" />
+                )}
                 <div className="hidden lg:flex flex-col justify-center">
-                  <span className="text-white text-xs font-bold leading-none">{name}</span>
-                  <span className="text-[10px] text-white/50 leading-none mt-1">{isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')}</span>
+                  {identityResolved ? (
+                    <>
+                      <span className="text-white text-xs font-bold leading-none">{name}</span>
+                      <span className="text-[10px] text-white/50 leading-none mt-1">{isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="h-3 w-24 rounded bg-white/10 animate-pulse" aria-hidden="true" />
+                      <span className="h-2 w-16 rounded bg-white/5 animate-pulse mt-1" aria-hidden="true" />
+                    </>
+                  )}
                 </div>
                 <HubIcon icon={ChevronDown} size={16} className={`w-4 h-4 text-white/50 hidden lg:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-white' : ''}`} />
               </button>
@@ -1321,10 +1451,26 @@ function HubPanelContent() {
                     <motion.div initial={{ opacity: 0, scale: 0.95, originY: 0, originX: 1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.15, ease: "easeOut" }}
                       className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[#18181b] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden">
                       <div className="p-5 border-b border-white/5 bg-white/5 flex items-center gap-4">
-                        <img src={avatar} alt={name} className="w-12 h-12 rounded-full border border-white/10 object-cover shrink-0" />
-                        <div className="flex-1 min-w-0"><p className="text-sm font-bold text-white truncate">{name}</p><p className="text-xs text-white/50 truncate mt-0.5">{authUser?.email || 'admin@qaway.pe'}</p></div>
+                        {identityResolved && avatar ? (
+                          <img key={avatar} src={avatar} alt={name} className="w-12 h-12 rounded-full border border-white/10 object-cover shrink-0" />
+                        ) : (
+                          <span className="w-12 h-12 rounded-full border border-white/10 bg-white/10 animate-pulse shrink-0" aria-hidden="true" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          {identityResolved ? (
+                            <><p className="text-sm font-bold text-white truncate">{name}</p><p className="text-xs text-white/50 truncate mt-0.5">{authUser?.email || 'Verificando identidad…'}</p></>
+                          ) : (
+                            <><p className="h-4 w-32 rounded bg-white/10 animate-pulse" aria-hidden="true" /><p className="h-3 w-40 rounded bg-white/5 animate-pulse mt-2" aria-hidden="true" /></>
+                          )}
+                        </div>
                       </div>
-                      <div className="p-2 border-t border-white/5 bg-black/20">
+                      <div className="p-2 border-t border-white/5 bg-black/20 space-y-0.5">
+                        <button onClick={() => { setIsProfileOpen(false); goTab('Mi cuenta') }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                          <HubIcon icon={User} size={15} className="w-4 h-4 text-zinc-400 shrink-0" /> Mi cuenta
+                        </button>
+                        <button onClick={() => window.alert('Sección Seguridad disponible próximamente.')} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                          <HubIcon icon={Shield} size={15} className="w-4 h-4 text-zinc-500 shrink-0" /> Seguridad <span className="ml-auto text-[10px] text-zinc-600">Próximamente</span>
+                        </button>
                         <button onClick={handleLogout} className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold">Cerrar Sesión</button>
                       </div>
                     </motion.div>
@@ -1405,6 +1551,25 @@ function HubPanelContent() {
             ) : activeTab === 'Configuracion' && !globalSearchQuery.trim() ? (
               /* Sección Configuración dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
               <ConfiguracionPanel />
+            ) : activeTab === 'Mi cuenta' && !globalSearchQuery.trim() ? (
+              /* Sección Mi cuenta dentro del panel (30.X: Page/View en el shell). Perfil personal
+                 desacoplado de empresa/usuarios/aplicaciones/planes; la identidad viene SOLO de la
+                 sesión + fila de users por id (nunca de tenant/rol en carga). */
+              panelAuth ? (
+                <HubProfilePanel
+                  profile={profileProps}
+                  onSaveProfile={handleSaveProfile}
+                  onUploadAvatar={handleUploadAvatar}
+                  onDeleteAvatar={handleDeleteAvatar}
+                  onOpenSecurity={() => window.alert('Sección Seguridad disponible próximamente.')}
+                  onOpenActivity={() => window.alert('Actividad de la cuenta disponible próximamente.')}
+                  onOpenHelp={() => goTab('Soporte')}
+                />
+              ) : (
+                <div className="py-24 text-center">
+                  <p className="text-sm font-semibold text-zinc-400">Cargando tu cuenta…</p>
+                </div>
+              )
             ) : globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
               /* Explorer Grid de Aplicaciones */
               <div>

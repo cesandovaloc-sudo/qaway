@@ -14,7 +14,7 @@ const SUPER_ADMIN_EMAILS = [
   'admin@qawaylab.com',
   'admin@qaway.test',
 ]
-const SUPER_ADMIN_AVATAR = '/assets/avatars/super-admin.png'
+const SUPER_ADMIN_AVATAR = '/assets/avatars/super-admin.webp'
 
 function hashEmail(email) {
   let h = 0
@@ -28,14 +28,14 @@ function avatarIndex(email) {
   return POOL[hashEmail(email) % POOL.length]
 }
 
-export function avatarFor(email) {
+export function avatarFor(email, isSuperAdmin = false) {
   const key = String(email || '').trim().toLowerCase()
-  if (SUPER_ADMIN_EMAILS.includes(key)) return SUPER_ADMIN_AVATAR
+  if (isSuperAdmin || SUPER_ADMIN_EMAILS.includes(key)) return SUPER_ADMIN_AVATAR
   return `https://i.pravatar.cc/150?img=${avatarIndex(email)}`
 }
 
-export function avatarForSize(email, size = 150) {
+export function avatarForSize(email, size = 150, isSuperAdmin = false) {
   const key = String(email || '').trim().toLowerCase()
-  if (SUPER_ADMIN_EMAILS.includes(key)) return SUPER_ADMIN_AVATAR
+  if (isSuperAdmin || SUPER_ADMIN_EMAILS.includes(key)) return SUPER_ADMIN_AVATAR
   return `https://i.pravatar.cc/${size}?img=${avatarIndex(email)}`
 }
