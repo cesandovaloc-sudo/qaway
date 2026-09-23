@@ -79,7 +79,7 @@ import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
 import UsuariosPage from '@/pages/5-qaway-hub/usuarios/UsuariosPage.jsx'
 import InvitarPage from '@/pages/5-qaway-hub/invitar/InvitarPage.jsx'
 import EmpresasPage from '@/pages/5-qaway-hub/empresas/EmpresasPage.jsx'
-import OnboardingPage from '@/pages/5-qaway-hub/onboarding/OnboardingPage.jsx'
+import HubOnboardingPage from '@/pages/5-qaway-hub/HubOnboardingPage.jsx'
 
 // Suite de Formularios & Tests Interactivos (10-briefs/1- Formularios)
 const FormulariosShowcasePage = lazy(() => import('@/pages/10-briefs/1- Formularios/FormulariosShowcasePage.jsx'))
@@ -409,8 +409,8 @@ export default function AppRouter() {
             path="hub/empresas"
             element={renderRoute('hub', <ProtectedRoute><EmpresasPage /></ProtectedRoute>)}
           />
-          {/* Onboarding canónico ÚNICO (aprobado 2026-09-23): /onboarding es el comercial.
-              /hub/bienvenida redirige ahí (conserva query) y no duplica flujos. */}
+          {/* Onboarding canónico ÚNICO (2026-09-23): /onboarding es el wizard del Hub
+              (HubOnboardingPage). /hub/bienvenida redirige ahí (conserva query) y no duplica flujos. */}
           <Route
             path="hub/bienvenida"
             element={<RedirectTo to="/onboarding" />}
@@ -602,7 +602,7 @@ export default function AppRouter() {
           <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
 
           <Route path="rutas" element={<RutasPage />} />
-          <Route path="onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <OnboardingPage />)} />
+          <Route path="onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
 
           <Route path="*" element={notFoundElement} />
         </Route>
