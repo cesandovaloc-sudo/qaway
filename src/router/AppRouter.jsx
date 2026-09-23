@@ -602,7 +602,6 @@ export default function AppRouter() {
           <Route path="landings" element={renderPublicPathRoute('landings', '/landings', <LandingsPage />)} />
 
           <Route path="rutas" element={<RutasPage />} />
-          <Route path="onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
 
           <Route path="*" element={notFoundElement} />
         </Route>
@@ -610,6 +609,8 @@ export default function AppRouter() {
         <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
         <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
         <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
+        {/* Onboarding: standalone FUERA del Layout (sin navbar/footer de marca). */}
+        <Route path="/onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
     </>
