@@ -183,7 +183,7 @@ const routes = [
     pillar: 'Marketing',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     preview: '/assets/hub-previews/preview-crm.jpg',
-    published: false,
+    published: true,
   },
   {
     icon: Route,

@@ -1,0 +1,5 @@
+# Candado de Privacidad: protocolos, marcos e implementaciones locales.
+# Nada de lo que viva en _docs/ se versiona en git (ni sale en builds del repo).
+# Para versionar algo intencionalmente, añade una excepción explícita (ej. `!README.md`).
+*
+!.gitignore
