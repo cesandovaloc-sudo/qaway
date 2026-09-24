@@ -137,10 +137,40 @@ export default function LoginPage() {
     }
   }
 
+  const [resetMode, setResetMode]       = useState('password') // 'password' | 'activation'
+  const [resendCooldown, setResendCooldown] = useState(0)
+
+  // ─── Reenvío de confirmación de cuenta nueva (signup) ─────────────────────
+  const handleResendActivation = async (e) => {
+    e.preventDefault()
+    if (!resetEmail.trim() || resendCooldown > 0) return
+    setError('')
+    try {
+      const supabase = getSupabaseClient()
+      if (!supabase) { setError('Servicio no disponible.'); return }
+      const { error: resendErr } = await supabase.auth.resend({
+        type: 'signup',
+        email: resetEmail.trim(),
+        options: {
+          emailRedirectTo: `${APP_BASE_URL}/login?verified=1`,
+        },
+      })
+      if (resendErr) {
+        setError(resendErr.message || 'No se pudo reenviar la activación.')
+      } else {
+        setResetSent(true)
+        setResendCooldown(60)
+      }
+    } catch (_) {
+      setError('Error al procesar la solicitud.')
+    }
+  }
+
   // ─── Recuperación de contraseña ───────────────────────────────────────────
   const handlePasswordReset = async (e) => {
     e.preventDefault()
     if (!resetEmail.trim()) return
+    setError('')
     try {
       const supabase = getSupabaseClient()
       if (!supabase) { setError('Servicio no disponible.'); return }
@@ -202,14 +232,25 @@ export default function LoginPage() {
     return () => { alive = false }
   }, [verified, navigate])
 
-  // Enlace de auth rechazado por el servidor (caducado/ya usado, #error=): abre el
-  // formulario de recuperación con el correo sugerido para reenviar al instante.
+  // Enlace de auth rechazado por el servidor (caducado/ya usado, #error=):
+  // Si es otp_expired o error de enlace de confirmación, activa el modo de activación.
   useEffect(() => {
     if (!linkError) return
+    const isActivationError = linkError.includes('otp_expired') || 
+                              linkError.includes('access_denied') || 
+                              linkErrorDesc.toLowerCase().includes('email') || 
+                              linkErrorDesc.toLowerCase().includes('link')
+    setResetMode(isActivationError ? 'activation' : 'password')
     setShowReset(true)
     if (resetEmail === '' && regEmail) setResetEmail(regEmail)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linkError])
+  }, [linkError, linkErrorDesc])
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setInterval(() => setResendCooldown((prev) => prev - 1), 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   // Mientras se verifica una sesión viva (pestaña nueva / correo confirmado) se
   // muestra un loader: evita el "flash" del formulario de login ya estando adentro.
@@ -274,57 +315,152 @@ export default function LoginPage() {
 
         <div className="w-full max-w-md relative z-10">
 
-          {/* ── Modo: Recuperar Contraseña ────────────────────────────── */}
+          {/* ── Modo: Reenviar Activación de Cuenta / Recuperar Contraseña ── */}
           {showReset ? (
-            <div>
+            <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">
               <button
-                onClick={() => { setShowReset(false); setResetSent(false); setError('') }}
-                className="text-zinc-500 hover:text-white text-sm mb-8 flex items-center gap-2 transition-colors"
+                onClick={() => { setShowReset(false); setResetSent(false); setError(''); setResetMode('password') }}
+                className="text-zinc-400 hover:text-white text-xs font-semibold mb-6 flex items-center gap-2 transition-colors uppercase tracking-wider"
               >
                 ← Volver al inicio de sesión
               </button>
-              <h2 className="text-3xl font-black text-white mb-2">Recuperar acceso</h2>
-              <p className="text-zinc-400 mb-8">Te enviaremos un enlace para restablecer tu contraseña.</p>
 
-              {linkError && (
-                <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-4 rounded-xl text-sm font-medium leading-relaxed">
-                  ✕ {linkErrorDesc}
-                  {regEmail ? ` Enviamos el correo a: ${regEmail}.` : ''} Pide uno nuevo con el formulario de abajo.
-                </div>
-              )}
+              {resetMode === 'activation' ? (
+                /* ── Caso A: Enlace de Activación Caducado / Nuevo Envío ── */
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mb-4 tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    ACTIVACIÓN DE CUENTA
+                  </div>
 
-              {resetSent ? (
-                <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-4 rounded-xl text-sm font-medium text-center">
-                  ✓ Correo enviado. Revisa tu bandeja de entrada.
+                  <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Activa tu cuenta</h2>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                    Por seguridad, los enlaces de confirmación tienen vigencia limitada. Si tu enlace caducó o no te llegó, ingresa tu correo para enviarte uno nuevo de inmediato.
+                  </p>
+
+                  {resetSent ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-5 rounded-xl text-sm font-medium space-y-2">
+                      <div className="font-bold flex items-center gap-2 text-emerald-300">
+                        ✓ Enlace de activación enviado
+                      </div>
+                      <p className="text-xs text-emerald-400/90 leading-relaxed">
+                        Revisa tu bandeja de entrada o carpeta de spam en <span className="underline font-semibold">{resetEmail}</span> y confirma tu acceso.
+                      </p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleResendActivation} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                          Correo Registrado
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Mail className="h-5 w-5 text-zinc-500" />
+                          </div>
+                          <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            placeholder="tu@correo.com"
+                            required
+                            className="w-full bg-zinc-950/80 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all font-medium placeholder:text-zinc-600 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-xs font-medium">
+                          {error}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={resendCooldown > 0}
+                        className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.99] text-sm shadow-lg shadow-orange-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {resendCooldown > 0
+                          ? `Reenviar en ${resendCooldown}s...`
+                          : 'Reenviar enlace de activación →'}
+                      </button>
+
+                      <div className="pt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => { setResetMode('password'); setError('') }}
+                          className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                          ¿Ya activaste tu cuenta y olvidaste tu clave? Restablécela aquí
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               ) : (
-                <form onSubmit={handlePasswordReset} className="space-y-4">
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-zinc-600" />
+                /* ── Caso B: Recuperación de Contraseña Tradicional ── */
+                <div>
+                  <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Recuperar acceso</h2>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                    Te enviaremos un enlace seguro a tu correo electrónico para que puedas crear una nueva contraseña.
+                  </p>
+
+                  {resetSent ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-5 rounded-xl text-sm font-medium space-y-2">
+                      <div className="font-bold flex items-center gap-2 text-emerald-300">
+                        ✓ Enlace de recuperación enviado
+                      </div>
+                      <p className="text-xs text-emerald-400/90 leading-relaxed">
+                        Revisa tu bandeja de entrada o spam en <span className="underline font-semibold">{resetEmail}</span> y sigue los pasos para cambiar tu clave.
+                      </p>
                     </div>
-                    <input
-                      type="email"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      placeholder="tu@correo.com"
-                      required
-                      className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all font-medium placeholder:text-zinc-600"
-                    />
-                  </div>
-                  {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm font-medium">{error}</div>
+                  ) : (
+                    <form onSubmit={handlePasswordReset} className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                          Correo Electrónico
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Mail className="h-5 w-5 text-zinc-500" />
+                          </div>
+                          <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            placeholder="tu@correo.com"
+                            required
+                            className="w-full bg-zinc-950/80 border border-zinc-800 text-white rounded-xl py-3.5 pl-12 pr-4 focus:outline-none focus:border-zinc-600 focus:ring-1 focus:ring-zinc-600 transition-all font-medium placeholder:text-zinc-600 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-xs font-medium">
+                          {error}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.99] text-sm shadow-md"
+                      >
+                        Enviar enlace de recuperación
+                      </button>
+
+                      <div className="pt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => { setResetMode('activation'); setError('') }}
+                          className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                          ¿Tu cuenta es nueva y no lograste confirmarla? Actívala aquí
+                        </button>
+                      </div>
+                    </form>
                   )}
-                  <button
-                    type="submit"
-                    className="w-full bg-white hover:bg-zinc-200 text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                  >
-                    Enviar enlace de recuperación
-                  </button>
-                </form>
+                </div>
               )}
             </div>
-
           ) : (
             /* ── Modo: Inicio de Sesión Principal ─────────────────────── */
             <>
