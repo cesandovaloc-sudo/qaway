@@ -560,9 +560,15 @@ export default function HubOnboardingPage() {
                 </button>
               ))}
             </div>
-            <p className="catalogHint">Este es tu arranque ({apps.length} apps). Qaway cuenta con {appsDb.length} aplicaciones en total: podrás sumar las demás desde el panel cuando quieras.</p>
-
-            <div className="note"><b>Tus apps quedan en modo prueba, sin costo.</b><span>Las {selected.length} apps que elegiste se activan al continuar SIN pedir tarjeta y quedan en periodo de prueba. Cuando venza, desde el panel decides el plan de cada app; nada se cobra automáticamente.</span></div>
+            <div className="note">
+              <b>Empieza tu prueba gratuita por 14 días</b>
+              <span>Tus apps seleccionadas se activan <b>GRATIS</b> hoy. Al finalizar los 14 días nada se cobra automáticamente: tú decides en tu panel qué plan mantener para cada aplicación.</span>
+              <small style={{ marginTop: 6, display: 'block', color: '#888', fontSize: 11 }}>Consulta las tarifas vigentes desde tu panel en cualquier momento.</small>
+              {/* Preparado y oculto para invocar cuando definas los precios: */}
+              <div style={{ display: 'none', marginTop: 8 }} className="tarifas-hook">
+                <span>¿Cuánto cuesta después? <button type="button" style={{ color: '#ff4b0b', textDecoration: 'underline', background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer' }}>Conoce las tarifas de cada app</button></span>
+              </div>
+            </div>
             <Notice error={noteIsError}>{note}</Notice>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveApps(true)}>{saving ? "Guardando…" : "Continuar →"}</button></div>
           </section>
