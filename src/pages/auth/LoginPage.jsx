@@ -248,12 +248,9 @@ export default function LoginPage() {
   return (
     <>
       {/* Loader mientras se verifica una sesión viva (pestaña nueva / correo
-          confirmado): evita el "flash" del formulario de login ya estando
-          adentro. Solo afecta al panel derecho; el branding lo mantiene AuthShell. */}
+          confirmado): pantalla limpia completa (#f7f7f8) sin la vista de login de fondo. */}
       {checking ? (
-        <div className="flex flex-col items-center justify-center min-h-[350px] w-full">
-          <QawayCleanLoader fullScreen={false} />
-        </div>
+        <QawayCleanLoader fullScreen={true} />
       ) : showReset ? (
             <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">
               <button

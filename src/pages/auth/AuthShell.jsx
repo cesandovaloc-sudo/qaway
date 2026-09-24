@@ -15,15 +15,9 @@ export default function AuthShell() {
   const isVerified = searchParams.get('verified') === '1'
   const hasAuthHash = typeof window !== 'undefined' && window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=signup'))
 
-  // Si el usuario viene de confirmar su correo, mostramos pantalla limpia con el
-  // mismo fondo neutro de onboarding (#f7f7f8) sin mostrar el panel oscuro de login.
+  // Si el usuario viene de confirmar su correo, mostramos pantalla limpia a pantalla completa (#f7f7f8) sin mostrar la vista de login.
   if (isVerified || hasAuthHash) {
-    return (
-      <div className="min-h-screen w-full bg-[#f7f7f8] flex items-center justify-center">
-        <QawayCleanLoader fullScreen={false} />
-        <div className="hidden"><Outlet /></div>
-      </div>
-    )
+    return <QawayCleanLoader fullScreen={true} />
   }
 
   return (

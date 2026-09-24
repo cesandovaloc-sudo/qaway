@@ -40,13 +40,35 @@ const LBL = {
   ruc: "RUC / identificación fiscal",
 };
 
-function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, list }) {
+function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
       <span>{label}{required ? <b className="req"> *</b> : null}{lock ? " 🔒" : ""}</span>
-      <input type={type} placeholder={placeholder} value={value} onChange={onChange} readOnly={lock} disabled={disabled} list={list} className={lock ? "locked" : ""} />
+      <input type={type} placeholder={placeholder} value={value} onChange={onChange} readOnly={lock} disabled={disabled} maxLength={maxLength} className={lock ? "locked" : ""} />
     </label>
   );
+}
+
+function SelectField({ label, value, onChange, required, invalid, placeholder, disabled, children }) {
+  return (
+    <label className={`field ${invalid ? "invalid" : ""}`}>
+      <span>{label}{required ? <b className="req"> *</b> : null}</span>
+      <select value={value} onChange={onChange} disabled={disabled}>
+        <option value="">{placeholder}</option>
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function splitPhone(phone) {
+  const v = (phone || "").trim();
+  if (!v) return { prefix: "", digits: "" };
+  const p = PAISES.find((x) => v.startsWith(x.dial));
+  if (p) return { prefix: p.dial, digits: v.slice(p.dial.length).trim().replace(/\D/g, "") };
+  const m = v.match(/^(?:\+|00)(\d{1,4})\s*(.*)$/);
+  if (m) return { prefix: "+" + m[1], digits: m[2].replace(/\D/g, "") };
+  return { prefix: "", digits: v.replace(/\D/g, "") };
 }
 
 export default function HubOnboardingPage() {
@@ -68,11 +90,13 @@ export default function HubOnboardingPage() {
   const [logoPreview, setLogoPreview] = useState("");
   const [constituida, setConstituida] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [prefix, setPrefix] = useState("+51");
 
   const next = () => setStep(s => Math.min(5, s + 1));
   const back = () => setStep(s => Math.max(1, s - 1));
   const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato");
   const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const paisSel = PAISES.find((p) => p.nombre === form.country) || null;
   // Identidad del usuario autenticado (para la carátula "Tu cuenta" bloqueada).
   const meta = (session?.user?.user_metadata) || {};
   const fullName = meta.full_name || "";
@@ -99,10 +123,12 @@ export default function HubOnboardingPage() {
             setTenant(t);
             const c = t.content || {};
             const contact = c.contact || {};
+            const { prefix: pfx, digits } = splitPhone(contact.phone || "");
+            setPrefix(pfx || "+51");
             setForm({
-              name: t.name || "", legal: t.legal_name || "", ruc: c.tax_id || "",
+              name: t.name || "", legal: t.legal_name || "", ruc: (c.tax_id || "").replace(/\D/g, ""),
               country: contact.country || "", rubro: (t.features || {}).rubro || "",
-              phone: contact.phone || "", email: contact.email || "",
+              phone: digits, email: contact.email || "",
             });
             setConstituida(!!(t.legal_name || c.tax_id));
           }
@@ -153,37 +179,35 @@ export default function HubOnboardingPage() {
   function validar() {
     const errs = {};
     if (!form.name.trim()) errs.name = "Escribe el nombre comercial de tu empresa.";
-    if (!form.country.trim()) errs.country = "Selecciona tu país.";
-    const pais = PAISES.find((p) => p.nombre.toLowerCase() === form.country.trim().toLowerCase());
-    const digitos = (form.phone.match(/\d/g) || []).join("");
-    if (!form.phone.trim()) errs.phone = "Escribe tu teléfono / WhatsApp.";
-    else if (digitos.length < (pais?.minDigitos || 6)) errs.phone = `El número debe tener al menos ${pais?.minDigitos || 6} dígitos (sin contar el prefijo).`;
+    if (!form.country) errs.country = "Selecciona tu país.";
+    const pais = PAISES.find((p) => p.nombre === form.country) || null;
+    if (!form.phone) errs.phone = "Escribe tu teléfono / WhatsApp.";
+    else if (form.phone.length < (pais?.minDigitos || 6)) errs.phone = `El número necesita al menos ${pais?.minDigitos || 6} dígitos.`;
     if (!form.email.trim()) errs.email = "Escribe el correo de contacto.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) errs.email = "Escribe un correo válido (ej. nombre@empresa.com).";
     if (constituida) {
       if (!form.legal.trim()) errs.legal = "Escribe la razón social de la empresa.";
-      if (!form.ruc.trim()) errs.ruc = "Escribe el RUC / identificación fiscal.";
-      else if (pais?.rucDigitos && form.ruc.trim().length !== pais.rucDigitos) errs.ruc = `El RUC de ${pais.nombre} tiene ${pais.rucDigitos} dígitos.`;
-      else if (!/^\d+$/.test(form.ruc.trim())) errs.ruc = "El RUC debe contener solo números.";
+      const ruc = form.ruc.trim();
+      if (!ruc) errs.ruc = "Escribe el RUC / identificación fiscal.";
+      else if (pais?.rucDigitos && ruc.length !== pais.rucDigitos) errs.ruc = `El RUC de ${pais.nombre} tiene exactamente ${pais.rucDigitos} dígitos.`;
     }
     return errs;
   }
 
   function handleCountryChange(e) {
     const v = e.target.value;
-    const pais = PAISES.find((p) => p.nombre.toLowerCase() === v.trim().toLowerCase());
-    setForm((f) => {
-      let phone = f.phone;
-      const soloPrefijo = !phone.trim() || /^\+[\d\s]{1,7}$/.test(phone.trim());
-      if (pais && soloPrefijo) phone = `${pais.dial} `;
-      return { ...f, country: v, phone };
-    });
+    const pais = PAISES.find((p) => p.nombre === v);
+    setForm((f) => ({ ...f, country: v }));
+    if (pais) setPrefix(pais.dial);
   }
 
-  function handleCountryBlur() {
-    const v = form.country.trim().toLowerCase();
-    if (!v) return;
-    const hits = PAISES.filter((p) => p.nombre.toLowerCase().startsWith(v));
-    if (hits.length === 1) setForm((f) => ({ ...f, country: hits[0].nombre }));
+  function handlePhoneChange(e) {
+    setForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, "") }));
+  }
+
+  function handleRucChange(e) {
+    const max = paisSel?.rucDigitos || 20;
+    setForm((f) => ({ ...f, ruc: e.target.value.replace(/\D/g, "").slice(0, max) }));
   }
 
   async function saveEmpresa(goNext) {
@@ -198,7 +222,8 @@ export default function HubOnboardingPage() {
     }
     setSaving(true);
     try {
-      const contact = { email: form.email, phone: form.phone, address: "", country: form.country };
+      const phoneFull = `${prefix} ${form.phone}`.trim();
+      const contact = { email: form.email.trim(), phone: phoneFull, address: "", country: form.country };
       let newTenantId = tenant?.id || null;
       if (!tenant) {
         // Sin marca: crearla (quedo admin). Slug derivado del nombre.
@@ -379,30 +404,31 @@ export default function HubOnboardingPage() {
               <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.webp" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
             </div>
 
+            <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} />
+
             <label className="check constituida">
               <input type="checkbox" checked={constituida} onChange={(e) => setConstituida(e.target.checked)} />
               <span>¿Es una empresa constituida?<small>De serlo, la Razón social y el RUC serán obligatorios.</small></span>
             </label>
 
             <div className="grid">
-              <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} />
               <Field label="Razón social" placeholder="Nombre legal de la empresa" value={form.legal} onChange={setF("legal")} disabled={!constituida} required={constituida} invalid={!!fieldErrors.legal} />
-              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={setF("ruc")} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} />
-              <label className={`field ${fieldErrors.country ? "invalid" : ""}`}>
-                <span>País<b className="req"> *</b></span>
-                <input list="hb-paises" placeholder="Busca tu país (Perú…)" value={form.country} onChange={handleCountryChange} onBlur={handleCountryBlur} />
+              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={handleRucChange} maxLength={paisSel?.rucDigitos || 40} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} />
+              <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} placeholder="Selecciona tu país…">
+                {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
+              </SelectField>
+              <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} placeholder="Opcional — selecciona…">
+                {RUBROS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </SelectField>
+              <label className={`field ${fieldErrors.phone ? "invalid" : ""}`}>
+                <span>Teléfono / WhatsApp<b className="req"> *</b></span>
+                <div className="phoneRow">
+                  <input className="phonePrefix" value={prefix} onChange={(e) => setPrefix(e.target.value.replace(/[^\d+ ]/g, "").slice(0, 6))} maxLength={6} placeholder="+51" inputMode="tel" />
+                  <input type="tel" value={form.phone} onChange={handlePhoneChange} placeholder="999 999 999" inputMode="tel" maxLength={15} />
+                </div>
               </label>
-              <Field label="Rubro / actividad" placeholder="Ej. Veterinaria" value={form.rubro} onChange={setF("rubro")} list="hb-rubros" />
-              <Field label="Teléfono / WhatsApp" placeholder="+51 999 999 999" type="tel" value={form.phone} onChange={setF("phone")} required invalid={!!fieldErrors.phone} />
+              <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} required invalid={!!fieldErrors.email} />
             </div>
-            <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} required invalid={!!fieldErrors.email} />
-
-            <datalist id="hb-paises">
-              {PAISES.map((p) => <option key={p.codigo} value={p.nombre} />)}
-            </datalist>
-            <datalist id="hb-rubros">
-              {RUBROS.map((r) => <option key={r} value={r} />)}
-            </datalist>
 
             {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveEmpresa(true)}>{saving ? "Creando tu espacio…" : "Continuar →"}</button></div>
@@ -477,10 +503,12 @@ export default function HubOnboardingPage() {
         .eyebrow{display:block;color:#ff4b0b;font-size:10px;font-weight:800;letter-spacing:1.6px;margin-bottom:12px}
         h1{font-size:38px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 12px}p{color:#73737b;font-size:14px;line-height:1.65;margin:0 0 27px;max-width:650px}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:11px;font-weight:800;margin-bottom:7px}.field input,.invite input{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 13px;outline:none}.field input:focus,.invite input:focus{border-color:#111}.field input.locked{background:#f6f6f7;color:#555;cursor:not-allowed;border-color:#e7e7eb}
+        .field select{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 34px 0 13px;outline:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer}.field select:focus{border-color:#111}
+        .phoneRow{display:flex;gap:8px}.phoneRow input{flex:1}.phoneRow .phonePrefix{flex:none;width:88px;background:#f6f6f7;color:#333;text-align:center;font-variant-numeric:tabular-nums}
         .check{display:flex;gap:8px;font-size:11px;color:#666;margin:5px 0 23px}.check input{accent-color:#ff4b0b}
-        .check.constituida{align-items:flex-start}.check.constituida span{line-height:1.4}.check.constituida small{display:block;color:#999;font-weight:400;font-size:10px;margin-top:2px;line-height:1.5}
+        .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#999;font-weight:400;font-size:11px;margin-top:3px;line-height:1.5}
         .req{color:#c0392b;font-weight:800;font-size:12px}
-        .field.invalid input{border-color:#c0392b!important}
+        .field.invalid input,.field.invalid select{border-color:#c0392b!important}
         .field input:disabled{background:#f6f6f7;color:#999;cursor:not-allowed}
         .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#a9a9ad;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #d6d6db;border-radius:12px;padding:13px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f3f3f5;display:grid;place-items:center;font-size:22px;color:#999}.logoUpload section{display:flex;flex-direction:column;gap:3px}.logoUpload section b{font-size:12px}.logoUpload section small{font-size:10px;color:#999}.logoUpload button{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700}
