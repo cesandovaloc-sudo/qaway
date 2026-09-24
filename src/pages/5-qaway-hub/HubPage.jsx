@@ -40,7 +40,7 @@ const routes = [
     pillar: 'IA',
     tone: 'bg-indigo-600/10 text-indigo-600',
     preview: '/assets/hub-previews/preview-agentes.png',
-    published: true,
+    published: false,
   },
   {
     icon: Calendar,
@@ -53,7 +53,7 @@ const routes = [
     pillar: 'Automatizacion',
     tone: 'bg-indigo-500/10 text-indigo-500',
     preview: '/assets/hub-previews/preview-agenda.png',
-    published: true,
+    published: false,
   },
   {
     icon: CreditCard,
@@ -66,7 +66,7 @@ const routes = [
     pillar: 'Marketing',
     tone: 'bg-emerald-500/10 text-emerald-500',
     preview: '/assets/hub-previews/preview-pagos.png',
-    published: true,
+    published: false,
   },
   {
     icon: Package,
@@ -92,7 +92,7 @@ const routes = [
     pillar: 'Creacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
     preview: '/assets/hub-previews/preview-academy.png',
-    published: true,
+    published: false,
   },
   {
     icon: Sparkles,
@@ -105,7 +105,7 @@ const routes = [
     pillar: 'Creacion',
     tone: 'bg-[#fe6612]/10 text-[#fe6612]',
     preview: '/assets/hub-previews/preview-creador.png',
-    published: true,
+    published: false,
   },
   {
     icon: FileImage,
