@@ -209,10 +209,11 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
     return () => { alive = false }
   }, [tenantId])
 
-  const activeApps = subs.filter((s) => s.status === 'active')
+  const activeApps = subs.filter((s) => s.status === 'active' || s.status === 'trialing')
   const plans = [...new Set(activeApps.map((s) => s.plan).filter(Boolean))]
   const statusMeta = {
     active: ['Activo', 'bg-emerald-50 text-emerald-600'],
+    trialing: ['En prueba', 'bg-sky-50 text-sky-600'],
     suspended: ['Suspendido', 'bg-amber-50 text-amber-600'],
     cancelled: ['Cancelado', 'bg-red-50 text-red-600'],
   }

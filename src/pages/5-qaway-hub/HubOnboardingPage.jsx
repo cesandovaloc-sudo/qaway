@@ -40,6 +40,11 @@ const LBL = {
   ruc: "RUC / identificación fiscal",
 };
 
+// Modo prueba al confirmar apps: trial corto si el catálogo define uno,
+// y un respaldo generoso solo para las marcas que arrancan sin pricing.
+const TRIAL_DIAS = 5;
+const TRIAL_DIAS_FALLBACK = 14;
+
 function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
@@ -273,15 +278,45 @@ export default function HubOnboardingPage() {
       if (!tenant) throw new Error("Primero registra tu empresa.");
       void appsDb;
       const alias = { inventory: "inventario" };
+      const { data: precios } = await supabase
+        .from("app_plan_pricing")
+        .select("app_id, plan, trial_days, is_available")
+        .eq("plan", "basico");
+      const ahora = new Date();
       for (const raw of selected) {
         const slug = alias[raw] || raw;
         const { data: app } = await supabase.from("app_catalog").select("id").eq("slug", slug).single();
         if (!app) continue;
-        await supabase.from("tenant_app_subscriptions").upsert(
-          { tenant_id: tenant.id, app_id: app.id, plan: "basico", status: "pending" },
+        const precio = (precios || []).find((p) => p.app_id === app.id);
+        const trialDias = (precio && precio.is_available === true && precio.trial_days > 0)
+          ? precio.trial_days
+          : (precio ? TRIAL_DIAS : TRIAL_DIAS_FALLBACK);
+        const trialEnds = new Date(ahora.getTime() + trialDias * 864e5).toISOString();
+        const { error: subErr } = await supabase.from("tenant_app_subscriptions").upsert(
+          {
+            tenant_id: tenant.id,
+            app_id: app.id,
+            plan: "basico",
+            status: "trialing",
+            trial_started_at: ahora.toISOString(),
+            trial_ends_at: trialEnds,
+            current_period_start: ahora.toISOString(),
+            current_period_end: trialEnds,
+          },
           { onConflict: "tenant_id,app_id" },
         );
+        if (subErr) throw subErr;
       }
+      // La marca pasa de borrador a activa al confirmar sus apps (modo prueba):
+      // así la invitación y las apps funcionan ya; el pago se decide después.
+      if (tenant.status !== "active") {
+        const { data: edgeData, error: edgeErr } = await conTimeout(
+          supabase.functions.invoke("activate-brand", { body: { tenant_id: tenant.id } }),
+          15000,
+        );
+        if (edgeErr || edgeData?.error) throw new Error((await leerErrorEdge(edgeErr)) || edgeData?.error);
+      }
+      setTenant((prev) => (prev ? { ...prev, status: "active" } : prev));
       if (goNext) next();
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
@@ -295,7 +330,12 @@ export default function HubOnboardingPage() {
       return;
     }
     const { data, error } = await supabase.functions.invoke("invite-user", {
-      body: { email: inviteEmail, tenant_id: tenant.id, role: "viewer", app_slugs: selected },
+      body: {
+        email: inviteEmail,
+        tenant_id: tenant.id,
+        role: "viewer",
+        app_slugs: selected.map((raw) => ({ inventory: "inventario" }[raw] || raw)),
+      },
     });
     if (error || data?.error) {
       setNote("No se pudo invitar: " + (data?.error || error.message));
@@ -452,7 +492,7 @@ export default function HubOnboardingPage() {
               ))}
             </div>
 
-            <div className="note"><b>Tu espacio se adapta a ti.</b><span>Podrás ampliar tus aplicaciones posteriormente.</span></div>
+            <div className="note"><b>Sin costo ahora, en modo prueba.</b><span>Estás reservando tus apps: se activarán al continuar sin pedir tarjeta. Terminado el periodo de prueba decides el plan desde el panel; nada se cobra automáticamente.</span></div>
             {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveApps(true)}>Continuar →</button></div>
           </section>
