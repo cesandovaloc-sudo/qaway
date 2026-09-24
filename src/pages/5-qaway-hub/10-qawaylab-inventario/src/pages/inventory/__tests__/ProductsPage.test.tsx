@@ -40,6 +40,7 @@ function makeProduct(overrides: Partial<Product> = {}): Product {
     status: 'active',
     condition: 9,
     unit: 'unidad',
+    stock: 0,
     min_stock: 0,
     location_id: null,
     cost: null,

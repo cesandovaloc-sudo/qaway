@@ -265,14 +265,14 @@ export const liquidationService = {
     for (const item of items) {
       const { data: product } = await supabase
         .from('products')
-        .select('base_price, min_stock')
+        .select('base_price, stock')
         .eq('id', item.product_id)
         .single()
 
       if (product) {
         totalReference += product.base_price || 0
         totalLiquidation += item.liquidation_price || 0
-        availableStock += product.min_stock || 0
+        availableStock += product.stock || 0
       }
     }
 

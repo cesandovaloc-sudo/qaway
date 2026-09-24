@@ -234,11 +234,11 @@ export const bundleService = {
     for (const item of items) {
       const { data: product } = await supabase
         .from('products')
-        .select('min_stock')
+        .select('stock')
         .eq('id', item.product_id)
         .single()
       
-      const stock = product?.min_stock || 0
+      const stock = product?.stock || 0
       const possibleSets = Math.floor(stock / item.quantity)
       minStock = Math.min(minStock, possibleSets)
     }

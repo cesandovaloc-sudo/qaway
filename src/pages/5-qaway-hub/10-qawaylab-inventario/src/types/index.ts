@@ -18,6 +18,7 @@ export interface Product {
   status: ProductStatus
   condition: number  // 1-10 Likert scale
   unit: string
+  stock: number
   min_stock: number
   location_id: string | null
   cost: number | null

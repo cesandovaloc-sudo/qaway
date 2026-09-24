@@ -69,7 +69,7 @@ export function ProductInfo({ product, onEdit, onDelete }: ProductInfoProps) {
         </div>
         <div className="bg-gray-50 rounded-lg p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wide">Stock</p>
-          <p className="text-xl font-bold text-gray-900">{product.min_stock}</p>
+          <p className="text-xl font-bold text-gray-900">{product.stock || 0}</p>
         </div>
         <div className="bg-gray-50 rounded-lg p-4">
           <p className="text-xs text-gray-500 uppercase tracking-wide">Condición</p>

@@ -41,7 +41,7 @@ export default function NewProductPage() {
         brand: data.brand || null,
         base_price: data.price || null,
         cost: data.cost || null,
-        min_stock: data.quantity,
+        stock: data.quantity,
         notes: data.notes || null,
         status: 'active',
         commercial_status: 'available',

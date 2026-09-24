@@ -65,14 +65,14 @@ export default function ProductGrid({ products, loading, onProductClick }: Produ
             <div className="flex items-center justify-between mt-3">
               <div className="flex items-center gap-1">
                 <div className={`w-2 h-2 rounded-full ${
-                  product.min_stock > 0 && product.min_stock <= 5
+                  product.stock > 0 && product.min_stock > 0 && product.stock <= product.min_stock
                     ? 'bg-amber-500'
-                    : product.min_stock > 5
+                    : product.stock > 0
                       ? 'bg-emerald-500'
                       : 'bg-red-500'
                 }`} />
                 <span className="text-xs text-muted">
-                  Stock: {product.min_stock || 0}
+                  Stock: {product.stock || 0}
                 </span>
               </div>
               <span className="text-sm font-semibold text-ink">

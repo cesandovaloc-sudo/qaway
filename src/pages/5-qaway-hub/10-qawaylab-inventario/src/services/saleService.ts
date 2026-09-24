@@ -120,8 +120,8 @@ export const saleService = {
     for (const item of items) {
       const product = stockMap.get(item.product_id)
       if (!product) continue
-      if (product.stock > 0 && item.quantity > product.stock) {
-        throw new Error(`Stock insuficiente de "${product.name}": disponible ${product.stock}, se pidieron ${item.quantity}`)
+      if (item.quantity > (product.stock || 0)) {
+        throw new Error(`Stock insuficiente de "${product.name}": disponible ${product.stock || 0}, se pidieron ${item.quantity}`)
       }
     }
   },

@@ -61,8 +61,8 @@ const columns: Column[] = [
     sortable: true,
     width: 'w-20',
     render: (p) => (
-      <span className={`text-sm font-medium ${p.min_stock > 0 && p.min_stock <= 5 ? 'text-amber-600' : 'text-ink'}`}>
-        {p.min_stock || 0}
+      <span className={`text-sm font-medium ${p.stock > 0 && p.min_stock > 0 && p.stock <= p.min_stock ? 'text-amber-600' : 'text-ink'}`}>
+        {p.stock || 0}
       </span>
     ),
   },

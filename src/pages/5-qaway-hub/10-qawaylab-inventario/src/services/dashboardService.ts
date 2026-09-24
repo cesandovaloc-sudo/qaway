@@ -105,7 +105,7 @@ export const dashboardService = {
       // Products stats
       supabase
         .from('products')
-        .select('id, min_stock, base_price, status, commercial_status'),
+        .select('id, stock, min_stock, base_price, status, commercial_status'),
       // Customers count
       supabase
         .from('customers')
@@ -162,10 +162,10 @@ export const dashboardService = {
     // Calculate product stats
     const totalProducts = products.length
     const activeProducts = products.filter((p: SupabaseResult) => p.status === 'active').length
-    const totalStock = products.reduce((sum: number, p: SupabaseResult) => sum + (p.min_stock || 0), 0)
-    const inventoryValue = products.reduce((sum: number, p: SupabaseResult) => sum + ((p.base_price || 0) * (p.min_stock || 0)), 0)
-    const lowStockCount = products.filter((p: SupabaseResult) => p.min_stock > 0 && p.min_stock <= 5).length
-    const outOfStockCount = products.filter((p: SupabaseResult) => p.min_stock === 0).length
+    const totalStock = products.reduce((sum: number, p: SupabaseResult) => sum + (p.stock || 0), 0)
+    const inventoryValue = products.reduce((sum: number, p: SupabaseResult) => sum + ((p.base_price || 0) * (p.stock || 0)), 0)
+    const lowStockCount = products.filter((p: SupabaseResult) => p.stock > 0 && (p.min_stock || 0) > 0 && p.stock <= p.min_stock).length
+    const outOfStockCount = products.filter((p: SupabaseResult) => p.stock <= 0).length
     const productsInOffer = products.filter((p: SupabaseResult) => p.commercial_status === 'reserved').length
     const productsInLiquidation = products.filter((p: SupabaseResult) => p.commercial_status === 'sold').length
 
@@ -283,9 +283,9 @@ export const dashboardService = {
   async getTopProducts(limit: number = 5): Promise<TopProduct[]> {
     const { data: products } = await supabase
       .from('products')
-      .select('id, name, sku, min_stock, base_price, image_url')
+      .select('id, name, sku, stock, base_price, image_url')
       .eq('status', 'active')
-      .gt('min_stock', 0)
+      .gt('stock', 0)
       .order('base_price', { ascending: false })
       .limit(limit)
 
@@ -293,7 +293,7 @@ export const dashboardService = {
       id: p.id,
       name: p.name,
       sku: p.sku,
-      stock: p.min_stock || 0,
+      stock: p.stock || 0,
       price: p.base_price || 0,
       image_url: p.image_url || null,
     }))
@@ -303,18 +303,19 @@ export const dashboardService = {
   async getLowStockProducts(limit: number = 5): Promise<TopProduct[]> {
     const { data: products } = await supabase
       .from('products')
-      .select('id, name, sku, min_stock, base_price, image_url')
+      .select('id, name, sku, stock, min_stock, base_price, image_url')
       .eq('status', 'active')
+      .gt('stock', 0)
       .gt('min_stock', 0)
-      .lte('min_stock', 5)
-      .order('min_stock', { ascending: true })
-      .limit(limit)
+      .order('stock', { ascending: true })
 
-    return (products || []).map((p: SupabaseResult) => ({
+    const candidates = (products || []).filter((p: SupabaseResult) => p.stock <= p.min_stock)
+
+    return candidates.slice(0, limit).map((p: SupabaseResult) => ({
       id: p.id,
       name: p.name,
       sku: p.sku,
-      stock: p.min_stock || 0,
+      stock: p.stock || 0,
       price: p.base_price || 0,
       image_url: p.image_url || null,
     }))
@@ -395,7 +396,7 @@ export const dashboardService = {
 
       const { data: products } = await supabase
         .from('products')
-        .select('id, min_stock, base_price')
+        .select('id, stock, base_price')
         .gte('created_at', startDate)
         .lt('created_at', endDate)
 
@@ -404,8 +405,8 @@ export const dashboardService = {
       trendData.push({
         day: dayName,
         productos: dayProducts.length,
-        stock: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + (p.min_stock || 0), 0),
-        valor: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + ((p.base_price || 0) * (p.min_stock || 0)), 0),
+        stock: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + (p.stock || 0), 0),
+        valor: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + ((p.base_price || 0) * (p.stock || 0)), 0),
       })
     }
 
