@@ -34,6 +34,8 @@ export default function LoginPage() {
     ? rawRedirect
     : '/hub/panel'
   const regEmail = searchParams.get('email') || ''
+  const linkError = searchParams.get('linkError') || ''
+  const linkErrorDesc = searchParams.get('linkErrorDesc') || ''
   // Ruta canónica post-login (aprobado 2026-09-23):
   //   ?redirect= explícito     → gana (prioridad).
   //   sin marca (tenant_id NULL y NO es plataforma) → /onboarding (continuar empresa).
@@ -200,6 +202,15 @@ export default function LoginPage() {
     return () => { alive = false }
   }, [verified, navigate])
 
+  // Enlace de auth rechazado por el servidor (caducado/ya usado, #error=): abre el
+  // formulario de recuperación con el correo sugerido para reenviar al instante.
+  useEffect(() => {
+    if (!linkError) return
+    setShowReset(true)
+    if (resetEmail === '' && regEmail) setResetEmail(regEmail)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkError])
+
   // Mientras se verifica una sesión viva (pestaña nueva / correo confirmado) se
   // muestra un loader: evita el "flash" del formulario de login ya estando adentro.
   if (checking) {
@@ -274,6 +285,13 @@ export default function LoginPage() {
               </button>
               <h2 className="text-3xl font-black text-white mb-2">Recuperar acceso</h2>
               <p className="text-zinc-400 mb-8">Te enviaremos un enlace para restablecer tu contraseña.</p>
+
+              {linkError && (
+                <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-4 rounded-xl text-sm font-medium leading-relaxed">
+                  ✕ {linkErrorDesc}
+                  {regEmail ? ` Enviamos el correo a: ${regEmail}.` : ''} Pide uno nuevo con el formulario de abajo.
+                </div>
+              )}
 
               {resetSent ? (
                 <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-4 rounded-xl text-sm font-medium text-center">

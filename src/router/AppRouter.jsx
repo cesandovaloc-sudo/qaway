@@ -4,6 +4,7 @@ import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supa
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ScrollToTop from '@/components/layout/ScrollToTop'
+import AuthLinkHandler from '@/router/AuthLinkHandler'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
 import LoginPage from '@/pages/auth/LoginPage'
@@ -187,6 +188,7 @@ export default function AppRouter() {
 
   return (
     <>
+      <AuthLinkHandler />
       <ScrollToTop />
       <Routes>
         <Route

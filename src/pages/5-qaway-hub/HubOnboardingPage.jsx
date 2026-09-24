@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/config/supabase";
+import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 
 const steps = ["Tu cuenta", "Tu empresa", "Tu Hub", "Tu equipo", "Listo"];
 
@@ -34,9 +35,13 @@ export default function HubOnboardingPage() {
   const [note, setNote] = useState("");
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [pendingLogo, setPendingLogo] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
 
   const next = () => setStep(s => Math.min(5, s + 1));
-  const back = () => setStep(s => Math.max(session ? 2 : 1, s - 1));
+  const back = () => setStep(s => Math.max(1, s - 1));
+  const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato");
   const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   // Identidad del usuario autenticado (para la carátula "Tu cuenta" bloqueada).
   const meta = (session?.user?.user_metadata) || {};
@@ -81,17 +86,65 @@ export default function HubOnboardingPage() {
     })();
   }, []);
 
+  function conTimeout(promise, ms) {
+    return new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error("Tiempo de espera agotado. Revisa tu conexión e intenta de nuevo.")), ms);
+      promise.then(
+        (v) => { clearTimeout(t); resolve(v); },
+        (e) => { clearTimeout(t); reject(e); },
+      );
+    });
+  }
+
+  async function leerErrorEdge(error) {
+    if (error && typeof error.context?.json === "function") {
+      try {
+        const j = await error.context.json();
+        if (j?.error) return j.error;
+      } catch { /* ignorar */ }
+    }
+    return error?.message || "Error desconocido";
+  }
+
+  async function subirLogo(tenantId, blob, baseBranding = {}) {
+    const path = `logos/${tenantId}/logo.webp`;
+    const { error: upErr } = await supabase.storage.from("resources").upload(path, blob, { upsert: true });
+    if (upErr) throw upErr;
+    const { data } = supabase.storage.from("resources").getPublicUrl(path);
+    const branding = { ...(baseBranding || {}), logo_url: data.publicUrl };
+    const { error } = await supabase.from("tenants").update({ branding }).eq("id", tenantId);
+    if (error) throw error;
+    setTenant((prev) => (prev ? { ...prev, branding } : prev));
+    setLogoPreview(data.publicUrl);
+    setNote("Logo actualizado.");
+  }
+
   async function saveEmpresa(goNext) {
     setNote("");
+    if (!form.name.trim()) {
+      setNote("Escribe el nombre comercial de tu empresa.");
+      return;
+    }
+    setSaving(true);
     try {
+      let newTenantId = tenant?.id || null;
       if (!tenant) {
         // Sin marca: crearla (quedo admin). Slug derivado del nombre.
         const slug = form.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-        const { data, error } = await supabase.functions.invoke("register-brand", {
-          body: { name: form.name, slug, plans: [] },
-        });
-        if (error || data?.error) throw new Error(data?.error || error.message);
-        setTenant(data.tenant);
+        const { data, error } = await conTimeout(
+          supabase.functions.invoke("register-brand", {
+            body: { name: form.name, slug, plans: [] },
+          }),
+          25000,
+        );
+        if (error || data?.error) throw new Error((await leerErrorEdge(error)) || data?.error);
+        const nuevoTenant = data.tenant;
+        newTenantId = nuevoTenant.id;
+        setTenant(nuevoTenant);
+        if (pendingLogo) {
+          await subirLogo(newTenantId, pendingLogo, nuevoTenant.branding);
+          setPendingLogo(null);
+        }
       } else {
         const contact = { email: form.email, phone: form.phone, address: "", country: form.country };
         const { error } = await supabase.from("tenants").update({
@@ -106,6 +159,8 @@ export default function HubOnboardingPage() {
       if (goNext) next();
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -148,19 +203,26 @@ export default function HubOnboardingPage() {
   }
 
   async function uploadLogo(file) {
-    if (!file || !tenant) return;
     setNote("");
+    if (!file) return;
+    if (!esImagenWebpValida(file)) {
+      setNote("Formato no permitido: usa PNG, JPG o WebP.");
+      return;
+    }
+    setLogoPreview(URL.createObjectURL(file));
+    const webp = await convertirAWebp(file, { scale: 1, quality: 0.92, maxEdge: 1200 });
+    if (!webp) {
+      setNote("No se pudo convertir la imagen a WebP.");
+      return;
+    }
+    if (!tenant) {
+      // La marca aún no existe: se sube automáticamente al crear la empresa.
+      setPendingLogo(webp);
+      setNote("Logo listo: se subirá al guardar tu empresa.");
+      return;
+    }
     try {
-      const ext = (file.name.split(".").pop() || "png").toLowerCase();
-      const path = `logos/${tenant.id}/logo.${ext}`;
-      const { error: upErr } = await supabase.storage.from("resources").upload(path, file, { upsert: true });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("resources").getPublicUrl(path);
-      const branding = { ...(tenant.branding || {}), logo_url: data.publicUrl };
-      const { error } = await supabase.from("tenants").update({ branding }).eq("id", tenant.id);
-      if (error) throw error;
-      setTenant({ ...tenant, branding });
-      setNote("Logo actualizado.");
+      await subirLogo(tenant.id, webp, tenant.branding);
     } catch (e) {
       setNote("No se pudo subir el logo: " + e.message);
     }
@@ -214,9 +276,12 @@ export default function HubOnboardingPage() {
             <p>Esta información será la base de tu espacio de trabajo. Podrás completarla o modificarla después.</p>
 
             <div className="logoUpload">
-              <div>+</div><section><b>Logo de tu empresa</b><small>Opcional · PNG, JPG o SVG</small></section>
+              {logoPreview
+                ? <img src={logoPreview} alt="Logo" style={{ width: 48, height: 48, objectFit: "contain", borderRadius: 9, border: "1px solid #e3e3e8" }} />
+                : <div>+</div>}
+              <section><b>Logo de tu empresa</b><small>PNG, JPG o WebP · se convierte a WebP automáticamente</small></section>
               <button onClick={() => document.getElementById("hb-logo-file").click()}>Subir logo</button>
-              <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.svg" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
+              <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.webp" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
             </div>
 
             <div className="grid">
@@ -229,8 +294,8 @@ export default function HubOnboardingPage() {
             </div>
             <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} />
 
-            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveEmpresa(true)}>Continuar →</button></div>
+            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
+            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveEmpresa(true)}>{saving ? "Creando tu espacio…" : "Continuar →"}</button></div>
           </section>
         )}
 
@@ -252,7 +317,7 @@ export default function HubOnboardingPage() {
             </div>
 
             <div className="note"><b>Tu espacio se adapta a ti.</b><span>Podrás ampliar tus aplicaciones posteriormente.</span></div>
-            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
+            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveApps(true)}>Continuar →</button></div>
           </section>
         )}
@@ -266,7 +331,7 @@ export default function HubOnboardingPage() {
               <input placeholder="correo@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
               <button onClick={sendInvite}>+ Añadir otra persona</button>
             </div>
-            {note !== "" && <p style={{ fontSize: 11, color: "#666" }}>{note}</p>}
+            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
             <div className="note"><b>Tú serás el administrador de la empresa.</b><span>Después podrás asignar aplicaciones, roles y permisos.</span></div>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Crear mi espacio →</button></div>
           </section>
