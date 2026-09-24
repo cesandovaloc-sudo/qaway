@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { isSuperAdmin } from '@/config/auth'
+import QawayCubeLoader from '@/components/ui/QawayCubeLoader'
 
 export default function LoginPage() {
   const [email, setEmail]               = useState('')
@@ -250,11 +251,8 @@ export default function LoginPage() {
           confirmado): evita el "flash" del formulario de login ya estando
           adentro. Solo afecta al panel derecho; el branding lo mantiene AuthShell. */}
       {checking ? (
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-2xl">
-            <span className="text-3xl font-black text-zinc-950">Q</span>
-          </div>
-          <div className="w-7 h-7 border-2 border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
+        <div className="flex flex-col items-center justify-center min-h-[350px] w-full">
+          <QawayCubeLoader text="Verificando tu acceso a Qaway Hub…" />
         </div>
       ) : showReset ? (
             <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">

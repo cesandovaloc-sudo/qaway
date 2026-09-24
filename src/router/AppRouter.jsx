@@ -184,6 +184,24 @@ function AdminCanonicalRedirect() {
   return <Navigate to={`/academy/app/admin/${subpath}${location.search}`} replace />
 }
 
+function RootIndexRoute() {
+  if (typeof window !== 'undefined' && window.location.hash) {
+    const hash = window.location.hash
+    if (hash.includes('access_token') || hash.includes('type=signup') || hash.includes('type=recovery')) {
+      return <Navigate to={`/onboarding${hash}`} replace />
+    }
+    if (hash.includes('error')) {
+      const params = new URLSearchParams(hash.replace(/^#/, ''))
+      const qs = new URLSearchParams({
+        linkError: params.get('error_code') || 'unknown',
+        linkErrorDesc: params.get('error_description') || 'El enlace es inválido o ha expirado.',
+      })
+      return <Navigate to={`/login?${qs.toString()}`} replace />
+    }
+  }
+  return <InicioPage />
+}
+
 export default function AppRouter() {
   const notFoundElement = <NotFoundPage />
 
@@ -438,7 +456,7 @@ export default function AppRouter() {
             element={renderRoute('hub', <ProtectedRoute><HubPanelPage /></ProtectedRoute>)}
           />
         <Route element={<Layout />}>
-          <Route index element={<InicioPage />} />
+          <Route index element={<RootIndexRoute />} />
           {/* Tienda de cliente (páginas de 10-qawaylab-inventario).
               Carrito y checkout son las dos páginas de cliente y se sirven
               aquí para que lleven el navbar oficial, igual que el flujo

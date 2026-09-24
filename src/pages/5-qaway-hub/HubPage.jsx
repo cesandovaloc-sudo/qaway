@@ -156,7 +156,7 @@ const routes = [
     category: 'Herramientas',
     pillar: 'Creacion',
     tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]',
-    preview: '/assets/hub-previews/preview-academy.png',
+    preview: '/assets/hub-previews/hub-portada.webp',
     published: true,
   },
   {

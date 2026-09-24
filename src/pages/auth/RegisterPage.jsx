@@ -51,7 +51,7 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: composedName, last_name: lastName.trim() },
-          emailRedirectTo: `${APP_BASE_URL}/login?verified=1`,
+          emailRedirectTo: `${APP_BASE_URL}/onboarding`,
         },
       })
       if (error) throw error
