@@ -45,16 +45,17 @@ const LBL = {
 const TRIAL_DIAS = 5;
 const TRIAL_DIAS_FALLBACK = 14;
 
-function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength }) {
+function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength, error }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
       <span>{label}{required ? <b className="req"> *</b> : null}{lock ? " 🔒" : ""}</span>
       <input type={type} placeholder={placeholder} value={value} onChange={onChange} readOnly={lock} disabled={disabled} maxLength={maxLength} className={lock ? "locked" : ""} />
+      {error ? <em className="field-error">{error}</em> : null}
     </label>
   );
 }
 
-function SelectField({ label, value, onChange, required, invalid, placeholder, disabled, children }) {
+function SelectField({ label, value, onChange, required, invalid, placeholder, disabled, error, children }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
       <span>{label}{required ? <b className="req"> *</b> : null}</span>
@@ -62,8 +63,14 @@ function SelectField({ label, value, onChange, required, invalid, placeholder, d
         <option value="">{placeholder}</option>
         {children}
       </select>
+      {error ? <em className="field-error">{error}</em> : null}
     </label>
   );
+}
+
+function Notice({ error, children }) {
+  if (!children) return null;
+  return <div className={`notice ${error ? "notice-error" : "notice-ok"}`}>{children}</div>;
 }
 
 function splitPhone(phone) {
@@ -88,9 +95,11 @@ export default function HubOnboardingPage() {
   const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "", rubro: "", phone: "", email: "" });
   const [inviteEmail, setInviteEmail] = useState("");
   const [note, setNote] = useState("");
+  const [logoNote, setLogoNote] = useState("");
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [sending, setSending] = useState(false);
   const [pendingLogo, setPendingLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [constituida, setConstituida] = useState(false);
@@ -99,9 +108,14 @@ export default function HubOnboardingPage() {
 
   const next = () => setStep(s => Math.min(5, s + 1));
   const back = () => setStep(s => Math.max(1, s - 1));
-  const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato");
-  const setF = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato") || note.startsWith("Tiempo");
+  const setF = (k) => (e) => {
+    const v = e.target.value;
+    setForm((f) => ({ ...f, [k]: v }));
+    if (fieldErrors[k]) setFieldErrors((fe) => { const n = { ...fe }; n[k] = undefined; return n; });
+  };
   const paisSel = PAISES.find((p) => p.nombre === form.country) || null;
+  const maxPhoneDigitos = paisSel?.maxDigitos || Math.max(paisSel?.minDigitos || 9, 9);
   // Identidad del usuario autenticado (para la carátula "Tu cuenta" bloqueada).
   const meta = (session?.user?.user_metadata) || {};
   const fullName = meta.full_name || "";
@@ -178,7 +192,7 @@ export default function HubOnboardingPage() {
     if (error) throw error;
     setTenant((prev) => (prev ? { ...prev, branding } : prev));
     setLogoPreview(data.publicUrl);
-    setNote("Logo actualizado.");
+    setLogoNote("Logo actualizado.");
   }
 
   function validar() {
@@ -188,6 +202,7 @@ export default function HubOnboardingPage() {
     const pais = PAISES.find((p) => p.nombre === form.country) || null;
     if (!form.phone) errs.phone = "Escribe tu teléfono / WhatsApp.";
     else if (form.phone.length < (pais?.minDigitos || 6)) errs.phone = `El número necesita al menos ${pais?.minDigitos || 6} dígitos.`;
+    else if (pais?.maxDigitos && form.phone.length > pais.maxDigitos) errs.phone = `El número de ${pais.nombre} tiene como máximo ${pais.maxDigitos} dígitos.`;
     if (!form.email.trim()) errs.email = "Escribe el correo de contacto.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim())) errs.email = "Escribe un correo válido (ej. nombre@empresa.com).";
     if (constituida) {
@@ -204,15 +219,19 @@ export default function HubOnboardingPage() {
     const pais = PAISES.find((p) => p.nombre === v);
     setForm((f) => ({ ...f, country: v }));
     if (pais) setPrefix(pais.dial);
+    setFieldErrors((fe) => (fe.country ? { ...fe, country: undefined } : fe));
   }
 
   function handlePhoneChange(e) {
-    setForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, "") }));
+    const v = e.target.value.replace(/\D/g, "").slice(0, maxPhoneDigitos);
+    setForm((f) => ({ ...f, phone: v }));
+    setFieldErrors((fe) => (fe.phone ? { ...fe, phone: undefined } : fe));
   }
 
   function handleRucChange(e) {
     const max = paisSel?.rucDigitos || 20;
     setForm((f) => ({ ...f, ruc: e.target.value.replace(/\D/g, "").slice(0, max) }));
+    setFieldErrors((fe) => (fe.ruc ? { ...fe, ruc: undefined } : fe));
   }
 
   async function saveEmpresa(goNext) {
@@ -274,6 +293,7 @@ export default function HubOnboardingPage() {
 
   async function saveApps(goNext) {
     setNote("");
+    setSaving(true);
     try {
       if (!tenant) throw new Error("Primero registra tu empresa.");
       void appsDb;
@@ -320,6 +340,8 @@ export default function HubOnboardingPage() {
       if (goNext) next();
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -329,24 +351,32 @@ export default function HubOnboardingPage() {
       setNote("Escribe un correo válido.");
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(inviteEmail.trim())) {
+      setNote("Escribe un correo válido (ej. nombre@empresa.com).");
+      return;
+    }
+    if (sending) return;
+    setSending(true);
     const { data, error } = await supabase.functions.invoke("invite-user", {
       body: {
-        email: inviteEmail,
+        email: inviteEmail.trim(),
         tenant_id: tenant.id,
         role: "viewer",
         app_slugs: selected.map((raw) => ({ inventory: "inventario" }[raw] || raw)),
       },
     });
+    setSending(false);
     if (error || data?.error) {
       setNote("No se pudo invitar: " + (data?.error || error.message));
       return;
     }
-    setNote("Invitación enviada a " + inviteEmail + ".");
+    setNote("Invitación enviada a " + inviteEmail.trim() + ".");
     setInviteEmail("");
   }
 
   async function uploadLogo(file) {
     setNote("");
+    setLogoNote("");
     if (!file) return;
     if (!esImagenWebpValida(file)) {
       setNote("Formato no permitido: usa PNG, JPG o WebP.");
@@ -361,7 +391,7 @@ export default function HubOnboardingPage() {
     if (!tenant) {
       // La marca aún no existe: se sube automáticamente al crear la empresa.
       setPendingLogo(webp);
-      setNote("Logo listo: se subirá al guardar tu empresa.");
+      setLogoNote("Logo listo: se subirá al guardar tu empresa.");
       return;
     }
     try {
@@ -439,12 +469,12 @@ export default function HubOnboardingPage() {
               {logoPreview
                 ? <img src={logoPreview} alt="Logo" style={{ width: 48, height: 48, objectFit: "contain", borderRadius: 9, border: "1px solid #e3e3e8" }} />
                 : <div>+</div>}
-              <section><b>Logo de tu empresa</b><small>PNG, JPG o WebP · se convierte a WebP automáticamente</small></section>
+              <section><b>Logo de tu empresa</b><small>PNG, JPG o WebP · se convierte a WebP automáticamente</small>{logoNote ? <em className="logo-note">✓ {logoNote}</em> : null}</section>
               <button onClick={() => document.getElementById("hb-logo-file").click()}>Subir logo</button>
               <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.webp" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
             </div>
 
-            <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} />
+            <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} error={fieldErrors.name} />
 
             <label className="check constituida">
               <input type="checkbox" checked={constituida} onChange={(e) => setConstituida(e.target.checked)} />
@@ -452,9 +482,9 @@ export default function HubOnboardingPage() {
             </label>
 
             <div className="grid">
-              <Field label="Razón social" placeholder="Nombre legal de la empresa" value={form.legal} onChange={setF("legal")} disabled={!constituida} required={constituida} invalid={!!fieldErrors.legal} />
-              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={handleRucChange} maxLength={paisSel?.rucDigitos || 40} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} />
-              <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} placeholder="Selecciona tu país…">
+              <Field label="Razón social" placeholder="Nombre legal de la empresa" value={form.legal} onChange={setF("legal")} disabled={!constituida} required={constituida} invalid={!!fieldErrors.legal} error={fieldErrors.legal} />
+              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={handleRucChange} maxLength={paisSel?.rucDigitos || 40} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} error={fieldErrors.ruc} />
+              <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} error={fieldErrors.country} placeholder="Selecciona tu país…">
                 {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
               </SelectField>
               <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} placeholder="Opcional — selecciona…">
@@ -464,13 +494,14 @@ export default function HubOnboardingPage() {
                 <span>Teléfono / WhatsApp<b className="req"> *</b></span>
                 <div className="phoneRow">
                   <input className="phonePrefix" value={prefix} onChange={(e) => setPrefix(e.target.value.replace(/[^\d+ ]/g, "").slice(0, 6))} maxLength={6} placeholder="+51" inputMode="tel" />
-                  <input type="tel" value={form.phone} onChange={handlePhoneChange} placeholder="999 999 999" inputMode="tel" maxLength={15} />
+                  <input type="tel" value={form.phone} onChange={handlePhoneChange} placeholder="999 999 999" inputMode="tel" maxLength={maxPhoneDigitos} />
                 </div>
+                {fieldErrors.phone ? <em className="field-error">{fieldErrors.phone}</em> : null}
               </label>
-              <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} required invalid={!!fieldErrors.email} />
+              <Field label="Correo de contacto" placeholder="contacto@empresa.com" type="email" value={form.email} onChange={setF("email")} required invalid={!!fieldErrors.email} error={fieldErrors.email} />
             </div>
 
-            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
+            <Notice error={noteIsError}>{note}</Notice>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveEmpresa(true)}>{saving ? "Creando tu espacio…" : "Continuar →"}</button></div>
           </section>
         )}
@@ -486,15 +517,16 @@ export default function HubOnboardingPage() {
                 <button key={id} className={selected.includes(id) ? "app selected" : "app"}
                   onClick={() => setSelected(x => x.includes(id) ? x.filter(v => v !== id) : [...x, id])}>
                   <div className="appIcon">Q</div>
-                  <span><b>{name}</b><small>{desc}</small></span>
+                  <span><b>{name}</b>{selected.includes(id) && <em className="trialTag">En prueba · sin costo</em>}<small>{desc}</small></span>
                   <i>{selected.includes(id) ? "✓" : ""}</i>
                 </button>
               ))}
             </div>
+            <p className="catalogHint">Este es tu arranque ({apps.length} apps). Qaway cuenta con {appsDb.length} aplicaciones en total: podrás sumar las demás desde el panel cuando quieras.</p>
 
-            <div className="note"><b>Sin costo ahora, en modo prueba.</b><span>Estás reservando tus apps: se activarán al continuar sin pedir tarjeta. Terminado el periodo de prueba decides el plan desde el panel; nada se cobra automáticamente.</span></div>
-            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={() => saveApps(true)}>Continuar →</button></div>
+            <div className="note"><b>Tus apps quedan en modo prueba, sin costo.</b><span>Las {selected.length} apps que elegiste se activan al continuar SIN pedir tarjeta y quedan en periodo de prueba. Cuando venza, desde el panel decides el plan de cada app; nada se cobra automáticamente.</span></div>
+            <Notice error={noteIsError}>{note}</Notice>
+            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveApps(true)}>{saving ? "Guardando…" : "Continuar →"}</button></div>
           </section>
         )}
 
@@ -505,9 +537,9 @@ export default function HubOnboardingPage() {
             <p>Puedes invitar a tu equipo ahora o hacerlo después desde el panel de administración.</p>
             <div className="invite">
               <input placeholder="correo@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
-              <button onClick={sendInvite}>+ Añadir otra persona</button>
+              <button disabled={sending} onClick={sendInvite}>{sending ? "Enviando…" : "+ Añadir otra persona"}</button>
             </div>
-            {note !== "" && <p style={{ fontSize: 13, color: noteIsError ? "#c0392b" : "#666", fontWeight: noteIsError ? 600 : 400 }}>{note}</p>}
+            <Notice error={noteIsError}>{note}</Notice>
             <div className="note"><b>Tú serás el administrador de la empresa.</b><span>Después podrás asignar aplicaciones, roles y permisos.</span></div>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Crear mi espacio →</button></div>
           </section>
@@ -553,7 +585,16 @@ export default function HubOnboardingPage() {
         .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#a9a9ad;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #d6d6db;border-radius:12px;padding:13px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f3f3f5;display:grid;place-items:center;font-size:22px;color:#999}.logoUpload section{display:flex;flex-direction:column;gap:3px}.logoUpload section b{font-size:12px}.logoUpload section small{font-size:10px;color:#999}.logoUpload button{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700}
         .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e0e0e5;border-radius:12px;padding:15px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:35px;height:35px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:12px}.app span small{font-size:10px;color:#85858c;line-height:1.4}.app>i{margin-left:auto;width:19px;height:19px;border:1px solid #ccc;border-radius:50%;font-style:normal;font-size:10px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
-        .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px}.note span{font-size:10px;color:#777}
+        .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px;color:#111}.note span{font-size:10px;color:#555}
+        .catalogHint{font-size:11px;color:#8a8a92;margin:12px 0 0;line-height:1.5}
+        .field-error{display:block;margin-top:6px;font-size:11px;color:#b3382e;font-weight:600;line-height:1.45}
+        .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:11px 14px;border-radius:10px;font-size:12px;line-height:1.55}
+        .notice-error{background:#fdf3f1;border:1px solid #f1d6d1;color:#a3321f;font-weight:700}
+        .notice-ok{background:#eef8f1;border:1px solid #d4ecdc;color:#14683c;font-weight:700}
+        .logo-note{display:block;font-style:normal;margin-top:5px;font-size:10px;font-weight:800;color:#159b4e}
+        .logoUpload section{flex:1;min-width:0}
+        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.2px;color:#14683c;background:#eef8f1;border:1px solid #d4ecdc;border-radius:999px;padding:3px 8px}
+        .invite button:disabled{color:#bbb;cursor:not-allowed}
         .invite{border:1px solid #e5e5e8;border-radius:11px;padding:13px}.invite button{border:0;background:none;color:#ff4b0b;font-size:11px;font-weight:800;margin-top:10px}
         .success{width:62px;height:62px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:28px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e6e6ea;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #eee}.summary div:last-child{border:0}.summary span{font-size:10px;color:#888}.summary b{font-size:11px}.full{width:100%;margin-top:20px}
         @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}

@@ -51,7 +51,9 @@ serve(async (req: Request) => {
     }
 
     const { data: tenant } = await admin.from('tenants').select('id, status').eq('id', tenant_id).single()
-    if (!tenant || tenant.status !== 'active') return json({ error: 'La empresa destino no es válida.' })
+    // Marca operativa: activa o en arranque (modo prueba; el onboarding activa, y
+    // un draft que vota invitar ya pasó registro). Fail-closed para lo demás.
+    if (!tenant || !['active', 'draft'].includes(tenant.status)) return json({ error: 'La empresa destino no es válida.' })
 
     const { data: apps } = await admin.from('app_catalog').select('slug').in('slug', app_slugs)
     const validSlugs = (apps || []).map((a: { slug: string }) => a.slug)
