@@ -247,7 +247,24 @@ export default function HubOnboardingPage() {
           ))}
         </div>
 
-        {loading && <div style={{ textAlign: "center", padding: "60px 0 30px", color: "#999", fontSize: 14 }}>Cargando…</div>}
+        {loading && (
+          <section className="card wide onboarding-skeleton">
+            <div className="sk-line sk-eyebrow" />
+            <div className="sk-line sk-title" />
+            <div className="sk-line sk-desc" />
+            <div className="sk-upload" />
+            <div className="grid">
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+              <div className="sk-field"><div className="sk-line sk-label" /><div className="sk-input" /></div>
+            </div>
+            <div className="sk-field" style={{ marginTop: 14 }}><div className="sk-line sk-label" /><div className="sk-input" /></div>
+            <div className="actions" style={{ marginTop: 24 }}><div className="sk-line sk-btn" /><div className="sk-line sk-btn" /></div>
+          </section>
+        )}
 
         {!loading && step === 1 && (
           <section className="card">
@@ -374,6 +391,17 @@ export default function HubOnboardingPage() {
         .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px}.note span{font-size:10px;color:#777}
         .invite{border:1px solid #e5e5e8;border-radius:11px;padding:13px}.invite button{border:0;background:none;color:#ff4b0b;font-size:11px;font-weight:800;margin-top:10px}
         .success{width:62px;height:62px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:28px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e6e6ea;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #eee}.summary div:last-child{border:0}.summary span{font-size:10px;color:#888}.summary b{font-size:11px}.full{width:100%;margin-top:20px}
+        @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
+        .onboarding-skeleton{animation:skPulse 1.4s ease-in-out infinite}
+        .sk-line{background:#eaeaee;border-radius:6px}
+        .sk-eyebrow{width:90px;height:10px;margin-bottom:14px}
+        .sk-title{width:min(320px,80%);height:32px;margin-bottom:14px}
+        .sk-desc{width:min(480px,95%);height:16px;margin-bottom:27px}
+        .sk-upload{height:74px;border-radius:12px;background:#f3f3f5;margin-bottom:22px}
+        .sk-field{margin-bottom:14px}
+        .sk-label{width:90px;height:11px;margin-bottom:7px}
+        .sk-input{height:47px;border-radius:9px;background:#f3f3f5}
+        .sk-btn{width:110px;height:48px;border-radius:9px;background:#eaeaee}
         footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#999;font-size:10px}
         @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:31px}.grid,.apps{grid-template-columns:1fr}}
       `}</style>

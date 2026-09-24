@@ -7,6 +7,7 @@ import ScrollToTop from '@/components/layout/ScrollToTop'
 import AuthLinkHandler from '@/router/AuthLinkHandler'
 import InicioPage from '@/pages/1-inicio/InicioPage.jsx'
 import InicioPageV3 from '@/pages/1-inicio/InicioPageV3.jsx'
+import AuthShell from '@/pages/auth/AuthShell'
 import LoginPage from '@/pages/auth/LoginPage'
 import UpdatePasswordPage from '@/pages/auth/UpdatePasswordPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
@@ -608,9 +609,14 @@ export default function AppRouter() {
           <Route path="*" element={notFoundElement} />
         </Route>
 
-        <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
+        {/* Auth: /login y /registrarse comparten el mismo layout de marca
+            (AuthShell) como ruta padre, de modo que el panel izquierdo no se
+            desmonta al alternar entre ambas. */}
+        <Route element={<AuthShell />}>
+          <Route path="/login" element={renderRoute('auth', <LoginPage />)} />
+          <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
+        </Route>
         <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
-        <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
         {/* Onboarding: standalone FUERA del Layout (sin navbar/footer de marca). */}
         <Route path="/onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
         <Route path="*" element={notFoundElement} />
