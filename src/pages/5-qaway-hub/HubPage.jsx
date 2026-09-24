@@ -313,7 +313,7 @@ export default function HubPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const activeRoutes = routes.filter((route) => {
-    if (isPublicSiteMode) return route.path === '/hub/blog-editor'
+    if (isPublicSiteMode) return route.published === true
     return true
   })
 
