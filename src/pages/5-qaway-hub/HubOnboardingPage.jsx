@@ -50,29 +50,34 @@ export default function HubOnboardingPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: { session: s } } = await supabase.auth.getSession();
-      setSession(s || null);
-      if (s?.user?.email) setAdminEmail(s.user.email);
-      // Ya autenticado: la carátula "Tu cuenta" no aplica, se salta directo a "Tu empresa".
-      if (s) setStep((st) => Math.max(st, 2));
-      setLoading(false);
-      if (!s) return;
-      const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
-      if (me?.tenant_id) {
-        const { data: t } = await supabase.from("tenants").select("*").eq("id", me.tenant_id).single();
-        if (t) {
-          setTenant(t);
-          const c = t.content || {};
-          const contact = c.contact || {};
-          setForm({
-            name: t.name || "", legal: t.legal_name || "", ruc: "",
-            country: contact.country || "", rubro: (t.features || {}).rubro || "",
-            phone: contact.phone || "", email: contact.email || "",
-          });
+      try {
+        const { data: { session: s } } = await supabase.auth.getSession();
+        setSession(s || null);
+        if (s?.user?.email) setAdminEmail(s.user.email);
+        // Ya autenticado: la carátula "Tu cuenta" no aplica, se salta directo a "Tu empresa".
+        if (s) setStep((st) => Math.max(st, 2));
+        if (!s) return;
+        const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
+        if (me?.tenant_id) {
+          const { data: t } = await supabase.from("tenants").select("*").eq("id", me.tenant_id).single();
+          if (t) {
+            setTenant(t);
+            const c = t.content || {};
+            const contact = c.contact || {};
+            setForm({
+              name: t.name || "", legal: t.legal_name || "", ruc: "",
+              country: contact.country || "", rubro: (t.features || {}).rubro || "",
+              phone: contact.phone || "", email: contact.email || "",
+            });
+          }
         }
+        const { data: catalog } = await supabase.from("app_catalog").select("slug");
+        if (catalog) setAppsDb(catalog.map((a) => a.slug));
+      } catch (e) {
+        setNote("No se pudo cargar tu cuenta. Comprueba tu conexión e intenta de nuevo.");
+      } finally {
+        setLoading(false);
       }
-      const { data: catalog } = await supabase.from("app_catalog").select("slug");
-      if (catalog) setAppsDb(catalog.map((a) => a.slug));
     })();
   }, []);
 

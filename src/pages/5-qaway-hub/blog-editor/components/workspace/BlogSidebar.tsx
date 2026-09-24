@@ -13,6 +13,7 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { useBlog } from '../../context/BlogContext'
+import { APP_BASE_URL } from '../../services/supabaseClient'
 
 interface BlogSidebarProps {
   activeTab: 'work-items' | 'kanban' | 'categories' | 'hubspot-guide' | 'analytics'
@@ -232,7 +233,7 @@ export default function BlogSidebar({
         </div>
 
         <a
-          href="http://localhost:4100/blog"
+          href={`${APP_BASE_URL}/blog`}
           target="_blank"
           rel="noreferrer"
           className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-muted hover:text-accent hover:bg-accent/5 transition-colors"

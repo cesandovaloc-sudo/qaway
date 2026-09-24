@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 // Base URL pública del sitio: en producción fijarla con VITE_APP_URL para que los
 // correos (confirmación, recuperación, OAuth) apunten al dominio real aunque el
 // registro se haga desde localhost. Sin variable, cae al origen actual.
-export const APP_BASE_URL = (import.meta.env.VITE_APP_URL as string | undefined) || window.location.origin
+export const APP_BASE_URL = (import.meta.env.VITE_APP_URL as string | undefined) || (typeof window !== 'undefined' ? window.location.origin : 'https://www.qawaylab.com')
 
 export const isSupabaseConfigured = (): boolean => {
   return Boolean(
