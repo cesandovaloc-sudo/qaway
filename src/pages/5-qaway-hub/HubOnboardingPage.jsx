@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/config/supabase";
 import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
 
 const steps = ["Tu cuenta", "Tu empresa", "Tu Hub", "Tu equipo", "Listo"];
+const SLUGS = ["tu-cuenta", "tu-empresa", "tu-hub", "tu-equipo", "listo"];
 
 const apps = [
   ["crm", "CRM Comercial", "Clientes, oportunidades y seguimiento comercial."],
@@ -31,15 +32,6 @@ const RUBROS = [
   "Servicios profesionales",
   "Otro",
 ];
-const LBL = {
-  name: "Nombre comercial",
-  country: "País",
-  phone: "Teléfono / WhatsApp",
-  email: "Correo de contacto",
-  legal: "Razón social",
-  ruc: "RUC / identificación fiscal",
-};
-
 // Modo prueba al confirmar apps: trial corto si el catálogo define uno,
 // y un respaldo generoso solo para las marcas que arrancan sin pricing.
 const TRIAL_DIAS = 5;
@@ -85,7 +77,10 @@ function splitPhone(phone) {
 
 export default function HubOnboardingPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const { paso } = useParams();
+  const slugIdx = paso ? SLUGS.indexOf(String(paso).toLowerCase()) : -1;
+  const validPaso = slugIdx >= 0 ? slugIdx + 1 : null;
+  const [step, setStep] = useState(() => validPaso || 1);
   const [selected, setSelected] = useState(["crm", "agenda"]);
   // Cableado SaaS (solo comportamiento; diseño intacto).
   const [session, setSession] = useState(null);
@@ -106,13 +101,14 @@ export default function HubOnboardingPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [prefix, setPrefix] = useState("+51");
 
-  const next = () => setStep(s => Math.min(5, s + 1));
-  const back = () => setStep(s => Math.max(1, s - 1));
+  const next = () => navigate(`/onboarding/${SLUGS[Math.min(5, step + 1) - 1]}`);
+  const back = () => navigate(`/onboarding/${SLUGS[Math.max(1, step - 1) - 1]}`);
   const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato") || note.startsWith("Tiempo");
   const setF = (k) => (e) => {
     const v = e.target.value;
     setForm((f) => ({ ...f, [k]: v }));
     if (fieldErrors[k]) setFieldErrors((fe) => { const n = { ...fe }; n[k] = undefined; return n; });
+    if (note.startsWith("Completa los campos")) setNote("");
   };
   const paisSel = PAISES.find((p) => p.nombre === form.country) || null;
   const maxPhoneDigitos = paisSel?.maxDigitos || Math.max(paisSel?.minDigitos || 9, 9);
@@ -161,6 +157,12 @@ export default function HubOnboardingPage() {
       }
     })();
   }, []);
+
+  // El paso vive en la URL (/onboarding/:paso): atrás/adelante del navegador
+  // y enlaces directos funcionan de verdad al cambiar el parámetro.
+  useEffect(() => {
+    if (validPaso) setStep(validPaso);
+  }, [paso]);
 
   function conTimeout(promise, ms) {
     return new Promise((resolve, reject) => {
@@ -219,29 +221,31 @@ export default function HubOnboardingPage() {
     const pais = PAISES.find((p) => p.nombre === v);
     setForm((f) => ({ ...f, country: v }));
     if (pais) setPrefix(pais.dial);
-    setFieldErrors((fe) => (fe.country ? { ...fe, country: undefined } : fe));
+    if (fieldErrors.country) setFieldErrors((fe) => { const n = { ...fe }; n.country = undefined; return n; });
+    if (note.startsWith("Completa los campos")) setNote("");
   }
 
   function handlePhoneChange(e) {
     const v = e.target.value.replace(/\D/g, "").slice(0, maxPhoneDigitos);
     setForm((f) => ({ ...f, phone: v }));
-    setFieldErrors((fe) => (fe.phone ? { ...fe, phone: undefined } : fe));
+    if (fieldErrors.phone) setFieldErrors((fe) => { const n = { ...fe }; n.phone = undefined; return n; });
+    if (note.startsWith("Completa los campos")) setNote("");
   }
 
   function handleRucChange(e) {
     const max = paisSel?.rucDigitos || 20;
     setForm((f) => ({ ...f, ruc: e.target.value.replace(/\D/g, "").slice(0, max) }));
-    setFieldErrors((fe) => (fe.ruc ? { ...fe, ruc: undefined } : fe));
+    if (fieldErrors.ruc) setFieldErrors((fe) => { const n = { ...fe }; n.ruc = undefined; return n; });
+    if (note.startsWith("Completa los campos")) setNote("");
   }
 
   async function saveEmpresa(goNext) {
     setNote("");
     setFieldErrors({});
     const errs = validar();
-    const claves = Object.keys(errs);
-    if (claves.length) {
+    if (Object.keys(errs).length) {
       setFieldErrors(errs);
-      setNote("Completa los campos señalados: " + claves.map((k) => LBL[k] || k).join(", ") + ".");
+      setNote("Completa los campos marcados para continuar.");
       return;
     }
     setSaving(true);
@@ -256,22 +260,56 @@ export default function HubOnboardingPage() {
           supabase.functions.invoke("register-brand", {
             body: { name: form.name, slug, plans: [] },
           }),
-          25000,
+          45000,
         );
-        if (error || data?.error) throw new Error((await leerErrorEdge(error)) || data?.error);
-        const nuevoTenant = data.tenant;
-        newTenantId = nuevoTenant.id;
-        const { error: updErr } = await supabase.from("tenants").update({
-          name: form.name,
-          legal_name: form.legal || null,
-          content: { tagline: "", contact, tax_id: form.ruc || null },
-          features: { ...(nuevoTenant.features || {}), rubro: form.rubro.trim() || null },
-        }).eq("id", newTenantId);
-        if (updErr) throw updErr;
-        setTenant({ ...nuevoTenant, name: form.name, legal_name: form.legal || null, content: { tagline: "", contact, tax_id: form.ruc || null } });
-        if (pendingLogo) {
-          await subirLogo(newTenantId, pendingLogo, nuevoTenant.branding);
-          setPendingLogo(null);
+        const errMsg = (error && (await leerErrorEdge(error))) || data?.error;
+        if (error || data?.error) {
+          // Recuperación: si una vuelta anterior agotó el tiempo (25s hoy) pero
+          // el edge igual creó la marca, este reintento da "Slug en uso". En vez
+          // de bloquear, reutilizamos esa marca ya creada.
+          if (/slug en uso/i.test(String(errMsg || ""))) {
+            const { data: me2 } = await supabase
+              .from("users").select("tenant_id").eq("id", session?.user?.id || "").single();
+            const { data: t2 } = me2?.tenant_id
+              ? await supabase.from("tenants").select("*").eq("id", me2.tenant_id).single()
+              : { data: null };
+            if (t2) {
+              const c2 = t2.content || {};
+              const c2t = c2.contact || {};
+              const { prefix: pfx2, digits: dg2 } = splitPhone(c2t.phone || "");
+              if (pfx2) setPrefix(pfx2);
+              setForm((f) => ({
+                ...f,
+                name: t2.name || f.name,
+                country: c2t.country || f.country,
+                rubro: (t2.features || {}).rubro || f.rubro,
+                phone: dg2,
+                email: c2t.email || f.email,
+                legal: t2.legal_name || f.legal,
+                ruc: (c2.tax_id || "").replace(/\D/g, "") || f.ruc,
+              }));
+              setConstituida(!!(t2.legal_name || c2.tax_id));
+              setTenant(t2);
+              newTenantId = t2.id;
+            }
+          }
+          if (!newTenantId) throw new Error(errMsg || "No se pudo registrar la marca.");
+        } else {
+          if (!data?.tenant) throw new Error("No se pudo registrar la marca.");
+          const nuevoTenant = data.tenant;
+          newTenantId = nuevoTenant.id;
+          const { error: updErr } = await supabase.from("tenants").update({
+            name: form.name,
+            legal_name: form.legal || null,
+            content: { tagline: "", contact, tax_id: form.ruc || null },
+            features: { ...(nuevoTenant.features || {}), rubro: form.rubro.trim() || null },
+          }).eq("id", newTenantId);
+          if (updErr) throw updErr;
+          setTenant({ ...nuevoTenant, name: form.name, legal_name: form.legal || null, content: { tagline: "", contact, tax_id: form.ruc || null } });
+          if (pendingLogo) {
+            await subirLogo(newTenantId, pendingLogo, nuevoTenant.branding);
+            setPendingLogo(null);
+          }
         }
       } else {
         const { error } = await supabase.from("tenants").update({
@@ -580,17 +618,17 @@ export default function HubOnboardingPage() {
         .check{display:flex;gap:8px;font-size:11px;color:#666;margin:5px 0 23px}.check input{accent-color:#ff4b0b}
         .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#999;font-weight:400;font-size:11px;margin-top:3px;line-height:1.5}
         .req{color:#c0392b;font-weight:800;font-size:12px}
-        .field.invalid input,.field.invalid select{border-color:#c0392b!important}
+        .field.invalid input,.field.invalid select{border-color:#e0aba1!important}
         .field input:disabled{background:#f6f6f7;color:#999;cursor:not-allowed}
         .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#a9a9ad;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #d6d6db;border-radius:12px;padding:13px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f3f3f5;display:grid;place-items:center;font-size:22px;color:#999}.logoUpload section{display:flex;flex-direction:column;gap:3px}.logoUpload section b{font-size:12px}.logoUpload section small{font-size:10px;color:#999}.logoUpload button{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700}
         .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e0e0e5;border-radius:12px;padding:15px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:35px;height:35px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:12px}.app span small{font-size:10px;color:#85858c;line-height:1.4}.app>i{margin-left:auto;width:19px;height:19px;border:1px solid #ccc;border-radius:50%;font-style:normal;font-size:10px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
         .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px;color:#111}.note span{font-size:10px;color:#555}
         .catalogHint{font-size:11px;color:#8a8a92;margin:12px 0 0;line-height:1.5}
-        .field-error{display:block;margin-top:6px;font-size:11px;color:#b3382e;font-weight:600;line-height:1.45}
+        .field-error{display:block;margin-top:6px;font-size:11px;color:#a86b60;font-weight:500;line-height:1.45}
         .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:11px 14px;border-radius:10px;font-size:12px;line-height:1.55}
-        .notice-error{background:#fdf3f1;border:1px solid #f1d6d1;color:#a3321f;font-weight:700}
-        .notice-ok{background:#eef8f1;border:1px solid #d4ecdc;color:#14683c;font-weight:700}
+        .notice-error{background:#fbf6f5;border:1px solid #eee3df;color:#9a6157;font-weight:600}
+        .notice-ok{background:#f4faf6;border:1px solid #e3ede6;color:#557062;font-weight:600}
         .logo-note{display:block;font-style:normal;margin-top:5px;font-size:10px;font-weight:800;color:#159b4e}
         .logoUpload section{flex:1;min-width:0}
         .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.2px;color:#14683c;background:#eef8f1;border:1px solid #d4ecdc;border-radius:999px;padding:3px 8px}

@@ -48,6 +48,7 @@ const publicPathAllowList = new Set([
   '/landings/sistema-contenido-notion',
   '/login',
   '/onboarding',
+  '/onboarding/:paso',
   '/portal/:slug',
   '/proyectos',
   '/proyectos/aurea-skincare',

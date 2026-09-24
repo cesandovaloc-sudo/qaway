@@ -635,8 +635,10 @@ export default function AppRouter() {
           <Route path="/registrarse" element={renderRoute('auth', <RegisterPage />)} />
         </Route>
         <Route path="/update-password" element={renderRoute('auth', <UpdatePasswordPage />)} />
-        {/* Onboarding: standalone FUERA del Layout (sin navbar/footer de marca). */}
-        <Route path="/onboarding" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
+        {/* Onboarding: standalone FUERA del Layout (sin navbar/footer de marca).
+            Cada paso es una ruta (/onboarding/:paso) para que Atrás/Adelante del
+            navegador y los deep-links funcionen. */}
+        <Route path="/onboarding/:paso?" element={renderPublicPathRoute('onboarding', '/onboarding', <HubOnboardingPage />)} />
         <Route path="*" element={notFoundElement} />
       </Routes>
     </>
