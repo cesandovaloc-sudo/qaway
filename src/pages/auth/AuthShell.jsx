@@ -1,5 +1,6 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useSearchParams } from 'react-router-dom'
 import { ShieldCheck } from 'lucide-react'
+import QawayCleanLoader from '@/components/ui/QawayCleanLoader'
 
 // Logos de proyectos activos (prueba social)
 const CLIENT_LOGOS = [
@@ -9,20 +10,22 @@ const CLIENT_LOGOS = [
   { name: 'Lumina Estética', initials: 'LE', color: 'bg-purple-500' },
 ]
 
-// Route layout compartido por /login y /registrarse: el panel izquierdo de
-// branding y los wrappers de fondo viven en un nodo que NO se desmonta al
-// alternar entre ambas rutas, así el resplandor (blobs) no se repinta y solo
-// cambia la columna derecha a través del Outlet.
-//
-// Congelado de layout (clave para que el branding no se mueva ni un píxel):
-//  - contenedor fijo a la pantalla (h-screen overflow-hidden): el documento
-//    jamás genera scrollbar global, por lo que el ancho útil (w-1/2) no cambia
-//    y la izquierda no salta horizontalmente al crecer el formulario;
-//  - izquierda con altura fija (h-full + centrado): su centro geométrico no
-//    cambia, impidiendo el salto vertical al estirarse la otra columna;
-//  - derecha con scroll propio (h-full overflow-y-auto): si el formulario es
-//    alto, el scroll ocurre solo dentro del panel derecho.
 export default function AuthShell() {
+  const [searchParams] = useSearchParams()
+  const isVerified = searchParams.get('verified') === '1'
+  const hasAuthHash = typeof window !== 'undefined' && window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=signup'))
+
+  // Si el usuario viene de confirmar su correo, mostramos pantalla limpia con el
+  // mismo fondo neutro de onboarding (#f7f7f8) sin mostrar el panel oscuro de login.
+  if (isVerified || hasAuthHash) {
+    return (
+      <div className="min-h-screen w-full bg-[#f7f7f8] flex items-center justify-center">
+        <QawayCleanLoader fullScreen={false} />
+        <div className="hidden"><Outlet /></div>
+      </div>
+    )
+  }
+
   return (
     <div className="h-screen overflow-hidden bg-zinc-950 flex font-sans">
 

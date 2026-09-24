@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Lock, Mail, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { getSupabaseClient, APP_BASE_URL } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
 import { isSuperAdmin } from '@/config/auth'
-import QawayCubeLoader from '@/components/ui/QawayCubeLoader'
+import QawayCleanLoader from '@/components/ui/QawayCleanLoader'
 
 export default function LoginPage() {
   const [email, setEmail]               = useState('')
@@ -252,7 +252,7 @@ export default function LoginPage() {
           adentro. Solo afecta al panel derecho; el branding lo mantiene AuthShell. */}
       {checking ? (
         <div className="flex flex-col items-center justify-center min-h-[350px] w-full">
-          <QawayCubeLoader text="Verificando tu acceso a Qaway Hub…" />
+          <QawayCleanLoader fullScreen={false} />
         </div>
       ) : showReset ? (
             <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 sm:p-8 backdrop-blur-sm shadow-xl">
