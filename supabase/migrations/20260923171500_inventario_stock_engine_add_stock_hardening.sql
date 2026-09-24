@@ -35,7 +35,7 @@ $$;
 
 -- 2) apply_sale_stock endurecido (solo si el esquema inventario existe;
 --    guardado en DO para no abortar en central, donde no hay sale_items).
-do $$
+do $do$
 begin
   if exists (
     select 1 from information_schema.tables
@@ -103,4 +103,4 @@ begin
     $apply$;
   end if;
 end;
-$$;
+$do$;
