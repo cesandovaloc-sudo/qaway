@@ -65,12 +65,12 @@ const ROUTES = [
   { icon: CreditCard, title: 'Qaway Pagos & Checkout Multi-metodo', description: 'Pasarela de pagos multi-metodo: Tarjeta Stripe, Yape, Plin, PagoEfectivo.', path: '/hub/pagos', access: 'pro', badge: 'Modulo Pagos', category: 'Comercio & Finanzas', pillar: 'Marketing', tone: 'bg-emerald-500/10 text-emerald-500', preview: '/assets/hub-previews/preview-pagos.png', published: true },
   { icon: Package, title: 'Qaway Inventario & ERP Comercial', description: 'Sistema integral de gestion de productos, stock, almacenes, movimientos Kardex.', path: '/hub/inventario', access: 'pro', badge: 'SaaS ERP', category: 'Logistica & Almacenes', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-inventario.png', published: true, app: 'inventario' },
   { icon: Star, title: 'Qaway Academy (LMS Cursos & Certificaciones)', description: 'Plataforma educativa integral: Catalogo de cursos, reproductor de lecciones.', path: '/hub/academy', access: 'pro', badge: 'LMS Real', category: 'Educacion & Cursos', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-academy.png', published: true },
-  { icon: Sparkles, title: 'Creador de Contenido Modular (5 Skills)', description: 'Fabrica de contenidos con IA: Radar viral, Guiones con retencion medida.', path: '/hub/creador-contenido', access: 'pro', badge: 'Nuevo', category: 'Marketing & Creacion', pillar: 'Creacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-creador.png', published: true },
-  { icon: FileImage, title: 'Optimizador de Imagenes WebP', description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP.', path: '/hub/optimizador-webp', access: 'free', badge: 'Gratis', category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-inventario.png', published: false },
+  { icon: Sparkles, title: 'Creador de Contenido Modular (5 Skills)', description: 'Fabrica de contenidos con IA: Radar viral, Guiones con retencion medida.', path: '/hub/creador-contenido', access: 'pro', badge: 'Nuevo', category: 'Marketing & Creacion', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: true },
+  { icon: FileImage, title: 'Optimizador de Imagenes WebP', description: 'Herramienta interactiva para comprimir y convertir imagenes PNG y JPG a WebP.', path: '/hub/optimizador-webp', access: 'free', badge: 'Gratis', category: 'Herramientas', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-inventario.png', published: false },
   { icon: Instagram, title: 'Descargador & Extractor de Instagram', description: 'Extractor y descargador multimedia de publicaciones.', path: '/hub/descargador-ig', access: 'free', badge: 'Borrador', category: 'Herramientas', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-creador.png', published: false },
-  { icon: FolderKanban, title: 'Gestor de Proyectos & Entregas', description: 'Trazabilidad y portal de cliente: ciclo de 6 hitos.', path: '/hub/gestor-proyectos', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#fe6612]/10 text-[#fe6612]', preview: '/assets/hub-previews/preview-agenda.png', published: false },
+  { icon: FolderKanban, title: 'Gestor de Proyectos & Entregas', description: 'Trazabilidad y portal de cliente: ciclo de 6 hitos.', path: '/hub/gestor-proyectos', access: 'pro', badge: 'Pro', category: 'Product Management', pillar: 'Automatizacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agenda.png', published: false },
   { icon: PenSquare, title: 'Editor de Blog', description: 'Plataforma editorial para crear, estructurar y publicar articulos.', path: '/hub/blog-editor', access: 'pro', badge: 'Listo', category: 'Herramientas', pillar: 'Creacion', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/hub-portada.webp', published: true, app: 'blog' },
-  { icon: Calendar, title: 'Consola WABA + CRM', description: 'Panel ejecutivo para campana: integracion WhatsApp API.', path: '/hub/waba-crm', access: 'pro', badge: 'Destacado', category: 'Panel de control', pillar: 'IA', tone: 'bg-[#191918] text-white', preview: '/assets/hub-previews/preview-agentes.png', published: false },
+  { icon: Calendar, title: 'Consola WABA + CRM', description: 'Panel ejecutivo para campana: integracion WhatsApp API.', path: '/hub/waba-crm', access: 'pro', badge: 'Destacado', category: 'Panel de control', pillar: 'IA', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-agentes.png', published: false },
   { icon: MessageSquare, title: 'Consola CRM Comercial', description: 'Bandeja multiagente de WhatsApp, atribucion en tiempo real.', path: '/hub/crm', access: 'pro', badge: 'Nuevo', category: 'Panel de control', pillar: 'Marketing', tone: 'bg-[#ff4b0b]/10 text-[#ff4b0b]', preview: '/assets/hub-previews/preview-crm.jpg', published: true, app: 'crm' },
 ]
 
@@ -283,13 +283,13 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
           <div className="border-b border-zinc-100 px-5 py-5">
-            <h2 className="text-base font-bold">Aplicaciones contratadas</h2>
+            <h2 className="text-sm font-bold text-zinc-950">Aplicaciones contratadas</h2>
             <p className="mt-1 text-xs text-zinc-500">Estado de tus apps y el plan de cada una.</p>
           </div>
           {subs.length === 0 ? (
             <div className="px-5 py-8 text-center">
               <p className="text-sm font-semibold text-zinc-600">{loading ? 'Cargando aplicaciones…' : 'Aún no tienes aplicaciones contratadas.'}</p>
-              <button type="button" onClick={() => setActiveTab('Aplicaciones')} className="mt-4 h-10 px-5 rounded-xl bg-[#ff4b0b] text-white text-sm font-bold transition hover:bg-[#e94308]">Ver aplicaciones disponibles</button>
+              <button type="button" onClick={() => setActiveTab('Aplicaciones')} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]">Ver aplicaciones disponibles</button>
             </div>
           ) : (
             <div className="divide-y divide-zinc-50 px-5">
@@ -314,7 +314,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
 
         {/* Acciones rápidas */}
         <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
-          <h2 className="text-base font-bold">Acciones rápidas</h2>
+          <h2 className="text-sm font-bold text-zinc-950">Acciones rápidas</h2>
           <p className="mt-1 text-xs text-zinc-500">Atajos a las secciones de tu panel.</p>
           <div className="mt-4 flex flex-col gap-2">
             {[
@@ -368,9 +368,9 @@ function ecosystemIcon(slug) {
 }
 
 const ECOSYSTEM_TONES = [
-  'bg-[#ff4b0b]', 'bg-indigo-600', 'bg-orange-500',
-  'bg-gradient-to-tr from-purple-600 to-pink-500', 'bg-zinc-900',
-  'bg-purple-600', 'bg-blue-600', 'bg-blue-500',
+  'bg-[#ff4b0b]', 'bg-[#ff7a45]', 'bg-[#ff9b73]',
+  'bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45]', 'bg-zinc-900',
+  'bg-[#ff4b0b]', 'bg-[#ff7a45]', 'bg-[#ff9b73]',
 ]
 
 function SuperAdminDashboard({ setActiveTab, navigate }) {
@@ -422,7 +422,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       const withSub = new Set(activeSubs.map((x) => x.tenant_id))
       data.tenants.forEach((x) => { if (!withSub.has(x.id)) planCounts['Sin plan'] += 1 })
       const planTotal = Math.max(data.tenants.length, 1)
-      const planColors = { Premium: '#f97316', Intermedio: '#3b82f6', Básico: '#eab308', 'Sin plan': '#d4d4d8' }
+      const planColors = { Premium: '#ff4b0b', Intermedio: '#ff7a45', Básico: '#ff9b73', 'Sin plan': '#d4d4d8' }
       let cursor = 0
       const donut = Object.keys(planCounts).map((label) => {
         const from = (cursor / planTotal) * 360
@@ -531,7 +531,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
           <div className="w-16 h-8 opacity-80">
             <svg className="w-full h-full" viewBox="0 0 60 30" fill="none">
-              <path d="M0 22 C15 25, 30 18, 45 12 L60 10" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M0 22 C15 25, 30 18, 45 12 L60 10" stroke="#ff4b0b" strokeWidth="2.5" strokeLinecap="round" />
             </svg>
           </div>
         </div>
@@ -585,7 +585,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-base font-bold text-zinc-950">Crecimiento de ingresos</h3>
+                <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Pagos completados por mes</p>
               </div>
               <span className="text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-700">Últimos 9 meses</span>
@@ -611,7 +611,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
           {/* Companies by Plan Donut Chart */}
           <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
-            <h3 className="text-base font-bold text-zinc-950 mb-4">Empresas por plan</h3>
+            <h3 className="text-sm font-bold text-zinc-950 mb-4">Empresas por plan</h3>
             <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
               <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
                 <div className="w-40 h-40 rounded-full" style={{ background: live && live.donut.length ? `conic-gradient(${live.donut.join(', ')})` : 'conic-gradient(#e4e4e7 0deg 360deg)' }} />
@@ -626,7 +626,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <div className="space-y-3 w-full sm:w-auto">
                 {(live ? Object.entries(live.planCounts) : []).map(([label, count]) => {
                   const pct = live ? Math.round((count / live.planTotal) * 100) : 0
-                  const color = label === 'Premium' ? '#f97316' : label === 'Intermedio' ? '#3b82f6' : label === 'Básico' ? '#eab308' : '#d4d4d8'
+                  const color = label === 'Premium' ? '#ff4b0b' : label === 'Intermedio' ? '#ff7a45' : label === 'Básico' ? '#ff9b73' : '#d4d4d8'
                   return (
                     <div key={label} className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
                       <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: color }} /><span className="text-zinc-700">{label}</span></div>
@@ -712,7 +712,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
-            <h3 className="text-base font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
+            <h3 className="text-sm font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
             <p className="text-xs text-zinc-500 mt-0.5">Estado general de las aplicaciones en todas las empresas.</p>
           </div>
           <button onClick={() => setActiveTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
@@ -868,7 +868,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
       {/* Mis aplicaciones */}
       <div>
         <div className="mb-3">
-          <h3 className="text-base font-bold text-zinc-950">Mis aplicaciones</h3>
+          <h3 className="text-sm font-bold text-zinc-950">Mis aplicaciones</h3>
           <p className="text-xs text-zinc-500 mt-0.5">Solo las apps donde tienes acceso asignado.</p>
         </div>
         {apps ? (
@@ -1770,7 +1770,7 @@ function HubPanelContent() {
                               <span className={`w-8 h-8 mb-3 rounded-lg flex items-center justify-center shrink-0 shadow-sm border border-black/[0.03] ${route.tone}`}>
                                 <HubIcon icon={Icon} size={16} className="w-4 h-4" />
                               </span>
-                              <h3 className="text-[14px] font-extrabold leading-snug text-zinc-900 tracking-tight pr-2">{route.title}</h3>
+                              <h3 className="text-sm font-bold text-zinc-950 tracking-tight pr-2">{route.title}</h3>
                             </div>
                           </article>
                         </Link>
@@ -1804,10 +1804,10 @@ function HubPanelContent() {
 
         {/* FLOATING ACTION BUTTONS */}
         <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-          <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 text-white shadow-[0_8px_30px_rgba(79,70,229,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-[var(--hub-border)]" title="Qaway IA Insights">
+          <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-[var(--hub-border)]" title="Qaway IA Insights">
             <HubIcon icon={Sparkles} size={24} className="w-6 h-6 animate-pulse" />
           </button>
-          <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff8c00] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/20" title="Chatbot de Ayuda">
+          <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/20" title="Chatbot de Ayuda">
             <HubIcon icon={MessageSquare} size={24} className="w-6 h-6 text-white" />
           </button>
         </div>

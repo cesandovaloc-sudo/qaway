@@ -208,7 +208,7 @@ function SectionCard({ title, subtitle, children, className = "" }) {
       className={`rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,.025)] ${className}`}
     >
       <div className="px-5 pt-4">
-        <h2 className="text-[14px] font-bold tracking-tight text-slate-900">{title}</h2>
+        <h2 className="text-sm font-bold text-zinc-950">{title}</h2>
         {subtitle && <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>}
       </div>
       {children}
@@ -320,7 +320,7 @@ export default function ConfiguracionPanel({
   );
 
   return (
-    <div className="min-h-full bg-[#f7f8fa] text-slate-900">
+    <div className="min-h-full bg-transparent text-slate-900">
       {/* Top header */}
       <div className="hidden text-white">
         <div className="flex h-full items-center">
@@ -426,8 +426,8 @@ export default function ConfiguracionPanel({
         </aside>
 
         {/* Main */}
-        <main className="min-w-0 flex-1">
-          <div className="mx-auto max-w-[1510px] px-5 py-5">
+        <div className="min-w-0 flex-1">
+          <div>
             {/* Breadcrumb / heading */}
             <div className="mb-4">
               <div className="mb-2 text-[11px] font-medium text-slate-500">
@@ -436,7 +436,7 @@ export default function ConfiguracionPanel({
 
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <h1 className="text-[28px] font-bold tracking-tight text-slate-900">
+                  <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">
                     Configuración
                   </h1>
                   <p className="mt-0.5 text-[13px] text-slate-500">
@@ -799,7 +799,7 @@ export default function ConfiguracionPanel({
                       {activeTab === "facturacion" && <FileText size={26} />}
                       {activeTab === "avanzado" && <Wrench size={26} />}
                     </div>
-                    <h3 className="mt-4 text-[15px] font-bold text-slate-800">
+                    <h3 className="mt-4 text-sm font-bold text-zinc-950">
                       {activeTabLabel}
                     </h3>
                     <p className="mt-1 max-w-md text-[11px] leading-5 text-slate-400">
@@ -843,7 +843,7 @@ export default function ConfiguracionPanel({
               Configuración del ecosistema · Qaway Lab · {new Date().getFullYear()}
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

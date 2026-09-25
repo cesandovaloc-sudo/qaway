@@ -444,8 +444,8 @@ export default function PagosPanel() {
   };
 
   return (
-    <div className="min-h-full bg-zinc-50 font-sans text-zinc-950">
-      <main className="p-5 md:p-6 lg:p-8">
+    <div className="min-h-full bg-transparent font-sans text-zinc-950">
+      <main>
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -478,7 +478,7 @@ export default function PagosPanel() {
             <button
               type="button"
               onClick={handleExport}
-              className="h-11 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white inline-flex items-center gap-2 shadow-sm hover:bg-[#f04406]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
             >
               <Download size={16} />
               Exportar
@@ -540,7 +540,7 @@ export default function PagosPanel() {
             <div className="p-5 border-b border-zinc-100">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <h2 className="text-base font-bold">Historial de pagos</h2>
+                  <h2 className="text-sm font-bold text-zinc-950">Historial de pagos</h2>
                   <p className="mt-1 text-xs text-zinc-500">
                     Todas las transacciones del ecosistema Qaway Lab.
                   </p>
@@ -772,7 +772,7 @@ export default function PagosPanel() {
           {/* Right column */}
           <aside className="space-y-4">
             <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
-              <h2 className="text-sm font-bold">Métodos de pago</h2>
+              <h2 className="text-sm font-bold text-zinc-950">Métodos de pago</h2>
 
               <div className="mt-4 flex items-center gap-4">
                 <DonutChart data={METHOD_DATA} total={2900} />
@@ -808,7 +808,7 @@ export default function PagosPanel() {
 
             <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">Ingresos por mes</h2>
+                <h2 className="text-sm font-bold text-zinc-950">Ingresos por mes</h2>
 
                 <button
                   type="button"
@@ -832,7 +832,7 @@ export default function PagosPanel() {
 
             <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold">Actividad reciente</h2>
+                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
                 <button
                   type="button"
                   className="text-xs font-bold text-zinc-500 hover:text-zinc-800"

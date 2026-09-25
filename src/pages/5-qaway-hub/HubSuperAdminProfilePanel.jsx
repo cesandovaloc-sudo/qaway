@@ -60,7 +60,7 @@ function SectionCard({ title, description, children, className = "" }) {
   return (
     <section className={cn("rounded-xl border border-gray-200 bg-white p-5", className)}>
       <div className="mb-4">
-        <h2 className="text-[14px] font-bold text-gray-900">{title}</h2>
+        <h2 className="text-sm font-bold text-zinc-950">{title}</h2>
         {description && <p className="mt-1 text-[11px] leading-4 text-gray-500">{description}</p>}
       </div>
       {children}
@@ -226,15 +226,15 @@ export default function HubProfilePanel({
   };
 
   return (
-    <div className="min-h-full bg-[#f8f9fb] text-gray-950">
-      <main className="mx-auto w-full max-w-[1500px] px-7 py-5">
+    <div className="min-h-full bg-transparent text-zinc-950">
+      <main>
 
         <div className="mb-3 flex items-start justify-between">
           <div>
             <div className="mb-2 flex items-center gap-2 text-[12px] text-gray-500">
               <span>Inicio</span><span>›</span><span>Mi cuenta</span>
             </div>
-            <h1 className="text-[29px] font-bold tracking-[-0.7px]">Mi cuenta</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">Mi cuenta</h1>
             <p className="mt-1 text-[14px] text-gray-500">
               Administra tu información personal, seguridad y preferencias de cuenta.
             </p>
@@ -291,7 +291,7 @@ export default function HubProfilePanel({
 
                     <div className="mt-3 flex gap-2">
                       <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207]">
+                        className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408]">
                         <ImagePlus size={13} /> Cambiar foto
                       </button>
                       <button type="button" onClick={deleteAvatar} disabled={!avatarUrl}
@@ -320,7 +320,7 @@ export default function HubProfilePanel({
                   <div className="flex items-center justify-end gap-2 pt-1">
                     {personalSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
                     <button type="button" onClick={savePersonal} disabled={savingPersonal}
-                      className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
                       <Save size={13} /> {savingPersonal ? "Guardando..." : "Guardar cambios"}
                     </button>
                   </div>
@@ -358,7 +358,7 @@ export default function HubProfilePanel({
                       <Clock3 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <select value={timezone} onChange={(e) => setTimezone(e.target.value)}
                         className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-[10px] text-gray-700 outline-none focus:border-[#ff4b0b]">
-                        <option>(GMT-05:00) Lima - Perú</option><option>(GMT-05:00) Bogotá</option><option>(GMT-05:00) Quito</option>
+                        <option>(GMT-05:00) Lima - Perú</option>
                       </select>
                     </div>
                   </label>
@@ -378,7 +378,7 @@ export default function HubProfilePanel({
                 <div className="flex items-center justify-end gap-2 pt-4">
                   {preferencesSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
                   <button type="button" onClick={savePreferences} disabled={savingPreferences}
-                    className="flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-[11px] font-bold text-white hover:bg-[#eb4207] disabled:opacity-60">
+                    className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
                     <Save size={13} /> {savingPreferences ? "Guardando..." : "Guardar cambios"}
                   </button>
                 </div>
@@ -389,7 +389,7 @@ export default function HubProfilePanel({
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500"><Shield size={18} /></div>
                 <div>
-                  <h2 className="text-[13px] font-bold text-orange-700">Cuenta de {data.roleLabel}</h2>
+                  <h2 className="text-sm font-bold text-zinc-950">Cuenta de {data.roleLabel}</h2>
                   <p className="mt-1 text-[10px] text-gray-600">
                     Tu cuenta mantiene los permisos definidos por tu rol y organización dentro del ecosistema Qaway Lab.
                   </p>

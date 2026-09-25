@@ -260,7 +260,7 @@ export default function ReportesPanel({ onGenerateReport, onExport }) {
   return (
     <div className="report-page">
       <style>{`
-        .report-page{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101116;background:#fff;min-height:100%;padding:28px 34px 34px;box-sizing:border-box}
+        .report-page{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#101116;background:transparent;min-height:100%;padding:0;box-sizing:border-box}
         .report-page *{box-sizing:border-box}
         .report-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:25px}
         .breadcrumbs{font-size:13px;color:#747985;margin-bottom:8px;display:flex;gap:10px;align-items:center}
@@ -291,7 +291,7 @@ export default function ReportesPanel({ onGenerateReport, onExport }) {
       <div className="report-top">
         <div>
           <div className="breadcrumbs"><span>Inicio</span><span>›</span><span>Reportes</span></div>
-          <h1 className="report-title">Reportes</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">Reportes</h1>
           <p className="report-description">Analiza el desempeño del ecosistema Qaway Lab con datos en tiempo real. Visualiza métricas clave, genera reportes y toma mejores decisiones.</p>
         </div>
         <div className="top-actions">

@@ -255,7 +255,7 @@ function PlanCard({ plan, onEdit }) {
           onClick={() => onEdit(plan)}
           className={`flex-1 rounded-lg border px-3 py-2 text-[11px] font-bold transition ${
             plan.popular
-              ? "border-[#ff4b0b] bg-[#ff4b0b] text-white hover:bg-[#e94309]"
+              ? "border-[#ff4b0b] bg-[#ff4b0b] text-white hover:bg-[#e94408]"
               : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50"
           }`}
         >
@@ -299,7 +299,7 @@ function DistributionCard({ plans }) {
 
   return (
     <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
-      <h2 className="text-sm font-extrabold text-zinc-900">Distribución de empresas por plan</h2>
+      <h2 className="text-sm font-extrabold text-zinc-950">Distribución de empresas por plan</h2>
 
       <div className="mt-3 flex items-center gap-5">
         <div className="relative h-[130px] w-[130px] shrink-0">
@@ -361,7 +361,7 @@ function ActivityCard() {
   return (
     <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-zinc-900">Actividad reciente</h2>
+        <h2 className="text-sm font-extrabold text-zinc-950">Actividad reciente</h2>
         <button className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">
           Ver todas <ArrowUpRight className="ml-0.5 inline" size={12} />
         </button>
@@ -422,7 +422,7 @@ function ComparisonTable({ plans }) {
   return (
     <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
       <div>
-        <h2 className="text-sm font-extrabold text-zinc-900">Comparativa de características</h2>
+        <h2 className="text-sm font-extrabold text-zinc-950">Comparativa de características</h2>
         <p className="mt-0.5 text-[11px] text-zinc-500">
           Vista rápida de las principales características por plan.
         </p>
@@ -507,7 +507,7 @@ function PlanModal({ plan, onClose, onSave }) {
             <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#ff4b0b]">
               Planes y precios
             </p>
-            <h3 className="mt-1 text-lg font-extrabold text-zinc-950">
+            <h3 className="mt-1 text-sm font-extrabold text-zinc-950">
               {isNew ? "Nuevo plan" : `Editar ${plan.name}`}
             </h3>
           </div>
@@ -627,7 +627,7 @@ export default function PlanesPreciosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] font-sans text-zinc-950">
+    <div className="min-h-full bg-transparent font-sans text-zinc-950">
       <style>{`
         .shadow-xs {
           box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 2px 8px rgba(0,0,0,.025);
@@ -635,7 +635,7 @@ export default function PlanesPreciosPage() {
         .input {
           width: 100%;
           border: 1px solid #e4e4e7;
-          border-radius: 10px;
+          border-radius: 12px;
           background: #fff;
           padding: 10px 12px;
           font-size: 12px;
@@ -648,7 +648,7 @@ export default function PlanesPreciosPage() {
       `}</style>
 
       {/* Contenido del módulo. El shell/sidebar existente de tu panel puede envolver este componente. */}
-      <main className="mx-auto max-w-[1500px] px-5 py-6 md:px-8">
+      <main>
         <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="mb-2 flex items-center gap-2 text-[11px] text-zinc-400">
@@ -677,7 +677,7 @@ export default function PlanesPreciosPage() {
             <button
               type="button"
               onClick={() => setModalPlan(null)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#ff4b0b] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm hover:bg-[#e94309]"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
             >
               <Plus size={15} strokeWidth={2.5} />
               Nuevo plan
@@ -726,7 +726,7 @@ export default function PlanesPreciosPage() {
           <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-base font-extrabold text-zinc-900">Planes disponibles</h2>
+                <h2 className="text-sm font-extrabold text-zinc-950">Planes disponibles</h2>
                 <p className="mt-0.5 text-[11px] text-zinc-500">
                   Administra los planes del ecosistema. Puedes activar, editar o desactivar planes.
                 </p>
@@ -783,7 +783,7 @@ export default function PlanesPreciosPage() {
                 <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff4b0b]">
                   Página pública
                 </p>
-                <h3 className="mt-1 text-lg font-extrabold">Planes y precios</h3>
+                <h3 className="mt-1 text-sm font-extrabold text-zinc-950">Planes y precios</h3>
               </div>
               <button onClick={() => setShowPublic(false)} className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100">
                 <X size={18} />

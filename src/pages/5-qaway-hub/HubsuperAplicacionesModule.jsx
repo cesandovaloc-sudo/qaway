@@ -210,7 +210,7 @@ function KpiCard({ icon: Icon, iconClass, label, value, delta, deltaClass = "tex
       </div>
 
       <div className="mt-3 flex items-end gap-3">
-        <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{value}</span>
+        <span className="text-2xl font-extrabold tracking-tight text-zinc-950">{value}</span>
         <div className="pb-1">
           <div className={`text-xs font-bold ${deltaClass}`}>{delta}</div>
           <div className="text-[10px] text-zinc-400">{note}</div>
@@ -395,7 +395,7 @@ export default function AplicacionesModule({ tenantId, session }) {
   }
 
   return (
-    <section className="min-h-full bg-[#f8f8f7] px-5 py-6 font-sans text-zinc-950 md:px-8 lg:px-9">
+    <section className="min-h-full bg-transparent font-sans text-zinc-950">
       {/* Header */}
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
@@ -405,7 +405,7 @@ export default function AplicacionesModule({ tenantId, session }) {
             <span className="text-zinc-600">Aplicaciones</span>
           </div>
 
-          <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
+          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">
             Aplicaciones
           </h1>
 
@@ -418,7 +418,7 @@ export default function AplicacionesModule({ tenantId, session }) {
         <button
           type="button"
           onClick={() => setShowNewApp(true)}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94308] active:scale-[0.99]"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] active:scale-[0.99]"
         >
           <Plus size={17} />
           Nueva aplicación
@@ -906,7 +906,7 @@ export default function AplicacionesModule({ tenantId, session }) {
             </div>
 
             <div className="space-y-4 p-5">
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-zinc-600">
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-zinc-800">
                 El botón y el flujo visual están preparados para acoplar la
                 creación real al catálogo existente. Esta versión no crea
                 registros ni modifica la base de datos.

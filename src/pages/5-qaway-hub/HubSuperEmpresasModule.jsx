@@ -395,7 +395,7 @@ export default function EmpresasModule({
         <button
           type="button"
           onClick={onCreateCompany}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#e94408] focus:outline-none focus:ring-4 focus:ring-orange-100"
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] focus:outline-none focus:ring-4 focus:ring-orange-100"
         >
           <span className="text-base leading-none">+</span>
           Nueva empresa

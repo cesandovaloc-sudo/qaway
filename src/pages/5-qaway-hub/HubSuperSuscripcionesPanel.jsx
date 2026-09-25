@@ -464,8 +464,8 @@ export default function SuscripcionesPanel({
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fb] font-sans text-zinc-950">
-      <main className="mx-auto w-full max-w-[1480px] px-6 py-6 lg:px-8">
+    <div className="min-h-full bg-transparent font-sans text-zinc-950">
+      <main>
         {/* Header */}
         <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>

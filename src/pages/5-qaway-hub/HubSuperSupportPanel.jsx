@@ -279,8 +279,8 @@ export default function SupportPanel({
   const tabCounts = [counts.all, counts.open, counts.waiting, counts.process, counts.closed];
 
   return (
-    <div className="min-h-full bg-[#f8f9fb] text-gray-950">
-      <main className="mx-auto w-full max-w-[1500px] px-7 py-5">
+    <div className="min-h-full bg-transparent text-zinc-950">
+      <main>
         {/* Header */}
         <div className="mb-6 flex items-start justify-between">
           <div>
@@ -289,7 +289,7 @@ export default function SupportPanel({
               <span>›</span>
               <span>Soporte</span>
             </div>
-            <h1 className="text-[29px] font-bold tracking-[-0.7px]">Soporte</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">Soporte</h1>
             <p className="mt-1 text-[14px] text-gray-500">
               Gestiona y da seguimiento a las solicitudes de soporte del ecosistema Qaway Lab.
               Resuelve incidencias y mejora la experiencia de tus clientes.
@@ -309,7 +309,7 @@ export default function SupportPanel({
             <button
               type="button"
               onClick={onNewTicket}
-              className="flex h-11 items-center gap-2 rounded-lg bg-[#ff4b0b] px-5 text-[12px] font-bold text-white shadow-sm hover:bg-[#eb4207]"
+              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
             >
               <Plus size={16} />
               Nuevo ticket
@@ -498,7 +498,7 @@ export default function SupportPanel({
           {/* Right column */}
           <aside className="space-y-3">
             <section className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="text-[14px] font-bold">Tickets por aplicación</h2>
+              <h2 className="text-sm font-bold text-zinc-950">Tickets por aplicación</h2>
               <div className="mt-4 flex items-center gap-5">
                 <DonutChart />
                 <div className="flex-1 space-y-3">
@@ -519,7 +519,7 @@ export default function SupportPanel({
 
             <section className="rounded-xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-[14px] font-bold">Actividad reciente</h2>
+                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
                 <button type="button" className="text-[11px] font-medium text-gray-500 hover:text-gray-900">
                   Ver todas →
                 </button>
@@ -562,7 +562,7 @@ export default function SupportPanel({
                     <span className="text-sm">💡</span>
                   </div>
                   <div>
-                    <h3 className="text-[12px] font-bold text-gray-700">Tip</h3>
+                    <h3 className="text-sm font-bold text-zinc-950">Tip</h3>
                     <p className="mt-1 pr-2 text-[10px] leading-4 text-gray-500">
                       Puedes crear respuestas rápidas para agilizar la atención de tickets frecuentes.
                     </p>

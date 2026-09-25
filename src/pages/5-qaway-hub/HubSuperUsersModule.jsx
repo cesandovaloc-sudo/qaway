@@ -60,12 +60,12 @@ const MOCK_USERS = [
 ];
 
 const ROLE_META = {
-  "Super Admin": { dot: "#ef4444", bg: "bg-red-50", text: "text-red-500" },
-  Admin: { dot: "#3b82f6", bg: "bg-blue-50", text: "text-blue-600" },
-  Editor: { dot: "#f59e0b", bg: "bg-amber-50", text: "text-amber-600" },
-  Visor: { dot: "#10b981", bg: "bg-emerald-50", text: "text-emerald-600" },
-  Invitado: { dot: "#8b5cf6", bg: "bg-violet-50", text: "text-violet-600" },
-  Usuario: { dot: "#9ca3af", bg: "bg-zinc-100", text: "text-zinc-600" },
+  "Super Admin": { dot: "#ff4b0b", bg: "bg-orange-50", text: "text-[#ff4b0b]" },
+  Admin: { dot: "#ff7a45", bg: "bg-orange-50/70", text: "text-[#e2641f]" },
+  Editor: { dot: "#ff9b73", bg: "bg-orange-50/40", text: "text-[#e26d3a]" },
+  Visor: { dot: "#71717a", bg: "bg-zinc-100", text: "text-zinc-600" },
+  Invitado: { dot: "#a1a1aa", bg: "bg-zinc-100", text: "text-zinc-500" },
+  Usuario: { dot: "#d4d4d8", bg: "bg-zinc-100", text: "text-zinc-500" },
 };
 
 function Icon({ children, size = 16, className = "" }) {
@@ -310,7 +310,7 @@ function UserAccessEditor({ userId, userName, tenantId, isPlatformAdmin, supabas
         <button
           type="button"
           onClick={saveAll}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#ff4b0b] px-4 text-xs font-bold text-white transition hover:bg-[#e94408]"
+          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
         >
           <Save size={14} />
           Guardar accesos
@@ -1057,7 +1057,7 @@ export default function UsersModule({
           {/* Right column */}
           <aside className="space-y-4">
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
-              <h2 className="text-base font-bold">Usuarios por rol</h2>
+              <h2 className="text-sm font-bold text-zinc-950">Usuarios por rol</h2>
 
               <div className="mt-5 flex items-center gap-5">
                 <div
@@ -1103,7 +1103,7 @@ export default function UsersModule({
 
             <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold">Actividad reciente</h2>
+                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
                 <button
                   type="button"
                   className="text-xs font-bold text-zinc-500 hover:text-zinc-950"
