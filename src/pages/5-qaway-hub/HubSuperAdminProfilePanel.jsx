@@ -60,7 +60,7 @@ function SectionCard({ title, description, children, className = "" }) {
   return (
     <section className={cn("rounded-xl border border-gray-200 bg-white p-5", className)}>
       <div className="mb-4">
-        <h2 className="text-sm font-bold text-zinc-950">{title}</h2>
+        <h2 className="text-lg font-bold text-zinc-950">{title}</h2>
         {description && <p className="mt-1 text-[11px] leading-4 text-gray-500">{description}</p>}
       </div>
       {children}
@@ -375,7 +375,7 @@ export default function HubProfilePanel({
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-500"><Shield size={18} /></div>
                 <div>
-                  <h2 className="text-sm font-bold text-zinc-950">Cuenta de {data.roleLabel}</h2>
+                  <h2 className="text-lg font-bold text-zinc-950">Cuenta de {data.roleLabel}</h2>
                   <p className="mt-1 text-[10px] text-gray-600">
                     Tu cuenta mantiene los permisos definidos por tu rol y organización dentro del ecosistema Qaway Lab.
                   </p>

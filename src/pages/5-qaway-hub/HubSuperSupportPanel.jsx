@@ -533,7 +533,7 @@ export default function SupportPanel({
           {/* Right column */}
           <aside className="space-y-3">
             <section className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="text-sm font-bold text-zinc-950">Tickets por aplicación</h2>
+              <h2 className="text-lg font-bold text-zinc-950">Tickets por aplicación</h2>
               <div className="mt-4 flex items-center gap-5">
                 <DonutChart />
                 <div className="flex-1 space-y-3">
@@ -554,7 +554,7 @@ export default function SupportPanel({
 
             <section className="rounded-xl border border-gray-200 bg-white p-5">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
+                <h2 className="text-lg font-bold text-zinc-950">Actividad reciente</h2>
                 <button type="button" className="text-[11px] font-medium text-gray-500 hover:text-gray-900">
                   Ver todas →
                 </button>

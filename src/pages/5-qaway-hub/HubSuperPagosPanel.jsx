@@ -239,7 +239,7 @@ function StatusBadge({ status }) {
 
 function KpiCard({ icon, iconClass, label, value, delta, deltaClass, note, line }) {
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
+    <div className="bg-white rounded-2xl border border-zinc-200 shadow-xs p-5">
       <div className="flex items-start justify-between">
         <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconClass}`}>
           {icon}
@@ -545,11 +545,11 @@ export default function PagosPanel() {
         {/* Main content */}
         <div className="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Payment history */}
-          <section className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
+          <section className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden">
             <div className="p-5 border-b border-zinc-100">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-zinc-950">Historial de pagos</h2>
+                  <h2 className="text-lg font-bold text-zinc-950">Historial de pagos</h2>
                   <p className="mt-1 text-xs text-zinc-500">
                     Todas las transacciones del ecosistema Qaway Lab.
                   </p>
@@ -788,8 +788,8 @@ export default function PagosPanel() {
 
           {/* Right column */}
           <aside className="space-y-4">
-            <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
-              <h2 className="text-sm font-bold text-zinc-950">Métodos de pago</h2>
+            <section className="bg-white rounded-2xl border border-zinc-200 shadow-xs p-5">
+              <h2 className="text-lg font-bold text-zinc-950">Métodos de pago</h2>
 
               <div className="mt-4 flex items-center gap-4">
                 <DonutChart data={METHOD_DATA} total={2900} />
@@ -823,9 +823,9 @@ export default function PagosPanel() {
               </div>
             </section>
 
-            <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
+            <section className="bg-white rounded-2xl border border-zinc-200 shadow-xs p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-zinc-950">Ingresos por mes</h2>
+                <h2 className="text-lg font-bold text-zinc-950">Ingresos por mes</h2>
 
                 <button
                   type="button"
@@ -847,9 +847,9 @@ export default function PagosPanel() {
               </div>
             </section>
 
-            <section className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
+            <section className="bg-white rounded-2xl border border-zinc-200 shadow-xs p-5">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
+                <h2 className="text-lg font-bold text-zinc-950">Actividad reciente</h2>
                 <button
                   type="button"
                   className="text-xs font-bold text-zinc-500 hover:text-zinc-800"

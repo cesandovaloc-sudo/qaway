@@ -236,7 +236,7 @@ function UserAccessEditor({ userId, userName, tenantId, isPlatformAdmin, supabas
           <Icon size={15}><ShieldCheck /></Icon>
           Accesos · {userName}
         </p>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
           {isPlatformAdmin ? "Vista global (plataforma)" : "Solo tu empresa (RLS)"}
         </span>
       </div>
@@ -679,7 +679,7 @@ export default function UsersModule({
           {statCards.map((card) => (
             <div
               key={card.label}
-              className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs"
+              className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -729,7 +729,7 @@ export default function UsersModule({
         {/* Main content */}
         <div className="grid gap-4 lg:grid-cols-3">
           <div className="min-w-0 lg:col-span-2">
-            <div className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-xs">
+            <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xs">
               <div className="border-b border-zinc-100 px-5 py-5 md:px-6">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                   <div>
@@ -1120,8 +1120,8 @@ export default function UsersModule({
 
           {/* Right column */}
           <aside className="space-y-4">
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
-              <h2 className="text-sm font-bold text-zinc-950">Usuarios por rol</h2>
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
+              <h2 className="text-lg font-bold text-zinc-950">Usuarios por rol</h2>
 
               <div className="mt-5 flex items-center gap-5">
                 <div
@@ -1165,9 +1165,9 @@ export default function UsersModule({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-zinc-950">Actividad reciente</h2>
+                <h2 className="text-lg font-bold text-zinc-950">Actividad reciente</h2>
                 <button
                   type="button"
                   className="text-xs font-bold text-zinc-500 hover:text-zinc-950"

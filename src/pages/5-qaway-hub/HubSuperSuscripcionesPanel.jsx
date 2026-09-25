@@ -233,7 +233,7 @@ function AppChips({ apps }) {
 
 function KpiCard({ icon, iconBg, label, value, delta, deltaDirection = "up", note, trend }) {
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <div className={`flex h-8 w-8 items-center justify-center rounded-full ${iconBg}`}>
           {icon}
@@ -303,7 +303,7 @@ function SubscriptionDistribution({ subscriptions }) {
   });
 
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-bold text-zinc-950">Suscripciones por plan</h3>
       </div>
@@ -354,7 +354,7 @@ function UpcomingRenewals({ subscriptions }) {
     .slice(0, 4);
 
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-bold text-zinc-950">Próximas renovaciones</h3>
         <button className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950">
@@ -542,7 +542,7 @@ export default function SuscripcionesPanel({
 
         {/* Main content */}
         <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_390px]">
-          <div className="min-w-0 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+          <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-base font-bold text-zinc-950">
@@ -630,28 +630,28 @@ export default function SuscripcionesPanel({
               <table className="w-full min-w-[920px] border-collapse">
                 <thead>
                   <tr className="border-y border-zinc-100 bg-zinc-50/60 text-left">
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Empresa
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Plan ↕
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Aplicaciones ↕
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Estado ↕
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Inicio ↕
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Renovación ↕
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Monto
                     </th>
-                    <th className="px-3 py-3 text-[10px] font-bold uppercase tracking-wide text-zinc-500">
+                    <th className="px-3 py-3 text-xs font-bold uppercase tracking-wide text-zinc-500">
                       Acciones
                     </th>
                   </tr>

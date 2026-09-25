@@ -283,7 +283,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
 
       {/* KPIs (misma tarjeta visual que el resumen global) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><HubIcon icon={Building2} size={16} className="w-4 h-4" /></span>
             <span className="text-xs font-bold text-zinc-500">Código de empresa</span>
@@ -291,7 +291,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
           <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : (company?.client_code || '—')}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
             <span className="text-xs font-bold text-zinc-500">Aplicaciones contratadas</span>
@@ -299,7 +299,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
           <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : subs.length}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-8 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0"><HubIcon icon={Zap} size={16} className="w-4 h-4" /></span>
             <span className="text-xs font-bold text-zinc-500">Aplicaciones activas</span>
@@ -307,7 +307,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
           <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : activeApps.length}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><HubIcon icon={CreditCard} size={16} className="w-4 h-4" /></span>
             <span className="text-xs font-bold text-zinc-500">Plan contratado</span>
@@ -318,9 +318,9 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
 
       {/* Row 2: Apps contratadas + Acciones rápidas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200/80 shadow-xs overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden">
           <div className="border-b border-zinc-100 px-5 py-5">
-            <h2 className="text-sm font-bold text-zinc-950">Aplicaciones contratadas</h2>
+            <h2 className="text-lg font-bold text-zinc-950">Aplicaciones contratadas</h2>
             <p className="mt-1 text-xs text-zinc-500">Estado de tus apps y el plan de cada una.</p>
           </div>
           {subs.length === 0 ? (
@@ -359,8 +359,8 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
         </div>
 
         {/* Acciones rápidas */}
-        <div className="bg-white rounded-2xl border border-zinc-200/80 shadow-xs p-5">
-          <h2 className="text-sm font-bold text-zinc-950">Acciones rápidas</h2>
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-xs p-5">
+          <h2 className="text-lg font-bold text-zinc-950">Acciones rápidas</h2>
           <p className="mt-1 text-xs text-zinc-500">Atajos a las secciones de tu panel.</p>
           <div className="mt-4 flex flex-col gap-2">
             {[
@@ -883,7 +883,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
         <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap">
           {/* Cápsula de telemetría estilo CRM */}
-          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100/90 border border-zinc-200 text-xs font-semibold text-zinc-700 shadow-2xs">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>{live.activeTenants} {live.activeTenants === 1 ? 'empresa activa' : 'empresas activas'}</span>
             <span className="text-zinc-300">·</span>
@@ -911,7 +911,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <button
               type="button"
               onClick={() => setShowActionsMenu((v) => !v)}
-              className="h-[38px] w-[38px] flex items-center justify-center bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200/80 text-zinc-800 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+              className="h-[38px] w-[38px] flex items-center justify-center bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200 text-zinc-800 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
               title="Acciones Rápidas de Super Administrador"
             >
               <HubIcon icon={Zap} size={15} className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -955,7 +955,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <button
               type="button"
               onClick={() => setShowTimeMenu((v) => !v)}
-              className="flex items-center gap-2 bg-white border border-zinc-200/80 text-xs font-semibold px-3.5 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer"
+              className="flex items-center gap-2 bg-white border border-zinc-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer"
             >
               <HubIcon icon={Calendar} size={15} className="w-4 h-4 text-zinc-500" />
               <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
@@ -987,7 +987,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       </div>
 
       {/* Barra de Filtros Encadenados Progresivos con Sticky (Paso 2) */}
-      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-2 mb-6 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
+      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-2 mb-6 bg-white/95 backdrop-blur-md border border-zinc-200 px-3.5 py-2.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         <div className="flex items-center gap-2 relative flex-wrap sm:flex-nowrap">
           {/* 1. CATEGORÍA / RUBRO (Multiselección) */}
           <div className="relative" ref={categoryMenuRef}>
@@ -1002,7 +1002,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 selectedCategories.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
               }`}
             >
               <HubIcon icon={Globe} size={14} className="w-3.5 h-3.5 opacity-70" />
@@ -1066,7 +1066,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 selectedTenantIds.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
               }`}
             >
               <span className={`w-2 h-2 rounded-full shrink-0 ${selectedTenantIds.length === 0 ? 'bg-emerald-500' : 'bg-[#ff4b0b]'}`} />
@@ -1158,7 +1158,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 selectedAppIds.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
               }`}
             >
               <HubIcon icon={Layers} size={14} className="w-3.5 h-3.5 opacity-70" />
@@ -1222,7 +1222,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
                 selectedPlans.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
               }`}
             >
               <HubIcon icon={SlidersHorizontal} size={14} className="w-3.5 h-3.5 opacity-70" />
@@ -1289,7 +1289,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       {/* Row 1: KPI Cards con Telemetría Reactiva */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* KPI 1: Empresas Activas */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
@@ -1321,7 +1321,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
 
           {/* KPI 2: MRR Recurrente */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
@@ -1353,7 +1353,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
 
           {/* KPI 3: Usuarios Totales */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
@@ -1375,7 +1375,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
 
           {/* KPI 4: Facturación Consolidada */}
-          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
@@ -1408,7 +1408,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
         {/* Tarjetas de Métricas Personalizadas (Super Administrador) */}
         {customMetrics.map((cm) => (
-          <div key={cm.id} className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group">
+          <div key={cm.id} className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
@@ -1441,14 +1441,14 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       {/* Row 2: Gráfico Horizontal de Crecimiento (2 Cols) + Actividad Reciente al Lado (1 Col) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Left: Gráfico Horizontal de Crecimiento de Ventas e Ingresos (lg:col-span-2) */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div>
                 <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos comerciales consolidado por mes</p>
               </div>
-              <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl border border-zinc-200/60">
+              <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl border border-zinc-200">
                 {[
                   { id: '30d', label: '30 d' },
                   { id: '90d', label: '90 d' },
@@ -1502,7 +1502,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         </div>
 
         {/* Right: Actividad Reciente al Lado a la Misma Altura (lg:col-span-1) */}
-        <div className="lg:col-span-1 bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+        <div className="lg:col-span-1 bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
@@ -1552,7 +1552,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         
         {/* Gráfico 1: Rendimiento Comercial */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
           <div className="flex justify-between items-center mb-5 relative">
             <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento comercial</h4>
             
@@ -1614,7 +1614,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         </div>
 
         {/* Gráfico 2: Ingresos por Aplicación */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
           <div className="flex justify-between items-center mb-5 relative">
             <h4 className="text-base font-bold text-zinc-900 tracking-tight">Ingresos por aplicación</h4>
             
@@ -1674,7 +1674,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         </div>
 
         {/* Gráfico 3: Empresas por Plan */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default flex flex-col justify-between">
+        <div className="bg-white border border-zinc-200 rounded-xl p-4 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default flex flex-col justify-between">
           <div className="flex justify-between items-center mb-3 relative">
             <h4 className="text-base font-bold text-zinc-900 tracking-tight">Empresas por plan</h4>
             
@@ -1905,7 +1905,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       )}
 
       {/* Row 3: Ecosystem Applications Grid */}
-      <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
+      <div className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div>
             <h3 className="text-sm font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
@@ -1918,7 +1918,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(live ? live.ecosystem : []).map((app, i) => (
-            <div key={i} className="rounded-xl border border-zinc-200/80 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all group">
+            <div key={i} className="rounded-xl border border-zinc-200 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all group">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <span className={`w-9 h-9 rounded-xl ${app.tone} text-white flex items-center justify-center shadow-xs`}>
@@ -1956,7 +1956,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
 function RestrictedCard({ tabLabel }) {
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-10 text-center">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-10 text-center">
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-zinc-100 text-zinc-500">
         <HubIcon icon={Shield} size={18} className="w-4.5 h-4.5" />
       </div>
@@ -2036,7 +2036,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
       </div>
 
       {/* Estado personal */}
-      <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <span className="relative flex w-10 h-10 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-white font-extrabold text-xs overflow-hidden">
             {initials || '?'}
@@ -2072,7 +2072,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {apps.map((app, i) => (
                 <Link key={app.slug} to={appWorkerRoute(app.slug)} className="group block">
-                  <div className="rounded-xl border border-zinc-200/80 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all h-full">
+                  <div className="rounded-xl border border-zinc-200 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all h-full">
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <span className={`w-9 h-9 rounded-xl ${ECOSYSTEM_TONES[i % ECOSYSTEM_TONES.length]} text-white flex items-center justify-center shadow-xs`}>
@@ -2102,7 +2102,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 animate-pulse rounded-xl border border-zinc-200/80 bg-zinc-100" />
+              <div key={i} className="h-32 animate-pulse rounded-xl border border-zinc-200 bg-zinc-100" />
             ))}
           </div>
         )}
@@ -2110,7 +2110,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
 
       {/* Accesos adicionales otorgados por el administrador */}
       {granted.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
           <h3 className="text-sm font-bold text-zinc-950 mb-3">Accesos adicionales</h3>
           <div className="flex flex-wrap gap-2">
             {granted.map((id) => {
@@ -2704,7 +2704,7 @@ function HubPanelContent() {
                                   <div key={group.key} className="mb-1">
                                     <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
                                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${group.dot}`} />
-                                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--hub-faint)]">{group.label} · {groupUsers.length}</p>
+                                      <p className="text-xs font-bold uppercase tracking-wider text-[var(--hub-faint)]">{group.label} · {groupUsers.length}</p>
                                     </div>
                                     {groupUsers.map((u) => (
                                       <button
@@ -2945,7 +2945,7 @@ function HubPanelContent() {
                         </button>
                         <div className="h-px bg-[var(--hub-border-soft)] my-1" />
                         <div className="flex items-center justify-between pl-4 pr-2 py-1.5">
-                          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--hub-faint)]">Tema</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--hub-faint)]">Tema</span>
                           <div className="flex items-center gap-0.5">
                             <button onClick={() => setThemeMode('claro')} title="Claro" aria-label="Tema claro" className={`p-1.5 rounded-lg transition-colors ${themeMode === 'claro' ? 'text-white bg-[var(--hub-hover)]' : 'text-[var(--hub-faint)] hover:text-white hover:bg-[var(--hub-hover)]'}`}>
                               <Sun size={14} className="w-4 h-4" />
@@ -2980,7 +2980,12 @@ function HubPanelContent() {
                   session={panelAuth.session}
                   isPlatformAdmin={panelAuth.isPlatformAdmin}
                   onCreateCompany={() => navigate('/hub/bienvenida')}
-                  onOpenCompany={(company) => company?.id && navigate(`/hub/panel/empresas?empresa=${company.id}`)}
+                  onOpenCompany={(company) => {
+                    if (company?.id) {
+                      setScopedTenant({ id: company.id, name: company.name })
+                      setActiveTab('Inicio')
+                    }
+                  }}
                 />
               ) : (
                 <div className="py-24 text-center">
@@ -3060,7 +3065,7 @@ function HubPanelContent() {
             ) : globalSearchQuery.trim() !== '' || (activeTab !== 'Inicio' && activeTab !== 'Todas') ? (
               /* Explorer Grid de Aplicaciones */
               <div>
-                <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-[#fafafa]/90 backdrop-blur-md py-4 -mx-6 px-6 md:-mx-8 md:px-8 border-b border-zinc-200/50 mb-6">
+                <div className="sticky top-0 z-20 flex flex-wrap items-center gap-2 bg-[#fafafa]/90 backdrop-blur-md py-4 -mx-6 px-6 md:-mx-8 md:px-8 border-b border-zinc-200 mb-6">
                   {PILLARS.map((p) => (
                     <button key={p.label} onClick={() => goTab(p.label)}
                       className={`h-9 px-4 rounded-xl text-sm font-semibold border transition-all duration-300 outline-none focus:outline-none focus:ring-0 select-none [-webkit-tap-highlight-color:transparent] ${activeTab === p.label ? 'bg-zinc-950 text-white border-zinc-950' : 'border-zinc-200 bg-white text-zinc-600 hover:text-zinc-950 hover:border-zinc-300'}`}>{p.label}</button>

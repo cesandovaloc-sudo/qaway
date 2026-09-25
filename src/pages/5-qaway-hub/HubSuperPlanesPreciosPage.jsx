@@ -155,7 +155,7 @@ function IconBox({ children, className = "" }) {
 
 function KpiCard({ icon: Icon, iconClass, label, value, delta, trend = "up", chart = "orange" }) {
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <IconBox className={iconClass}>
@@ -215,7 +215,7 @@ function PlanCard({ plan, onEdit }) {
 
   return (
     <div
-      className={`relative flex min-h-[266px] flex-col rounded-2xl border border-zinc-200/70 p-4 ${tone.card}`}
+      className={`relative flex min-h-[266px] flex-col rounded-2xl border border-zinc-200 p-4 ${tone.card}`}
     >
       {plan.popular && (
         <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-2xl bg-[#ff4b0b] px-3 py-1.5 text-[10px] font-bold text-white">
@@ -298,8 +298,8 @@ function DistributionCard({ plans }) {
   };
 
   return (
-    <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
-      <h2 className="text-sm font-extrabold text-zinc-950">Distribución de empresas por plan</h2>
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
+      <h2 className="text-lg font-extrabold text-zinc-950">Distribución de empresas por plan</h2>
 
       <div className="mt-3 flex items-center gap-5">
         <div className="relative h-[130px] w-[130px] shrink-0">
@@ -359,9 +359,9 @@ function ActivityCard() {
   };
 
   return (
-    <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-zinc-950">Actividad reciente</h2>
+        <h2 className="text-lg font-extrabold text-zinc-950">Actividad reciente</h2>
         <button className="text-[11px] font-semibold text-zinc-500 hover:text-zinc-900">
           Ver todas <ArrowUpRight className="ml-0.5 inline" size={12} />
         </button>
@@ -420,9 +420,9 @@ function ComparisonTable({ plans }) {
   ];
 
   return (
-    <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div>
-        <h2 className="text-sm font-extrabold text-zinc-950">Comparativa de características</h2>
+        <h2 className="text-lg font-extrabold text-zinc-950">Comparativa de características</h2>
         <p className="mt-0.5 text-[11px] text-zinc-500">
           Vista rápida de las principales características por plan.
         </p>
@@ -504,7 +504,7 @@ function PlanModal({ plan, onClose, onSave }) {
       <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
           <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#ff4b0b]">
+            <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#ff4b0b]">
               Planes y precios
             </p>
             <h3 className="mt-1 text-sm font-extrabold text-zinc-950">
@@ -589,7 +589,7 @@ function PlanModal({ plan, onClose, onSave }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+      <span className="mb-1.5 block text-xs font-extrabold uppercase tracking-wide text-zinc-500">
         {label}
       </span>
       {children}
@@ -734,10 +734,10 @@ export default function PlanesPreciosPage() {
 
         {/* Principal */}
         <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(320px,0.72fr)]">
-          <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-sm font-extrabold text-zinc-950">Planes disponibles</h2>
+                <h2 className="text-lg font-extrabold text-zinc-950">Planes disponibles</h2>
                 <p className="mt-0.5 text-[11px] text-zinc-500">
                   Administra los planes del ecosistema. Puedes activar, editar o desactivar planes.
                 </p>
@@ -798,10 +798,10 @@ export default function PlanesPreciosPage() {
 
       {showPublic && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff4b0b]">
+                <p className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">
                   Página pública
                 </p>
                 <h3 className="mt-1 text-sm font-extrabold text-zinc-950">Planes y precios</h3>

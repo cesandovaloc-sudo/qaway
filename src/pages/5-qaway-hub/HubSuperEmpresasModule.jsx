@@ -7,6 +7,8 @@ import {
   Clock3,
   Download,
   Ellipsis,
+  ExternalLink,
+  Eye,
   FileSpreadsheet,
   Filter,
   HelpCircle,
@@ -145,7 +147,7 @@ function getPlanLabel(value) {
 
 function StatCard({ icon, tone, title, value, delta, deltaTone = "up", subtitle }) {
   return (
-    <article className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+    <article className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="flex items-start justify-between gap-4">
         <div className={`grid h-8 w-8 place-items-center rounded-full ${tone}`}>
           {icon}
@@ -223,15 +225,23 @@ export default function EmpresasModule({
   const [openMenu, setOpenMenu] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [notice, setNotice] = useState("");
-  const [importingFile, setImportingFile] = useState(false);
 
-  // Estados para modales in-app (Confirmación de eliminación y Edición Rápida)
+  // Estados para modales in-app (Ficha de Empresa, Edición Rápida y Confirmación de Eliminación)
+  const [viewModal, setViewModal] = useState({ isOpen: false, company: null });
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, company: null, loading: false });
   const [editModal, setEditModal] = useState({
     isOpen: false,
     company: null,
     saving: false,
     form: { name: "", sector: "", plan: "Básico", status: "active" },
+  });
+
+  // Estado para flujo de importación estilo Inventario (ProductImport)
+  const [importState, setImportState] = useState({
+    fileName: null,
+    rows: null,
+    parsing: false,
+    importing: false,
   });
 
   const handleExportExcel = () => {
@@ -247,7 +257,6 @@ export default function EmpresasModule({
       "Plan",
       "Estado",
       "Usuarios Activos",
-      "Almacenamiento",
       "MRR Estimado (S/)",
       "Fecha Registro",
     ];
@@ -267,7 +276,6 @@ export default function EmpresasModule({
         planLabel,
         statusLabel,
         c.userCount ?? c.users ?? 1,
-        c.storage || "1 GB",
         c.mrr || 0,
         formatDate(c.createdAt),
       ];
@@ -291,7 +299,6 @@ export default function EmpresasModule({
       { wch: 20 },
       { wch: 15 },
       { wch: 12 },
-      { wch: 16 },
       { wch: 16 },
       { wch: 18 },
       { wch: 16 },
@@ -337,10 +344,8 @@ export default function EmpresasModule({
 
     setDeleteModal((prev) => ({ ...prev, loading: true }));
     try {
-      // 1. Desvincular usuarios asociados a este tenant
       await supabase.from("users").update({ tenant_id: null }).eq("tenant_id", company.id);
 
-      // 2. Eliminar de public.tenants
       const { error: delErr } = await supabase.from("tenants").delete().eq("id", company.id);
       if (delErr) {
         console.warn("Delete directo en tenants falló, aplicando soft-delete:", delErr);
@@ -424,13 +429,15 @@ export default function EmpresasModule({
     }
   };
 
-  const handleFileUpload = async (e) => {
+  // Flujo de Importación al estilo Inventario (ProductImport)
+  const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImportingFile(true);
+
+    setImportState({ fileName: file.name, rows: null, parsing: true, importing: false });
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
@@ -439,64 +446,80 @@ export default function EmpresasModule({
       );
       if (headerIndex === -1) headerIndex = 0;
 
-      const rows = jsonData.slice(headerIndex + 1);
-      const localUICompanies = [];
+      const rawRows = jsonData.slice(headerIndex + 1);
+      const parsedRows = [];
 
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
+      for (let i = 0; i < rawRows.length; i++) {
+        const row = rawRows[i];
         if (!row || !row[0]) continue;
-
         const name = String(row[0] || "").trim();
         if (!name || name.toLowerCase().includes("plantilla")) continue;
 
-        const sector = String(row[1] || "General").trim();
-        const plan = String(row[2] || "básico").trim();
-        const clientCode = String(row[3] || `EMP-${Date.now().toString().slice(-4)}${i + 1}`).trim();
-        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `empresa-${Date.now()}`;
+        parsedRows.push({
+          name,
+          sector: String(row[1] || "General").trim(),
+          plan: String(row[2] || "básico").trim(),
+          clientCode: String(row[3] || `EMP-${Date.now().toString().slice(-4)}${i + 1}`).trim(),
+        });
+      }
+
+      setImportState({ fileName: file.name, rows: parsedRows, parsing: false, importing: false });
+    } catch (err) {
+      console.error("Error al leer archivo Excel:", err);
+      setNotice("No se pudo procesar el archivo Excel. Asegúrese de usar .xlsx o .csv.");
+      setTimeout(() => setNotice(""), 4000);
+      setImportState({ fileName: null, rows: null, parsing: false, importing: false });
+    }
+  };
+
+  const confirmImportToSupabase = async () => {
+    if (!importState.rows || importState.rows.length === 0) return;
+    setImportState((prev) => ({ ...prev, importing: true }));
+
+    try {
+      const localUICompanies = [];
+      for (let i = 0; i < importState.rows.length; i++) {
+        const item = importState.rows[i];
+        const slug = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `empresa-${Date.now()}`;
         const newUuid = crypto.randomUUID();
 
-        const newTenantPayload = {
+        const payload = {
           id: newUuid,
-          name,
+          name: item.name,
           slug,
-          client_code: clientCode,
+          client_code: item.clientCode,
           status: "active",
-          industry: sector,
-          plan: plan,
+          industry: item.sector,
+          plan: item.plan,
           created_at: new Date().toISOString(),
         };
 
-        const { data: dbData } = await supabase.from("tenants").insert(newTenantPayload).select().single();
-        const createdItem = dbData || newTenantPayload;
+        const { data: dbData } = await supabase.from("tenants").insert(payload).select().single();
+        const createdItem = dbData || payload;
 
         localUICompanies.push({
           ...createdItem,
           id: createdItem.id,
           name: createdItem.name,
-          subtitle: `Sector: ${sector}`,
+          subtitle: `Sector: ${item.sector}`,
           status: { key: "active", label: "Activa" },
           createdAt: createdItem.created_at,
-          plan: plan,
+          plan: item.plan,
           userCount: 1,
           applicationCount: 1,
         });
       }
 
-      if (localUICompanies.length > 0) {
-        setCompanies((prev) => [...localUICompanies, ...prev]);
-        setShowImportModal(false);
-        setNotice(`${localUICompanies.length} empresas guardadas correctamente en Supabase.`);
-        setTimeout(() => setNotice(""), 4000);
-      } else {
-        setNotice("No se encontraron filas válidas en el archivo Excel.");
-        setTimeout(() => setNotice(""), 4000);
-      }
-    } catch (err) {
-      console.error("Error al leer e importar el archivo Excel:", err);
-      setNotice("Error al procesar el archivo Excel. Verifique el formato.");
+      setCompanies((prev) => [...localUICompanies, ...prev]);
+      setShowImportModal(false);
+      setImportState({ fileName: null, rows: null, parsing: false, importing: false });
+      setNotice(`${localUICompanies.length} empresas guardadas exitosamente en Supabase.`);
       setTimeout(() => setNotice(""), 4000);
-    } finally {
-      setImportingFile(false);
+    } catch (err) {
+      console.error("Error importando a Supabase:", err);
+      setNotice("Error al guardar en Supabase: " + (err.message || "Falla de red"));
+      setTimeout(() => setNotice(""), 4000);
+      setImportState((prev) => ({ ...prev, importing: false }));
     }
   };
 
@@ -661,7 +684,7 @@ export default function EmpresasModule({
     <div className="min-w-0 space-y-5 font-sans text-zinc-950">
       {/* Gate: el listado global es exclusivo del Super Administrador */}
       {!canAccess && (
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-10 text-center">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-10 text-center">
           <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-zinc-100 text-zinc-500">
             <ShieldAlert size={18} />
           </div>
@@ -700,26 +723,36 @@ export default function EmpresasModule({
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={handleExportExcel}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50"
+            onClick={downloadExcelTemplate}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 transition"
+            title="Descargar plantilla formato .xlsx"
           >
-            <Download size={15} />
-            Descargar Excel
+            <Download size={14} className="text-zinc-500" />
+            Descargar plantilla
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 transition"
+          >
+            <FileSpreadsheet size={14} className="text-emerald-600" />
+            Exportar Excel
           </button>
 
           <button
             type="button"
             onClick={() => setShowImportModal(true)}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-3.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50 transition"
           >
-            <Upload size={15} />
+            <Upload size={14} className="text-[#ff4b0b]" />
             Subir Excel
           </button>
 
           <button
             type="button"
             onClick={onCreateCompany}
-            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06] focus:outline-none focus:ring-4 focus:ring-orange-100"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-4 text-xs font-bold text-white shadow-sm transition hover:bg-[#e03f06] focus:outline-none focus:ring-4 focus:ring-orange-100"
           >
             <span className="text-base leading-none">+</span>
             Nueva empresa
@@ -727,62 +760,142 @@ export default function EmpresasModule({
         </div>
       </div>
 
-      {/* Modal de Importación Excel */}
+      {/* Modal de Importación Excel (Flujo estilo Inventario / ProductImport) */}
       {showImportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-              <div className="flex items-center gap-2">
-                <FileSpreadsheet className="text-[#ff4b0b]" size={20} />
-                <h3 className="text-base font-bold text-zinc-900">Importar empresas (.xlsx / .csv)</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-xl bg-orange-50 text-[#ff4b0b]">
+                  <FileSpreadsheet size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-zinc-950">Importación Masiva de Empresas</h3>
+                  <p className="text-xs text-zinc-500 font-medium">Sincronización en vivo con Supabase Organizations</p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() => setShowImportModal(false)}
-                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                onClick={() => {
+                  setShowImportModal(false);
+                  setImportState({ fileName: null, rows: null, parsing: false, importing: false });
+                }}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
               >
-                <X size={16} />
+                <X size={18} />
               </button>
             </div>
 
-            <div className="my-5">
-              <label className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center hover:border-orange-300 hover:bg-orange-50/20 cursor-pointer transition">
-                <Upload size={24} className="mb-2 text-zinc-400" />
-                <span className="text-xs font-bold text-zinc-800">
-                  {importingFile ? "Procesando archivo..." : "Selecciona un archivo Excel (.xlsx, .xls) o CSV"}
-                </span>
-                <span className="mt-1 text-[11px] text-zinc-400">
-                  Importación inteligente con lectura automática de columnas
-                </span>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={importingFile}
-                />
-              </label>
-
-              <div className="mt-3 text-center">
-                <button
-                  type="button"
-                  onClick={downloadExcelTemplate}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ff4b0b] hover:underline"
-                >
-                  <Download size={13} /> Descargar plantilla modelo (.xlsx)
-                </button>
+            {/* Columnas reconocidas */}
+            <div className="mt-4 rounded-xl bg-zinc-50 border border-zinc-200/80 p-3.5">
+              <p className="text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Columnas reconocidas en Excel / CSV:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-medium text-zinc-600">
+                <span className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200 font-bold text-zinc-800">1. Nombre (Req)</span>
+                <span className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200">2. Sector / Cat.</span>
+                <span className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200">3. Plan</span>
+                <span className="bg-white px-2.5 py-1 rounded-lg border border-zinc-200">4. Código / RUC</span>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100">
-              <button
-                type="button"
-                onClick={() => setShowImportModal(false)}
-                className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50"
-              >
-                Cancelar
-              </button>
-            </div>
+            {/* Paso 1: Dropzone o carga */}
+            {!importState.rows ? (
+              <div className="my-5">
+                <label className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-200 p-6 text-center hover:border-orange-300 hover:bg-orange-50/20 cursor-pointer transition">
+                  <Upload size={32} className="mb-2 text-[#ff4b0b]" />
+                  <span className="text-xs font-extrabold text-zinc-800">
+                    {importState.parsing ? "Analizando contenido del archivo..." : "Haz clic para seleccionar o arrastra tu archivo Excel"}
+                  </span>
+                  <span className="mt-1 text-[11px] text-zinc-400">
+                    Soporta formatos .xlsx, .xls y .csv
+                  </span>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                    disabled={importState.parsing}
+                  />
+                </label>
+
+                <div className="mt-4 flex items-center justify-between pt-2">
+                  <button
+                    type="button"
+                    onClick={downloadExcelTemplate}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ff4b0b] hover:underline"
+                  >
+                    <Download size={14} /> Descargar plantilla modelo (.xlsx)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowImportModal(false)}
+                    className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Paso 2: Previsualización de filas procesadas estilo ProductImport */
+              <div className="my-4 space-y-4">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-3.5 text-xs text-emerald-900 font-bold flex items-center justify-between">
+                  <span>✓ Archivo leído: <strong>{importState.fileName}</strong> ({importState.rows.length} empresas listas)</span>
+                  <button
+                    type="button"
+                    onClick={() => setImportState({ fileName: null, rows: null, parsing: false, importing: false })}
+                    className="text-[11px] text-emerald-700 underline hover:text-emerald-950 font-bold"
+                  >
+                    Cambiar archivo
+                  </button>
+                </div>
+
+                <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-200 bg-white">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-zinc-50 border-b border-zinc-100 text-[10px] font-extrabold text-zinc-500 uppercase">
+                      <tr>
+                        <th className="px-3 py-2">Empresa</th>
+                        <th className="px-3 py-2">Sector</th>
+                        <th className="px-3 py-2">Plan</th>
+                        <th className="px-3 py-2">Código</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {importState.rows.slice(0, 5).map((row, idx) => (
+                        <tr key={idx} className="hover:bg-zinc-50/50">
+                          <td className="px-3 py-2 font-bold text-zinc-800">{row.name}</td>
+                          <td className="px-3 py-2 text-zinc-600">{row.sector}</td>
+                          <td className="px-3 py-2 text-zinc-600">{row.plan}</td>
+                          <td className="px-3 py-2 text-zinc-400 font-mono text-[10px]">{row.clientCode}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {importState.rows.length > 5 && (
+                    <div className="p-2 text-center text-[10px] text-zinc-400 font-bold border-t border-zinc-100 bg-zinc-50/30">
+                      + {importState.rows.length - 5} empresas adicionales en cola
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-3">
+                  <button
+                    type="button"
+                    disabled={importState.importing}
+                    onClick={() => setImportState({ fileName: null, rows: null, parsing: false, importing: false })}
+                    className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                  >
+                    Descartar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={importState.importing}
+                    onClick={confirmImportToSupabase}
+                    className="rounded-xl bg-[#ff4b0b] hover:bg-[#e03f06] px-5 py-2 text-xs font-bold text-white shadow-xs transition disabled:opacity-50 inline-flex items-center gap-2"
+                  >
+                    {importState.importing ? "Importando a Supabase..." : `Importar ${importState.rows.length} empresas a Supabase`}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -832,10 +945,10 @@ export default function EmpresasModule({
 
       {/* Contenido */}
       <div className="grid gap-5 lg:grid-cols-3">
-        <section className="min-w-0 rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs lg:col-span-2">
+        <section className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs lg:col-span-2">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-sm font-extrabold text-zinc-950">
+              <h2 className="text-lg font-extrabold text-zinc-950">
                 Listado de empresas
               </h2>
               <p className="mt-1 text-xs text-zinc-500">
@@ -1011,10 +1124,11 @@ export default function EmpresasModule({
                                 type="button"
                                 onClick={() => {
                                   setOpenMenu(null);
-                                  onOpenCompany?.(company);
+                                  setViewModal({ isOpen: true, company });
                                 }}
-                                className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50"
+                                className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50 flex items-center gap-2"
                               >
+                                <Eye size={14} className="text-zinc-500" />
                                 Ver empresa
                               </button>
                               <button
@@ -1116,9 +1230,9 @@ export default function EmpresasModule({
 
         {/* Columna lateral */}
         <aside className="space-y-5">
-          <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-zinc-950">
+              <h2 className="text-lg font-extrabold text-zinc-950">
                 Distribución por plan
               </h2>
             </div>
@@ -1169,9 +1283,9 @@ export default function EmpresasModule({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs">
+          <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-zinc-950">
+              <h2 className="text-lg font-extrabold text-zinc-950">
                 Actividad reciente
               </h2>
               <button
@@ -1253,7 +1367,7 @@ export default function EmpresasModule({
       {/* Modal de Edición Rápida de Empresa (Requisito PANEL-05) */}
       {editModal.isOpen && editModal.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
               <div>
                 <p className="text-[10px] font-bold text-[#ff4b0b] uppercase tracking-wider">Edición Rápida</p>
@@ -1344,7 +1458,7 @@ export default function EmpresasModule({
       {/* Modal In-App de Confirmación de Eliminación (Reemplaza window.confirm) */}
       {deleteModal.isOpen && deleteModal.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-red-100 text-red-600">
                 <ShieldAlert size={20} />
@@ -1373,6 +1487,103 @@ export default function EmpresasModule({
                 className="rounded-xl bg-red-600 hover:bg-red-700 px-5 py-2 text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50"
               >
                 {deleteModal.loading ? "Eliminando..." : "Eliminar Definitivamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Ficha Completa de Empresa */}
+      {viewModal.isOpen && viewModal.company && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between border-b border-zinc-100 pb-4">
+              <div className="flex items-center gap-3">
+                <CompanyAvatar company={viewModal.company} />
+                <div>
+                  <h3 className="text-base font-extrabold text-zinc-950">{viewModal.company.name}</h3>
+                  <p className="text-xs text-zinc-500 font-medium">{viewModal.company.subtitle || "Organización activa en Qaway Lab"}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewModal({ isOpen: false, company: null })}
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="my-4 grid grid-cols-2 gap-3 text-xs">
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Estado actual</p>
+                <p className="mt-1 font-extrabold text-zinc-900 inline-flex items-center gap-1.5">
+                  <span className={`h-2 w-2 rounded-full ${viewModal.company.status?.key === "active" ? "bg-emerald-500" : viewModal.company.status?.key === "trialing" ? "bg-amber-400" : "bg-red-500"}`} />
+                  {viewModal.company.status?.label || "Activa"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Plan contratado</p>
+                <p className="mt-1 font-extrabold text-zinc-900">{getPlanLabel(viewModal.company.plan)}</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Sector / Industria</p>
+                <p className="mt-1 font-extrabold text-zinc-900">{viewModal.company.sector || viewModal.company.industry || "General"}</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Fecha de registro</p>
+                <p className="mt-1 font-extrabold text-zinc-900">{formatDate(viewModal.company.createdAt)}</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Usuarios vinculados</p>
+                <p className="mt-1 font-extrabold text-zinc-900">{viewModal.company.userCount ?? 1} usuarios</p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-100 bg-zinc-50 p-3">
+                <p className="text-[10px] font-bold text-zinc-400 uppercase">Aplicaciones activas</p>
+                <p className="mt-1 font-extrabold text-zinc-900">{viewModal.company.applicationCount ?? 1} módulos</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-orange-50/60 border border-orange-100 p-3 text-[11px] text-zinc-600 font-medium">
+              <span className="font-bold text-zinc-800">UUID Supabase: </span>
+              <code className="text-[10px] font-mono text-[#ff4b0b]">{viewModal.company.id}</code>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t border-zinc-100 pt-4 mt-5">
+              <button
+                type="button"
+                onClick={() => setViewModal({ isOpen: false, company: null })}
+                className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50"
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const comp = viewModal.company;
+                  setViewModal({ isOpen: false, company: null });
+                  openEditModal(comp);
+                }}
+                className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-700 hover:bg-zinc-50 shadow-xs"
+              >
+                Editar datos
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const comp = viewModal.company;
+                  setViewModal({ isOpen: false, company: null });
+                  onOpenCompany?.(comp);
+                }}
+                className="rounded-xl bg-[#ff4b0b] hover:bg-[#e03f06] px-5 py-2 text-xs font-bold text-white shadow-xs transition inline-flex items-center gap-1.5"
+              >
+                <ExternalLink size={14} />
+                Ver como esta empresa
               </button>
             </div>
           </div>

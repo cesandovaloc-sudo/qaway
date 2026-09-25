@@ -197,7 +197,7 @@ function PlanBadge({ plan }) {
 
 function KpiCard({ icon: Icon, iconClass, label, value, delta, deltaClass = "text-emerald-600", note = "vs. mes anterior" }) {
   return (
-    <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
           <div className={`flex h-8 w-8 items-center justify-center rounded-full ${iconClass}`}>
@@ -465,7 +465,7 @@ export default function AplicacionesModule({ tenantId, session }) {
       {/* Main grid */}
       <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,0.8fr)]">
         {/* Table */}
-        <div className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
           <div className="border-b border-zinc-100 px-5 py-5">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
@@ -539,22 +539,22 @@ export default function AplicacionesModule({ tenantId, session }) {
             <table className="w-full min-w-[820px] border-collapse">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50/50 text-left">
-                  <th className="px-5 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-5 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Aplicación
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Descripción
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Estado
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Empresas activas
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Plan base
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wide text-zinc-500">
+                  <th className="px-4 py-3 text-xs font-extrabold uppercase tracking-wide text-zinc-500">
                     Última actualización
                   </th>
                   <th className="w-16 px-4 py-3" />
@@ -728,7 +728,7 @@ export default function AplicacionesModule({ tenantId, session }) {
 
         {/* Right rail */}
         <aside className="space-y-5">
-          <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-base font-bold">Estado del ecosistema</h2>
               <span className="text-xs font-semibold text-zinc-400">
@@ -739,7 +739,7 @@ export default function AplicacionesModule({ tenantId, session }) {
             <DonutChart apps={apps} />
           </div>
 
-          <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="mb-5 flex items-center justify-between">
               <h2 className="text-base font-bold">Actividad reciente</h2>
               <button
@@ -814,7 +814,7 @@ export default function AplicacionesModule({ tenantId, session }) {
           <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-zinc-100 p-5">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff4b0b]">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">
                   Aplicación
                 </span>
                 <h3 className="mt-1 text-xl font-extrabold">
@@ -888,7 +888,7 @@ export default function AplicacionesModule({ tenantId, session }) {
           <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-zinc-100 p-5">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#ff4b0b]">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">
                   Aplicaciones
                 </span>
                 <h3 className="mt-1 text-xl font-extrabold">
