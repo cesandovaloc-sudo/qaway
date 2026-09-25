@@ -380,15 +380,15 @@ export default function EmpresasModule({
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span>Inicio</span>
             <span>›</span>
-            <span className="text-zinc-600">Empresas</span>
+            <span className="text-zinc-600">Marcas</span>
           </div>
 
           <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">
-            Empresas
+            Marcas
           </h1>
 
           <p className="mt-1 text-sm text-zinc-500">
-            Gestiona todas las empresas del ecosistema Qaway Lab.
+            Gestiona todas las marcas y empresas del ecosistema Qaway Lab.
           </p>
         </div>
 

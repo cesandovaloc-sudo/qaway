@@ -92,7 +92,7 @@ const PILLAR_GRADIENTS = {
 
 const SUPER_ADMIN_NAV = [
   { id: 'Inicio', label: 'Inicio', icon: Home },
-  { id: 'Empresas', label: 'Empresas', icon: Building2 },
+  { id: 'Empresas', label: 'Marcas', icon: Building2 },
   { id: 'Usuarios', label: 'Usuarios', icon: Users },
   { id: 'Aplicaciones', label: 'Aplicaciones', icon: LayoutGrid },
   { id: 'Planes', label: 'Planes y Precios', icon: Tag },
@@ -144,6 +144,18 @@ function displayName(email) {
   const base = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
   if (!base) return null
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+}
+
+// Formato ejecutivo del estándar del proyecto (Estandar_Arquetipos_Disenos_y_Layouts_SaaS.md:365):
+// "Carlos Enrique Sandoval Ocaña" → "Carlos S." · "Juanito Alimaña" → "Juanito A."
+// Evita que el chip de usuario del topbar devore el ancho con el nombre completo.
+function shortName(full) {
+  if (!full) return null
+  const parts = String(full).trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return null
+  if (parts.length === 1) return parts[0]
+  if (parts.length === 2) return `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.`
+  return `${parts[0]} ${parts[2].charAt(0).toUpperCase()}.`
 }
 
 function fileToDataUrl(file) {
@@ -1298,9 +1310,9 @@ function HubPanelContent() {
                 key={nav.id}
                 onClick={() => goTab(nav.id)}
                 title={isSidebarCollapsed ? nav.label : ''}
-                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-xl text-xs font-semibold transition-all w-full text-left ${isActive ? 'bg-[#ff4b0b] text-white shadow-lg shadow-[#ff4b0b]/20 font-bold' : 'text-white/65 hover:text-white hover:bg-[var(--hub-chip)]'}`}
+                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left ${isActive ? 'bg-[var(--hub-hover)] text-white' : 'text-white/65 hover:text-white hover:bg-[var(--hub-chip)]'}`}
               >
-                <HubIcon icon={Icon} size={16} className="w-4 h-4 shrink-0" />
+                <HubIcon icon={Icon} size={16} className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4b0b]' : ''}`} />
                 {!isSidebarCollapsed && <span className="truncate">{nav.label}</span>}
               </button>
             )
@@ -1342,7 +1354,7 @@ function HubPanelContent() {
                   <button
                     type="button"
                     onClick={() => setIsTenantSwitcherOpen((o) => !o)}
-                    className="flex items-center gap-2 h-9 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-xs font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold transition-all cursor-pointer"
                     title="Seleccionar marca (ver como)"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -1410,7 +1422,7 @@ function HubPanelContent() {
                   <button
                     type="button"
                     onClick={() => setIsBrandUsersOpen((o) => !o)}
-                    className="flex items-center gap-2 h-9 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-xs font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold transition-all cursor-pointer"
                     title="Tu empresa — equipo"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -1493,7 +1505,7 @@ function HubPanelContent() {
                   </AnimatePresence>
                 </>
               ) : (
-                <button type="button" className="flex items-center gap-2 h-9 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-white text-xs font-bold cursor-default" title="Tu marca">
+                <button type="button" className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-white text-sm font-bold cursor-default" title="Tu marca">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="max-w-40 truncate">{panelAuth?.tenantName || 'Mi empresa'}</span>
                 </button>
@@ -1501,11 +1513,11 @@ function HubPanelContent() {
             </div>
 
             <div className="relative">
-              <button type="button" onClick={() => setIsWaffleOpen(!isWaffleOpen)} className="group flex items-center gap-2 h-9 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer" title="Ecosistema de Aplicaciones">
-                <div className="grid grid-cols-3 gap-[3px] w-3.5 h-3.5 place-items-center">
+              <button type="button" onClick={() => setIsWaffleOpen(!isWaffleOpen)} className="group flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer" title="Ecosistema de Aplicaciones">
+                <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
                   {[...Array(9)].map((_, i) => (<span key={i} className="w-[3px] h-[3px] rounded-full bg-white/70 group-hover:bg-[#ff4b0b] transition-colors" />))}
                 </div>
-                <span className="text-xs font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">Apps</span>
+                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">Apps</span>
                 <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-[var(--hub-faint)] group-hover:text-white/80 transition-transform duration-200" />
               </button>
               <AppSwitcherDropdown isOpen={isWaffleOpen} onClose={() => setIsWaffleOpen(false)} />
@@ -1517,13 +1529,13 @@ function HubPanelContent() {
             <div className="relative block">
               <HubIcon icon={Search} size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--hub-faint)]" />
               <input ref={searchInputRef} type="text" value={globalSearchQuery} onChange={(e) => setGlobalSearchQuery(e.target.value)} placeholder="Buscar empresas, usuarios, apps..."
-                className="bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-full pl-10 pr-16 py-2 text-xs text-white placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-[#ff4b0b]/50 focus:bg-[var(--hub-surface-strong)] w-[240px] md:w-[320px] lg:w-[400px] transition-all shadow-inner" />
+                className="bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-full pl-10 pr-16 py-2.5 text-sm text-white placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-[#ff4b0b]/50 focus:bg-[var(--hub-surface-strong)] w-[240px] md:w-[320px] lg:w-[420px] transition-all shadow-inner" />
               {globalSearchQuery ? (
                 <button onClick={() => setGlobalSearchQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--hub-dim)] hover:text-white transition-colors"><HubIcon icon={X} size={16} className="w-4 h-4" /></button>
               ) : (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[var(--hub-hover)] rounded-md text-[var(--hub-dim)] border border-[var(--hub-border-soft)]">Ctrl</kbd>
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[var(--hub-hover)] rounded-md text-[var(--hub-dim)] border border-[var(--hub-border-soft)]">K</kbd>
+                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-[var(--hub-hover)] rounded-md text-[var(--hub-dim)] border border-[var(--hub-border-soft)]">Ctrl</kbd>
+                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-[var(--hub-hover)] rounded-md text-[var(--hub-dim)] border border-[var(--hub-border-soft)]">K</kbd>
                 </div>
               )}
               <AnimatePresence>
@@ -1544,7 +1556,7 @@ function HubPanelContent() {
                                   <div className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[13px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20"><HubIcon icon={Icon} size={16} className="w-4 h-4" /></div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{app.title}</p>
-                                    <div className="flex items-center gap-2 text-xs text-[var(--hub-faint)] mt-1"><span className="truncate">{app.pillar}</span><span className="px-1.5 py-0.5 rounded-sm bg-[var(--hub-chip)] text-[var(--hub-dim)]">{app.badge || 'Pro'}</span></div>
+                                    <div className="flex items-center gap-2 text-xs text-[var(--hub-faint)] mt-1"><span className="truncate">{app.pillar}</span><span className="px-1.5 py-0.5 rounded-md bg-[var(--hub-chip)] text-[var(--hub-dim)]">{app.badge || 'Pro'}</span></div>
                                   </div>
                                   <HubIcon icon={MessageSquare} size={20} className="w-5 h-5 text-[var(--hub-faint)] group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
                                 </Link>
@@ -1581,7 +1593,7 @@ function HubPanelContent() {
                 <div className="hidden lg:flex flex-col justify-center">
                   {identityResolved ? (
                     <>
-                      <span className="text-white text-xs font-bold leading-none">{name}</span>
+                      <span className="text-white text-xs font-bold leading-none">{shortName(name) || name}</span>
                       <span className="text-[10px] text-[var(--hub-dim)] leading-none mt-1">{isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')}</span>
                     </>
                   ) : (
