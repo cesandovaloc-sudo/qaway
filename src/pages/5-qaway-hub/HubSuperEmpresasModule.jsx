@@ -250,6 +250,7 @@ export default function EmpresasModule({
 
     const headers = [
       "N°",
+      "UUID Supabase",
       "Código",
       "Empresa",
       "Titular / Contacto",
@@ -257,7 +258,6 @@ export default function EmpresasModule({
       "Plan",
       "Estado",
       "Usuarios Activos",
-      "MRR Estimado (S/)",
       "Fecha Registro",
     ];
 
@@ -269,6 +269,7 @@ export default function EmpresasModule({
 
       return [
         idx + 1,
+        c.id || "—",
         code,
         c.name || "—",
         ownerLabel,
@@ -276,7 +277,6 @@ export default function EmpresasModule({
         planLabel,
         statusLabel,
         c.userCount ?? c.users ?? 1,
-        c.mrr || 0,
         formatDate(c.createdAt),
       ];
     });
@@ -293,6 +293,7 @@ export default function EmpresasModule({
     const worksheet = XLSX.utils.aoa_to_sheet(aoa);
     worksheet["!cols"] = [
       { wch: 5 },
+      { wch: 38 },
       { wch: 14 },
       { wch: 30 },
       { wch: 28 },
@@ -301,7 +302,6 @@ export default function EmpresasModule({
       { wch: 12 },
       { wch: 16 },
       { wch: 18 },
-      { wch: 16 },
     ];
 
     const workbook = XLSX.utils.book_new();
