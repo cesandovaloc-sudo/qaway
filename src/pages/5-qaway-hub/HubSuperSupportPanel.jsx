@@ -243,6 +243,7 @@ export default function SupportPanel({
   const [query, setQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
   const [showTip, setShowTip] = useState(true);
 
   const filteredTickets = useMemo(() => {
@@ -264,6 +265,13 @@ export default function SupportPanel({
       return matchesStatus && matchesQuery;
     });
   }, [tickets, activeTab, query]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / itemsPerPage));
+
+  const paginatedTickets = useMemo(() => {
+    const start = (page - 1) * itemsPerPage;
+    return filteredTickets.slice(start, start + itemsPerPage);
+  }, [filteredTickets, page, itemsPerPage]);
 
   const counts = useMemo(() => {
     const countByStatus = (status) => tickets.filter((t) => t.status === status).length;
@@ -404,7 +412,7 @@ export default function SupportPanel({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTickets.map((ticket) => (
+                  {paginatedTickets.map((ticket) => (
                     <tr
                       key={ticket.id}
                       onClick={() => onOpenTicket?.(ticket)}
@@ -455,16 +463,26 @@ export default function SupportPanel({
             {/* Pagination */}
             <div className="flex items-center justify-between px-5 py-3">
               <span className="text-[11px] text-gray-500">
-                Mostrando {Math.min(filteredTickets.length, 8)} de {filteredTickets.length} tickets
+                Mostrando {filteredTickets.length === 0 ? 0 : (page - 1) * itemsPerPage + 1} a {Math.min(page * itemsPerPage, filteredTickets.length)} de {filteredTickets.length} tickets
               </span>
               <div className="flex items-center gap-1">
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                >
                   <ChevronsLeft size={14} />
                 </button>
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                >
                   <ChevronLeft size={14} />
                 </button>
-                {[1, 2, 3, 4].map((number) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
                   <button
                     key={number}
                     type="button"
@@ -477,19 +495,36 @@ export default function SupportPanel({
                     {number}
                   </button>
                 ))}
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                >
                   <ChevronRight size={14} />
                 </button>
-                <button type="button" className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                >
                   <ChevronsRight size={14} />
                 </button>
               </div>
               <div className="flex items-center gap-2 text-[11px] text-gray-500">
                 Filas por página:
-                <select className="rounded-md border border-gray-200 bg-white px-2 py-1.5 outline-none">
-                  <option>8</option>
-                  <option>10</option>
-                  <option>20</option>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="rounded-md border border-gray-200 bg-white px-2 py-1.5 outline-none"
+                >
+                  <option value={8}>8</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
                 </select>
               </div>
             </div>

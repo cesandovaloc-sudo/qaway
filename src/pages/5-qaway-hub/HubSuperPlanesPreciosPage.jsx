@@ -752,15 +752,25 @@ export default function PlanesPreciosPage() {
         </div>
 
         <div className="mt-4 flex items-center justify-between px-1 text-[11px] text-zinc-500">
-          <span>Mostrando {plans.length} de {plans.length} planes</span>
+          <span>Mostrando {plans.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, plans.length)} de {plans.length} planes</span>
           <div className="flex items-center gap-1">
-            <button className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400 disabled:opacity-40"
+            >
               <ChevronLeft size={14} />
             </button>
-            <button className="grid h-8 w-8 place-items-center rounded-lg bg-[#ff4b0b] text-white font-bold">
-              1
-            </button>
-            <button className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400">
+            <span className="px-2 text-xs font-bold text-[#ff4b0b]">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400 disabled:opacity-40"
+            >
               <ChevronRight size={14} />
             </button>
           </div>

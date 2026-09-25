@@ -370,6 +370,8 @@ export default function PagosPanel() {
   const [showFilters, setShowFilters] = useState(false);
   const [dateRange, setDateRange] = useState("01 Sep 2026 - 30 Sep 2026");
   const [openMenu, setOpenMenu] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const filteredPayments = useMemo(() => {
     const normalized = query.toLowerCase().trim();
@@ -390,6 +392,13 @@ export default function PagosPanel() {
       return matchesQuery && matchesStatus && matchesMethod;
     });
   }, [payments, query, statusFilter, methodFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPayments.length / itemsPerPage));
+
+  const paginatedPayments = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredPayments.slice(start, start + itemsPerPage);
+  }, [filteredPayments, currentPage, itemsPerPage]);
 
   const totalRevenue = payments
     .filter((p) => p.status === "Completado")
@@ -636,7 +645,7 @@ export default function PagosPanel() {
                 </thead>
 
                 <tbody>
-                  {filteredPayments.map((payment) => (
+                  {paginatedPayments.map((payment) => (
                     <tr
                       key={payment.id}
                       className="border-t border-zinc-100 hover:bg-zinc-50/60 transition-colors"
@@ -735,35 +744,43 @@ export default function PagosPanel() {
 
             <div className="flex items-center justify-between border-t border-zinc-100 px-5 py-3">
               <div className="text-xs text-zinc-400">
-                Mostrando {filteredPayments.length} de {payments.length} pagos
+                Mostrando {filteredPayments.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredPayments.length)} de {filteredPayments.length} pagos
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="w-8 h-8 rounded-lg border border-zinc-200 bg-white inline-flex items-center justify-center text-zinc-400"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="w-8 h-8 rounded-lg border border-zinc-200 bg-white inline-flex items-center justify-center text-zinc-400 disabled:opacity-40"
                 >
                   <ChevronLeft size={15} />
                 </button>
 
-                <button
-                  type="button"
-                  className="w-8 h-8 rounded-lg bg-[#ff4b0b] text-white text-xs font-bold"
-                >
-                  1
-                </button>
+                <span className="px-2 text-xs font-bold text-[#ff4b0b]">
+                  Página {currentPage} de {totalPages}
+                </span>
 
                 <button
                   type="button"
-                  className="w-8 h-8 rounded-lg border border-zinc-200 bg-white inline-flex items-center justify-center text-zinc-500"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="w-8 h-8 rounded-lg border border-zinc-200 bg-white inline-flex items-center justify-center text-zinc-500 disabled:opacity-40"
                 >
                   <ChevronRight size={15} />
                 </button>
 
-                <select className="ml-2 h-8 rounded-lg border border-zinc-200 bg-white px-2 text-xs text-zinc-500">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="ml-2 h-8 rounded-lg border border-zinc-200 bg-white px-2 text-xs text-zinc-500"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
                 </select>
               </div>
             </div>

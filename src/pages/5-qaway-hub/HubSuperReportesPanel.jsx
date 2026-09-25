@@ -224,7 +224,7 @@ function Status({ value }) {
 export default function ReportesPanel({ onGenerateReport, onExport }) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -354,7 +354,7 @@ export default function ReportesPanel({ onGenerateReport, onExport }) {
                 ))}
                 <button className="page-btn" disabled={safePage === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}><ChevronRight size={15}/></button>
               </div>
-              <label className="page-size">Filas por página:<select defaultValue="5"><option>5</option><option>10</option><option>20</option></select></label>
+              <label className="page-size">Filas por página:<select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={5}>5</option><option value={10}>10</option><option value={20}>20</option></select></label>
             </div>
           </div>
         </div>

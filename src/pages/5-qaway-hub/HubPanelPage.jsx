@@ -184,7 +184,7 @@ async function optimizeAvatar(file, maxSize = 512) {
 function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
   const [company, setCompany] = useState(null)
   const [subs, setSubs] = useState([])
-  const [appNames, setAppNames] = useState({})
+  const [appMeta, setAppMeta] = useState({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -197,12 +197,12 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
       const [tenantRes, subsRes, appsRes] = await Promise.all([
         supabase.from('tenants').select('name, client_code, status').eq('id', tenantId).maybeSingle(),
         supabase.from('tenant_app_subscriptions').select('app_id, plan, status').eq('tenant_id', tenantId),
-        supabase.from('app_catalog').select('id, name'),
+        supabase.from('app_catalog').select('id, name, slug'),
       ])
       if (!alive) return
       setCompany(tenantRes.data)
       setSubs(subsRes.data || [])
-      setAppNames(Object.fromEntries((appsRes.data || []).map((a) => [a.id, a.name])))
+      setAppMeta(Object.fromEntries((appsRes.data || []).map((a) => [a.id, a])))
       setLoading(false)
     })()
     return () => { alive = false }
@@ -295,17 +295,26 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
             <div className="divide-y divide-zinc-50 px-5">
               {subs.map((sub) => {
                 const [label, classes] = statusMeta[sub.status] || [sub.status, 'bg-zinc-100 text-zinc-600']
-                return (
-                  <div key={sub.app_id} className="flex items-center justify-between py-3.5">
+                const cat = appMeta[sub.app_id]
+                const route = cat?.slug && WORKER_APP_ROUTES[cat.slug] ? appWorkerRoute(cat.slug) : null
+                const row = (
+                  <div className="flex items-center justify-between py-3.5">
                     <div className="flex items-center gap-3">
                       <span className="w-9 h-9 rounded-xl bg-zinc-100 text-zinc-600 flex items-center justify-center shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
                       <div>
-                        <p className="text-sm font-bold text-zinc-900">{appNames[sub.app_id] || 'Aplicación'}</p>
+                        <p className="text-sm font-bold text-zinc-900">{cat?.name || 'Aplicación'}</p>
                         <p className="text-[11px] text-zinc-500 capitalize">Plan {sub.plan || '—'}</p>
                       </div>
                     </div>
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${classes}`}>{label}</span>
                   </div>
+                )
+                return route && sub.status !== 'cancelled' && sub.status !== 'suspended' ? (
+                  <Link key={sub.app_id} to={route} className="block transition-colors hover:bg-orange-50/40">
+                    {row}
+                  </Link>
+                ) : (
+                  <div key={sub.app_id}>{row}</div>
                 )
               })}
             </div>
@@ -460,7 +469,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         active: activeSubs.filter((x) => x.app_id === a.id).length,
         users: rolesByApp[a.id] || 0,
         tone: ECOSYSTEM_TONES[i % ECOSYSTEM_TONES.length],
-        path: a.slug ? `/hub/${a.slug}` : '/hub',
+        path: a.slug ? appWorkerRoute(a.slug) : null,
       })).sort((x, y) => y.active - x.active).slice(0, 8)
 
       // Actividad reciente real (tenants y usuarios más nuevos).

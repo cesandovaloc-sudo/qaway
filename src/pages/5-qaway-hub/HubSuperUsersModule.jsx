@@ -346,6 +346,7 @@ export default function UsersModule({
   const [showFilters, setShowFilters] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
   const [permUserId, setPermUserId] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
 
   // Soporte del detalle: deep-link /hub/panel/usuarios?usuario=id
   const location = useLocation();
@@ -803,6 +804,16 @@ export default function UsersModule({
                         <input
                           type="checkbox"
                           aria-label="Seleccionar todos"
+                          checked={visibleUsers.length > 0 && visibleUsers.every((u) => selectedUsers.includes(u.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              const pageIds = visibleUsers.map((u) => u.id);
+                              setSelectedUsers((prev) => Array.from(new Set([...prev, ...pageIds])));
+                            } else {
+                              const pageIds = new Set(visibleUsers.map((u) => u.id));
+                              setSelectedUsers((prev) => prev.filter((id) => !pageIds.has(id)));
+                            }
+                          }}
                           className="h-4 w-4 rounded border-zinc-300 accent-[#ff4b0b]"
                         />
                       </th>
@@ -850,6 +861,14 @@ export default function UsersModule({
                               <input
                                 type="checkbox"
                                 aria-label={`Seleccionar ${user.name}`}
+                                checked={selectedUsers.includes(user.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedUsers((prev) => [...prev, user.id]);
+                                  } else {
+                                    setSelectedUsers((prev) => prev.filter((id) => id !== user.id));
+                                  }
+                                }}
                                 className="h-4 w-4 rounded border-zinc-300 accent-[#ff4b0b]"
                               />
                             </td>

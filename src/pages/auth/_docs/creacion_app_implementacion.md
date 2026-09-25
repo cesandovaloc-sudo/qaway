@@ -17,6 +17,12 @@
      - Aclaración: *Consulta las tarifas vigentes desde tu panel en cualquier momento.*
      - Gancho preparado y oculto (`display: none`, `.tarifas-hook`): *¿Cuánto cuesta después? Conoce las tarifas de cada app*.
 
-### 3. Verificación
-- Oxlint: 0 errores.
-- Vite build + Prerender: Compilación exitosa (0 errores).
+
+### 4. Registro de Conexión de Cables / Handlers en Paneles Qaway Hub (2026-09-25)
+- **Archivos conectados:**
+  - `HubSuperPagosPanel.jsx`: Paginación dinámica `currentPage`, `itemsPerPage`, total de páginas, botones anterior/siguiente e indicador `Mostrando X a Y de Z pagos`.
+  - `HubSuperPlanesPreciosPage.jsx`: Paginación `currentPage`, `itemsPerPage` y conmutación de páginas previa/siguiente.
+  - `HubSuperSupportPanel.jsx`: Paginación interactiva con `ChevronsLeft`, `ChevronLeft`, `ChevronRight`, `ChevronsRight` y `<select>` de filas por página.
+  - `HubSuperReportesPanel.jsx`: Control dinámico de filas por página vinculado a `pageSize` state y reset de página.
+  - `HubSuperUsersModule.jsx`: Checkboxes de cabecera (seleccionar todos en página) y selección individual por usuario en `selectedUsers`.
+- **Candado Visual Cumplido:** Cero modificaciones de diseño, colores o maquetación CSS.
