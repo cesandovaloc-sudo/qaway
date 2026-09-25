@@ -610,6 +610,17 @@ export default function PlanesPreciosPage() {
   const [plans, setPlans] = useState(plansSeed);
   const [modalPlan, setModalPlan] = useState(null);
   const [showPublic, setShowPublic] = useState(false);
+  // Paginación real (hallazgo P1 #4 de la auditoría: los controles se veían vivos pero no
+  // tenían estado — de hecho el estado faltaba y reventaba en render). Corte por página
+  // sobre la grilla; `page` acota para que borrar planes nunca deje la página fuera de rango.
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.max(1, Math.ceil(plans.length / itemsPerPage));
+  const page = Math.min(currentPage, totalPages);
+  const paginatedPlans = useMemo(
+    () => plans.slice((page - 1) * itemsPerPage, page * itemsPerPage),
+    [plans, page]
+  );
 
   const totalCompanies = useMemo(
     () => plans.reduce((sum, plan) => sum + plan.companies, 0),
@@ -734,7 +745,7 @@ export default function PlanesPreciosPage() {
             </div>
 
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {plans.map((plan) => (
+              {paginatedPlans.map((plan) => (
                 <PlanCard key={plan.id} plan={plan} onEdit={setModalPlan} />
               ))}
             </div>
@@ -752,23 +763,23 @@ export default function PlanesPreciosPage() {
         </div>
 
         <div className="mt-4 flex items-center justify-between px-1 text-[11px] text-zinc-500">
-          <span>Mostrando {plans.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, plans.length)} de {plans.length} planes</span>
+          <span>Mostrando {plans.length === 0 ? 0 : (page - 1) * itemsPerPage + 1} a {Math.min(page * itemsPerPage, plans.length)} de {plans.length} planes</span>
           <div className="flex items-center gap-1">
             <button
               type="button"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              onClick={() => setCurrentPage(page - 1)}
               className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400 disabled:opacity-40"
             >
               <ChevronLeft size={14} />
             </button>
             <span className="px-2 text-xs font-bold text-[#ff4b0b]">
-              Página {currentPage} de {totalPages}
+              Página {page} de {totalPages}
             </span>
             <button
               type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              onClick={() => setCurrentPage(page + 1)}
               className="grid h-8 w-8 place-items-center rounded-lg border border-zinc-200 bg-white text-zinc-400 disabled:opacity-40"
             >
               <ChevronRight size={14} />

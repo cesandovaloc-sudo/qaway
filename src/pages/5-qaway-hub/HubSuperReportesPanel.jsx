@@ -238,6 +238,19 @@ export default function ReportesPanel({ onGenerateReport, onExport }) {
   const safePage = Math.min(page, totalPages);
   const visible = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
+  const kpis = useMemo(() => {
+    const totalMrr = companies.reduce((sum, c) => sum + (c.mrr || 0), 0);
+    const activeCompanies = companies.filter((c) => c.status === "Activa").length;
+    const activeSubs = companies.reduce((sum, c) => sum + (c.apps || 0), 0);
+    const retentionRate = companies.length > 0 ? Math.round((activeCompanies / companies.length) * 100) : 100;
+    return {
+      mrrFmt: `S/ ${totalMrr.toLocaleString("es-PE")}`,
+      activeCompanies,
+      activeSubs,
+      retentionFmt: `${retentionRate}%`,
+    };
+  }, []);
+
   const generate = () => {
     if (onGenerateReport) onGenerateReport();
     else window.dispatchEvent(new CustomEvent("qaway:generate-report"));
@@ -301,10 +314,10 @@ export default function ReportesPanel({ onGenerateReport, onExport }) {
       </div>
 
       <div className="kpi-grid">
-        <KpiCard icon={TrendingUp} title="Ingresos totales (MRR)" value="S/ 2,900" change="↑ 15%" tone="green" />
-        <KpiCard icon={Users} title="Empresas activas" value="12" change="↑ 33%" tone="blue" />
-        <KpiCard icon={CreditCard} title="Suscripciones activas" value="28" change="↑ 27%" tone="orange" />
-        <KpiCard icon={BarChart3} title="Tasa de retención" value="92%" change="↑ 5%" tone="purple" spark="up" />
+        <KpiCard icon={TrendingUp} title="Ingresos totales (MRR)" value={kpis.mrrFmt} change="↑ 15%" tone="green" />
+        <KpiCard icon={Users} title="Empresas activas" value={String(kpis.activeCompanies)} change="↑ 33%" tone="blue" />
+        <KpiCard icon={CreditCard} title="Suscripciones activas" value={String(kpis.activeSubs)} change="↑ 27%" tone="orange" />
+        <KpiCard icon={BarChart3} title="Tasa de retención" value={kpis.retentionFmt} change="↑ 5%" tone="purple" spark="up" />
       </div>
 
       <div className="main-grid">

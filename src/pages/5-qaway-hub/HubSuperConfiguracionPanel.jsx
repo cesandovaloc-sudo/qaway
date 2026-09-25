@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/config/supabase";
 import {
   Activity,
   BarChart3,
@@ -277,6 +278,32 @@ export default function ConfiguracionPanel({
   const [activeTab, setActiveTab] = useState("general");
   const [dirty, setDirty] = useState(false);
   const [notice, setNotice] = useState("");
+  const [tenantCount, setTenantCount] = useState(null);
+  const [systemOnline, setSystemOnline] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    async function loadMetrics() {
+      try {
+        const { count } = await supabase
+          .from("tenants")
+          .select("*", { count: "exact", head: true });
+        if (alive && count !== null) setTenantCount(count);
+      } catch (e) {
+        console.error("ConfiguracionPanel tenant count error:", e);
+      }
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (alive) setSystemOnline(Boolean(data));
+      } catch (e) {
+        if (alive) setSystemOnline(false);
+      }
+    }
+    loadMetrics();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const update = (key, value) => {
     setSettings((current) => ({ ...current, [key]: value }));
@@ -465,35 +492,32 @@ export default function ConfiguracionPanel({
                 icon={Globe2}
                 iconClass="bg-blue-50 text-blue-500"
                 label="Empresas configuradas"
-                value="12"
-                change="↑ 20%"
-                detail="vs. mes anterior"
+                value={tenantCount !== null ? String(tenantCount) : "—"}
+                detail="Métricas de BD Supabase"
                 sparkline="4,23 22,20 38,18 54,14 71,11 94,8"
               />
               <MetricCard
                 icon={Link2}
                 iconClass="bg-orange-50 text-orange-500"
                 label="Integraciones activas"
-                value="6"
-                change="↑ 50%"
-                detail="vs. mes anterior"
+                value={String(integrations.filter((i) => i.connected).length)}
+                detail="Conexiones de servicio"
                 sparkline="4,23 22,19 38,15 54,11 71,8 94,7"
               />
               <MetricCard
                 icon={SlidersHorizontal}
                 iconClass="bg-violet-50 text-violet-500"
                 label="Parámetros del sistema"
-                value="24"
-                change="↑ 9%"
-                detail="vs. mes anterior"
+                value={String(Object.keys(settings).length)}
+                detail="Ajustes activos"
                 sparkline="4,23 22,21 38,18 54,15 71,10 94,7"
               />
               <MetricCard
                 icon={Check}
                 iconClass="bg-emerald-50 text-emerald-500"
                 label="Estado del sistema"
-                value="Operativo"
-                detail="Todos los servicios en línea"
+                value={systemOnline ? "Operativo" : "Verificando"}
+                detail={systemOnline ? "Todos los servicios en línea" : "Reconectando con Supabase"}
                 sparkline="4,22 22,18 38,15 54,10 71,9 94,10"
               />
             </div>
