@@ -176,12 +176,18 @@ export default function HubOnboardingPage() {
             if (!isStandard && savedRubro) setCustomRubro(savedRubro);
             setConstituida(!!(t.legal_name || c.tax_id));
 
-            // Si no viene con paso explícito en URL, retomar desde el paso pendiente:
-            if (!validPaso) {
-              const { data: currentSubs } = await supabase.from("tenant_app_subscriptions").select("app_id").eq("tenant_id", t.id);
-              if (t.status === "active") {
+            // Si la empresa ya está activa y no está en el paso final de confirmación,
+            // derivar directamente al panel de administración (la empresa ya no está en borrador):
+            if (t.status === "active") {
+              if (validPaso === 5) {
                 setStep(5);
-              } else if (currentSubs && currentSubs.length > 0) {
+              } else {
+                navigate("/hub/panel", { replace: true });
+                return;
+              }
+            } else if (!validPaso) {
+              const { data: currentSubs } = await supabase.from("tenant_app_subscriptions").select("app_id").eq("tenant_id", t.id);
+              if (currentSubs && currentSubs.length > 0) {
                 setStep(4);
               } else {
                 setStep(3);
@@ -390,12 +396,23 @@ export default function HubOnboardingPage() {
 
       const [preciosRes, appsRes] = await Promise.all([
         supabase.from("app_plan_pricing").select("app_id, plan, trial_days, is_available").eq("plan", "basico"),
-        supabase.from("app_catalog").select("id, slug").in("slug", selectedSlugs),
+        supabase.from("app_catalog").select("id, slug"),
       ]);
 
       const precios = preciosRes.data || [];
       const catalogApps = appsRes.data || [];
       const ahora = new Date();
+
+      const selectedAppIds = catalogApps.filter((a) => selectedSlugs.includes(a.slug)).map((a) => a.id);
+
+      // Si el usuario desmarcó apps al retroceder, eliminamos las suscripciones desmarcadas:
+      if (selectedAppIds.length > 0) {
+        await supabase
+          .from("tenant_app_subscriptions")
+          .delete()
+          .eq("tenant_id", tenant.id)
+          .not("app_id", "in", `(${selectedAppIds.join(",")})`);
+      }
 
       const upsertPromises = selectedSlugs.map((slug) => {
         const app = catalogApps.find((a) => a.slug === slug);
@@ -670,9 +687,8 @@ export default function HubOnboardingPage() {
                 <button type="button" className="btn-add-invite" onClick={addInviteField}>
                   + Añadir otra persona ({inviteEmails.length}/5)
                 </button>
-              ) : (
-                <p className="invite-max-hint">Llegaste al límite inicial de 5 personas. Podrás invitar a todo tu equipo desde el panel sin límites.</p>
-              )}
+              ) : null}
+              <p className="invite-max-hint">Puedes invitar hasta 5 personas para arrancar. Podrás administrar accesos, roles y reenviar invitaciones en cualquier momento desde tu Panel de Usuarios.</p>
             </div>
 
             <Notice error={noteIsError}>{note}</Notice>
@@ -705,7 +721,7 @@ export default function HubOnboardingPage() {
             </div>
             <div className="actions" style={{ marginTop: 24 }}>
               <button className="secondary" onClick={back}>← Atrás</button>
-              <button className="primary" style={{ flex: 1, marginLeft: 12 }} onClick={() => navigate("/hub/panel")}>
+              <button className="primary" style={{ flex: 1, marginLeft: 12 }} onClick={() => navigate("/hub/panel", { replace: true })}>
                 Entrar a mi Hub →
               </button>
             </div>
