@@ -989,20 +989,29 @@ function HubPanelContent() {
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session || !alive) return
-      const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin, permissions, full_name, avatar_url, created_at').eq('id', session.user.id).single()
+      const { data: me } = await supabase.from('users').select('tenant_id, role, is_platform_admin, permissions, full_name, avatar_url, created_at').eq('id', session.user.id).maybeSingle()
       if (!alive) return
+
+      // Si el usuario fue eliminado en Supabase o su cuenta ya no existe:
+      // limpiar la sesión residual de localStorage y redirigir a /login
+      if (!me) {
+        await supabase.auth.signOut().catch(() => {})
+        navigate('/login', { replace: true })
+        return
+      }
+
       const metaIsPlatform = session.user.app_metadata?.role === 'platform_admin' || session.user.user_metadata?.role === 'platform_admin'
-      const dbIsPlatform = me?.role === 'admin' && me?.is_platform_admin === true
+      const dbIsPlatform = me.role === 'admin' && me.is_platform_admin === true
       const isPlatformAdmin = dbIsPlatform || metaIsPlatform
-      const role = isPlatformAdmin ? 'platform_admin' : (me?.role || 'user')
+      const role = isPlatformAdmin ? 'platform_admin' : (me.role || 'user')
       // Admin de marca = rol 'admin' con tenant (dueño o co-admin) o plataforma.
-      const isTenantAdmin = isPlatformAdmin || (me?.role === 'admin' && Boolean(me?.tenant_id))
-      if (!isPlatformAdmin && !me?.tenant_id) {
+      const isTenantAdmin = isPlatformAdmin || (me.role === 'admin' && Boolean(me.tenant_id))
+      if (!isPlatformAdmin && !me.tenant_id) {
         navigate('/onboarding/tu-empresa', { replace: true })
         return
       }
       let tenantName = null
-      if (me?.tenant_id) {
+      if (me.tenant_id) {
         const { data: tenant } = await supabase.from('tenants').select('name, status').eq('id', me.tenant_id).maybeSingle()
         tenantName = tenant?.name || null
         if (!isPlatformAdmin && tenant?.status === 'draft') {

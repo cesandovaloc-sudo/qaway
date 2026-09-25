@@ -142,15 +142,23 @@ export default function HubOnboardingPage() {
     (async () => {
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
-        setSession(s || null);
-        if (s?.user?.email) setAdminEmail(s.user.email);
         if (!s) {
           setLoading(false);
           return;
         }
 
-        const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
-        if (me?.tenant_id) {
+        const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).maybeSingle();
+        if (!me) {
+          await supabase.auth.signOut().catch(() => {});
+          setSession(null);
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        setSession(s);
+        if (s?.user?.email) setAdminEmail(s.user.email);
+
+        if (me.tenant_id) {
           const { data: t } = await supabase.from("tenants").select("*").eq("id", me.tenant_id).single();
           if (t) {
             setTenant(t);
