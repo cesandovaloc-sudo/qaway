@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { avatarForSize } from "@/lib/userAvatar";
 import {
   Search,
   SlidersHorizontal,
@@ -133,6 +132,7 @@ function normalizeUser(row, { tenantName = "", isPlatformAdmin = false } = {}) {
       row.updated_at ||
       "—",
     createdAt: row.created_at || null,
+    avatar_url: row.avatar_url || null,
     isSuperAdmin: row.role === "admin" && row.is_platform_admin === true,
   };
 }
@@ -862,13 +862,15 @@ export default function UsersModule({
                               >
                                 <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-extrabold text-zinc-600 overflow-hidden">
                                   {initials(user.name)}
-                                  <img
-                                    src={avatarForSize(user.email, 64, user.isSuperAdmin)}
-                                    alt=""
-                                    loading="lazy"
-                                    onError={(e) => e.currentTarget.remove()}
-                                    className="absolute inset-0 h-full w-full object-cover"
-                                  />
+                                  {user.avatar_url && (
+                                    <img
+                                      src={user.avatar_url}
+                                      alt=""
+                                      loading="lazy"
+                                      onError={(e) => e.currentTarget.remove()}
+                                      className="absolute inset-0 h-full w-full object-cover"
+                                    />
+                                  )}
                                 </span>
                                 <span className="font-bold text-zinc-900">
                                   {user.name}

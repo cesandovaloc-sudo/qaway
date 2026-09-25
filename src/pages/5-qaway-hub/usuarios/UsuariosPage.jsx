@@ -27,7 +27,7 @@ export default function UsuariosPage() {
       setMe(meRow || null)
       setApps(catalog || [])
       if (meRow?.tenant_id) {
-        const { data: mates } = await supabase.from('users').select('id, email, full_name, role, tenant_id').eq('tenant_id', meRow.tenant_id)
+        const { data: mates } = await supabase.from('users').select('id, email, full_name, role, tenant_id, avatar_url').eq('tenant_id', meRow.tenant_id)
         setUsers(mates || [])
       } else {
         setUsers([])
@@ -133,7 +133,15 @@ export default function UsuariosPage() {
               <ul className="mt-3 divide-y rounded-2xl border bg-white" style={{ borderColor: '#e5e5e9', divideColor: '#eee' }}>
                 {users.map((u) => (
                   <li key={u.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm" style={{ color: '#111' }}>
-                    <span>{u.full_name || u.email} <span style={{ color: '#85858c' }}>· {u.email}</span></span>
+                    <span className="flex items-center gap-2.5">
+                      <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-100 text-[10px] font-extrabold text-zinc-600">
+                        {((u.full_name || u.email) || '').split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase() || '?'}
+                        {u.avatar_url && (
+                          <img src={u.avatar_url} alt="" loading="lazy" onError={(e) => e.currentTarget.remove()} className="absolute inset-0 h-full w-full object-cover" />
+                        )}
+                      </span>
+                      <span>{u.full_name || u.email} <span style={{ color: '#85858c' }}>· {u.email}</span></span>
+                    </span>
                     <span className="rounded-full border px-3 py-1 font-mono text-xs" style={{ borderColor: '#dddde2', color: '#55555c' }}>{u.role}</span>
                   </li>
                 ))}

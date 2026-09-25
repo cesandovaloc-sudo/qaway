@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/icons/hubIcons'
 import { Sun, Moon, Contrast } from 'lucide-react'
 import { logoutUser } from '@/config/auth'
-import { avatarFor } from '@/lib/userAvatar'
 import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
 import { AppSwitcherDropdown } from './5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
@@ -1148,9 +1147,10 @@ function HubPanelContent() {
   }, [panelAuth, activeTab, navigate, allowedTabIds])
 
   const name = identityResolved ? (panelAuth?.fullName || displayName(authUser?.email)) : null
-  // Foto estable por usuario: avatar subido (users.avatar_url) o foto de stock por cuenta.
-  // Neutra (null) hasta que la identidad actual esté resuelta: nunca pinta avatar anterior.
-  const avatar = identityResolved ? (panelAuth?.avatarUrl || avatarFor(authUser?.email, panelAuth?.isPlatformAdmin)) : null
+  // Foto estable por usuario: solo avatar real (users.avatar_url). El onboarding nunca
+  // asigna foto; sin ella se muestran las siglas. Neutra hasta resolver la identidad.
+  const avatar = identityResolved ? (panelAuth?.avatarUrl || null) : null
+  const initials = identityResolved && name ? name.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase() : ''
 
   // ── Mi cuenta / perfil (30.X): persistencia SOLO de identidad personal ──
   // Alcance aprobado: nombre completo → users.full_name; foto → users.avatar_url vía
@@ -1562,6 +1562,10 @@ function HubPanelContent() {
               <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 cursor-pointer p-1 lg:p-1.5 rounded-full hover:bg-[var(--hub-chip)] transition-colors text-left border border-transparent focus:outline-none" aria-label={identityResolved ? name : 'Cargando identidad'}>
                 {identityResolved && avatar ? (
                   <img key={avatar} src={avatar} alt={name} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] object-cover" />
+                ) : identityResolved ? (
+                  <span title={initials ? 'Sube tu foto de perfil' : undefined} className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-dim)] font-bold items-center justify-center text-xs lg:text-sm select-none">{initials || '?'}
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#ff4b0b] ring-2 ring-[#111111]" aria-hidden="true" />
+                  </span>
                 ) : (
                   <span className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] bg-[var(--hub-hover)] animate-pulse" aria-hidden="true" />
                 )}
@@ -1589,6 +1593,10 @@ function HubPanelContent() {
                       <div className="p-5 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)] flex items-center gap-4">
                         {identityResolved && avatar ? (
                           <img key={avatar} src={avatar} alt={name} className="w-12 h-12 rounded-full border border-[var(--hub-border)] object-cover shrink-0" />
+                        ) : identityResolved ? (
+                          <span title={initials ? 'Sube tu foto de perfil' : undefined} className="relative inline-flex w-12 h-12 rounded-full border border-[var(--hub-border)] bg-[var(--hub-hover)] text-[var(--hub-dim)] font-bold items-center justify-center text-sm select-none shrink-0">{initials || '?'}
+                            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#ff4b0b] ring-2 ring-[var(--hub-surface)]" aria-hidden="true" />
+                          </span>
                         ) : (
                           <span className="w-12 h-12 rounded-full border border-[var(--hub-border)] bg-[var(--hub-hover)] animate-pulse shrink-0" aria-hidden="true" />
                         )}
