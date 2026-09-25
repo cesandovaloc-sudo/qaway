@@ -1604,7 +1604,7 @@ function HubPanelContent() {
                 {identityResolved && avatar ? (
                   <img key={avatar} src={avatar} alt={name} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] object-cover" />
                 ) : identityResolved ? (
-                  <span title={initials ? 'Sube tu foto de perfil' : undefined} className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-dim)] font-bold items-center justify-center text-xs lg:text-sm select-none">{initials || '?'}
+                  <span onClick={(e) => { e.stopPropagation(); goTab('Mi cuenta') }} title={initials ? 'Sube tu foto de perfil — clic para subirla' : undefined} className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-dim)] font-bold items-center justify-center text-xs lg:text-sm select-none cursor-pointer hover:border-[#ff4b0b]/60 hover:text-white transition-colors">{initials || '?'}
                     <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#ff4b0b] ring-2 ring-[#111111]" aria-hidden="true" />
                   </span>
                 ) : (
@@ -1613,8 +1613,8 @@ function HubPanelContent() {
                 <div className="hidden lg:flex flex-col justify-center">
                   {identityResolved ? (
                     <>
-                      <span className="text-white text-xs font-bold leading-none">{shortName(name) || name}</span>
-                      <span className="text-[10px] text-[var(--hub-dim)] leading-none mt-1">{isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')}</span>
+                      <span className="text-white text-[13px] font-bold leading-none">{shortName(name) || name}</span>
+                      <span className="text-[10px] text-[var(--hub-dim)] leading-none mt-1.5">{isPlatformAdmin ? 'Super Administrador' : (panelAuth?.isTenantAdmin ? 'Administrador de empresa' : 'Miembro del equipo')}</span>
                     </>
                   ) : (
                     <>

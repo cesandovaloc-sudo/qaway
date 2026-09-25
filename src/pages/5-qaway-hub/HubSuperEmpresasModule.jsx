@@ -312,7 +312,7 @@ export default function EmpresasModule({
       setLoading(true);
       setError("");
 
-      const { data, error: queryError } = await supabase
+      const { data: tenantsData, error: queryError } = await supabase
         .from("tenants")
         .select("*")
         .order("created_at", { ascending: false });
@@ -329,15 +329,35 @@ export default function EmpresasModule({
         return;
       }
 
-      const normalized = (data || []).map((row) => {
+      let usersByTenant = {};
+      try {
+        const { data: usersData } = await supabase
+          .from("users")
+          .select("id, tenant_id, full_name, email, role");
+        (usersData || []).forEach((u) => {
+          if (!u.tenant_id) return;
+          if (!usersByTenant[u.tenant_id]) usersByTenant[u.tenant_id] = [];
+          usersByTenant[u.tenant_id].push(u);
+        });
+      } catch (e) {
+        console.warn("No se pudo mapear usuarios por tenant:", e);
+      }
+
+      const normalized = (tenantsData || []).map((row) => {
         const name = getCompanyName(row);
         const status = normalizeStatus(row.status || row.state);
+        const tenantUsers = usersByTenant[row.id] || [];
+        const owner = tenantUsers.find((u) => u.role === "admin") || tenantUsers[0];
+        const ownerLabel = owner ? (owner.full_name || owner.email) : null;
+        const subtitle = ownerLabel
+          ? `Titular: ${ownerLabel}`
+          : getCompanySubtitle(row);
 
         return {
           ...row,
           id: row.id,
           name,
-          subtitle: getCompanySubtitle(row),
+          subtitle,
           status,
           createdAt: row.created_at || row.createdAt,
           plan:
@@ -346,14 +366,11 @@ export default function EmpresasModule({
             row.current_plan ||
             row.plan_tier ||
             null,
-          userCount:
-            row.user_count ??
-            row.users_count ??
-            null,
+          userCount: tenantUsers.length || 1,
           applicationCount:
             row.application_count ??
             row.applications_count ??
-            null,
+            1,
         };
       });
 
