@@ -38,7 +38,12 @@ export default function LoginPage() {
     if (rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')) return rawRedirect
     try {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
-      if (me && me.tenant_id === null && !me.is_platform_admin) return '/onboarding'
+      if (me && !me.is_platform_admin) {
+        if (!me.tenant_id) return '/onboarding/tu-empresa'
+        // Si tiene empresa pero su estado sigue en borrador, retomar en tu-hub
+        const { data: t } = await supabase.from('tenants').select('status').eq('id', me.tenant_id).maybeSingle()
+        if (t && t.status === 'draft') return '/onboarding/tu-hub'
+      }
     } catch (_) { /* error de lectura: cae al destino normal */ }
     return '/hub/panel'
   }

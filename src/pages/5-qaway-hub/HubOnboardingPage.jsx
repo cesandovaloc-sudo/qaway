@@ -88,7 +88,8 @@ export default function HubOnboardingPage() {
   const [adminEmail, setAdminEmail] = useState("");
   const [appsDb, setAppsDb] = useState([]);
   const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "", rubro: "", phone: "", email: "" });
-  const [inviteEmail, setInviteEmail] = useState("");
+  const [customRubro, setCustomRubro] = useState("");
+  const [inviteEmails, setInviteEmails] = useState([""]);
   const [note, setNote] = useState("");
   const [logoNote, setLogoNote] = useState("");
   const [terms, setTerms] = useState(false);
@@ -122,15 +123,32 @@ export default function HubOnboardingPage() {
     email: session?.user?.email || "",
   };
 
+  const addInviteField = () => {
+    if (inviteEmails.length >= 5) return;
+    setInviteEmails((prev) => [...prev, ""]);
+  };
+  const removeInviteField = (index) => {
+    setInviteEmails((prev) => prev.filter((_, i) => i !== index));
+  };
+  const updateInviteEmail = (index, value) => {
+    setInviteEmails((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  };
+
   useEffect(() => {
     (async () => {
       try {
         const { data: { session: s } } = await supabase.auth.getSession();
         setSession(s || null);
         if (s?.user?.email) setAdminEmail(s.user.email);
-        // Ya autenticado: la carátula "Tu cuenta" no aplica, se salta directo a "Tu empresa".
-        if (s) setStep((st) => Math.max(st, 2));
-        if (!s) return;
+        if (!s) {
+          setLoading(false);
+          return;
+        }
+
         const { data: me } = await supabase.from("users").select("tenant_id").eq("id", s.user.id).single();
         if (me?.tenant_id) {
           const { data: t } = await supabase.from("tenants").select("*").eq("id", me.tenant_id).single();
@@ -140,13 +158,31 @@ export default function HubOnboardingPage() {
             const contact = c.contact || {};
             const { prefix: pfx, digits } = splitPhone(contact.phone || "");
             setPrefix(pfx || "+51");
+            const savedRubro = (t.features || {}).rubro || "";
+            const isStandard = RUBROS.includes(savedRubro);
             setForm({
               name: t.name || "", legal: t.legal_name || "", ruc: (c.tax_id || "").replace(/\D/g, ""),
-              country: contact.country || "", rubro: (t.features || {}).rubro || "",
+              country: contact.country || "", rubro: isStandard ? savedRubro : (savedRubro ? "Otro" : ""),
               phone: digits, email: contact.email || "",
             });
+            if (!isStandard && savedRubro) setCustomRubro(savedRubro);
             setConstituida(!!(t.legal_name || c.tax_id));
+
+            // Si no viene con paso explícito en URL, retomar desde el paso pendiente:
+            if (!validPaso) {
+              const { data: currentSubs } = await supabase.from("tenant_app_subscriptions").select("app_id").eq("tenant_id", t.id);
+              if (t.status === "active") {
+                setStep(5);
+              } else if (currentSubs && currentSubs.length > 0) {
+                setStep(4);
+              } else {
+                setStep(3);
+              }
+            }
           }
+        } else {
+          // No tiene empresa aún: ir directo al Paso 2 (Tu empresa)
+          if (!validPaso) setStep(2);
         }
         const { data: catalog } = await supabase.from("app_catalog").select("slug");
         if (catalog) setAppsDb(catalog.map((a) => a.slug));
@@ -202,6 +238,8 @@ export default function HubOnboardingPage() {
     if (!form.name.trim()) errs.name = "Escribe el nombre comercial de tu empresa.";
     if (!form.country) errs.country = "Selecciona tu país.";
     const pais = PAISES.find((p) => p.nombre === form.country) || null;
+    if (!form.rubro) errs.rubro = "Selecciona el rubro de tu empresa.";
+    else if (form.rubro === "Otro" && !customRubro.trim()) errs.customRubro = "Escribe tu rubro o actividad específica.";
     if (!form.phone) errs.phone = "Escribe tu teléfono / WhatsApp.";
     else if (form.phone.length < (pais?.minDigitos || 6)) errs.phone = `El número necesita al menos ${pais?.minDigitos || 6} dígitos.`;
     else if (pais?.maxDigitos && form.phone.length > pais.maxDigitos) errs.phone = `El número de ${pais.nombre} tiene como máximo ${pais.maxDigitos} dígitos.`;
@@ -252,6 +290,7 @@ export default function HubOnboardingPage() {
     try {
       const phoneFull = `${prefix} ${form.phone}`.trim();
       const contact = { email: form.email.trim(), phone: phoneFull, address: "", country: form.country };
+      const finalRubro = form.rubro === "Otro" ? customRubro.trim() : form.rubro;
       let newTenantId = tenant?.id || null;
       if (!tenant) {
         // Sin marca: crearla (quedo admin). Slug derivado del nombre.
@@ -278,16 +317,19 @@ export default function HubOnboardingPage() {
               const c2t = c2.contact || {};
               const { prefix: pfx2, digits: dg2 } = splitPhone(c2t.phone || "");
               if (pfx2) setPrefix(pfx2);
+              const savedR = (t2.features || {}).rubro || "";
+              const isStd = RUBROS.includes(savedR);
               setForm((f) => ({
                 ...f,
                 name: t2.name || f.name,
                 country: c2t.country || f.country,
-                rubro: (t2.features || {}).rubro || f.rubro,
+                rubro: isStd ? savedR : (savedR ? "Otro" : ""),
                 phone: dg2,
                 email: c2t.email || f.email,
                 legal: t2.legal_name || f.legal,
                 ruc: (c2.tax_id || "").replace(/\D/g, "") || f.ruc,
               }));
+              if (!isStd && savedR) setCustomRubro(savedR);
               setConstituida(!!(t2.legal_name || c2.tax_id));
               setTenant(t2);
               newTenantId = t2.id;
@@ -302,7 +344,7 @@ export default function HubOnboardingPage() {
             name: form.name,
             legal_name: form.legal || null,
             content: { tagline: "", contact, tax_id: form.ruc || null },
-            features: { ...(nuevoTenant.features || {}), rubro: form.rubro.trim() || null },
+            features: { ...(nuevoTenant.features || {}), rubro: finalRubro || null },
           }).eq("id", newTenantId);
           if (updErr) throw updErr;
           setTenant({ ...nuevoTenant, name: form.name, legal_name: form.legal || null, content: { tagline: "", contact, tax_id: form.ruc || null } });
@@ -316,7 +358,7 @@ export default function HubOnboardingPage() {
           name: form.name,
           legal_name: form.legal || null,
           content: { tagline: "", contact, tax_id: form.ruc || null },
-          features: { ...(tenant.features || {}), rubro: form.rubro },
+          features: { ...(tenant.features || {}), rubro: finalRubro },
         }).eq("id", tenant.id);
         if (error) throw error;
         setTenant({ ...tenant, name: form.name });
@@ -334,23 +376,27 @@ export default function HubOnboardingPage() {
     setSaving(true);
     try {
       if (!tenant) throw new Error("Primero registra tu empresa.");
-      void appsDb;
       const alias = { inventory: "inventario" };
-      const { data: precios } = await supabase
-        .from("app_plan_pricing")
-        .select("app_id, plan, trial_days, is_available")
-        .eq("plan", "basico");
+      const selectedSlugs = selected.map((raw) => alias[raw] || raw);
+
+      const [preciosRes, appsRes] = await Promise.all([
+        supabase.from("app_plan_pricing").select("app_id, plan, trial_days, is_available").eq("plan", "basico"),
+        supabase.from("app_catalog").select("id, slug").in("slug", selectedSlugs),
+      ]);
+
+      const precios = preciosRes.data || [];
+      const catalogApps = appsRes.data || [];
       const ahora = new Date();
-      for (const raw of selected) {
-        const slug = alias[raw] || raw;
-        const { data: app } = await supabase.from("app_catalog").select("id").eq("slug", slug).single();
-        if (!app) continue;
-        const precio = (precios || []).find((p) => p.app_id === app.id);
+
+      const upsertPromises = selectedSlugs.map((slug) => {
+        const app = catalogApps.find((a) => a.slug === slug);
+        if (!app) return Promise.resolve();
+        const precio = precios.find((p) => p.app_id === app.id);
         const trialDias = (precio && precio.is_available === true && precio.trial_days > 0)
           ? precio.trial_days
           : (precio ? TRIAL_DIAS : TRIAL_DIAS_FALLBACK);
         const trialEnds = new Date(ahora.getTime() + trialDias * 864e5).toISOString();
-        const { error: subErr } = await supabase.from("tenant_app_subscriptions").upsert(
+        return supabase.from("tenant_app_subscriptions").upsert(
           {
             tenant_id: tenant.id,
             app_id: app.id,
@@ -363,8 +409,10 @@ export default function HubOnboardingPage() {
           },
           { onConflict: "tenant_id,app_id" },
         );
-        if (subErr) throw subErr;
-      }
+      });
+
+      await Promise.all(upsertPromises);
+
       // La marca pasa de borrador a activa al confirmar sus apps (modo prueba):
       // así la invitación y las apps funcionan ya; el pago se decide después.
       if (tenant.status !== "active") {
@@ -383,33 +431,39 @@ export default function HubOnboardingPage() {
     }
   }
 
-  async function sendInvite() {
+  async function finishEquipoAndNext() {
     setNote("");
-    if (!inviteEmail || !tenant) {
-      setNote("Escribe un correo válido.");
+    const validEmails = inviteEmails.map((e) => e.trim()).filter(Boolean);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    const invalid = validEmails.find((e) => !emailRegex.test(e));
+    if (invalid) {
+      setNote(`El correo "${invalid}" no tiene un formato válido.`);
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(inviteEmail.trim())) {
-      setNote("Escribe un correo válido (ej. nombre@empresa.com).");
-      return;
+    if (validEmails.length > 0 && tenant) {
+      setSending(true);
+      try {
+        const alias = { inventory: "inventario" };
+        const appSlugs = selected.map((raw) => alias[raw] || raw);
+        await Promise.all(
+          validEmails.map((email) =>
+            supabase.functions.invoke("invite-user", {
+              body: {
+                email,
+                tenant_id: tenant.id,
+                role: "viewer",
+                app_slugs: appSlugs,
+              },
+            })
+          )
+        );
+      } catch (err) {
+        console.error("Error enviando invitaciones:", err);
+      } finally {
+        setSending(false);
+      }
     }
-    if (sending) return;
-    setSending(true);
-    const { data, error } = await supabase.functions.invoke("invite-user", {
-      body: {
-        email: inviteEmail.trim(),
-        tenant_id: tenant.id,
-        role: "viewer",
-        app_slugs: selected.map((raw) => ({ inventory: "inventario" }[raw] || raw)),
-      },
-    });
-    setSending(false);
-    if (error || data?.error) {
-      setNote("No se pudo invitar: " + (data?.error || error.message));
-      return;
-    }
-    setNote("Invitación enviada a " + inviteEmail.trim() + ".");
-    setInviteEmail("");
+    next();
   }
 
   async function uploadLogo(file) {
@@ -493,7 +547,9 @@ export default function HubOnboardingPage() {
             {!session && (
               <label className="check"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} /> Acepto los términos y condiciones.</label>
             )}
-            <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
+            <div className="actions" style={{ justifyContent: "flex-end" }}>
+              <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
+            </div>
           </section>
         )}
 
@@ -525,9 +581,12 @@ export default function HubOnboardingPage() {
               <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} error={fieldErrors.country} placeholder="Selecciona tu país…">
                 {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
               </SelectField>
-              <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} placeholder="Opcional — selecciona…">
+              <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} required invalid={!!fieldErrors.rubro} error={fieldErrors.rubro} placeholder="Selecciona tu rubro…">
                 {RUBROS.map((r) => <option key={r} value={r}>{r}</option>)}
               </SelectField>
+              {form.rubro === "Otro" && (
+                <Field label="Especifica tu rubro" placeholder="Ej. Consultoría, Arquitectura..." value={customRubro} onChange={(e) => { setCustomRubro(e.target.value); if (fieldErrors.customRubro) setFieldErrors(fe => ({ ...fe, customRubro: undefined })); }} required invalid={!!fieldErrors.customRubro} error={fieldErrors.customRubro} />
+              )}
               <label className={`field ${fieldErrors.phone ? "invalid" : ""}`}>
                 <span>Teléfono / WhatsApp<b className="req"> *</b></span>
                 <div className="phoneRow">
@@ -560,15 +619,14 @@ export default function HubOnboardingPage() {
                 </button>
               ))}
             </div>
-            <div className="note">
-              <b>Empieza tu prueba gratuita por 14 días</b>
-              <span>Tus apps seleccionadas se activan <b>GRATIS</b> hoy. Al finalizar los 14 días nada se cobra automáticamente: tú decides en tu panel qué plan mantener para cada aplicación.</span>
-              <small style={{ marginTop: 6, display: 'block', color: '#888', fontSize: 11 }}>Consulta las tarifas vigentes desde tu panel en cualquier momento.</small>
-              {/* Preparado y oculto para invocar cuando definas los precios: */}
-              <div style={{ display: 'none', marginTop: 8 }} className="tarifas-hook">
-                <span>¿Cuánto cuesta después? <button type="button" style={{ color: '#ff4b0b', textDecoration: 'underline', background: 'none', border: 0, padding: 0, font: 'inherit', cursor: 'pointer' }}>Conoce las tarifas de cada app</button></span>
-              </div>
+
+            <div className="note trial-box">
+              <div className="trial-badge">✓ PRUEBA GRATUITA POR 14 DÍAS · ACCESO TOTAL</div>
+              <b>Empieza tu prueba gratuita sin tarjeta de crédito</b>
+              <span>Tus aplicaciones seleccionadas se activan <b>100% GRATIS hoy</b>. Al finalizar los 14 días nada se cobra automáticamente: tú tienes el control total y decides en tu panel qué plan mantener.</span>
+              <small className="trial-footer">Transparencia garantizada · Consulta tarifas y planes vigentes desde tu panel en cualquier momento.</small>
             </div>
+
             <Notice error={noteIsError}>{note}</Notice>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveApps(true)}>{saving ? "Guardando…" : "Continuar →"}</button></div>
           </section>
@@ -578,14 +636,48 @@ export default function HubOnboardingPage() {
           <section className="card">
             <small className="eyebrow">TU EQUIPO</small>
             <h1>¿Trabajarás con otras personas?</h1>
-            <p>Puedes invitar a tu equipo ahora o hacerlo después desde el panel de administración.</p>
-            <div className="invite">
-              <input placeholder="correo@empresa.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
-              <button disabled={sending} onClick={sendInvite}>{sending ? "Enviando…" : "+ Añadir otra persona"}</button>
+            <p>Puedes invitar a personas de tu equipo ahora o hacerlo después desde tu panel de administración.</p>
+
+            <div className="invite-box">
+              {inviteEmails.map((email, idx) => (
+                <div key={idx} className="invite-row">
+                  <input
+                    type="email"
+                    placeholder={`correo-${idx + 1}@empresa.com`}
+                    value={email}
+                    onChange={(e) => updateInviteEmail(idx, e.target.value)}
+                  />
+                  {inviteEmails.length > 1 && (
+                    <button type="button" className="btn-remove-invite" onClick={() => removeInviteField(idx)} title="Eliminar fila">
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              {inviteEmails.length < 5 ? (
+                <button type="button" className="btn-add-invite" onClick={addInviteField}>
+                  + Añadir otra persona ({inviteEmails.length}/5)
+                </button>
+              ) : (
+                <p className="invite-max-hint">Llegaste al límite inicial de 5 personas. Podrás invitar a todo tu equipo desde el panel sin límites.</p>
+              )}
             </div>
+
             <Notice error={noteIsError}>{note}</Notice>
-            <div className="note"><b>Tú serás el administrador de la empresa.</b><span>Después podrás asignar aplicaciones, roles y permisos.</span></div>
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" onClick={next}>Crear mi espacio →</button></div>
+
+            <div className="note admin-role-box">
+              <div className="role-badge">ADMINISTRADOR DEL ESPACIO</div>
+              <b>Tú eres el administrador de la empresa</b>
+              <span>Tendrás el control total sobre las aplicaciones activas, facturación y la asignación de roles o permisos para cada miembro de tu equipo.</span>
+            </div>
+
+            <div className="actions">
+              <button className="secondary" onClick={back}>← Atrás</button>
+              <button className="primary" disabled={sending} onClick={finishEquipoAndNext}>
+                {sending ? "Invitando equipo…" : "Crear mi espacio →"}
+              </button>
+            </div>
           </section>
         )}
 
@@ -600,7 +692,12 @@ export default function HubOnboardingPage() {
               <div><span>Administrador</span><b>{adminEmail || "Tú"}</b></div>
               <div><span>Aplicaciones</span><b>{selected.join(" · ")}</b></div>
             </div>
-            <button className="primary full" onClick={() => navigate("/hub/panel")}>Entrar a mi Hub →</button>
+            <div className="actions" style={{ marginTop: 24 }}>
+              <button className="secondary" onClick={back}>← Atrás</button>
+              <button className="primary" style={{ flex: 1, marginLeft: 12 }} onClick={() => navigate("/hub/panel")}>
+                Entrar a mi Hub →
+              </button>
+            </div>
           </section>
         )}
       </main>
@@ -612,35 +709,47 @@ export default function HubOnboardingPage() {
         button,input{font:inherit}button{cursor:pointer}
         .onboarding{min-height:100vh;display:flex;flex-direction:column}
         header{height:76px;background:#fff;border-bottom:1px solid #e9e9ec;padding:0 6vw;display:flex;align-items:center;justify-content:space-between}
-        .logo{font-size:23px;font-weight:800;letter-spacing:-1px}.logo span{color:#ff4b0b}.login{font-size:13px;color:#777}.login b{color:#111;margin-left:5px}
+        .logo{font-size:23px;font-weight:800;letter-spacing:-1px}.logo span{color:#ff4b0b}.login{font-size:14px;color:#64748b}.login b{color:#111;margin-left:5px;cursor:pointer}
         main{width:min(820px,92vw);margin:auto;padding:42px 0 65px;flex:1}
-        .progress{display:flex;justify-content:center;align-items:center;margin-bottom:34px}.step{display:flex;align-items:center;gap:7px;color:#aaa}.step i{font-style:normal;width:27px;height:27px;border:1px solid #d8d8dd;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:white}.step span{font-size:11px;font-weight:700}.step.active{color:#111}.step.active i{background:#111;color:#fff;border-color:#111}.bar{height:1px;width:48px;background:#ddd;margin:0 11px}.bar.active{background:#111}
-        .card{background:#fff;border:1px solid #e5e5e9;border-radius:20px;padding:40px;box-shadow:0 15px 45px rgba(0,0,0,.045)}.card.wide{max-width:800px}.card.wider{max-width:900px}.card.done{text-align:center}
-        .eyebrow{display:block;color:#ff4b0b;font-size:10px;font-weight:800;letter-spacing:1.6px;margin-bottom:12px}
-        h1{font-size:38px;line-height:1.04;letter-spacing:-1.8px;margin:0 0 12px}p{color:#73737b;font-size:14px;line-height:1.65;margin:0 0 27px;max-width:650px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:11px;font-weight:800;margin-bottom:7px}.field input,.invite input{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 13px;outline:none}.field input:focus,.invite input:focus{border-color:#111}.field input.locked{background:#f6f6f7;color:#555;cursor:not-allowed;border-color:#e7e7eb}
-        .field select{width:100%;height:47px;border:1px solid #dddde2;border-radius:9px;padding:0 34px 0 13px;outline:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer}.field select:focus{border-color:#111}
-        .phoneRow{display:flex;gap:8px}.phoneRow input{flex:1}.phoneRow .phonePrefix{flex:none;width:88px;background:#f6f6f7;color:#333;text-align:center;font-variant-numeric:tabular-nums}
-        .check{display:flex;gap:8px;font-size:11px;color:#666;margin:5px 0 23px}.check input{accent-color:#ff4b0b}
-        .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#999;font-weight:400;font-size:11px;margin-top:3px;line-height:1.5}
-        .req{color:#c0392b;font-weight:800;font-size:12px}
+        .progress{display:flex;justify-content:center;align-items:center;margin-bottom:34px}.step{display:flex;align-items:center;gap:7px;color:#94a3b8}.step i{font-style:normal;width:29px;height:29px;border:1px solid #d8d8dd;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:white}.step span{font-size:13px;font-weight:700}.step.active{color:#0f172a}.step.active i{background:#0f172a;color:#fff;border-color:#0f172a}.bar{height:1px;width:48px;background:#cbd5e1;margin:0 11px}.bar.active{background:#0f172a}
+        .card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:40px;box-shadow:0 15px 45px rgba(0,0,0,.045)}.card.wide{max-width:800px}.card.wider{max-width:900px}.card.done{text-align:center}
+        .eyebrow{display:block;color:#ff4b0b;font-size:11px;font-weight:800;letter-spacing:1.5px;margin-bottom:12px}
+        h1{font-size:34px;line-height:1.1;letter-spacing:-1.2px;margin:0 0 12px;color:#0f172a}p{color:#4b5563;font-size:15px;line-height:1.6;margin:0 0 27px;max-width:650px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:13px;font-weight:700;color:#1e293b;margin-bottom:7px}.field input{width:100%;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 13px;font-size:14.5px;outline:none}.field input:focus{border-color:#0f172a}.field input.locked{background:#f8fafc;color:#475569;cursor:not-allowed;border-color:#e2e8f0}
+        .field select{width:100%;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 34px 0 13px;font-size:14.5px;outline:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer}.field select:focus{border-color:#0f172a}
+        .phoneRow{display:flex;gap:8px}.phoneRow input{flex:1}.phoneRow .phonePrefix{flex:none;width:88px;background:#f8fafc;color:#1e293b;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+        .check{display:flex;gap:8px;font-size:14px;color:#475569;margin:5px 0 23px}.check input{accent-color:#ff4b0b;width:16px;height:16px;margin-top:2px}
+        .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#64748b;font-weight:400;font-size:13px;margin-top:3px;line-height:1.5}
+        .req{color:#c0392b;font-weight:800;font-size:13px}
         .field.invalid input,.field.invalid select{border-color:#e0aba1!important}
-        .field input:disabled{background:#f6f6f7;color:#999;cursor:not-allowed}
-        .primary,.secondary{height:48px;border-radius:9px;padding:0 19px;font-size:12px;font-weight:800}.primary{background:#111;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#a9a9ad;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #dddde2}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
-        .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #d6d6db;border-radius:12px;padding:13px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f3f3f5;display:grid;place-items:center;font-size:22px;color:#999}.logoUpload section{display:flex;flex-direction:column;gap:3px}.logoUpload section b{font-size:12px}.logoUpload section small{font-size:10px;color:#999}.logoUpload button{margin-left:auto;border:1px solid #ddd;background:#fff;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700}
-        .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e0e0e5;border-radius:12px;padding:15px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:35px;height:35px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:12px}.app span small{font-size:10px;color:#85858c;line-height:1.4}.app>i{margin-left:auto;width:19px;height:19px;border:1px solid #ccc;border-radius:50%;font-style:normal;font-size:10px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
-        .note{background:#f7f7f8;border-radius:10px;padding:12px 14px;margin-top:17px;display:flex;flex-direction:column;gap:3px}.note b{font-size:11px;color:#111}.note span{font-size:10px;color:#555}
-        .catalogHint{font-size:11px;color:#8a8a92;margin:12px 0 0;line-height:1.5}
-        .field-error{display:block;margin-top:6px;font-size:11px;color:#a86b60;font-weight:500;line-height:1.45}
-        .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:11px 14px;border-radius:10px;font-size:12px;line-height:1.55}
-        .notice-error{background:#fbf6f5;border:1px solid #eee3df;color:#9a6157;font-weight:600}
-        .notice-ok{background:#f4faf6;border:1px solid #e3ede6;color:#557062;font-weight:600}
-        .logo-note{display:block;font-style:normal;margin-top:5px;font-size:10px;font-weight:800;color:#159b4e}
-        .logoUpload section{flex:1;min-width:0}
-        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:9px;font-weight:800;letter-spacing:.2px;color:#14683c;background:#eef8f1;border:1px solid #d4ecdc;border-radius:999px;padding:3px 8px}
-        .invite button:disabled{color:#bbb;cursor:not-allowed}
-        .invite{border:1px solid #e5e5e8;border-radius:11px;padding:13px}.invite button{border:0;background:none;color:#ff4b0b;font-size:11px;font-weight:800;margin-top:10px}
-        .success{width:62px;height:62px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:28px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e6e6ea;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #eee}.summary div:last-child{border:0}.summary span{font-size:10px;color:#888}.summary b{font-size:11px}.full{width:100%;margin-top:20px}
+        .field input:disabled{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
+        .primary,.secondary{height:48px;border-radius:9px;padding:0 22px;font-size:14px;font-weight:700}.primary{background:#0f172a;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#94a3b8;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #cbd5e1;color:#1e293b}.secondary:hover{background:#f8fafc}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+        .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #cbd5e1;border-radius:12px;padding:14px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f1f5f9;display:grid;place-items:center;font-size:22px;color:#64748b}.logoUpload section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.logoUpload section b{font-size:14px;color:#0f172a}.logoUpload section small{font-size:13px;color:#64748b}.logoUpload button{margin-left:auto;border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:8px 12px;font-size:13px;font-weight:700;color:#1e293b}
+        .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:36px;height:36px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:15px;color:#0f172a}.app span small{font-size:13.5px;color:#64748b;line-height:1.4}.app>i{margin-left:auto;width:20px;height:20px;border:1px solid #cbd5e1;border-radius:50%;font-style:normal;font-size:11px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
+        .note{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-top:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:6px}
+        .note b{font-size:15px;color:#0f172a;font-weight:700}
+        .note span{font-size:14px;color:#475569;line-height:1.55}
+        .trial-box{border:1px solid #d1fae5;background:linear-gradient(180deg,#f0fdf4 0%,#ffffff 100%)}
+        .trial-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.3px;color:#166534;background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
+        .trial-footer{font-size:12.5px;color:#64748b;margin-top:4px}
+        .admin-role-box{border:1px solid #e2e8f0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
+        .role-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
+        .invite-box{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+        .invite-row{display:flex;gap:8px;align-items:center}
+        .invite-row input{flex:1;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 13px;font-size:14.5px;outline:none}
+        .invite-row input:focus{border-color:#0f172a}
+        .btn-remove-invite{width:36px;height:36px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;display:grid;place-items:center;font-size:13px;cursor:pointer;transition:all .15s}
+        .btn-remove-invite:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+        .btn-add-invite{align-self:flex-start;border:0;background:none;color:#ff4b0b;font-size:13px;font-weight:800;cursor:pointer;padding:6px 0}
+        .btn-add-invite:hover{text-decoration:underline}
+        .invite-max-hint{font-size:12.5px;color:#64748b;margin:4px 0 0}
+        .field-error{display:block;margin-top:6px;font-size:12.5px;color:#b91c1c;font-weight:500;line-height:1.45}
+        .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13.5px;line-height:1.55}
+        .notice-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-weight:600}
+        .notice-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-weight:600}
+        .logo-note{display:block;font-style:normal;margin-top:5px;font-size:12px;font-weight:700;color:#16a34a}
+        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#166534;background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:3px 8px}
+        .success{width:64px;height:64px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e2e8f0;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9}.summary div:last-child{border:0}.summary span{font-size:13px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
         @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
         .onboarding-skeleton{animation:skPulse 1.4s ease-in-out infinite}
         .sk-line{background:#eaeaee;border-radius:6px}
@@ -652,8 +761,8 @@ export default function HubOnboardingPage() {
         .sk-label{width:90px;height:11px;margin-bottom:7px}
         .sk-input{height:47px;border-radius:9px;background:#f3f3f5}
         .sk-btn{width:110px;height:48px;border-radius:9px;background:#eaeaee}
-        footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#999;font-size:10px}
-        @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:31px}.grid,.apps{grid-template-columns:1fr}}
+        footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#64748b;font-size:13px}
+        @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:28px}.grid,.apps{grid-template-columns:1fr}}
       `}</style>
     </div>
   );

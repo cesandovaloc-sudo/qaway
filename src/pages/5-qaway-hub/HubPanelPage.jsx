@@ -997,10 +997,18 @@ function HubPanelContent() {
       const role = isPlatformAdmin ? 'platform_admin' : (me?.role || 'user')
       // Admin de marca = rol 'admin' con tenant (dueño o co-admin) o plataforma.
       const isTenantAdmin = isPlatformAdmin || (me?.role === 'admin' && Boolean(me?.tenant_id))
+      if (!isPlatformAdmin && !me?.tenant_id) {
+        navigate('/onboarding/tu-empresa', { replace: true })
+        return
+      }
       let tenantName = null
       if (me?.tenant_id) {
-        const { data: tenant } = await supabase.from('tenants').select('name').eq('id', me.tenant_id).maybeSingle()
+        const { data: tenant } = await supabase.from('tenants').select('name, status').eq('id', me.tenant_id).maybeSingle()
         tenantName = tenant?.name || null
+        if (!isPlatformAdmin && tenant?.status === 'draft') {
+          navigate('/onboarding/tu-hub', { replace: true })
+          return
+        }
       }
       if (alive) setPanelAuth({
         session,
