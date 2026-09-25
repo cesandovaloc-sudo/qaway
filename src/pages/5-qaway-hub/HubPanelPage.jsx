@@ -459,6 +459,13 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
   const [showTimeMenu, setShowTimeMenu] = useState(false)
   const timeMenuRef = useRef(null)
 
+  // 1. Dropdown Acciones Rápidas en Cabecera
+  const [showActionsMenu, setShowActionsMenu] = useState(false)
+  const actionsMenuRef = useRef(null)
+
+  // Selector temporal para gráfico horizontal de crecimiento (30D / 90D / 9M / Todo)
+  const [revenueTimeRange, setRevenueTimeRange] = useState('9m')
+
   // 1. Modal Nueva Métrica (Super Admin)
   const [isMetricModalOpen, setIsMetricModalOpen] = useState(false)
   const [customMetrics, setCustomMetrics] = useState([])
@@ -499,6 +506,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
   useEffect(() => {
     function handleClickOutside(event) {
       if (timeMenuRef.current && !timeMenuRef.current.contains(event.target)) setShowTimeMenu(false)
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) setShowActionsMenu(false)
       if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target)) setShowCategoryMenu(false)
       if (tenantMenuRef.current && !tenantMenuRef.current.contains(event.target)) setShowTenantMenu(false)
       if (appMenuRef.current && !appMenuRef.current.contains(event.target)) setShowAppMenu(false)
@@ -814,6 +822,28 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 6)
 
+    // 11. Gráfico horizontal amplio de Crecimiento de ingresos y ventas (bars mensuales)
+    const count = revenueTimeRange === '30d' ? 4 : revenueTimeRange === '90d' ? 3 : revenueTimeRange === 'all' ? 12 : 9
+    const months = []
+    for (let i = count - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${d.getMonth()}`
+      const val = allTransactions
+        .filter((tx) => `${tx.date.getFullYear()}-${tx.date.getMonth()}` === key)
+        .reduce((sum, tx) => sum + tx.amount, 0)
+      months.push({
+        month: d.toLocaleDateString('es-PE', { month: 'short' }),
+        val,
+      })
+    }
+    const hasRevenue = months.some((m) => m.val > 0)
+    const maxVal = Math.max(...months.map((m) => m.val), 1)
+    const bars = months.map((m) => ({
+      ...m,
+      height: `${Math.max(Math.round((m.val / maxVal) * 100), 6)}%`,
+      label: revFmt.format(m.val),
+    }))
+
     return {
       activeTenants,
       totalTenants: filteredTenants.length,
@@ -830,10 +860,12 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       appStats,
       ecosystem,
       recent,
+      bars,
+      hasRevenue,
       tenantsList: tenants,
       appsList: apps,
     }
-  }, [rawData, selectedCategories, selectedTenantIds, selectedAppIds, selectedPlans, timeRange, rendimientoPeriod])
+  }, [rawData, selectedCategories, selectedTenantIds, selectedAppIds, selectedPlans, timeRange, rendimientoPeriod, revenueTimeRange])
 
   const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const money = live ? (live.revenue > 0 ? live.revFmt.format(live.revenue) : 'S/ 0') : '—'
@@ -868,6 +900,52 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <HubIcon icon={Plus} size={15} className="w-4 h-4" />
             <span>Nueva Métrica</span>
           </button>
+
+          {/* Botón Desplegable Acciones Rápidas */}
+          <div className="relative" ref={actionsMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowActionsMenu((v) => !v)}
+              className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200/80 text-zinc-800 text-xs font-semibold px-3 py-2.5 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+              title="Acciones Rápidas de Super Administrador"
+            >
+              <HubIcon icon={Zap} size={14} className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>Acciones</span>
+              <HubIcon icon={ChevronDown} size={14} className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showActionsMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showActionsMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Acciones de Plataforma</p>
+                <div className="space-y-1 mt-1">
+                  {[
+                    { icon: Building2, title: 'Crear nueva empresa', to: '/hub/bienvenida' },
+                    { icon: UserPlus, title: 'Invitar usuario', to: '/hub/invitar' },
+                    { icon: Tag, title: 'Gestionar planes', tab: 'Planes' },
+                    { icon: CreditCard, title: 'Ver suscripciones', tab: 'Suscripciones' },
+                    { icon: BarChart3, title: 'Generar reporte', tab: 'Reportes' },
+                    { icon: Settings, title: 'Configuración general', tab: 'Configuración' },
+                  ].map((act, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setShowActionsMenu(false)
+                        if (act.to) navigate(act.to)
+                        else if (act.tab) setActiveTab(act.tab)
+                      }}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors font-semibold text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950 cursor-pointer"
+                    >
+                      <span className="w-6 h-6 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-600 shrink-0">
+                        <HubIcon icon={act.icon} size={13} className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="truncate">{act.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Selector de Rango de Tiempo Interactivo (CRM) */}
           <div className="relative" ref={timeMenuRef}>
@@ -1327,7 +1405,117 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         ))}
       </div>
 
-      {/* Row 2: 3 Tarjetas de Gráficos con Recharts y Selectores de Tiempo Específicos (Paso 3) */}
+      {/* Row 2: Gráfico Horizontal de Crecimiento (2 Cols) + Actividad Reciente al Lado (1 Col) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Left: Gráfico Horizontal de Crecimiento de Ventas e Ingresos (lg:col-span-2) */}
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos comerciales consolidado por mes</p>
+              </div>
+              <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl border border-zinc-200/60">
+                {[
+                  { id: '30d', label: '30D' },
+                  { id: '90d', label: '90D' },
+                  { id: '9m', label: '9M' },
+                  { id: 'all', label: 'Todo' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setRevenueTimeRange(t.id)}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-colors cursor-pointer ${
+                      revenueTimeRange === t.id
+                        ? 'bg-white text-zinc-900 shadow-2xs'
+                        : 'text-zinc-500 hover:text-zinc-900'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {live && live.hasRevenue ? (
+              <div className="h-56 flex items-end justify-between gap-2 pt-6 px-2">
+                {live.bars.map((b, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                    <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10 shadow-sm pointer-events-none">
+                      {b.label}
+                    </div>
+                    <div
+                      className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 ease-out group-hover:brightness-110"
+                      style={{ height: b.height }}
+                    />
+                    <span className="text-[11px] font-medium text-zinc-400 mt-2">{b.month}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-56 flex items-center justify-center rounded-xl bg-zinc-50/70 border border-dashed border-zinc-200">
+                <p className="text-xs text-zinc-400 font-medium">
+                  {live ? 'Sin cobros ni ventas registradas en este período.' : 'Cargando datos en vivo…'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+            <span>Volumen consolidado: {money}</span>
+            <span className="text-zinc-500 font-semibold">MRR estimado: {mrrDisplay}</span>
+          </div>
+        </div>
+
+        {/* Right: Actividad Reciente al Lado a la Misma Altura (lg:col-span-1) */}
+        <div className="lg:col-span-1 bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <h3 className="text-sm font-bold text-zinc-950">Actividad reciente</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('Empresas')}
+                className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-0.5 cursor-pointer"
+              >
+                Ver todo <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {live.recent.map((act, i) => (
+                <div key={i} className="flex items-start gap-3 text-xs p-2 rounded-xl hover:bg-zinc-50 transition-colors">
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${act.color}`}>
+                    <HubIcon icon={act.title.includes('empresa') ? Building2 : User} size={13} className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-zinc-900 truncate">{act.title}</p>
+                    <p className="text-zinc-500 text-[11px] truncate mt-0.5">{act.detail}</p>
+                  </div>
+                  <span className="text-[10px] font-medium text-zinc-400 whitespace-nowrap bg-zinc-100 px-2 py-0.5 rounded-full">
+                    {timeAgo(act.time)}
+                  </span>
+                </div>
+              ))}
+              {live.recent.length === 0 && (
+                <p className="text-xs text-zinc-400 py-6 text-center">Sin actividad registrada todavía.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+            <span>En vivo</span>
+            <span className="text-emerald-600 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Sincronizado
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Row 3: Fila de 3 Tarjetas de Gráficos Analíticos */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         
         {/* Gráfico 1: Rendimiento Comercial */}
@@ -1559,114 +1747,26 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
       </div>
 
-      {/* Row 3: Actividad Reciente y Acciones Rápidas (Niveladas en 2 Columnas - Paso 3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        
-        {/* Columna 1: Actividad Reciente (Subida a este nivel) */}
-        <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <h3 className="text-sm font-bold text-zinc-950">Actividad reciente en vivo</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab('Empresas')}
-                className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-0.5 cursor-pointer"
-              >
-                Ver todo <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
-              </button>
-            </div>
-
-            <div className="space-y-3.5">
-              {live.recent.map((act, i) => (
-                <div key={i} className="flex items-start gap-3 text-xs p-2 rounded-xl hover:bg-zinc-50 transition-colors">
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${act.color}`}>
-                    <HubIcon icon={act.title.includes('empresa') ? Building2 : User} size={14} className="w-4 h-4" />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-zinc-900 truncate">{act.title}</p>
-                    <p className="text-zinc-500 text-[11px] truncate mt-0.5">{act.detail}</p>
-                  </div>
-                  <span className="text-[10px] font-medium text-zinc-400 whitespace-nowrap bg-zinc-100 px-2 py-0.5 rounded-full">
-                    {timeAgo(act.time)}
-                  </span>
-                </div>
-              ))}
-              {live.recent.length === 0 && (
-                <p className="text-xs text-zinc-400 py-6 text-center">Sin actividad registrada en este período.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
-            <span>Sincronización en tiempo real</span>
-            <span className="text-emerald-600 font-semibold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Operativo
-            </span>
-          </div>
-        </div>
-
-        {/* Columna 2: Acciones Rápidas & Herramientas Super Admin */}
-        <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-zinc-950">Acciones rápidas</h3>
-              <button
-                type="button"
-                onClick={() => setIsMetricModalOpen(true)}
-                className="w-7 h-7 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 flex items-center justify-center transition-colors cursor-pointer"
-                title="Nueva acción / métrica"
-              >
-                <HubIcon icon={Plus} size={14} className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
-              {[
-                { icon: Building2, title: 'Crear empresa', to: '/hub/bienvenida' },
-                { icon: UserPlus, title: 'Invitar usuario', to: '/hub/invitar' },
-                { icon: Tag, title: 'Gestionar planes', tab: 'Planes' },
-                { icon: CreditCard, title: 'Suscripciones', tab: 'Suscripciones' },
-                { icon: BarChart3, title: 'Generar reporte', tab: 'Reportes' },
-                { icon: Settings, title: 'Configuración', tab: 'Configuración' },
-              ].map((act, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => (act.to ? navigate(act.to) : setActiveTab(act.tab))}
-                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/80 text-left transition-colors text-xs font-semibold text-zinc-800 group cursor-pointer"
-                >
-                  <span className="w-7 h-7 rounded-lg bg-white border border-zinc-200/60 flex items-center justify-center text-zinc-600 group-hover:text-zinc-950 transition-colors shadow-2xs shrink-0">
-                    <HubIcon icon={act.icon} size={14} className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="truncate">{act.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tarjeta de Notas del Administrador Integrada para balance vertical */}
-          <div className="bg-amber-50/60 rounded-xl p-3.5 border border-amber-200/80 shadow-2xs">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                📝 Notas del administrador
-              </span>
-              <button
-                type="button"
-                className="text-amber-700 hover:text-amber-950 p-1 rounded-md transition-colors"
-                title="Editar notas"
-              >
-                <HubIcon icon={PenSquare} size={13} className="w-3.5 h-3.5" />
-              </button>
-            </div>
-            <p className="text-[11px] text-amber-800/90 leading-relaxed font-medium">
+      {/* Notas del Administrador (Barra Compacta) */}
+      <div className="bg-amber-50/60 rounded-2xl p-4 border border-amber-200/80 shadow-2xs flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+            <HubIcon icon={PenSquare} size={15} className="w-4 h-4" />
+          </span>
+          <div className="min-w-0">
+            <span className="text-xs font-bold text-amber-900 block">Notas del administrador</span>
+            <p className="text-xs text-amber-800/90 truncate font-medium">
               Revisar renovaciones de planes este mes. Monitorear límites de almacenamiento y cuotas de consumo de agentes IA.
             </p>
           </div>
         </div>
-
+        <button
+          type="button"
+          onClick={() => setActiveTab('Configuración')}
+          className="text-xs font-bold text-amber-800 hover:text-amber-950 px-3 py-1.5 bg-amber-100/80 hover:bg-amber-200/70 rounded-xl transition-colors shrink-0"
+        >
+          Gestionar notas
+        </button>
       </div>
 
       {/* Modal Nueva Métrica (Super Administrador) */}
@@ -2323,6 +2423,59 @@ function HubPanelContent() {
     })
   }, [globalSearchQuery, activeTab, denied])
 
+  // Búsqueda de personas en vivo (lógica "potente" del CRM en el Hub): escribe "fernando"
+  // → usuarios reales de Supabase, con su marca (nombre + código) para que se entienda
+  // a qué empresa pertenece. RLS limita el alcance: admin de marca solo ve a los suyos;
+  // plataforma (sin scope) consulta el listado global. Debounce para no martillar la BD.
+  const [searchUsers, setSearchUsers] = useState([])
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false)
+  useEffect(() => {
+    const q = globalSearchQuery.trim().toLowerCase()
+    if (q.length < 2 || !panelAuth) { setSearchUsers([]); setIsSearchingUsers(false); return }
+    if (!isPlatformAdmin && !effectiveIsTenantAdmin) { setSearchUsers([]); return }
+    setIsSearchingUsers(true)
+    let alive = true
+    const t = setTimeout(async () => {
+      try {
+        let query = supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url, role, tenant_id')
+          .or(`full_name.ilike.%${q}%,email.ilike.%${q}%`)
+          .limit(6)
+        if (!isPlatformAdmin) query = query.eq('tenant_id', effectiveTenantId)
+        const { data } = await query
+        if (!alive) return
+        const tenantMap = new Map((tenantOptions || []).map((t) => [t.id, t]))
+        setSearchUsers((data || []).map((u) => ({
+          id: u.id,
+          name: nameWords(u.full_name || u.email || '?').join(' '),
+          email: u.email || '',
+          role: u.role || 'user',
+          avatarUrl: u.avatar_url || null,
+          tenantName: u.tenant_id
+            ? (tenantMap.get(u.tenant_id)?.name || (u.tenant_id === effectiveTenantId ? effectiveTenantName : null))
+            : null,
+          tenantCode: u.tenant_id ? (tenantMap.get(u.tenant_id)?.client_code || null) : null,
+        })))
+      } catch (_) {
+        if (alive) setSearchUsers([])
+      } finally {
+        if (alive) setIsSearchingUsers(false)
+      }
+    }, 250)
+    return () => { alive = false; clearTimeout(t) }
+  }, [globalSearchQuery, panelAuth, isPlatformAdmin, effectiveIsTenantAdmin, effectiveTenantId, effectiveTenantName, tenantOptions])
+
+  // Marcas en el buscador (solo plataforma): escribe "zulens" → aparece la marca con su
+  // código y un clic activa el contexto "ver como". Usa el catálogo ya cargado (sin query extra).
+  const searchTenants = useMemo(() => {
+    const q = globalSearchQuery.trim().toLowerCase()
+    if (q.length < 2 || !isPlatformAdmin || !Array.isArray(tenantOptions)) return []
+    return tenantOptions
+      .filter((t) => (t.name || '').toLowerCase().includes(q) || (t.client_code || '').toLowerCase().includes(q))
+      .slice(0, 4)
+  }, [globalSearchQuery, isPlatformAdmin, tenantOptions])
+
   const handleLogout = async () => {
     sessionStorage.removeItem('qaway.scopedTenant')
     setScopedTenant(null)
@@ -2598,7 +2751,7 @@ function HubPanelContent() {
                 {globalSearchQuery.trim() !== '' && (
                   <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} transition={{ duration: 0.15 }}
                     className="absolute top-[calc(100%+12px)] left-0 w-full bg-[var(--hub-pop)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden">
-                    {filtered.length === 0 ? (
+                    {(filtered.length === 0 && searchUsers.length === 0 && searchTenants.length === 0 && !isSearchingUsers) ? (
                       <div className="p-6 text-center"><p className="text-sm text-[var(--hub-dim)] font-medium">No se encontraron resultados para "{globalSearchQuery}"</p></div>
                     ) : (
                       <div className="flex flex-col">
@@ -2620,6 +2773,78 @@ function HubPanelContent() {
                             )
                           })}
                         </ul>
+                        {searchTenants.length > 0 && (
+                          <>
+                            <div className="px-4 py-2.5 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]"><span className="text-xs font-bold text-[var(--hub-dim)] uppercase tracking-wider">Marcas</span></div>
+                            <ul className="py-2">
+                              {searchTenants.map((t) => (
+                                <li key={t.id}>
+                                  <button type="button" onClick={() => { setScopedTenant({ id: t.id, name: t.name }); setActiveTab('Inicio'); setGlobalSearchQuery('') }} className="w-full px-4 py-3 hover:bg-[var(--hub-chip)] transition-colors flex items-center gap-4 text-left group">
+                                    <span className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[11px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">{(t.name || '?').slice(0, 2).toUpperCase()}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{t.name}</p>
+                                      {t.client_code && <p className="text-xs text-[var(--hub-faint)] mt-0.5">Código {t.client_code}</p>}
+                                    </div>
+                                    <span className="shrink-0 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-[var(--hub-border-soft)] text-[10px] font-bold text-[var(--hub-dim)] group-hover:text-white group-hover:border-white/20 transition-colors">
+                                      <HubIcon icon={ChevronRight} size={12} className="w-3 h-3" /> Ver como
+                                    </span>
+                                  </button>
+
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+                        {(searchUsers.length > 0 || isSearchingUsers) && (
+                          <>
+                            <div className="px-4 py-2.5 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]"><span className="text-xs font-bold text-[var(--hub-dim)] uppercase tracking-wider">Personas</span></div>
+                            {isSearchingUsers && searchUsers.length === 0 ? (
+                              <div className="px-4 py-3.5 flex items-center gap-4">
+                                <span className="h-9 w-9 rounded-full bg-[var(--hub-hover)] animate-pulse shrink-0" />
+                                <span className="h-3 w-44 rounded bg-[var(--hub-hover)] animate-pulse" />
+                              </div>
+                            ) : (
+                              <ul className="py-2">
+                                {searchUsers.map((u) => {
+                                  const roleChip = u.role === 'admin' ? 'bg-[#ff4b0b]/15 text-orange-300'
+                                    : u.role === 'editor' ? 'bg-sky-500/15 text-sky-300'
+                                    : u.role === 'viewer' ? 'bg-emerald-500/15 text-emerald-300'
+                                    : u.role === 'guest' ? 'bg-amber-500/15 text-amber-300'
+                                    : 'bg-white/10 text-[var(--hub-dim)]'
+                                  const roleLabel = u.role === 'admin' ? 'Admin' : u.role === 'editor' ? 'Editor' : u.role === 'viewer' ? 'Viewer' : u.role === 'guest' ? 'Invitado' : 'Miembro'
+                                  const uInitials = u.name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?'
+                                  return (
+                                    <li key={u.id}>
+                                      <button type="button" onClick={() => { setGlobalSearchQuery(''); navigate(`/hub/panel/usuarios?usuario=${u.id}`) }} className="w-full px-4 py-3 hover:bg-[var(--hub-chip)] transition-colors flex items-center gap-4 text-left group">
+                                        {u.avatarUrl ? (
+                                          <img src={u.avatarUrl} alt={u.name} className="w-9 h-9 rounded-full object-cover border border-[var(--hub-border)] shrink-0" />
+                                        ) : (
+                                          <span className="w-9 h-9 rounded-full bg-[var(--hub-hover)] text-[var(--hub-dim)] font-bold text-[11px] flex items-center justify-center shrink-0 border border-[var(--hub-border)]">{uInitials}</span>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 min-w-0">
+                                            <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{u.name}</p>
+                                            <span className={`shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${roleChip}`}>{roleLabel}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-xs text-[var(--hub-faint)] mt-1">
+                                            {u.email && <span className="truncate">{u.email}</span>}
+                                            {u.tenantName && (
+                                              <span className="ml-auto shrink-0 inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-[var(--hub-chip)] border border-[var(--hub-border-soft)] text-[10px] font-semibold text-[var(--hub-dim)]">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                                {u.tenantName}{u.tenantCode ? ` · ${u.tenantCode}` : ''}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <HubIcon icon={ChevronRight} size={16} className="w-4 h-4 text-[var(--hub-faint)] group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                                      </button>
+                                    </li>
+                                  )
+                                })}
+                              </ul>
+                            )}
+                          </>
+                        )}
                         <div className="px-4 py-3 bg-[var(--hub-chip)] border-t border-[var(--hub-border-soft)] flex items-center justify-between text-xs text-[var(--hub-faint)]"><span>Saltar directo a la app</span><span>Esc para cerrar</span></div>
                       </div>
                     )}
