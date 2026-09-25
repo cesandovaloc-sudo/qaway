@@ -109,11 +109,8 @@ const integrations = [
 
 const tabs = [
   { id: "general", label: "General" },
-  { id: "integraciones", label: "Integraciones" },
-  { id: "notificaciones", label: "Notificaciones" },
-  { id: "seguridad", label: "Seguridad" },
-  { id: "personalizacion", label: "Personalización" },
-  { id: "facturacion", label: "Facturación" },
+  { id: "conexiones", label: "Conexiones" },
+  { id: "cuenta", label: "Cuenta" },
   { id: "avanzado", label: "Avanzado" },
 ];
 
@@ -401,57 +398,10 @@ export default function ConfiguracionPanel({
         </div>
       </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="hidden w-[214px] border-r border-slate-800 bg-[#111314]">
-          <nav className="space-y-1 px-2 py-3">
-            {[
-              ["Inicio", BarChart3],
-              ["Empresas", Globe2],
-              ["Usuarios", Activity],
-              ["Aplicaciones", SlidersHorizontal],
-              ["Planes y Precios", Sparkles],
-              ["Suscripciones", Clock3],
-              ["Pagos", Zap],
-              ["Reportes", FileText],
-              ["Soporte", Info],
-              ["Configuración", Settings],
-            ].map(([label, Icon]) => {
-              const selected = label === "Configuración";
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  className={[
-                    "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[12px] transition",
-                    selected
-                      ? "bg-orange-500 font-semibold text-white"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white",
-                  ].join(" ")}
-                >
-                  <Icon size={16} />
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="absolute bottom-4 left-2 right-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-            <div className="flex items-center gap-2 text-[11px] font-semibold text-orange-400">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500/10">
-                ?
-              </span>
-              ¿Necesitas ayuda?
-            </div>
-            <p className="mt-1 text-[9px] leading-4 text-slate-400">
-              Accede a la documentación o contacta al equipo.
-            </p>
-            <button className="mt-2 w-full rounded-lg bg-white/10 px-2 py-1.5 text-[10px] font-medium text-slate-200">
-              Centro de Ayuda →
-            </button>
-          </div>
-        </aside>
-
+      {/* Fase 5 (fila 27): sin doble shell — la sidebar interna se retira; el menú lateral
+          del shell es la única navegación y este panel vive sobre el lienzo maestro igual
+          que el resto de módulos. */}
+      <div>
         {/* Main */}
         <div className="min-w-0 flex-1">
           <div>
@@ -816,11 +766,11 @@ export default function ConfiguracionPanel({
                 >
                   <div className="flex h-[290px] flex-col items-center justify-center px-6 text-center">
                     <div className="rounded-2xl bg-orange-50 p-4 text-orange-500">
-                      {activeTab === "integraciones" && <Link2 size={26} />}
-                      {activeTab === "notificaciones" && <Bell size={26} />}
-                      {activeTab === "seguridad" && <Shield size={26} />}
-                      {activeTab === "personalizacion" && <Palette size={26} />}
-                      {activeTab === "facturacion" && <FileText size={26} />}
+                      {activeTab === "conexiones" && <Link2 size={26} />}
+                      {activeTab === "conexiones" && <Bell size={26} />}
+                      {activeTab === "cuenta" && <Shield size={26} />}
+                      {activeTab === "cuenta" && <Palette size={26} />}
+                      {activeTab === "cuenta" && <FileText size={26} />}
                       {activeTab === "avanzado" && <Wrench size={26} />}
                     </div>
                     <h3 className="mt-4 text-sm font-bold text-zinc-950">

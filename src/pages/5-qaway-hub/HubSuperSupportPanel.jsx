@@ -183,18 +183,20 @@ function StatCard({ icon, title, value, change, positive = true, lineClass = "te
 }
 
 function Badge({ children, type }) {
+  // Píldoras unificadas (fila 31): mismo patrón dot+texto que Usuarios, en rampa de marca
+  // (intensidad) + neutros; sin semáforo rojo/azul/verde.
   const styles = {
-    Alta: "bg-red-50 text-red-500",
-    Media: "bg-amber-50 text-amber-600",
-    Baja: "bg-emerald-50 text-emerald-600",
-    Abierto: "bg-red-50 text-red-500",
-    "En proceso": "bg-blue-50 text-blue-600",
-    "En espera": "bg-amber-50 text-amber-600",
-    Cerrado: "bg-emerald-50 text-emerald-600",
+    Alta: "bg-orange-50 text-[#e03f06]",
+    Media: "bg-orange-50/70 text-[#e2641f]",
+    Baja: "bg-orange-50/40 text-[#e26d3a]",
+    Abierto: "bg-orange-50 text-[#e03f06]",
+    "En proceso": "bg-orange-50/70 text-[#e2641f]",
+    "En espera": "bg-orange-50/40 text-[#e26d3a]",
+    Cerrado: "bg-zinc-100 text-zinc-600",
   };
 
   return (
-    <span className={cn("inline-flex rounded-md px-2.5 py-1 text-[11px] font-semibold", styles[type] || "bg-gray-100 text-gray-600")}>
+    <span className={cn("inline-flex rounded-lg px-2.5 py-1 text-[11px] font-semibold", styles[type] || "bg-zinc-100 text-zinc-600")}>
       {children}
     </span>
   );
