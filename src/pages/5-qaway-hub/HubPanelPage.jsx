@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { HubIcon } from '@/components/ui/icons'
@@ -6,9 +7,13 @@ import {
   AlertCircle, ArrowRight, BarChart3, Bell, Bot, Building2, Calendar, ChevronDown, ChevronRight, Clock, CreditCard,
   FileImage, FolderKanban, HelpCircle, Home, Instagram, LayoutGrid, Menu, MessageSquare,
   Package, PenSquare, Plus, Receipt, Search, Settings, Shield, Sparkles,
-  Star, Tag, User, UserPlus, Users, X, Zap,
+  Star, Tag, User, UserPlus, Users, X, Zap, Check, Layers, Globe, Filter, SlidersHorizontal,
 } from '@/components/ui/icons/hubIcons'
-import { Sun, Moon, Contrast } from 'lucide-react'
+import { Sun, Moon, Contrast, Activity } from 'lucide-react'
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, ResponsiveContainer,
+} from 'recharts'
 import { logoutUser } from '@/config/auth'
 import { supabase } from '@/config/supabase'
 import { useAppAccess } from './hooks/useAppAccess'
@@ -414,27 +419,114 @@ const ECOSYSTEM_TONES = [
   'bg-[#ff4b0b]', 'bg-[#ff7a45]', 'bg-[#ff9b73]',
 ]
 
-function SuperAdminDashboard({ setActiveTab, navigate }) {
-  const [live, setLive] = useState(null)
-  const [timeRange, setTimeRange] = useState('9m')
+const STANDARD_CATEGORIES = [
+  'Salud y Veterinaria',
+  'Inmobiliaria y Construcción',
+  'Retail y Comercio',
+  'Gastronomía y Alimentos',
+  'Contabilidad y Finanzas',
+  'Tecnología y Software',
+  'Servicios Profesionales',
+]
 
-  // Datos globales reales (plataforma = is_admin). Consultas guardadas de Supabase
-  // cruzando pasarelas (payments) y pedidos comerciales de inventario (orders).
+function resolveTenantCategory(t) {
+  if (t?.category && STANDARD_CATEGORIES.includes(t.category)) return t.category
+  const text = `${t?.category || ''} ${t?.industry || ''} ${t?.sector || ''} ${t?.name || ''} ${t?.slug || ''}`.toLowerCase()
+  if (text.match(/vet|salud|clinic|medic|mascot|canin/)) return 'Salud y Veterinaria'
+  if (text.match(/inmob|epc|const|prop|hogar|bienes|edif/)) return 'Inmobiliaria y Construcción'
+  if (text.match(/retail|tiend|ecom|comerc|vent|market/)) return 'Retail y Comercio'
+  if (text.match(/gastro|rest|cafe|comid|alimen|bar/)) return 'Gastronomía y Alimentos'
+  if (text.match(/conta|finan|tribut|audi|fiscal/)) return 'Contabilidad y Finanzas'
+  if (text.match(/tech|soft|digit|ia|agenc|cloud|dev/)) return 'Tecnología y Software'
+  return 'Servicios Profesionales'
+}
+
+const TIME_LABELS = {
+  realtime: 'Tiempo Real',
+  today: 'Hoy',
+  '7days': 'Últimos 7 días',
+  '30days': 'Últimos 30 días',
+  all: 'Histórico Completo',
+}
+
+function SuperAdminDashboard({ setActiveTab, navigate }) {
+  // Datos crudos desde Supabase
+  const [rawData, setRawData] = useState({ tenants: [], users: [], subs: [], apps: [], pays: [], orders: [], roles: [] })
+  const [loading, setLoading] = useState(true)
+
+  // 1. Filtro temporal general (CRM)
+  const [timeRange, setTimeRange] = useState('realtime')
+  const [showTimeMenu, setShowTimeMenu] = useState(false)
+  const timeMenuRef = useRef(null)
+
+  // 1. Modal Nueva Métrica (Super Admin)
+  const [isMetricModalOpen, setIsMetricModalOpen] = useState(false)
+  const [customMetrics, setCustomMetrics] = useState([])
+  const [metricForm, setMetricForm] = useState({ name: '', source: 'tenants', target: 50, unit: 'num' })
+
+  // 2. Estados y Refs para la Barra de Filtros Cascada (Multiselección)
+  const [selectedCategories, setSelectedCategories] = useState([])
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false)
+  const categoryMenuRef = useRef(null)
+
+  const [selectedTenantIds, setSelectedTenantIds] = useState([])
+  const [showTenantMenu, setShowTenantMenu] = useState(false)
+  const [tenantSearch, setTenantSearch] = useState('')
+  const tenantMenuRef = useRef(null)
+
+  const [selectedAppIds, setSelectedAppIds] = useState([])
+  const [showAppMenu, setShowAppMenu] = useState(false)
+  const appMenuRef = useRef(null)
+
+  const [selectedPlans, setSelectedPlans] = useState([])
+  const [showPlanMenu, setShowPlanMenu] = useState(false)
+  const planMenuRef = useRef(null)
+
+  // 3. Selectores de tiempo específicos para los 3 gráficos
+  const [rendimientoPeriod, setRendimientoPeriod] = useState('Mensual')
+  const [showRendimientoMenu, setShowRendimientoMenu] = useState(false)
+  const rendimientoMenuRef = useRef(null)
+
+  const [appTimeframe, setAppTimeframe] = useState('Este mes')
+  const [showAppTimeframeMenu, setShowAppTimeframeMenu] = useState(false)
+  const appTimeframeMenuRef = useRef(null)
+
+  const [planTimeframe, setPlanTimeframe] = useState('Este mes')
+  const [showPlanTimeframeMenu, setShowPlanTimeframeMenu] = useState(false)
+  const planTimeframeMenuRef = useRef(null)
+
+  // Listener global de click fuera para cerrar todos los dropdowns
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (timeMenuRef.current && !timeMenuRef.current.contains(event.target)) setShowTimeMenu(false)
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(event.target)) setShowCategoryMenu(false)
+      if (tenantMenuRef.current && !tenantMenuRef.current.contains(event.target)) setShowTenantMenu(false)
+      if (appMenuRef.current && !appMenuRef.current.contains(event.target)) setShowAppMenu(false)
+      if (planMenuRef.current && !planMenuRef.current.contains(event.target)) setShowPlanMenu(false)
+      if (rendimientoMenuRef.current && !rendimientoMenuRef.current.contains(event.target)) setShowRendimientoMenu(false)
+      if (appTimeframeMenuRef.current && !appTimeframeMenuRef.current.contains(event.target)) setShowAppTimeframeMenu(false)
+      if (planTimeframeMenuRef.current && !planTimeframeMenuRef.current.contains(event.target)) setShowPlanTimeframeMenu(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Carga de datos globales (plataforma = is_admin)
   useEffect(() => {
     let alive = true
     ;(async () => {
-      let data = { tenants: [], users: [], subs: [], apps: [], pays: [], orders: [], roles: [] }
       try {
         const [t, u, s, a, p, o, r] = await Promise.all([
-          supabase.from('tenants').select('id, name, status, deleted_at, created_at'),
+          supabase.from('tenants').select('id, name, client_code, category, industry, sector, status, deleted_at, created_at'),
           supabase.from('users').select('id, full_name, email, created_at'),
           supabase.from('tenant_app_subscriptions').select('tenant_id, app_id, plan, status'),
           supabase.from('app_catalog').select('id, name, slug'),
-          supabase.from('payments').select('amount, created_at, status'),
-          supabase.from('orders').select('amount, total_amount, created_at, status'),
+          supabase.from('payments').select('amount, created_at, status, tenant_id'),
+          supabase.from('orders').select('amount, total_amount, created_at, status, tenant_id'),
           supabase.from('user_app_roles').select('app_id'),
         ])
-        data = {
+        if (!alive) return
+        setRawData({
           tenants: t.data || [],
           users: u.data || [],
           subs: s.data || [],
@@ -442,106 +534,306 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           pays: p.data || [],
           orders: o.data || [],
           roles: r.data || [],
-        }
-      } catch {
-        data = { tenants: [], users: [], subs: [], apps: [], pays: [], orders: [], roles: [] }
+        })
+      } catch (err) {
+        console.error('Error cargando datos SuperAdmin:', err)
+      } finally {
+        if (alive) setLoading(false)
       }
-      if (!alive) return
+    })()
+    return () => { alive = false }
+  }, [])
 
-      const activeTenants = data.tenants.filter((x) => String(x.status) === 'active' && !x.deleted_at).length
-      const activeSubs = data.subs.filter((x) => String(x.status) === 'active')
-      const activeApps = new Set(activeSubs.map((x) => x.app_id)).size
+  // Handlers para multiselección
+  const toggleCategory = (cat) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    )
+  }
 
-      // Consolidación de ingresos reales: payments (pasarelas) + orders (inventario/web)
-      const paidPayments = data.pays.filter((x) => ['completed', 'paid', 'approved'].includes(String(x.status || '').toLowerCase()))
-      const paidOrders = data.orders.filter((x) => ['completed', 'paid', 'delivered', 'entregado'].includes(String(x.status || '').toLowerCase()))
+  const toggleTenant = (id) => {
+    setSelectedTenantIds((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    )
+  }
 
-      const revPayments = paidPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
-      const revOrders = paidOrders.reduce((acc, o) => acc + (Number(o.total_amount || o.amount) || 0), 0)
-      const revenue = revPayments + revOrders
-      const revFmt = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 })
+  const toggleApp = (id) => {
+    setSelectedAppIds((prev) =>
+      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
+    )
+  }
 
-      // MRR Recurrente de planes activos: Básico (S/ 49), Intermedio (S/ 99), Premium (S/ 199)
-      const mrr = activeSubs.reduce((acc, sub) => {
-        const plan = String(sub.plan || '').toLowerCase()
-        if (plan.includes('premi')) return acc + 199
-        if (plan.includes('inter')) return acc + 99
-        return acc + 49
-      }, 0)
+  const togglePlan = (p) => {
+    setSelectedPlans((prev) =>
+      prev.includes(p) ? prev.filter((item) => item !== p) : [...prev, p]
+    )
+  }
 
-      // Donut por plan (desde suscripciones activas reales).
-      const planCounts = { Premium: 0, Intermedio: 0, Básico: 0, 'Sin plan': 0 }
-      activeSubs.forEach((x) => {
-        const plan = String(x.plan || '').toLowerCase().trim()
-        if (plan.includes('premi')) planCounts.Premium += 1
-        else if (plan.includes('inter')) planCounts.Intermedio += 1
-        else planCounts.Básico += 1
-      })
-      const withSub = new Set(activeSubs.map((x) => x.tenant_id))
-      data.tenants.forEach((x) => { if (!withSub.has(x.id)) planCounts['Sin plan'] += 1 })
-      const planTotal = Math.max(data.tenants.length, 1)
-      const planColors = { Premium: '#ff4b0b', Intermedio: '#ff7a45', Básico: '#ff9b73', 'Sin plan': '#d4d4d8' }
-      let cursor = 0
-      const donut = Object.keys(planCounts).map((label) => {
+  const resetFilters = () => {
+    setSelectedCategories([])
+    setSelectedTenantIds([])
+    setSelectedAppIds([])
+    setSelectedPlans([])
+    setTenantSearch('')
+  }
+
+  const hasAnyFilter =
+    selectedCategories.length > 0 ||
+    selectedTenantIds.length > 0 ||
+    selectedAppIds.length > 0 ||
+    selectedPlans.length > 0
+
+  // Cálculo reactivo con useMemo cruzando filtros y telemetría
+  const live = useMemo(() => {
+    const { tenants, users, subs, apps, pays, orders, roles } = rawData
+
+    // 1. Filtrado de Empresas
+    let filteredTenants = tenants.filter((x) => !x.deleted_at)
+
+    if (selectedCategories.length > 0) {
+      filteredTenants = filteredTenants.filter((t) =>
+        selectedCategories.includes(resolveTenantCategory(t))
+      )
+    }
+
+    if (selectedTenantIds.length > 0) {
+      filteredTenants = filteredTenants.filter((t) => selectedTenantIds.includes(t.id))
+    }
+
+    if (selectedAppIds.length > 0) {
+      const tenantsWithApps = new Set(
+        subs.filter((s) => selectedAppIds.includes(s.app_id)).map((s) => s.tenant_id)
+      )
+      filteredTenants = filteredTenants.filter((t) => tenantsWithApps.has(t.id))
+    }
+
+    if (selectedPlans.length > 0) {
+      const tenantsWithPlans = new Set(
+        subs
+          .filter((s) =>
+            selectedPlans.some((p) =>
+              String(s.plan || '').toLowerCase().includes(p.toLowerCase())
+            )
+          )
+          .map((s) => s.tenant_id)
+      )
+      if (selectedPlans.includes('Sin plan')) {
+        const withAnySub = new Set(subs.map((s) => s.tenant_id))
+        tenants.forEach((t) => {
+          if (!withAnySub.has(t.id)) tenantsWithPlans.add(t.id)
+        })
+      }
+      filteredTenants = filteredTenants.filter((t) => tenantsWithPlans.has(t.id))
+    }
+
+    const filteredTenantIds = new Set(filteredTenants.map((t) => t.id))
+    const activeTenants = filteredTenants.filter((x) => String(x.status) === 'active').length
+
+    // 2. Suscripciones filtradas
+    let activeSubs = subs.filter(
+      (s) => String(s.status) === 'active' && filteredTenantIds.has(s.tenant_id)
+    )
+    if (selectedAppIds.length > 0) {
+      activeSubs = activeSubs.filter((s) => selectedAppIds.includes(s.app_id))
+    }
+    if (selectedPlans.length > 0) {
+      activeSubs = activeSubs.filter((s) =>
+        selectedPlans.some((p) =>
+          String(s.plan || '').toLowerCase().includes(p.toLowerCase())
+        )
+      )
+    }
+
+    const activeApps = new Set(activeSubs.map((x) => x.app_id)).size
+
+    // 3. MRR Recurrente de suscripciones filtradas
+    const mrr = activeSubs.reduce((acc, sub) => {
+      const plan = String(sub.plan || '').toLowerCase()
+      if (plan.includes('premi')) return acc + 199
+      if (plan.includes('inter')) return acc + 99
+      return acc + 49
+    }, 0)
+
+    // 4. Pagos y Pedidos con filtro temporal (CRM timeRange)
+    const now = new Date()
+    let timeCutoff = 0
+    if (timeRange === 'today') {
+      timeCutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    } else if (timeRange === '7days') {
+      timeCutoff = now.getTime() - 7 * 24 * 60 * 60 * 1000
+    } else if (timeRange === '30days') {
+      timeCutoff = now.getTime() - 30 * 24 * 60 * 60 * 1000
+    } else if (timeRange === 'realtime') {
+      timeCutoff = now.getTime() - 24 * 60 * 60 * 1000
+    }
+
+    const paidPayments = pays.filter((x) => {
+      const validStatus = ['completed', 'paid', 'approved'].includes(String(x.status || '').toLowerCase())
+      const validTime = !timeCutoff || new Date(x.created_at).getTime() >= timeCutoff
+      const validTenant = !x.tenant_id || filteredTenantIds.has(x.tenant_id)
+      return validStatus && validTime && validTenant
+    })
+
+    const paidOrders = orders.filter((x) => {
+      const validStatus = ['completed', 'paid', 'delivered', 'entregado'].includes(String(x.status || '').toLowerCase())
+      const validTime = !timeCutoff || new Date(x.created_at).getTime() >= timeCutoff
+      const validTenant = !x.tenant_id || filteredTenantIds.has(x.tenant_id)
+      return validStatus && validTime && validTenant
+    })
+
+    const revPayments = paidPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
+    const revOrders = paidOrders.reduce((acc, o) => acc + (Number(o.total_amount || o.amount) || 0), 0)
+    const revenue = revPayments + revOrders
+    const revFmt = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 })
+
+    // 5. Donut por plan
+    const planCounts = { Premium: 0, Intermedio: 0, Básico: 0, 'Sin plan': 0 }
+    activeSubs.forEach((x) => {
+      const plan = String(x.plan || '').toLowerCase().trim()
+      if (plan.includes('premi')) planCounts.Premium += 1
+      else if (plan.includes('inter')) planCounts.Intermedio += 1
+      else planCounts.Básico += 1
+    })
+    const withSub = new Set(activeSubs.map((x) => x.tenant_id))
+    filteredTenants.forEach((x) => {
+      if (!withSub.has(x.id)) planCounts['Sin plan'] += 1
+    })
+    const planTotal = Math.max(filteredTenants.length, 1)
+    const planColors = { Premium: '#ff4b0b', Intermedio: '#ff7a45', Básico: '#ff9b73', 'Sin plan': '#d4d4d8' }
+    let cursor = 0
+    const donut = Object.keys(planCounts)
+      .map((label) => {
         const from = (cursor / planTotal) * 360
         cursor += planCounts[label]
         return planCounts[label] ? `${planColors[label]} ${from}deg ${(cursor / planTotal) * 360}deg` : null
-      }).filter(Boolean)
+      })
+      .filter(Boolean)
 
-      // Registro unificado de transacciones para el gráfico interactivo
-      const allTransactions = [
-        ...paidPayments.map((p) => ({ amount: Number(p.amount) || 0, date: new Date(p.created_at) })),
-        ...paidOrders.map((o) => ({ amount: Number(o.total_amount || o.amount) || 0, date: new Date(o.created_at) })),
-      ].filter((x) => !Number.isNaN(x.date.getTime()))
+    // 6. Transacciones para gráficos
+    const allTransactions = [
+      ...paidPayments.map((p) => ({ amount: Number(p.amount) || 0, date: new Date(p.created_at) })),
+      ...paidOrders.map((o) => ({ amount: Number(o.total_amount || o.amount) || 0, date: new Date(o.created_at) })),
+    ].filter((x) => !Number.isNaN(x.date.getTime()))
 
-      // Cálculo de barras según período seleccionado (30D, 90D, 9M, Todo)
-      const now = new Date()
-      const count = timeRange === '30d' ? 4 : timeRange === '90d' ? 3 : timeRange === 'all' ? 12 : 9
-      const months = []
-      for (let i = count - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-        const key = `${d.getFullYear()}-${d.getMonth()}`
-        const val = allTransactions
-          .filter((tx) => `${tx.date.getFullYear()}-${tx.date.getMonth()}` === key)
-          .reduce((sum, tx) => sum + tx.amount, 0)
-        months.push({
-          month: d.toLocaleDateString('es-PE', { month: 'short' }),
-          val,
+    // 7. Rendimiento Comercial (LineChart según rendimientoPeriod)
+    let rendimientoData = []
+    if (rendimientoPeriod === 'Diario') {
+      const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)
+        const dayTxs = allTransactions.filter(
+          (tx) => tx.date.getDate() === d.getDate() && tx.date.getMonth() === d.getMonth()
+        )
+        rendimientoData.push({
+          name: days[d.getDay()],
+          ingresos: Math.round(dayTxs.reduce((sum, tx) => sum + tx.amount, 0)),
+          operaciones: dayTxs.length,
         })
       }
-      const hasRevenue = months.some((m) => m.val > 0)
-      const maxVal = Math.max(...months.map((m) => m.val), 1)
-      const bars = months.map((m) => ({
-        ...m,
-        height: `${Math.max(Math.round((m.val / maxVal) * 100), 6)}%`,
-        label: revFmt.format(m.val),
-      }))
+    } else if (rendimientoPeriod === 'Semanal') {
+      for (let i = 3; i >= 0; i--) {
+        const semStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000)
+        const semEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000)
+        const semTxs = allTransactions.filter((tx) => tx.date >= semStart && tx.date < semEnd)
+        rendimientoData.push({
+          name: `Sem ${4 - i}`,
+          ingresos: Math.round(semTxs.reduce((sum, tx) => sum + tx.amount, 0)),
+          operaciones: semTxs.length,
+        })
+      }
+    } else if (rendimientoPeriod === 'Trimestral') {
+      const quarters = ['T1', 'T2', 'T3', 'T4']
+      const currentQ = Math.floor(now.getMonth() / 3)
+      for (let i = 0; i < 4; i++) {
+        const qIndex = (currentQ - 3 + i + 4) % 4
+        const qTxs = allTransactions.filter((tx) => Math.floor(tx.date.getMonth() / 3) === qIndex)
+        rendimientoData.push({
+          name: quarters[qIndex],
+          ingresos: Math.round(qTxs.reduce((sum, tx) => sum + tx.amount, 0)),
+          operaciones: qTxs.length,
+        })
+      }
+    } else {
+      // Mensual (default)
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const key = `${d.getFullYear()}-${d.getMonth()}`
+        const monthTxs = allTransactions.filter(
+          (tx) => `${tx.date.getFullYear()}-${tx.date.getMonth()}` === key
+        )
+        rendimientoData.push({
+          name: d.toLocaleDateString('es-PE', { month: 'short' }),
+          ingresos: Math.round(monthTxs.reduce((sum, tx) => sum + tx.amount, 0)),
+          operaciones: monthTxs.length,
+        })
+      }
+    }
 
-      // Ecosistema: apps reales (top 8 por suscripciones activas).
-      const rolesByApp = {}
-      data.roles.forEach((r) => { rolesByApp[r.app_id] = (rolesByApp[r.app_id] || 0) + 1 })
-      const ecosystem = data.apps.map((a, i) => ({
-        title: a.name || a.slug || 'Aplicación',
-        slug: a.slug || '',
-        active: activeSubs.filter((x) => x.app_id === a.id).length,
-        users: rolesByApp[a.id] || 0,
-        tone: ECOSYSTEM_TONES[i % ECOSYSTEM_TONES.length],
-        path: a.slug ? appWorkerRoute(a.slug) : null,
-      })).sort((x, y) => y.active - x.active).slice(0, 8)
+    // 8. Datos para gráfico de Ingresos por Aplicación (BarChart horizontal)
+    const appStats = apps.map((a) => {
+      const appSubs = activeSubs.filter((s) => s.app_id === a.id)
+      const subRev = appSubs.reduce((acc, s) => {
+        const pl = String(s.plan || '').toLowerCase()
+        return acc + (pl.includes('premi') ? 199 : pl.includes('inter') ? 99 : 49)
+      }, 0)
+      return {
+        name: a.name || a.slug || 'App',
+        facturacion: subRev,
+        subs: appSubs.length,
+      }
+    }).sort((a, b) => b.facturacion - a.facturacion).slice(0, 5)
 
-      // Actividad reciente real (tenants y usuarios más nuevos).
-      const recent = [
-        ...data.tenants.map((x) => ({ title: 'Nueva empresa registrada', detail: x.name || '—', time: x.created_at, color: 'text-blue-500 bg-blue-50' })),
-        ...data.users.map((x) => ({ title: 'Nuevo usuario registrado', detail: x.full_name || x.email || '—', time: x.created_at, color: 'text-orange-500 bg-orange-50' })),
-      ].filter((x) => x.time).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5)
+    // 9. Ecosistema general
+    const rolesByApp = {}
+    roles.forEach((r) => { rolesByApp[r.app_id] = (rolesByApp[r.app_id] || 0) + 1 })
+    const ecosystem = apps.map((a, i) => ({
+      title: a.name || a.slug || 'Aplicación',
+      slug: a.slug || '',
+      active: activeSubs.filter((x) => x.app_id === a.id).length,
+      users: rolesByApp[a.id] || 0,
+      tone: ECOSYSTEM_TONES[i % ECOSYSTEM_TONES.length],
+      path: a.slug ? appWorkerRoute(a.slug) : null,
+    })).sort((x, y) => y.active - x.active).slice(0, 8)
 
-      if (alive) setLive({
-        activeTenants, totalTenants: data.tenants.length, totalUsers: data.users.length, activeApps,
-        revenue, mrr, revFmt, planCounts, planTotal, donut, bars, hasRevenue, ecosystem, recent,
-      })
-    })()
-    return () => { alive = false }
-  }, [timeRange])
+    // 10. Actividad reciente
+    const recent = [
+      ...filteredTenants.map((x) => ({
+        title: 'Nueva empresa registrada',
+        detail: x.name || '—',
+        time: x.created_at,
+        color: 'text-blue-500 bg-blue-50',
+      })),
+      ...users.map((x) => ({
+        title: 'Nuevo usuario registrado',
+        detail: x.full_name || x.email || '—',
+        time: x.created_at,
+        color: 'text-orange-500 bg-orange-50',
+      })),
+    ]
+      .filter((x) => x.time)
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 6)
+
+    return {
+      activeTenants,
+      totalTenants: filteredTenants.length,
+      allTenantsCount: tenants.length,
+      totalUsers: users.length,
+      activeApps,
+      revenue,
+      mrr,
+      revFmt,
+      planCounts,
+      planTotal,
+      donut,
+      rendimientoData,
+      appStats,
+      ecosystem,
+      recent,
+      tenantsList: tenants,
+      appsList: apps,
+    }
+  }, [rawData, selectedCategories, selectedTenantIds, selectedAppIds, selectedPlans, timeRange, rendimientoPeriod])
 
   const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const money = live ? (live.revenue > 0 ? live.revFmt.format(live.revenue) : 'S/ 0') : '—'
@@ -549,19 +841,371 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Top Banner / Header Greeting */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Top Banner / Header Greeting con Botones de CRM (Paso 1) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
           <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Super Administrador</h1>
           <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona empresas, usuarios, facturación consolidada e inventario desde un solo lugar.</p>
         </div>
-        <div className="hidden lg:block text-right">
-          <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
+
+        <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap">
+          {/* Cápsula de telemetría estilo CRM */}
+          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100/90 border border-zinc-200/80 text-xs font-semibold text-zinc-700 shadow-2xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{live.activeTenants} {live.activeTenants === 1 ? 'empresa activa' : 'empresas activas'}</span>
+            <span className="text-zinc-300">·</span>
+            <span>{hasAnyFilter ? `${live.totalTenants} filtradas` : `${live.allTenantsCount} registradas`}</span>
+          </span>
+
+          {/* Botón Nueva Métrica (Solo Super Administrador) */}
+          <button
+            type="button"
+            onClick={() => setIsMetricModalOpen(true)}
+            className="flex items-center gap-1.5 bg-[#ff4b0b] hover:bg-[#e04108] text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_10px_rgba(255,75,11,0.25)] active:scale-[0.98] cursor-pointer"
+            title="Crear métrica personalizada (Super Administrador)"
+          >
+            <HubIcon icon={Plus} size={15} className="w-4 h-4" />
+            <span>Nueva Métrica</span>
+          </button>
+
+          {/* Selector de Rango de Tiempo Interactivo (CRM) */}
+          <div className="relative" ref={timeMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowTimeMenu((v) => !v)}
+              className="flex items-center gap-2 bg-white border border-zinc-200/80 text-xs font-semibold px-3.5 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer"
+            >
+              <HubIcon icon={Calendar} size={15} className="w-4 h-4 text-zinc-500" />
+              <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
+              <HubIcon icon={ChevronDown} size={14} className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showTimeMenu ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showTimeMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 py-1.5 text-xs overflow-hidden">
+                {Object.entries(TIME_LABELS).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      setTimeRange(key)
+                      setShowTimeMenu(false)
+                    }}
+                    className={`w-full text-left px-4 py-2 font-medium transition-colors flex items-center justify-between ${
+                      timeRange === key ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {timeRange === key && <span className="w-1.5 h-1.5 rounded-full bg-zinc-900" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Row 1: 4 KPI Cards con física y estilo ergonómico unificado al CRM */}
+      {/* Barra de Filtros Encadenados Progresivos con Sticky (Paso 2) */}
+      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-2 mb-6 bg-white/95 backdrop-blur-md border border-zinc-200/80 px-3.5 py-2.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-2 relative flex-wrap sm:flex-nowrap">
+          {/* 1. CATEGORÍA / RUBRO (Multiselección) */}
+          <div className="relative" ref={categoryMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowCategoryMenu((v) => !v)
+                setShowTenantMenu(false)
+                setShowAppMenu(false)
+                setShowPlanMenu(false)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+                selectedCategories.length > 0
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+              }`}
+            >
+              <HubIcon icon={Globe} size={14} className="w-3.5 h-3.5 opacity-70" />
+              <span>
+                {selectedCategories.length === 0
+                  ? 'Categoría: Todas'
+                  : selectedCategories.length === 1
+                  ? selectedCategories[0]
+                  : `${selectedCategories.length} Categorías`}
+              </span>
+              <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 opacity-60" />
+            </button>
+
+            {showCategoryMenu && (
+              <div className="absolute left-0 top-[calc(100%+6px)] w-64 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2.5 text-xs animate-in fade-in duration-150">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Categoría / Rubro</p>
+                <div className="space-y-1 mt-1 max-h-56 overflow-y-auto">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategories([])}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                      selectedCategories.length === 0 ? 'bg-zinc-100 text-zinc-900 font-bold' : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>Todas las Categorías</span>
+                    {selectedCategories.length === 0 && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-zinc-900" />}
+                  </button>
+                  {STANDARD_CATEGORIES.map((cat) => {
+                    const isSelected = selectedCategories.includes(cat)
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => toggleCategory(cat)}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                          isSelected ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{cat}</span>
+                        {isSelected && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-white shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <span className="text-zinc-300 font-light">/</span>
+
+          {/* 2. EMPRESA / TENANT (Multiselección con buscador) */}
+          <div className="relative" ref={tenantMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowTenantMenu((v) => !v)
+                setShowCategoryMenu(false)
+                setShowAppMenu(false)
+                setShowPlanMenu(false)
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+                selectedTenantIds.length > 0
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full shrink-0 ${selectedTenantIds.length === 0 ? 'bg-emerald-500' : 'bg-[#ff4b0b]'}`} />
+              <span className="max-w-[190px] truncate text-left">
+                {selectedTenantIds.length === 0
+                  ? 'Empresas: Todas'
+                  : selectedTenantIds.length === 1
+                  ? (live.tenantsList.find((t) => t.id === selectedTenantIds[0])?.name || '1 Empresa')
+                  : `${selectedTenantIds.length} Empresas`}
+              </span>
+              <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 opacity-60 shrink-0" />
+            </button>
+
+            {showTenantMenu && (
+              <div className="absolute left-0 top-[calc(100%+6px)] w-80 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2.5 text-xs animate-in fade-in duration-150">
+                <div className="relative mb-2">
+                  <HubIcon icon={Search} size={14} className="w-3.5 h-3.5 text-zinc-400 absolute left-2.5 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="Buscar empresa por nombre o código..."
+                    value={tenantSearch}
+                    onChange={(e) => setTenantSearch(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-800 outline-none focus:border-zinc-400 font-medium"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="max-h-56 overflow-y-auto space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTenantIds([])}
+                    className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                      selectedTenantIds.length === 0 ? 'bg-zinc-100 text-zinc-900 font-bold' : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span>Todas las Empresas</span>
+                    </div>
+                    {selectedTenantIds.length === 0 && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-zinc-900" />}
+                  </button>
+
+                  {live.tenantsList
+                    .filter((t) => {
+                      const matchText = `${t.name || ''} ${t.client_code || ''}`.toLowerCase()
+                      return matchText.includes(tenantSearch.toLowerCase())
+                    })
+                    .map((t) => {
+                      const isSelected = selectedTenantIds.includes(t.id)
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => toggleTenant(t.id)}
+                          className={`w-full text-left px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                            isSelected ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                          }`}
+                        >
+                          <div className="flex flex-col min-w-0 pr-2">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${String(t.status) === 'active' ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
+                              <span className="truncate font-semibold">{t.name}</span>
+                            </div>
+                            <span className={`text-[10px] truncate ${isSelected ? 'text-white/70' : 'text-zinc-400'}`}>
+                              {resolveTenantCategory(t)} {t.client_code ? `· ${t.client_code}` : ''}
+                            </span>
+                          </div>
+                          {isSelected && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-white shrink-0" />}
+                        </button>
+                      )
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <span className="text-zinc-300 font-light">/</span>
+
+          {/* 3. APLICACIÓN (Multiselección) */}
+          <div className="relative" ref={appMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAppMenu((v) => !v)
+                setShowCategoryMenu(false)
+                setShowTenantMenu(false)
+                setShowPlanMenu(false)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+                selectedAppIds.length > 0
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+              }`}
+            >
+              <HubIcon icon={Layers} size={14} className="w-3.5 h-3.5 opacity-70" />
+              <span className="max-w-[160px] truncate">
+                {selectedAppIds.length === 0
+                  ? 'Aplicación: Todas'
+                  : selectedAppIds.length === 1
+                  ? (live.appsList.find((a) => a.id === selectedAppIds[0])?.name || '1 Aplicación')
+                  : `${selectedAppIds.length} Aplicaciones`}
+              </span>
+              <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 opacity-60" />
+            </button>
+
+            {showAppMenu && (
+              <div className="absolute left-0 top-[calc(100%+6px)] w-60 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Aplicación del Ecosistema</p>
+                <div className="space-y-1 mt-1 max-h-56 overflow-y-auto">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedAppIds([])}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                      selectedAppIds.length === 0 ? 'bg-zinc-100 text-zinc-900 font-bold' : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>Todas las Aplicaciones</span>
+                    {selectedAppIds.length === 0 && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-zinc-900" />}
+                  </button>
+                  {live.appsList.map((app) => {
+                    const isSelected = selectedAppIds.includes(app.id)
+                    return (
+                      <button
+                        key={app.id}
+                        type="button"
+                        onClick={() => toggleApp(app.id)}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                          isSelected ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{app.name}</span>
+                        {isSelected && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-white shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <span className="text-zinc-300 font-light">/</span>
+
+          {/* 4. PLAN (Multiselección) */}
+          <div className="relative" ref={planMenuRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowPlanMenu((v) => !v)
+                setShowCategoryMenu(false)
+                setShowTenantMenu(false)
+                setShowAppMenu(false)
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+                selectedPlans.length > 0
+                  ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/80 text-zinc-600 font-medium'
+              }`}
+            >
+              <HubIcon icon={SlidersHorizontal} size={14} className="w-3.5 h-3.5 opacity-70" />
+              <span className="max-w-[150px] truncate">
+                {selectedPlans.length === 0
+                  ? 'Plan: Todos'
+                  : selectedPlans.length === 1
+                  ? selectedPlans[0]
+                  : `${selectedPlans.length} Planes`}
+              </span>
+              <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 opacity-60" />
+            </button>
+
+            {showPlanMenu && (
+              <div className="absolute left-0 top-[calc(100%+6px)] w-52 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 p-2 text-xs animate-in fade-in duration-150">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Plan de Suscripción</p>
+                <div className="space-y-1 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlans([])}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                      selectedPlans.length === 0 ? 'bg-zinc-100 text-zinc-900 font-bold' : 'text-zinc-700 hover:bg-zinc-50'
+                    }`}
+                  >
+                    <span>Todos los Planes</span>
+                    {selectedPlans.length === 0 && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-zinc-900" />}
+                  </button>
+                  {['Premium', 'Intermedio', 'Básico', 'Sin plan'].map((p) => {
+                    const isSelected = selectedPlans.includes(p)
+                    return (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => togglePlan(p)}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-between ${
+                          isSelected ? 'bg-zinc-900 text-white font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{p}</span>
+                        {isSelected && <HubIcon icon={Check} size={14} className="w-3.5 h-3.5 text-white shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* BOTÓN RESTABLECER FILTROS */}
+          {hasAnyFilter && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded-lg text-xs font-semibold transition-colors ml-auto shrink-0 cursor-pointer"
+              title="Restablecer todos los filtros"
+            >
+              <span>Restablecer</span>
+              <HubIcon icon={X} size={13} className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Row 1: KPI Cards con Telemetría Reactiva */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Empresas Activas */}
         <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
@@ -572,10 +1216,10 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               </span>
               <span className="text-xs font-semibold text-zinc-600">Empresas activas</span>
             </div>
-            <span className="text-[10px] font-bold text-zinc-400">Total: {live ? live.totalTenants : '—'}</span>
+            <span className="text-[10px] font-bold text-zinc-400">Total: {live.totalTenants}</span>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live ? live.activeTenants : '—'}</span>
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.activeTenants}</span>
           </div>
           <p className="text-xs font-semibold text-blue-600 mt-1.5 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Ecosistema activo
@@ -600,7 +1244,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{mrrDisplay}</span>
           </div>
           <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ARR: S/ {live ? (live.mrr * 12).toLocaleString('es-PE') : '0'}
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ARR: S/ {(live.mrr * 12).toLocaleString('es-PE')}
           </p>
           <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
             <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,9 100,2" />
@@ -619,17 +1263,17 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <span className="text-[10px] font-bold text-orange-600">Directorio BD</span>
           </div>
           <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live ? live.totalUsers : '—'}</span>
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.totalUsers}</span>
           </div>
           <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live ? live.activeApps : '—'} apps asignadas
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live.activeApps} apps asignadas
           </p>
           <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
             <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,16 20,12 40,15 60,6 80,10 100,2" />
           </svg>
         </div>
 
-        {/* KPI 4: Facturación Consolidada (Caja & Inventario) */}
+        {/* KPI 4: Facturación Consolidada */}
         <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -650,176 +1294,489 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,14 20,16 40,10 60,12 80,5 100,2" />
           </svg>
         </div>
-      </div>
 
-      {/* Row 2: Analytics & Actions Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2 Cols): Charts */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Revenue Chart con Selector de Rango Temporal */}
-          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <div>
-                <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos de inventario por mes</p>
+        {/* Tarjetas de Métricas Personalizadas (Super Administrador) */}
+        {customMetrics.map((cm) => (
+          <div key={cm.id} className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group">
+            <div className="flex justify-between items-start mb-2">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-semibold text-zinc-600 truncate max-w-[140px]">{cm.name}</span>
               </div>
-              <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl border border-zinc-200/60">
-                {[
-                  { id: '30d', label: '30D' },
-                  { id: '90d', label: '90D' },
-                  { id: '9m', label: '9M' },
-                  { id: 'all', label: 'Todo' },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setTimeRange(t.id)}
-                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-colors ${
-                      timeRange === t.id
-                        ? 'bg-white text-zinc-900 shadow-2xs'
-                        : 'text-zinc-500 hover:text-zinc-900'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {live && live.hasRevenue ? (
-              <div className="h-48 flex items-end justify-between gap-1.5 pt-4 px-2">
-                {live.bars.map((b, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-                    <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10 shadow-sm pointer-events-none">
-                      {b.label}
-                    </div>
-                    <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 ease-out group-hover:brightness-110" style={{ height: b.height }} />
-                    <span className="text-[11px] font-medium text-zinc-400 mt-2">{b.month}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-48 flex items-center justify-center rounded-xl bg-zinc-50/70 border border-dashed border-zinc-200">
-                <p className="text-xs text-zinc-400 font-medium">{live ? 'Sin cobros ni ventas registradas en este período.' : 'Cargando datos en vivo…'}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Companies by Plan Donut Chart con Leyenda Interactiva hacia Empresas */}
-          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-zinc-950">Empresas por plan</h3>
               <button
                 type="button"
-                onClick={() => setActiveTab('Empresas')}
-                className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors"
+                onClick={() => setCustomMetrics((prev) => prev.filter((m) => m.id !== cm.id))}
+                className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-all p-1"
+                title="Eliminar métrica"
               >
-                Ver todas →
+                <HubIcon icon={X} size={14} className="w-3.5 h-3.5" />
               </button>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
-              <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
-                <div className="w-40 h-40 rounded-full" style={{ background: live && live.donut.length ? `conic-gradient(${live.donut.join(', ')})` : 'conic-gradient(#e4e4e7 0deg 360deg)' }} />
-                <div className="absolute w-[72%] h-[72%] bg-white rounded-full flex items-center justify-center shadow-xs">
-                  <div className="text-center">
-                    <span className="block text-[10px] text-zinc-400 font-medium">Total</span>
-                    <span className="block text-lg font-extrabold text-zinc-950">{live ? live.planTotal : '—'}</span>
-                    <span className="block text-[9px] text-zinc-400">empresas</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2 w-full sm:w-auto">
-                {(live ? Object.entries(live.planCounts) : []).map(([label, count]) => {
-                  const pct = live ? Math.round((count / live.planTotal) * 100) : 0
-                  const color = label === 'Premium' ? '#ff4b0b' : label === 'Intermedio' ? '#ff7a45' : label === 'Básico' ? '#ff9b73' : '#d4d4d8'
-                  return (
+            <h3 className="text-3xl font-extrabold tracking-tight text-zinc-900 mt-2">
+              {cm.unit === 'currency' ? `S/ ${cm.val.toLocaleString('es-PE')}` : cm.unit === 'pct' ? `${cm.val}%` : cm.val}
+            </h3>
+            <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
+              Personalizada por Super Admin
+            </p>
+            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 25,8 50,14 75,6 100,2" />
+            </svg>
+          </div>
+        ))}
+      </div>
+
+      {/* Row 2: 3 Tarjetas de Gráficos con Recharts y Selectores de Tiempo Específicos (Paso 3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        
+        {/* Gráfico 1: Rendimiento Comercial */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+          <div className="flex justify-between items-center mb-5 relative">
+            <h4 className="text-base font-bold text-zinc-900 tracking-tight">Rendimiento comercial</h4>
+            
+            {/* Dropdown Interactivo */}
+            <div className="relative" ref={rendimientoMenuRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRendimientoMenu((v) => !v)
+                  setShowAppTimeframeMenu(false)
+                  setShowPlanTimeframeMenu(false)
+                }}
+                className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+              >
+                <span>{rendimientoPeriod}</span>
+                <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-zinc-500" />
+              </button>
+
+              {showRendimientoMenu && (
+                <div className="absolute right-0 mt-1.5 w-36 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                  {['Diario', 'Semanal', 'Mensual', 'Trimestral'].map((p) => (
                     <button
-                      key={label}
+                      key={p}
                       type="button"
-                      onClick={() => setActiveTab('Empresas')}
-                      className="w-full flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold p-1.5 rounded-lg hover:bg-zinc-50 transition-colors text-left"
-                      title={`Ver empresas con plan ${label}`}
+                      onClick={() => {
+                        setRendimientoPeriod(p)
+                        setShowRendimientoMenu(false)
+                      }}
+                      className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                        rendimientoPeriod === p ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                      }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
-                        <span className="text-zinc-700">{label}</span>
-                      </div>
-                      <span className="text-zinc-500">{live ? count : '—'} <span className="text-zinc-400 font-normal">({pct}%)</span></span>
+                      {p}
                     </button>
-                  )
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
+          </div>
+
+          <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
+            <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-[#ff4b0b]"></div> Ingresos (S/)</div>
+            <div className="flex items-center gap-1.5"><div className="w-3 h-1 rounded-full bg-zinc-900"></div> Transacciones</div>
+          </div>
+
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={live.rendimientoData} margin={{ top: 5, right: 0, left: -15, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f4" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#71717a' }} dy={10} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#71717a' }} tickFormatter={(val) => `S/${val >= 1000 ? `${Math.round(val / 1000)}k` : val}`} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#71717a' }} />
+                <RechartsTooltip contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgba(0,0,0,0.08)' }} />
+                <Line yAxisId="left" type="monotone" dataKey="ingresos" name="Ingresos (S/)" stroke="#ff4b0b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 0, fill: '#ff4b0b' }} />
+                <Line yAxisId="right" type="monotone" dataKey="operaciones" name="Transacciones" stroke="#18181b" strokeWidth={2.5} dot={{ r: 0 }} activeDot={{ r: 5, strokeWidth: 0, fill: '#18181b' }} />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Right Column (1 Col): Quick Actions, Activity & Notes */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
+        {/* Gráfico 2: Ingresos por Aplicación */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default">
+          <div className="flex justify-between items-center mb-5 relative">
+            <h4 className="text-base font-bold text-zinc-900 tracking-tight">Ingresos por aplicación</h4>
+            
+            {/* Dropdown Interactivo */}
+            <div className="relative" ref={appTimeframeMenuRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAppTimeframeMenu((v) => !v)
+                  setShowRendimientoMenu(false)
+                  setShowPlanTimeframeMenu(false)
+                }}
+                className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+              >
+                <span>{appTimeframe}</span>
+                <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-zinc-500" />
+              </button>
+
+              {showAppTimeframeMenu && (
+                <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                  {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Año actual'].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setAppTimeframe(t)
+                        setShowAppTimeframeMenu(false)
+                      }}
+                      className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                        appTimeframe === t ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 mb-4 text-xs font-semibold text-zinc-500">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-[#ff4b0b]"></div> Facturado</div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-sm bg-zinc-200"></div> Suscripciones</div>
+          </div>
+
+          <div className="h-56 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={live.appStats} layout="vertical" margin={{ top: 0, right: 15, left: 5, bottom: 0 }}>
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#52525b', fontWeight: 500 }} width={95} />
+                <RechartsTooltip cursor={{ fill: '#f4f4f5' }} contentStyle={{ borderRadius: '10px', border: '1px solid #e4e4e7', fontSize: '12px', boxShadow: '0 4px 12px -2px rgba(0,0,0,0.08)' }} />
+                <Bar dataKey="facturacion" name="Facturado (S/)" stackId="a" fill="#ff4b0b" barSize={16} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="subs" name="Suscripciones" stackId="a" fill="#e4e4e7" barSize={16} radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráfico 3: Empresas por Plan */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 cursor-default flex flex-col justify-between">
+          <div className="flex justify-between items-center mb-3 relative">
+            <h4 className="text-base font-bold text-zinc-900 tracking-tight">Empresas por plan</h4>
+            
+            {/* Dropdown Interactivo */}
+            <div className="relative" ref={planTimeframeMenuRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPlanTimeframeMenu((v) => !v)
+                  setShowRendimientoMenu(false)
+                  setShowAppTimeframeMenu(false)
+                }}
+                className="text-xs font-semibold flex items-center gap-1 bg-zinc-100 hover:bg-zinc-200 transition-colors text-zinc-700 px-2.5 py-1.5 rounded-lg active:scale-[0.98]"
+              >
+                <span>{planTimeframe}</span>
+                <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-zinc-500" />
+              </button>
+
+              {showPlanTimeframeMenu && (
+                <div className="absolute right-0 mt-1.5 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-xs animate-in fade-in duration-150">
+                  {['Este mes', 'Últimos 30 días', 'Este trimestre', 'Año actual'].map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        setPlanTimeframe(t)
+                        setShowPlanTimeframeMenu(false)
+                      }}
+                      className={`w-full text-left px-3 py-1.5 font-medium transition-colors ${
+                        planTimeframe === t ? 'bg-zinc-50 text-zinc-900 font-bold' : 'text-zinc-600 hover:bg-zinc-50'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-around gap-4 py-2">
+            <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
+              <div
+                className="w-32 h-32 rounded-full"
+                style={{
+                  background:
+                    live.donut.length > 0
+                      ? `conic-gradient(${live.donut.join(', ')})`
+                      : 'conic-gradient(#e4e4e7 0deg 360deg)',
+                }}
+              />
+              <div className="absolute w-[72%] h-[72%] bg-white rounded-full flex items-center justify-center shadow-xs">
+                <div className="text-center">
+                  <span className="block text-[9px] text-zinc-400 font-medium">Total</span>
+                  <span className="block text-base font-extrabold text-zinc-950">{live.planTotal}</span>
+                  <span className="block text-[8px] text-zinc-400">empresas</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 flex-1 pl-2">
+              {Object.entries(live.planCounts).map(([label, count]) => {
+                const pct = Math.round((count / live.planTotal) * 100)
+                const color =
+                  label === 'Premium'
+                    ? '#ff4b0b'
+                    : label === 'Intermedio'
+                    ? '#ff7a45'
+                    : label === 'Básico'
+                    ? '#ff9b73'
+                    : '#d4d4d8'
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setActiveTab('Empresas')}
+                    className="w-full flex items-center justify-between gap-2 text-xs font-semibold p-1 rounded-lg hover:bg-zinc-50 transition-colors text-left"
+                    title={`Ver empresas con plan ${label}`}
+                  >
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: color }} />
+                      <span className="text-zinc-700 truncate">{label}</span>
+                    </div>
+                    <span className="text-zinc-500 shrink-0 text-[11px]">
+                      {count} <span className="text-zinc-400 font-normal">({pct}%)</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="border-t border-zinc-100 pt-2 text-right">
+            <button
+              type="button"
+              onClick={() => setActiveTab('Empresas')}
+              className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors inline-flex items-center gap-1"
+            >
+              Ver todas las empresas →
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Row 3: Actividad Reciente y Acciones Rápidas (Niveladas en 2 Columnas - Paso 3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        
+        {/* Columna 1: Actividad Reciente (Subida a este nivel) */}
+        <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <h3 className="text-sm font-bold text-zinc-950">Actividad reciente en vivo</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('Empresas')}
+                className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-0.5 cursor-pointer"
+              >
+                Ver todo <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5">
+              {live.recent.map((act, i) => (
+                <div key={i} className="flex items-start gap-3 text-xs p-2 rounded-xl hover:bg-zinc-50 transition-colors">
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${act.color}`}>
+                    <HubIcon icon={act.title.includes('empresa') ? Building2 : User} size={14} className="w-4 h-4" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-zinc-900 truncate">{act.title}</p>
+                    <p className="text-zinc-500 text-[11px] truncate mt-0.5">{act.detail}</p>
+                  </div>
+                  <span className="text-[10px] font-medium text-zinc-400 whitespace-nowrap bg-zinc-100 px-2 py-0.5 rounded-full">
+                    {timeAgo(act.time)}
+                  </span>
+                </div>
+              ))}
+              {live.recent.length === 0 && (
+                <p className="text-xs text-zinc-400 py-6 text-center">Sin actividad registrada en este período.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 font-medium">
+            <span>Sincronización en tiempo real</span>
+            <span className="text-emerald-600 font-semibold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Operativo
+            </span>
+          </div>
+        </div>
+
+        {/* Columna 2: Acciones Rápidas & Herramientas Super Admin */}
+        <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+          <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-zinc-950">Acciones rápidas</h3>
-              <button className="w-6 h-6 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 flex items-center justify-center transition-colors">
+              <button
+                type="button"
+                onClick={() => setIsMetricModalOpen(true)}
+                className="w-7 h-7 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-600 flex items-center justify-center transition-colors cursor-pointer"
+                title="Nueva acción / métrica"
+              >
                 <HubIcon icon={Plus} size={14} className="w-3.5 h-3.5" />
               </button>
             </div>
-            <div className="space-y-2">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
               {[
-                { icon: Building2, title: 'Crear nueva empresa', to: '/hub/bienvenida' },
+                { icon: Building2, title: 'Crear empresa', to: '/hub/bienvenida' },
                 { icon: UserPlus, title: 'Invitar usuario', to: '/hub/invitar' },
                 { icon: Tag, title: 'Gestionar planes', tab: 'Planes' },
-                { icon: CreditCard, title: 'Ver suscripciones', tab: 'Suscripciones' },
+                { icon: CreditCard, title: 'Suscripciones', tab: 'Suscripciones' },
                 { icon: BarChart3, title: 'Generar reporte', tab: 'Reportes' },
+                { icon: Settings, title: 'Configuración', tab: 'Configuración' },
               ].map((act, i) => (
-                <button key={i} onClick={() => (act.to ? navigate(act.to) : setActiveTab(act.tab))} className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/80 text-left transition-colors text-xs font-semibold text-zinc-800 group">
-                  <span className="w-7 h-7 rounded-lg bg-white border border-zinc-200/60 flex items-center justify-center text-zinc-600 group-hover:text-zinc-950 transition-colors shadow-2xs">
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => (act.to ? navigate(act.to) : setActiveTab(act.tab))}
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/80 text-left transition-colors text-xs font-semibold text-zinc-800 group cursor-pointer"
+                >
+                  <span className="w-7 h-7 rounded-lg bg-white border border-zinc-200/60 flex items-center justify-center text-zinc-600 group-hover:text-zinc-950 transition-colors shadow-2xs shrink-0">
                     <HubIcon icon={act.icon} size={14} className="w-3.5 h-3.5" />
                   </span>
-                  <span>{act.title}</span>
+                  <span className="truncate">{act.title}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-zinc-950">Actividad reciente</h3>
-              <button className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950 transition-colors flex items-center gap-0.5">
-                Ver todo <HubIcon icon={ArrowRight} size={12} className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {(live ? live.recent : []).map((act, i) => (
-                <div key={i} className="flex items-start gap-3 text-xs">
-                  <span className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${act.color}`}>
-                    <HubIcon icon={act.title.includes('empresa') ? Building2 : User} size={13} className="w-3.5 h-3.5" />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-zinc-900 truncate">{act.title}</p>
-                    <p className="text-zinc-500 text-[11px] truncate">{act.detail}</p>
-                  </div>
-                  <span className="text-[10px] text-zinc-400 whitespace-nowrap">{timeAgo(act.time)}</span>
-                </div>
-              ))}
-              {live && live.recent.length === 0 && (
-                <p className="text-xs text-zinc-400 py-2">Sin actividad registrada todavía.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-amber-50/60 rounded-2xl p-5 border border-amber-200/80 shadow-xs">
-            <div className="flex items-center justify-between mb-2">
+          {/* Tarjeta de Notas del Administrador Integrada para balance vertical */}
+          <div className="bg-amber-50/60 rounded-xl p-3.5 border border-amber-200/80 shadow-2xs">
+            <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
                 📝 Notas del administrador
               </span>
-              <button className="text-amber-700 hover:text-amber-950 p-1 rounded-md transition-colors">
+              <button
+                type="button"
+                className="text-amber-700 hover:text-amber-950 p-1 rounded-md transition-colors"
+                title="Editar notas"
+              >
                 <HubIcon icon={PenSquare} size={13} className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-xs text-amber-800/90 leading-relaxed font-medium">
-              Revisar renovaciones de planes este mes. Preparar reporte trimestral para dirección.
+            <p className="text-[11px] text-amber-800/90 leading-relaxed font-medium">
+              Revisar renovaciones de planes este mes. Monitorear límites de almacenamiento y cuotas de consumo de agentes IA.
             </p>
           </div>
         </div>
+
       </div>
+
+      {/* Modal Nueva Métrica (Super Administrador) */}
+      {isMetricModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-zinc-100 bg-zinc-50/50">
+              <div>
+                <h2 className="text-base font-extrabold text-zinc-900">Crear Métrica Personalizada</h2>
+                <p className="text-xs text-zinc-500 font-medium">Exclusivo de Super Administrador para monitorización en vivo.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsMetricModalOpen(false)}
+                className="p-1.5 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer text-zinc-500"
+              >
+                <HubIcon icon={X} size={16} className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!metricForm.name.trim()) return
+                const newMetric = {
+                  id: `metric_${Date.now()}`,
+                  name: metricForm.name.trim(),
+                  val: Number(metricForm.target) || 0,
+                  unit: metricForm.unit,
+                  source: metricForm.source,
+                }
+                setCustomMetrics((prev) => [...prev, newMetric])
+                setMetricForm({ name: '', source: 'tenants', target: 50, unit: 'num' })
+                setIsMetricModalOpen(false)
+              }}
+              className="p-6 space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Nombre de la Métrica</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ej. Tasa de Retención, LTV Estimado, Clientes VIP"
+                  value={metricForm.name}
+                  onChange={(e) => setMetricForm({ ...metricForm, name: e.target.value })}
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-800 outline-none focus:border-[#ff4b0b] focus:ring-1 focus:ring-[#ff4b0b]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Origen de Datos</label>
+                  <select
+                    value={metricForm.source}
+                    onChange={(e) => setMetricForm({ ...metricForm, source: e.target.value })}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-800 outline-none focus:border-[#ff4b0b]"
+                  >
+                    <option value="tenants">Empresas / Tenants</option>
+                    <option value="subs">Suscripciones / MRR</option>
+                    <option value="pays">Pasarelas / Pagos</option>
+                    <option value="orders">Inventario / Ventas</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Unidad de Medida</label>
+                  <select
+                    value={metricForm.unit}
+                    onChange={(e) => setMetricForm({ ...metricForm, unit: e.target.value })}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-800 outline-none focus:border-[#ff4b0b]"
+                  >
+                    <option value="num">Número entero (123)</option>
+                    <option value="currency">Moneda (S/ 1,234)</option>
+                    <option value="pct">Porcentaje (85%)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1.5">Valor Inicial / Meta</label>
+                <input
+                  type="number"
+                  required
+                  placeholder="ej. 100"
+                  value={metricForm.target}
+                  onChange={(e) => setMetricForm({ ...metricForm, target: e.target.value })}
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-800 outline-none focus:border-[#ff4b0b]"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-zinc-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsMetricModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-zinc-600 hover:bg-zinc-100 transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#ff4b0b] hover:bg-[#e04108] text-white transition-colors shadow-xs cursor-pointer"
+                >
+                  Guardar Métrica
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Row 3: Ecosystem Applications Grid */}
       <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
@@ -1205,8 +2162,7 @@ function HubPanelContent() {
   useEffect(() => {
     if (!panelAuth?.isPlatformAdmin) return
     let alive = true
-    ;(async () => {
-      const { data } = await supabase.from('tenants').select('id, name').order('name')
+    ;(async () => {        const { data } = await supabase.from('tenants').select('id, name, client_code').order('name')
       if (alive) setTenantOptions(data || [])
     })()
     return () => { alive = false }
@@ -1463,7 +2419,7 @@ function HubPanelContent() {
                   <button
                     type="button"
                     onClick={() => setIsTenantSwitcherOpen((o) => !o)}
-                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all"
                     title="Seleccionar marca (ver como)"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -1506,6 +2462,7 @@ function HubPanelContent() {
                                 >
                                   <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scopedTenant?.id === t.id ? 'bg-orange-400' : 'bg-white/20'}`} />
                                   <span className="truncate">{t.name}</span>
+                                  <span className="ml-auto text-[10px] font-semibold text-[var(--hub-faint)] shrink-0">{t.client_code}</span>
                                 </button>
                               ))
                             )}
@@ -1531,7 +2488,7 @@ function HubPanelContent() {
                   <button
                     type="button"
                     onClick={() => setIsBrandUsersOpen((o) => !o)}
-                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold transition-all cursor-pointer"
+                    className="flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all"
                     title="Tu empresa — equipo"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
