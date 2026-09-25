@@ -1230,7 +1230,9 @@ function HubPanelContent() {
       const { error: upErr } = await supabase.storage
         .from('avatars')
         .upload(path, blob, { upsert: true, contentType: 'image/webp', cacheControl: '3600' })
-      if (upErr) throw new Error('No se pudo subir la foto. Verifica que exista el bucket "avatars" en Supabase Storage.')
+      // El detalle crudo de Supabase ("Bucket not found", "violates row-level security", etc.)
+      // distingue bucket inexistente vs permisos RLS vs proyecto equivocado. Jamás lo tragar.
+      if (upErr) throw new Error(`No se pudo subir la foto a Supabase Storage. Detalle real: ${upErr.message}`)
       const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path)
       await updateSelf({ avatar_url: pub.publicUrl })
       setPanelAuth((p) => (p ? { ...p, avatarUrl: pub.publicUrl } : p))
