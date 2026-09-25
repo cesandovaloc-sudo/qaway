@@ -5,7 +5,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock3,
+  Download,
   Ellipsis,
+  FileSpreadsheet,
   Filter,
   HelpCircle,
   MoreHorizontal,
@@ -13,10 +15,12 @@ import {
   ShieldAlert,
   TrendingDown,
   TrendingUp,
+  Upload,
   Users,
   X,
   XCircle,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { supabase } from "@/config/supabase";
 
 /**
@@ -217,6 +221,67 @@ export default function EmpresasModule({
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [openMenu, setOpenMenu] = useState(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [importingFile, setImportingFile] = useState(false);
+
+  const handleExportExcel = () => {
+    const dataToExport = (companies.length ? companies : []).map((c) => ({
+      "RUC / ID": c.id,
+      "Nombre Empresa": c.name,
+      "Sector": c.sector,
+      "Plan": c.plan,
+      "Estado": c.status,
+      "Usuarios": c.users,
+      "Almacenamiento": c.storage,
+      "Ultima Actividad": c.lastActivity,
+      "MRR (S/)": c.mrr,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Empresas");
+    XLSX.writeFile(workbook, `empresas_qaway_lab_${Date.now()}.xlsx`);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportingFile(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length > 0) {
+        const importedCompanies = jsonData.map((row, index) => ({
+          id: String(row["RUC / ID"] || row["ID"] || row["id"] || `EMP-2026-${String(companies.length + index + 1).padStart(4, "0")}`),
+          name: String(row["Nombre Empresa"] || row["Empresa"] || row["nombre"] || "Empresa Nueva"),
+          sector: String(row["Sector"] || row["sector"] || "General"),
+          plan: String(row["Plan"] || row["plan"] || "básico"),
+          status: String(row["Estado"] || row["estado"] || "activo"),
+          users: Number(row["Usuarios"] || row["usuarios"] || 1),
+          storage: String(row["Almacenamiento"] || row["almacenamiento"] || "1 GB"),
+          lastActivity: "Hoy",
+          mrr: Number(row["MRR (S/)"] || row["MRR"] || row["mrr"] || 0),
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+        }));
+
+        setCompanies((prev) => [...importedCompanies, ...prev]);
+        setShowImportModal(false);
+        setNotice(`${importedCompanies.length} empresas cargadas correctamente desde el Excel.`);
+        setTimeout(() => setNotice(""), 4000);
+      } else {
+        alert("El archivo Excel no contiene filas con datos.");
+      }
+    } catch (err) {
+      console.error("Error al leer el archivo Excel:", err);
+      alert("No se pudo leer el archivo Excel. Asegúrate de usar un archivo .xlsx o .csv válido.");
+    } finally {
+      setImportingFile(false);
+    }
+  };
 
   /*
    * El listado global de empresas es exclusivo del Super Administrador
@@ -374,33 +439,109 @@ export default function EmpresasModule({
           </p>
         </div>
       )}
+      {notice && (
+        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-800">
+          {notice}
+        </div>
+      )}
+
       {/* Encabezado */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-400">
             <span>Inicio</span>
             <span>›</span>
-            <span className="text-zinc-600">Marcas</span>
+            <span className="text-zinc-600">Empresas</span>
           </div>
 
           <h1 className="text-2xl font-extrabold tracking-tight text-zinc-950 md:text-3xl">
-            Marcas
+            Empresas
           </h1>
 
           <p className="mt-1 text-sm text-zinc-500">
-            Gestiona todas las marcas y empresas del ecosistema Qaway Lab.
+            Gestiona todas las empresas del ecosistema Qaway Lab.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={onCreateCompany}
-          className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] focus:outline-none focus:ring-4 focus:ring-orange-100"
-        >
-          <span className="text-base leading-none">+</span>
-          Nueva empresa
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50"
+          >
+            <Download size={15} />
+            Descargar Excel
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowImportModal(true)}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-50"
+          >
+            <Upload size={15} />
+            Subir Excel
+          </button>
+
+          <button
+            type="button"
+            onClick={onCreateCompany}
+            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] focus:outline-none focus:ring-4 focus:ring-orange-100"
+          >
+            <span className="text-base leading-none">+</span>
+            Nueva empresa
+          </button>
+        </div>
       </div>
+
+      {/* Modal de Importación Excel */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="text-[#ff4b0b]" size={20} />
+                <h3 className="text-base font-bold text-zinc-900">Importar empresas (.xlsx / .csv)</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowImportModal(false)}
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="my-5">
+              <label className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-200 p-6 text-center hover:border-orange-300 hover:bg-orange-50/20 cursor-pointer transition">
+                <Upload size={24} className="mb-2 text-zinc-400" />
+                <span className="text-xs font-bold text-zinc-800">
+                  {importingFile ? "Procesando archivo..." : "Selecciona un archivo Excel (.xlsx, .xls) o CSV"}
+                </span>
+                <span className="mt-1 text-[11px] text-zinc-400">
+                  Importación inteligente con lectura automática de columnas
+                </span>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  disabled={importingFile}
+                />
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100">
+              <button
+                type="button"
+                onClick={() => setShowImportModal(false)}
+                className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

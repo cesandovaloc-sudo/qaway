@@ -92,7 +92,7 @@ const PILLAR_GRADIENTS = {
 
 const SUPER_ADMIN_NAV = [
   { id: 'Inicio', label: 'Inicio', icon: Home },
-  { id: 'Empresas', label: 'Marcas', icon: Building2 },
+  { id: 'Empresas', label: 'Empresas', icon: Building2 },
   { id: 'Usuarios', label: 'Usuarios', icon: Users },
   { id: 'Aplicaciones', label: 'Aplicaciones', icon: LayoutGrid },
   { id: 'Planes', label: 'Planes y Precios', icon: Tag },
@@ -146,16 +146,36 @@ function displayName(email) {
   return base.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
+// Un "nombre" que viene como correo (cuenta sin full_name en BD) nunca debe pintarse
+// tal cual en pantalla: s.admin@qawaylab.com → "S Admin". Solo capa de presentación;
+// no toca el modelo de usuarios.
+function nameWords(raw) {
+  if (!raw) return []
+  let text = String(raw).trim()
+  if (text.includes('@')) text = text.split('@')[0]
+  return text
+    .replace(/[._-]+/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+}
+
+// Nombre legible completo para superficies de identidad (dropdown de perfil).
+function readableName(full) {
+  const words = nameWords(full)
+  return words.length > 0 ? words.join(' ') : null
+}
+
 // Formato ejecutivo del estándar del proyecto (Estandar_Arquetipos_Disenos_y_Layouts_SaaS.md:365):
 // "Carlos Enrique Sandoval Ocaña" → "Carlos S." · "Juanito Alimaña" → "Juanito A."
-// Evita que el chip de usuario del topbar devore el ancho con el nombre completo.
+// Si el nombre proviene de un correo (sin full_name real en BD) se humaniza sin acortar más.
 function shortName(full) {
-  if (!full) return null
-  const parts = String(full).trim().split(/\s+/).filter(Boolean)
-  if (parts.length === 0) return null
-  if (parts.length === 1) return parts[0]
-  if (parts.length === 2) return `${parts[0]} ${parts[1].charAt(0).toUpperCase()}.`
-  return `${parts[0]} ${parts[2].charAt(0).toUpperCase()}.`
+  const words = nameWords(full)
+  if (words.length === 0) return null
+  if (typeof full === 'string' && full.includes('@')) return words.join(' ')
+  if (words.length === 1) return words[0]
+  if (words.length === 2) return `${words[0]} ${words[1].charAt(0).toUpperCase()}.`
+  return `${words[0]} ${words[2].charAt(0).toUpperCase()}.`
 }
 
 function fileToDataUrl(file) {
@@ -1151,14 +1171,14 @@ function HubPanelContent() {
 
   const navItems = useMemo(() => {
     if (!panelAuth) return []
+    if (panelAuth.isPlatformAdmin && !actingAsBrand) return SUPER_ADMIN_NAV
     if (effectiveIsTenantAdmin) return TENANT_ADMIN_NAV
-    if (panelAuth.isPlatformAdmin) return SUPER_ADMIN_NAV
     const granted = new Set(panelAuth.permissions?.panel || [])
     return [
       ...WORKER_BASE_NAV,
       ...TENANT_ADMIN_NAV.filter((nav) => granted.has(nav.id) && !ADMIN_ONLY_NAV.has(nav.id)),
     ]
-  }, [panelAuth, effectiveIsTenantAdmin])
+  }, [panelAuth, effectiveIsTenantAdmin, actingAsBrand])
 
   // Guard por tab: una sección no permitida vuelve a Inicio (defensa en capas, sin backend).
   const allowedTabIds = useMemo(() => new Set(navItems.map((nav) => nav.id)), [navItems])
@@ -1171,7 +1191,7 @@ function HubPanelContent() {
   // Foto estable por usuario: solo avatar real (users.avatar_url). El onboarding nunca
   // asigna foto; sin ella se muestran las siglas. Neutra hasta resolver la identidad.
   const avatar = identityResolved ? (panelAuth?.avatarUrl || null) : null
-  const initials = identityResolved && name ? name.split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase() : ''
+  const initials = identityResolved && name ? nameWords(name).join(' ').split(' ').filter(Boolean).slice(0, 2).map((x) => x[0]).join('').toUpperCase() : ''
 
   // ── Mi cuenta / perfil (30.X): persistencia SOLO de identidad personal ──
   // Alcance aprobado: nombre completo → users.full_name; foto → users.avatar_url vía
@@ -1623,7 +1643,7 @@ function HubPanelContent() {
                         )}
                         <div className="flex-1 min-w-0">
                           {identityResolved ? (
-                            <><p className="text-sm font-bold text-white truncate">{name}</p><p className="text-xs text-[var(--hub-dim)] truncate mt-0.5">{authUser?.email || 'Verificando identidad…'}</p></>
+                            <><p className="text-sm font-bold text-white truncate">{readableName(name) || name}</p><p className="text-xs text-[var(--hub-dim)] truncate mt-0.5">{authUser?.email || 'Verificando identidad…'}</p></>
                           ) : (
                             <><p className="h-4 w-32 rounded bg-[var(--hub-hover)] animate-pulse" aria-hidden="true" /><p className="h-3 w-40 rounded bg-[var(--hub-chip)] animate-pulse mt-2" aria-hidden="true" /></>
                           )}
