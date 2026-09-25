@@ -110,6 +110,7 @@ function CRMContent() {
   const [simulating, setSimulating] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
+  const [isTenantOpen, setIsTenantOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const navigate = useNavigate()
   const searchInputRef = useRef(null)
@@ -359,20 +360,62 @@ function CRMContent() {
             {/* Selector Multi-Tenant de Marca / Empresa */}
             {tenants && tenants.length > 0 && (
               <div className="relative">
-                <select
-                  value={selectedTenantId}
-                  onChange={(e) => setSelectedTenantId(e.target.value)}
-                  className="h-10 pl-3 pr-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all appearance-none"
+                {/* Trigger píldora (diseño Hub) + desplegable premium: mismo patrón visual del
+                    selector de marcas del Panel principal. La lógica de tenant es la misma
+                    del select anterior (selectedTenantId / 'all'). */}
+                <button
+                  type="button"
+                  onClick={() => setIsTenantOpen((o) => !o)}
+                  className="flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all"
                   title="Cambiar Marca / Tenant Activo"
                 >
-                  <option value="all" className="bg-[#18181b] text-white">🏢 Todas las Marcas</option>
-                  {tenants.map(t => (
-                    <option key={t.id} value={t.id} className="bg-[#18181b] text-white">
-                      {t.name} ({t.client_code})
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="max-w-40 truncate">{selectedTenantId === 'all' ? 'Todas las Marcas' : (tenants.find((t) => t.id === selectedTenantId)?.name || 'Todas las Marcas')}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform duration-200 ${isTenantOpen ? 'rotate-180 text-white' : ''}`} />
+                </button>
+                <AnimatePresence>
+                  {isTenantOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsTenantOpen(false)} aria-label="Cerrar selector de marca" />
+                      <motion.div
+                        initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[#18181b] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                      >
+                        <div className="p-4 border-b border-white/5 bg-white/5">
+                          <p className="text-xs font-extrabold text-white">Cambiar de marca</p>
+                          <p className="text-[10px] text-white/50 mt-0.5">Las vistas se filtran por la marca activa.</p>
+                        </div>
+                        <div className="p-2 max-h-64 overflow-y-auto">
+                          {tenants.map((t) => (
+                            <button
+                              key={t.id}
+                              type="button"
+                              onClick={() => { setSelectedTenantId(t.id); setIsTenantOpen(false) }}
+                              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors ${selectedTenantId === t.id ? 'bg-orange-500/15 text-orange-300' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === t.id ? 'bg-orange-400' : 'bg-white/20'}`} />
+                              <span className="truncate">{t.name}</span>
+                              <span className="ml-auto text-[10px] font-semibold text-white/40 shrink-0">{t.client_code}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <div className="p-2 border-t border-white/5 bg-black/20">
+                          <button
+                            type="button"
+                            onClick={() => { setSelectedTenantId('all'); setIsTenantOpen(false) }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTenantId === 'all' ? 'text-orange-300' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === 'all' ? 'bg-orange-400' : 'bg-white/20'}`} />
+                            Todas las Marcas
+                          </button>
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
+                </AnimatePresence>
               </div>
             )}
           </div>
