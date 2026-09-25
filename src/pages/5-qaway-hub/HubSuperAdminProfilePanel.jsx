@@ -162,10 +162,8 @@ export default function HubProfilePanel({
   const [avatarUrl, setAvatarUrl] = useState(data.avatarUrl || "");
   const [section, setSection] = useState("cuenta");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [savingPersonal, setSavingPersonal] = useState(false);
-  const [savingPreferences, setSavingPreferences] = useState(false);
-  const [personalSaved, setPersonalSaved] = useState(false);
-  const [preferencesSaved, setPreferencesSaved] = useState(false);
+  const [savingAll, setSavingAll] = useState(false);
+  const [savedAll, setSavedAll] = useState(false);
 
   useEffect(() => {
     setFullName(data.fullName);
@@ -173,9 +171,19 @@ export default function HubProfilePanel({
     setTimezone(data.timezone);
     setLanguage(data.language);
     setAvatarUrl(data.avatarUrl || "");
-    setSelectedFile(null);
-  }, [data.fullName, data.roleLabel, data.timezone, data.language, data.avatarUrl]);
+    // Sin data.avatarUrl en deps a propósito: la subida de foto actualiza el prop avatarUrl
+    // y NO debe resetear el nombre/cargo que el usuario esté editando.
+  }, [data.fullName, data.roleLabel, data.timezone, data.language]);
 
+  // Sincronización exclusiva de la foto: refleja el avatar real (Storage) sin resetear
+  // el formulario de identidad. Al terminar la subida reemplaza el preview dataURL
+  // por la URL canónica; al eliminar, limpia el estado.
+  useEffect(() => {
+    setAvatarUrl(data.avatarUrl || "");
+  }, [data.avatarUrl]);
+
+  // La foto SOLO previsualiza al seleccionarla (dataURL local). Se persiste al pulsar
+  // "Guardar cambios" junto con el resto de la página — nunca se sube por su cuenta.
   const selectAvatar = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -195,33 +203,23 @@ export default function HubProfilePanel({
     reader.readAsDataURL(file);
   };
 
-  const savePersonal = async () => {
-    setSavingPersonal(true);
+  // Guardado unificado: identidad + preferencias + foto pendiente en UNA sola acción.
+  // Modelo Gmail/Notion: la página se configura y se guarda completa, sin botones por bloque.
+  const saveAll = async () => {
+    setSavingAll(true);
     try {
       if (selectedFile && onUploadAvatar) await onUploadAvatar(selectedFile);
-      if (onSaveProfile) await onSaveProfile({ fullName: fullName.trim(), roleLabel });
+      if (onSaveProfile) await onSaveProfile({ fullName: fullName.trim(), roleLabel, timezone, language });
       setSelectedFile(null);
-      setPersonalSaved(true);
-      setTimeout(() => setPersonalSaved(false), 2500);
+      setSavedAll(true);
+      setTimeout(() => setSavedAll(false), 2500);
     } finally {
-      setSavingPersonal(false);
-    }
-  };
-
-  const savePreferences = async () => {
-    setSavingPreferences(true);
-    try {
-      if (onSaveProfile) await onSaveProfile({ timezone, language });
-      setPreferencesSaved(true);
-      setTimeout(() => setPreferencesSaved(false), 2500);
-    } finally {
-      setSavingPreferences(false);
+      setSavingAll(false);
     }
   };
 
   const deleteAvatar = async () => {
     setAvatarUrl("");
-    setSelectedFile(null);
     if (onDeleteAvatar) await onDeleteAvatar();
   };
 
@@ -317,13 +315,7 @@ export default function HubProfilePanel({
                       className="h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-[11px] text-gray-800 outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-orange-100" />
                   </label>
 
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    {personalSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
-                    <button type="button" onClick={savePersonal} disabled={savingPersonal}
-className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
-                      <Save size={13} /> {savingPersonal ? "Guardando..." : "Guardar cambios"}
-                    </button>
-                  </div>
+
                 </div>
               </SectionCard>
             </div>
@@ -375,13 +367,7 @@ className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm fon
                   </label>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-4">
-                  {preferencesSaved && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
-                  <button type="button" onClick={savePreferences} disabled={savingPreferences}
-                    className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
-                    <Save size={13} /> {savingPreferences ? "Guardando..." : "Guardar cambios"}
-                  </button>
-                </div>
+
               </SectionCard>
             </div>
 
@@ -396,6 +382,21 @@ className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm fon
                 </div>
               </div>
             </section>
+
+            {/* Guardado unificado (una sola acción para toda la página): identidad, preferencias
+                y foto pendiente. Barra fija inferior para que siempre esté a la vista. */}
+            <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white/95 px-5 py-3 shadow-lg shadow-zinc-900/5 backdrop-blur">
+              <p className="min-w-0 truncate text-[10px] text-gray-500">
+                {selectedFile ? "Tu nueva foto de perfil se incluirá al guardar." : "Los cambios de esta página se guardan juntos."}
+              </p>
+              <div className="flex shrink-0 items-center gap-2">
+                {savedAll && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
+                <button type="button" onClick={saveAll} disabled={savingAll}
+                  className="flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
+                  <Save size={14} /> {savingAll ? "Guardando..." : "Guardar cambios"}
+                </button>
+              </div>
+            </div>
           </div>
 
           <aside className="space-y-3">

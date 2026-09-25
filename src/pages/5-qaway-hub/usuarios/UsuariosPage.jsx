@@ -83,6 +83,23 @@ export default function UsuariosPage() {
     refresh()
   }
 
+  async function handleRemoveUser(targetUser) {
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${targetUser.full_name || targetUser.email} de tu marca?`)) return
+    setMsg('')
+    try {
+      await supabase.from('user_app_roles').delete().eq('user_id', targetUser.id)
+      const { error } = await supabase.from('users').delete().eq('id', targetUser.id)
+      if (error) {
+        const { error: upErr } = await supabase.from('users').update({ tenant_id: null, status: 'Inactivo' }).eq('id', targetUser.id)
+        if (upErr) throw upErr
+      }
+      setMsg('Usuario eliminado correctamente.')
+      refresh()
+    } catch (err) {
+      setMsg('Error al eliminar usuario: ' + (err.message || 'Error desconocido'))
+    }
+  }
+
   const isAdmin = me?.role === 'admin'
 
   return (
@@ -142,7 +159,18 @@ export default function UsuariosPage() {
                       </span>
                       <span>{u.full_name || u.email} <span style={{ color: '#85858c' }}>· {u.email}</span></span>
                     </span>
-                    <span className="rounded-full border px-3 py-1 font-mono text-xs" style={{ borderColor: '#dddde2', color: '#55555c' }}>{u.role}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full border px-3 py-1 font-mono text-xs" style={{ borderColor: '#dddde2', color: '#55555c' }}>{u.role}</span>
+                      {isAdmin && u.id !== me?.id && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUser(u)}
+                          className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-bold text-red-600 hover:bg-red-50 transition"
+                        >
+                          Eliminar
+                        </button>
+                      )}
+                    </div>
                   </li>
                 ))}
                 {users.length === 0 && <li className="px-4 py-3 text-sm" style={{ color: '#85858c' }}>Sin usuarios visibles.</li>}

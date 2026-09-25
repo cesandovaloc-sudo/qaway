@@ -1181,10 +1181,13 @@ function HubPanelContent() {
   }, [panelAuth, effectiveIsTenantAdmin, actingAsBrand])
 
   // Guard por tab: una sección no permitida vuelve a Inicio (defensa en capas, sin backend).
+  // 'Mi cuenta' vive fuera del sidebar (se abre desde el menú de perfil), así que no está en
+  // navItems: se excluye del guard para que F5 / URL directa en /hub/panel/mi-cuenta no rebote.
   const allowedTabIds = useMemo(() => new Set(navItems.map((nav) => nav.id)), [navItems])
   useEffect(() => {
     if (!panelAuth) return
-    if (!allowedTabIds.has(activeTab) && activeTab !== 'Todas') navigate('/hub/panel')
+    if (activeTab === 'Todas' || activeTab === 'Mi cuenta') return
+    if (!allowedTabIds.has(activeTab)) navigate('/hub/panel')
   }, [panelAuth, activeTab, navigate, allowedTabIds])
 
   const name = identityResolved ? (panelAuth?.fullName || displayName(authUser?.email)) : null

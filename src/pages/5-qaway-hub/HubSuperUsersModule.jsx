@@ -334,9 +334,8 @@ export default function UsersModule({
   onInviteUser,
   onOpenUser,
 }) {
-  // Los datos de ejemplo solo aplican en contexto plataforma (listado global).
-  // Un tenant_admin nunca parte de filas ajenas a su marca.
-  const [users, setUsers] = useState(() => (isPlatformAdmin ? MOCK_USERS : []));
+  // Los usuarios se consultan siempre en vivo desde Supabase; no se usan datos mock.
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -347,6 +346,40 @@ export default function UsersModule({
   const [openMenu, setOpenMenu] = useState(null);
   const [permUserId, setPermUserId] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  const handleDeleteUser = async (user) => {
+    if (user.isSuperAdmin) {
+      alert("No se puede eliminar a un Super Administrador de la plataforma.");
+      return;
+    }
+    const confirm = window.confirm(
+      `¿Estás seguro de que deseas eliminar al usuario "${user.name}" (${user.email})?`
+    );
+    if (!confirm) return;
+
+    try {
+      // 1. Eliminar asignaciones de roles de app asociadas al usuario
+      await supabase.from("user_app_roles").delete().eq("user_id", user.id);
+
+      // 2. Intentar eliminación directa en public.users
+      const { error: delErr } = await supabase.from("users").delete().eq("id", user.id);
+      if (delErr) {
+        console.warn("Delete en users falló por RLS/FK, desvinculando de la empresa:", delErr);
+        // Fallback: desvincular de la empresa y marcar inactivo
+        const { error: upErr } = await supabase
+          .from("users")
+          .update({ status: "Inactivo", tenant_id: null })
+          .eq("id", user.id);
+        if (upErr) throw new Error(delErr.message || upErr.message);
+      }
+
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+      setSelectedUsers((prev) => prev.filter((id) => id !== user.id));
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
+      alert("No se pudo eliminar el usuario: " + err.message);
+    }
+  };
 
   // Soporte del detalle: deep-link /hub/panel/usuarios?usuario=id
   const location = useLocation();
@@ -973,6 +1006,18 @@ export default function UsersModule({
                                     >
                                       Gestionar permisos
                                     </button>
+                                    {!user.isSuperAdmin && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenMenu(null);
+                                          handleDeleteUser(user);
+                                        }}
+                                        className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50"
+                                      >
+                                        Eliminar usuario
+                                      </button>
+                                    )}
                                   </div>
                                 )}
                               </div>

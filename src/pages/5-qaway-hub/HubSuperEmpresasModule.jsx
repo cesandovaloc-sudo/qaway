@@ -229,18 +229,52 @@ export default function EmpresasModule({
     const dataToExport = (companies.length ? companies : []).map((c) => ({
       "RUC / ID": c.id,
       "Nombre Empresa": c.name,
-      "Sector": c.sector,
-      "Plan": c.plan,
-      "Estado": c.status,
-      "Usuarios": c.users,
-      "Almacenamiento": c.storage,
-      "Ultima Actividad": c.lastActivity,
-      "MRR (S/)": c.mrr,
+      "Sector": c.sector || c.industry || "General",
+      "Plan": typeof c.plan === "string" ? c.plan : (c.plan?.label || "Sin plan"),
+      "Estado": typeof c.status === "string" ? c.status : (c.status?.label || "Activa"),
+      "Usuarios": c.userCount ?? c.users ?? 1,
+      "Almacenamiento": c.storage || "1 GB",
+      "Fecha Registro": formatDate(c.createdAt),
+      "MRR (S/)": c.mrr || 0,
     }));
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Empresas");
     XLSX.writeFile(workbook, `empresas_qaway_lab_${Date.now()}.xlsx`);
+  };
+
+  const handleDeleteCompany = async (company) => {
+    if (company.slug === "qaway-lab" || company.name?.toLowerCase().includes("qaway lab")) {
+      alert("No se puede eliminar la empresa principal (Master) Qaway Lab.");
+      return;
+    }
+    const confirm = window.confirm(
+      `¿Estás seguro de que deseas eliminar la empresa "${company.name}"?\nEsta acción eliminará el registro de la base de datos.`
+    );
+    if (!confirm) return;
+
+    try {
+      // 1. Desvincular usuarios asociados a este tenant
+      await supabase.from("users").update({ tenant_id: null }).eq("tenant_id", company.id);
+
+      // 2. Eliminar el registro en public.tenants
+      const { error: delErr } = await supabase.from("tenants").delete().eq("id", company.id);
+      if (delErr) {
+        console.warn("Delete en tenants falló, aplicando soft-delete:", delErr);
+        const { error: upErr } = await supabase
+          .from("tenants")
+          .update({ status: "inactive", deleted_at: new Date().toISOString() })
+          .eq("id", company.id);
+        if (upErr) throw new Error(delErr.message || upErr.message);
+      }
+
+      setCompanies((prev) => prev.filter((c) => c.id !== company.id));
+      setNotice(`Empresa "${company.name}" eliminada correctamente.`);
+      setTimeout(() => setNotice(""), 3500);
+    } catch (err) {
+      console.error("Error al eliminar empresa:", err);
+      alert("No se pudo eliminar la empresa: " + err.message);
+    }
   };
 
   const handleFileUpload = async (e) => {
@@ -799,6 +833,16 @@ export default function EmpresasModule({
                                 className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50"
                               >
                                 Gestionar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenu(null);
+                                  handleDeleteCompany(company);
+                                }}
+                                className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50"
+                              >
+                                Eliminar empresa
                               </button>
                             </div>
                           )}
