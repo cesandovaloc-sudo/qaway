@@ -87,7 +87,7 @@ export default function HubOnboardingPage() {
   const [tenant, setTenant] = useState(null);
   const [adminEmail, setAdminEmail] = useState("");
   const [appsDb, setAppsDb] = useState([]);
-  const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "", rubro: "", phone: "", email: "" });
+  const [form, setForm] = useState({ name: "", legal: "", ruc: "", country: "Perú", rubro: "", phone: "", email: "" });
   const [customRubro, setCustomRubro] = useState("");
   const [inviteEmails, setInviteEmails] = useState([""]);
   const [note, setNote] = useState("");
@@ -249,7 +249,7 @@ export default function HubOnboardingPage() {
       if (!form.legal.trim()) errs.legal = "Escribe la razón social de la empresa.";
       const ruc = form.ruc.trim();
       if (!ruc) errs.ruc = "Escribe el RUC / identificación fiscal.";
-      else if (pais?.rucDigitos && ruc.length !== pais.rucDigitos) errs.ruc = `El RUC de ${pais.nombre} tiene exactamente ${pais.rucDigitos} dígitos.`;
+      else if (pais?.rucDigitos && ruc.length !== pais.rucDigitos) errs.ruc = `El RUC de ${pais.nombre} debe tener exactamente ${pais.rucDigitos} dígitos (has ingresado ${ruc.length}).`;
     }
     return errs;
   }
@@ -260,6 +260,7 @@ export default function HubOnboardingPage() {
     setForm((f) => ({ ...f, country: v }));
     if (pais) setPrefix(pais.dial);
     if (fieldErrors.country) setFieldErrors((fe) => { const n = { ...fe }; n.country = undefined; return n; });
+    if (fieldErrors.ruc) setFieldErrors((fe) => { const n = { ...fe }; n.ruc = undefined; return n; });
     if (note.startsWith("Completa los campos")) setNote("");
   }
 
@@ -271,8 +272,8 @@ export default function HubOnboardingPage() {
   }
 
   function handleRucChange(e) {
-    const max = paisSel?.rucDigitos || 20;
-    setForm((f) => ({ ...f, ruc: e.target.value.replace(/\D/g, "").slice(0, max) }));
+    const v = e.target.value.replace(/\D/g, "");
+    setForm((f) => ({ ...f, ruc: v }));
     if (fieldErrors.ruc) setFieldErrors((fe) => { const n = { ...fe }; n.ruc = undefined; return n; });
     if (note.startsWith("Completa los campos")) setNote("");
   }
@@ -570,6 +571,18 @@ export default function HubOnboardingPage() {
 
             <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} error={fieldErrors.name} />
 
+            <div className="grid">
+              <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} error={fieldErrors.country} placeholder="Selecciona tu país…">
+                {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
+              </SelectField>
+              <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} required invalid={!!fieldErrors.rubro} error={fieldErrors.rubro} placeholder="Selecciona tu rubro…">
+                {RUBROS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </SelectField>
+            </div>
+            {form.rubro === "Otro" && (
+              <Field label="Especifica tu rubro" placeholder="Ej. Consultoría, Arquitectura..." value={customRubro} onChange={(e) => { setCustomRubro(e.target.value); if (fieldErrors.customRubro) setFieldErrors(fe => ({ ...fe, customRubro: undefined })); }} required invalid={!!fieldErrors.customRubro} error={fieldErrors.customRubro} />
+            )}
+
             <label className="check constituida">
               <input type="checkbox" checked={constituida} onChange={(e) => setConstituida(e.target.checked)} />
               <span>¿Es una empresa constituida?<small>De serlo, la Razón social y el RUC serán obligatorios.</small></span>
@@ -577,16 +590,7 @@ export default function HubOnboardingPage() {
 
             <div className="grid">
               <Field label="Razón social" placeholder="Nombre legal de la empresa" value={form.legal} onChange={setF("legal")} disabled={!constituida} required={constituida} invalid={!!fieldErrors.legal} error={fieldErrors.legal} />
-              <Field label="RUC / identificación fiscal" placeholder="Ingresa tu identificación" value={form.ruc} onChange={handleRucChange} maxLength={paisSel?.rucDigitos || 40} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} error={fieldErrors.ruc} />
-              <SelectField label="País" value={form.country} onChange={handleCountryChange} required invalid={!!fieldErrors.country} error={fieldErrors.country} placeholder="Selecciona tu país…">
-                {PAISES.map((p) => <option key={p.codigo} value={p.nombre}>{p.nombre}</option>)}
-              </SelectField>
-              <SelectField label="Rubro / actividad" value={form.rubro} onChange={setF("rubro")} required invalid={!!fieldErrors.rubro} error={fieldErrors.rubro} placeholder="Selecciona tu rubro…">
-                {RUBROS.map((r) => <option key={r} value={r}>{r}</option>)}
-              </SelectField>
-              {form.rubro === "Otro" && (
-                <Field label="Especifica tu rubro" placeholder="Ej. Consultoría, Arquitectura..." value={customRubro} onChange={(e) => { setCustomRubro(e.target.value); if (fieldErrors.customRubro) setFieldErrors(fe => ({ ...fe, customRubro: undefined })); }} required invalid={!!fieldErrors.customRubro} error={fieldErrors.customRubro} />
-              )}
+              <Field label={paisSel?.nombre === "Perú" ? "RUC / identificación fiscal" : "Identificación fiscal / RUC"} placeholder={paisSel?.nombre === "Perú" ? "Ej. 20601234567 (11 dígitos)" : "Ingresa tu identificación"} value={form.ruc} onChange={handleRucChange} maxLength={paisSel?.rucDigitos ? paisSel.rucDigitos + 2 : 25} disabled={!constituida} required={constituida} invalid={!!fieldErrors.ruc} error={fieldErrors.ruc} />
               <label className={`field ${fieldErrors.phone ? "invalid" : ""}`}>
                 <span>Teléfono / WhatsApp<b className="req"> *</b></span>
                 <div className="phoneRow">
@@ -621,10 +625,9 @@ export default function HubOnboardingPage() {
             </div>
 
             <div className="note trial-box">
-              <div className="trial-badge">✓ PRUEBA GRATUITA POR 14 DÍAS · ACCESO TOTAL</div>
+              <div className="trial-badge">PRUEBA GRATUITA POR 14 DÍAS · ACCESO TOTAL</div>
               <b>Empieza tu prueba gratuita sin tarjeta de crédito</b>
               <span>Tus aplicaciones seleccionadas se activan <b>100% GRATIS hoy</b>. Al finalizar los 14 días nada se cobra automáticamente: tú tienes el control total y decides en tu panel qué plan mantener.</span>
-              <small className="trial-footer">Transparencia garantizada · Consulta tarifas y planes vigentes desde tu panel en cualquier momento.</small>
             </div>
 
             <Notice error={noteIsError}>{note}</Notice>
@@ -729,9 +732,8 @@ export default function HubOnboardingPage() {
         .note{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-top:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:6px}
         .note b{font-size:15px;color:#0f172a;font-weight:700}
         .note span{font-size:14px;color:#475569;line-height:1.55}
-        .trial-box{border:1px solid #d1fae5;background:linear-gradient(180deg,#f0fdf4 0%,#ffffff 100%)}
-        .trial-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.3px;color:#166534;background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
-        .trial-footer{font-size:12.5px;color:#64748b;margin-top:4px}
+        .trial-box{border:1px solid #e2e8f0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
+        .trial-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
         .admin-role-box{border:1px solid #e2e8f0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
         .role-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
         .invite-box{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
@@ -748,7 +750,7 @@ export default function HubOnboardingPage() {
         .notice-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-weight:600}
         .notice-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-weight:600}
         .logo-note{display:block;font-style:normal;margin-top:5px;font-size:12px;font-weight:700;color:#16a34a}
-        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#166534;background:#dcfce7;border:1px solid #bbf7d0;border-radius:999px;padding:3px 8px}
+        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#334155;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px}
         .success{width:64px;height:64px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e2e8f0;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9}.summary div:last-child{border:0}.summary span{font-size:13px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
         @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
         .onboarding-skeleton{animation:skPulse 1.4s ease-in-out infinite}
