@@ -416,20 +416,22 @@ const ECOSYSTEM_TONES = [
 
 function SuperAdminDashboard({ setActiveTab, navigate }) {
   const [live, setLive] = useState(null)
+  const [timeRange, setTimeRange] = useState('9m')
 
-  // Datos globales reales (plataforma = is_admin). Consultas guardadas:
-  // si algo falla se muestra "—", nunca se inventan cifras.
+  // Datos globales reales (plataforma = is_admin). Consultas guardadas de Supabase
+  // cruzando pasarelas (payments) y pedidos comerciales de inventario (orders).
   useEffect(() => {
     let alive = true
     ;(async () => {
-      let data = { tenants: [], users: [], subs: [], apps: [], pays: [], roles: [] }
+      let data = { tenants: [], users: [], subs: [], apps: [], pays: [], orders: [], roles: [] }
       try {
-        const [t, u, s, a, p, r] = await Promise.all([
+        const [t, u, s, a, p, o, r] = await Promise.all([
           supabase.from('tenants').select('id, name, status, deleted_at, created_at'),
           supabase.from('users').select('id, full_name, email, created_at'),
           supabase.from('tenant_app_subscriptions').select('tenant_id, app_id, plan, status'),
           supabase.from('app_catalog').select('id, name, slug'),
           supabase.from('payments').select('amount, created_at, status'),
+          supabase.from('orders').select('amount, total_amount, created_at, status'),
           supabase.from('user_app_roles').select('app_id'),
         ])
         data = {
@@ -438,19 +440,34 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           subs: s.data || [],
           apps: a.data || [],
           pays: p.data || [],
+          orders: o.data || [],
           roles: r.data || [],
         }
       } catch {
-        data = { tenants: [], users: [], subs: [], apps: [], pays: [], roles: [] }
+        data = { tenants: [], users: [], subs: [], apps: [], pays: [], orders: [], roles: [] }
       }
       if (!alive) return
 
       const activeTenants = data.tenants.filter((x) => String(x.status) === 'active' && !x.deleted_at).length
       const activeSubs = data.subs.filter((x) => String(x.status) === 'active')
       const activeApps = new Set(activeSubs.map((x) => x.app_id)).size
-      const earned = data.pays.filter((x) => x.status === 'completed' || x.status === 'paid')
-      const revenue = earned.reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
+
+      // Consolidación de ingresos reales: payments (pasarelas) + orders (inventario/web)
+      const paidPayments = data.pays.filter((x) => ['completed', 'paid', 'approved'].includes(String(x.status || '').toLowerCase()))
+      const paidOrders = data.orders.filter((x) => ['completed', 'paid', 'delivered', 'entregado'].includes(String(x.status || '').toLowerCase()))
+
+      const revPayments = paidPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0)
+      const revOrders = paidOrders.reduce((acc, o) => acc + (Number(o.total_amount || o.amount) || 0), 0)
+      const revenue = revPayments + revOrders
       const revFmt = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN', maximumFractionDigits: 0 })
+
+      // MRR Recurrente de planes activos: Básico (S/ 49), Intermedio (S/ 99), Premium (S/ 199)
+      const mrr = activeSubs.reduce((acc, sub) => {
+        const plan = String(sub.plan || '').toLowerCase()
+        if (plan.includes('premi')) return acc + 199
+        if (plan.includes('inter')) return acc + 99
+        return acc + 49
+      }, 0)
 
       // Donut por plan (desde suscripciones activas reales).
       const planCounts = { Premium: 0, Intermedio: 0, Básico: 0, 'Sin plan': 0 }
@@ -471,26 +488,34 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         return planCounts[label] ? `${planColors[label]} ${from}deg ${(cursor / planTotal) * 360}deg` : null
       }).filter(Boolean)
 
-      // Ingresos por mes (últimos 9 meses) para el gráfico.
-      const monthSum = new Map()
-      earned.forEach((p) => {
-        const d = new Date(p.created_at)
-        if (Number.isNaN(d.getTime())) return
-        const key = `${d.getFullYear()}-${d.getMonth()}`
-        monthSum.set(key, (monthSum.get(key) || 0) + (Number(p.amount) || 0))
-      })
+      // Registro unificado de transacciones para el gráfico interactivo
+      const allTransactions = [
+        ...paidPayments.map((p) => ({ amount: Number(p.amount) || 0, date: new Date(p.created_at) })),
+        ...paidOrders.map((o) => ({ amount: Number(o.total_amount || o.amount) || 0, date: new Date(o.created_at) })),
+      ].filter((x) => !Number.isNaN(x.date.getTime()))
+
+      // Cálculo de barras según período seleccionado (30D, 90D, 9M, Todo)
       const now = new Date()
+      const count = timeRange === '30d' ? 4 : timeRange === '90d' ? 3 : timeRange === 'all' ? 12 : 9
       const months = []
-      for (let i = 8; i >= 0; i--) {
+      for (let i = count - 1; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const key = `${d.getFullYear()}-${d.getMonth()}`
+        const val = allTransactions
+          .filter((tx) => `${tx.date.getFullYear()}-${tx.date.getMonth()}` === key)
+          .reduce((sum, tx) => sum + tx.amount, 0)
         months.push({
           month: d.toLocaleDateString('es-PE', { month: 'short' }),
-          val: monthSum.get(`${d.getFullYear()}-${d.getMonth()}`) || 0,
+          val,
         })
       }
       const hasRevenue = months.some((m) => m.val > 0)
       const maxVal = Math.max(...months.map((m) => m.val), 1)
-      const bars = months.map((m) => ({ ...m, height: `${Math.round((m.val / maxVal) * 100)}%`, label: revFmt.format(m.val) }))
+      const bars = months.map((m) => ({
+        ...m,
+        height: `${Math.max(Math.round((m.val / maxVal) * 100), 6)}%`,
+        label: revFmt.format(m.val),
+      }))
 
       // Ecosistema: apps reales (top 8 por suscripciones activas).
       const rolesByApp = {}
@@ -511,15 +536,16 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       ].filter((x) => x.time).sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5)
 
       if (alive) setLive({
-        activeTenants, totalUsers: data.users.length, activeApps, revenue, revFmt,
-        planCounts, planTotal, donut, bars, hasRevenue, ecosystem, recent,
+        activeTenants, totalTenants: data.tenants.length, totalUsers: data.users.length, activeApps,
+        revenue, mrr, revFmt, planCounts, planTotal, donut, bars, hasRevenue, ecosystem, recent,
       })
     })()
     return () => { alive = false }
-  }, [])
+  }, [timeRange])
 
   const today = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const money = live ? (live.revenue > 0 ? live.revFmt.format(live.revenue) : 'S/ 0') : '—'
+  const mrrDisplay = live ? (live.mrr > 0 ? live.revFmt.format(live.mrr) : 'S/ 0') : '—'
 
   return (
     <div className="space-y-6 pb-12">
@@ -528,93 +554,101 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         <div>
           <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
           <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Super Administrador</h1>
-          <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona empresas, usuarios, aplicaciones y el crecimiento de Qaway Lab desde un solo lugar.</p>
+          <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona empresas, usuarios, facturación consolidada e inventario desde un solo lugar.</p>
         </div>
         <div className="hidden lg:block text-right">
           <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
         </div>
       </div>
 
-      {/* Row 1: 4 KPI Cards (datos reales, sin cifras inventadas) */}
+      {/* Row 1: 4 KPI Cards con física y estilo ergonómico unificado al CRM */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Empresas Activas */}
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
                 <HubIcon icon={Building2} size={16} className="w-4 h-4" />
               </span>
-              <span className="text-xs font-bold text-zinc-500">Empresas activas</span>
+              <span className="text-xs font-semibold text-zinc-600">Empresas activas</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.activeTenants : '—'}</span>
-            </div>
+            <span className="text-[10px] font-bold text-zinc-400">Total: {live ? live.totalTenants : '—'}</span>
           </div>
-          <div className="w-16 h-8 opacity-80">
-            <svg className="w-full h-full" viewBox="0 0 60 30" fill="none">
-              <path d="M0 25 C15 20, 30 22, 45 15 L60 18" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live ? live.activeTenants : '—'}</span>
           </div>
+          <p className="text-xs font-semibold text-blue-600 mt-1.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Ecosistema activo
+          </p>
+          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,8 80,10 100,3" />
+          </svg>
         </div>
 
-        {/* KPI 2: Usuarios Totales */}
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
-                <HubIcon icon={Users} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-bold text-zinc-500">Usuarios totales</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.totalUsers : '—'}</span>
-            </div>
-          </div>
-          <div className="w-16 h-8 opacity-80">
-            <svg className="w-full h-full" viewBox="0 0 60 30" fill="none">
-              <path d="M0 22 C15 25, 30 18, 45 12 L60 10" stroke="#ff4b0b" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-          </div>
-        </div>
-
-        {/* KPI 3: Aplicaciones Activas */}
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                <HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-bold text-zinc-500">Aplicaciones activas</span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">{live ? live.activeApps : '—'}</span>
-            </div>
-          </div>
-          <div className="w-16 h-8 opacity-80">
-            <svg className="w-full h-full" viewBox="0 0 60 30" fill="none">
-              <path d="M0 26 C15 20, 30 24, 45 14 L60 12" stroke="#a855f7" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-          </div>
-        </div>
-
-        {/* KPI 4: Ingresos */}
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-xs flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+        {/* KPI 2: MRR Recurrente */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
                 <HubIcon icon={CreditCard} size={16} className="w-4 h-4" />
               </span>
-              <span className="text-xs font-bold text-zinc-500">Ingresos</span>
+              <span className="text-xs font-semibold text-zinc-600">MRR Recurrente</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-extrabold text-zinc-950">{money}</span>
+            <span className="text-[10px] font-bold text-emerald-600">Suscripciones</span>
+          </div>
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{mrrDisplay}</span>
+          </div>
+          <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ARR: S/ {live ? (live.mrr * 12).toLocaleString('es-PE') : '0'}
+          </p>
+          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,9 100,2" />
+          </svg>
+        </div>
+
+        {/* KPI 3: Usuarios Totales */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
+                <HubIcon icon={Users} size={16} className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-semibold text-zinc-600">Usuarios totales</span>
             </div>
+            <span className="text-[10px] font-bold text-orange-600">Directorio BD</span>
           </div>
-          <div className="w-16 h-8 opacity-80">
-            <svg className="w-full h-full" viewBox="0 0 60 30" fill="none">
-              <path d="M0 24 C15 22, 30 15, 45 10 L60 5" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live ? live.totalUsers : '—'}</span>
           </div>
+          <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live ? live.activeApps : '—'} apps asignadas
+          </p>
+          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,16 20,12 40,15 60,6 80,10 100,2" />
+          </svg>
+        </div>
+
+        {/* KPI 4: Facturación Consolidada (Caja & Inventario) */}
+        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+                <HubIcon icon={Receipt} size={16} className="w-4 h-4" />
+              </span>
+              <span className="text-xs font-semibold text-zinc-600">Caja consolidada</span>
+            </div>
+            <span className="text-[10px] font-bold text-purple-600">Inventario + Pagos</span>
+          </div>
+          <div className="mt-2.5 flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{money}</span>
+          </div>
+          <p className="text-xs font-semibold text-purple-600 mt-1.5 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" /> Cobros completados
+          </p>
+          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,14 20,16 40,10 60,12 80,5 100,2" />
+          </svg>
         </div>
       </div>
 
@@ -622,41 +656,70 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 Cols): Charts */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Revenue Chart */}
-          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
-            <div className="flex items-center justify-between mb-6">
+          {/* Revenue Chart con Selector de Rango Temporal */}
+          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
               <div>
-                <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Pagos completados por mes</p>
+                <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos de inventario por mes</p>
               </div>
-              <span className="text-xs font-semibold bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-1.5 text-zinc-700">Últimos 9 meses</span>
+              <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl border border-zinc-200/60">
+                {[
+                  { id: '30d', label: '30D' },
+                  { id: '90d', label: '90D' },
+                  { id: '9m', label: '9M' },
+                  { id: 'all', label: 'Todo' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTimeRange(t.id)}
+                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-colors ${
+                      timeRange === t.id
+                        ? 'bg-white text-zinc-900 shadow-2xs'
+                        : 'text-zinc-500 hover:text-zinc-900'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
             </div>
             {live && live.hasRevenue ? (
               <div className="h-48 flex items-end justify-between gap-1.5 pt-4 px-2">
                 {live.bars.map((b, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-                    <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10">
+                    <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-white text-[10px] font-mono px-2 py-0.5 rounded-md whitespace-nowrap z-10 shadow-sm pointer-events-none">
                       {b.label}
                     </div>
-                    <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 group-hover:brightness-110" style={{ height: b.height }} />
+                    <div className="w-full bg-gradient-to-t from-[#ff4b0b] to-[#ff7a45] rounded-t-lg transition-all duration-300 ease-out group-hover:brightness-110" style={{ height: b.height }} />
                     <span className="text-[11px] font-medium text-zinc-400 mt-2">{b.month}</span>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="h-48 flex items-center justify-center rounded-xl bg-zinc-50/70 border border-dashed border-zinc-200">
-                <p className="text-xs text-zinc-400 font-medium">{live ? 'Sin ingresos registrados todavía.' : 'Cargando…'}</p>
+                <p className="text-xs text-zinc-400 font-medium">{live ? 'Sin cobros ni ventas registradas en este período.' : 'Cargando datos en vivo…'}</p>
               </div>
             )}
           </div>
 
-          {/* Companies by Plan Donut Chart */}
-          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-xs">
-            <h3 className="text-sm font-bold text-zinc-950 mb-4">Empresas por plan</h3>
+          {/* Companies by Plan Donut Chart con Leyenda Interactiva hacia Empresas */}
+          <div className="bg-white rounded-2xl p-6 border border-zinc-200/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-zinc-950">Empresas por plan</h3>
+              <button
+                type="button"
+                onClick={() => setActiveTab('Empresas')}
+                className="text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors"
+              >
+                Ver todas →
+              </button>
+            </div>
             <div className="flex flex-col sm:flex-row items-center justify-around gap-6">
               <div className="relative w-40 h-40 flex items-center justify-center shrink-0">
                 <div className="w-40 h-40 rounded-full" style={{ background: live && live.donut.length ? `conic-gradient(${live.donut.join(', ')})` : 'conic-gradient(#e4e4e7 0deg 360deg)' }} />
-                <div className="absolute w-[72%] h-[72%] bg-white rounded-full flex items-center justify-center">
+                <div className="absolute w-[72%] h-[72%] bg-white rounded-full flex items-center justify-center shadow-xs">
                   <div className="text-center">
                     <span className="block text-[10px] text-zinc-400 font-medium">Total</span>
                     <span className="block text-lg font-extrabold text-zinc-950">{live ? live.planTotal : '—'}</span>
@@ -664,15 +727,24 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                   </div>
                 </div>
               </div>
-              <div className="space-y-3 w-full sm:w-auto">
+              <div className="space-y-2 w-full sm:w-auto">
                 {(live ? Object.entries(live.planCounts) : []).map(([label, count]) => {
                   const pct = live ? Math.round((count / live.planTotal) * 100) : 0
                   const color = label === 'Premium' ? '#ff4b0b' : label === 'Intermedio' ? '#ff7a45' : label === 'Básico' ? '#ff9b73' : '#d4d4d8'
                   return (
-                    <div key={label} className="flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold">
-                      <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full" style={{ background: color }} /><span className="text-zinc-700">{label}</span></div>
-                      <span className="text-zinc-500">{live ? count : '—'} <span className="text-zinc-400">({pct}%)</span></span>
-                    </div>
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setActiveTab('Empresas')}
+                      className="w-full flex items-center justify-between sm:justify-start gap-4 text-xs font-semibold p-1.5 rounded-lg hover:bg-zinc-50 transition-colors text-left"
+                      title={`Ver empresas con plan ${label}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
+                        <span className="text-zinc-700">{label}</span>
+                      </div>
+                      <span className="text-zinc-500">{live ? count : '—'} <span className="text-zinc-400 font-normal">({pct}%)</span></span>
+                    </button>
                   )
                 })}
               </div>
@@ -1370,7 +1442,19 @@ function HubPanelContent() {
             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-2 rounded-full text-[var(--hub-text-soft)] hover:text-white hover:bg-[var(--hub-hover)] transition-colors" title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}>
               <HubIcon icon={Menu} size={20} className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
             </button>
-            
+
+            {/* Waffle App Switcher — mismo orden que el CRM: hamburguesa primero, luego Apps */}
+            <div className="relative">
+              <button type="button" onClick={() => setIsWaffleOpen(!isWaffleOpen)} className="group flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer" title="Ecosistema de Aplicaciones">
+                <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
+                  {[...Array(9)].map((_, i) => (<span key={i} className="w-[3px] h-[3px] rounded-full bg-white/70 group-hover:bg-[#ff4b0b] transition-colors" />))}
+                </div>
+                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">Apps</span>
+                <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-[var(--hub-faint)] group-hover:text-white/80 transition-transform duration-200" />
+              </button>
+              <AppSwitcherDropdown isOpen={isWaffleOpen} onClose={() => setIsWaffleOpen(false)} />
+            </div>
+
             {/* Tenant Global Switcher Pill: plataforma elige la marca ("ver como");
                 el resto de roles la ve como indicador estático de su marca. */}
             <div className="relative">
@@ -1537,16 +1621,6 @@ function HubPanelContent() {
               )}
             </div>
 
-            <div className="relative">
-              <button type="button" onClick={() => setIsWaffleOpen(!isWaffleOpen)} className="group flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer" title="Ecosistema de Aplicaciones">
-                <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
-                  {[...Array(9)].map((_, i) => (<span key={i} className="w-[3px] h-[3px] rounded-full bg-white/70 group-hover:bg-[#ff4b0b] transition-colors" />))}
-                </div>
-                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">Apps</span>
-                <HubIcon icon={ChevronDown} size={14} className="w-3.5 h-3.5 text-[var(--hub-faint)] group-hover:text-white/80 transition-transform duration-200" />
-              </button>
-              <AppSwitcherDropdown isOpen={isWaffleOpen} onClose={() => setIsWaffleOpen(false)} />
-            </div>
           </div>
 
           {/* Search, Notifications & User Profile */}

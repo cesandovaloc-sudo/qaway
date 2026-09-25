@@ -362,7 +362,7 @@ function CRMContent() {
                 <select
                   value={selectedTenantId}
                   onChange={(e) => setSelectedTenantId(e.target.value)}
-                  className="h-10 pl-3 pr-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all appearance-none"
+                  className="h-10 pl-3 pr-8 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all appearance-none"
                   title="Cambiar Marca / Tenant Activo"
                 >
                   <option value="all" className="bg-[#18181b] text-white">🏢 Todas las Marcas</option>
@@ -542,17 +542,17 @@ function CRMContent() {
                       </div>
                       
                       {/* Opciones CRM Reales */}
-                      <div className="p-2 flex flex-col gap-1">
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                      <div className="p-2 flex flex-col gap-0.5">
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
                           Preferencias de Cuenta
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
                           Usuarios y Roles
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
                           Integraciones (Meta/WA)
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-colors font-medium">
+                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
                           Suscripción y Pagos
                         </button>
                       </div>
