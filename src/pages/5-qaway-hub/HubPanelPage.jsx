@@ -463,8 +463,8 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
   const [showActionsMenu, setShowActionsMenu] = useState(false)
   const actionsMenuRef = useRef(null)
 
-  // Selector temporal para gráfico horizontal de crecimiento (30D / 90D / 9M / Todo)
-  const [revenueTimeRange, setRevenueTimeRange] = useState('9m')
+  // Selector temporal para gráfico horizontal de crecimiento (30 d / 90 d / 12 m / Todo)
+  const [revenueTimeRange, setRevenueTimeRange] = useState('12m')
 
   // 1. Modal Nueva Métrica (Super Admin)
   const [isMetricModalOpen, setIsMetricModalOpen] = useState(false)
@@ -823,7 +823,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       .slice(0, 6)
 
     // 11. Gráfico horizontal amplio de Crecimiento de ingresos y ventas (bars mensuales)
-    const count = revenueTimeRange === '30d' ? 4 : revenueTimeRange === '90d' ? 3 : revenueTimeRange === 'all' ? 12 : 9
+    const count = revenueTimeRange === '30d' ? 4 : revenueTimeRange === '90d' ? 3 : revenueTimeRange === '12m' ? 12 : 12
     const months = []
     for (let i = count - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
@@ -901,17 +901,20 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <span>Nueva Métrica</span>
           </button>
 
-          {/* Botón Desplegable Acciones Rápidas */}
-          <div className="relative" ref={actionsMenuRef}>
+          {/* Botón Desplegable Acciones Rápidas (Icono con hover y click) */}
+          <div
+            className="relative"
+            ref={actionsMenuRef}
+            onMouseEnter={() => setShowActionsMenu(true)}
+            onMouseLeave={() => setShowActionsMenu(false)}
+          >
             <button
               type="button"
               onClick={() => setShowActionsMenu((v) => !v)}
-              className="flex items-center gap-1.5 bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200/80 text-zinc-800 text-xs font-semibold px-3 py-2.5 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+              className="h-[38px] w-[38px] flex items-center justify-center bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200/80 text-zinc-800 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
               title="Acciones Rápidas de Super Administrador"
             >
-              <HubIcon icon={Zap} size={14} className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>Acciones</span>
-              <HubIcon icon={ChevronDown} size={14} className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showActionsMenu ? 'rotate-180' : ''}`} />
+              <HubIcon icon={Zap} size={15} className="w-4 h-4 text-amber-500 fill-amber-500" />
             </button>
 
             {showActionsMenu && (
@@ -1285,93 +1288,123 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
       {/* Row 1: KPI Cards con Telemetría Reactiva */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Empresas Activas */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
-                <HubIcon icon={Building2} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-semibold text-zinc-600">Empresas activas</span>
+          {/* KPI 1: Empresas Activas */}
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                  <HubIcon icon={Building2} size={16} className="w-4 h-4" />
+                </span>
+                <span className="text-xs font-semibold text-zinc-600">Empresas activas</span>
+              </div>
+              <span className="text-[10px] font-bold text-zinc-400">Total: {live.totalTenants}</span>
             </div>
-            <span className="text-[10px] font-bold text-zinc-400">Total: {live.totalTenants}</span>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.activeTenants}</span>
+            </div>
+            {live.activeTenants > 0 ? (
+              <p className="text-xs font-semibold text-blue-600 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Ecosistema activo
+              </p>
+            ) : (
+              <p className="text-xs font-medium text-zinc-400 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin empresas activas
+              </p>
+            )}
+            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+              {live.activeTenants > 0 ? (
+                <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,8 80,10 100,3" />
+              ) : (
+                <polyline fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" points="0,15 100,15" />
+              )}
+            </svg>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.activeTenants}</span>
-          </div>
-          <p className="text-xs font-semibold text-blue-600 mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" /> Ecosistema activo
-          </p>
-          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-            <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,8 80,10 100,3" />
-          </svg>
-        </div>
 
-        {/* KPI 2: MRR Recurrente */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
-                <HubIcon icon={CreditCard} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-semibold text-zinc-600">MRR Recurrente</span>
+          {/* KPI 2: MRR Recurrente */}
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                  <HubIcon icon={CreditCard} size={16} className="w-4 h-4" />
+                </span>
+                <span className="text-xs font-semibold text-zinc-600">MRR Recurrente</span>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-600">Suscripciones</span>
             </div>
-            <span className="text-[10px] font-bold text-emerald-600">Suscripciones</span>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{mrrDisplay}</span>
+            </div>
+            {live.mrr > 0 ? (
+              <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ARR: S/ {(live.mrr * 12).toLocaleString('es-PE')}
+              </p>
+            ) : (
+              <p className="text-xs font-medium text-zinc-400 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin cobros recurrentes
+              </p>
+            )}
+            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+              {live.mrr > 0 ? (
+                <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,9 100,2" />
+              ) : (
+                <polyline fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" points="0,15 100,15" />
+              )}
+            </svg>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{mrrDisplay}</span>
-          </div>
-          <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ARR: S/ {(live.mrr * 12).toLocaleString('es-PE')}
-          </p>
-          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-            <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,9 100,2" />
-          </svg>
-        </div>
 
-        {/* KPI 3: Usuarios Totales */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
-                <HubIcon icon={Users} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-semibold text-zinc-600">Usuarios totales</span>
+          {/* KPI 3: Usuarios Totales */}
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
+                  <HubIcon icon={Users} size={16} className="w-4 h-4" />
+                </span>
+                <span className="text-xs font-semibold text-zinc-600">Usuarios totales</span>
+              </div>
+              <span className="text-[10px] font-bold text-orange-600">Directorio BD</span>
             </div>
-            <span className="text-[10px] font-bold text-orange-600">Directorio BD</span>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.totalUsers}</span>
+            </div>
+            <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live.activeApps} apps asignadas
+            </p>
+            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,16 20,12 40,15 60,6 80,10 100,2" />
+            </svg>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.totalUsers}</span>
-          </div>
-          <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live.activeApps} apps asignadas
-          </p>
-          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-            <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,16 20,12 40,15 60,6 80,10 100,2" />
-          </svg>
-        </div>
 
-        {/* KPI 4: Facturación Consolidada */}
-        <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
-                <HubIcon icon={Receipt} size={16} className="w-4 h-4" />
-              </span>
-              <span className="text-xs font-semibold text-zinc-600">Caja consolidada</span>
+          {/* KPI 4: Facturación Consolidada */}
+          <div className="bg-white border border-zinc-200/80 rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+                  <HubIcon icon={Receipt} size={16} className="w-4 h-4" />
+                </span>
+                <span className="text-xs font-semibold text-zinc-600">Caja consolidada</span>
+              </div>
+              <span className="text-[10px] font-bold text-purple-600">Inventario + Pagos</span>
             </div>
-            <span className="text-[10px] font-bold text-purple-600">Inventario + Pagos</span>
+            <div className="mt-2.5 flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{money}</span>
+            </div>
+            {live.revenue > 0 ? (
+              <p className="text-xs font-semibold text-purple-600 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" /> Cobros completados
+              </p>
+            ) : (
+              <p className="text-xs font-medium text-zinc-400 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin cobros registrados
+              </p>
+            )}
+            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+              {live.revenue > 0 ? (
+                <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,14 20,16 40,10 60,12 80,5 100,2" />
+              ) : (
+                <polyline fill="none" stroke="#e4e4e7" strokeWidth="1.5" strokeLinecap="round" points="0,15 100,15" />
+              )}
+            </svg>
           </div>
-          <div className="mt-2.5 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{money}</span>
-          </div>
-          <p className="text-xs font-semibold text-purple-600 mt-1.5 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" /> Cobros completados
-          </p>
-          <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
-            <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,14 20,16 40,10 60,12 80,5 100,2" />
-          </svg>
-        </div>
 
         {/* Tarjetas de Métricas Personalizadas (Super Administrador) */}
         {customMetrics.map((cm) => (
@@ -1415,20 +1448,20 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 <h3 className="text-sm font-bold text-zinc-950">Crecimiento de ingresos y ventas</h3>
                 <p className="text-xs text-zinc-500 mt-0.5">Pagos de pasarelas y pedidos comerciales consolidado por mes</p>
               </div>
-              <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl border border-zinc-200/60">
+              <div className="flex items-center gap-1.5 bg-zinc-100 p-1 rounded-xl border border-zinc-200/60">
                 {[
-                  { id: '30d', label: '30D' },
-                  { id: '90d', label: '90D' },
-                  { id: '9m', label: '9M' },
+                  { id: '30d', label: '30 d' },
+                  { id: '90d', label: '90 d' },
+                  { id: '12m', label: '12 m' },
                   { id: 'all', label: 'Todo' },
                 ].map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => setRevenueTimeRange(t.id)}
-                    className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-colors cursor-pointer ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                       revenueTimeRange === t.id
-                        ? 'bg-white text-zinc-900 shadow-2xs'
+                        ? 'bg-white text-zinc-950 shadow-2xs font-bold'
                         : 'text-zinc-500 hover:text-zinc-900'
                     }`}
                   >
