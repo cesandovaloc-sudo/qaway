@@ -172,7 +172,7 @@ function StatCard({ icon, title, value, change, positive = true, lineClass = "te
       </div>
 
       <div className="mt-2 flex items-end gap-3">
-        <span className="text-[28px] font-bold leading-none tracking-tight text-gray-950">{value}</span>
+        <span className="text-2xl font-bold leading-none tracking-tight text-gray-950">{value}</span>
         <span className={cn("mb-0.5 text-[12px] font-semibold", positive ? "text-emerald-500" : "text-red-500")}>
           {change}
         </span>
@@ -317,7 +317,7 @@ export default function SupportPanel({
             <button
               type="button"
               onClick={onNewTicket}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
             >
               <Plus size={16} />
               Nuevo ticket
@@ -442,7 +442,7 @@ export default function SupportPanel({
                             event.stopPropagation();
                             onOpenTicket?.(ticket);
                           }}
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50"
                         >
                           <MoreHorizontal size={15} />
                         </button>
@@ -470,7 +470,7 @@ export default function SupportPanel({
                   type="button"
                   onClick={() => setPage(1)}
                   disabled={page === 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 disabled:opacity-40"
                 >
                   <ChevronsLeft size={14} />
                 </button>
@@ -478,7 +478,7 @@ export default function SupportPanel({
                   type="button"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 disabled:opacity-40"
                 >
                   <ChevronLeft size={14} />
                 </button>
@@ -488,7 +488,7 @@ export default function SupportPanel({
                     type="button"
                     onClick={() => setPage(number)}
                     className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-md text-[11px] font-semibold",
+                      "flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-semibold",
                       page === number ? "bg-[#ff4b0b] text-white" : "text-gray-500 hover:bg-gray-50"
                     )}
                   >
@@ -499,7 +499,7 @@ export default function SupportPanel({
                   type="button"
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 disabled:opacity-40"
                 >
                   <ChevronRight size={14} />
                 </button>
@@ -507,7 +507,7 @@ export default function SupportPanel({
                   type="button"
                   onClick={() => setPage(totalPages)}
                   disabled={page === totalPages}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-gray-50 disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 disabled:opacity-40"
                 >
                   <ChevronsRight size={14} />
                 </button>
@@ -520,7 +520,7 @@ export default function SupportPanel({
                     setItemsPerPage(Number(e.target.value));
                     setPage(1);
                   }}
-                  className="rounded-md border border-gray-200 bg-white px-2 py-1.5 outline-none"
+                  className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 outline-none"
                 >
                   <option value={8}>8</option>
                   <option value={10}>10</option>

@@ -218,7 +218,7 @@ function PlanCard({ plan, onEdit }) {
       className={`relative flex min-h-[266px] flex-col rounded-2xl border border-zinc-200/70 p-4 ${tone.card}`}
     >
       {plan.popular && (
-        <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-2xl bg-[#ff4b0b] px-3 py-1.5 text-[10px] font-extrabold text-white">
+        <div className="absolute right-0 top-0 rounded-bl-lg rounded-tr-2xl bg-[#ff4b0b] px-3 py-1.5 text-[10px] font-bold text-white">
           Más popular
         </div>
       )}
@@ -255,7 +255,7 @@ function PlanCard({ plan, onEdit }) {
           onClick={() => onEdit(plan)}
           className={`flex-1 rounded-lg border px-3 py-2 text-[11px] font-bold transition ${
             plan.popular
-              ? "border-[#ff4b0b] bg-[#ff4b0b] text-white hover:bg-[#e94408]"
+              ? "border-[#ff4b0b] bg-[#ff4b0b] text-white hover:bg-[#e03f06]"
               : "border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50"
           }`}
         >
@@ -646,7 +646,7 @@ export default function PlanesPreciosPage() {
         .input {
           width: 100%;
           border: 1px solid #e4e4e7;
-          border-radius: 12px;
+          border-radius: 16px;
           background: #fff;
           padding: 10px 12px;
           font-size: 12px;
@@ -688,7 +688,7 @@ export default function PlanesPreciosPage() {
             <button
               type="button"
               onClick={() => setModalPlan(null)}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
             >
               <Plus size={15} strokeWidth={2.5} />
               Nuevo plan

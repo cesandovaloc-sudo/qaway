@@ -310,7 +310,7 @@ function UserAccessEditor({ userId, userName, tenantId, isPlatformAdmin, supabas
         <button
           type="button"
           onClick={saveAll}
-          className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
         >
           <Save size={14} />
           Guardar accesos
@@ -666,7 +666,7 @@ export default function UsersModule({
             <button
               type="button"
               onClick={onInviteUser}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] active:scale-[0.99]"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06] active:scale-[0.99]"
             >
               <Icon size={17}><Plus /></Icon>
               Invitar usuario

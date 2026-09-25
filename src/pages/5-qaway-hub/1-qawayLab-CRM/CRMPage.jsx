@@ -57,7 +57,7 @@ class ErrorBoundary extends React.Component {
               <summary className="text-[11px] text-zinc-500 hover:text-zinc-400 cursor-pointer select-none">
                 Ver reporte técnico del sistema
               </summary>
-              <pre className="mt-2 p-3 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] text-zinc-400 font-mono overflow-auto max-h-36">
+              <pre className="mt-2 p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-[10px] text-zinc-400 font-mono overflow-auto max-h-36">
                 {this.state.error?.toString()}
                 {this.state.errorInfo?.componentStack}
               </pre>
@@ -265,7 +265,7 @@ function CRMContent() {
           <button 
             onClick={handleSimulate}
             disabled={simulating}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
               isSidebarCollapsed ? "justify-center" : ""
             }`}
             title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
@@ -281,7 +281,7 @@ function CRMContent() {
           {/* Módulo de Configuración */}
           <button 
             onClick={() => setActiveTab('configuracion')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm font-medium ${
               activeTab === 'configuracion'
                 ? "bg-white/10 text-white shadow-sm" 
                 : "text-white/60 hover:text-white hover:bg-white/5"
@@ -531,7 +531,7 @@ function CRMContent() {
             {/* 2. Botón Primario de Creación (Equilibrado) */}
             <button 
               onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#dc3d00] text-white px-3.5 py-2 rounded-lg text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#e03f06] text-white px-3.5 py-2 rounded-xl text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="hidden sm:block">Nueva oportunidad</span>
@@ -674,7 +674,7 @@ function CRMContent() {
             title="Qaway IA Insights"
           >
             <Sparkles className="w-6 h-6 animate-pulse" />
-            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
+            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
               Insights con IA
             </span>
           </button>
@@ -682,11 +682,11 @@ function CRMContent() {
           {/* Botón de Chatbot de Soporte */}
           <button
             onClick={() => alert("Próximamente: Chatbot de Soporte y Ayuda Integrado.")}
-            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff8c00] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:shadow-[0_8px_40px_rgba(255,75,11,0.6)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/20"
+            className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-[#ff4b0b] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:shadow-[0_8px_40px_rgba(255,75,11,0.6)] hover:-translate-y-1 transition-all duration-300 ease-out border border-white/20"
             title="Chatbot de Ayuda"
           >
             <MessageSquare className="w-6 h-6 text-white" />
-            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
+            <span className="absolute right-full mr-4 bg-[#18181b] border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xl pointer-events-none">
               Soporte / Chatbot
             </span>
           </button>

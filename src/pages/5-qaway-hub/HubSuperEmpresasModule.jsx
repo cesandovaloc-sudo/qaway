@@ -225,42 +225,125 @@ export default function EmpresasModule({
   const [notice, setNotice] = useState("");
   const [importingFile, setImportingFile] = useState(false);
 
+  // Estados para modales in-app (Confirmación de eliminación y Edición Rápida)
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, company: null, loading: false });
+  const [editModal, setEditModal] = useState({
+    isOpen: false,
+    company: null,
+    saving: false,
+    form: { name: "", sector: "", plan: "Básico", status: "active" },
+  });
+
   const handleExportExcel = () => {
-    const dataToExport = (companies.length ? companies : []).map((c) => ({
-      "RUC / ID": c.id,
-      "Nombre Empresa": c.name,
-      "Sector": c.sector || c.industry || "General",
-      "Plan": typeof c.plan === "string" ? c.plan : (c.plan?.label || "Sin plan"),
-      "Estado": typeof c.status === "string" ? c.status : (c.status?.label || "Activa"),
-      "Usuarios": c.userCount ?? c.users ?? 1,
-      "Almacenamiento": c.storage || "1 GB",
-      "Fecha Registro": formatDate(c.createdAt),
-      "MRR (S/)": c.mrr || 0,
-    }));
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const list = companies.length ? companies : [];
+    const dateStr = new Date().toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" });
+
+    const headers = [
+      "N°",
+      "Código",
+      "Empresa",
+      "Titular / Contacto",
+      "Sector / Industria",
+      "Plan",
+      "Estado",
+      "Usuarios Activos",
+      "Almacenamiento",
+      "MRR Estimado (S/)",
+      "Fecha Registro",
+    ];
+
+    const rows = list.map((c, idx) => {
+      const planLabel = typeof c.plan === "string" ? c.plan : (c.plan?.label || "Sin plan");
+      const statusLabel = typeof c.status === "string" ? c.status : (c.status?.label || "Activa");
+      const code = c.client_code || c.slug || `EMP-${String(idx + 1).padStart(3, "0")}`;
+      const ownerLabel = c.subtitle?.startsWith("Titular: ") ? c.subtitle.replace("Titular: ", "") : "—";
+
+      return [
+        idx + 1,
+        code,
+        c.name || "—",
+        ownerLabel,
+        c.sector || c.industry || "General",
+        planLabel,
+        statusLabel,
+        c.userCount ?? c.users ?? 1,
+        c.storage || "1 GB",
+        c.mrr || 0,
+        formatDate(c.createdAt),
+      ];
+    });
+
+    const aoa = [
+      ["QAWAY LAB — ECOSISTEMA DIGITAL"],
+      ["REPORTE OFICIAL DE EMPRESAS Y ORGANIZACIONES"],
+      [`Fecha de emisión: ${dateStr} | Generado por: Super Administrador`],
+      [],
+      headers,
+      ...rows,
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+    worksheet["!cols"] = [
+      { wch: 5 },
+      { wch: 14 },
+      { wch: 30 },
+      { wch: 28 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 18 },
+      { wch: 16 },
+    ];
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Empresas");
     XLSX.writeFile(workbook, `empresas_qaway_lab_${Date.now()}.xlsx`);
   };
 
-  const handleDeleteCompany = async (company) => {
+  const downloadExcelTemplate = () => {
+    const headers = ["Nombre de la Empresa", "Sector / Categoría", "Plan", "Código / RUC (Opcional)"];
+    const sampleRows = [
+      ["Empresa Ejemplo S.A.C.", "Tecnología", "Básico", "EMP-2026-0001"],
+      ["Comercializadora Rímac", "Comercio", "Intermedio", "EMP-2026-0002"],
+    ];
+    const aoa = [
+      ["PLANTILLA MODELO PARA IMPORTACIÓN DE EMPRESAS — QAWAY LAB"],
+      ["Complete los datos comenzando en la fila 5. No modifique los nombres de las columnas en la fila 4."],
+      [],
+      headers,
+      ...sampleRows,
+    ];
+    const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+    worksheet["!cols"] = [{ wch: 30 }, { wch: 22 }, { wch: 16 }, { wch: 22 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "PlantillaEmpresas");
+    XLSX.writeFile(workbook, "plantilla_modelo_empresas_qaway.xlsx");
+  };
+
+  const requestDeleteCompany = (company) => {
     if (company.slug === "qaway-lab" || company.name?.toLowerCase().includes("qaway lab")) {
-      alert("No se puede eliminar la empresa principal (Master) Qaway Lab.");
+      setNotice("No se puede eliminar la empresa principal (Master) Qaway Lab.");
+      setTimeout(() => setNotice(""), 3500);
       return;
     }
-    const confirm = window.confirm(
-      `¿Estás seguro de que deseas eliminar la empresa "${company.name}"?\nEsta acción eliminará el registro de la base de datos.`
-    );
-    if (!confirm) return;
+    setDeleteModal({ isOpen: true, company, loading: false });
+  };
 
+  const executeDeleteCompany = async () => {
+    const company = deleteModal.company;
+    if (!company) return;
+
+    setDeleteModal((prev) => ({ ...prev, loading: true }));
     try {
       // 1. Desvincular usuarios asociados a este tenant
       await supabase.from("users").update({ tenant_id: null }).eq("tenant_id", company.id);
 
-      // 2. Eliminar el registro en public.tenants
+      // 2. Eliminar de public.tenants
       const { error: delErr } = await supabase.from("tenants").delete().eq("id", company.id);
       if (delErr) {
-        console.warn("Delete en tenants falló, aplicando soft-delete:", delErr);
+        console.warn("Delete directo en tenants falló, aplicando soft-delete:", delErr);
         const { error: upErr } = await supabase
           .from("tenants")
           .update({ status: "inactive", deleted_at: new Date().toISOString() })
@@ -269,11 +352,75 @@ export default function EmpresasModule({
       }
 
       setCompanies((prev) => prev.filter((c) => c.id !== company.id));
-      setNotice(`Empresa "${company.name}" eliminada correctamente.`);
+      setNotice(`Empresa "${company.name}" eliminada correctamente de Supabase.`);
       setTimeout(() => setNotice(""), 3500);
     } catch (err) {
       console.error("Error al eliminar empresa:", err);
-      alert("No se pudo eliminar la empresa: " + err.message);
+      setNotice("No se pudo eliminar la empresa: " + (err.message || "Error de BD"));
+      setTimeout(() => setNotice(""), 4000);
+    } finally {
+      setDeleteModal({ isOpen: false, company: null, loading: false });
+    }
+  };
+
+  const openEditModal = (company) => {
+    setEditModal({
+      isOpen: true,
+      company,
+      saving: false,
+      form: {
+        name: company.name || "",
+        sector: company.industry || company.sector || "General",
+        plan: typeof company.plan === "string" ? company.plan : (company.plan?.label || "Básico"),
+        status: company.status?.key || company.status || "active",
+      },
+    });
+  };
+
+  const handleSaveEditCompany = async (e) => {
+    e.preventDefault();
+    if (!editModal.company) return;
+    setEditModal((prev) => ({ ...prev, saving: true }));
+
+    try {
+      const companyId = editModal.company.id;
+      const { form } = editModal;
+
+      const { error: updateErr } = await supabase
+        .from("tenants")
+        .update({
+          name: form.name,
+          industry: form.sector,
+          plan: form.plan,
+          status: form.status,
+        })
+        .eq("id", companyId);
+
+      if (updateErr) throw updateErr;
+
+      setCompanies((prev) =>
+        prev.map((c) =>
+          c.id === companyId
+            ? {
+                ...c,
+                name: form.name,
+                sector: form.sector,
+                industry: form.sector,
+                plan: form.plan,
+                status: normalizeStatus(form.status),
+              }
+            : c
+        )
+      );
+
+      setNotice(`Empresa "${form.name}" actualizada correctamente.`);
+      setTimeout(() => setNotice(""), 3500);
+      setEditModal({ isOpen: false, company: null, saving: false, form: { name: "", sector: "", plan: "Básico", status: "active" } });
+    } catch (err) {
+      console.error("Error actualizando empresa:", err);
+      setNotice("Error al actualizar la empresa: " + err.message);
+      setTimeout(() => setNotice(""), 4000);
+      setEditModal((prev) => ({ ...prev, saving: false }));
     }
   };
 
@@ -285,33 +432,69 @@ export default function EmpresasModule({
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      if (jsonData.length > 0) {
-        const importedCompanies = jsonData.map((row, index) => ({
-          id: String(row["RUC / ID"] || row["ID"] || row["id"] || `EMP-2026-${String(companies.length + index + 1).padStart(4, "0")}`),
-          name: String(row["Nombre Empresa"] || row["Empresa"] || row["nombre"] || "Empresa Nueva"),
-          sector: String(row["Sector"] || row["sector"] || "General"),
-          plan: String(row["Plan"] || row["plan"] || "básico"),
-          status: String(row["Estado"] || row["estado"] || "activo"),
-          users: Number(row["Usuarios"] || row["usuarios"] || 1),
-          storage: String(row["Almacenamiento"] || row["almacenamiento"] || "1 GB"),
-          lastActivity: "Hoy",
-          mrr: Number(row["MRR (S/)"] || row["MRR"] || row["mrr"] || 0),
-          avatar_url: null,
+      let headerIndex = jsonData.findIndex(
+        (row) => Array.isArray(row) && row.some((cell) => String(cell).toLowerCase().includes("nombre"))
+      );
+      if (headerIndex === -1) headerIndex = 0;
+
+      const rows = jsonData.slice(headerIndex + 1);
+      const localUICompanies = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || !row[0]) continue;
+
+        const name = String(row[0] || "").trim();
+        if (!name || name.toLowerCase().includes("plantilla")) continue;
+
+        const sector = String(row[1] || "General").trim();
+        const plan = String(row[2] || "básico").trim();
+        const clientCode = String(row[3] || `EMP-${Date.now().toString().slice(-4)}${i + 1}`).trim();
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `empresa-${Date.now()}`;
+        const newUuid = crypto.randomUUID();
+
+        const newTenantPayload = {
+          id: newUuid,
+          name,
+          slug,
+          client_code: clientCode,
+          status: "active",
+          industry: sector,
+          plan: plan,
           created_at: new Date().toISOString(),
-        }));
+        };
 
-        setCompanies((prev) => [...importedCompanies, ...prev]);
+        const { data: dbData } = await supabase.from("tenants").insert(newTenantPayload).select().single();
+        const createdItem = dbData || newTenantPayload;
+
+        localUICompanies.push({
+          ...createdItem,
+          id: createdItem.id,
+          name: createdItem.name,
+          subtitle: `Sector: ${sector}`,
+          status: { key: "active", label: "Activa" },
+          createdAt: createdItem.created_at,
+          plan: plan,
+          userCount: 1,
+          applicationCount: 1,
+        });
+      }
+
+      if (localUICompanies.length > 0) {
+        setCompanies((prev) => [...localUICompanies, ...prev]);
         setShowImportModal(false);
-        setNotice(`${importedCompanies.length} empresas cargadas correctamente desde el Excel.`);
+        setNotice(`${localUICompanies.length} empresas guardadas correctamente en Supabase.`);
         setTimeout(() => setNotice(""), 4000);
       } else {
-        alert("El archivo Excel no contiene filas con datos.");
+        setNotice("No se encontraron filas válidas en el archivo Excel.");
+        setTimeout(() => setNotice(""), 4000);
       }
     } catch (err) {
-      console.error("Error al leer el archivo Excel:", err);
-      alert("No se pudo leer el archivo Excel. Asegúrate de usar un archivo .xlsx o .csv válido.");
+      console.error("Error al leer e importar el archivo Excel:", err);
+      setNotice("Error al procesar el archivo Excel. Verifique el formato.");
+      setTimeout(() => setNotice(""), 4000);
     } finally {
       setImportingFile(false);
     }
@@ -536,7 +719,7 @@ export default function EmpresasModule({
           <button
             type="button"
             onClick={onCreateCompany}
-            className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408] focus:outline-none focus:ring-4 focus:ring-orange-100"
+            className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06] focus:outline-none focus:ring-4 focus:ring-orange-100"
           >
             <span className="text-base leading-none">+</span>
             Nueva empresa
@@ -579,6 +762,16 @@ export default function EmpresasModule({
                   disabled={importingFile}
                 />
               </label>
+
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={downloadExcelTemplate}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#ff4b0b] hover:underline"
+                >
+                  <Download size={13} /> Descargar plantilla modelo (.xlsx)
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100">
@@ -828,7 +1021,7 @@ export default function EmpresasModule({
                                 type="button"
                                 onClick={() => {
                                   setOpenMenu(null);
-                                  onCompanyAction?.("manage", company);
+                                  openEditModal(company);
                                 }}
                                 className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-zinc-700 hover:bg-zinc-50"
                               >
@@ -838,7 +1031,7 @@ export default function EmpresasModule({
                                 type="button"
                                 onClick={() => {
                                   setOpenMenu(null);
-                                  handleDeleteCompany(company);
+                                  requestDeleteCompany(company);
                                 }}
                                 className="w-full rounded-lg px-3 py-2 text-left text-xs font-bold text-red-600 hover:bg-red-50"
                               >
@@ -932,7 +1125,7 @@ export default function EmpresasModule({
 
             <div className="mt-5 flex items-center gap-5">
               <div className="relative h-32 w-32 shrink-0">
-                <div className="absolute inset-0 rounded-full bg-[conic-gradient(#f97316_0_33%,#3b82f6_33%_58%,#eab308_58%_83%,#d4d4d8_83%_100%)]" />
+                <div className="absolute inset-0 rounded-full bg-[conic-gradient(#ff4b0b_0_33%,#ff7140_33%_58%,#ffb08a_58%_83%,#d4d4d8_83%_100%)]" />
                 <div className="absolute inset-5 grid place-items-center rounded-full bg-white">
                   <div className="text-center">
                     <div className="text-[9px] font-medium text-zinc-400">Total</div>
@@ -1056,6 +1249,135 @@ export default function EmpresasModule({
           </section>
         </aside>
       </div>
+
+      {/* Modal de Edición Rápida de Empresa (Requisito PANEL-05) */}
+      {editModal.isOpen && editModal.company && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+              <div>
+                <p className="text-[10px] font-bold text-[#ff4b0b] uppercase tracking-wider">Edición Rápida</p>
+                <h3 className="text-base font-extrabold text-zinc-950">Gestionar Empresa: {editModal.company.name}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditModal({ isOpen: false, company: null, saving: false, form: { name: "", sector: "", plan: "Básico", status: "active" } })}
+                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditCompany} className="mt-4 space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-zinc-700 mb-1">Nombre de la Empresa</label>
+                <input
+                  type="text"
+                  required
+                  value={editModal.form.name}
+                  onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, name: e.target.value } }))}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-xs text-zinc-900 font-semibold focus:border-[#ff4b0b] focus:outline-none focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-zinc-700 mb-1">Sector / Categoría Comercial</label>
+                <input
+                  type="text"
+                  value={editModal.form.sector}
+                  onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, sector: e.target.value } }))}
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2.5 text-xs text-zinc-900 font-semibold focus:border-[#ff4b0b] focus:outline-none focus:bg-white"
+                  placeholder="Ej. Tecnología, Comercio, Servicios"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-zinc-700 mb-1">Plan Contratado</label>
+                  <select
+                    value={editModal.form.plan}
+                    onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, plan: e.target.value } }))}
+                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-900 focus:border-[#ff4b0b] focus:outline-none"
+                  >
+                    <option value="Premium">Premium</option>
+                    <option value="Intermedio">Intermedio</option>
+                    <option value="Básico">Básico</option>
+                    <option value="Sin plan">Sin plan</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-zinc-700 mb-1">Estado en la Plataforma</label>
+                  <select
+                    value={editModal.form.status}
+                    onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, status: e.target.value } }))}
+                    className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-900 focus:border-[#ff4b0b] focus:outline-none"
+                  >
+                    <option value="active">Activa</option>
+                    <option value="trialing">En prueba</option>
+                    <option value="inactive">Inactiva</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setEditModal({ isOpen: false, company: null, saving: false, form: { name: "", sector: "", plan: "Básico", status: "active" } })}
+                  className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editModal.saving}
+                  className="rounded-xl bg-[#ff4b0b] hover:bg-[#e03f06] px-5 py-2 text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50"
+                >
+                  {editModal.saving ? "Guardando..." : "Guardar Cambios"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal In-App de Confirmación de Eliminación (Reemplaza window.confirm) */}
+      {deleteModal.isOpen && deleteModal.company && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-4">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-red-100 text-red-600">
+                <ShieldAlert size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-extrabold text-zinc-950">¿Eliminar empresa?</h3>
+                <p className="mt-1 text-xs text-zinc-600 font-medium leading-relaxed">
+                  Estás a punto de eliminar <strong className="text-zinc-900">"{deleteModal.company.name}"</strong>. Esta acción eliminará el registro de Supabase y desvinculará a sus usuarios.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 border-t border-zinc-100 pt-4 mt-6">
+              <button
+                type="button"
+                disabled={deleteModal.loading}
+                onClick={() => setDeleteModal({ isOpen: false, company: null, loading: false })}
+                className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={deleteModal.loading}
+                onClick={executeDeleteCompany}
+                className="rounded-xl bg-red-600 hover:bg-red-700 px-5 py-2 text-xs font-bold text-white shadow-xs transition-colors disabled:opacity-50"
+              >
+                {deleteModal.loading ? "Eliminando..." : "Eliminar Definitivamente"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -266,7 +266,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
           <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona los usuarios, aplicaciones, suscripciones y soporte de tu empresa desde un solo lugar.</p>
         </div>
         <div className="hidden lg:block text-right">
-          <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
+          <p className="text-xs italic text-zinc-400">“Tecnología para negocios que avanzan.”</p>
         </div>
       </div>
 
@@ -326,7 +326,7 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
           {subs.length === 0 ? (
             <div className="px-5 py-8 text-center">
               <p className="text-sm font-semibold text-zinc-600">{loading ? 'Cargando aplicaciones…' : 'Aún no tienes aplicaciones contratadas.'}</p>
-              <button type="button" onClick={() => setActiveTab('Aplicaciones')} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]">Ver aplicaciones disponibles</button>
+              <button type="button" onClick={() => setActiveTab('Aplicaciones')} className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]">Ver aplicaciones disponibles</button>
             </div>
           ) : (
             <div className="divide-y divide-zinc-50 px-5">
@@ -894,7 +894,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           <button
             type="button"
             onClick={() => setIsMetricModalOpen(true)}
-            className="flex items-center gap-1.5 bg-[#ff4b0b] hover:bg-[#e04108] text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_10px_rgba(255,75,11,0.25)] active:scale-[0.98] cursor-pointer"
+            className="flex items-center gap-1.5 bg-[#ff4b0b] hover:bg-[#e03f06] text-white text-sm font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_10px_rgba(255,75,11,0.25)] active:scale-[0.98] cursor-pointer"
             title="Crear métrica personalizada (Super Administrador)"
           >
             <HubIcon icon={Plus} size={15} className="w-4 h-4" />
@@ -1780,7 +1780,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
       </div>
 
-      {/* Notas del Administrador (Barra Compacta) */}
+      {/* Notas del Administrador (Barra Informativa Exclusiva de Super Admin) */}
       <div className="bg-amber-50/60 rounded-2xl p-4 border border-amber-200/80 shadow-2xs flex items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3 min-w-0">
           <span className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
@@ -1793,13 +1793,6 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setActiveTab('Configuración')}
-          className="text-xs font-bold text-amber-800 hover:text-amber-950 px-3 py-1.5 bg-amber-100/80 hover:bg-amber-200/70 rounded-xl transition-colors shrink-0"
-        >
-          Gestionar notas
-        </button>
       </div>
 
       {/* Modal Nueva Métrica (Super Administrador) */}
@@ -1900,7 +1893,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-[#ff4b0b] hover:bg-[#e04108] text-white transition-colors shadow-xs cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-sm font-bold bg-[#ff4b0b] hover:bg-[#e03f06] text-white transition-colors shadow-xs cursor-pointer"
                 >
                   Guardar Métrica
                 </button>
@@ -2038,7 +2031,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
           <p className="mt-1 text-xs md:text-sm text-zinc-500">Bienvenido{name ? `, ${name}` : ''}. Aquí están las aplicaciones que tu administrador habilitó para ti.</p>
         </div>
         <div className="hidden lg:block text-right">
-          <p className="text-xs italic text-zinc-400 font-serif">“Tecnología para negocios que avanzan.”</p>
+          <p className="text-xs italic text-zinc-400">“Tecnología para negocios que avanzan.”</p>
         </div>
       </div>
 
@@ -3079,7 +3072,7 @@ function HubPanelContent() {
                 {filtered.length === 0 ? (
                   <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-8 text-center">
                     <p className="text-[15px] font-semibold text-zinc-900">Sin resultados</p>
-                    <button onClick={() => { setGlobalSearchQuery(''); goTab('Inicio') }} className="mt-4 h-10 px-5 rounded-full bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
+                    <button onClick={() => { setGlobalSearchQuery(''); goTab('Inicio') }} className="mt-4 h-10 px-5 rounded-xl bg-zinc-950 text-white text-sm font-bold">Limpiar filtros</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

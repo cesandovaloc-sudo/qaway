@@ -487,7 +487,7 @@ export default function PagosPanel() {
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e94408]"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
             >
               <Download size={16} />
               Exportar

@@ -289,7 +289,7 @@ export default function HubProfilePanel({
 
                     <div className="mt-3 flex gap-2">
                       <button type="button" onClick={() => fileInputRef.current?.click()}
-                        className="flex h-11 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408]">
+                        className="flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e03f06]">
                         <ImagePlus size={13} /> Cambiar foto
                       </button>
                       <button type="button" onClick={deleteAvatar} disabled={!avatarUrl}
@@ -392,7 +392,7 @@ export default function HubProfilePanel({
               <div className="flex shrink-0 items-center gap-2">
                 {savedAll && <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600"><CheckCircle2 size={13} /> Guardado</span>}
                 <button type="button" onClick={saveAll} disabled={savingAll}
-                  className="flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e94408] disabled:opacity-60">
+                  className="flex h-10 items-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm hover:bg-[#e03f06] disabled:opacity-60">
                   <Save size={14} /> {savingAll ? "Guardando..." : "Guardar cambios"}
                 </button>
               </div>
