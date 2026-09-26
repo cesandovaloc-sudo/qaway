@@ -60,8 +60,12 @@ const navItems: NavItem[] = [
   { to: '/reportes', label: 'Reportes', icon: <FileText size={18} />, section: 'REPORTES' },
 ]
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
+// Uniformización Hub: el colapso se gobierna desde el topbar (AppLayout pasa
+// la prop). El estado interno queda como respaldo si se usa sin prop.
+export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: boolean }) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false)
+  const collapsed = collapsedProp ?? internalCollapsed
+  const setCollapsed = setInternalCollapsed
 
   const getHref = (to: string) => {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
@@ -133,9 +137,10 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Collapse toggle */}
+      {/* Collapse toggle (respaldo; el primario vive en el topbar, como el Hub) */}
       <button
         onClick={() => setCollapsed(!collapsed)}
+        aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
         className="flex items-center justify-center h-12 border-t border-white/10 text-muted-light hover:text-white transition-colors"
       >
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
