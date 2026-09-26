@@ -53,9 +53,9 @@ interface AccountingEntry {
 }
 
 const inputCls =
-  'px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
 const selectCls =
-  'px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 appearance-none'
+  'px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 appearance-none'
 
 export default function AccountingPage() {
   const [entries, setEntries] = useState<AccountingEntry[]>([])
@@ -234,8 +234,8 @@ export default function AccountingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Contabilidad</h1>
-          <p className="text-muted-light/60 text-sm mt-1">Asientos contables con doble partida</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Contabilidad</h1>
+          <p className="text-muted text-sm mt-1">Asientos contables con doble partida</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true) }}
@@ -248,16 +248,16 @@ export default function AccountingPage() {
 
       {/* Resumen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Total Débitos</p>
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Total Débitos</p>
           <p className="text-2xl font-bold text-blue-400 mt-1">S/ {totalDebitAll.toFixed(2)}</p>
         </div>
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Total Créditos</p>
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Total Créditos</p>
           <p className="text-2xl font-bold text-purple-400 mt-1">S/ {totalCreditAll.toFixed(2)}</p>
         </div>
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Balance</p>
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Balance</p>
           <p className={`text-2xl font-bold mt-1 ${Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? 'text-green-400' : 'text-red-400'}`}>
             S/ {(totalDebitAll - totalCreditAll).toFixed(2)}
           </p>
@@ -266,7 +266,7 @@ export default function AccountingPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"
           placeholder="Buscar por descripción o número de asiento..."
@@ -291,19 +291,19 @@ export default function AccountingPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <BookOpen size={48} className="mx-auto text-muted-light/20 mb-4" />
-          <p className="text-muted-light/60">No hay asientos contables registrados</p>
-          <p className="text-muted-light/40 text-sm mt-1">Crea tu primer asiento con débito y crédito</p>
+          <BookOpen size={48} className="mx-auto text-muted mb-4" />
+          <p className="text-muted ">No hay asientos contables registrados</p>
+          <p className="text-muted text-sm mt-1">Crea tu primer asiento con débito y crédito</p>
         </div>
       ) : (
         <div className="space-y-4">
           {filtered.map(entry => (
-            <div key={entry.id} className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+            <div key={entry.id} className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
               {/* Entry header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200">
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-mono font-bold text-brand">{entry.entry_number}</span>
-                  <span className="text-sm text-white">{entry.description}</span>
+                  <span className="text-sm text-ink">{entry.description}</span>
                   <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                     entry.status === 'posted'
                       ? 'bg-green-500/10 text-green-400'
@@ -315,13 +315,13 @@ export default function AccountingPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-light/60">
+                  <span className="text-xs text-muted ">
                     {new Date(entry.entry_date).toLocaleDateString('es-PE')}
                   </span>
                   {entry.status === 'draft' && (
                     <button
                       onClick={() => cancelEntry(entry.id)}
-                      className="p-1 text-muted-light/40 hover:text-red-400 transition-colors"
+                      className="p-1 text-muted hover:text-red-400 transition-colors"
                       title="Anular asiento"
                     >
                       <X size={14} />
@@ -334,21 +334,21 @@ export default function AccountingPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-white/5">
-                      <th className="text-left px-4 py-2 text-xs font-mono uppercase text-muted-light/60">Cuenta</th>
-                      <th className="text-left px-4 py-2 text-xs font-mono uppercase text-muted-light/60">Descripción</th>
-                      <th className="text-right px-4 py-2 text-xs font-mono uppercase text-muted-light/60">Débito</th>
-                      <th className="text-right px-4 py-2 text-xs font-mono uppercase text-muted-light/60">Crédito</th>
+                    <tr className="border-b border-zinc-100">
+                      <th className="text-left px-4 py-2 text-xs font-mono uppercase text-muted ">Cuenta</th>
+                      <th className="text-left px-4 py-2 text-xs font-mono uppercase text-muted ">Descripción</th>
+                      <th className="text-right px-4 py-2 text-xs font-mono uppercase text-muted ">Débito</th>
+                      <th className="text-right px-4 py-2 text-xs font-mono uppercase text-muted ">Crédito</th>
                     </tr>
                   </thead>
                   <tbody>
                     {entry.lines.map((line, i) => (
-                      <tr key={i} className="border-b border-white/5 hover:bg-white/5">
+                      <tr key={i} className="border-b border-zinc-100 hover:bg-zinc-50">
                         <td className="px-4 py-2 text-sm">
                           <span className="text-brand font-mono">{line.accountCode}</span>
-                          <span className="text-muted-light/60 ml-2">{line.accountName}</span>
+                          <span className="text-muted ml-2">{line.accountName}</span>
                         </td>
-                        <td className="px-4 py-2 text-sm text-muted-light/80">{line.description || '—'}</td>
+                        <td className="px-4 py-2 text-sm text-muted ">{line.description || '—'}</td>
                         <td className="px-4 py-2 text-sm text-right font-medium text-blue-400">
                           {line.debit > 0 ? `S/ ${line.debit.toFixed(2)}` : '—'}
                         </td>
@@ -359,8 +359,8 @@ export default function AccountingPage() {
                     ))}
                   </tbody>
                   <tfoot>
-                    <tr className="border-t border-white/10 bg-white/5">
-                      <td colSpan={2} className="px-4 py-2 text-sm font-medium text-muted-light/80">Totales</td>
+                    <tr className="border-t border-zinc-200 bg-zinc-50">
+                      <td colSpan={2} className="px-4 py-2 text-sm font-medium text-muted ">Totales</td>
                       <td className="px-4 py-2 text-sm text-right font-bold text-blue-400">S/ {entry.total_debit.toFixed(2)}</td>
                       <td className="px-4 py-2 text-sm text-right font-bold text-purple-400">S/ {entry.total_credit.toFixed(2)}</td>
                     </tr>
@@ -369,7 +369,7 @@ export default function AccountingPage() {
               </div>
 
               {/* Balance indicator */}
-              <div className="px-4 py-2 border-t border-white/5 flex items-center gap-2">
+              <div className="px-4 py-2 border-t border-zinc-100 flex items-center gap-2">
                 {entry.is_balanced ? (
                   <span className="flex items-center gap-1 text-xs text-green-400">
                     <Check size={12} /> Cuadrado
@@ -391,13 +391,13 @@ export default function AccountingPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
         >
-          <div className="bg-surface border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-              <h2 className="text-lg font-semibold text-white">Nuevo Asiento Contable</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+              <h2 className="text-lg font-semibold text-ink">Nuevo Asiento Contable</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 text-muted-light/40 hover:text-white transition-colors"
+                className="p-1 text-muted hover:text-ink transition-colors"
               >
                 <X size={20} />
               </button>
@@ -408,7 +408,7 @@ export default function AccountingPage() {
               {/* Datos del asiento */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs text-muted-light/60 mb-1">Descripción *</label>
+                  <label className="block text-xs text-muted mb-1">Descripción *</label>
                   <input
                     type="text"
                     value={entryDesc}
@@ -418,7 +418,7 @@ export default function AccountingPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-muted-light/60 mb-1">Fecha *</label>
+                  <label className="block text-xs text-muted mb-1">Fecha *</label>
                   <input
                     type="date"
                     value={entryDate}
@@ -429,7 +429,7 @@ export default function AccountingPage() {
               </div>
 
               <div>
-                <label className="block text-xs text-muted-light/60 mb-1">Referencia (opcional)</label>
+                <label className="block text-xs text-muted mb-1">Referencia (opcional)</label>
                 <input
                   type="text"
                   value={entryReference}
@@ -442,12 +442,12 @@ export default function AccountingPage() {
               {/* Líneas del asiento */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+                  <label className="text-xs font-mono uppercase tracking-wider text-muted ">
                     Líneas del Asiento ({lines.length})
                   </label>
                   <button
                     onClick={addLine}
-                    className="flex items-center gap-1 px-2 py-1 text-xs text-brand hover:text-white bg-brand/10 hover:bg-brand/20 rounded transition-colors"
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-brand hover:text-ink bg-brand/10 hover:bg-brand/20 rounded transition-colors"
                   >
                     <Plus size={12} />
                     Agregar línea
@@ -456,7 +456,7 @@ export default function AccountingPage() {
 
                 <div className="space-y-2">
                   {/* Header row */}
-                  <div className="grid grid-cols-12 gap-2 px-3 text-xs font-mono uppercase text-muted-light/40">
+                  <div className="grid grid-cols-12 gap-2 px-3 text-xs font-mono uppercase text-muted ">
                     <div className="col-span-2">Cuenta</div>
                     <div className="col-span-3">Nombre</div>
                     <div className="col-span-3">Descripción</div>
@@ -478,7 +478,7 @@ export default function AccountingPage() {
                           ))}
                         </select>
                       </div>
-                      <div className="col-span-3 text-xs text-muted-light/60 truncate">
+                      <div className="col-span-3 text-xs text-muted truncate">
                         {line.accountName || '—'}
                       </div>
                       <div className="col-span-3">
@@ -487,7 +487,7 @@ export default function AccountingPage() {
                           value={line.description}
                           onChange={e => updateLine(idx, 'description', e.target.value)}
                           placeholder="Detalle..."
-                          className="w-full px-2 py-1.5 bg-background border border-white/10 rounded text-white text-xs focus:outline-none focus:ring-1 focus:ring-brand/50"
+                          className="w-full px-2 py-1.5 bg-background border border-zinc-200 rounded text-ink text-xs focus:outline-none focus:ring-1 focus:ring-brand/50"
                         />
                       </div>
                       <div className="col-span-2">
@@ -498,7 +498,7 @@ export default function AccountingPage() {
                           value={line.debit || ''}
                           onChange={e => updateLine(idx, 'debit', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
-                          className="w-full px-2 py-1.5 bg-background border border-white/10 rounded text-blue-400 text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand/50"
+                          className="w-full px-2 py-1.5 bg-background border border-zinc-200 rounded text-blue-400 text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand/50"
                         />
                       </div>
                       <div className="col-span-2 flex items-center gap-1">
@@ -509,12 +509,12 @@ export default function AccountingPage() {
                           value={line.credit || ''}
                           onChange={e => updateLine(idx, 'credit', parseFloat(e.target.value) || 0)}
                           placeholder="0.00"
-                          className="w-full px-2 py-1.5 bg-background border border-white/10 rounded text-purple-400 text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand/50"
+                          className="w-full px-2 py-1.5 bg-background border border-zinc-200 rounded text-purple-400 text-xs text-right focus:outline-none focus:ring-1 focus:ring-brand/50"
                         />
                         <button
                           onClick={() => removeLine(idx)}
                           disabled={lines.length <= 2}
-                          className="p-1 text-muted-light/30 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          className="p-1 text-muted hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                           title="Eliminar línea"
                         >
                           <Trash2 size={12} />
@@ -527,13 +527,13 @@ export default function AccountingPage() {
                 {/* Totales y balance */}
                 <div className="flex items-center justify-between mt-3 px-3 py-2 bg-background rounded-lg">
                   <div className="flex items-center gap-4">
-                    <span className="text-xs text-muted-light/60">
+                    <span className="text-xs text-muted ">
                       Débito: <span className="font-bold text-blue-400">S/ {totalDebit.toFixed(2)}</span>
                     </span>
-                    <span className="text-xs text-muted-light/60">
+                    <span className="text-xs text-muted ">
                       Crédito: <span className="font-bold text-purple-400">S/ {totalCredit.toFixed(2)}</span>
                     </span>
-                    <span className="text-xs text-muted-light/60">
+                    <span className="text-xs text-muted ">
                       Diferencia: <span className={`font-bold ${isBalanced ? 'text-green-400' : 'text-red-400'}`}>
                         S/ {Math.abs(totalDebit - totalCredit).toFixed(2)}
                       </span>
@@ -553,17 +553,17 @@ export default function AccountingPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-muted-light hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-muted hover:text-ink transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleSave('draft')}
                 disabled={!isValid || saving}
-                className="px-4 py-2 text-sm bg-white/10 text-white rounded-lg hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm bg-zinc-100 text-ink rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {saving ? 'Guardando...' : 'Guardar Borrador'}
               </button>

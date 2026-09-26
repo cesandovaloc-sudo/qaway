@@ -28,9 +28,9 @@ const quickAccessItems: QuickAccessItem[] = [
     title: 'Pedidos Web',
     subtitle: 'Revisar órdenes del carrito online, comprobantes y entregas',
     badge: 'Ventas Web',
-    badgeColor: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+    badgeColor: 'bg-blue-500/10 text-blue-600 border border-blue-500/20',
     icon: Globe,
-    iconColor: 'text-blue-400',
+    iconColor: 'text-blue-600',
     iconBg: 'bg-blue-500/10 group-hover:bg-blue-500/20',
     href: '/ventas/pedidos-web',
   },
@@ -39,9 +39,9 @@ const quickAccessItems: QuickAccessItem[] = [
     title: 'Validar Pagos & Vouchers',
     subtitle: 'Confirmar depósitos Yape/Plin, transferencias y créditos',
     badge: 'Finanzas',
-    badgeColor: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+    badgeColor: 'bg-amber-500/10 text-amber-600 border border-amber-500/20',
     icon: CreditCard,
-    iconColor: 'text-amber-400',
+    iconColor: 'text-amber-600',
     iconBg: 'bg-amber-500/10 group-hover:bg-amber-500/20',
     href: '/ventas',
   },
@@ -50,9 +50,9 @@ const quickAccessItems: QuickAccessItem[] = [
     title: 'Stock Crítico & Reposición',
     subtitle: 'Supervisar productos con inventario bajo o por agotarse',
     badge: 'Logística',
-    badgeColor: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+    badgeColor: 'bg-rose-500/10 text-rose-600 border border-rose-500/20',
     icon: AlertTriangle,
-    iconColor: 'text-rose-400',
+    iconColor: 'text-rose-600',
     iconBg: 'bg-rose-500/10 group-hover:bg-rose-500/20',
     href: '/logistica',
   },
@@ -61,9 +61,9 @@ const quickAccessItems: QuickAccessItem[] = [
     title: 'Punto de Venta (POS)',
     subtitle: 'Emitir venta rápida en mostrador al contado o con tarjeta',
     badge: 'Caja Rápida',
-    badgeColor: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    badgeColor: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
     icon: ShoppingCart,
-    iconColor: 'text-emerald-400',
+    iconColor: 'text-emerald-600',
     iconBg: 'bg-emerald-500/10 group-hover:bg-emerald-500/20',
     href: '/ventas/nueva',
   },
@@ -90,10 +90,10 @@ export function QuickAccessCards() {
             <Sparkles size={16} className="text-brand" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white tracking-wide uppercase">
+            <h2 className="text-sm font-semibold text-ink tracking-wide uppercase">
               Accesos Rápidos Prioritarios
             </h2>
-            <p className="text-xs text-muted-light/60">
+            <p className="text-xs text-muted">
               Páginas clave a revisar para la operación de tu negocio
             </p>
           </div>
@@ -118,10 +118,10 @@ export function QuickAccessCards() {
             <Link
               key={item.id}
               to={getHref(item.href)}
-              className="group relative flex flex-col justify-between p-4 bg-surface border border-white/10 hover:border-brand/40 rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/5 overflow-hidden"
+              className="group relative flex flex-col justify-between p-4 bg-white border border-zinc-200 hover:border-brand/40 rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/5 overflow-hidden"
             >
               {/* Decorador sutil en hover */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-40 group-hover:opacity-100" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-zinc-100 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-40 group-hover:opacity-100" />
 
               <div>
                 {/* Cabecera de la tarjeta: Icono y Badge */}
@@ -139,16 +139,16 @@ export function QuickAccessCards() {
                 </div>
 
                 {/* Título y descripción ergonómica */}
-                <h3 className="text-base font-semibold text-white group-hover:text-brand transition-colors duration-200 line-clamp-1">
+                <h3 className="text-base font-semibold text-ink group-hover:text-brand transition-colors duration-200 line-clamp-1">
                   {item.title}
                 </h3>
-                <p className="text-xs text-muted-light/70 mt-1 leading-relaxed line-clamp-2">
+                <p className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
                   {item.subtitle}
                 </p>
               </div>
 
               {/* Pie con llamada a la acción */}
-              <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs font-medium text-muted-light/60 group-hover:text-brand transition-colors">
+              <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-medium text-muted group-hover:text-brand transition-colors">
                 <span>Ingresar ahora</span>
                 <ArrowRight
                   size={14}

@@ -20,7 +20,38 @@
 | **3** | `6479fc09` | Token `--color-brand-hover: #e03f06` + receta única de botón primario `h-10 px-5 rounded-xl text-sm font-bold` en 10 archivos + migración de 17 hovers sueltos en 7 archivos (filas 9-12) |
 | **4** | `de8744bb` | Píldora de marca/empresa estática (dot verde pulsante + nombre), informativa como corresponde a una app (fila 38) |
 | **5** | `f2f6d4c5` | Waffle de Apps (9 puntos + label al hover → `/hub`) + H1 unificados a `text-2xl md:text-3xl font-extrabold tracking-tight` en ~20 páginas admin (filas 39/13) |
-| **6** | (este commit) | Verificación global + bitácora |
+| **6** | `75a44a54` | Verificación global + bitácora |
+
+## Corrección de contraste — fila 24 del plan (sep-26, post-Etapa 6)
+
+El usuario detectó "páginas con texto claro y fondo claro" (fila 24: contraste de texto
+sobre color). Causa: páginas/componentes del inventario conservaban utilidades del tema
+oscuro original (text-white, text-muted-light, bg-white/5-10, border-white/10, bg-ink)
+sobre las tarjetas blancas del tema claro.
+
+**Mapeo aplicado** (solo sobre fondos claros; el cromo oscuro del Header/Sidebar y los
+botones de color con texto blanco son intencionales, iguales que en el Hub):
+
+- `text-white` → `text-ink`; `text-white/N` → `text-muted`; `text-muted-light[/N]` → `text-muted`
+- `bg-white/5` → `bg-zinc-50`; `bg-white/10` → `bg-zinc-100`; `bg-ink` (en claro) → `bg-white`
+- `border-white/10` → `border-zinc-200`; `border-white/15` → `border-zinc-300`; `divide-white/5` → `divide-zinc-100`
+- Chips/iconos color-400 sobre fondo claro → color-600 (azul/ámbar/rose/emerald)
+- Re-forzado `text-white` en botones que quedan sobre fondo de color (brand/red/blue/etc.)
+
+**Archivos corregidos en esta pasada:** `app/router/RequirePermission.tsx` (tarjeta
+"Acceso restringido" ahora blanco sobre claro, copy intacto), `dashboard/QuickAccessCards.tsx`,
+`settings/BrandingSettings.tsx`, `pricing/PriceListCard.tsx`, `products/ProductTable.tsx`,
+`products/ProductGrid.tsx`, `inventory/CategoriesPage.tsx`, `inventory/LocationsPage.tsx`,
+`inventory/MovementsPage.tsx`, `pricing/PriceListsPage.tsx`, `finance/AccountingPage.tsx`
+(hover de botón secundario) — junto con las páginas ya corregidas en la pasada previa
+(Dashboard, WebOrders, Accounting, Expenses, PettyCash, Suppliers, PurchaseOrders,
+NewPurchaseOrder, Reports, Products). `PublicCatalogPage` y `GuestAccessPage` quedan como
+están (storefront público fuera del alcance de la uniformización admin).
+
+**Verificación:** scan final = 0 residuos claro-sobre-claro (solo quedan los oscuros
+intencionales del Header/Sidebar/chips sobre color, idénticos al Hub); typecheck 0 errores;
+tests 17/17 en verde (el aviso `scrollIntoView` de Checkout.jsx es preexistente en jsdom).
+Plan v3 regenerado con fila 24 actualizada a "corregido y verificado".
 
 ## Verificación global final
 

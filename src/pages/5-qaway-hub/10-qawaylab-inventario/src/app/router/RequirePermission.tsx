@@ -11,7 +11,7 @@ import type { UserPermissions } from '@/types/user'
  * sección, y la denegación muestra una tarjeta de "Acceso restringido" con el
  * mismo mensaje del Hub ("es una sección administrativa. Solicita acceso a tu
  * administrador"). Adaptado al tema visual del inventario (clases del design
- * system propio: surface/ink/muted-light), sin duplicar lógica de roles.
+ * system propio, tema claro: surface/ink/muted + zinc), sin duplicar lógica de roles.
  *
  * Estructura: <RequirePermission permission="can_access_fiscal_settings">
  *   <Route path="contabilidad" element={<AccountingPage />} />
@@ -60,12 +60,12 @@ export default function RequirePermission({ permission }: { permission: RoutePer
     // sigue montado via Outlet chain), no en página aparte.
     return (
       <div className="min-h-[50vh] flex items-center justify-center p-6">
-        <div className="border border-white/10 rounded-2xl bg-surface p-10 text-center max-w-md">
-          <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white/5 text-muted-light/60">
+        <div className="border border-zinc-200 rounded-2xl bg-white p-10 text-center max-w-md">
+          <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-zinc-100 text-muted">
             <Shield size={18} />
           </div>
-          <p className="mt-3 text-sm font-extrabold text-white">Acceso restringido</p>
-          <p className="mt-1 text-xs text-muted-light/60">
+          <p className="mt-3 text-sm font-extrabold text-ink">Acceso restringido</p>
+          <p className="mt-1 text-xs text-muted">
             Esta sección es administrativa. Solicita acceso a tu administrador para poder verla.
           </p>
         </div>

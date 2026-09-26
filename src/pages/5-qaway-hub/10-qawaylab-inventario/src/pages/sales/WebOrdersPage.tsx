@@ -294,12 +294,12 @@ export default function WebOrdersPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Pedidos Web</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Pedidos Web</h1>
               <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 {orders.length} órdenes
               </span>
             </div>
-            <p className="text-sm text-muted-light/60 mt-0.5">
+            <p className="text-sm text-muted mt-0.5">
               Bandeja unificada de pedidos generados en el carrito web y tienda online
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function WebOrdersPage() {
           <button
             onClick={loadOrders}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-light bg-surface border border-white/10 rounded-xl hover:bg-white/5 hover:text-white transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted bg-surface border border-zinc-200 rounded-xl hover:bg-zinc-50 hover:text-ink transition-all disabled:opacity-50"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             <span>Actualizar</span>
@@ -328,20 +328,20 @@ export default function WebOrdersPage() {
 
       {/* Tarjetas de Métricas de Pedidos Web */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
               Total Pedidos Web
             </span>
-            <Package size={16} className="text-muted-light/40" />
+            <Package size={16} className="text-muted " />
           </div>
-          <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.totalCount}</p>
-          <p className="text-xs text-muted-light/60 mt-1">Registrados en tienda online</p>
+          <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.totalCount}</p>
+          <p className="text-xs text-muted mt-1">Registrados en tienda online</p>
         </div>
 
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
               Por Confirmar
             </span>
             <Clock size={16} className="text-amber-400" />
@@ -350,9 +350,9 @@ export default function WebOrdersPage() {
           <p className="text-xs text-amber-400/80 mt-1">Requieren validar voucher/pago</p>
         </div>
 
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
               Confirmados
             </span>
             <CheckCircle2 size={16} className="text-emerald-400" />
@@ -361,9 +361,9 @@ export default function WebOrdersPage() {
           <p className="text-xs text-emerald-400/80 mt-1">Pagados o despachados</p>
         </div>
 
-        <div className="bg-surface border border-white/10 rounded-xl p-4">
+        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
               Ingresos Confirmados
             </span>
             <DollarSign size={16} className="text-brand" />
@@ -374,20 +374,20 @@ export default function WebOrdersPage() {
       </div>
 
       {/* Barra de Búsqueda y Filtros */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-surface border border-white/10 p-3 rounded-xl">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-surface border border-zinc-200 p-3 rounded-xl">
         <div className="relative w-full sm:max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
           <input
             type="text"
             placeholder="Buscar por código, cliente o producto..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-ink/50 border border-white/10 rounded-lg text-sm text-white placeholder:text-muted-light/40 focus:outline-none focus:border-brand/50 transition-colors"
+            className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-ink placeholder:text-muted focus:outline-none focus:border-brand/50 transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <span className="text-xs text-muted-light/60 whitespace-nowrap pl-1">Filtrar:</span>
+          <span className="text-xs text-muted whitespace-nowrap pl-1">Filtrar:</span>
           {[
             { id: 'all', label: 'Todos' },
             { id: 'pending', label: 'Pendientes' },
@@ -401,7 +401,7 @@ export default function WebOrdersPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
                 filterStatus === tab.id
                   ? 'bg-brand text-white'
-                  : 'bg-white/5 text-muted-light hover:text-white hover:bg-white/10'
+                  : 'bg-zinc-50 text-muted hover:text-ink hover:bg-zinc-100'
               }`}
             >
               {tab.label}
@@ -429,10 +429,10 @@ export default function WebOrdersPage() {
       )}
 
       {/* Tabla de Pedidos Web */}
-      <div className="bg-surface border border-white/10 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/5 border-b border-white/10 text-xs font-mono uppercase tracking-wider text-muted-light/60">
+            <thead className="bg-zinc-50 border-b border-zinc-200 text-xs font-mono uppercase tracking-wider text-muted ">
               <tr>
                 <th className="py-3.5 px-4">Pedido / Fecha</th>
                 <th className="py-3.5 px-4">Cliente</th>
@@ -443,10 +443,10 @@ export default function WebOrdersPage() {
                 <th className="py-3.5 px-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-muted-light">
+            <tbody className="divide-y divide-zinc-100 text-muted">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-muted-light/60">
+                  <td colSpan={7} className="py-12 text-center text-muted ">
                     <Globe size={32} className="mx-auto mb-2 opacity-40 text-blue-400" />
                     <p className="text-sm font-medium">No se encontraron pedidos con estos filtros.</p>
                   </td>
@@ -470,10 +470,10 @@ export default function WebOrdersPage() {
                     >
                       {/* ID y Fecha */}
                       <td className="py-4 px-4">
-                        <div className="font-mono text-sm font-semibold text-white group-hover:text-brand transition-colors">
+                        <div className="font-mono text-sm font-semibold text-ink group-hover:text-brand transition-colors">
                           {order.id}
                         </div>
-                        <div className="text-xs text-muted-light/50 flex items-center gap-1 mt-0.5">
+                        <div className="text-xs text-muted flex items-center gap-1 mt-0.5">
                           <Calendar size={12} />
                           <span>{formattedDate}</span>
                         </div>
@@ -481,9 +481,9 @@ export default function WebOrdersPage() {
 
                       {/* Cliente */}
                       <td className="py-4 px-4">
-                        <div className="font-medium text-white">{order.customer_name}</div>
+                        <div className="font-medium text-ink">{order.customer_name}</div>
                         {order.customer_phone && (
-                          <div className="text-xs text-muted-light/50 mt-0.5">
+                          <div className="text-xs text-muted mt-0.5">
                             {order.customer_phone}
                           </div>
                         )}
@@ -491,7 +491,7 @@ export default function WebOrdersPage() {
 
                       {/* Productos */}
                       <td className="py-4 px-4 max-w-xs">
-                        <div className="text-sm text-white font-medium truncate">
+                        <div className="text-sm text-ink font-medium truncate">
                           {order.items[0]?.product_title || 'Pedido Web'}
                         </div>
                         {order.items.length > 1 && (
@@ -503,15 +503,15 @@ export default function WebOrdersPage() {
 
                       {/* Total */}
                       <td className="py-4 px-4">
-                        <span className="font-semibold text-white">
+                        <span className="font-semibold text-ink">
                           {formatCurrency(order.total)}
                         </span>
                       </td>
 
                       {/* Método de Pago */}
                       <td className="py-4 px-4">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-muted-light">
-                          <CreditCard size={13} className="text-muted-light/60" />
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+                          <CreditCard size={13} className="text-muted " />
                           <span>{order.payment_method}</span>
                         </span>
                       </td>
@@ -534,7 +534,7 @@ export default function WebOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => setSelectedOrder(order)}
-                            className="p-1.5 text-muted-light hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            className="p-1.5 text-muted hover:text-ink hover:bg-zinc-100 rounded-lg transition-colors"
                             title="Ver detalles"
                           >
                             <Eye size={16} />
@@ -566,45 +566,45 @@ export default function WebOrdersPage() {
       {/* Modal Detalle de Pedido */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg bg-surface border border-white/10 rounded-2xl p-6 shadow-2xl space-y-5">
+          <div className="relative w-full max-w-lg bg-surface border border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5">
             {/* Cabecera Modal */}
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-xs font-mono uppercase tracking-widest text-brand">
                   Detalle de Pedido Web
                 </span>
-                <h3 className="text-xl font-bold text-white mt-1">{selectedOrder.id}</h3>
-                <p className="text-xs text-muted-light/60">
+                <h3 className="text-xl font-bold text-ink mt-1">{selectedOrder.id}</h3>
+                <p className="text-xs text-muted ">
                   Emitido el {new Date(selectedOrder.created_at).toLocaleString('es-PE')}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="p-1.5 text-muted-light hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                className="p-1.5 text-muted hover:text-ink hover:bg-zinc-100 rounded-lg transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Datos del Cliente */}
-            <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-2">
-              <div className="flex items-center gap-2 text-white font-medium text-sm">
+            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-100 space-y-2">
+              <div className="flex items-center gap-2 text-ink font-medium text-sm">
                 <User size={15} className="text-brand" />
                 <span>{selectedOrder.customer_name || 'Cliente sin nombre'}</span>
               </div>
               {selectedOrder.customer_email && (
-                <p className="text-xs text-muted-light/70 pl-6">
+                <p className="text-xs text-muted pl-6">
                   {selectedOrder.customer_email}
                 </p>
               )}
               {selectedOrder.customer_phone && (
-                <p className="text-xs text-muted-light/70 pl-6">
+                <p className="text-xs text-muted pl-6">
                   Tel: {selectedOrder.customer_phone}
                 </p>
               )}
               {selectedOrder.shipping_address && (
-                <div className="flex items-start gap-2 text-xs text-muted-light/70 pl-6 pt-1">
-                  <MapPin size={13} className="text-muted-light/40 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-xs text-muted pl-6 pt-1">
+                  <MapPin size={13} className="text-muted shrink-0 mt-0.5" />
                   <span>{selectedOrder.shipping_address}</span>
                 </div>
               )}
@@ -612,19 +612,19 @@ export default function WebOrdersPage() {
 
             {/* Desglose de Productos */}
             <div>
-              <h4 className="text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-2">
+              <h4 className="text-xs font-mono uppercase tracking-wider text-muted mb-2">
                 Productos Comprados
               </h4>
-              <div className="divide-y divide-white/5 border border-white/5 rounded-xl overflow-hidden bg-ink/30">
+              <div className="divide-y divide-zinc-100 border border-zinc-100 rounded-xl overflow-hidden bg-white/30">
                 {selectedOrder.items.map((item, idx) => (
                   <div key={idx} className="p-3 flex items-center justify-between text-sm">
                     <div>
-                      <div className="font-medium text-white">{item.product_title}</div>
-                      <div className="text-xs text-muted-light/50">
+                      <div className="font-medium text-ink">{item.product_title}</div>
+                      <div className="text-xs text-muted ">
                         {item.quantity} x {formatCurrency(item.unit_price)}
                       </div>
                     </div>
-                    <div className="font-semibold text-white">
+                    <div className="font-semibold text-ink">
                       {formatCurrency(item.subtotal)}
                     </div>
                   </div>
@@ -634,7 +634,7 @@ export default function WebOrdersPage() {
 
             {/* Total */}
             <div className="flex items-center justify-between p-3.5 bg-brand/10 border border-brand/20 rounded-xl">
-              <span className="font-semibold text-white">Total a Pagar</span>
+              <span className="font-semibold text-ink">Total a Pagar</span>
               <span className="text-xl font-bold text-brand">
                 {formatCurrency(selectedOrder.total)}
               </span>
@@ -642,24 +642,24 @@ export default function WebOrdersPage() {
 
             {/* Notas */}
             {selectedOrder.notes && (
-              <div className="p-3 bg-white/5 border border-white/5 rounded-xl">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-light/50 block mb-1">
+              <div className="p-3 bg-zinc-50 border border-zinc-100 rounded-xl">
+                <span className="text-xs font-mono uppercase tracking-wider text-muted block mb-1">
                   Notas del pedido:
                 </span>
-                <p className="text-xs text-muted-light/80 italic">{selectedOrder.notes}</p>
+                <p className="text-xs text-muted italic">{selectedOrder.notes}</p>
               </div>
             )}
 
             {/* Estado y Acciones Rápidas */}
-            <div className="space-y-2 pt-2 border-t border-white/10">
-              <span className="text-xs text-muted-light/60 block">Cambiar estado del pedido:</span>
+            <div className="space-y-2 pt-2 border-t border-zinc-200">
+              <span className="text-xs text-muted block">Cambiar estado del pedido:</span>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => updateOrderStatus(selectedOrder.id, 'paid')}
                   className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                     selectedOrder.status === 'paid'
                       ? 'bg-emerald-500 text-white border-emerald-400'
-                      : 'bg-white/5 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
+                      : 'bg-zinc-50 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10'
                   }`}
                 >
                   ✓ Pagado
@@ -669,7 +669,7 @@ export default function WebOrdersPage() {
                   className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                     selectedOrder.status === 'delivered'
                       ? 'bg-purple-500 text-white border-purple-400'
-                      : 'bg-white/5 text-purple-400 border-purple-500/20 hover:bg-purple-500/10'
+                      : 'bg-zinc-50 text-purple-400 border-purple-500/20 hover:bg-purple-500/10'
                   }`}
                 >
                   ✓ Entregado
@@ -679,7 +679,7 @@ export default function WebOrdersPage() {
                   className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
                     selectedOrder.status === 'cancelled'
                       ? 'bg-rose-500 text-white border-rose-400'
-                      : 'bg-white/5 text-rose-400 border-rose-500/20 hover:bg-rose-500/10'
+                      : 'bg-zinc-50 text-rose-400 border-rose-500/20 hover:bg-rose-500/10'
                   }`}
                 >
                   ✕ Cancelar

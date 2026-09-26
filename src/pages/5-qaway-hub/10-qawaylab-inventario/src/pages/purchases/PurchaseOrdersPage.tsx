@@ -47,7 +47,7 @@ export default function PurchaseOrdersPage() {
   )
 
   const statusColors: Record<string, string> = {
-    draft: 'bg-muted-light/10 text-muted-light/60',
+    draft: 'bg-muted-light/10 text-muted ',
     pending: 'bg-yellow-500/10 text-yellow-400',
     approved: 'bg-green-500/10 text-green-400',
     received: 'bg-blue-500/10 text-blue-400',
@@ -59,8 +59,8 @@ export default function PurchaseOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Órdenes de Compra</h1>
-          <p className="text-muted-light/60 text-sm mt-1">Gestión de compras a proveedores</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Órdenes de Compra</h1>
+          <p className="text-muted text-sm mt-1">Gestión de compras a proveedores</p>
         </div>
         <Link
           to="/compras/nueva"
@@ -73,7 +73,7 @@ export default function PurchaseOrdersPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"
           placeholder="Buscar por número o proveedor..."
@@ -95,36 +95,36 @@ export default function PurchaseOrdersPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <ShoppingCart size={48} className="mx-auto text-muted-light/20 mb-4" />
-          <p className="text-muted-light/60">No hay órdenes de compra</p>
-          <p className="text-muted-light/40 text-sm mt-1">Crea tu primera orden para comenzar</p>
+          <ShoppingCart size={48} className="mx-auto text-muted mb-4" />
+          <p className="text-muted ">No hay órdenes de compra</p>
+          <p className="text-muted text-sm mt-1">Crea tu primera orden para comenzar</p>
         </div>
       ) : (
-        <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+        <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Orden</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Proveedor</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Estado</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Total</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Fecha</th>
+              <tr className="border-b border-zinc-200">
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Orden</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Proveedor</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Estado</th>
+                <th className="text-right px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Total</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Fecha</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(order => (
-                <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 text-sm text-white font-medium">{order.order_number}</td>
-                  <td className="px-4 py-3 text-sm text-muted-light/80">{order.supplier_name || '—'}</td>
+                <tr key={order.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+                  <td className="px-4 py-3 text-sm text-ink font-medium">{order.order_number}</td>
+                  <td className="px-4 py-3 text-sm text-muted ">{order.supplier_name || '—'}</td>
                   <td className="px-4 py-3 text-sm">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs ${statusColors[order.status] || 'bg-muted-light/10 text-muted-light/60'}`}>
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs ${statusColors[order.status] || 'bg-muted-light/10 text-muted '}`}>
                       {order.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-white text-right">
+                  <td className="px-4 py-3 text-sm text-ink text-right">
                     {order.currency === 'USD' ? '$' : 'S/'} {order.total?.toFixed(2)}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-light/60">
+                  <td className="px-4 py-3 text-sm text-muted ">
                     {new Date(order.created_at).toLocaleDateString('es-PE')}
                   </td>
                 </tr>

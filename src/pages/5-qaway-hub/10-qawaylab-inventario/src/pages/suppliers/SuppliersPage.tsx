@@ -18,9 +18,9 @@ interface Supplier {
 }
 
 const inputCls =
-  'w-full px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'w-full px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
 const selectCls =
-  'px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 appearance-none'
+  'px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 appearance-none'
 
 // Los proveedores son clientes con tipo 'proveedor' en la tabla customers
 export default function SuppliersPage() {
@@ -131,8 +131,8 @@ export default function SuppliersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Proveedores</h1>
-          <p className="text-muted-light/60 text-sm mt-1">Gestión de proveedores y compras</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Proveedores</h1>
+          <p className="text-muted text-sm mt-1">Gestión de proveedores y compras</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true) }}
@@ -145,7 +145,7 @@ export default function SuppliersPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"
           placeholder="Buscar por nombre, documento o contacto..."
@@ -170,45 +170,45 @@ export default function SuppliersPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <Truck size={48} className="mx-auto text-muted-light/20 mb-4" />
-          <p className="text-muted-light/60">No hay proveedores registrados</p>
-          <p className="text-muted-light/40 text-sm mt-1">Crea tu primer proveedor para comenzar</p>
+          <Truck size={48} className="mx-auto text-muted mb-4" />
+          <p className="text-muted ">No hay proveedores registrados</p>
+          <p className="text-muted text-sm mt-1">Crea tu primer proveedor para comenzar</p>
         </div>
       ) : (
-        <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+        <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Nombre</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Documento</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Contacto</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Dirección</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Teléfono</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Email</th>
+              <tr className="border-b border-zinc-200">
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Nombre</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Documento</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Contacto</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Dirección</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Teléfono</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Email</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(supplier => (
-                <tr key={supplier.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 text-sm text-white font-medium">{supplier.name}</td>
+                <tr key={supplier.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+                  <td className="px-4 py-3 text-sm text-ink font-medium">{supplier.name}</td>
                   <td className="px-4 py-3 text-sm">
                     {supplier.doc_type && supplier.doc_number ? (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-brand/10 text-brand rounded text-xs font-mono">
                         {supplier.doc_type} {supplier.doc_number}
                       </span>
                     ) : (
-                      <span className="text-muted-light/40">—</span>
+                      <span className="text-muted ">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-light/80">
+                  <td className="px-4 py-3 text-sm text-muted ">
                     {supplier.contact_name || '—'}
                     {supplier.contact_phone && (
-                      <span className="block text-xs text-muted-light/50">{supplier.contact_phone}</span>
+                      <span className="block text-xs text-muted ">{supplier.contact_phone}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-light/80">{supplier.address || '—'}</td>
-                  <td className="px-4 py-3 text-sm text-muted-light/80">{supplier.phone || '—'}</td>
-                  <td className="px-4 py-3 text-sm text-muted-light/80">{supplier.email || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-muted ">{supplier.address || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-muted ">{supplier.phone || '—'}</td>
+                  <td className="px-4 py-3 text-sm text-muted ">{supplier.email || '—'}</td>
                 </tr>
               ))}
             </tbody>
@@ -222,13 +222,13 @@ export default function SuppliersPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
         >
-          <div className="bg-surface border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+          <div className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-              <h2 className="text-lg font-semibold text-white">Nuevo Proveedor</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+              <h2 className="text-lg font-semibold text-ink">Nuevo Proveedor</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-1 text-muted-light/40 hover:text-white transition-colors"
+                className="p-1 text-muted hover:text-ink transition-colors"
               >
                 <X size={20} />
               </button>
@@ -238,10 +238,10 @@ export default function SuppliersPage() {
             <div className="px-6 py-4 space-y-5">
               {/* Datos del proveedor */}
               <div>
-                <h3 className="text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Datos del Proveedor</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-muted mb-3">Datos del Proveedor</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label className="block text-xs text-muted-light/60 mb-1">Razón Social / Nombre *</label>
+                    <label className="block text-xs text-muted mb-1">Razón Social / Nombre *</label>
                     <input
                       type="text"
                       value={form.name}
@@ -251,7 +251,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Tipo de Documento</label>
+                    <label className="block text-xs text-muted mb-1">Tipo de Documento</label>
                     <select
                       value={form.doc_type}
                       onChange={e => updateField('doc_type', e.target.value)}
@@ -263,7 +263,7 @@ export default function SuppliersPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">N° de Documento</label>
+                    <label className="block text-xs text-muted mb-1">N° de Documento</label>
                     <input
                       type="text"
                       value={form.doc_number}
@@ -274,7 +274,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs text-muted-light/60 mb-1">Dirección</label>
+                    <label className="block text-xs text-muted mb-1">Dirección</label>
                     <input
                       type="text"
                       value={form.address}
@@ -284,7 +284,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Teléfono</label>
+                    <label className="block text-xs text-muted mb-1">Teléfono</label>
                     <input
                       type="tel"
                       value={form.phone}
@@ -294,7 +294,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Email</label>
+                    <label className="block text-xs text-muted mb-1">Email</label>
                     <input
                       type="email"
                       value={form.email}
@@ -308,10 +308,10 @@ export default function SuppliersPage() {
 
               {/* Contacto principal */}
               <div>
-                <h3 className="text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Contacto Principal</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-muted mb-3">Contacto Principal</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Nombre</label>
+                    <label className="block text-xs text-muted mb-1">Nombre</label>
                     <input
                       type="text"
                       value={form.contact_name}
@@ -321,7 +321,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Teléfono</label>
+                    <label className="block text-xs text-muted mb-1">Teléfono</label>
                     <input
                       type="tel"
                       value={form.contact_phone}
@@ -331,7 +331,7 @@ export default function SuppliersPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-muted-light/60 mb-1">Email</label>
+                    <label className="block text-xs text-muted mb-1">Email</label>
                     <input
                       type="email"
                       value={form.contact_email}
@@ -345,7 +345,7 @@ export default function SuppliersPage() {
 
               {/* Notas */}
               <div>
-                <label className="block text-xs text-muted-light/60 mb-1">Notas (opcional)</label>
+                <label className="block text-xs text-muted mb-1">Notas (opcional)</label>
                 <textarea
                   value={form.notes}
                   onChange={e => updateField('notes', e.target.value)}
@@ -357,10 +357,10 @@ export default function SuppliersPage() {
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-muted-light hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-muted hover:text-ink transition-colors"
               >
                 Cancelar
               </button>

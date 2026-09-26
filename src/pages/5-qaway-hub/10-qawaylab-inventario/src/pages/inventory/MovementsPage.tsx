@@ -8,7 +8,7 @@ export default function MovementsPage() {
         <p className="text-sm text-muted mt-1">Historial de entradas, salidas y ajustes.</p>
       </div>
       <div className="bg-white rounded-xl border border-surface-muted p-12 text-center">
-        <ArrowLeftRight size={40} className="mx-auto text-muted-light mb-3" />
+        <ArrowLeftRight size={40} className="mx-auto text-muted mb-3" />
         <p className="text-sm text-muted">Próximamente.</p>
       </div>
     </div>

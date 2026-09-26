@@ -14,7 +14,7 @@ interface Line {
 }
 
 const inputCls =
-  'w-full px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm placeholder:text-muted-light/40 focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'w-full px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/50'
 
 type Step = 'supplier' | 'products' | 'confirm'
 
@@ -225,13 +225,13 @@ export default function NewPurchaseOrderPage() {
         <div className="flex items-center gap-3">
           <Link
             to="/compras"
-            className="p-2 text-muted-light hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+            className="p-2 text-muted hover:text-ink hover:bg-zinc-50 rounded-lg transition-colors"
           >
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Nueva Orden de Compra</h1>
-            <p className="text-muted-light/60 text-sm mt-1">Registrar compra a proveedor</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Nueva Orden de Compra</h1>
+            <p className="text-muted text-sm mt-1">Registrar compra a proveedor</p>
           </div>
         </div>
       </div>
@@ -251,7 +251,7 @@ export default function NewPurchaseOrderPage() {
                   ? 'bg-brand text-white'
                   : i < steps.findIndex(x => x.id === step)
                     ? 'bg-green-500/10 text-green-400'
-                    : 'bg-white/5 text-muted-light/60'
+                    : 'bg-zinc-50 text-muted '
               }`}
             >
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
@@ -259,14 +259,14 @@ export default function NewPurchaseOrderPage() {
                   ? 'bg-white text-brand'
                   : i < steps.findIndex(x => x.id === step)
                     ? 'bg-green-500 text-white'
-                    : 'bg-white/10 text-muted-light/60'
+                    : 'bg-zinc-100 text-muted '
               }`}>
                 {i < steps.findIndex(x => x.id === step) ? <Check size={12} /> : i + 1}
               </span>
               {s.label}
             </button>
             {i < steps.length - 1 && (
-              <div className={`w-8 h-0.5 ${i < steps.findIndex(x => x.id === step) ? 'bg-green-500' : 'bg-white/10'}`} />
+              <div className={`w-8 h-0.5 ${i < steps.findIndex(x => x.id === step) ? 'bg-green-500' : 'bg-zinc-100'}`} />
             )}
           </div>
         ))}
@@ -284,12 +284,12 @@ export default function NewPurchaseOrderPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* ── PASO 1: Proveedor ── */}
           {step === 'supplier' && (
-            <div className="bg-surface border border-white/10 rounded-xl p-6 space-y-4">
+            <div className="bg-surface border border-zinc-200 rounded-xl p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-white">Seleccionar Proveedor</h2>
+                <h2 className="text-lg font-semibold text-ink">Seleccionar Proveedor</h2>
                 <button
                   onClick={() => setShowNewSupplier(true)}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-brand hover:text-white bg-brand/10 hover:bg-brand/20 rounded-lg transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs text-brand hover:text-ink bg-brand/10 hover:bg-brand/20 rounded-lg transition-colors"
                 >
                   <UserPlus size={12} />
                   Crear nuevo
@@ -303,8 +303,8 @@ export default function NewPurchaseOrderPage() {
                       <Truck size={20} className="text-brand" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{supplier.name}</p>
-                      <p className="text-xs text-muted-light/60">
+                      <p className="text-sm font-medium text-ink">{supplier.name}</p>
+                      <p className="text-xs text-muted ">
                         {supplier.doc_type && supplier.doc_number
                           ? `${supplier.doc_type} ${supplier.doc_number}`
                           : 'Sin documento'}
@@ -314,14 +314,14 @@ export default function NewPurchaseOrderPage() {
                   </div>
                   <button
                     onClick={() => setSupplier(null)}
-                    className="p-2 text-muted-light hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                    className="p-2 text-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                   >
                     <X size={16} />
                   </button>
                 </div>
               ) : (
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
                   <input
                     value={supplierQuery}
                     onChange={e => {
@@ -335,7 +335,7 @@ export default function NewPurchaseOrderPage() {
                     autoFocus
                   />
                   {supplierOpen && supplierResults.length > 0 && (
-                    <div className="absolute z-20 mt-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    <div className="absolute z-20 mt-1 w-full bg-surface border border-zinc-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                       {supplierResults.map(s => (
                         <button
                           key={s.id}
@@ -344,10 +344,10 @@ export default function NewPurchaseOrderPage() {
                             setSupplierOpen(false)
                             setSupplierQuery('')
                           }}
-                          className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                          className="w-full text-left px-4 py-3 hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0"
                         >
-                          <span className="block text-sm text-white font-medium">{s.name}</span>
-                          <span className="block text-xs text-muted-light/60">
+                          <span className="block text-sm text-ink font-medium">{s.name}</span>
+                          <span className="block text-xs text-muted ">
                             {s.doc_type && s.doc_number
                               ? `${s.doc_type} ${s.doc_number}`
                               : 'Sin documento'}
@@ -360,7 +360,7 @@ export default function NewPurchaseOrderPage() {
                 </div>
               )}
 
-              <p className="text-xs text-muted-light/40">
+              <p className="text-xs text-muted ">
                 El proveedor es opcional. Puedes saltar este paso.
               </p>
             </div>
@@ -370,9 +370,9 @@ export default function NewPurchaseOrderPage() {
           {step === 'products' && (
             <div className="space-y-4">
               {/* Buscador de productos */}
-              <div className="bg-surface border border-white/10 rounded-xl p-4">
+              <div className="bg-surface border border-zinc-200 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+                  <label className="text-xs font-mono uppercase tracking-wider text-muted ">
                     Buscar productos
                   </label>
                   <button
@@ -384,7 +384,7 @@ export default function NewPurchaseOrderPage() {
                   </button>
                 </div>
                 <div className="relative">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
                   <input
                     value={productQuery}
                     onChange={e => {
@@ -398,16 +398,16 @@ export default function NewPurchaseOrderPage() {
                     autoFocus
                   />
                   {productOpen && productResults.length > 0 && (
-                    <div className="absolute z-20 mt-1 w-full bg-surface border border-white/10 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                    <div className="absolute z-20 mt-1 w-full bg-surface border border-zinc-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                       {productResults.map(p => (
                         <button
                           key={p.id}
                           onClick={() => addLine(p)}
-                          className="w-full text-left px-4 py-3 hover:bg-white/5 transition-colors flex items-center justify-between border-b border-white/5 last:border-0"
+                          className="w-full text-left px-4 py-3 hover:bg-zinc-50 transition-colors flex items-center justify-between border-b border-zinc-100 last:border-0"
                         >
                           <div>
-                            <span className="block text-sm text-white font-medium">{p.name}</span>
-                            <span className="block text-xs text-muted-light/60">
+                            <span className="block text-sm text-ink font-medium">{p.name}</span>
+                            <span className="block text-xs text-muted ">
                               SKU: {p.sku || '—'} · Stock: {(p as any).stock ?? '—'}
                             </span>
                           </div>
@@ -422,25 +422,25 @@ export default function NewPurchaseOrderPage() {
               </div>
 
               {/* Líneas de la orden */}
-              <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/10">
-                  <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+              <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-200">
+                  <p className="text-xs font-mono uppercase tracking-wider text-muted ">
                     Items de la orden ({lines.length})
                   </p>
                 </div>
                 {lines.length === 0 ? (
                   <div className="px-4 py-12 text-center">
-                    <Truck size={48} className="mx-auto text-muted-light/20 mb-3" />
-                    <p className="text-muted-light/60 text-sm">Aún no hay productos</p>
-                    <p className="text-muted-light/40 text-xs mt-1">Busca un producto o haz clic en "Agregar manual"</p>
+                    <Truck size={48} className="mx-auto text-muted mb-3" />
+                    <p className="text-muted text-sm">Aún no hay productos</p>
+                    <p className="text-muted text-xs mt-1">Busca un producto o haz clic en "Agregar manual"</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-white/5">
+                  <div className="divide-y divide-zinc-100">
                     {lines.map((line, index) => (
                       <div key={index} className="px-4 py-3 flex items-center gap-3">
                         <div className="flex-1 min-w-0">
                           {line.product_id ? (
-                            <span className="text-sm text-white truncate block">{line.product_title}</span>
+                            <span className="text-sm text-ink truncate block">{line.product_title}</span>
                           ) : (
                             <input
                               value={line.product_title}
@@ -474,13 +474,13 @@ export default function NewPurchaseOrderPage() {
                           />
                         </div>
                         <div className="w-24 text-right">
-                          <span className="text-sm text-white font-medium">
+                          <span className="text-sm text-ink font-medium">
                             S/ {(line.quantity * line.unit_price).toFixed(2)}
                           </span>
                         </div>
                         <button
                           onClick={() => removeLine(index)}
-                          className="p-1.5 text-muted-light hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                          className="p-1.5 text-muted hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -497,15 +497,15 @@ export default function NewPurchaseOrderPage() {
             <div className="space-y-4">
               {/* Resumen del proveedor */}
               {supplier && (
-                <div className="bg-surface border border-white/10 rounded-xl p-4">
-                  <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-2">Proveedor</p>
+                <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+                  <p className="text-xs font-mono uppercase tracking-wider text-muted mb-2">Proveedor</p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-brand/20 flex items-center justify-center">
                       <Truck size={18} className="text-brand" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{supplier.name}</p>
-                      <p className="text-xs text-muted-light/60">
+                      <p className="text-sm font-medium text-ink">{supplier.name}</p>
+                      <p className="text-xs text-muted ">
                         {supplier.doc_type} {supplier.doc_number}
                       </p>
                     </div>
@@ -514,22 +514,22 @@ export default function NewPurchaseOrderPage() {
               )}
 
               {/* Lista de productos */}
-              <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/10">
-                  <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">
+              <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-zinc-200">
+                  <p className="text-xs font-mono uppercase tracking-wider text-muted ">
                     Productos ({lines.length})
                   </p>
                 </div>
-                <div className="divide-y divide-white/5">
+                <div className="divide-y divide-zinc-100">
                   {lines.map((line, i) => (
                     <div key={i} className="px-4 py-3 flex items-center justify-between">
                       <div>
-                        <span className="text-sm text-white">{line.product_title}</span>
-                        <span className="text-xs text-muted-light/60 ml-2">
+                        <span className="text-sm text-ink">{line.product_title}</span>
+                        <span className="text-xs text-muted ml-2">
                           {line.quantity} × S/ {line.unit_price.toFixed(2)}
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-sm font-medium text-ink">
                         S/ {(line.quantity * line.unit_price).toFixed(2)}
                       </span>
                     </div>
@@ -538,8 +538,8 @@ export default function NewPurchaseOrderPage() {
               </div>
 
               {/* Notas */}
-              <div className="bg-surface border border-white/10 rounded-xl p-4">
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-2">
+              <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-2">
                   Notas (opcional)
                 </label>
                 <textarea
@@ -557,23 +557,23 @@ export default function NewPurchaseOrderPage() {
         {/* Derecha: resumen + acciones */}
         <div className="space-y-4">
           {/* Resumen */}
-          <div className="bg-surface border border-white/10 rounded-xl p-4 space-y-3">
-            <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Resumen</p>
+          <div className="bg-surface border border-zinc-200 rounded-xl p-4 space-y-3">
+            <p className="text-xs font-mono uppercase tracking-wider text-muted ">Resumen</p>
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-light/60">Proveedor</span>
-                <span className="text-white text-xs">{supplier?.name || 'Sin proveedor'}</span>
+                <span className="text-muted ">Proveedor</span>
+                <span className="text-ink text-xs">{supplier?.name || 'Sin proveedor'}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-light/60">Items</span>
-                <span className="text-white">{lines.length}</span>
+                <span className="text-muted ">Items</span>
+                <span className="text-ink">{lines.length}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-muted-light/60">Subtotal</span>
-                <span className="text-white">S/ {subtotal.toFixed(2)}</span>
+                <span className="text-muted ">Subtotal</span>
+                <span className="text-ink">S/ {subtotal.toFixed(2)}</span>
               </div>
-              <div className="border-t border-white/10 pt-2 flex justify-between">
-                <span className="text-sm font-medium text-white">Total</span>
+              <div className="border-t border-zinc-200 pt-2 flex justify-between">
+                <span className="text-sm font-medium text-ink">Total</span>
                 <span className="text-lg font-bold text-brand">S/ {subtotal.toFixed(2)}</span>
               </div>
             </div>
@@ -597,7 +597,7 @@ export default function NewPurchaseOrderPage() {
                 {step === 'products' && (
                   <button
                     onClick={() => setStep('supplier')}
-                    className="w-full px-4 py-2.5 text-sm text-muted-light hover:text-white transition-colors"
+                    className="w-full px-4 py-2.5 text-sm text-muted hover:text-ink transition-colors"
                   >
                     ← Volver a Proveedor
                   </button>
@@ -622,13 +622,13 @@ export default function NewPurchaseOrderPage() {
                 <button
                   onClick={() => handleSave('draft')}
                   disabled={saving || lines.length === 0}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-50 border border-zinc-200 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Guardar Borrador
                 </button>
                 <button
                   onClick={() => setStep('products')}
-                  className="w-full px-4 py-2.5 text-sm text-muted-light hover:text-white transition-colors"
+                  className="w-full px-4 py-2.5 text-sm text-muted hover:text-ink transition-colors"
                 >
                   ← Volver a Productos
                 </button>
@@ -644,16 +644,16 @@ export default function NewPurchaseOrderPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setShowNewSupplier(false) }}
         >
-          <div className="bg-surface border border-white/10 rounded-2xl w-full max-w-md mx-4">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-              <h2 className="text-lg font-semibold text-white">Crear Proveedor</h2>
-              <button onClick={() => setShowNewSupplier(false)} className="p-1 text-muted-light/40 hover:text-white">
+          <div className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-md mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
+              <h2 className="text-lg font-semibold text-ink">Crear Proveedor</h2>
+              <button onClick={() => setShowNewSupplier(false)} className="p-1 text-muted hover:text-ink">
                 <X size={20} />
               </button>
             </div>
             <div className="px-6 py-4 space-y-4">
               <div>
-                <label className="block text-xs text-muted-light/60 mb-1">Razón Social / Nombre *</label>
+                <label className="block text-xs text-muted mb-1">Razón Social / Nombre *</label>
                 <input
                   type="text"
                   value={newSupplierName}
@@ -665,7 +665,7 @@ export default function NewPurchaseOrderPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-muted-light/60 mb-1">RUC</label>
+                  <label className="block text-xs text-muted mb-1">RUC</label>
                   <input
                     type="text"
                     value={newSupplierDoc}
@@ -676,7 +676,7 @@ export default function NewPurchaseOrderPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-muted-light/60 mb-1">Teléfono</label>
+                  <label className="block text-xs text-muted mb-1">Teléfono</label>
                   <input
                     type="tel"
                     value={newSupplierPhone}
@@ -687,7 +687,7 @@ export default function NewPurchaseOrderPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-muted-light/60 mb-1">Email</label>
+                <label className="block text-xs text-muted mb-1">Email</label>
                 <input
                   type="email"
                   value={newSupplierEmail}
@@ -697,10 +697,10 @@ export default function NewPurchaseOrderPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200">
               <button
                 onClick={() => setShowNewSupplier(false)}
-                className="px-4 py-2 text-sm text-muted-light hover:text-white transition-colors"
+                className="px-4 py-2 text-sm text-muted hover:text-ink transition-colors"
               >
                 Cancelar
               </button>

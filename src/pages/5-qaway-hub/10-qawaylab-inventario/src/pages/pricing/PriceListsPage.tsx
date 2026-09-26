@@ -70,7 +70,7 @@ export default function PriceListsPage() {
         </div>
       ) : lists.length === 0 ? (
         <div className="bg-white rounded-xl border border-surface-muted p-12 text-center">
-          <Tag size={40} className="mx-auto text-muted-light mb-3" />
+          <Tag size={40} className="mx-auto text-muted mb-3" />
           <h3 className="font-display text-lg font-semibold text-ink mb-2">
             Sin listas de precios
           </h3>

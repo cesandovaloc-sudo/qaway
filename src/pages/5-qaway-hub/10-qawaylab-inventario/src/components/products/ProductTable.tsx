@@ -158,7 +158,7 @@ export default function ProductTable({
   }
 
   const SortIcon = ({ field }: { field: string }) => {
-    if (sortField !== field) return <ArrowUpDown size={12} className="text-muted-light" />
+    if (sortField !== field) return <ArrowUpDown size={12} className="text-muted" />
     return sortOrder === 'asc'
       ? <ArrowUp size={12} className="text-brand" />
       : <ArrowDown size={12} className="text-brand" />
@@ -213,7 +213,7 @@ export default function ProductTable({
           ) : products.length === 0 ? (
             <tr>
               <td colSpan={columns.length + 1} className="px-4 py-16 text-center">
-                <Package size={40} className="mx-auto text-muted-light mb-3" />
+                <Package size={40} className="mx-auto text-muted mb-3" />
                 <p className="text-sm text-muted">No hay productos que mostrar.</p>
               </td>
             </tr>

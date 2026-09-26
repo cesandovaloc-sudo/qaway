@@ -55,7 +55,7 @@ export default function PriceListCard({
             {list.is_active ? (
               <ToggleRight size={18} className="text-emerald-500" />
             ) : (
-              <ToggleLeft size={18} className="text-muted-light" />
+              <ToggleLeft size={18} className="text-muted" />
             )}
           </button>
           <button

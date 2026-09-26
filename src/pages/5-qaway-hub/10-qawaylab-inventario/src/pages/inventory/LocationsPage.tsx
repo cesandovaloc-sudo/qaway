@@ -8,7 +8,7 @@ export default function LocationsPage() {
         <p className="text-sm text-muted mt-1">Administra las ubicaciones de tu inventario.</p>
       </div>
       <div className="bg-white rounded-xl border border-surface-muted p-12 text-center">
-        <MapPin size={40} className="mx-auto text-muted-light mb-3" />
+        <MapPin size={40} className="mx-auto text-muted mb-3" />
         <p className="text-sm text-muted">Próximamente.</p>
       </div>
     </div>

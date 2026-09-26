@@ -25,7 +25,7 @@ export default function ProductGrid({ products, loading, onProductClick }: Produ
   if (products.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-surface-muted p-12 text-center">
-        <Package size={40} className="mx-auto text-muted-light mb-3" />
+        <Package size={40} className="mx-auto text-muted mb-3" />
         <p className="text-sm text-muted">No hay productos que mostrar.</p>
       </div>
     )
@@ -41,7 +41,7 @@ export default function ProductGrid({ products, loading, onProductClick }: Produ
         >
           {/* Image */}
           <div className="aspect-[4/3] bg-surface flex items-center justify-center">
-            <Package size={32} className="text-muted-light" />
+            <Package size={32} className="text-muted" />
           </div>
 
           {/* Content */}
@@ -83,7 +83,7 @@ export default function ProductGrid({ products, loading, onProductClick }: Produ
             {/* Location */}
             {product.location_id && (
               <div className="flex items-center gap-1 mt-2 pt-2 border-t border-surface-muted">
-                <MapPin size={12} className="text-muted-light" />
+                <MapPin size={12} className="text-muted" />
                 <span className="text-xs text-muted truncate">{product.location_id}</span>
               </div>
             )}

@@ -34,7 +34,7 @@ const categories = [
 ]
 
 const inputCls =
-  'w-full px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm placeholder:text-muted-light/40 focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'w-full px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/50'
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -148,8 +148,8 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Gastos</h1>
-          <p className="text-muted-light/60 text-sm mt-1">Registro de gastos operativos</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Gastos</h1>
+          <p className="text-muted text-sm mt-1">Registro de gastos operativos</p>
         </div>
         <button
           onClick={openForm}
@@ -164,25 +164,25 @@ export default function ExpensesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Tarjetas de resumen */}
         <div className="space-y-4">
-          <div className="bg-surface border border-white/10 rounded-xl p-4">
-            <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Total Gastos</p>
+          <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+            <p className="text-xs font-mono uppercase tracking-wider text-muted ">Total Gastos</p>
             <p className="text-2xl font-bold text-red-400 mt-1">S/ {totalGastos.toFixed(2)}</p>
           </div>
-          <div className="bg-surface border border-white/10 rounded-xl p-4">
-            <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">N° Gastos</p>
-            <p className="text-2xl font-bold text-white mt-1">{filtered.length}</p>
+          <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+            <p className="text-xs font-mono uppercase tracking-wider text-muted ">N° Gastos</p>
+            <p className="text-2xl font-bold text-ink mt-1">{filtered.length}</p>
           </div>
-          <div className="bg-surface border border-white/10 rounded-xl p-4">
-            <p className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Promedio</p>
-            <p className="text-2xl font-bold text-white mt-1">
+          <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+            <p className="text-xs font-mono uppercase tracking-wider text-muted ">Promedio</p>
+            <p className="text-2xl font-bold text-ink mt-1">
               S/ {filtered.length > 0 ? (totalGastos / filtered.length).toFixed(2) : '0.00'}
             </p>
           </div>
         </div>
 
         {/* Gráfico de torta */}
-        <div className="lg:col-span-2 bg-surface border border-white/10 rounded-xl p-6">
-          <h3 className="text-sm font-semibold text-white mb-4">Distribución por Categoría</h3>
+        <div className="lg:col-span-2 bg-surface border border-zinc-200 rounded-xl p-6">
+          <h3 className="text-sm font-semibold text-ink mb-4">Distribución por Categoría</h3>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
@@ -219,7 +219,7 @@ export default function ExpensesPage() {
             </ResponsiveContainer>
           ) : (
             <div className="flex items-center justify-center h-[280px]">
-              <p className="text-muted-light/40 text-sm">Sin datos para graficar</p>
+              <p className="text-muted text-sm">Sin datos para graficar</p>
             </div>
           )}
         </div>
@@ -227,7 +227,7 @@ export default function ExpensesPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"
           placeholder="Buscar por descripción o categoría..."
@@ -252,32 +252,32 @@ export default function ExpensesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <Receipt size={48} className="mx-auto text-muted-light/20 mb-4" />
-          <p className="text-muted-light/60">No hay gastos registrados</p>
-          <p className="text-muted-light/40 text-sm mt-1">Registra tu primer gasto</p>
+          <Receipt size={48} className="mx-auto text-muted mb-4" />
+          <p className="text-muted ">No hay gastos registrados</p>
+          <p className="text-muted text-sm mt-1">Registra tu primer gasto</p>
         </div>
       ) : (
-        <div className="bg-surface border border-white/10 rounded-xl overflow-hidden">
+        <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Fecha</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Descripción</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Categoría</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted-light/60">Monto</th>
+              <tr className="border-b border-zinc-200">
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Fecha</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Descripción</th>
+                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Categoría</th>
+                <th className="text-right px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Monto</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(expense => {
                 const catInfo = getCategoryInfo(expense.category)
                 return (
-                  <tr key={expense.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="px-4 py-3 text-sm text-muted-light/60">
+                  <tr key={expense.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
+                    <td className="px-4 py-3 text-sm text-muted ">
                       {new Date(expense.expense_date).toLocaleDateString('es-PE')}
                     </td>
-                    <td className="px-4 py-3 text-sm text-white">{expense.description}</td>
+                    <td className="px-4 py-3 text-sm text-ink">{expense.description}</td>
                     <td className="px-4 py-3 text-sm">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 bg-white/5 rounded text-xs ${catInfo.textColor}`}>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-50 rounded text-xs ${catInfo.textColor}`}>
                         <Tag size={10} />
                         {catInfo.label}
                       </span>
@@ -298,21 +298,21 @@ export default function ExpensesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
 
-          <div className="relative w-full max-w-md bg-surface border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-red-500/5">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 bg-red-500/5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
                   <Receipt size={20} className="text-red-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Nuevo Gasto</h3>
-                  <p className="text-xs text-muted-light/60">Registrar gasto operativo</p>
+                  <h3 className="text-lg font-semibold text-ink">Nuevo Gasto</h3>
+                  <p className="text-xs text-muted ">Registrar gasto operativo</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowForm(false)}
-                className="p-2 text-muted-light hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                className="p-2 text-muted hover:text-ink hover:bg-zinc-50 rounded-lg transition-colors"
               >
                 <X size={18} />
               </button>
@@ -329,7 +329,7 @@ export default function ExpensesPage() {
 
               {/* Descripción */}
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
                   Descripción *
                 </label>
                 <input
@@ -343,7 +343,7 @@ export default function ExpensesPage() {
 
               {/* Categoría */}
               <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-1.5">
+                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
                   Categoría *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -353,8 +353,8 @@ export default function ExpensesPage() {
                       onClick={() => setCategory(cat.value)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-left transition-colors ${
                         category === cat.value
-                          ? 'bg-brand/20 border border-brand/50 text-white'
-                          : 'bg-background border border-white/10 text-muted-light hover:text-white hover:bg-white/5'
+                          ? 'bg-brand/20 border border-brand/50 text-ink'
+                          : 'bg-background border border-zinc-200 text-muted hover:text-ink hover:bg-zinc-50'
                       }`}
                     >
                       <Tag size={12} className={cat.textColor} />
@@ -367,11 +367,11 @@ export default function ExpensesPage() {
               {/* Monto + Fecha */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-1.5">
+                  <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
                     Monto (S/) *
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-light/40 text-sm">S/</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">S/</span>
                     <input
                       type="number"
                       min="0.01"
@@ -379,12 +379,12 @@ export default function ExpensesPage() {
                       value={amount}
                       onChange={e => setAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full pl-10 pr-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 text-lg font-medium text-red-400"
+                      className="w-full pl-10 pr-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50 text-lg font-medium text-red-400"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-1.5">
+                  <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
                     Fecha *
                   </label>
                   <input
@@ -398,10 +398,10 @@ export default function ExpensesPage() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-white/10 flex gap-3">
+            <div className="px-6 py-4 border-t border-zinc-200 flex gap-3">
               <button
                 onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                className="flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-200 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
               >
                 Cancelar
               </button>

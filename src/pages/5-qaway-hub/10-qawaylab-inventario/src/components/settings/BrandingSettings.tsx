@@ -47,12 +47,12 @@ export function BrandingSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Branding & Personalización</h3>
-          <p className="text-muted-light/60 text-sm">Personaliza los colores, logo y estilos de tu app</p>
+          <h3 className="text-lg font-semibold text-ink">Branding & Personalización</h3>
+          <p className="text-muted text-sm">Personaliza los colores, logo y estilos de tu app</p>
         </div>
         <button
           onClick={resetBranding}
-          className="flex items-center gap-2 px-3 py-1.5 text-muted-light hover:text-white text-sm transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 text-muted hover:text-ink text-sm transition-colors"
         >
           <RotateCcw size={14} />
           Restablecer
@@ -60,11 +60,11 @@ export function BrandingSettings() {
       </div>
 
       {/* Logo */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
-        <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Logo</label>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4">
+        <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-3">Logo</label>
         <div className="flex items-center gap-4">
           {branding.logoUrl ? (
-            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 rounded-lg object-contain bg-white/5" />
+            <img src={branding.logoUrl} alt="Logo" className="w-16 h-16 rounded-lg object-contain bg-zinc-100" />
           ) : (
             <div className="w-16 h-16 rounded-lg bg-brand/10 flex items-center justify-center">
               <Palette size={24} className="text-brand" />
@@ -76,47 +76,47 @@ export function BrandingSettings() {
               Subir Logo
               <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
             </label>
-            <p className="text-xs text-muted-light/40 mt-1">PNG, SVG o JPG (max 2MB)</p>
+            <p className="text-xs text-muted mt-1">PNG, SVG o JPG (max 2MB)</p>
           </div>
         </div>
         <div className="mt-4">
-          <label className="block text-xs text-muted-light/60 mb-1">Texto del logo</label>
+          <label className="block text-xs text-muted mb-1">Texto del logo</label>
           <input
             type="text"
             value={branding.logoText}
             onChange={(e) => updateBranding({ logoText: e.target.value })}
-            className="w-full px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50"
+            className="w-full px-3 py-2 bg-white border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50"
           />
         </div>
       </div>
 
       {/* Color presets */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
-        <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Temas Predefinidos</label>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4">
+        <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-3">Temas Predefinidos</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {colorPresets.map(preset => (
             <button
               key={preset.name}
               onClick={() => updateBranding(preset.config)}
-              className="flex items-center gap-2 p-3 bg-background rounded-lg border border-white/10 hover:border-brand/50 transition-colors text-left"
+              className="flex items-center gap-2 p-3 bg-white rounded-lg border border-zinc-200 hover:border-brand/50 transition-colors text-left"
             >
               <div className="flex gap-1">
                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.config.primaryColor }} />
                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.config.secondaryColor }} />
                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: preset.config.accentColor }} />
               </div>
-              <span className="text-xs text-muted-light">{preset.name}</span>
+              <span className="text-xs text-muted">{preset.name}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Custom colors */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
-        <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Colores Personalizados</label>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4">
+        <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-3">Colores Personalizados</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs text-muted-light/60 mb-1">Color Principal</label>
+            <label className="block text-xs text-muted mb-1">Color Principal</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -128,12 +128,12 @@ export function BrandingSettings() {
                 type="text"
                 value={branding.primaryColor}
                 onChange={(e) => updateBranding({ primaryColor: e.target.value })}
-                className="flex-1 px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
+                className="flex-1 px-3 py-2 bg-white border border-zinc-200 rounded-lg text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-muted-light/60 mb-1">Color Secundario</label>
+            <label className="block text-xs text-muted mb-1">Color Secundario</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -145,12 +145,12 @@ export function BrandingSettings() {
                 type="text"
                 value={branding.secondaryColor}
                 onChange={(e) => updateBranding({ secondaryColor: e.target.value })}
-                className="flex-1 px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
+                className="flex-1 px-3 py-2 bg-white border border-zinc-200 rounded-lg text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-muted-light/60 mb-1">Color de Acento</label>
+            <label className="block text-xs text-muted mb-1">Color de Acento</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -162,7 +162,7 @@ export function BrandingSettings() {
                 type="text"
                 value={branding.accentColor}
                 onChange={(e) => updateBranding({ accentColor: e.target.value })}
-                className="flex-1 px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
+                className="flex-1 px-3 py-2 bg-white border border-zinc-200 rounded-lg text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-brand/50"
               />
             </div>
           </div>
@@ -170,11 +170,11 @@ export function BrandingSettings() {
       </div>
 
       {/* Border radius */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
-        <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Estilos</label>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4">
+        <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-3">Estilos</label>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-muted-light/60 mb-1">Border Radius ({branding.borderRadius}px)</label>
+            <label className="block text-xs text-muted mb-1">Border Radius ({branding.borderRadius}px)</label>
             <input
               type="range"
               min="0"
@@ -185,7 +185,7 @@ export function BrandingSettings() {
             />
           </div>
           <div>
-            <label className="block text-xs text-muted-light/60 mb-1">Border Width ({branding.borderWidth}px)</label>
+            <label className="block text-xs text-muted mb-1">Border Width ({branding.borderWidth}px)</label>
             <input
               type="range"
               min="0"
@@ -199,8 +199,8 @@ export function BrandingSettings() {
       </div>
 
       {/* Preview */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
-        <label className="block text-xs font-mono uppercase tracking-wider text-muted-light/60 mb-3">Vista Previa</label>
+      <div className="bg-white border border-zinc-200 rounded-xl p-4">
+        <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-3">Vista Previa</label>
         <div className="flex items-center gap-4 p-4 rounded-lg" style={{ backgroundColor: branding.backgroundColor }}>
           <div 
             className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"

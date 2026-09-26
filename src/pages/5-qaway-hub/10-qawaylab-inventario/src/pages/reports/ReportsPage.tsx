@@ -17,7 +17,7 @@ import {
 type ReportType = 'kardex' | 'productos' | 'clientes' | 'ventas' | 'libro_mayor'
 
 const inputCls =
-  'px-3 py-2 bg-background border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm focus:outline-none focus:ring-2 focus:ring-brand/50'
 
 function defaultDateRange() {
   const now = new Date()
@@ -382,8 +382,8 @@ export default function ReportsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Reportes</h1>
-        <p className="text-muted-light/60 text-sm mt-1">Análisis y exportación de datos</p>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Reportes</h1>
+        <p className="text-muted text-sm mt-1">Análisis y exportación de datos</p>
       </div>
 
       {/* Report tabs */}
@@ -408,14 +408,14 @@ export default function ReportsPage() {
       </div>
 
       {/* Filtros de fecha */}
-      <div className="bg-surface border border-white/10 rounded-xl p-4">
+      <div className="bg-surface border border-zinc-200 rounded-xl p-4">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-muted-light/60" />
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Período</span>
+            <Calendar size={16} className="text-muted " />
+            <span className="text-xs font-mono uppercase tracking-wider text-muted ">Período</span>
           </div>
           <div>
-            <label className="block text-xs text-muted-light/40 mb-1">Desde</label>
+            <label className="block text-xs text-muted mb-1">Desde</label>
             <input
               type="date"
               value={dateFrom}
@@ -424,7 +424,7 @@ export default function ReportsPage() {
             />
           </div>
           <div>
-            <label className="block text-xs text-muted-light/40 mb-1">Hasta</label>
+            <label className="block text-xs text-muted mb-1">Hasta</label>
             <input
               type="date"
               value={dateTo}
@@ -438,7 +438,7 @@ export default function ReportsPage() {
               setDateFrom(d.from)
               setDateTo(d.to)
             }}
-            className="px-3 py-2 text-xs text-muted-light hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+            className="px-3 py-2 text-xs text-muted hover:text-ink bg-zinc-50 hover:bg-zinc-100 rounded-lg transition-colors"
           >
             Este mes
           </button>
@@ -446,7 +446,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Report content */}
-      <div className="bg-surface border border-white/10 rounded-xl p-6">
+      <div className="bg-surface border border-zinc-200 rounded-xl p-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 size={24} className="animate-spin text-brand" />
@@ -458,8 +458,8 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Kardex Valorizado</h2>
-                    <p className="text-muted-light/60 text-sm">Movimientos de inventario en el período</p>
+                    <h2 className="text-lg font-semibold text-ink">Kardex Valorizado</h2>
+                    <p className="text-muted text-sm">Movimientos de inventario en el período</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -475,7 +475,7 @@ export default function ReportsPage() {
                           'kardex'
                         )
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-zinc-50 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
                     >
                       <Download size={14} />
                       CSV
@@ -503,20 +503,20 @@ export default function ReportsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Entradas</p>
+                    <p className="text-xs text-muted ">Entradas</p>
                     <p className="text-xl font-bold text-green-400">
                       {kardexData.filter(r => r.type === 'entry' || r.type === 'sale').reduce((s, r) => s + r.quantity, 0)}
                     </p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Salidas</p>
+                    <p className="text-xs text-muted ">Salidas</p>
                     <p className="text-xl font-bold text-red-400">
                       {kardexData.filter(r => r.type === 'exit').reduce((s, r) => s + r.quantity, 0)}
                     </p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Movimientos</p>
-                    <p className="text-xl font-bold text-white">{kardexData.length}</p>
+                    <p className="text-xs text-muted ">Movimientos</p>
+                    <p className="text-xl font-bold text-ink">{kardexData.length}</p>
                   </div>
                 </div>
 
@@ -524,38 +524,38 @@ export default function ReportsPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Fecha</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Producto</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Tipo</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Cantidad</th>
+                        <tr className="border-b border-zinc-200">
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Fecha</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Producto</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Tipo</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Cantidad</th>
                         </tr>
                       </thead>
                       <tbody>
                         {kardexData.map((row, i) => (
-                          <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="px-4 py-2 text-sm text-muted-light/60">
+                          <tr key={i} className="border-b border-zinc-100 hover:bg-zinc-50">
+                            <td className="px-4 py-2 text-sm text-muted ">
                               {new Date(row.created_at).toLocaleDateString('es-PE')}
                             </td>
-                            <td className="px-4 py-2 text-sm text-white">{row.product_name}</td>
+                            <td className="px-4 py-2 text-sm text-ink">{row.product_name}</td>
                             <td className="px-4 py-2 text-sm">
                               <span className={`px-2 py-0.5 rounded text-xs ${
                                 row.type === 'entry' ? 'bg-green-500/10 text-green-400' :
                                 row.type === 'exit' ? 'bg-red-500/10 text-red-400' :
                                 row.type === 'sale' ? 'bg-blue-500/10 text-blue-400' :
-                                'bg-muted-light/10 text-muted-light/60'
+                                'bg-muted-light/10 text-muted '
                               }`}>
                                 {row.type}
                               </span>
                             </td>
-                            <td className="px-4 py-2 text-sm text-white text-right font-medium">{row.quantity}</td>
+                            <td className="px-4 py-2 text-sm text-ink text-right font-medium">{row.quantity}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                 ) : (
-                  <p className="text-center text-muted-light/40 py-8">No hay movimientos en este período</p>
+                  <p className="text-center text-muted py-8">No hay movimientos en este período</p>
                 )}
               </div>
             )}
@@ -565,8 +565,8 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Ventas por Producto</h2>
-                    <p className="text-muted-light/60 text-sm">Ranking de productos más vendidos</p>
+                    <h2 className="text-lg font-semibold text-ink">Ventas por Producto</h2>
+                    <p className="text-muted text-sm">Ranking de productos más vendidos</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -577,7 +577,7 @@ export default function ReportsPage() {
                           'ventas_por_producto'
                         )
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-zinc-50 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
                     >
                       <Download size={14} />
                       CSV
@@ -602,19 +602,19 @@ export default function ReportsPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">#</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Producto</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Unidades</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Ingreso</th>
+                        <tr className="border-b border-zinc-200">
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">#</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Producto</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Unidades</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Ingreso</th>
                         </tr>
                       </thead>
                       <tbody>
                         {productosData.map((row, i) => (
-                          <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="px-4 py-2 text-sm text-muted-light/40">{i + 1}</td>
-                            <td className="px-4 py-2 text-sm text-white">{row.product_title}</td>
-                            <td className="px-4 py-2 text-sm text-white text-right font-medium">{row.total_qty}</td>
+                          <tr key={i} className="border-b border-zinc-100 hover:bg-zinc-50">
+                            <td className="px-4 py-2 text-sm text-muted ">{i + 1}</td>
+                            <td className="px-4 py-2 text-sm text-ink">{row.product_title}</td>
+                            <td className="px-4 py-2 text-sm text-ink text-right font-medium">{row.total_qty}</td>
                             <td className="px-4 py-2 text-sm text-brand text-right">S/ {row.total_revenue.toFixed(2)}</td>
                           </tr>
                         ))}
@@ -622,7 +622,7 @@ export default function ReportsPage() {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-center text-muted-light/40 py-8">No hay ventas de productos en este período</p>
+                  <p className="text-center text-muted py-8">No hay ventas de productos en este período</p>
                 )}
               </div>
             )}
@@ -632,8 +632,8 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Compras por Cliente</h2>
-                    <p className="text-muted-light/60 text-sm">Historial de compras en el período</p>
+                    <h2 className="text-lg font-semibold text-ink">Compras por Cliente</h2>
+                    <p className="text-muted text-sm">Historial de compras en el período</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -644,7 +644,7 @@ export default function ReportsPage() {
                           'compras_por_cliente'
                         )
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-zinc-50 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
                     >
                       <Download size={14} />
                       CSV
@@ -669,19 +669,19 @@ export default function ReportsPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">#</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Cliente</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Pedidos</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Total Gastado</th>
+                        <tr className="border-b border-zinc-200">
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">#</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Cliente</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Pedidos</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Total Gastado</th>
                         </tr>
                       </thead>
                       <tbody>
                         {clientesData.map((row, i) => (
-                          <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="px-4 py-2 text-sm text-muted-light/40">{i + 1}</td>
-                            <td className="px-4 py-2 text-sm text-white">{row.customer_name}</td>
-                            <td className="px-4 py-2 text-sm text-white text-right">{row.total_orders}</td>
+                          <tr key={i} className="border-b border-zinc-100 hover:bg-zinc-50">
+                            <td className="px-4 py-2 text-sm text-muted ">{i + 1}</td>
+                            <td className="px-4 py-2 text-sm text-ink">{row.customer_name}</td>
+                            <td className="px-4 py-2 text-sm text-ink text-right">{row.total_orders}</td>
                             <td className="px-4 py-2 text-sm text-brand text-right font-medium">S/ {row.total_spent.toFixed(2)}</td>
                           </tr>
                         ))}
@@ -689,7 +689,7 @@ export default function ReportsPage() {
                     </table>
                   </div>
                 ) : (
-                  <p className="text-center text-muted-light/40 py-8">No hay compras en este período</p>
+                  <p className="text-center text-muted py-8">No hay compras en este período</p>
                 )}
               </div>
             )}
@@ -699,8 +699,8 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Resumen de Ventas</h2>
-                    <p className="text-muted-light/60 text-sm">Resumen general del período</p>
+                    <h2 className="text-lg font-semibold text-ink">Resumen de Ventas</h2>
+                    <p className="text-muted text-sm">Resumen general del período</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -717,7 +717,7 @@ export default function ReportsPage() {
                           'resumen_ventas'
                         )
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-zinc-50 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
                     >
                       <Download size={14} />
                       CSV
@@ -746,28 +746,28 @@ export default function ReportsPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Total Ventas</p>
+                    <p className="text-xs text-muted ">Total Ventas</p>
                     <p className="text-2xl font-bold text-brand">S/ {(ventasData?.total_ventas || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">N° Ventas</p>
-                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{ventasData?.count_ventas || 0}</p>
+                    <p className="text-xs text-muted ">N° Ventas</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{ventasData?.count_ventas || 0}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Promedio/Venta</p>
-                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">S/ {(ventasData?.promedio || 0).toFixed(2)}</p>
+                    <p className="text-xs text-muted ">Promedio/Venta</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">S/ {(ventasData?.promedio || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Cobrado</p>
+                    <p className="text-xs text-muted ">Cobrado</p>
                     <p className="text-2xl font-bold text-green-400">S/ {(ventasData?.pagado || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Por Cobrar</p>
+                    <p className="text-xs text-muted ">Por Cobrar</p>
                     <p className="text-2xl font-bold text-red-400">S/ {(ventasData?.deuda || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Tasa de Cobranza</p>
-                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                    <p className="text-xs text-muted ">Tasa de Cobranza</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
                       {(ventasData?.total_ventas || 0) > 0
                         ? (((ventasData?.pagado || 0) / (ventasData?.total_ventas || 1)) * 100).toFixed(0)
                         : '0'}%
@@ -776,11 +776,11 @@ export default function ReportsPage() {
                 </div>
 
                 {/* ── Tendencia de Ventas ── */}
-                <div className="mt-6 pt-6 border-t border-white/10">
+                <div className="mt-6 pt-6 border-t border-zinc-200">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-white">Tendencia de Ventas</h3>
-                      <p className="text-muted-light/60 text-sm">
+                      <h3 className="text-lg font-semibold text-ink">Tendencia de Ventas</h3>
+                      <p className="text-muted text-sm">
                         {trendMode === 'daily' ? 'Ventas por día' : 'Ventas por semana'}
                       </p>
                     </div>
@@ -790,7 +790,7 @@ export default function ReportsPage() {
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                           trendMode === 'daily'
                             ? 'bg-brand text-white'
-                            : 'text-muted-light hover:text-white'
+                            : 'text-muted hover:text-ink'
                         }`}
                       >
                         Diario
@@ -800,7 +800,7 @@ export default function ReportsPage() {
                         className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
                           trendMode === 'weekly'
                             ? 'bg-brand text-white'
-                            : 'text-muted-light hover:text-white'
+                            : 'text-muted hover:text-ink'
                         }`}
                       >
                         Semanal
@@ -868,8 +868,8 @@ export default function ReportsPage() {
                     </div>
                   ) : (
                     <div className="bg-background rounded-lg p-8 text-center">
-                      <TrendingUp size={32} className="mx-auto text-muted-light/30 mb-2" />
-                      <p className="text-muted-light/40 text-sm">No hay datos de ventas para graficar</p>
+                      <TrendingUp size={32} className="mx-auto text-muted mb-2" />
+                      <p className="text-muted text-sm">No hay datos de ventas para graficar</p>
                     </div>
                   )}
 
@@ -890,7 +890,7 @@ export default function ReportsPage() {
                               {isUp ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                               {Math.abs(pct).toFixed(0)}%
                             </span>
-                            <span className="text-muted-light/60 text-xs">vs. período anterior</span>
+                            <span className="text-muted text-xs">vs. período anterior</span>
                           </>
                         )
                       })()}
@@ -905,8 +905,8 @@ export default function ReportsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Libro Mayor</h2>
-                    <p className="text-muted-light/60 text-sm">Movimientos por cuenta contable</p>
+                    <h2 className="text-lg font-semibold text-ink">Libro Mayor</h2>
+                    <p className="text-muted text-sm">Movimientos por cuenta contable</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -925,7 +925,7 @@ export default function ReportsPage() {
                           'libro_mayor'
                         )
                       }
-                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-muted-light rounded-lg hover:bg-white/10 hover:text-white transition-colors text-sm"
+                      className="flex items-center gap-2 px-3 py-2 bg-zinc-50 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
                     >
                       <Download size={14} />
                       CSV
@@ -957,7 +957,7 @@ export default function ReportsPage() {
                 {/* Filtro por cuenta */}
                 <div className="bg-background rounded-lg p-3">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-light/60">Filtrar por cuenta:</span>
+                    <span className="text-xs text-muted ">Filtrar por cuenta:</span>
                     <select
                       value={libroAccount}
                       onChange={e => setLibroAccount(e.target.value)}
@@ -971,7 +971,7 @@ export default function ReportsPage() {
                     {libroAccount && (
                       <button
                         onClick={() => setLibroAccount('')}
-                        className="text-xs text-muted-light hover:text-white transition-colors"
+                        className="text-xs text-muted hover:text-ink transition-colors"
                       >
                         Limpiar
                       </button>
@@ -982,19 +982,19 @@ export default function ReportsPage() {
                 {/* Resumen */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Total Débitos</p>
+                    <p className="text-xs text-muted ">Total Débitos</p>
                     <p className="text-xl font-bold text-blue-400">
                       S/ {libroData.reduce((s, r) => s + r.debit, 0).toFixed(2)}
                     </p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Total Créditos</p>
+                    <p className="text-xs text-muted ">Total Créditos</p>
                     <p className="text-xl font-bold text-purple-400">
                       S/ {libroData.reduce((s, r) => s + r.credit, 0).toFixed(2)}
                     </p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
-                    <p className="text-xs text-muted-light/60">Saldo Final</p>
+                    <p className="text-xs text-muted ">Saldo Final</p>
                     <p className={`text-xl font-bold ${libroData.length > 0 && libroData[libroData.length - 1].running_balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                       S/ {libroData.length > 0 ? libroData[libroData.length - 1].running_balance.toFixed(2) : '0.00'}
                     </p>
@@ -1006,27 +1006,27 @@ export default function ReportsPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Fecha</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">N° Asiento</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Descripción</th>
-                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Cuenta</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Débito</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Crédito</th>
-                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted-light/60">Saldo</th>
+                        <tr className="border-b border-zinc-200">
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Fecha</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">N° Asiento</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Descripción</th>
+                          <th className="text-left px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Cuenta</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Débito</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Crédito</th>
+                          <th className="text-right px-4 py-2 text-xs font-mono uppercase tracking-wider text-muted ">Saldo</th>
                         </tr>
                       </thead>
                       <tbody>
                         {libroData.map((row, i) => (
-                          <tr key={i} className="border-b border-white/5 hover:bg-white/5">
-                            <td className="px-4 py-2 text-sm text-muted-light/60">
+                          <tr key={i} className="border-b border-zinc-100 hover:bg-zinc-50">
+                            <td className="px-4 py-2 text-sm text-muted ">
                               {row.entry_date ? new Date(row.entry_date + 'T00:00:00').toLocaleDateString('es-PE') : '—'}
                             </td>
                             <td className="px-4 py-2 text-sm text-brand font-mono">{row.entry_number}</td>
-                            <td className="px-4 py-2 text-sm text-white">{row.description}</td>
+                            <td className="px-4 py-2 text-sm text-ink">{row.description}</td>
                             <td className="px-4 py-2 text-sm">
-                              <span className="text-muted-light/80 font-mono text-xs">{row.account_code}</span>
-                              <span className="text-muted-light/60 ml-1 text-xs">{row.account_name}</span>
+                              <span className="text-muted font-mono text-xs">{row.account_code}</span>
+                              <span className="text-muted ml-1 text-xs">{row.account_name}</span>
                             </td>
                             <td className="px-4 py-2 text-sm text-right font-medium text-blue-400">
                               {row.debit > 0 ? `S/ ${row.debit.toFixed(2)}` : '—'}
@@ -1034,7 +1034,7 @@ export default function ReportsPage() {
                             <td className="px-4 py-2 text-sm text-right font-medium text-purple-400">
                               {row.credit > 0 ? `S/ ${row.credit.toFixed(2)}` : '—'}
                             </td>
-                            <td className="px-4 py-2 text-sm text-right font-medium text-white">
+                            <td className="px-4 py-2 text-sm text-right font-medium text-ink">
                               S/ {row.running_balance.toFixed(2)}
                             </td>
                           </tr>
@@ -1044,8 +1044,8 @@ export default function ReportsPage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <BookOpen size={32} className="mx-auto text-muted-light/30 mb-2" />
-                    <p className="text-muted-light/40 text-sm">
+                    <BookOpen size={32} className="mx-auto text-muted mb-2" />
+                    <p className="text-muted text-sm">
                       {libroAccount ? 'No hay movimientos para esta cuenta en el período' : 'No hay asientos contables en este período'}
                     </p>
                   </div>

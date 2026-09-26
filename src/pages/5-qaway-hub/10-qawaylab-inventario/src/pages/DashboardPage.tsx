@@ -55,7 +55,7 @@ export default function DashboardPage() {
           </div>
           <div className="absolute inset-0 rounded-2xl bg-brand/20 animate-ping" />
         </div>
-        <p className="mt-6 text-sm font-medium text-muted-light/60">Cargando dashboard...</p>
+        <p className="mt-6 text-sm font-medium text-muted ">Cargando dashboard...</p>
       </div>
     )
   }
@@ -70,8 +70,8 @@ export default function DashboardPage() {
               <LayoutDashboard size={24} className="text-brand" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
-              <p className="text-sm text-muted-light/60 mt-0.5">Resumen de tu negocio</p>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Dashboard</h1>
+              <p className="text-sm text-muted mt-0.5">Resumen de tu negocio</p>
             </div>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-red-400">Error al cargar</h3>
-              <p className="text-sm text-muted-light/60 mt-1">{error}</p>
+              <p className="text-sm text-muted mt-1">{error}</p>
               <button
                 onClick={refresh}
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"
@@ -107,8 +107,8 @@ export default function DashboardPage() {
             <LayoutDashboard size={24} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-light/60 mt-0.5">Resumen ejecutivo de tu negocio</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted mt-0.5">Resumen ejecutivo de tu negocio</p>
           </div>
         </div>
         <button
@@ -133,46 +133,46 @@ export default function DashboardPage() {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <DollarSign size={16} className="text-brand" />
-            <h2 className="text-sm font-semibold text-muted-light/60 uppercase tracking-wider">Ventas y Flujo de Caja</h2>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Ventas y Flujo de Caja</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Ventas Hoy */}
-            <div className="bg-surface border border-white/10 rounded-xl p-4">
+            <div className="bg-surface border border-zinc-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Ventas Hoy</span>
-                <Calendar size={14} className="text-muted-light/40" />
+                <span className="text-xs font-mono uppercase tracking-wider text-muted ">Ventas Hoy</span>
+                <Calendar size={14} className="text-muted " />
               </div>
-              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesToday}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.salesToday}</p>
               <p className="text-sm text-brand mt-1">{formatCurrency(stats.revenueToday)}</p>
             </div>
 
             {/* Ventas Semana */}
-            <div className="bg-surface border border-white/10 rounded-xl p-4">
+            <div className="bg-surface border border-zinc-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Esta Semana</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted ">Esta Semana</span>
                 <TrendingUp size={14} className="text-green-400" />
               </div>
-              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesWeek}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.salesWeek}</p>
               <p className="text-sm text-green-400 mt-1">{formatCurrency(stats.revenueWeek)}</p>
             </div>
 
             {/* Ventas Mes */}
-            <div className="bg-surface border border-white/10 rounded-xl p-4">
+            <div className="bg-surface border border-zinc-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Este Mes</span>
-                <BarChart3 size={14} className="text-muted-light/40" />
+                <span className="text-xs font-mono uppercase tracking-wider text-muted ">Este Mes</span>
+                <BarChart3 size={14} className="text-muted " />
               </div>
-              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesMonth}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.salesMonth}</p>
               <p className="text-sm text-brand mt-1">{formatCurrency(stats.revenueMonth)}</p>
             </div>
 
             {/* Por Cobrar */}
-            <div className="bg-surface border border-white/10 rounded-xl p-4">
+            <div className="bg-surface border border-zinc-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Por Cobrar</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted ">Por Cobrar</span>
                 <CreditCard size={14} className="text-yellow-400" />
               </div>
-              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.pendingPayments}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.pendingPayments}</p>
               <p className="text-sm text-yellow-400 mt-1">{formatCurrency(stats.pendingPaymentsAmount)}</p>
             </div>
           </div>
@@ -185,8 +185,8 @@ export default function DashboardPage() {
       {stats && (
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <Package size={16} className="text-muted-light/60" />
-            <h2 className="text-sm font-semibold text-muted-light/60 uppercase tracking-wider">Inventario</h2>
+            <Package size={16} className="text-muted " />
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Inventario</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Productos" value={stats.totalProducts} icon={Package} color="text-brand" />
@@ -203,8 +203,8 @@ export default function DashboardPage() {
       {stats && (
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <ShoppingCart size={16} className="text-muted-light/60" />
-            <h2 className="text-sm font-semibold text-muted-light/60 uppercase tracking-wider">Comercial</h2>
+            <ShoppingCart size={16} className="text-muted " />
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">Comercial</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Clientes" value={stats.totalCustomers} icon={Users} color="text-purple-400" />
@@ -253,12 +253,12 @@ export default function DashboardPage() {
 
       {/* Empty state if no products */}
       {stats && stats.totalProducts === 0 && (
-        <div className="bg-surface border border-white/10 rounded-2xl p-12 text-center">
+        <div className="bg-surface border border-zinc-200 rounded-2xl p-12 text-center">
           <div className="inline-flex p-4 bg-brand/10 rounded-2xl mb-6">
             <Package size={40} className="text-brand" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Tu inventario está vacío</h3>
-          <p className="text-sm text-muted-light/60 mb-8 max-w-md mx-auto leading-relaxed">
+          <h3 className="text-xl font-bold text-ink mb-2">Tu inventario está vacío</h3>
+          <p className="text-sm text-muted mb-8 max-w-md mx-auto leading-relaxed">
             Comienza agregando productos o capturando uno con la cámara para que la IA lo identifique automáticamente.
           </p>
           <div className="flex items-center justify-center gap-4">
@@ -271,7 +271,7 @@ export default function DashboardPage() {
             </a>
             <a
               href="/inventario"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white/5 text-muted-light border border-white/10 rounded-xl text-sm font-semibold hover:bg-white/10 hover:text-white transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-50 text-muted border border-zinc-200 rounded-xl text-sm font-semibold hover:bg-zinc-100 hover:text-ink transition-colors"
             >
               Ver inventario
             </a>
