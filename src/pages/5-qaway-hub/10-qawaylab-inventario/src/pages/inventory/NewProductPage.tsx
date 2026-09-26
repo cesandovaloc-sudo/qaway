@@ -67,7 +67,7 @@ export default function NewProductPage() {
           <Package size={20} />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
             Nuevo Producto
           </h1>
           <p className="text-sm text-muted mt-0.5">

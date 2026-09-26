@@ -158,7 +158,7 @@ export default function NewSalePage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Nueva venta</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Nueva venta</h1>
             <p className="text-sm text-gray-500">Venta de mostrador (POS)</p>
           </div>
         </div>

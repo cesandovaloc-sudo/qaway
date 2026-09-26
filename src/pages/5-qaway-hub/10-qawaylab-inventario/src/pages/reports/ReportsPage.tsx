@@ -382,7 +382,7 @@ export default function ReportsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-bold text-white">Reportes</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Reportes</h1>
         <p className="text-muted-light/60 text-sm mt-1">Análisis y exportación de datos</p>
       </div>
 
@@ -751,11 +751,11 @@ export default function ReportsPage() {
                   </div>
                   <div className="bg-background rounded-lg p-4">
                     <p className="text-xs text-muted-light/60">N° Ventas</p>
-                    <p className="text-2xl font-bold text-white">{ventasData?.count_ventas || 0}</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{ventasData?.count_ventas || 0}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
                     <p className="text-xs text-muted-light/60">Promedio/Venta</p>
-                    <p className="text-2xl font-bold text-white">S/ {(ventasData?.promedio || 0).toFixed(2)}</p>
+                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">S/ {(ventasData?.promedio || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-background rounded-lg p-4">
                     <p className="text-xs text-muted-light/60">Cobrado</p>
@@ -767,7 +767,7 @@ export default function ReportsPage() {
                   </div>
                   <div className="bg-background rounded-lg p-4">
                     <p className="text-xs text-muted-light/60">Tasa de Cobranza</p>
-                    <p className="text-2xl font-bold text-white">
+                    <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
                       {(ventasData?.total_ventas || 0) > 0
                         ? (((ventasData?.pagado || 0) / (ventasData?.total_ventas || 1)) * 100).toFixed(0)
                         : '0'}%

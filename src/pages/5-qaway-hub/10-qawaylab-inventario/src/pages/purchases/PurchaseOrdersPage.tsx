@@ -59,7 +59,7 @@ export default function PurchaseOrdersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white">Órdenes de Compra</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Órdenes de Compra</h1>
           <p className="text-muted-light/60 text-sm mt-1">Gestión de compras a proveedores</p>
         </div>
         <Link

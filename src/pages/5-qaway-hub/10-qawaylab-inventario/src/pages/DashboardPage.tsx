@@ -70,7 +70,7 @@ export default function DashboardPage() {
               <LayoutDashboard size={24} className="text-brand" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
               <p className="text-sm text-muted-light/60 mt-0.5">Resumen de tu negocio</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function DashboardPage() {
             <LayoutDashboard size={24} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dashboard</h1>
             <p className="text-sm text-muted-light/60 mt-0.5">Resumen ejecutivo de tu negocio</p>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Ventas Hoy</span>
                 <Calendar size={14} className="text-muted-light/40" />
               </div>
-              <p className="text-2xl font-bold text-white">{stats.salesToday}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesToday}</p>
               <p className="text-sm text-brand mt-1">{formatCurrency(stats.revenueToday)}</p>
             </div>
 
@@ -152,7 +152,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Esta Semana</span>
                 <TrendingUp size={14} className="text-green-400" />
               </div>
-              <p className="text-2xl font-bold text-white">{stats.salesWeek}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesWeek}</p>
               <p className="text-sm text-green-400 mt-1">{formatCurrency(stats.revenueWeek)}</p>
             </div>
 
@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Este Mes</span>
                 <BarChart3 size={14} className="text-muted-light/40" />
               </div>
-              <p className="text-2xl font-bold text-white">{stats.salesMonth}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.salesMonth}</p>
               <p className="text-sm text-brand mt-1">{formatCurrency(stats.revenueMonth)}</p>
             </div>
 
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                 <span className="text-xs font-mono uppercase tracking-wider text-muted-light/60">Por Cobrar</span>
                 <CreditCard size={14} className="text-yellow-400" />
               </div>
-              <p className="text-2xl font-bold text-white">{stats.pendingPayments}</p>
+              <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.pendingPayments}</p>
               <p className="text-sm text-yellow-400 mt-1">{formatCurrency(stats.pendingPaymentsAmount)}</p>
             </div>
           </div>

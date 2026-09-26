@@ -234,7 +234,7 @@ export default function AccountingPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white">Contabilidad</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Contabilidad</h1>
           <p className="text-muted-light/60 text-sm mt-1">Asientos contables con doble partida</p>
         </div>
         <button

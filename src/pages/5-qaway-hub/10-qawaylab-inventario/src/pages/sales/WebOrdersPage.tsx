@@ -294,7 +294,7 @@ export default function WebOrdersPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white tracking-tight">Pedidos Web</h1>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Pedidos Web</h1>
               <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 {orders.length} órdenes
               </span>
@@ -335,7 +335,7 @@ export default function WebOrdersPage() {
             </span>
             <Package size={16} className="text-muted-light/40" />
           </div>
-          <p className="text-2xl font-bold text-white">{stats.totalCount}</p>
+          <p className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">{stats.totalCount}</p>
           <p className="text-xs text-muted-light/60 mt-1">Registrados en tienda online</p>
         </div>
 

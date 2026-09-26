@@ -47,7 +47,7 @@ export default function PriceListsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-ink tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
             Listas de precios
           </h1>
           <p className="text-sm text-muted mt-1">

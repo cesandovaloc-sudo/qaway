@@ -24,7 +24,7 @@ export default function CatalogsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Catálogos</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Catálogos</h1>
           <p className="text-sm text-gray-500">Genera catálogos PDF y vistas públicas de tus productos</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">

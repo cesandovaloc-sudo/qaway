@@ -230,7 +230,7 @@ export default function NewPurchaseOrderPage() {
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-display font-bold text-white">Nueva Orden de Compra</h1>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Nueva Orden de Compra</h1>
             <p className="text-muted-light/60 text-sm mt-1">Registrar compra a proveedor</p>
           </div>
         </div>

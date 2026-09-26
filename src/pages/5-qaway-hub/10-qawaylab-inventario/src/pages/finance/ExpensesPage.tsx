@@ -148,7 +148,7 @@ export default function ExpensesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-white">Gastos</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Gastos</h1>
           <p className="text-muted-light/60 text-sm mt-1">Registro de gastos operativos</p>
         </div>
         <button

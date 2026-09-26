@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, LayoutGrid } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 
@@ -65,6 +65,23 @@ export default function Header({
           className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         >
           <Menu size={20} className={collapsed ? '' : 'rotate-180'} />
+        </button>
+
+        {/* Waffle de Apps (fila 39): cápsula 9 puntos con "Apps" al hover.
+            El switcher completo vive centralizado en el Hub (/hub), como en
+            HubPanelPage.jsx:2583 — aquí la píldora conduce al ecosistema. */}
+        <button
+          type="button"
+          onClick={() => navigate('/hub')}
+          className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/70 hover:text-white transition-all cursor-pointer"
+          title="Ecosistema de Aplicaciones"
+        >
+          <span className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
+            {[...Array(9)].map((_, i) => (
+              <span key={i} className="w-[3px] h-[3px] rounded-full bg-white/60 group-hover:bg-brand transition-colors" />
+            ))}
+          </span>
+          <span className="text-sm font-bold max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-300 whitespace-nowrap">Apps</span>
         </button>
 
         {/* Píldora de marca/empresa (fila 38): en las apps es indicador estático

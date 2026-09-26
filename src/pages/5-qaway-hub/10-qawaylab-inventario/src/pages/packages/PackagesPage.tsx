@@ -23,7 +23,7 @@ export default function PackagesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Paquetes</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Paquetes</h1>
           <p className="text-sm text-gray-500">Agrupa productos para ofrecer soluciones completas</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">

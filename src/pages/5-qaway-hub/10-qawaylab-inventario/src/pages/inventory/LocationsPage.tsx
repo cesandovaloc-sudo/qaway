@@ -4,7 +4,7 @@ export default function LocationsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink tracking-tight">Ubicaciones</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Ubicaciones</h1>
         <p className="text-sm text-muted mt-1">Administra las ubicaciones de tu inventario.</p>
       </div>
       <div className="bg-white rounded-xl border border-surface-muted p-12 text-center">

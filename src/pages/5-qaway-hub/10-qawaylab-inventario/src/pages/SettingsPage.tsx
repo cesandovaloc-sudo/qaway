@@ -46,7 +46,7 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-2xl font-semibold text-ink tracking-tight">Configuración</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Configuración</h1>
         <p className="text-sm text-muted mt-1">
           Configuración fiscal y general de la aplicación.
         </p>
