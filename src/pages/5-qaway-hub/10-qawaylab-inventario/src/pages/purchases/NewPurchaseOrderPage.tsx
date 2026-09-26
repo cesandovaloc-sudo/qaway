@@ -589,7 +589,7 @@ export default function NewPurchaseOrderPage() {
                     else if (step === 'products') setStep('confirm')
                   }}
                   disabled={!canAdvance(step)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Siguiente
                   <ArrowLeft size={16} className="rotate-180" />
@@ -608,7 +608,7 @@ export default function NewPurchaseOrderPage() {
                 <button
                   onClick={() => handleSave('pending')}
                   disabled={saving || lines.length === 0}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand text-white rounded-lg hover:bg-brand/90 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand text-white rounded-lg hover:bg-brand-hover transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -707,7 +707,7 @@ export default function NewPurchaseOrderPage() {
               <button
                 onClick={handleCreateSupplier}
                 disabled={!newSupplierName.trim() || savingSupplier}
-                className="px-4 py-2 text-sm bg-brand text-white rounded-lg hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm bg-brand text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {savingSupplier ? 'Creando...' : 'Crear y Seleccionar'}
               </button>

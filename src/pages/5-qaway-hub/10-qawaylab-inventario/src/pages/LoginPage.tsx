@@ -157,7 +157,7 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={resetLoading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light disabled:opacity-60 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover disabled:opacity-60 transition-colors"
                   >
                     {resetLoading ? <Loader2 size={16} className="animate-spin" /> : null}
                     {resetLoading ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}
@@ -276,7 +276,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light disabled:opacity-60 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover disabled:opacity-60 transition-colors"
                 >
                   {submitting ? (
                     <Loader2 size={16} className="animate-spin" />

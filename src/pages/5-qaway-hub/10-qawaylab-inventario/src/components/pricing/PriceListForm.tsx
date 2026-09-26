@@ -122,7 +122,7 @@ export default function PriceListForm({ list, onSave, onClose, saving }: PriceLi
             <button
               type="submit"
               disabled={!formData.name || saving}
-              className="px-5 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-5 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving ? 'Guardando...' : list ? 'Guardar cambios' : 'Crear lista'}
             </button>

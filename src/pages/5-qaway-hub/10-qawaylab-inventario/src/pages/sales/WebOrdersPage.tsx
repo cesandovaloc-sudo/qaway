@@ -318,7 +318,7 @@ export default function WebOrdersPage() {
             href="/landings/desarrollo-web-qaway"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand/90 rounded-xl shadow-lg shadow-brand/20 transition-all"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand-hover rounded-xl shadow-lg shadow-brand/20 transition-all"
           >
             <span>Ver Catálogo Web</span>
             <ExternalLink size={14} />

@@ -131,7 +131,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         <div className="px-3 pb-3">
           <NavLink
             to={getHref('/captura')}
-            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-light transition-colors"
+            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-hover transition-colors"
           >
             <Camera size={16} />
             <span>Capturar con IA</span>

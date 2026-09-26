@@ -56,7 +56,7 @@ export default function PriceListsPage() {
         </div>
         <button
           onClick={handleCreate}
-          className="inline-flex items-center gap-2 px-3 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+          className="inline-flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
         >
           <Plus size={14} />
           Nueva lista
@@ -80,7 +80,7 @@ export default function PriceListsPage() {
           </p>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
           >
             <Plus size={14} />
             Crear primera lista

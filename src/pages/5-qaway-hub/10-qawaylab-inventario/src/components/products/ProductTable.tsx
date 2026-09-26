@@ -258,7 +258,7 @@ export default function ProductTable({
             <button className="px-3 py-1.5 text-xs font-medium text-ink bg-white border border-surface-muted rounded-lg hover:border-brand/30 transition-colors">
               Agregar a campaña
             </button>
-            <button className="px-3 py-1.5 text-xs font-medium text-white bg-brand rounded-lg hover:bg-brand-light transition-colors">
+            <button className="px-3 py-1.5 text-xs font-medium text-white bg-brand rounded-lg hover:bg-brand-hover transition-colors">
               Exportar
             </button>
           </div>

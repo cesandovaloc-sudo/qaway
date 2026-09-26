@@ -81,7 +81,7 @@ export default function ProductsPage() {
           </button>
           <Link
             to={typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/captura' : '/captura'}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+            className="inline-flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
           >
             <Camera size={14} />
             Capturar
@@ -341,7 +341,7 @@ function FilterPanel({
         </button>
         <button
           onClick={() => onApply(localFilters)}
-          className="px-4 py-1.5 text-sm font-medium text-white bg-brand rounded-lg hover:bg-brand-light transition-colors"
+          className="h-10 px-5 text-sm font-bold text-white bg-brand rounded-xl hover:bg-brand-hover transition-colors"
         >
           Aplicar filtros
         </button>

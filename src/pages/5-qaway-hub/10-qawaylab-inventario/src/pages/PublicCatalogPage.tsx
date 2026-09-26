@@ -184,7 +184,7 @@ export default function PublicCatalogPage() {
           </div>
           <button
             onClick={() => navigate('/carrito')}
-            className="px-4 py-2 bg-brand rounded-lg text-sm font-medium hover:bg-brand-light transition-colors"
+            className="h-10 px-5 bg-brand rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
           >
             Ver carrito
           </button>

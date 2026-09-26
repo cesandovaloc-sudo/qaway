@@ -264,7 +264,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-center gap-4">
             <a
               href="/captura"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-brand text-white rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors"
+              className="inline-flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
             >
               <Package size={18} />
               Capturar con IA

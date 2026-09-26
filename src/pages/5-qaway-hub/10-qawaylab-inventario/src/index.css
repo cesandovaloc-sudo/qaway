@@ -5,6 +5,8 @@
   --color-brand: #ff4b0b;
   --color-brand-light: #ff7a45;
   --color-brand-bright: #ff9b73;
+  /* Fila 11 plan v3: hover único de marca, decidido y ejecutado en el Hub (#e03f06) */
+  --color-brand-hover: #e03f06;
 
   --color-ink: #111111;
   --color-ink-2: #18181b;

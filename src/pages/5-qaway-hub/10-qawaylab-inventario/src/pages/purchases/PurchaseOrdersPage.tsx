@@ -64,7 +64,7 @@ export default function PurchaseOrdersPage() {
         </div>
         <Link
           to="/compras/nueva"
-          className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-lg hover:bg-brand-light transition-colors text-sm font-medium"
+          className="flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl hover:bg-brand-hover transition-colors text-sm font-bold"
         >
           <Plus size={16} />
           Nueva Orden
