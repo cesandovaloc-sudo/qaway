@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import AppLayout from '@/app/layouts/AppLayout'
 import RequireAuth from '@/app/router/RequireAuth'
+import RequirePermission from '@/app/router/RequirePermission'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProductsPage from '@/pages/inventory/ProductsPage'
@@ -55,21 +56,26 @@ export default function AppRouter() {
       <Route element={<RequireAuth />}>
         {/* Rutas admin (con layout) */}
         <Route element={<AppLayout />}>
-          {/* Dashboard */}
+          {/* Dashboard: cualquier autenticado (el detalle de datos lo decide el RLS) */}
           <Route index element={<DashboardPage />} />
 
-          {/* Logística / Inventario */}
+          {/* Logística / Inventario — lectura: cualquier autenticado */}
           <Route path="logistica" element={<ProductsPage />} />
-          <Route path="logistica/nuevo" element={<NewProductPage />} />
           <Route path="logistica/:id" element={<ProductDetailPage />} />
           <Route path="logistica/categorias" element={<CategoriesPage />} />
           <Route path="logistica/ubicaciones" element={<LocationsPage />} />
           <Route path="logistica/movimientos" element={<MovementsPage />} />
           <Route path="inventario" element={<ProductsPage />} />
-          <Route path="inventario/nuevo" element={<NewProductPage />} />
           <Route path="inventario/:id" element={<ProductDetailPage />} />
-          <Route path="nuevo" element={<NewProductPage />} />
           <Route path=":id" element={<ProductDetailPage />} />
+
+          {/* C-4: creación de productos exige el permiso del modelo de roles
+              (guest/viewer niegan can_create_products en rolePermissions) */}
+          <Route element={<RequirePermission permission="can_create_products" />}>
+            <Route path="logistica/nuevo" element={<NewProductPage />} />
+            <Route path="inventario/nuevo" element={<NewProductPage />} />
+            <Route path="nuevo" element={<NewProductPage />} />
+          </Route>
 
           {/* Comercial */}
           <Route path="clientes" element={<CustomersPage />} />
@@ -78,13 +84,20 @@ export default function AppRouter() {
           <Route path="paquetes" element={<PackagesPage />} />
           <Route path="cotizaciones" element={<QuotationsPage />} />
 
-          {/* Ventas */}
-          <Route path="ventas" element={<SalesPage />} />
-          <Route path="ventas/pedidos-web" element={<WebOrdersPage />} />
-          <Route path="ventas/nueva" element={<NewSalePage />} />
-          <Route path="ventas/:id" element={<SaleDetailPage />} />
+          {/* Ventas — lectura: exige can_view_sales (guest lo niega) */}
+          <Route element={<RequirePermission permission="can_view_sales" />}>
+            <Route path="ventas" element={<SalesPage />} />
+            <Route path="ventas/pedidos-web" element={<WebOrdersPage />} />
+            <Route path="ventas/:id" element={<SaleDetailPage />} />
+          </Route>
 
-          {/* Compras */}
+          {/* C-4: registrar ventas exige can_create_sales */}
+          <Route element={<RequirePermission permission="can_create_sales" />}>
+            <Route path="ventas/nueva" element={<NewSalePage />} />
+          </Route>
+
+          {/* Compras: lectura autenticada; la escritura la decide el RLS
+              (purchase_orders recibe policies propias en el Bloque 2) */}
           <Route path="compras" element={<PurchaseOrdersPage />} />
           <Route path="compras/nueva" element={<NewPurchaseOrderPage />} />
           <Route path="compras/proveedores" element={<SuppliersPage />} />
@@ -94,17 +107,24 @@ export default function AppRouter() {
           <Route path="promociones" element={<LiquidationPage />} />
           <Route path="promociones/catalogos" element={<CatalogsPage />} />
 
-          {/* Finanzas */}
-          <Route path="caja" element={<PettyCashPage />} />
-          <Route path="gastos" element={<ExpensesPage />} />
-          <Route path="contabilidad" element={<AccountingPage />} />
+          {/* C-4: finanzas/contabilidad = sección fiscal (admin; el modelo de
+              roles niega can_access_fiscal_settings a editor/viewer/guest) */}
+          <Route element={<RequirePermission permission="can_access_fiscal_settings" />}>
+            <Route path="caja" element={<PettyCashPage />} />
+            <Route path="gastos" element={<ExpensesPage />} />
+            <Route path="contabilidad" element={<AccountingPage />} />
+          </Route>
 
           {/* Reportes */}
           <Route path="reportes" element={<ReportsPage />} />
 
-          {/* Config */}
-          <Route path="config" element={<SettingsPage />} />
-          <Route path="config/enlaces" element={<SharedLinksPage />} />
+          {/* C-4: configuración y usuarios = exclusivos de admin, igual que el
+              Hub (ADMIN_ONLY_NAV: "Usuarios y Configuración son EXCLUSIVAS de
+              administrador, jamás otorgables") */}
+          <Route element={<RequirePermission permission="can_access_settings" />}>
+            <Route path="config" element={<SettingsPage />} />
+            <Route path="config/enlaces" element={<SharedLinksPage />} />
+          </Route>
         </Route>
 
         {/* Captura IA (protegida, fuera del layout principal) */}

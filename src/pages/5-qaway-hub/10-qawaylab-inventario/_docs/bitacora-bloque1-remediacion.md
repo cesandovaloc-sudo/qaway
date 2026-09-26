@@ -1,7 +1,22 @@
 # Bitácora — Bloque 1 de remediación (run-2 · 10-qawaylab-inventario)
 
-**Fecha:** 2026-09-26 · 16:15 · **Agente:** Buffy (Codebuff) · **Rama:** `main-web`
+**Fecha:** 2026-09-26 · 16:15 (act. 16:40) · **Agente:** Buffy (Codebuff) · **Rama:** `main-web`
 **Alcance:** Fixes frontend/código de los hallazgos confirmados de la auditoría `security-audit` run-2. Supabase (RLS/policies/RPCs) queda para el Bloque 2 (agente especializado).
+
+## CIERRE C-4 (16:40) — `RequirePermission` unificado con el Hub
+
+Con la aprobación del otro agente se implementó el gate de autorización por ruta replicando el comportamiento del panel principal Hub (`HubPanelPage.jsx`):
+
+- **`src/app/router/RequirePermission.tsx` (nuevo):** sesión habilita, permiso habilita la sección, denegación fail-closed con la tarjeta "Acceso restringido" y el MISMO copy del Hub ("es una sección administrativa. Solicita acceso a tu administrador"). La decisión usa la resolución efectiva de la app (`userService.getEffectivePermissions`: rol base + overrides de `permissions`), jamás `session` sola. Sin perfil resuelto → denegado.
+- **`AppRouter.tsx` reestructurado con grupos por permiso:**
+  - `can_create_products` → /logistica/nuevo, /inventario/nuevo, /nuevo
+  - `can_view_sales` → /ventas, /ventas/pedidos-web, /ventas/:id
+  - `can_create_sales` → /ventas/nueva
+  - `can_access_fiscal_settings` → /caja, /gastos, /contabilidad (sección fiscal)
+  - `can_access_settings` → /config, /config/enlaces (exclusivo admin, igual que `ADMIN_ONLY_NAV` del Hub)
+  - Lectura de inventario/clientes/compras: autenticados (el dato lo decide el RLS del Bloque 2) — misma filosofía del Hub ("Mi espacio" vs secciones administrativas).
+- **Test nuevo** `RequirePermission.test.tsx` (5 casos: sin sesión, viewer denegado, viewer con override permitido, admin permitido, sesión sin perfil fail-closed) — **5/5 passed**. `purchaseFlow` sigue 7/7. Typecheck limpio en archivos tocados.
+- **Pendiente opcional de UX (no seguridad):** el `Sidebar.tsx` es estático y muestra todos los enlaces; filtrarlos por permiso (como la nav del Hub) es pulido visual — al hacer clic en una sección no permitida se ve la tarjeta restringida, comportamiento correcto e informativo.
 
 ## Archivos nuevos
 
