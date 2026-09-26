@@ -1,5 +1,6 @@
 import { supabase } from '@/config/supabase'
 import { handleAuthError } from '@/lib/auth'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import type {
   Customer,
   PaginatedResponse,
@@ -52,9 +53,9 @@ export const saleService = {
       query = query.eq('payment_status', params.payment_status)
     }
     if (params?.search) {
-      query = query.or(
-        `sale_number.ilike.%${params.search}%,customer_name.ilike.%${params.search}%,doc_number.ilike.%${params.search}%`
-      )
+      // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+      const saleOrFilter = ilikeOr(['sale_number', 'customer_name', 'doc_number'], params.search)
+      if (saleOrFilter) query = query.or(saleOrFilter)
     }
 
     const { data, error, count } = await query

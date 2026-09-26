@@ -14,16 +14,22 @@ import { useCart } from '@/hooks/useCart'
 // vacío. Por eso el identificador se resuelve según su tipo real.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-async function resolveProductByRef(ref: string) {
+const PUBLIC_PRODUCT_COLUMNS =
+  'id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at'
+
+// La fila pública es un subconjunto de la tabla; los consumidores usan
+// fallbacks (title||name, base_price||price). Se tipa loose a propósito.
+async function resolveProductByRef(ref: string): Promise<any> {
   if (UUID_RE.test(ref)) {
-    const { data } = await supabase.from('products').select('*').eq('id', ref).limit(1)
+    // C-5: proyección pública explícita — sin cost/stock/notes
+    const { data } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('id', ref).limit(1)
     return data?.[0] ?? null
   }
 
-  const { data } = await supabase.from('products').select('*').eq('slug', ref).limit(1)
+  const { data } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('slug', ref).limit(1)
   if (data?.[0]) return data[0]
 
-  const { data: bySku } = await supabase.from('products').select('*').eq('sku', ref).limit(1)
+  const { data: bySku } = await supabase.from('products').select(PUBLIC_PRODUCT_COLUMNS).eq('sku', ref).limit(1)
   return bySku?.[0] ?? null
 }
 

@@ -3,15 +3,31 @@
 # Valida el flujo real de pedidos (orders/order_items/payments)
 # contra Supabase con RLS: invitado, usuario y admin + storage.
 #
-# Uso:
-#   Contra el proyecto local (dev): bash scripts/validate-order-flow.sh
-#   Contra el proyecto real (tras aplicar las migraciones):
-#     SUPABASE_URL=<url> SUPABASE_ANON_KEY=<anon> \
-#     SUPABASE_SERVICE_ROLE_KEY=<service> bash scripts/validate-order-flow.sh
+# N-16 (run-2): NO publica credenciales. Las contraseñas de los
+# usuarios de prueba NUNCA están en este archivo: se toman de
+# variables de entorno con valores generados. Ejemplo:
 #
-# Esperado: 16 ok / 0 fail. Los datos creados son de prueba
-# (notas 'TEST *'), borrables desde el panel/SQL del proyecto.
+#   TEST_BUYER_PASSWORD="$(openssl rand -base64 18)" \
+#   TEST_ADMIN_PASSWORD="$(openssl rand -base64 18)" \
+#   bash scripts/validate-order-flow.sh
+#
+# Objetivo permitido: SOLO proyectos locales (http://localhost*).
+# Contra producción usar la variante read-only de verificación.
+# Los datos creados son de prueba (notas 'TEST *'), borrables
+# desde el panel/SQL del proyecto.
 # ============================================================
+
+# N-16: guard — jamás operar contra un proyecto desplegado
+case "${SUPABASE_URL:-http://localhost:54321}" in
+  http://localhost*|http://127.0.0.1*|https://localhost*) ;;
+  *) echo "ABORTADO (N-16): este script solo puede ejecutarse contra proyectos locales."
+     echo "  SUPABASE_URL='${SUPABASE_URL:-}' no es localhost. Para producción usa verificación read-only." >&2
+     exit 78 ;;
+esac
+
+# N-16: credenciales por env (generadas fuera del repo). Sin fallback hardcodeado.
+TEST_BUYER_PASSWORD=${TEST_BUYER_PASSWORD:?"Define TEST_BUYER_PASSWORD (ej. openssl rand -base64 18)"}
+TEST_ADMIN_PASSWORD=${TEST_ADMIN_PASSWORD:?"Define TEST_ADMIN_PASSWORD (ej. openssl rand -base64 18)"}
 
 # Credenciales: prioridad a env vars, fallback a Supabase local (CLI)
 if [ -n "$SUPABASE_URL" ]; then
@@ -56,8 +72,8 @@ NG=$(curl -s "$URL/rest/v1/orders" -H "apikey: $ANON" -H "Authorization: Bearer 
 [ "$NG" = "0" ] && ok 'guest NO puede leer NINGUNA order (PII protegida)' || bad "guest lee $NG orders"
 
 # 3) Usuario autenticado (con returning, como el modulo)
-curl -s -X POST "$URL/auth/v1/signup" -H "apikey: $ANON" -H 'Content-Type: application/json' -d '{"email":"comprador@test.local","password":"Test1234!"}' > /dev/null
-TOK2=$(curl -s -X POST "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H 'Content-Type: application/json' -d '{"email":"comprador@test.local","password":"Test1234!"}' | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).access_token||'')}catch{console.log('')}})")
+curl -s -X POST "$URL/auth/v1/signup" -H "apikey: $ANON" -H 'Content-Type: application/json' -d "{\"email\":\"comprador@test.local\",\"password\":\"$TEST_BUYER_PASSWORD\"}" > /dev/null
+TOK2=$(curl -s -X POST "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H 'Content-Type: application/json' -d "{\"email\":\"comprador@test.local\",\"password\":\"$TEST_BUYER_PASSWORD\"}" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).access_token||'')}catch{console.log('')}})")
 UID2=$(curl -s "$URL/auth/v1/user" -H "apikey: $ANON" -H "Authorization: Bearer $TOK2" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).id||'')}catch{console.log('')}})")
 [ -n "$TOK2" ] && ok 'sign-in comprador' || bad 'sign-in comprador'
 C=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/rest/v1/orders" -H "apikey: $ANON" -H "Authorization: Bearer $TOK2" -H 'Content-Type: application/json' -H 'Prefer: return=representation' -d "{\"user_id\":\"$UID2\",\"total\":99.0,\"payment_method\":\"directo\",\"status\":\"pending\"}")
@@ -66,11 +82,11 @@ N2=$(curl -s "$URL/rest/v1/orders" -H "apikey: $ANON" -H "Authorization: Bearer 
 [ "$N2" = "1" ] && ok 'usuario ve SOLO su order (1)' || bad "usuario ve $N2"
 
 # 4) Admin ve todas (requiere rol admin en public.users)
-ADMINID=$(curl -s -X POST "$URL/auth/v1/admin/users" -H "apikey: $SERVICE" -H "Authorization: Bearer $SERVICE" -H 'Content-Type: application/json' -d '{"email":"adminx@test.local","password":"Test1234!","email_confirm":true}' | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).id||'')}catch{console.log('')}})")
+ADMINID=$(curl -s -X POST "$URL/auth/v1/admin/users" -H "apikey: $SERVICE" -H "Authorization: Bearer $SERVICE" -H 'Content-Type: application/json' -d "{\"email\":\"adminx@test.local\",\"password\":\"$TEST_ADMIN_PASSWORD\",\"email_confirm\":true}" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).id||'')}catch{console.log('')}})")
 [ -n "$ADMINID" ] && ok 'admin user creado (service)' || bad 'admin user: fallo'
 C=$(curl -s -o /dev/null -w '%{http_code}' -X PATCH "$URL/rest/v1/users?id=eq.$ADMINID" -H "apikey: $SERVICE" -H "Authorization: Bearer $SERVICE" -H 'Content-Type: application/json' -H 'Prefer: return=representation' -d '{"role":"admin"}')
 [ "$C" = "200" ] && ok 'promover a admin (service role, trigger ok)' || bad "promover admin: HTTP $C"
-TOKA=$(curl -s -X POST "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H 'Content-Type: application/json' -d '{"email":"adminx@test.local","password":"Test1234!"}' | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).access_token||'')}catch{console.log('')}})")
+TOKA=$(curl -s -X POST "$URL/auth/v1/token?grant_type=password" -H "apikey: $ANON" -H 'Content-Type: application/json' -d "{\"email\":\"adminx@test.local\",\"password\":\"$TEST_ADMIN_PASSWORD\"}" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).access_token||'')}catch{console.log('')}})")
 [ -n "$TOKA" ] && ok 'sign-in admin' || bad 'sign-in admin'
 NA=$(curl -s "$URL/rest/v1/orders" -H "apikey: $ANON" -H "Authorization: Bearer $TOKA" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).length)}catch{console.log('ERR')}})")
 [ "$NA" -ge "2" ] && ok "admin ve TODAS las orders (>=2)" || bad "admin ve $NA"

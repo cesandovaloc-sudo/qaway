@@ -48,7 +48,11 @@ export default function GuestAccessPage() {
 
     const loadProducts = async () => {
       try {
-        let query = supabase.from('products').select('*').eq('status', 'active')
+        // C-5: proyección pública explícita — sin cost/stock/notes
+        let query = supabase
+          .from('products')
+          .select('id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at')
+          .eq('status', 'active')
 
         // If products are restricted
         if (link.products && link.products.length > 0) {
@@ -57,7 +61,8 @@ export default function GuestAccessPage() {
 
         const { data, error } = await query.order('name')
         if (error) throw error
-        setProducts(data || [])
+        // La proyección pública (C-5) es un subconjunto del tipo Product
+        setProducts((data || []) as unknown as Product[])
       } catch (err) {
         console.error('Error loading products:', err)
       }

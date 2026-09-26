@@ -1,5 +1,6 @@
 import { supabase } from '@/config/supabase'
 import { handleAuthError } from '@/lib/auth'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import { sunatLookupAdapter } from './adapters/sunatLookupAdapter'
 import type {
   Customer,
@@ -55,10 +56,11 @@ export const customerService = {
 
   // Search customers (incluye documento fiscal)
   async searchCustomers(query: string): Promise<Customer[]> {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .or(`name.ilike.%${query}%,company.ilike.%${query}%,email.ilike.%${query}%,doc_number.ilike.%${query}%`)
+    // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+    const orFilter = ilikeOr(['name', 'company', 'email', 'doc_number'], query)
+    let request = supabase.from('customers').select('*')
+    if (orFilter) request = request.or(orFilter)
+    const { data, error } = await request
       .order('name')
       .limit(10)
 

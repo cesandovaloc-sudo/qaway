@@ -17,6 +17,7 @@ import {
   X,
   CreditCard,
   MessageCircle,
+  AlertCircle,
 } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 
@@ -43,77 +44,19 @@ export interface WebOrder {
   items: WebOrderItem[]
 }
 
-const DEMO_WEB_ORDERS: WebOrder[] = [
-  {
-    id: 'QW-ORD-9021',
-    created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // hace 45 min
-    customer_name: 'Carlos Mendoza',
-    customer_email: 'carlos.mendoza@gmail.com',
-    customer_phone: '+51 987 654 321',
-    shipping_address: 'Av. Javier Prado Este 2450, San Borja, Lima',
-    payment_method: 'Yape / Plin',
-    status: 'pending',
-    total: 349.0,
-    notes: 'Confirmar recepción de voucher adjunto.',
-    items: [
-      {
-        product_id: 'prod-1',
-        product_title: 'Pack Landing Page Pro + Dominio',
-        quantity: 1,
-        unit_price: 349.0,
-        subtotal: 349.0,
-      },
-    ],
-  },
-  {
-    id: 'QW-ORD-8942',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // hace 4 horas
-    customer_name: 'Mariana Rosas V.',
-    customer_email: 'mariana.rosas@empresa.pe',
-    customer_phone: '+51 945 112 334',
-    shipping_address: 'Calle Las Begonias 441, San Isidro, Lima',
-    payment_method: 'Tarjeta de Crédito',
-    status: 'paid',
-    total: 580.0,
-    notes: 'Solicita factura electrónica.',
-    items: [
-      {
-        product_id: 'prod-2',
-        product_title: 'Suscripción Qaway Hub Anual',
-        quantity: 1,
-        unit_price: 490.0,
-        subtotal: 490.0,
-      },
-      {
-        product_id: 'prod-3',
-        product_title: 'Módulo WhatsApp CRM Add-on',
-        quantity: 1,
-        unit_price: 90.0,
-        subtotal: 90.0,
-      },
-    ],
-  },
-  {
-    id: 'QW-ORD-8810',
-    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // hace 1 día
-    customer_name: 'Estudio Jurídico Del Solar',
-    customer_email: 'contacto@delsolar.com',
-    customer_phone: '+51 912 887 665',
-    shipping_address: 'Miraflores, Lima',
-    payment_method: 'Transferencia BCP',
-    status: 'delivered',
-    total: 1250.0,
-    items: [
-      {
-        product_id: 'prod-4',
-        product_title: 'Sistema de Agenda & Facturación Personalizada',
-        quantity: 1,
-        unit_price: 1250.0,
-        subtotal: 1250.0,
-      },
-    ],
-  },
-]
+// C-6: el array DEMO_WEB_ORDERS fue eliminado (run-2). Renderizar fixtures con
+// "Ingresos Confirmados" S/ 2,179 ocultaba el estado real del negocio; el panel
+// ahora muestra un banner de error cuando la carga falla y "0 órdenes" cuando
+// genuinamente no hay pedidos.
+
+// Estados reales de orders (CHECK DB) → estados de UI. 'refunded' se muestra
+// como 'cancelled' en la bandeja; la granularidad fina vive fuera del panel.
+const REMOTE_STATUS_TO_UI: Record<string, WebOrder['status']> = {
+  pending: 'pending',
+  paid: 'paid',
+  cancelled: 'cancelled',
+  refunded: 'cancelled',
+}
 
 const statusBadges: Record<
   WebOrder['status'],
@@ -158,6 +101,8 @@ const statusBadges: Record<
 
 export default function WebOrdersPage() {
   const [orders, setOrders] = useState<WebOrder[]>([])
+  // C-6: error de carga visible para el operador (antes el fallback DEMO lo ocultaba)
+  const [dataError, setDataError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -184,6 +129,10 @@ export default function WebOrdersPage() {
           .order('created_at', { ascending: false })
           .limit(50)
 
+        if (error) {
+          // C-6: el error de carga debe ser visible para el operador
+          setDataError(`No se pudieron cargar pedidos desde la base de datos: ${error.message}`)
+        }
         if (!error && data && data.length > 0) {
           combined = data.map((o) => ({
             id: o.id || `ORD-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
@@ -196,7 +145,7 @@ export default function WebOrdersPage() {
                 ? o.shipping_address
                 : o.shipping_address?.address || 'Lima, Perú',
             payment_method: o.payment_method || 'Web Checkout',
-            status: o.status || 'pending',
+            status: REMOTE_STATUS_TO_UI[o.status] || 'pending',
             total: Number(o.total) || 0,
             notes: o.notes,
             items: (o.items || []).map((it: any) => ({
@@ -210,7 +159,9 @@ export default function WebOrdersPage() {
           }))
         }
       } catch (err) {
-        console.warn('[WebOrdersPage] Supabase error fallback:', err)
+        console.error('[WebOrdersPage] Supabase error:', err)
+        // C-6: antes este catch tragaba el error y caía a DEMO
+        setDataError(`No se pudieron cargar pedidos web: ${err instanceof Error ? err.message : 'error desconocido'}`)
       }
 
       // 2. Failsafe localStorage (qaway_orders)
@@ -252,11 +203,8 @@ export default function WebOrdersPage() {
         console.warn('[WebOrdersPage] Local orders parse error:', e)
       }
 
-      // 3. Fallback a DEMO_WEB_ORDERS si no hay ninguno
-      if (combined.length === 0) {
-        combined = [...DEMO_WEB_ORDERS]
-      }
-
+      // C-6: sin fallback a fixtures. Si no hay pedidos, se muestra 0 con el
+      // banner (si hubo error) o vacío genuino.
       setOrders(combined)
     } finally {
       setLoading(false)
@@ -285,11 +233,29 @@ export default function WebOrdersPage() {
       console.warn('[WebOrdersPage] update local error:', e)
     }
 
-    // Actualizar en Supabase si está disponible
+    // Actualizar en Supabase. El CHECK de orders.status solo acepta
+    // ('pending','paid','cancelled','refunded') — los estados de UI
+    // shipped/delivered se mapean a 'paid' (pedido cobrado y avanzado);
+    // la granularidad de UI vive solo en el cliente.
+    const REMOTE_STATUS_MAP: Record<WebOrder['status'], string> = {
+      pending: 'pending',
+      paid: 'paid',
+      shipped: 'paid',
+      delivered: 'paid',
+      cancelled: 'cancelled',
+    }
     try {
-      await supabase.from('orders').update({ status: newStatus }).eq('id', orderId)
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: REMOTE_STATUS_MAP[newStatus] })
+        .eq('id', orderId)
+      if (error) {
+        console.error('[WebOrdersPage] update status error:', error.message)
+        setDataError(`No se pudo actualizar el estado del pedido ${orderId}: ${error.message}`)
+      }
     } catch (e) {
-      // Ignorar si tabla remota no responde
+      console.error('[WebOrdersPage] update status falló:', e)
+      setDataError(`No se pudo actualizar el estado del pedido ${orderId}`)
     }
   }
 
@@ -443,6 +409,24 @@ export default function WebOrdersPage() {
           ))}
         </div>
       </div>
+
+      {/* C-6: banner de error de datos — nunca ocultar fallos de carga con datos ficticios */}
+      {dataError && (
+        <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-xl p-4" role="alert">
+          <AlertCircle size={18} className="text-red-400 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-red-300">Error de carga de pedidos</p>
+            <p className="text-xs text-red-300/80 mt-0.5">{dataError}</p>
+            <button
+              type="button"
+              onClick={() => { setDataError(null); loadOrders() }}
+              className="text-xs text-red-200 underline mt-1 hover:text-red-100"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tabla de Pedidos Web */}
       <div className="bg-surface border border-white/10 rounded-xl overflow-hidden shadow-sm">

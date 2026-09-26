@@ -11,18 +11,30 @@ export interface SiteConfig {
   }
 }
 
-function readEnv(key: string): string {
-  const value = import.meta.env[key]
+/**
+ * N-05 (run-2 · inventario.bundle.computed-env-embeds-unrequested-vars):
+ * el acceso computado `import.meta.env[key]` impedía la sustitución estática
+ * de Vite y serializaba el objeto env COMPLETO en el bundle (observado en
+ * dist/assets/CheckoutPage-*.js con claves anon y refs de proyecto que este
+ * módulo nunca pide). Con acceso punteado estático, Vite reemplaza cada
+ * `import.meta.env.VITE_X` por su literal (o undefined) y el bundle solo
+ * contiene las variables realmente solicitadas.
+ *
+ * REGLA: nunca reintroducir acceso computado ni desestructurar import.meta.env.
+ */
+function trimEnv(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
 export const siteConfig: SiteConfig = {
-  siteUrl: readEnv('VITE_PUBLIC_SITE_URL') || window.location.origin,
-  appUrl: readEnv('VITE_PUBLIC_APP_URL') || window.location.origin,
-  whatsapp: readEnv('VITE_PUBLIC_WHATSAPP') || null,
-  phone: readEnv('VITE_PUBLIC_PHONE') || null,
+  siteUrl: trimEnv(import.meta.env.VITE_PUBLIC_SITE_URL) || window.location.origin,
+  appUrl: trimEnv(import.meta.env.VITE_PUBLIC_APP_URL) || window.location.origin,
+  whatsapp: trimEnv(import.meta.env.VITE_PUBLIC_WHATSAPP) || null,
+  phone: trimEnv(import.meta.env.VITE_PUBLIC_PHONE) || null,
   cart: {
-    appUrl: readEnv('VITE_CART_APP_URL') || null,
-    enabled: readEnv('VITE_CART_ENABLED') === 'true' || Boolean(readEnv('VITE_CART_APP_URL')),
+    appUrl: trimEnv(import.meta.env.VITE_CART_APP_URL) || null,
+    enabled:
+      trimEnv(import.meta.env.VITE_CART_ENABLED) === 'true' ||
+      Boolean(trimEnv(import.meta.env.VITE_CART_APP_URL)),
   },
 }

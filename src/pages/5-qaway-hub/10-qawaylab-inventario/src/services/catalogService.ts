@@ -83,11 +83,12 @@ export const catalogService = {
     if (catalogError) throw catalogError
 
     // Get items with products and bundles
+    // C-5: proyección pública explícita — products(*) filtraba cost/stock al storefront
     const { data: items, error: itemsError } = await supabase
       .from('catalog_items')
       .select(`
         *,
-        product:products(*),
+        product:products(id, sku, name, slug, description, category, brand, type, status, condition, unit, base_price, commercial_status, image_url, images, created_at, updated_at),
         bundle:bundles(name, bundle_price)
       `)
       .eq('catalog_id', id)

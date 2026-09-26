@@ -1,4 +1,5 @@
 import { supabase } from '@/config/supabase'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import type { PaginatedResponse, PaginationParams } from '@/types'
 
 export interface PurchaseOrderItemInput {
@@ -76,9 +77,9 @@ export const purchaseService = {
       query = query.eq('status', params.status)
     }
     if (params?.search) {
-      query = query.or(
-        `order_number.ilike.%${params.search}%,supplier_name.ilike.%${params.search}%`
-      )
+      // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+      const orderOrFilter = ilikeOr(['order_number', 'supplier_name'], params.search)
+      if (orderOrFilter) query = query.or(orderOrFilter)
     }
 
     const { data, error, count } = await query

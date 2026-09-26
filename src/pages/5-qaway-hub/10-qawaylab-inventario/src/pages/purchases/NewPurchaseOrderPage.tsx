@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Search, Trash2, Loader2, AlertCircle, ArrowLeft, Plus, Truck, Check, UserPlus, X } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 import { purchaseService } from '@/services/purchaseService'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import type { Customer, Product } from '@/types'
 
 interface Line {
@@ -56,11 +57,14 @@ export default function NewPurchaseOrderPage() {
       setSupplierResults([])
       return
     }
-    const { data } = await supabase
+    // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+    const supplierFilter = ilikeOr(['name', 'doc_number'], query)
+    let supplierReq = supabase
       .from('customers')
       .select('*')
       .eq('customer_type', 'proveedor')
-      .or(`name.ilike.%${query}%,doc_number.ilike.%${query}%`)
+    if (supplierFilter) supplierReq = supplierReq.or(supplierFilter)
+    const { data } = await supplierReq
       .order('name')
       .limit(8)
     setSupplierResults((data || []) as unknown as Customer[])
@@ -71,11 +75,13 @@ export default function NewPurchaseOrderPage() {
       setProductResults([])
       return
     }
-    const { data } = await supabase
+    const productFilter = ilikeOr(['name', 'sku'], query)
+    let productReq = supabase
       .from('products')
       .select('id, name, sku, base_price, cost, unit')
       .eq('status', 'active')
-      .or(`name.ilike.%${query}%,sku.ilike.%${query}%`)
+    if (productFilter) productReq = productReq.or(productFilter)
+    const { data } = await productReq
       .order('name')
       .limit(8)
     setProductResults((data || []) as unknown as Product[])

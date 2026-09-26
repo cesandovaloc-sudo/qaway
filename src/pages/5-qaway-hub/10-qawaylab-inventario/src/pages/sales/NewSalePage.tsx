@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   Check,
 } from 'lucide-react'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import { supabase } from '@/config/supabase'
 import { customerService } from '@/services/customerService'
 import { saleService } from '@/services/saleService'
@@ -65,11 +66,14 @@ export default function NewSalePage() {
       setProductResults([])
       return
     }
-    const { data } = await supabase
+    // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+    const productFilter = ilikeOr(['name', 'sku'], query)
+    let productReq = supabase
       .from('products')
       .select('id, name, sku, base_price, stock, unit')
       .eq('status', 'active')
-      .or(`name.ilike.%${query}%,sku.ilike.%${query}%`)
+    if (productFilter) productReq = productReq.or(productFilter)
+    const { data } = await productReq
       .order('name')
       .limit(8)
     setProductResults((data || []) as unknown as Product[])

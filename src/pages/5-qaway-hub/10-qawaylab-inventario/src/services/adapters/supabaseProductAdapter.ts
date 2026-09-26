@@ -1,4 +1,5 @@
 import { supabase } from '@/config/supabase'
+import { ilikeOr } from '@/lib/postgrestFilters'
 import type {
   Product,
   ProductFilters,
@@ -29,7 +30,9 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     // Apply filters
     if (filters.search) {
-      query = query.or(`name.ilike.%${filters.search}%,sku.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+      // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+      const orFilter = ilikeOr(['name', 'sku', 'description'], filters.search)
+      if (orFilter) query = query.or(orFilter)
     }
     if (filters.category_id) {
       query = query.eq('category_id', filters.category_id)
@@ -57,9 +60,13 @@ export const supabaseProductAdapter: ProductsAdapter = {
     const from = (pagination.page - 1) * pagination.per_page
     const to = from + pagination.per_page - 1
 
+    // C-2 (sink dormido): allowlist de columnas de orden — sort_by nunca llega crudo a .order()
+    const SORTABLE_COLUMNS = new Set(['created_at', 'updated_at', 'name', 'sku', 'base_price', 'stock'])
+    const sortColumn = SORTABLE_COLUMNS.has(pagination.sort_by || '') ? pagination.sort_by! : 'created_at'
+
     query = query
       .range(from, to)
-      .order(pagination.sort_by || 'created_at', { ascending: pagination.sort_order === 'asc' })
+      .order(sortColumn, { ascending: pagination.sort_order === 'asc' })
 
     const { data, error, count } = await query
 
@@ -186,10 +193,13 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async searchProducts(query) {
-    const { data, error } = await supabase
+    // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+    const orFilter = ilikeOr(['name', 'sku'], query)
+    let request = supabase
       .from('products')
       .select('*')
-      .or(`name.ilike.%${query}%,sku.ilike.%${query}%`)
+    if (orFilter) request = request.or(orFilter)
+    const { data, error } = await request
       .limit(10)
 
     if (error) return []

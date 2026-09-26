@@ -124,8 +124,10 @@ export function createPaymentsService(supabase, options = {}) {
         return data || []
       } catch (err) {
         console.warn('[PaymentsService] Supabase getUserPayments fallback:', err)
+        // C-7: el fallback debe respetar el mismo filtro user_id que el query remoto
+        // (antes devolvía pagos de otros usuarios cacheados en el mismo origen)
         const local = JSON.parse(localStorage.getItem('qaway_payments') || '[]')
-        return local
+        return local.filter((p) => !userId || p.user_id === userId)
       }
     },
 

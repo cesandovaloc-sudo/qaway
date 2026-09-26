@@ -239,6 +239,8 @@ export default function Checkout({
       let order = null
       if (ordersService && ordersService.createOrder) {
         try {
+          // N-04 fail-closed: createOrder ahora propaga errores (sin orden real no
+          // hay éxito falso). El catch externo de submit() muestra el error real.
           order = await ordersService.createOrder(uid, orderItems, {
             paymentMethod: selectedMethod,
             shippingAddress: {
@@ -259,22 +261,17 @@ export default function Checkout({
             notes: formData.notes,
           })
         } catch (err) {
-          console.warn('[Checkout] Error en createOrder, usando fallback:', err)
-          order = {
-            id: `ord_${Date.now()}`,
-            total: subtotal,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-          }
+          // N-04 fail-closed: se propaga al catch externo de submit() → el
+          // comprador ve el error real; nunca un "Pedido registrado con éxito"
+          // con una orden que la base de datos rechazó.
+          console.error('[Checkout] createOrder rechazado:', err)
+          throw err
         }
       } else {
-        // Fallback simulación
-        order = {
-          id: `ord_${Date.now()}`,
-          total: subtotal,
-          status: 'pending',
-          created_at: new Date().toISOString(),
-        }
+        // N-04 fail-closed: sin servicio de órdenes no hay persistencia; nunca
+        // simular éxito (antes se generaba un ord_ local ficticio).
+        console.error('[Checkout] ordersService no disponible')
+        throw new Error('No se pudo registrar el pedido: servicio de pedidos no disponible.')
       }
 
       // 2. Registro del pago.

@@ -44,11 +44,14 @@ export function createOrdersService(supabase) {
           status: 'pending',
           created_at: new Date().toISOString(),
         }
-        try {
-          const { error: orderError } = await supabase.from('orders').insert(payload)
-          if (orderError) console.warn('[OrdersService] Supabase orders table warning:', orderError.message)
-        } catch (err) {
-          console.warn('[OrdersService] Supabase insert fallback:', err)
+        // N-04 fail-closed: el error de insert se PROPAGA. Antes se degradaba a
+        // console.warn y se devolvía el payload no persistido, mostrando "Pedido
+        // registrado con éxito" al cliente con un pedido que la DB rechazó.
+        const { error: orderError } = await supabase.from('orders').insert(payload)
+        if (orderError) {
+          const e = new Error(orderError.message)
+          e.code = orderError.code
+          throw e
         }
         order = payload
       } else {
@@ -69,17 +72,10 @@ export function createOrdersService(supabase) {
           if (orderError) throw orderError
           order = data
         } catch (err) {
-          console.warn('[OrdersService] Supabase insert fallback (user):', err)
-          order = {
-            id: genId(),
-            user_id: userId,
-            total,
-            payment_method: paymentMethod,
-            shipping_address: shippingAddress,
-            notes,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-          }
+          // N-04 fail-closed: sin pedido real no hay éxito falso. Se propaga y el
+          // catch de createLocalOrder (Checkout) se lo muestra al comprador.
+          console.error('[OrdersService] Supabase insert rechazado:', err)
+          throw err
         }
       }
 
