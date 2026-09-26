@@ -110,9 +110,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               to={getHref(item.to)}
               end={item.end}
               className={({ isActive }) =>
+                // Fila 5 plan v2/v3: activo sobrio — fondo sutil + SOLO el icono
+                // en naranja (antes: fondo naranja lleno con texto)
                 `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
                   isActive
-                    ? 'bg-brand/10 text-brand'
+                    ? 'bg-white/10 text-white [&_svg]:text-brand'
                     : 'text-muted-light hover:text-white hover:bg-white/5'
                 } ${collapsed ? 'justify-center' : ''}`
               }
