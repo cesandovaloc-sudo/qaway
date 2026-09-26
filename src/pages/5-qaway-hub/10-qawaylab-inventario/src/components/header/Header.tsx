@@ -67,6 +67,17 @@ export default function Header({
           <Menu size={20} className={collapsed ? '' : 'rotate-180'} />
         </button>
 
+        {/* Píldora de marca/empresa (fila 38): en las apps es indicador estático
+            de la marca activa (igual que el Hub para workers); sin tenant muestra
+            la marca global */}
+        <div
+          className="hidden md:flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 text-white text-sm font-bold cursor-default"
+          title="Marca activa"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="max-w-40 truncate">Qaway Lab</span>
+        </div>
+
         <div className="relative flex-1 max-w-md lg:max-w-[420px] min-w-0">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
           <input
