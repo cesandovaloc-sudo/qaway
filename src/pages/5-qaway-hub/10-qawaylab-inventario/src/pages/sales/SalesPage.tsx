@@ -95,7 +95,7 @@ export default function SalesPage() {
       </div>
 
       {/* Filters — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 bg-white/95 backdrop-blur-md py-2 rounded-xl">
+      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 bg-white/95 backdrop-blur-md border border-zinc-200 py-2 px-3.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input

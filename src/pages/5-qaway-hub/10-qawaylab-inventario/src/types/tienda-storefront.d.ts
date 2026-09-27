@@ -50,12 +50,14 @@ declare module '@/components/checkout/storefront/*' {
 // compra única de servicios y cursos, normalización de carritos persistidos).
 // La declaración exacta tiene precedencia sobre la wildcard de arriba.
 declare module '@/components/checkout/storefront/utils' {
+  export function itemId(item: unknown): string | null
   export function itemKey(item: unknown): string
   export function itemTitle(item: unknown): string
   export function itemPrice(item: unknown): number
   export function itemQty(item: unknown): number
   export function itemImage(item: unknown): string | null
   export function itemCategory(item: unknown): string
+  export function itemDescription(item: unknown): string
   export function isSingleInstance(item: unknown): boolean
   export function normalizeCart(items: unknown): unknown[]
   export function money(value: unknown, currency?: string): string

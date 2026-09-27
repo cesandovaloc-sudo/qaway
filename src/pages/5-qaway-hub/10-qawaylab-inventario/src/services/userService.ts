@@ -1,5 +1,4 @@
 import { supabase } from '@/config/supabase'
-import { handleAuthError } from '@/lib/auth'
 import type { User, UserRole, UserPermissions, SharedAccessLink } from '@/types/user'
 import { rolePermissions, resolvePermissions } from '@/types/user'
 
@@ -24,15 +23,18 @@ export const userService = {
         .eq('id', user.id)
         .single()
 
+      // El objeto cumple el contrato `User` (types/user.ts): la columna de
+      // nombre es `full_name` — es la que leen el topbar y los guards de
+      // permisos — y no existen `status`/`updated_at` en ese contrato.
       return {
         id: user.id,
         email: user.email || '',
-        name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Super Administrador',
+        full_name: profileData?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Super Administrador',
+        avatar_url: profileData?.avatar_url || null,
         role: 'admin' as UserRole,
         permissions: rolePermissions['admin'],
-        status: 'active',
         created_at: profileData?.created_at || new Date().toISOString(),
-        updated_at: profileData?.updated_at || new Date().toISOString(),
+        last_active_at: profileData?.last_active_at || null,
       }
     }
 

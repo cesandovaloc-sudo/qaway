@@ -29,6 +29,8 @@ function mockAuth(overrides: Partial<AuthContextValue> = {}): void {
     profile: null,
     loading: false,
     signIn: vi.fn(),
+    signInWithOAuth: vi.fn(),
+    resetPassword: vi.fn(),
     signOut: vi.fn(),
     ...overrides,
   })

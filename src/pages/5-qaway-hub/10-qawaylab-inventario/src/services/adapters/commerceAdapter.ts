@@ -18,6 +18,8 @@ export interface CommerceProductSource {
   name: string
   sku?: string | null
   base_price?: number | null
+  description?: string | null
+  short_description?: string | null
   images?: Array<{ processed_url?: string | null; original_url?: string | null }> | null
 }
 

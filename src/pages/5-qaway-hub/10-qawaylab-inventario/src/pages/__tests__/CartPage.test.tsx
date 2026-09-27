@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import CartPage from '@/pages/CartPage'
@@ -141,7 +141,11 @@ describe('CartPage — tienda · «Mi pedido» (storefront)', () => {
     // Resumen (OrderSummary): productos + subtotal 2×249.9 + 29.9 = 529.70
     expect(screen.getByRole('heading', { name: 'Resumen' })).toBeInTheDocument()
     expect(screen.getByText('Productos')).toBeInTheDocument()
-    expect(screen.getByText('S/ 529.70')).toBeInTheDocument()
+    // OrderSummary pinta Subtotal y Total; sin ajustes ambos coinciden, asì que la
+    // aserción se acota a la fila Total para que sea inequívoca.
+    const totalRow = screen.getByText('Total').closest('.summary-row')
+    expect(totalRow).not.toBeNull()
+    expect(within(totalRow as HTMLElement).getByText('S/ 529.70')).toBeInTheDocument()
 
     // El pago ya no vive en el carrito: es el paso 2
     expect(screen.queryByRole('button', { name: 'Confirmar pedido' })).not.toBeInTheDocument()

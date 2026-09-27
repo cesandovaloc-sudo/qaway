@@ -66,7 +66,7 @@ describe('DashboardPage', () => {
     renderPage()
 
     expect(screen.getByText('Cargando dashboard...')).toBeInTheDocument()
-    expect(screen.queryByText('Métricas principales')).not.toBeInTheDocument()
+    expect(screen.queryByText('Ventas y Flujo de Caja')).not.toBeInTheDocument()
   })
 
   it('muestra el error y Reintentar llama a refresh', async () => {
@@ -90,11 +90,10 @@ describe('DashboardPage', () => {
     renderPage()
 
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
-    expect(screen.getByText('Métricas principales')).toBeInTheDocument()
+    expect(screen.getByText('Ventas y Flujo de Caja')).toBeInTheDocument()
     expect(screen.getByText('Productos')).toBeInTheDocument()
     expect(screen.getByText('25')).toBeInTheDocument()
-    expect(screen.getByText('Stock total')).toBeInTheDocument()
-    expect(screen.getByText('320')).toBeInTheDocument()
+    expect(screen.getByText('Valor inventario')).toBeInTheDocument()
     // El formato es-PE usa un espacio no separable (NBSP) que el normalizador no colapsa
     expect(screen.getByText((content: string) => content.replace(/\u00A0/g, ' ').trim() === 'S/ 48,500')).toBeInTheDocument()
     expect(screen.getByText('Stock bajo')).toBeInTheDocument()

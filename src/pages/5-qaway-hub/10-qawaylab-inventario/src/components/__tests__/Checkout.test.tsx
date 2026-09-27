@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Checkout } from '@qawaylab/pago'
+import Checkout from '@/components/checkout/Checkout'
 
 const items = [
   { id: 'prod-1', title: 'Zapatillas Running Pro', unit_price: 249.9, quantity: 2, product_type: 'physical' },
@@ -85,7 +85,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
     expect(screen.getByRole('radio', { name: /Mercado Pago/ })).toBeDisabled()
     expect(screen.getByRole('radio', { name: /Pago con QR/ })).toBeDisabled()
 
-    // El default es el primer método habilitado (manual).
+    // El default es el primer método habilitado (taypi).
     expect(screen.getByRole('radio', { name: /Yape \/ Plin \/ Transferencia/ })).toBeChecked()
 
     // El panel de datos de cobro arranca COLAPSADO: se abre al hacer clic.
@@ -140,7 +140,7 @@ describe('Checkout (módulo @qawaylab/pago)', () => {
         { product_id: 'prod-2', product_title: 'Medias Deportivas', product_type: 'physical', unit_price: 29.9, quantity: 1 },
       ],
       expect.objectContaining({
-        paymentMethod: 'manual',
+        paymentMethod: 'taypi',
         shippingAddress: expect.objectContaining({
           name: 'Juan Pérez',
           phone: '999 888 777',

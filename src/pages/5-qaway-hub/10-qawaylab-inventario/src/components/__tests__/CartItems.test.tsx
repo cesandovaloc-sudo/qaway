@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import CartItems from '@qawaylab/pago/components/storefront/CartItems'
+import CartItems from '@/components/checkout/storefront/CartItems'
 import type { CartItem } from '../../../contracts/commerce/v1.types'
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {

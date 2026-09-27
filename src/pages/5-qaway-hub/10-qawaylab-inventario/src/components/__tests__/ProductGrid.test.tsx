@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import ProductGrid from '@qawaylab/pago/components/storefront/ProductGrid'
+import ProductGrid from '@/components/checkout/storefront/ProductGrid'
 
 function makeProduct(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {

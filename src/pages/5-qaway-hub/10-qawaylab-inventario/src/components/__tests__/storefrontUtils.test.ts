@@ -7,7 +7,7 @@ import {
   itemImage,
   itemCategory,
   money,
-} from '../checkout/storefront/utils'
+} from '@/components/checkout/storefront/utils'
 
 describe('storefront utils · itemId', () => {
   it('prioriza id sobre product_id y uid', () => {

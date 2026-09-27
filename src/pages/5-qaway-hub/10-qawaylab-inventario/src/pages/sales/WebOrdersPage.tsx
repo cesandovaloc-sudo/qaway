@@ -374,7 +374,7 @@ export default function WebOrdersPage() {
       </div>
 
       {/* Barra de Búsqueda y Filtros — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white/95 backdrop-blur-md border border-zinc-200 p-3 rounded-xl">
+      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white/95 backdrop-blur-md border border-zinc-200 p-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         <div className="relative w-full sm:max-w-md">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
           <input

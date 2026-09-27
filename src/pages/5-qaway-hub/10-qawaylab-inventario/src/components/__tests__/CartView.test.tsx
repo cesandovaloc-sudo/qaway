@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import CartView from '@qawaylab/pago/components/storefront/CartView'
+import CartView from '@/components/checkout/storefront/CartView'
 import type { CartItem } from '../../../contracts/commerce/v1.types'
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {
@@ -80,7 +80,9 @@ describe('CartView (storefront del módulo)', () => {
 
     const summary = screen.getByText('Resumen').closest('.order-summary') as HTMLElement
     expect(within(summary).getByText('9')).toBeInTheDocument()
-    expect(within(summary).getByText('S/ 999.50')).toBeInTheDocument()
+    // Sin descuento, Subtotal y Total muestran el mismo monto: se acota al total.
+    const totalRow = within(summary).getByText('Total').closest('.summary-row') as HTMLElement
+    expect(within(totalRow).getByText('S/ 999.50')).toBeInTheDocument()
   })
 
   it('calcula count y subtotal de los items cuando no vienen', () => {
@@ -89,7 +91,8 @@ describe('CartView (storefront del módulo)', () => {
     const summary = screen.getByText('Resumen').closest('.order-summary') as HTMLElement
     // 2 + 1 = 3 productos; 2×249.90 + 1×249.90 = 749.70
     expect(within(summary).getByText('3')).toBeInTheDocument()
-    expect(within(summary).getByText('S/ 749.70')).toBeInTheDocument()
+    const totalRow = within(summary).getByText('Total').closest('.summary-row') as HTMLElement
+    expect(within(totalRow).getByText('S/ 749.70')).toBeInTheDocument()
   })
 
   it('muestra el encabezado con eyebrow, title y copy (defaults y custom)', () => {

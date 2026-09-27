@@ -144,7 +144,7 @@ export default function SuppliersPage() {
       </div>
 
       {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md py-1 rounded-lg">
+      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md border border-zinc-200 py-1 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"

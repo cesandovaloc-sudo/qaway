@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import ProductDetail from '@qawaylab/pago/components/storefront/ProductDetail'
+import ProductDetail from '@/components/checkout/storefront/ProductDetail'
 
 function makeProduct(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {

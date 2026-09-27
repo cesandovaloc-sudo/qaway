@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import ProductCard from '@qawaylab/pago/components/storefront/ProductCard'
+import ProductCard from '@/components/checkout/storefront/ProductCard'
 
 function makeProduct(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {

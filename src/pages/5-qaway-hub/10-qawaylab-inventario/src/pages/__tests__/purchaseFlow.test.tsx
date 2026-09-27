@@ -7,7 +7,6 @@ import { catalogService } from '@/services/catalogService'
 import type { CatalogFull } from '@/services/catalogService'
 import { useAuth } from '@/context/AuthContext'
 import { siteConfig } from '@/config/site'
-import { firstEnabledMethod } from '@/components/checkout/paymentConfig'
 
 // Los servicios reales de @qawaylab/pago tocan supabase: se mockean para el flujo
 const { createOrderMock, createPaymentMock } = vi.hoisted(() => ({
@@ -136,6 +135,8 @@ describe('Flujo de compra completo (catálogo → agregar → carrito → checko
       profile: null,
       loading: false,
       signIn: vi.fn(),
+      signInWithOAuth: vi.fn(),
+      resetPassword: vi.fn(),
       signOut: vi.fn(),
     })
   })

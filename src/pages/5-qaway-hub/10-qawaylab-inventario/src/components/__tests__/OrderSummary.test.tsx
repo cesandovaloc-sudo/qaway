@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import OrderSummary from '@qawaylab/pago/components/storefront/OrderSummary'
+import OrderSummary from '@/components/checkout/storefront/OrderSummary'
 import type { CartItem } from '../../../contracts/commerce/v1.types'
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {
@@ -43,7 +43,9 @@ describe('OrderSummary (storefront del módulo)', () => {
     render(<OrderSummary items={[makeItem()]} count={9} subtotal={999.5} />)
 
     expect(screen.getByText('9')).toBeInTheDocument()
-    expect(screen.getByText('S/ 999.50')).toBeInTheDocument()
+    // Sin descuento, Subtotal y Total coinciden: se acota a la fila del Subtotal.
+    const subtotalRow = screen.getByText('Subtotal').closest('.summary-row') as HTMLElement
+    expect(subtotalRow).toHaveTextContent('S/ 999.50')
     // Las filas de ítems siguen calculándose de items
     expect(screen.getByText('2 × Zapatillas Running Pro')).toBeInTheDocument()
   })
@@ -90,13 +92,17 @@ describe('OrderSummary (storefront del módulo)', () => {
 
     expect(screen.getByText('Productos')).toBeInTheDocument()
     expect(screen.getByText('0')).toBeInTheDocument()
-    expect(screen.getByText('S/ 0.00')).toBeInTheDocument()
+    const subtotalRow = screen.getByText('Subtotal').closest('.summary-row') as HTMLElement
+    expect(subtotalRow).toHaveTextContent('S/ 0.00')
   })
 
   it('formatea precios inválidos como S/ 0.00 en lugar de romper', () => {
     render(<OrderSummary items={[makeItem({ unit_price: NaN })]} />)
 
     // Fila del ítem y subtotal se muestran como S/ 0.00 sin romper
-    expect(screen.getAllByText('S/ 0.00')).toHaveLength(2)
+    const itemRow = screen.getByText('2 × Zapatillas Running Pro').closest('.summary-row') as HTMLElement
+    expect(itemRow).toHaveTextContent('S/ 0.00')
+    const subtotalRow = screen.getByText('Subtotal').closest('.summary-row') as HTMLElement
+    expect(subtotalRow).toHaveTextContent('S/ 0.00')
   })
 })
