@@ -81,12 +81,12 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-ink transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+      className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-surface)] border-r border-[var(--hub-border)] transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
         collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-[72px] shrink-0 border-b border-white/10">
+      <div className="flex items-center gap-3 px-5 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
         <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
           <Package size={18} className="text-white" />
         </div>

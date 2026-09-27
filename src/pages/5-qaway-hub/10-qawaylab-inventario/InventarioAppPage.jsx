@@ -42,7 +42,7 @@ class ErrorBoundary extends Component {
 
 export default function InventarioAppPage() {
   return (
-    <div className="qaway-inventario-root" style={{ minHeight: '100vh' }}>
+    <div className="qaway-inventario-root hub-shell" style={{ minHeight: '100vh' }}>
       <AuthProvider>
         <ErrorBoundary>
           <Suspense fallback={

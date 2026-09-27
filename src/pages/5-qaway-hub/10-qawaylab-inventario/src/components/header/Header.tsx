@@ -47,12 +47,18 @@ export default function Header({
       document.documentElement.classList.remove('dark')
       document.documentElement.setAttribute('data-theme', 'contraste')
     }
+    window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
 
-  const identityResolved = !loading && (profile !== null || session !== null)
-  const email = session?.user?.email ?? ''
-  const userMetadataName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || ''
-  const fullNameRaw = profile?.full_name || userMetadataName || email.split('@')[0] || 'Usuario'
+  // Caché local para eliminar al 100% el parpadeo/flash en recargas
+  const [cachedProfile] = useState<{ displayName: string; avatarUrl: string | null; roleLabel: string; initials: string } | null>(() => {
+    try {
+      const raw = localStorage.getItem('qaway.hubProfile')
+      return raw ? JSON.parse(raw) : null
+    } catch {
+      return null
+    }
+  })
 
   // Formato oficial del Hub: "Carlos Sandoval" -> "Carlos S."
   const shortName = (str: string) => {
@@ -72,19 +78,52 @@ export default function Header({
     return `${firstName} ${lastNameInit}.`
   }
 
-  const displayName = shortName(fullNameRaw)
-  const avatarUrl = profile?.avatar_url || session?.user?.user_metadata?.avatar_url || null
-  const roleLabel = profile ? roleLabels[profile.role] || profile.role : ''
-  const initials = (fullNameRaw || '?')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w: string) => w[0])
-    .join('')
-    .toUpperCase()
+  // Guardar en caché cuando el perfil de Supabase esté resuelto
+  useEffect(() => {
+    if (profile) {
+      const full = profile.full_name || ''
+      const name = shortName(full)
+      const role = roleLabels[profile.role] || profile.role || 'Miembro del equipo'
+      const inits = (full || '?').split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()
+      try {
+        localStorage.setItem(
+          'qaway.hubProfile',
+          JSON.stringify({
+            displayName: name,
+            avatarUrl: profile.avatar_url || null,
+            roleLabel: role,
+            initials: inits,
+          })
+        )
+      } catch {
+        // Ignorar storage errors
+      }
+    }
+  }, [profile])
+
+  // Anti-flash: solo se marca como resuelto si ya tenemos perfil real o perfil en caché.
+  // Jamás hace fallback al email split antes de que termine de cargar.
+  const hasRealData = Boolean(profile || cachedProfile)
+  const identityResolved = !loading && hasRealData
+
+  const activeData = profile
+    ? {
+        displayName: shortName(profile.full_name || ''),
+        avatarUrl: profile.avatar_url || session?.user?.user_metadata?.avatar_url || null,
+        roleLabel: roleLabels[profile.role] || profile.role || 'Miembro del equipo',
+        initials: (profile.full_name || '?').split(' ').filter(Boolean).slice(0, 2).map((w: string) => w[0]).join('').toUpperCase(),
+      }
+    : cachedProfile || null
+
+  const displayName = activeData?.displayName || (loading ? '' : 'Usuario')
+  const avatarUrl = activeData?.avatarUrl || null
+  const roleLabel = activeData?.roleLabel || (loading ? '' : 'Miembro del equipo')
+  const initials = activeData?.initials || '?'
+  const email = session?.user?.email ?? ''
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('qaway.hubProfile')
       await signOut()
     } catch {
       // Ignorar errores de logout
@@ -93,7 +132,7 @@ export default function Header({
   }
 
   return (
-    <header className="h-[72px] shrink-0 bg-ink border-b border-white/10 flex items-center justify-between px-5 lg:px-6 relative z-50">
+    <header className="h-[72px] shrink-0 bg-[var(--hub-surface)] border-b border-[var(--hub-border)] flex items-center justify-between px-5 lg:px-6 relative z-50 text-[var(--hub-text)]">
       {/* Lado izquierdo: hamburguesa + Apps + Selector moderno de Almacén */}
       <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
         <button
@@ -134,8 +173,8 @@ export default function Header({
           {isWarehouseOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsWarehouseOpen(false)} aria-label="Cerrar selector" />
-              <div className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-ink-2 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left">
-                <div className="p-4 border-b border-white/10 bg-white/5">
+              <div className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left">
+                <div className="p-4 border-b border-[var(--hub-border-soft)] bg-white/5">
                   <p className="text-xs font-extrabold text-white">Cambiar de almacén</p>
                   <p className="text-[10px] text-white/40 mt-0.5">Filtra el inventario y operaciones por sede o almacén.</p>
                 </div>
@@ -238,9 +277,9 @@ export default function Header({
           {isProfileOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} aria-label="Cerrar perfil" />
-              <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-ink-2 border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden text-left">
+              <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left">
                 {/* Encabezado identidad */}
-                <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3.5">
+                <div className="p-4 border-b border-[var(--hub-border-soft)] bg-white/5 flex items-center gap-3.5">
                   {avatarUrl ? (
                     <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full border border-white/20 object-cover shrink-0" />
                   ) : (
@@ -256,24 +295,36 @@ export default function Header({
                   </div>
                 </div>
 
-                {/* Selector contextual de Almacén (Regla 1-ResumenPanel.js:139-146) */}
-                <div className="px-3.5 py-2.5 border-b border-white/10 bg-white/[0.02]">
-                  <label className="flex items-center gap-2 text-[11px] font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
-                    <Warehouse size={13} className="text-brand" /> Almacén actual
-                  </label>
-                  <select
-                    value={selectedWarehouse?.name || 'Todos los almacenes'}
-                    onChange={(e) => {
-                      const found = warehousesList.find(w => w.name === e.target.value)
-                      setSelectedWarehouse(found || null)
-                    }}
-                    className="w-full bg-white/10 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-brand/50 cursor-pointer"
-                  >
-                    <option value="Todos los almacenes" className="bg-ink text-white">Todos los almacenes</option>
+                {/* Selector contextual de Almacén (Regla 1-ResumenPanel.js:139-146 + Hub cápsula) */}
+                <div className="p-2 border-b border-white/10 bg-white/[0.02]">
+                  <div className="px-2 py-1 text-[11px] font-semibold text-white/50 uppercase tracking-wider flex items-center justify-between">
+                    <span className="flex items-center gap-1.5"><Warehouse size={13} className="text-brand" /> Almacén actual</span>
+                    <span className="text-[10px] text-white/40">{selectedWarehouse ? selectedWarehouse.code : 'GLOBAL'}</span>
+                  </div>
+                  <div className="mt-1 space-y-0.5 max-h-40 overflow-y-auto">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedWarehouse(null)}
+                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold transition-colors cursor-pointer ${!selectedWarehouse ? 'bg-brand/15 text-brand font-bold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!selectedWarehouse ? 'bg-brand' : 'bg-white/20'}`} />
+                      <span>Todos los almacenes</span>
+                    </button>
                     {warehousesList.map((w) => (
-                      <option key={w.id} value={w.name} className="bg-ink text-white">{w.name}</option>
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => setSelectedWarehouse(w)}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-brand' : 'bg-white/20'}`} />
+                          <span className="truncate">{w.name}</span>
+                        </div>
+                        <span className="text-[10px] text-white/40 ml-2 font-mono shrink-0">{w.code}</span>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
                 {/* Menú de navegación (Regla 1-ResumenPanel.js:147-155 + HubPanelPage.jsx:2940-2945) */}

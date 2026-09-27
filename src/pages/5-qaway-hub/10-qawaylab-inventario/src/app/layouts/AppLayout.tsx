@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/sidebar/Sidebar'
 import Header from '@/components/header/Header'
@@ -15,22 +15,35 @@ import Header from '@/components/header/Header'
  * - el topbar es hermano `shrink-0` FUERA del scroller, por eso queda siempre
  *   visible (no necesita ser sticky);
  * - `<main>` es el contenedor de scroll (`flex-1 min-h-0 overflow-y-auto`).
- * Sin esta estructura no existe contenedor de scroll intermedio, así que el
- * `sticky top-0` de una barra de filtros se resuelve contra el documento y la
- * barra se ancla al tope del viewport, ocupando el lugar del topbar.
  */
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>(() => {
+    return (localStorage.getItem('qaway.hubTheme') as 'claro' | 'contraste' | 'oscuro') || 'contraste'
+  })
+
+  useEffect(() => {
+    const handleThemeChange = (e: any) => {
+      if (e.detail) {
+        setThemeMode(e.detail)
+      }
+    }
+    window.addEventListener('qaway-theme-change', handleThemeChange)
+    return () => window.removeEventListener('qaway-theme-change', handleThemeChange)
+  }, [])
 
   return (
-    <div className="h-dvh bg-surface overflow-hidden">
+    <div
+      data-mode={themeMode}
+      className="hub-shell h-dvh bg-[var(--hub-bg)] text-[var(--hub-text)] overflow-hidden transition-colors duration-200"
+    >
       <Sidebar collapsed={collapsed} />
       <div
         className="flex flex-col h-dvh min-h-0 transition-all duration-300"
         style={{ marginLeft: collapsed ? 72 : 256 }}
       >
         <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 min-h-0 overflow-y-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto bg-[var(--hub-bg)] text-[var(--hub-text)] transition-colors duration-200">
           <div className="p-6 min-h-full">
             <Outlet />
           </div>
