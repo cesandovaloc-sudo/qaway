@@ -30,7 +30,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/', label: 'Inicio', icon: <LayoutDashboard size={18} /> },
+  { to: '/', label: 'Resumen', icon: <LayoutDashboard size={18} /> },
 
   { to: '/logistica', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
   { to: '/logistica/categorias', label: 'Categorías', icon: <FolderTree size={18} /> },
@@ -81,17 +81,17 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-ink transition-all duration-300 overflow-y-auto ${
-        collapsed ? 'w-[72px]' : 'w-[260px]'
+      className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-ink transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+        collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-white/10">
+      <div className="flex items-center gap-3 px-5 h-[72px] shrink-0 border-b border-white/10">
         <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
           <Package size={18} className="text-white" />
         </div>
         {!collapsed && (
-          <span className="font-display text-white text-sm font-medium tracking-tight">
+          <span className="font-display text-white text-lg font-bold tracking-wide">
             Inventario
           </span>
         )}
@@ -110,12 +110,10 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               to={getHref(item.to)}
               end={item.end}
               className={({ isActive }) =>
-                // Fila 5 plan v2/v3: activo sobrio — fondo sutil + SOLO el icono
-                // en naranja (antes: fondo naranja lleno con texto)
-                `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white/10 text-white [&_svg]:text-brand'
-                    : 'text-muted-light hover:text-white hover:bg-white/5'
+                    ? 'bg-white/10 text-white [&_svg]:text-brand font-semibold'
+                    : 'text-white/65 hover:text-white hover:bg-white/10'
                 } ${collapsed ? 'justify-center' : ''}`
               }
             >

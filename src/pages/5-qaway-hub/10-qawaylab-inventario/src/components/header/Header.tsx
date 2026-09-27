@@ -34,14 +34,36 @@ export default function Header({
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   const email = session?.user?.email ?? ''
-  const displayName = profile?.full_name || email.split('@')[0] || 'Usuario'
+  const userMetadataName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || ''
+  const fullNameRaw = profile?.full_name || userMetadataName || email.split('@')[0] || 'Usuario'
+
+  // Formato oficial del Hub: "Carlos Sandoval" -> "Carlos S."
+  const shortName = (str: string) => {
+    if (!str || !str.trim()) return 'Usuario'
+    let clean = str.trim()
+    // Si viene un correo (ej: s.admin@qawaylab.com), extraer la parte del usuario
+    if (clean.includes('@')) {
+      clean = clean.split('@')[0].replace(/[._-]/g, ' ')
+    }
+    const parts = clean.split(/\s+/).filter(Boolean)
+    if (parts.length === 0) return 'Usuario'
+    if (parts.length === 1) {
+      const single = parts[0]
+      return single.charAt(0).toUpperCase() + single.slice(1)
+    }
+    const firstName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
+    const lastNameInit = parts[1].charAt(0).toUpperCase()
+    return `${firstName} ${lastNameInit}.`
+  }
+
+  const displayName = shortName(fullNameRaw)
+  const avatarUrl = profile?.avatar_url || session?.user?.user_metadata?.avatar_url || null
   const roleLabel = profile ? roleLabels[profile.role] || profile.role : ''
-  // Iniciales: 2 palabras, igual que el Hub (nameWords)
-  const initials = (displayName || '?')
+  const initials = (fullNameRaw || '?')
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0])
+    .map((w: string) => w[0])
     .join('')
     .toUpperCase()
 
@@ -49,15 +71,15 @@ export default function Header({
     try {
       await signOut()
     } catch {
-      // Ignorar errores de logout: la sesión local se limpia igualmente
+      // Ignorar errores de logout
     }
     navigate('/login', { replace: true })
   }
 
   return (
     <header className="h-[72px] shrink-0 bg-ink border-b border-white/10 flex items-center justify-between px-5 lg:px-6 relative z-50">
-      {/* Lado izquierdo: hamburguesa (colapso) + buscador, como el Hub */}
-      <div className="flex items-center gap-2 lg:gap-3 flex-1 min-w-0">
+      {/* Lado izquierdo: hamburguesa + Apps + Marca activa */}
+      <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
         <button
           onClick={onToggleSidebar}
           aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
@@ -67,9 +89,6 @@ export default function Header({
           <Menu size={20} className={collapsed ? '' : 'rotate-180'} />
         </button>
 
-        {/* Waffle de Apps (fila 39): cápsula 9 puntos con "Apps" al hover.
-            El switcher completo vive centralizado en el Hub (/hub), como en
-            HubPanelPage.jsx:2583 — aquí la píldora conduce al ecosistema. */}
         <button
           type="button"
           onClick={() => navigate('/hub')}
@@ -84,9 +103,6 @@ export default function Header({
           <span className="text-sm font-bold max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-300 whitespace-nowrap">Apps</span>
         </button>
 
-        {/* Píldora de marca/empresa (fila 38): en las apps es indicador estático
-            de la marca activa (igual que el Hub para workers); sin tenant muestra
-            la marca global */}
         <div
           className="hidden md:flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 text-white text-sm font-bold cursor-default"
           title="Marca activa"
@@ -94,19 +110,23 @@ export default function Header({
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="max-w-40 truncate">Qaway Lab</span>
         </div>
+      </div>
 
-        <div className="relative flex-1 max-w-md lg:max-w-[420px] min-w-0">
+      {/* Lado derecho: buscador con Ctrl K + campana + perfil Supabase */}
+      <div className="flex items-center gap-3 lg:gap-5 ml-auto">
+        <div className="relative hidden sm:block w-[220px] md:w-[280px] lg:w-[360px]">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
           <input
             type="text"
             placeholder="Buscar productos, SKU, categorías..."
-            className="w-full bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-brand/50 focus:bg-white/10 transition-colors"
+            className="w-full bg-white/5 border border-white/10 rounded-full pl-10 pr-16 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-brand/50 focus:bg-white/10 transition-colors"
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/50 border border-white/10">Ctrl</kbd>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-white/10 rounded text-white/50 border border-white/10">K</kbd>
+          </div>
         </div>
-      </div>
 
-      {/* Lado derecho: campana + perfil (alineación Hub) */}
-      <div className="flex items-center gap-2 lg:gap-3 ml-4">
         <button
           className="relative p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           title="Notificaciones"
@@ -115,19 +135,22 @@ export default function Header({
           <span className="absolute top-2 right-2 w-2 h-2 bg-brand rounded-full ring-2 ring-ink" />
         </button>
 
-        {/* Dropdown de perfil (fila 34/36): botón circular + nombre/rol + chevron */}
+        {/* Dropdown de perfil */}
         <div className="relative z-[100]">
           <button
             onClick={() => setIsProfileOpen((o) => !o)}
             aria-label={displayName}
             className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-3 pr-1 cursor-pointer rounded-full hover:bg-white/10 transition-colors text-left border border-transparent focus:outline-none"
           >
-            {/* Círculo de identidad (fila 34): iniciales 2 palabras + punto naranja */}
-            <span className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/15 bg-white/10 text-white/70 font-bold items-center justify-center text-xs lg:text-sm select-none">
-              {initials || <User size={16} className="text-brand" />}
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand ring-2 ring-ink" aria-hidden="true" />
-            </span>
-            {/* Nombre + rol: 13px bold + 10px, igual que el Hub */}
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/20 object-cover" />
+            ) : (
+              <span className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/15 bg-white/10 text-white/70 font-bold items-center justify-center text-xs lg:text-sm select-none">
+                {initials || <User size={16} className="text-brand" />}
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand ring-2 ring-ink" aria-hidden="true" />
+              </span>
+            )}
+
             <div className="hidden lg:flex flex-col justify-center">
               <span className="text-white text-[13px] font-bold leading-none">{displayName}</span>
               <span className="text-[10px] text-white/40 leading-none mt-1.5">

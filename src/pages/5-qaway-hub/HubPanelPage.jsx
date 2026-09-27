@@ -2517,7 +2517,7 @@ function HubPanelContent() {
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
       <aside className={`hub-chrome ${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-[var(--hub-border)] bg-[var(--hub-bg)] transition-all duration-300 ease-in-out`}>
         {/* LOGO */}
-        <button onClick={() => goTab('Inicio')} className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-[var(--hub-border)] shrink-0 cursor-pointer hover:bg-[var(--hub-chip)] transition-colors group w-full text-left`}>
+        <button onClick={() => goTab('Inicio')} className={`h-[72px] shrink-0 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-[var(--hub-border)] cursor-pointer hover:bg-[var(--hub-chip)] transition-colors group w-full text-left`}>
           <div className="flex items-center gap-3">
             <span className="font-bold text-white tracking-wide text-lg leading-tight">
               {isSidebarCollapsed ? (
