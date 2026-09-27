@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 
@@ -29,9 +29,9 @@ export default function Header({
 }) {
   const { session, profile, signOut } = useAuth()
   const navigate = useNavigate()
-  // Fila 36 plan v3: dropdown de perfil idéntico en estructura al Hub
-  // (encabezado con identidad + Mi cuenta + Seguridad + Cerrar Sesión)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [warehouse, setWarehouse] = useState('Todos los almacenes')
+  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>('contraste')
 
   const email = session?.user?.email ?? ''
   const userMetadataName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || ''
@@ -166,36 +166,110 @@ export default function Header({
           {isProfileOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} aria-label="Cerrar perfil" />
-              <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-ink-2 border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden">
-                <div className="p-5 border-b border-white/10 bg-white/5 flex items-center gap-4">
-                  <span className="inline-flex w-12 h-12 rounded-full border border-white/15 bg-white/10 text-white/70 font-bold items-center justify-center text-sm select-none shrink-0">
-                    {initials || '?'}
-                  </span>
+              <div className="absolute right-0 top-[calc(100%+8px)] w-72 bg-ink-2 border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden text-left">
+                {/* Encabezado identidad */}
+                <div className="p-4 border-b border-white/10 bg-white/5 flex items-center gap-3.5">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full border border-white/20 object-cover shrink-0" />
+                  ) : (
+                    <span className="relative inline-flex w-11 h-11 rounded-full border border-white/15 bg-white/10 text-white/70 font-bold items-center justify-center text-sm select-none shrink-0">
+                      {initials || <User size={18} className="text-brand" />}
+                      <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand ring-2 ring-ink" aria-hidden="true" />
+                    </span>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{displayName}</p>
-                    <p className="text-xs text-white/40 truncate mt-0.5">{email || 'Sesión activa'}</p>
+                    <p className="text-[11px] text-white/50 truncate mt-0.5">{roleLabel || 'Miembro del equipo'}</p>
+                    <p className="text-[11px] text-white/30 truncate">{email || 'admin@qawaylab.pe'}</p>
                   </div>
                 </div>
-                <div className="p-2 border-t border-white/10 space-y-0.5">
-                  <button
-                    onClick={() => { setIsProfileOpen(false); navigate('/config') }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
+
+                {/* Selector contextual de Almacén (Regla 1-ResumenPanel.js:139-146) */}
+                <div className="px-3.5 py-2.5 border-b border-white/10 bg-white/[0.02]">
+                  <label className="flex items-center gap-2 text-[11px] font-semibold text-white/50 mb-1.5 uppercase tracking-wider">
+                    <Warehouse size={13} className="text-brand" /> Almacén actual
+                  </label>
+                  <select
+                    value={warehouse}
+                    onChange={(e) => setWarehouse(e.target.value)}
+                    className="w-full bg-white/10 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-brand/50 cursor-pointer"
                   >
-                    <User size={15} className="text-white/50 shrink-0" /> Mi cuenta
+                    <option value="Todos los almacenes" className="bg-ink text-white">Todos los almacenes</option>
+                    <option value="Almacén Principal" className="bg-ink text-white">Almacén Principal</option>
+                    <option value="Almacén Surco" className="bg-ink text-white">Almacén Surco</option>
+                    <option value="Almacén Secundario" className="bg-ink text-white">Almacén Secundario</option>
+                  </select>
+                </div>
+
+                {/* Menú de navegación (Regla 1-ResumenPanel.js:147-155 + HubPanelPage.jsx:2940-2945) */}
+                <div className="p-2 space-y-0.5">
+                  <button
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/config') }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
+                  >
+                    <User size={14} className="text-white/50 shrink-0" /> Mi cuenta
+                  </button>
+                  <button
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/organizacion/usuarios') }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
+                  >
+                    <Users size={14} className="text-white/50 shrink-0" /> Usuarios y permisos
+                  </button>
+                  <button
+                    onClick={() => { setIsProfileOpen(false); navigate('/hub/inventario/config') }}
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
+                  >
+                    <Settings size={14} className="text-white/50 shrink-0" /> Configuración de la empresa
                   </button>
                   <button
                     onClick={() => window.alert('Sección Seguridad disponible próximamente.')}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-xs text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold cursor-pointer"
                   >
-                    <Shield size={15} className="text-white/40 shrink-0" /> Seguridad
-                    <span className="ml-auto text-[10px] text-white/30">Próximamente</span>
+                    <Shield size={14} className="text-white/40 shrink-0" /> Seguridad
+                    <span className="ml-auto text-[10px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded">Próximamente</span>
                   </button>
-                  <div className="h-px bg-white/10 my-1" />
+
+                  <div className="h-px bg-white/10 my-1.5" />
+
+                  {/* Selector de Tema (Regla 1-ResumenPanel.js:156-161 + HubPanelPage.jsx:2947-2960) */}
+                  <div className="flex items-center justify-between px-3 py-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-white/40">Tema</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setThemeMode('claro')}
+                        title="Claro"
+                        aria-label="Tema claro"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'claro' ? 'text-white bg-white/20' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                      >
+                        <Sun size={14} />
+                      </button>
+                      <button
+                        onClick={() => setThemeMode('contraste')}
+                        title="Claro-Oscuro (Contraste)"
+                        aria-label="Tema contraste"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'contraste' ? 'text-white bg-white/20' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                      >
+                        <Contrast size={14} />
+                      </button>
+                      <button
+                        onClick={() => setThemeMode('oscuro')}
+                        title="Oscuro"
+                        aria-label="Tema oscuro"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'oscuro' ? 'text-white bg-white/20' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
+                      >
+                        <Moon size={14} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-white/10 my-1.5" />
+
+                  {/* Botón de Cerrar Sesión */}
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold cursor-pointer"
+                    className="w-full flex items-center px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold cursor-pointer"
                   >
-                    <LogOut size={15} className="mr-3" /> Cerrar Sesión
+                    <LogOut size={14} className="mr-2.5" /> Cerrar Sesión
                   </button>
                 </div>
               </div>
