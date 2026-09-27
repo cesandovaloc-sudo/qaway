@@ -6,6 +6,8 @@ import ProductTable from '@/components/products/ProductTable'
 import ProductGrid from '@/components/products/ProductGrid'
 import ProductImport from '@/components/products/ProductImport'
 import type { Product, ProductFilters } from '@/types'
+// @ts-ignore
+import ProductosPanel from '../../../imagen-diseño/1-ResumenPanel/2-ProductosPanel'
 
 type ViewMode = 'table' | 'grid'
 
@@ -61,6 +63,23 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
+      {/* PANEL REFERENCIA DE DISEÑO STACKEADO PARA COMPARACIÓN LADO A LADO */}
+      <div className="rounded-2xl border-2 border-dashed border-brand/40 p-2 bg-white/50">
+        <div className="px-4 py-2 bg-brand/10 border-b border-brand/20 rounded-t-xl flex items-center justify-between mb-4">
+          <span className="text-xs font-bold text-brand uppercase tracking-wider">
+            [REFERENCIA DE DISEÑO - MÓDULO PRODUCTOS] 2-ProductosPanel.jsx
+          </span>
+          <span className="text-xs text-muted">Panel modelo montado para evaluación visual lado a lado</span>
+        </div>
+        <ProductosPanel />
+      </div>
+
+      <div className="border-t-2 border-zinc-200 my-8 pt-8">
+        <div className="text-xs font-semibold text-zinc-400 uppercase tracking-widest text-center mb-6">
+          ▼ PANTALLA ACTUAL DE PRODUCTOS (CÓDIGO ORIGINAL INVENTARIO) ▼
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
