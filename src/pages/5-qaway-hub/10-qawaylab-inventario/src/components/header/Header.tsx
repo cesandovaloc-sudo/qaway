@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
@@ -10,16 +10,13 @@ const roleLabels: Record<string, string> = {
   guest: 'Invitado',
 }
 
-/**
- * Etapa 1 — Uniformización con el panel principal (Hub, HubPanelPage.jsx:2574):
- * - Alto del topbar: h-[72px] (antes h-16).
- * - Cromo oscuro bg-ink con texto blanco (el Hub usa #111111 + tokens).
- * - Hamburguesa de colapso a la izquierda (antes vivía abajo del sidebar).
- * - Buscador redondo (rounded-full) con ancho responsivo 240/320/420px.
- * - Campana redonda p-2 con badge puntito marca + ring oscuro.
- * - Círculo de perfil w-8 lg:w-9 con nombre + rol a la derecha (13px/10px).
- * Las cápsulas de acción: h-10 text-sm (fila 2 del plan).
- */
+const warehousesList = [
+  { id: '1', name: 'Almacén Principal', code: 'ALM-01' },
+  { id: '2', name: 'Tienda Surco', code: 'ALM-SUR' },
+  { id: '3', name: 'Almacén Secundario', code: 'ALM-02' },
+  { id: '4', name: 'Tienda Online', code: 'ALM-ONL' },
+]
+
 export default function Header({
   collapsed,
   onToggleSidebar,
@@ -27,12 +24,32 @@ export default function Header({
   collapsed: boolean
   onToggleSidebar: () => void
 }) {
-  const { session, profile, signOut } = useAuth()
+  const { session, profile, signOut, loading } = useAuth()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [warehouse, setWarehouse] = useState('Todos los almacenes')
-  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>('contraste')
+  const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
+  const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
+  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>(() => {
+    return (localStorage.getItem('qaway.hubTheme') as 'claro' | 'contraste' | 'oscuro') || 'contraste'
+  })
 
+  // Sincronización del tema con document.documentElement y localStorage (HubPanelPage.jsx:2144-2148)
+  useEffect(() => {
+    localStorage.setItem('qaway.hubTheme', themeMode)
+    document.documentElement.style.colorScheme = themeMode === 'claro' ? 'light' : 'dark'
+    if (themeMode === 'claro') {
+      document.documentElement.classList.remove('dark')
+      document.documentElement.setAttribute('data-theme', 'light')
+    } else if (themeMode === 'oscuro') {
+      document.documentElement.classList.add('dark')
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      document.documentElement.setAttribute('data-theme', 'contraste')
+    }
+  }, [themeMode])
+
+  const identityResolved = !loading && (profile !== null || session !== null)
   const email = session?.user?.email ?? ''
   const userMetadataName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || ''
   const fullNameRaw = profile?.full_name || userMetadataName || email.split('@')[0] || 'Usuario'
@@ -41,7 +58,6 @@ export default function Header({
   const shortName = (str: string) => {
     if (!str || !str.trim()) return 'Usuario'
     let clean = str.trim()
-    // Si viene un correo (ej: s.admin@qawaylab.com), extraer la parte del usuario
     if (clean.includes('@')) {
       clean = clean.split('@')[0].replace(/[._-]/g, ' ')
     }
@@ -78,7 +94,7 @@ export default function Header({
 
   return (
     <header className="h-[72px] shrink-0 bg-ink border-b border-white/10 flex items-center justify-between px-5 lg:px-6 relative z-50">
-      {/* Lado izquierdo: hamburguesa + Apps + Marca activa */}
+      {/* Lado izquierdo: hamburguesa + Apps + Selector moderno de Almacén */}
       <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
         <button
           onClick={onToggleSidebar}
@@ -103,12 +119,57 @@ export default function Header({
           <span className="text-sm font-bold max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-300 whitespace-nowrap">Apps</span>
         </button>
 
-        <div
-          className="hidden md:flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 text-white text-sm font-bold cursor-default"
-          title="Marca activa"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="max-w-40 truncate">Qaway Lab</span>
+        {/* Selector moderno de Almacén (reutilizado de HubPanelPage.jsx:2600-2660) */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsWarehouseOpen((o) => !o)}
+            className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
+            title="Seleccionar almacén (ver como)"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="max-w-40 truncate">{selectedWarehouse ? selectedWarehouse.name : 'Todos los almacenes'}</span>
+            <ChevronDown size={14} className={`w-3.5 h-3.5 text-white/40 transition-transform duration-200 ${isWarehouseOpen ? 'rotate-180 text-white' : ''}`} />
+          </button>
+          {isWarehouseOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsWarehouseOpen(false)} aria-label="Cerrar selector" />
+              <div className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-ink-2 border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left">
+                <div className="p-4 border-b border-white/10 bg-white/5">
+                  <p className="text-xs font-extrabold text-white">Cambiar de almacén</p>
+                  <p className="text-[10px] text-white/40 mt-0.5">Filtra el inventario y operaciones por sede o almacén.</p>
+                </div>
+                <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
+                  {warehousesList.map((w) => (
+                    <button
+                      key={w.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedWarehouse(w)
+                        setIsWarehouseOpen(false)
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-brand' : 'bg-white/20'}`} />
+                      <span className="truncate">{w.name}</span>
+                      <span className="ml-auto text-[10px] font-semibold text-white/40 shrink-0">{w.code}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="p-2 border-t border-white/10 bg-white/5">
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedWarehouse(null); setIsWarehouseOpen(false); }}
+                    disabled={!selectedWarehouse}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-white/30 cursor-default'}`}
+                  >
+                    <Warehouse size={14} className="w-3.5 h-3.5" />
+                    Todos los almacenes (Vista global)
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -139,23 +200,34 @@ export default function Header({
         <div className="relative z-[100]">
           <button
             onClick={() => setIsProfileOpen((o) => !o)}
-            aria-label={displayName}
+            aria-label={identityResolved ? displayName : 'Cargando perfil'}
             className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-3 pr-1 cursor-pointer rounded-full hover:bg-white/10 transition-colors text-left border border-transparent focus:outline-none"
           >
-            {avatarUrl ? (
+            {identityResolved && avatarUrl ? (
               <img src={avatarUrl} alt={displayName} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/20 object-cover" />
-            ) : (
+            ) : identityResolved ? (
               <span className="relative inline-flex w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/15 bg-white/10 text-white/70 font-bold items-center justify-center text-xs lg:text-sm select-none">
                 {initials || <User size={16} className="text-brand" />}
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-brand ring-2 ring-ink" aria-hidden="true" />
               </span>
+            ) : (
+              <span className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-white/10 bg-white/10 animate-pulse" aria-hidden="true" />
             )}
 
             <div className="hidden lg:flex flex-col justify-center">
-              <span className="text-white text-[13px] font-bold leading-none">{displayName}</span>
-              <span className="text-[10px] text-white/40 leading-none mt-1.5">
-                {roleLabel || email}
-              </span>
+              {identityResolved ? (
+                <>
+                  <span className="text-white text-[13px] font-bold leading-none">{displayName}</span>
+                  <span className="text-[10px] text-white/40 leading-none mt-1.5">
+                    {roleLabel || email}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="h-3 w-20 rounded bg-white/10 animate-pulse" aria-hidden="true" />
+                  <span className="h-2 w-14 rounded bg-white/5 animate-pulse mt-1" aria-hidden="true" />
+                </>
+              )}
             </div>
             <ChevronDown
               size={16}
@@ -190,14 +262,17 @@ export default function Header({
                     <Warehouse size={13} className="text-brand" /> Almacén actual
                   </label>
                   <select
-                    value={warehouse}
-                    onChange={(e) => setWarehouse(e.target.value)}
+                    value={selectedWarehouse?.name || 'Todos los almacenes'}
+                    onChange={(e) => {
+                      const found = warehousesList.find(w => w.name === e.target.value)
+                      setSelectedWarehouse(found || null)
+                    }}
                     className="w-full bg-white/10 border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none focus:border-brand/50 cursor-pointer"
                   >
                     <option value="Todos los almacenes" className="bg-ink text-white">Todos los almacenes</option>
-                    <option value="Almacén Principal" className="bg-ink text-white">Almacén Principal</option>
-                    <option value="Almacén Surco" className="bg-ink text-white">Almacén Surco</option>
-                    <option value="Almacén Secundario" className="bg-ink text-white">Almacén Secundario</option>
+                    {warehousesList.map((w) => (
+                      <option key={w.id} value={w.name} className="bg-ink text-white">{w.name}</option>
+                    ))}
                   </select>
                 </div>
 
