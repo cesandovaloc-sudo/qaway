@@ -53,6 +53,28 @@ intencionales del Header/Sidebar/chips sobre color, idénticos al Hub); typechec
 tests 17/17 en verde (el aviso `scrollIntoView` de Checkout.jsx es preexistente en jsdom).
 Plan v3 regenerado con fila 24 actualizada a "corregido y verificado".
 
+## Anti-scroll de barras de filtros — fila 42 del plan (sep-26)
+
+Pedido del usuario: replicar el "anti-scroll" del panel principal — al scrollear una
+lista, la barra de filtros/búsqueda se ancla arriba y sigue usable. Referencia verificada:
+`HubPanelPage.jsx:990` (`sticky top-0 z-30 bg-white/95 backdrop-blur-md border-zinc-200
+rounded-xl`), misma receta que ya usan los paneles del CRM (ClientesView:266,
+LeadsView:163, TareasView:292, DashboardView:283).
+
+**Aplicado en 13 paneles del inventario** (los que tienen barra de búsqueda/filtros):
+ProductsPage (toolbar), SalesPage, WebOrdersPage, CustomersPage, SuppliersPage,
+PurchaseOrdersPage, AccountingPage, ExpensesPage, ReportsPage (filtros de fecha),
+QuotationsPage, PackagesPage, CatalogsPage, LiquidationPage.
+
+**Fuera de alcance (sin barra o no son listas):** Dashboard, Caja Chica, Enlaces
+compartidos, Categorías/Ubicaciones/Movimientos ("Próximamente"), Configuración, wizards
+(Nueva Venta / Nueva Compra) y storefront (GuestAccess/PublicCatalog). El topbar del
+shell NO es sticky (igual que en el Hub): al anclar en top-0, la barra de filtros es el
+único elemento fijo durante el scroll, que es el comportamiento pedido.
+
+**Verificación:** typecheck 0 errores; tests 17/17 en verde. Plan v3 regenerado con la
+fila 42 ("Anti-scroll") en Aplicado (solo inventario).
+
 ## Verificación global final
 
 - **Typecheck:** 0 errores en archivos tocados (errores restantes = preexistentes documentados: tests con mocks viejos, `qawa/*.js` sin `.d.ts`, `userService`, `commerceAdapter`).

@@ -264,8 +264,8 @@ export default function AccountingPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative">
+      {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
+      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md py-1 rounded-lg">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
         <input
           type="text"

@@ -407,8 +407,8 @@ export default function ReportsPage() {
         })}
       </div>
 
-      {/* Filtros de fecha */}
-      <div className="bg-surface border border-zinc-200 rounded-xl p-4">
+      {/* Filtros de fecha — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
+      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border border-zinc-200 rounded-xl p-4">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex items-center gap-2">
             <Calendar size={16} className="text-muted " />

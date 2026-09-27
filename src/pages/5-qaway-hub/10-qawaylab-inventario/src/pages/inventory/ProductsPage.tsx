@@ -107,8 +107,8 @@ export default function ProductsPage() {
         />
       )}
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-3">
+      {/* Toolbar — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
+      <div className="sticky top-0 z-30 flex items-center gap-3 bg-white/95 backdrop-blur-md py-2 rounded-xl">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
