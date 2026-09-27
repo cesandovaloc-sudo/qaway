@@ -1,0 +1,173 @@
+## 1. ¿Estos módulos ya están contemplados en Inventario & ERP Comercial?
+
+**Sí, algunos ya existen en la arquitectura de Qaway, pero no todos están terminados ni funcionan de manera integral.** Según la revisión técnica que compartiste, este es el estado:
+
+| Funcionalidad                       | ¿Está contemplada? | Estado identificado                                                                                              |
+| ----------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Registro de pedidos                 | Sí                 | Existen `orders` y `order_items` para la tienda.                                                                 |
+| Gestión de pedidos                  | Sí                 | Existe infraestructura comercial, pero falta verificar el flujo completo de principio a fin.                     |
+| Validación del pago                 | Sí, parcialmente   | Existe `payments` y se contempla el pago manual con voucher. La integración completa debe validarse.             |
+| Configuración de entrega o recojo   | No confirmada      | No tenemos evidencia suficiente de un módulo completo para configurar modalidades de entrega y recojo.           |
+| Panel de administración del cliente | Sí, parcialmente   | Existe el panel del módulo, pero todavía hay que definir y validar qué funciones se habilitan para cada cliente. |
+
+### ¿Qué significa esto para tu producto?
+
+La tienda no debe limitarse a mostrar productos y recibir pedidos.
+
+El cliente debe poder administrar su negocio desde su propio panel:
+
+* Registrar y editar productos.
+* Consultar los pedidos recibidos.
+* Cambiar el estado de los pedidos.
+* Revisar los pagos y comprobantes.
+* Gestionar la preparación de pedidos.
+* Configurar las modalidades de entrega o recojo.
+
+**La diferencia es que ya tienes parte de la infraestructura, pero todavía no podemos afirmar que todo el proceso comercial esté terminado.**
+
+Además, la versión independiente y la versión SaaS pueden compartir funcionalidades, aunque la forma de desplegarlas y administrarlas sea diferente.
+
+---
+
+# 2. Lista ampliada de nichos para San Martín de Porres
+
+Incorporo gimnasios y colegios, pero diferenciando los negocios que pueden utilizar una tienda online de aquellos que necesitan un sistema de gestión especializado.
+
+## A. Comercios con productos físicos
+
+| N.º | Nicho                                 | Solución que puedes ofrecer                         |
+| --- | ------------------------------------- | --------------------------------------------------- |
+| 1   | Tiendas de productos para mascotas    | Catálogo, carrito, pedidos y control de inventario. |
+| 2   | Tiendas de regalos y novedades        | Tienda online y administración de productos.        |
+| 3   | Tiendas de café y productos gourmet   | Catálogo, pedidos y control de stock.               |
+| 4   | Tiendas de ropa y accesorios          | Catálogo con variantes de productos y carrito.      |
+| 5   | Tiendas de cosméticos                 | Catálogo, precios y gestión de pedidos.             |
+| 6   | Tiendas de artículos para el hogar    | Tienda online y control de existencias.             |
+| 7   | Distribuidoras de alimentos y bebidas | Catálogo comercial y pedidos de clientes.           |
+| 8   | Tiendas de artículos deportivos       | Catálogo de productos y pedidos.                    |
+| 9   | Panaderías y pastelerías              | Catálogo, pedidos y opciones de recojo o entrega.   |
+| 10  | Tiendas de tecnología y accesorios    | Catálogo, precios y gestión de pedidos.             |
+
+Estos negocios pueden encajar en tu propuesta de **Tienda Online Administrable o SaaS Básico**, dependiendo de las funcionalidades que tengan disponibles.
+
+---
+
+## B. Gimnasios y centros deportivos
+
+Los gimnasios representan un nicho diferente porque pueden necesitar tanto la venta de productos como la administración de sus servicios.
+
+| N.º | Nicho                                   | Sistema que podrías ofrecer                             |
+| --- | --------------------------------------- | ------------------------------------------------------- |
+| 11  | Gimnasios                               | Gestión de socios, membresías, pagos y vencimientos.    |
+| 12  | Centros de entrenamiento funcional      | Gestión de clientes, planes y horarios de clases.       |
+| 13  | Estudios de entrenamiento personalizado | Gestión de clientes, sesiones y agenda de entrenadores. |
+| 14  | Academias deportivas                    | Inscripciones, alumnos, horarios y pagos.               |
+
+### ¿Qué necesitaría un sistema para gimnasios?
+
+Un sistema especializado podría incluir:
+
+* Registro de socios.
+* Membresías y planes.
+* Fechas de inicio y vencimiento.
+* Registro de pagos.
+* Control de asistencia.
+* Horarios de clases.
+* Gestión de entrenadores.
+* Reportes de socios activos, vencidos y nuevos.
+
+**Esto no está confirmado como parte del Inventario & ERP Comercial actual.** Podría desarrollarse como un módulo especializado que reutilice componentes de clientes, pagos y reportes.
+
+---
+
+## C. Colegios y centros educativos
+
+Aquí la propuesta cambia: no sería simplemente una tienda online, sino un **sistema de gestión escolar**.
+
+| N.º | Nicho                                | Sistema que podrías ofrecer                          |
+| --- | ------------------------------------ | ---------------------------------------------------- |
+| 15  | Colegios privados                    | Sistema de gestión escolar y administrativa.         |
+| 16  | Nidos y centros de educación inicial | Gestión de alumnos, matrículas y pagos.              |
+| 17  | Academias preuniversitarias          | Inscripciones, alumnos, cursos y pagos.              |
+| 18  | Centros de capacitación              | Gestión de estudiantes, cursos, matrículas y cobros. |
+
+### ¿Qué debería incluir un sistema para colegios?
+
+Un sistema escolar puede contemplar:
+
+**Gestión académica**
+
+* Registro de alumnos.
+* Matrículas.
+* Aulas, grados y secciones.
+* Asignación de docentes.
+* Asistencia.
+* Calificaciones.
+* Boletines de notas.
+
+**Gestión administrativa**
+
+* Pensiones y conceptos de pago.
+* Registro de pagos y deudas.
+* Datos de padres y apoderados.
+* Reportes administrativos.
+* Comunicaciones con las familias.
+
+**Portal para padres y alumnos**
+
+* Consulta de calificaciones.
+* Consulta de asistencia.
+* Estado de pagos.
+* Comunicados y actividades.
+
+Estas funciones **no forman parte del alcance confirmado de Inventario & ERP Comercial**. Para ofrecer un sistema escolar completo, necesitarías desarrollar o integrar un producto educativo específico.
+
+---
+
+# 3. Cómo organizaría tu portafolio de soluciones
+
+En lugar de intentar que una sola aplicación resuelva todas las necesidades, organizaría el portafolio de Qaway Lab en tres líneas:
+
+### 1. Comercio Digital
+
+Para tiendas y distribuidores.
+
+* Web comercial.
+* Tienda online.
+* Carrito y pedidos.
+* Panel de administración.
+* Inventario y gestión comercial.
+
+### 2. Gestión de Servicios
+
+Para gimnasios, centros deportivos, veterinarias y otros negocios de servicios.
+
+* Gestión de clientes.
+* Membresías o planes, cuando corresponda.
+* Pagos.
+* Agenda y reservas, según el negocio.
+
+### 3. Gestión Educativa
+
+Para colegios, nidos y academias.
+
+* Matrículas.
+* Gestión de alumnos.
+* Gestión académica.
+* Pagos y administración.
+* Portal para padres y estudiantes.
+
+---
+
+## 4. ¿Qué puedes ofrecer primero?
+
+| Solución                                             | Situación                                                       |
+| ---------------------------------------------------- | --------------------------------------------------------------- |
+| Tienda online administrable                          | Es la línea más directamente relacionada con tu módulo actual.  |
+| SaaS Básico para comercios                           | Depende de completar y validar los flujos comerciales del plan. |
+| Sistema para gimnasios                               | Requiere definir y desarrollar funciones especializadas.        |
+| Sistema para colegios                                | Requiere un producto educativo específico.                      |
+| Sistema de citas para veterinarias y otros servicios | Depende de terminar y validar Calendario.                       |
+| Sistema de reservas hoteleras                        | Requiere resolver disponibilidad de habitaciones y reservas.    |
+
+**Conclusión:** el Inventario & ERP Comercial puede servir como base para tu oferta de comercio digital. Los gimnasios y colegios deben considerarse líneas de producto distintas, aunque puedan reutilizar parte de la infraestructura de Qaway.

@@ -1,0 +1,1461 @@
+[
+  {
+    "coverage_id": "index.html%23fonts.googleapis.com%20stylesheet%20link::index.html%23no%20content%20security%20policy::build-config::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "index.html#fonts.googleapis.com stylesheet link",
+      "boundary": "index.html#no content security policy",
+      "subsystem": "build-config",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "index.html#fonts.googleapis.com stylesheet link",
+    "boundary": "index.html#no content security policy",
+    "subsystem": "build-config",
+    "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "starting_paths": [
+      "index.html",
+      "src/config/supabase.ts",
+      "package.json"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#DOM-based XSS",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization",
+      "CLIENT-SIDE.md#Clickjacking",
+      "CLOUD-AND-DEPLOYMENT.md#Core discipline",
+      "CLOUD-AND-DEPLOYMENT.md#Universal moves",
+      "CLOUD-AND-DEPLOYMENT.md#Validation rules",
+      "CLOUD-AND-DEPLOYMENT.md#Secret exposure across workload boundaries",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Mutable and unbound build inputs",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Dependency source and namespace confusion"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "SUPPLY-CHAIN-AND-RELEASE.md#Self-update and unsigned delivery",
+        "reason": "there is no updater, auto-update channel, or signed artefact in the target"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "index.html",
+      "src/config/supabase.ts",
+      "package.json",
+      ".env.example",
+      ".gitignore",
+      "src/agenda/pages/AdminPanelPage.tsx"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "index.html",
+          "src/config/supabase.ts",
+          "package.json",
+          ".env.example",
+          ".gitignore",
+          "src/agenda/pages/AdminPanelPage.tsx"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "index.html:3+no-framing-restriction-in-repo",
+      "index.html:3+no-content-security-policy"
+    ],
+    "unresolved": [
+      "Third-party CSS inclusion is recorded as an invariant, not a finding: CSS provably cannot reach the localStorage session, and the realistic worst case is UI restyling plus the Google origin observing visitor IPs. Self-hosting the Inter woff2 files would remove even that and is the only change that reduces the origin count to zero.",
+      "SRI is inapplicable to this endpoint because the Google Fonts css2 response varies by User-Agent, so the missing integrity attribute is not reported as a defect, only as a reason the third-party origin is a single point of failure."
+    ]
+  },
+  {
+    "coverage_id": "out-of-target%20central%20supabase%20migration%20chain%23tenant_id%20backfill%20and%20is_admin%20function::out-of-target%20central%20RLS%20policies%20that%20accept%20tenant_id%20is%20null::out-of-scope%20central%20migration%20chain::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "out-of-target central supabase migration chain#tenant_id backfill and is_admin function",
+      "boundary": "out-of-target central RLS policies that accept tenant_id is null",
+      "subsystem": "out-of-scope central migration chain",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "out-of-target central supabase migration chain#tenant_id backfill and is_admin function",
+    "boundary": "out-of-target central RLS policies that accept tenant_id is null",
+    "subsystem": "out-of-scope central migration chain",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "README.md"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision",
+        "reason": "the collision surface is defined by central migrations this scoped run may not audit"
+      },
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+        "reason": "the app_metadata tenant_id contract is defined outside the audited folder"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "out_of_scope",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The target README documents a central migration chain owned by the parent project that adds tenant_id and is_admin(); whether the audited folder's tables are actually bound to it at deploy time cannot be established from inside the audited folder."
+    ]
+  },
+  {
+    "coverage_id": "out-of-target%20hub%20shell%20AppRouter%23agenda%20lazy%20route%20without%20a%20protected%20wrapper::out-of-target%20hub%20Supabase%20client%20that%20does%20not%20apply%20the%20qaway_agenda_auth_token%20storageKey::out-of-scope%20hub%20shell::ATTACK-CLASSES.md%23Chained%20vulnerabilities%20and%20trust%20boundaries",
+    "canonical_refs": {
+      "surface": "out-of-target hub shell AppRouter#agenda lazy route without a protected wrapper",
+      "boundary": "out-of-target hub Supabase client that does not apply the qaway_agenda_auth_token storageKey",
+      "subsystem": "out-of-scope hub shell",
+      "attack_class": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries"
+    },
+    "surface": "out-of-target hub shell AppRouter#agenda lazy route without a protected wrapper",
+    "boundary": "out-of-target hub Supabase client that does not apply the qaway_agenda_auth_token storageKey",
+    "subsystem": "out-of-scope hub shell",
+    "attack_class": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "starting_paths": [
+      "AgendaAppPage.jsx",
+      "src/config/supabase.ts",
+      "AGENTS.md"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "CLIENT-SIDE.md#Cross-context storage and broadcast confusion",
+        "reason": "the conflicting client instance is owned by the hub shell, not this folder"
+      },
+      {
+        "block": "CLIENT-SIDE.md#Client-side navigation confusion",
+        "reason": "hub-level route protection is outside the audited folder"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "out_of_scope",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The production entry point is the parent hub router, whose ProtectedRoute and Supabase client configuration are outside the audited folder; the in-folder standalone router is unreachable, so entry-point trust cannot be settled from this folder alone."
+    ]
+  },
+  {
+    "coverage_id": "out-of-target%20supabase%2Ffunctions%2Fagenda-send-notifications%2Findex.ts%23POST%20handler::out-of-target%20supabase%20function%20config%20with%20verify_jwt%20false%20and%20a%20service%20role%20key::out-of-scope%20external%20edge%20function::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "out-of-target supabase/functions/agenda-send-notifications/index.ts#POST handler",
+      "boundary": "out-of-target supabase function config with verify_jwt false and a service role key",
+      "subsystem": "out-of-scope external edge function",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "out-of-target supabase/functions/agenda-send-notifications/index.ts#POST handler",
+    "boundary": "out-of-target supabase function config with verify_jwt false and a service role key",
+    "subsystem": "out-of-scope external edge function",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "supabase/config.toml",
+      "README.md",
+      "supabase/README.md"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Workload identity overreach",
+        "reason": "the surface itself sits outside the audited folder, so no companion class can be reviewed"
+      },
+      {
+        "block": "PROTOCOLS-RPC-AND-MESSAGING.md#Broker, queue, and event-bus trust",
+        "reason": "the notification broker surface is the same out-of-target function"
+      },
+      {
+        "block": "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+        "reason": "the function body is outside the audited folder"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "out_of_scope",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The documented notification function lives in a separate Supabase functions directory outside the audited folder; this scoped run cannot read or validate its authorization, service-role use, or webhook signature handling."
+    ]
+  },
+  {
+    "coverage_id": "package.json%23dependencies%20and%20devDependencies%20ranges::vite.config.js%23build%20input%20resolution::build-config::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": "package.json#dependencies and devDependencies ranges",
+      "boundary": "vite.config.js#build input resolution",
+      "subsystem": "build-config",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": "package.json#dependencies and devDependencies ranges",
+    "boundary": "vite.config.js#build input resolution",
+    "subsystem": "build-config",
+    "attack_class": "ATTACK-CLASSES.md#Obvious things",
+    "starting_paths": [
+      "package.json",
+      "vite.config.js",
+      "tsconfig.json"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [
+      "SUPPLY-CHAIN-AND-RELEASE.md#Core discipline",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Universal moves",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Validation rules",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Mutable and unbound build inputs",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Dependency source and namespace confusion",
+      "SUPPLY-CHAIN-AND-RELEASE.md#Build-context inclusion"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Cryptography and secrets",
+        "reason": "no secret material is committed; the anon key is a build-time environment input"
+      },
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Build and deploy-time secret injection",
+        "reason": "the hosting pipeline is out of target and belongs to the deployment out-of-scope unit"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "package.json",
+      "vite.config.js",
+      "tsconfig.json",
+      "package-lock.json"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "package.json",
+          "vite.config.js",
+          "tsconfig.json",
+          "package-lock.json"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "package.json:13+caret-floating-ranges-install-command-undefined",
+      "package.json:21+typescript-and-recharts-in-production-dependencies"
+    ],
+    "unresolved": [
+      "tsconfig.json sets include to src and never enables allowJs, so tsc --noEmit does not typecheck AgendaAppPage.jsx, the module holding the live route table. Reported as a build-input fact here; the route-table analysis is in the duplicate-router unit.",
+      "Whether the built artifact's source maps leak source is not decidable: vite.config.js sets no build.sourcemap so Vite's production default of false applies, but a dev or preview deployment would differ."
+    ]
+  },
+  {
+    "coverage_id": "src%2FApp.tsx%23nested%20route%20table::AgendaAppPage.jsx%23route%20table%20mounted%20by%20hub::src%2Fagenda%2Fpages::ATTACK-CLASSES.md%23Chained%20vulnerabilities%20and%20trust%20boundaries",
+    "canonical_refs": {
+      "surface": "src/App.tsx#nested route table",
+      "boundary": "AgendaAppPage.jsx#route table mounted by hub",
+      "subsystem": "src/agenda/pages",
+      "attack_class": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries"
+    },
+    "surface": "src/App.tsx#nested route table",
+    "boundary": "AgendaAppPage.jsx#route table mounted by hub",
+    "subsystem": "src/agenda/pages",
+    "attack_class": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "starting_paths": [
+      "src/App.tsx",
+      "AgendaAppPage.jsx",
+      "src/main.tsx",
+      "index.html"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#Client-side navigation confusion",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLIENT-SIDE.md#DOM-based XSS",
+        "reason": "routing drift carries no markup interpretation surface of its own"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "src/App.tsx",
+      "AgendaAppPage.jsx",
+      "src/main.tsx",
+      "index.html",
+      "tsconfig.json"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "src/App.tsx",
+          "AgendaAppPage.jsx",
+          "src/main.tsx",
+          "index.html",
+          "tsconfig.json"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 1. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "tsconfig.json:31+AgendaAppPage.jsx-outside-the-typecheck-gate"
+    ],
+    "unresolved": [
+      "The full consequence of the dead standalone entry is not decidable from source: index.html is Vite's implicit build entry and its only module reference is unresolvable. Whether vite build hard-fails, warns, or emits a bundle with no application code cannot be determined without executing the build, which is prohibited. Stated as a source fact only: the path referenced at index.html:14 does not exist.",
+      "Because the standalone entry is dead, the third-party stylesheet is only fetched if this folder is served standalone. In the live hub mount index.html is not used at all, so the remote-CSS and missing-CSP conditions may not apply to the live route. Which shape is deployed is a hosting fact, flagged there as well."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23booked_slots%20select::supabase%2Fmigrations%2F0001_agenda_schema.sql%23booked_slots%20view::supabase%2Fmigrations::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#booked_slots select",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#booked_slots view",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#booked_slots select",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#booked_slots view",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Search, cache, and index ACL drift",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Workload identity overreach",
+        "reason": "view ownership and default privileges are a policy question, not a workload-identity one"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-read",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/context/AgendaContext.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-read",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/context/AgendaContext.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "0001_agenda_schema.sql:115+definer-view-bypasses-bookings-rls",
+      "0001_agenda_schema.sql:112+realtime-publication-pii-broadcast"
+    ],
+    "unresolved": [
+      "Whether any later out-of-folder migration recreates public.booked_slots with security_invoker = true or adds a tenant predicate. Only 0001 and 0002 exist here and both were read end to end, so within this folder the definer semantics stand.",
+      "The view owner role matters for blast radius; that role is whatever ran the migration and is not determinable from source."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23deleteEventType%20and%20schedule%20writes::supabase%2Fmigrations%2F0001_agenda_schema.sql%23owner_event_types%20using%20business_id::src%2Fagenda%2Fadapters::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#deleteEventType and schedule writes",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_event_types using business_id",
+      "subsystem": "src/agenda/adapters",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#deleteEventType and schedule writes",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_event_types using business_id",
+    "subsystem": "src/agenda/adapters",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Soft-delete and tombstone bypass",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Injection",
+        "reason": "updates pass bound parameters through the PostgREST client"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-authz-session",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "agendaAdapter.ts:199+0001_agenda_schema.sql:54+delete-cascades-bookings-and-pii",
+      "AdminPanelPage.tsx:948+unconditional-success-toast",
+      "AgendaContext.tsx:245+0001_agenda_schema.sql:33+no-unique-business-day"
+    ],
+    "unresolved": [
+      "0001 enables RLS on all six tables and issues no table-level GRANT/REVOKE, relying on Supabase default privileges; whether the live project carries an extra grant is a dashboard fact outside the folder.",
+      "on delete cascade also runs from businesses itself, so a DELETE FROM businesses authorised by 0001:91 for all would permanently destroy every child row including all customer PII. No soft-delete or retention control exists in either migration, and no in-app path reaches it.",
+      "Whether the destructive panel actions can be completed inside a frame depends entirely on deployed response headers, which nothing in this folder can set."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23loadPublicData%20selects::supabase%2Fmigrations%2F0001_agenda_schema.sql%23anon_read_business%20using%20true::supabase%2Fmigrations::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#loadPublicData selects",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#anon_read_business using true",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#loadPublicData selects",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#anon_read_business using true",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/PublicBookingPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Enumeration and aggregate oracles",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Analytics, logs, traces, and diagnostics as alternate readers",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Search, cache, and index ACL drift"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Cookie scope and transport",
+        "reason": "reads use the anon API key header, not cookies"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-read",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/types.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-read",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/PublicBookingPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/types.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "0001_agenda_schema.sql:97+platform-wide-anon-read-no-tenant-predicate",
+      "agendaAdapter.ts:89+0001_agenda_schema.sql:10+owner_id-in-public-projection",
+      "0001_agenda_schema.sql:6+no-publication-lifecycle-column"
+    ],
+    "unresolved": [
+      "Whether any tenant-binding claim exists on the live project, for example a PostgREST db-pre-request GUC or a per-tenant JWT. supabase/config.toml declares only project_id and states it is a reference, so no such mechanism is source-visible. If one exists, these candidates change shape.",
+      "The out-of-scope notification edge function and the parent hub may add further readers of these same tables, outside this folder's boundary.",
+      "0001 adds public.bookings to the supabase_realtime publication. The app never subscribes; the reachable consequences are assessed in the booked-slots-view unit."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23reminders%20insert%20on%20booking::supabase%2Fmigrations%2F0001_agenda_schema.sql%23reminders%20rls%20enabled%20no%20policy::supabase%2Fmigrations::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#reminders insert on booking",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#reminders rls enabled no policy",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#reminders insert on booking",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#reminders rls enabled no policy",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Retention and queued-work overrun",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Soft-delete and tombstone bypass",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality",
+        "reason": "reminder fan-out is one row per booking channel, bounded by the insert the caller already made"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-write",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/context/AgendaContext.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-write",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/context/AgendaContext.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 1. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "agendaAdapter.ts:177+0001_agenda_schema.sql:89+reminders-fail-closed-and-silent"
+    ],
+    "unresolved": [
+      "Whether the out-of-scope edge function agenda-send-notifications populates or only dispatches the reminders table. It lives in the monorepo root supabase/functions/ and cannot be read from this target. Check: select status, count(*) from public.reminders group by 1; any rows mean another writer populates the table.",
+      "Whether anon and authenticated hold table-level INSERT on public.reminders, since neither migration issues a GRANT. This changes the observed error code, not the outcome."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23rpc%20secure_manage_booking%20calls::supabase%2Fmigrations%2F0001_agenda_schema.sql%23secure_manage_booking%20security%20definer::supabase%2Fmigrations::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#rpc secure_manage_booking calls",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#secure_manage_booking security definer",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#rpc secure_manage_booking calls",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#secure_manage_booking security definer",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/ManageBookingPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Blob and signed-reference overreach",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key scope and resource binding",
+      "WEB-PROTOCOL-AND-AUTH.md#Session fixation and invalidation"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality",
+        "reason": "the RPC takes four scalar arguments with no collection input"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-write",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/ManageBookingPage.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-write",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/ManageBookingPage.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "0001_agenda_schema.sql:144+unvalidated-reschedule-interval",
+      "0001_agenda_schema.sql:122+returns-public.bookings-pii-oracle",
+      "0001_agenda_schema.sql:130+non-deterministic-token-lookup"
+    ],
+    "unresolved": [
+      "The role that owns public.secure_manage_booking relative to the owner of public.bookings determines whether the SELECT at 0001:130 bypasses RLS. No FORCE ROW LEVEL SECURITY exists in either migration and the creating role is a migration-runner fact not in source. Check: select pg_get_userbyid(proowner), prosecdef from pg_proc where proname='secure_manage_booking'.",
+      "The deployed project may contain later policies, grants or a replaced function body that these two migrations do not reflect; 0002 drops and recreates the anon policy, so source-to-live drift is plausible and undetectable from source."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23signUp%20auto%20create%20business::supabase%2Fmigrations%2F0001_agenda_schema.sql%23owner_business%20insert%20with%20check%20owner_id%20eq%20auth%20uid::src%2Fagenda%2Fadapters::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#signUp auto create business",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business insert with check owner_id eq auth uid",
+      "subsystem": "src/agenda/adapters",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#signUp auto create business",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business insert with check owner_id eq auth uid",
+    "subsystem": "src/agenda/adapters",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/pages/AdminPanelPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Account linking and identity collision",
+      "WEB-PROTOCOL-AND-AUTH.md#Password reset and broader recovery",
+      "WEB-PROTOCOL-AND-AUTH.md#OAuth/OIDC request and callback binding"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Private key or shared secret reuse",
+        "reason": "the anon publishable key is the only credential in the target source"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-authz-session",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "agendaAdapter.ts:63+0001_agenda_schema.sql:9+email-derived-slug-squat",
+      "agendaAdapter.ts:41+no-captcha-no-quota-no-invite-gate"
+    ],
+    "unresolved": [
+      "Password recovery cannot be completed through this app: AdminPanelPage.tsx:80 redirects to origin + /update-password, a path absent from both route tables, and no supabase.auth.updateUser call exists anywhere in the folder, so the recovery session is never converted into a new password and no prior session or refresh token is revoked. Whether the hub implements that path is out of target.",
+      "Whether the live project has both migrations applied and no later migration adds a slug-conflict handler, a signup trigger, or a reservation table is a migration-history fact outside the folder."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fcontext%2FAgendaContext.tsx%23createBooking%20row%20build::supabase%2Fmigrations%2F0002_booking_free_only.sql%23anon_insert_booking%20with%20check::supabase%2Fmigrations::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/agenda/context/AgendaContext.tsx#createBooking row build",
+      "boundary": "supabase/migrations/0002_booking_free_only.sql#anon_insert_booking with check",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/context/AgendaContext.tsx#createBooking row build",
+    "boundary": "supabase/migrations/0002_booking_free_only.sql#anon_insert_booking with check",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/context/AgendaContext.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Blob and signed-reference overreach",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "WEB-PROTOCOL-AND-AUTH.md#Ordinary CSRF",
+        "reason": "anon insert target is a stateless JSON API, not a cookie-authenticated state-changing form"
+      },
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Reachable fatal error or deadlock",
+        "reason": "EXCLUDE constraint deadlock behaviour belongs to the write-contention unit, not policy authorization"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-write",
+    "reviewed_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/config/supabase.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-write",
+        "reviewed_paths": [
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql",
+          "src/config/supabase.ts"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "AgendaContext.tsx:173+0002_booking_free_only.sql:14+business_id-unbound",
+      "AgendaContext.tsx:178+0001_agenda_schema.sql:66+unbounded-slot-range",
+      "agendaAdapter.ts:172+0001_agenda_schema.sql:108+insert-returning-denied"
+    ],
+    "unresolved": [
+      "Whether the deployed project hosts more than one business. Both the cross-tenant write and the calendar-denial primitive are source-certain; their blast radius is not. Check: select business_id, count(*) from public.bookings group by 1 on the production project.",
+      "Supabase default table privileges: neither migration issues any GRANT on the inserted tables, so anon INSERT reaching the policy at 0002:8 rather than failing first with 42501 depends on Supabase alter default privileges, a platform fact not in source.",
+      "No rate limit, CAPTCHA or turnstile exists anywhere in the target, so write frequency is bounded only by PostgREST and any platform-level limit. No control line exists inside the target folder to point at."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fcontext%2FAgendaContext.tsx%23error%20message%20returned%20to%20component%20state::src%2Fagenda%2Fpages%2FPublicBookingPage.tsx%23setError%20rendered%20banner::src%2Fagenda%2Fcontext::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": "src/agenda/context/AgendaContext.tsx#error message returned to component state",
+      "boundary": "src/agenda/pages/PublicBookingPage.tsx#setError rendered banner",
+      "subsystem": "src/agenda/context",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": "src/agenda/context/AgendaContext.tsx#error message returned to component state",
+    "boundary": "src/agenda/pages/PublicBookingPage.tsx#setError rendered banner",
+    "subsystem": "src/agenda/context",
+    "attack_class": "ATTACK-CLASSES.md#Obvious things",
+    "starting_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/pages/AdminPanelPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Enumeration and aggregate oracles",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Injection",
+        "reason": "errors are rendered as React children, which escape by construction; the disclosure class is the live one"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/pages/PublicBookingPage.tsx",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/adapters/agendaAdapter.ts"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "AgendaContext.tsx:203+PublicBookingPage.tsx:466+raw-postgrest-error-passthrough",
+      "AdminPanelPage.tsx:41+signup-error-enumeration-oracle"
+    ],
+    "unresolved": [
+      "supabase.ts logs only a hardcoded message, but when the app is misconfigured the client silently targets https://placeholder.supabase.co with the literal placeholder key, so every query fails and the public page falls through to the hardcoded demo business. An unconfigured production deploy shows plausible-looking demo availability rather than an error, which would mask a real outage."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fcontext%2FAgendaContext.tsx%23generateSlots%20duration_minutes%20input::supabase%2Fmigrations%2F0001_agenda_schema.sql%23bookings%20slot_range%20exclude%20constraint::src%2Fagenda%2Fcontext::ATTACK-CLASSES.md%23Business%20logic",
+    "canonical_refs": {
+      "surface": "src/agenda/context/AgendaContext.tsx#generateSlots duration_minutes input",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#bookings slot_range exclude constraint",
+      "subsystem": "src/agenda/context",
+      "attack_class": "ATTACK-CLASSES.md#Business logic"
+    },
+    "surface": "src/agenda/context/AgendaContext.tsx#generateSlots duration_minutes input",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#bookings slot_range exclude constraint",
+    "subsystem": "src/agenda/context",
+    "attack_class": "ATTACK-CLASSES.md#Business logic",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/PublicBookingPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Business logic",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Core discipline",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Universal moves",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Validation rules",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Pre-authentication work imbalance",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Reachable fatal error or deadlock"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Rate-limit and quota drift",
+        "reason": "no rate limiter exists in the target; that absence is recorded in the deployment-out-of-scope unit"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-read",
+    "reviewed_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-read",
+        "reviewed_paths": [
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/pages/PublicBookingPage.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "0002_booking_free_only.sql:13+no-server-side-slot-validity-check",
+      "0001_agenda_schema.sql:66+no-insert-volume-cap",
+      "0001_agenda_schema.sql:122+rpc-returns-pii-to-anon"
+    ],
+    "unresolved": [
+      "Whether the out-of-scope edge function reacts to booking INSERTs. 0001 puts bookings in the realtime publication and the reminders table is never populated on the anon path. If the function fires per inserted booking, the unbounded-insert candidate gains a downstream amplifier that cannot be assessed from this folder.",
+      "Whether the deployed Postgres major is 15+. The migration text is unambiguous; on 14 and earlier the same definer behaviour applies, so the conclusion holds either way.",
+      "How a real customer ever obtains a working cancel_token is unresolved: the client value at AgendaContext.tsx:183 is a non-uuid literal, so on a live project the insert either fails with 22P02 or commits with an undisclosed server-generated token. That decides whether the ManageBookingPage defect is total or intermittent."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fcontext%2FAgendaContext.tsx%23loginAsDemo%20fabricated%20Session::src%2Fagenda%2Fpages%2FAdminPanelPage.tsx%23session%20read%20from%20AgendaContext::src%2Fagenda%2Fcontext::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/agenda/context/AgendaContext.tsx#loginAsDemo fabricated Session",
+      "boundary": "src/agenda/pages/AdminPanelPage.tsx#session read from AgendaContext",
+      "subsystem": "src/agenda/context",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/context/AgendaContext.tsx#loginAsDemo fabricated Session",
+    "boundary": "src/agenda/pages/AdminPanelPage.tsx#session read from AgendaContext",
+    "subsystem": "src/agenda/context",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Cryptography and secrets",
+        "reason": "no secret is forged; the session object is a plain client-side object"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunt-authz-session",
+    "reviewed_paths": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Cleared. No candidate survived. All attacker-controlled values on this unit were traced to their sinks and each named control was verified to hold at its source line.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [
+      "The demo button permanently overwrites the panel state of an already signed-in owner, and nothing restores the real data until the next loadBusinessData triggered by a genuine auth change. Today this is display-only; it becomes consequential the moment any booking-status action is added to the panel, which is future code, not a present path.",
+      "signOut does not clear the fabricated demo arrays: it nulls session and business but leaves the demo eventTypes/schedules/bookings in state. They stay unrendered behind the !session gate, so there is no present disclosure, but the clear is asymmetric with the rest of the sign-out path."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fpages%2FAdminPanelPage.tsx%23if%20not%20session%20LoginView::supabase%2Fmigrations%2F0001_agenda_schema.sql%23owner_business%20using%20owner_id%20eq%20auth%20uid::src%2Fagenda%2Fpages::ATTACK-CLASSES.md%23Access%20control",
+    "canonical_refs": {
+      "surface": "src/agenda/pages/AdminPanelPage.tsx#if not session LoginView",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business using owner_id eq auth uid",
+      "subsystem": "src/agenda/pages",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/pages/AdminPanelPage.tsx#if not session LoginView",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business using owner_id eq auth uid",
+    "subsystem": "src/agenda/pages",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Stale authorization and derived copy use",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Session fixation and invalidation",
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLIENT-SIDE.md#DOM-based XSS",
+        "reason": "panel rendering is covered by the PII and calendar sink units"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunt-authz-session",
+    "reviewed_paths": [
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/config/supabase.ts",
+      "index.html",
+      "AgendaAppPage.jsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "src/config/supabase.ts",
+          "index.html",
+          "AgendaAppPage.jsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Cleared. No candidate survived. All attacker-controlled values on this unit were traced to their sinks and each named control was verified to hold at its source line.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": [
+      "Customer PII survives sign-out in provider state: AgendaContext.tsx:355-359 clears session and business but not bookings/eventTypes/schedules/exceptions. No consumer renders them without the !session gate, so there is no source-visible disclosure path today; recorded because the missing clear is exactly those lines.",
+      "loadBusinessData is fired by an unawaited effect with no cancellation or generation guard, so a slow response for principal A can resolve after principal B signs in and overwrite B's panel data. A stale in-browser view, not a boundary crossing; reachability in a shared browser is a deployment question outside the folder.",
+      "Whether the parent hub wraps the panel route in its own protected route, and therefore whether the agenda panel is reachable pre-login by design, cannot be settled from this folder."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fpages%2FManageBookingPage.tsx%23cancel_token%20from%20route%20param::supabase%2Fmigrations%2F0001_agenda_schema.sql%23cancel_token%20uuid%20default%20gen_random_uuid::supabase%2Fmigrations::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "src/agenda/pages/ManageBookingPage.tsx#cancel_token from route param",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#cancel_token uuid default gen_random_uuid",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "src/agenda/pages/ManageBookingPage.tsx#cancel_token from route param",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#cancel_token uuid default gen_random_uuid",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "starting_paths": [
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/ManageBookingPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Blob and signed-reference overreach",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Enumeration and aggregate oracles",
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key scope and resource binding"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Injection",
+        "reason": "the token is compared by uuid equality inside SQL, not concatenated into a statement"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-anon-write",
+    "reviewed_paths": [
+      "src/agenda/pages/ManageBookingPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-anon-write",
+        "reviewed_paths": [
+          "src/agenda/pages/ManageBookingPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "AgendaContext.tsx:183+0001_agenda_schema.sql:63+math-random-overrides-gen-random-uuid",
+      "0001_agenda_schema.sql:130+no-expiry-no-rotation-no-single-use"
+    ],
+    "unresolved": [
+      "Whether the deployed site serves a robots.txt, an X-Robots-Tag or a noindex that keeps /gestionar/:token out of search indexes. index.html sets neither and the manage page is a fully rendered SPA route. Deployment headers are not source-visible.",
+      "Whether production cancel_token values were minted by this client code or by a writer that lets the 0001:63 default apply. If minted elsewhere the entropy is 122 bits, which changes likelihood but not the defect. Check: select left(cancel_token::text, 11), count(*) from public.bookings group by 1.",
+      "How many bookings per tenant carry a client-minted token, and whether the non-populated reminders queue means customers received no emailed token at all, which would leave the on-screen link as the only copy and raise disclosure likelihood."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Fpages%2FPublicBookingPage.tsx%23customer%20name%20email%20phone%20inputs::src%2Fagenda%2Fadapters%2FagendaAdapter.ts%23bookings%20insert%20customer%20columns::src%2Fagenda%2Fpages::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "src/agenda/pages/PublicBookingPage.tsx#customer name email phone inputs",
+      "boundary": "src/agenda/adapters/agendaAdapter.ts#bookings insert customer columns",
+      "subsystem": "src/agenda/pages",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "src/agenda/pages/PublicBookingPage.tsx#customer name email phone inputs",
+    "boundary": "src/agenda/adapters/agendaAdapter.ts#bookings insert customer columns",
+    "subsystem": "src/agenda/pages",
+    "attack_class": "ATTACK-CLASSES.md#Injection",
+    "starting_paths": [
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Analytics, logs, traces, and diagnostics as alternate readers",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Retention and queued-work overrun",
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#DOM-based XSS"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification",
+        "reason": "query shape is fixed; the amplification surface is the row-count surface already covered"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "src/agenda/pages/PublicBookingPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 3. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "0002_booking_free_only.sql:14+cross-tenant-booking-injection",
+      "AgendaContext.tsx:44+client-only-slot-policy",
+      "AgendaContext.tsx:183+weak-capability-token-on-a-definer-rpc"
+    ],
+    "unresolved": [
+      "Cross-tenant metadata disclosure, recorded not padded: 0001 grants anon_read_business using (true) with no column restriction and the client does select('*'), so every visitor receives owner_id, whatsapp_number and branding for every tenant. Severity is low; logged for an owner decision on switching to an explicit column list.",
+      "0001:99-100 grant using (true) on schedules and availability_exceptions with no tenant predicate, so any anon key holder reads every tenant's working hours. The client scopes its own reads correctly; the over-broad grant is the issue. Low value, likely intentional.",
+      "onAuthStateChange fires but there is no session-persistence reconciliation after signOut beyond clearing local component state, and persistSession plus autoRefreshToken stay on. No BroadcastChannel or storage-event handling exists in the target, so the cross-tab stale-token question could not be closed from source alone."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fagenda%2Futils%2FcalendarLinks.ts%23generateGoogleCalendarUrl%20and%20downloadIcsFile::src%2Fagenda%2Futils%2FcalendarLinks.ts%23untrusted%20title%20description%20location%20interpolation::src%2Fagenda%2Futils::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "src/agenda/utils/calendarLinks.ts#generateGoogleCalendarUrl and downloadIcsFile",
+      "boundary": "src/agenda/utils/calendarLinks.ts#untrusted title description location interpolation",
+      "subsystem": "src/agenda/utils",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "src/agenda/utils/calendarLinks.ts#generateGoogleCalendarUrl and downloadIcsFile",
+    "boundary": "src/agenda/utils/calendarLinks.ts#untrusted title description location interpolation",
+    "subsystem": "src/agenda/utils",
+    "attack_class": "ATTACK-CLASSES.md#Injection",
+    "starting_paths": [
+      "src/agenda/utils/calendarLinks.ts",
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/pages/ManageBookingPage.tsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#DOM-based XSS",
+      "CLIENT-SIDE.md#Client-side navigation confusion",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Universal moves",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Validation rules",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "ATTACK-CLASSES.md#Resource and file handling",
+        "reason": "the download is a fixed-size Blob, not a filesystem or archive path"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-sinks-supply",
+    "reviewed_paths": [
+      "src/agenda/utils/calendarLinks.ts",
+      "src/agenda/pages/PublicBookingPage.tsx",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/adapters/agendaAdapter.ts",
+      "supabase/migrations/0001_agenda_schema.sql",
+      "supabase/migrations/0002_booking_free_only.sql"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-sinks-supply",
+        "reviewed_paths": [
+          "src/agenda/utils/calendarLinks.ts",
+          "src/agenda/pages/PublicBookingPage.tsx",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 1. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "calendarLinks.ts:38+unescaped-ics-summary-property-injection"
+    ],
+    "unresolved": [
+      "RFC 5545 also requires 75-octet line folding and a UID property; neither is implemented in the ICS builder. Spec-compliance and interop, not a security defect on its own, but folding is worth adding alongside the escaping fix.",
+      "calendarLinks.ts calls URL.revokeObjectURL synchronously right after link.click(); several browsers abort the download in that case. Functional only, noted so the escaping fix does not trip over it."
+    ]
+  },
+  {
+    "coverage_id": "src%2Fconfig%2Fsupabase.ts%23createClient%20session%20storage%20localStorage::src%2Fconfig%2Fsupabase.ts%23storageKey%20namespaced%20token%20key::src%2Fconfig::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
+    "canonical_refs": {
+      "surface": "src/config/supabase.ts#createClient session storage localStorage",
+      "boundary": "src/config/supabase.ts#storageKey namespaced token key",
+      "subsystem": "src/config",
+      "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets"
+    },
+    "surface": "src/config/supabase.ts#createClient session storage localStorage",
+    "boundary": "src/config/supabase.ts#storageKey namespaced token key",
+    "subsystem": "src/config",
+    "attack_class": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "starting_paths": [
+      "src/config/supabase.ts",
+      "index.html",
+      "AgendaAppPage.jsx"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Cryptography and secrets",
+    "selected_companion_blocks": [
+      "WEB-PROTOCOL-AND-AUTH.md#Core discipline",
+      "WEB-PROTOCOL-AND-AUTH.md#Universal moves",
+      "WEB-PROTOCOL-AND-AUTH.md#Validation rules",
+      "WEB-PROTOCOL-AND-AUTH.md#Cookie scope and transport",
+      "WEB-PROTOCOL-AND-AUTH.md#API-key exposure and unsafe transport",
+      "WEB-PROTOCOL-AND-AUTH.md#Session fixation and invalidation",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding",
+      "CLIENT-SIDE.md#Core discipline",
+      "CLIENT-SIDE.md#Universal moves",
+      "CLIENT-SIDE.md#Validation rules",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization",
+      "CLIENT-SIDE.md#Cross-context storage and broadcast confusion",
+      "CLIENT-SIDE.md#Clickjacking"
+    ],
+    "excluded_blocks": [
+      {
+        "block": "CLOUD-AND-DEPLOYMENT.md#Secret exposure across workload boundaries",
+        "reason": "the client is the same trust boundary as its own localStorage"
+      }
+    ],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunt-authz-session",
+    "reviewed_paths": [
+      "src/config/supabase.ts",
+      "src/agenda/pages/AdminPanelPage.tsx",
+      "src/agenda/context/AgendaContext.tsx",
+      "index.html",
+      "AgendaAppPage.jsx"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/config/supabase.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "index.html",
+          "AgendaAppPage.jsx"
+        ],
+        "invariant": "Walk the full control and data path for the assigned unit and test only its declared attack-class blocks; report a candidate only with a file:line source-to-sink trace, otherwise record an explicit clearance.",
+        "method": "source",
+        "result": "Candidate(s) raised: 2. Each retained a file:line source-to-sink trace; the residual unresolved items are recorded in this unit.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "supabase.ts:14+AgendaContext.tsx:102+url-fragment-session-adoption-unvalidated",
+      "AdminPanelPage.tsx:246+supabase.ts:20+remember-me-control-is-inert"
+    ],
+    "unresolved": [
+      "Storage-scope cross-talk with the hub cannot be settled from this folder. Because storageKey is namespaced, a hub client using the default sb-<ref>-auth-token key neither shares nor clears this session, so whether hub logout leaves a live agenda session in localStorage is an out-of-target fact.",
+      "index.html carries no CSP, no frame-ancestors and no Referrer-Policy, and the live document is served by a host outside the folder; the deployed header set is the blocker on the framed-click dimension of the delete-cascade candidate.",
+      "Whether any same-origin script outside this folder reads the namespaced storage key is unverifiable here. Inside the folder the key has exactly one writer and one reader, and no XSS sink was found that could turn that into a lesser-authority disclosure."
+    ]
+  }
+]

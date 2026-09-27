@@ -1,0 +1,124 @@
+{
+  "run_id": "qawaylab-agenda-2026-09-27-run-1",
+  "repo": "qawaylab-agenda",
+  "target": "C:\\LEO\\EMPRESAS\\QAWAY LAB\\1-QawayLab-Digital\\1-qawaylab-web\\src\\pages\\5-qaway-hub\\8-qawaylab-agenda",
+  "git_repo_root": "C:\\LEO\\EMPRESAS\\QAWAY LAB\\1-QawayLab-Digital\\1-qawaylab-web",
+  "path_convention": "target-relative, forward slashes, relative to `target` (not the git repo root). Example: `src/agenda/pages/AdminPanelPage.tsx`.",
+  "source_ref": {
+    "reviewed_commit": "6906eb12",
+    "branch": "main-web",
+    "commit_subject": "2026-09-26_21:29_A22@@@_inventario-filtros-sticky-12-paneles-y-verificacion-de-suite",
+    "commit_date": "2026-09-26 21:30",
+    "target_worktree": "clean at run start (git status --porcelain over the target returned no entries)",
+    "untracked_at_run_start": ["doc/ (created by this run)"],
+    "note": "No target source was modified by this run. Unreviewed files: none inside the target source tree."
+  },
+  "profile": "standard",
+  "run_kind": "scoped",
+  "scope_paths": [
+    "AgendaAppPage.jsx",
+    "package.json",
+    "vite.config.js",
+    "tsconfig.json",
+    "index.html",
+    ".env.example",
+    "src/App.tsx",
+    "src/main.tsx",
+    "src/index.css",
+    "src/config/supabase.ts",
+    "src/agenda/types.ts",
+    "src/agenda/adapters/agendaAdapter.ts",
+    "src/agenda/context/AgendaContext.tsx",
+    "src/agenda/pages/HomePage.tsx",
+    "src/agenda/pages/PublicBookingPage.tsx",
+    "src/agenda/pages/ManageBookingPage.tsx",
+    "src/agenda/pages/AdminPanelPage.tsx",
+    "src/agenda/utils/calendarLinks.ts",
+    "supabase/config.toml",
+    "supabase/migrations/0001_agenda_schema.sql",
+    "supabase/migrations/0002_booking_free_only.sql"
+  ],
+  "out_of_scope": [
+    {
+      "path": ".env",
+      "reason": "Local secret material. Read-only inspection of key NAMES is permitted; values are never read, copied, or recorded. Not a reviewable source artifact."
+    },
+    {
+      "path": "supabase/functions/",
+      "reason": "The README references an edge function `agenda-send-notifications` living in the monorepo root `supabase/functions/`, which is outside this scoped target. Email/WhatsApp dispatch logic is therefore not source-visible here."
+    },
+    {
+      "path": "monorepo root src/ outside 5-qaway-hub/8-qawaylab-agenda",
+      "reason": "User scoped the audit to the Agenda app folder only."
+    }
+  ],
+  "budget": null,
+  "budget_gate": {
+    "user_set_budget": false,
+    "baseline_recon_reserved": 4,
+    "post_wave_critic_reserved": 1,
+    "final_clean_critic_reserved": 1,
+    "verifier_reserve_reserved": 2,
+    "verdict": "pass",
+    "reason": "No user budget was set. Target is small (~2,800 lines, 12 code files, 2 SQL migrations), so the parent proposes a standard profile with no hard cap. All mandatory reserves are funded."
+  },
+  "execution_policy": "sandboxed-source-and-local-only",
+  "execution_capability": {
+    "target_controlled_execution": "unavailable",
+    "detail": "This host provides no OS-enforced sandbox with an empty allowlisted environment, no external network, read-only target/toolchain mounts, scratch-only writes, and explicit CPU/memory/process/file-size/disk/wall-clock limits. Per SKILL.md universal execution safety, target-controlled code is therefore NOT executed. The app additionally requires `npm install` (network fetch, prohibited) and a live Supabase project (shared external service, prohibited).",
+    "consequence": "Every check in this run is `method: \"source\"` with `artifact: null`. Any candidate requiring behavioral resolution is emitted as `needs_validation` with the exact blocker."
+  },
+  "companion_files": [
+    "RECONNAISSANCE.md",
+    "HUNTING.md",
+    "ATTACK-CLASSES.md",
+    "VALIDATION-AND-REPORTING.md",
+    "WEB-PROTOCOL-AND-AUTH.md",
+    "CLIENT-SIDE.md",
+    "DATA-ISOLATION-AND-LIFECYCLE.md",
+    "CLOUD-AND-DEPLOYMENT.md",
+    "SUPPLY-CHAIN-AND-RELEASE.md",
+    "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md",
+    "report-schema.json"
+  ],
+  "prior_runs": {
+    "compatible_ledgers_found": 0,
+    "paths": [],
+    "note": "`doc/` was created empty by this run. No prior `coverage-ledger.json` or `findings.json` exists for this target. This is a first-run baseline, not a re-audit."
+  },
+  "output_dir_selection": {
+    "selected": "doc/security-audit/run-1 (inside the target)",
+    "selected_by": "explicit user instruction",
+    "skill_default": "~/security-audit-skill/<repo-name>/run-<N> (outside the target)",
+    "deviation_justification": "SKILL.md permits an in-target output directory only when version control ignores the whole directory. The user explicitly designated `doc/` as the project folder for implementation, correction, and bitacora markdown that is meant to be version-controlled and committed. Because target-controlled execution is unavailable in this run (see execution_capability), no `agents/*/scratch/` or `agents/*/artifacts/` content can ever be produced, so the pollution risk the SKILL.md condition guards against does not apply. Every file under this run directory is trusted parent-side authored prose and JSON. The deviation is recorded here and disclosed in REPORT.md.",
+    "gitignore_modified": false
+  },
+  "shared_file_owners": {
+    "run-metadata.json": "parent",
+    "architecture.md": "parent",
+    "coverage-ledger.json": "parent",
+    "findings.json": "parent",
+    "REPORT.md": "parent",
+    "FINDINGS-DETAIL.md": "parent",
+    "NEEDS-VALIDATION.md": "parent"
+  },
+  "canonical_agent_ids": {
+    "recon": ["recon-product-stack", "recon-authority-controls", "recon-entry-surfaces", "recon-execution-deploy"],
+    "hunters": [],
+    "verifiers": [],
+    "critics": []
+  },
+  "schema_validators": {
+    "status": "cannot_execute_on_this_host",
+    "detail": "Both `validate-coverage-ledger.cjs` and `validate-findings.cjs` open their input through `readFileWithinLimit()`, which hard-refuses any platform where `fs.constants.O_NOFOLLOW` or `fs.constants.O_NONBLOCK` is absent. On win32 Node exposes neither constant, so both scripts abort with `SafeInputError: OS no-follow and nonblocking input protection is unavailable` before parsing any input. This is a deliberate, correct refusal: the guard exists so a ledger can never be swapped between validation and use.",
+    "remediation_paths_considered": [
+      "Run the unmodified validator in a Linux container. Rejected for now: the Docker CLI is installed but the daemon is not running.",
+      "Run the unmodified validator under WSL. Rejected: the `Ubuntu` distribution's virtual disk is missing (`WSL/Service/CreateInstance/MountDisk/HCSC/ERROR_PATH_NOT_FOUND`).",
+      "Shim `fs.constants` or patch the validator to bypass the guard. Rejected: patching or shimming the trust tooling would destroy the guarantee the gate exists to provide, which is never acceptable.",
+      "Reimplement the checks in a separate parent-side script. Not treated as a substitute for the gate; any result from it is advisory only and is labelled as such."
+    ],
+    "consequence": "The ledger and findings schema gates cannot be signed off in this run. No artifact may claim to be 'validator-passed'. The parent performs an independent parent-side conformance review of the same documented rules and records the result as `advisory`, and the report states plainly that the official gate did not run.",
+    "reopen_condition": "Start Docker Desktop, then re-run both validators unmodified inside a Linux container against the final `coverage-ledger.json` and `findings.json`."
+  },
+  "run_status": "in_progress"
+}

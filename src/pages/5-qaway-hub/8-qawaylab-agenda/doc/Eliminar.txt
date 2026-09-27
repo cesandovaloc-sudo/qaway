@@ -1,0 +1,608 @@
+Now write the generator script.
+# Wrote AppData\Local\Temp\opencode\gen-ledger.mjs
+import { writeFileSync } from "node:fs";
+
+const OUT =
+  "C:/LEO/EMPRESAS/QAWAY LAB/1-QawayLab-Digital/1-qawaylab-web/src/pages/5-qaway-hub/8-qawaylab-agenda/doc/security-audit/run-1/coverage-ledger.json";
+
+const D = "DATA-ISOLATION-AND-LIFECYCLE.md#";
+const W = "WEB-PROTOCOL-AND-AUTH.md#";
+const C = "CLIENT-SIDE.md#";
+const CL = "CLOUD-AND-DEPLOYMENT.md#";
+const R = "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#";
+const S = "SUPPLY-CHAIN-AND-RELEASE.md#";
+const CORE = (f) => [`${f}Core discipline`, `${f}Universal moves`, `${f}Validation rules`];
+
+const MIG = [
+  "supabase/migrations/0001_agenda_schema.sql",
+  "supabase/migrations/0002_booking_free_only.sql",
+];
+const ADAPT = "src/agenda/adapters/agendaAdapter.ts";
+const CTX = "src/agenda/context/AgendaContext.tsx";
+
+const units = [];
+const unit = (u) => units.push(u);
+
+const inScope = (o) => ({
+  prior_status: "new",
+  attempts: [],
+  wave: 1,
+  status: "planned",
+  agent_id: null,
+  reviewed_paths: [],
+  local_checks: [],
+  result_fingerprints: [],
+  unresolved: [],
+  ...o,
+});
+
+// ---------------------------------------------------------------- hunter 1
+unit(
+  inScope({
+    surface: `${CTX}#createBooking row build`,
+    boundary: `supabase/migrations/0002_booking_free_only.sql#anon_insert_booking with check`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: [...MIG, ADAPT, CTX],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Policy and query disagreement`,
+      `${D}Blob and signed-reference overreach`,
+      `${D}Stale authorization and derived copy use`,
+    ],
+    excluded_blocks: [
+      { block: "WEB-PROTOCOL-AND-AUTH.md#Ordinary CSRF", reason: "anon insert target is a stateless JSON API, not a cookie-authenticated state-changing form" },
+      { block: "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Reachable fatal error or deadlock", reason: "EXCLUDE constraint deadlock behaviour belongs to the write-contention unit, not policy authorization" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${ADAPT}#rpc secure_manage_booking calls`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#secure_manage_booking security definer`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: [...MIG, ADAPT, "src/agenda/pages/ManageBookingPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Policy and query disagreement`,
+      `${D}Blob and signed-reference overreach`,
+      `${D}Stale authorization and derived copy use`,
+      ...CORE(W),
+      `${W}JWT verification and claim binding`,
+      `${W}API-key scope and resource binding`,
+      `${W}Session fixation and invalidation`,
+    ],
+    excluded_blocks: [
+      { block: "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality", reason: "the RPC takes four scalar arguments with no collection input" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `src/agenda/pages/ManageBookingPage.tsx#cancel_token from route param`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#cancel_token uuid default gen_random_uuid`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Cryptography and secrets",
+    starting_paths: [...MIG, ADAPT, "src/agenda/pages/ManageBookingPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Cryptography and secrets",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Blob and signed-reference overreach`,
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Enumeration and aggregate oracles`,
+      ...CORE(W),
+      `${W}JWT verification and claim binding`,
+      `${W}API-key scope and resource binding`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Injection", reason: "the token is compared by uuid equality inside SQL, not concatenated into a statement" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${ADAPT}#reminders insert on booking`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#reminders rls enabled no policy`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Business logic",
+    starting_paths: [...MIG, ADAPT],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Business logic",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Retention and queued-work overrun`,
+      `${D}Soft-delete and tombstone bypass`,
+      `${D}Missing tenant or owner enforcement`,
+    ],
+    excluded_blocks: [
+      { block: "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Unbounded buffering and cardinality", reason: "reminder fan-out is one row per booking channel, bounded by the insert the caller already made" },
+    ],
+  }),
+);
+
+// ---------------------------------------------------------------- hunter 2
+unit(
+  inScope({
+    surface: `${ADAPT}#loadPublicData selects`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#anon_read_business using true`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    starting_paths: [...MIG, ADAPT, "src/agenda/pages/PublicBookingPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Enumeration and aggregate oracles`,
+      `${D}Analytics, logs, traces, and diagnostics as alternate readers`,
+      `${D}Search, cache, and index ACL drift`,
+    ],
+    excluded_blocks: [
+      { block: "WEB-PROTOCOL-AND-AUTH.md#Cookie scope and transport", reason: "reads use the anon API key header, not cookies" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${ADAPT}#booked_slots select`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#booked_slots view`,
+    subsystem: "supabase/migrations",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: [...MIG, ADAPT],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Policy and query disagreement`,
+      `${D}Search, cache, and index ACL drift`,
+      `${D}Stale authorization and derived copy use`,
+    ],
+    excluded_blocks: [
+      { block: "CLOUD-AND-DEPLOYMENT.md#Workload identity overreach", reason: "view ownership and default privileges are a policy question, not a workload-identity one" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${CTX}#generateSlots duration_minutes input`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#bookings slot_range exclude constraint`,
+    subsystem: "src/agenda/context",
+    attack_class: "ATTACK-CLASSES.md#Business logic",
+    starting_paths: [...MIG, CTX, "src/agenda/pages/PublicBookingPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Business logic",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Composite-key and namespace collision`,
+      ...CORE(R),
+      `${R}Database and downstream query amplification`,
+      `${R}Pre-authentication work imbalance`,
+      `${R}Unbounded buffering and cardinality`,
+      `${R}Reachable fatal error or deadlock`,
+    ],
+    excluded_blocks: [
+      { block: "CLOUD-AND-DEPLOYMENT.md#Rate-limit and quota drift", reason: "no rate limiter exists in the target; that absence is recorded in the deployment-out-of-scope unit" },
+    ],
+  }),
+);
+
+// ---------------------------------------------------------------- hunter 3
+unit(
+  inScope({
+    surface: `src/agenda/pages/AdminPanelPage.tsx#if not session LoginView`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#owner_business using owner_id eq auth uid`,
+    subsystem: "src/agenda/pages",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: [ADAPT, "src/agenda/pages/AdminPanelPage.tsx", ...MIG],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Stale authorization and derived copy use`,
+      ...CORE(W),
+      `${W}Session fixation and invalidation`,
+      ...CORE(C),
+      `${C}Browser-storage disclosure and stale authorization`,
+    ],
+    excluded_blocks: [
+      { block: "CLIENT-SIDE.md#DOM-based XSS", reason: "panel rendering is covered by the PII and calendar sink units" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${ADAPT}#signUp auto create business`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#owner_business insert with check owner_id eq auth uid`,
+    subsystem: "src/agenda/adapters",
+    attack_class: "ATTACK-CLASSES.md#Business logic",
+    starting_paths: [ADAPT, ...MIG, "src/agenda/pages/AdminPanelPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Business logic",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Composite-key and namespace collision`,
+      `${D}Missing tenant or owner enforcement`,
+      ...CORE(W),
+      `${W}Account linking and identity collision`,
+      `${W}Password reset and broader recovery`,
+      `${W}OAuth/OIDC request and callback binding`,
+    ],
+    excluded_blocks: [
+      { block: "WEB-PROTOCOL-AND-AUTH.md#Private key or shared secret reuse", reason: "the anon publishable key is the only credential in the target source" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `src/config/supabase.ts#createClient session storage localStorage`,
+    boundary: `src/config/supabase.ts#storageKey namespaced token key`,
+    subsystem: "src/config",
+    attack_class: "ATTACK-CLASSES.md#Cryptography and secrets",
+    starting_paths: ["src/config/supabase.ts", "index.html", "AgendaAppPage.jsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Cryptography and secrets",
+    selected_companion_blocks: [
+      ...CORE(W),
+      `${W}Cookie scope and transport`,
+      `${W}API-key exposure and unsafe transport`,
+      `${W}Session fixation and invalidation`,
+      `${W}JWT verification and claim binding`,
+      ...CORE(C),
+      `${C}Browser-storage disclosure and stale authorization`,
+      `${C}Cross-context storage and broadcast confusion`,
+      `${C}Clickjacking`,
+    ],
+    excluded_blocks: [
+      { block: "CLOUD-AND-DEPLOYMENT.md#Secret exposure across workload boundaries", reason: "the client is the same trust boundary as its own localStorage" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${CTX}#loginAsDemo fabricated Session`,
+    boundary: `src/agenda/pages/AdminPanelPage.tsx#session read from AgendaContext`,
+    subsystem: "src/agenda/context",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: [CTX, "src/agenda/pages/AdminPanelPage.tsx", ADAPT, ...MIG],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [
+      ...CORE(C),
+      `${C}Browser-storage disclosure and stale authorization`,
+      ...CORE(D),
+      `${D}Stale authorization and derived copy use`,
+      `${D}Missing tenant or owner enforcement`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Cryptography and secrets", reason: "no secret is forged; the session object is a plain client-side object" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${ADAPT}#deleteEventType and schedule writes`,
+    boundary: `supabase/migrations/0001_agenda_schema.sql#owner_event_types using business_id`,
+    subsystem: "src/agenda/adapters",
+    attack_class: "ATTACK-CLASSES.md#Business logic",
+    starting_paths: [ADAPT, "src/agenda/pages/AdminPanelPage.tsx", ...MIG],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Business logic",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Policy and query disagreement`,
+      `${D}Soft-delete and tombstone bypass`,
+      `${D}Composite-key and namespace collision`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Injection", reason: "updates pass bound parameters through the PostgREST client" },
+    ],
+  }),
+);
+
+// ---------------------------------------------------------------- hunter 4
+unit(
+  inScope({
+    surface: `src/agenda/pages/PublicBookingPage.tsx#customer name email phone inputs`,
+    boundary: `${ADAPT}#bookings insert customer columns`,
+    subsystem: "src/agenda/pages",
+    attack_class: "ATTACK-CLASSES.md#Injection",
+    starting_paths: ["src/agenda/pages/PublicBookingPage.tsx", ADAPT, ...MIG],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Injection",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Analytics, logs, traces, and diagnostics as alternate readers`,
+      `${D}Missing tenant or owner enforcement`,
+      `${D}Retention and queued-work overrun`,
+      ...CORE(C),
+      `${C}DOM-based XSS`,
+    ],
+    excluded_blocks: [
+      { block: "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md#Database and downstream query amplification", reason: "query shape is fixed; the amplification surface is the row-count surface already covered" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `src/agenda/utils/calendarLinks.ts#generateGoogleCalendarUrl and downloadIcsFile`,
+    boundary: `src/agenda/utils/calendarLinks.ts#untrusted title description location interpolation`,
+    subsystem: "src/agenda/utils",
+    attack_class: "ATTACK-CLASSES.md#Injection",
+    starting_paths: ["src/agenda/utils/calendarLinks.ts", "src/agenda/context/AgendaContext.tsx", "src/agenda/pages/ManageBookingPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Injection",
+    selected_companion_blocks: [
+      ...CORE(C),
+      `${C}DOM-based XSS`,
+      `${C}Client-side navigation confusion`,
+      ...CORE(D),
+      `${D}Missing tenant or owner enforcement`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Resource and file handling", reason: "the download is a fixed-size Blob, not a filesystem or archive path" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `${CTX}#error message returned to component state`,
+    boundary: `src/agenda/pages/PublicBookingPage.tsx#setError rendered banner`,
+    subsystem: "src/agenda/context",
+    attack_class: "ATTACK-CLASSES.md#Obvious things",
+    starting_paths: [CTX, "src/agenda/pages/PublicBookingPage.tsx", "src/agenda/pages/AdminPanelPage.tsx"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Obvious things",
+    selected_companion_blocks: [
+      ...CORE(D),
+      `${D}Enumeration and aggregate oracles`,
+      `${D}Missing tenant or owner enforcement`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Injection", reason: "errors are rendered as React children, which escape by construction; the disclosure class is the live one" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `index.html#fonts.googleapis.com stylesheet link`,
+    boundary: `index.html#no content security policy`,
+    subsystem: "build-config",
+    attack_class: "ATTACK-CLASSES.md#Cryptography and secrets",
+    starting_paths: ["index.html", "src/config/supabase.ts", "package.json"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Cryptography and secrets",
+    selected_companion_blocks: [
+      ...CORE(C),
+      `${C}DOM-based XSS`,
+      `${C}Browser-storage disclosure and stale authorization`,
+      `${C}Clickjacking`,
+      ...CORE(CL),
+      `${CL}Secret exposure across workload boundaries`,
+      ...CORE(S),
+      `${S}Mutable and unbound build inputs`,
+      `${S}Dependency source and namespace confusion`,
+    ],
+    excluded_blocks: [
+      { block: "SUPPLY-CHAIN-AND-RELEASE.md#Self-update and unsigned delivery", reason: "there is no updater, auto-update channel, or signed artefact in the target" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `package.json#dependencies and devDependencies ranges`,
+    boundary: `vite.config.js#build input resolution`,
+    subsystem: "build-config",
+    attack_class: "ATTACK-CLASSES.md#Obvious things",
+    starting_paths: ["package.json", "vite.config.js", "tsconfig.json"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Obvious things",
+    selected_companion_blocks: [
+      ...CORE(S),
+      `${S}Mutable and unbound build inputs`,
+      `${S}Dependency source and namespace confusion`,
+      `${S}Build-context inclusion`,
+    ],
+    excluded_blocks: [
+      { block: "ATTACK-CLASSES.md#Cryptography and secrets", reason: "no secret material is committed; the anon key is a build-time environment input" },
+      { block: "CLOUD-AND-DEPLOYMENT.md#Build and deploy-time secret injection", reason: "the hosting pipeline is out of target and belongs to the deployment out-of-scope unit" },
+    ],
+  }),
+);
+unit(
+  inScope({
+    surface: `src/App.tsx#nested route table`,
+    boundary: `AgendaAppPage.jsx#route table mounted by hub`,
+    subsystem: "src/agenda/pages",
+    attack_class: "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    starting_paths: ["src/App.tsx", "AgendaAppPage.jsx", "src/main.tsx", "index.html"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    selected_companion_blocks: [
+      ...CORE(C),
+      `${C}Client-side navigation confusion`,
+      ...CORE(D),
+      `${D}Stale authorization and derived copy use`,
+    ],
+    excluded_blocks: [
+      { block: "CLIENT-SIDE.md#DOM-based XSS", reason: "routing drift carries no markup interpretation surface of its own" },
+    ],
+  }),
+);
+
+// ---------------------------------------------------------------- out of scope
+const outOfScope = (o) => ({
+  prior_status: "new",
+  attempts: [],
+  wave: 1,
+  status: "out_of_scope",
+  agent_id: null,
+  reviewed_paths: [],
+  local_checks: [],
+  result_fingerprints: [],
+  ...o,
+});
+
+unit(
+  outOfScope({
+    surface: "out-of-target supabase/functions/agenda-send-notifications/index.ts#POST handler",
+    boundary: "out-of-target supabase function config with verify_jwt false and a service role key",
+    subsystem: "out-of-scope external edge function",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: ["supabase/config.toml", "README.md", "supabase/README.md"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [],
+    excluded_blocks: [
+      { block: "CLOUD-AND-DEPLOYMENT.md#Workload identity overreach", reason: "the surface itself sits outside the audited folder, so no companion class can be reviewed" },
+      { block: "PROTOCOLS-RPC-AND-MESSAGING.md#Broker, queue, and event-bus trust", reason: "the notification broker surface is the same out-of-target function" },
+      { block: "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement", reason: "the function body is outside the audited folder" },
+    ],
+    unresolved: [
+      "The documented notification function lives in a separate Supabase functions directory outside the audited folder; this scoped run cannot read or validate its authorization, service-role use, or webhook signature handling.",
+    ],
+  }),
+);
+unit(
+  outOfScope({
+    surface: "out-of-target central supabase migration chain#tenant_id backfill and is_admin function",
+    boundary: "out-of-target central RLS policies that accept tenant_id is null",
+    subsystem: "out-of-scope central migration chain",
+    attack_class: "ATTACK-CLASSES.md#Access control",
+    starting_paths: ["supabase/migrations/0001_agenda_schema.sql", "README.md"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Access control",
+    selected_companion_blocks: [],
+    excluded_blocks: [
+      { block: "DATA-ISOLATION-AND-LIFECYCLE.md#Composite-key and namespace collision", reason: "the collision surface is defined by central migrations this scoped run may not audit" },
+      { block: "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding", reason: "the app_metadata tenant_id contract is defined outside the audited folder" },
+    ],
+    unresolved: [
+      "The target README documents a central migration chain owned by the parent project that adds tenant_id and is_admin(); whether the audited folder's tables are actually bound to it at deploy time cannot be established from inside the audited folder.",
+    ],
+  }),
+);
+unit(
+  outOfScope({
+    surface: "out-of-target hub shell AppRouter#agenda lazy route without a protected wrapper",
+    boundary: "out-of-target hub Supabase client that does not apply the qaway_agenda_auth_token storageKey",
+    subsystem: "out-of-scope hub shell",
+    attack_class: "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    starting_paths: ["AgendaAppPage.jsx", "src/config/supabase.ts", "AGENTS.md"],
+    ordinary_attack_class_block: "ATTACK-CLASSES.md#Chained vulnerabilities and trust boundaries",
+    selected_companion_blocks: [],
+    excluded_blocks: [
+      { block: "CLIENT-SIDE.md#Cross-context storage and broadcast confusion", reason: "the conflicting client instance is owned by the hub shell, not this folder" },
+      { block: "CLIENT-SIDE.md#Client-side navigation confusion", reason: "hub-level route protection is outside the audited folder" },
+    ],
+    unresolved: [
+      "The production entry point is the parent hub router, whose ProtectedRoute and Supabase client configuration are outside the audited folder; the in-folder standalone router is unreachable, so entry-point trust cannot be settled from this folder alone.",
+    ],
+  }),
+);
+
+// ---------------------------------------------------------------- emit
+function encodeCanonicalRef(value) {
+  let encoded = "";
+  for (const byte of Buffer.from(value, "utf8")) {
+    const unreserved =
+      (byte >= 0x41 && byte <= 0x5a) ||
+      (byte >= 0x61 && byte <= 0x7a) ||
+      (byte >= 0x30 && byte <= 0x39) ||
+      byte === 0x2d || byte === 0x2e || byte === 0x5f || byte === 0x7e;
+    encoded += unreserved ? String.fromCharCode(byte) : `%${byte.toString(16).toUpperCase().padStart(2, "0")}`;
+  }
+  return encoded;
+}
+
+const FIELDS = ["surface", "boundary", "subsystem", "attack_class"];
+for (const u of units) {
+  u.canonical_refs = Object.fromEntries(FIELDS.map((f) => [f, u[f]]));
+  u.coverage_id = FIELDS.map((f) => encodeCanonicalRef(u[f])).join("::");
+}
+units.sort((a, b) => (a.coverage_id < b.coverage_id ? -1 : a.coverage_id > b.coverage_id ? 1 : 0));
+
+const ordered = units.map((u) => ({
+  coverage_id: u.coverage_id,
+  canonical_refs: u.canonical_refs,
+  surface: u.surface,
+  boundary: u.boundary,
+  subsystem: u.subsystem,
+  attack_class: u.attack_class,
+  starting_paths: u.starting_paths,
+  ordinary_attack_class_block: u.ordinary_attack_class_block,
+  selected_companion_blocks: u.selected_companion_blocks,
+  excluded_blocks: u.excluded_blocks,
+  prior_status: u.prior_status,
+  attempts: u.attempts,
+  wave: u.wave,
+  status: u.status,
+  agent_id: u.agent_id,
+  reviewed_paths: u.reviewed_paths,
+  local_checks: u.local_checks,
+  result_fingerprints: u.result_fingerprints,
+  unresolved: u.unresolved,
+}));
+
+writeFileSync(OUT, `${JSON.stringify(ordered, null, 2)}\n`, "utf8");
+console.log(`wrote ${ordered.length} units`);
+console.log(`in scope: ${ordered.filter((u) => u.status === "planned").length}`);
+console.log(`out of scope: ${ordered.filter((u) => u.status === "out_of_scope").length}`);
+
+$ node "C:\Users\csand\AppData\Local\Temp\opencode\gen-ledger.mjs"; if ($?) { node "C:\Users\csand\.agents\skills\security-audit\validate-coverage-ledger.cjs" "C:\LEO\EMPRESAS\QAWAY LAB\1-QawayLab-Digital\1-qawaylab-web\src\pages\5-qaway-hub\8-qawaylab-agenda\doc\security-audit\run-1\coverage-ledger.json" }
+wrote 21 units
+in scope: 18
+out of scope: 3
+Failed to read coverage ledger: OS no-follow and nonblocking input protection is unavailable
+Thought: 309ms
+The validator failed to read the file due to "OS no-follow and nonblocking input protection is unavailable". This is probably a Windows-specific check. Let me look at the read function.
+$ $f="C:\Users\csand\.agents\skills\security-audit\validate-coverage-ledger.cjs"; Select-String -LiteralPath $f -Pattern "no-follow and nonblocking" -Context 18,4 | ForEach-Object { "$($_.LineNumber)"; $_.Context.PreContext; $_.Line; $_.Context.PostContext }
+726
+
+  validateAttempts(unit.attempts, unit, base, errors);
+  validateStringArray(unit.reviewed_paths, `${base}.reviewed_paths`, errors, { pathValue: true });
+  validateChecks(unit.local_checks, `${base}.local_checks`, errors);
+  validateReviewedPathOwnership(unit, base, errors);
+  validateStringArray(unit.result_fingerprints, `${base}.result_fingerprints`, errors, { fingerprint: true });
+  validateStringArray(unit.unresolved, `${base}.unresolved`, errors);
+
+  validateStateInvariants(unit, base, errors);
+…
+Click to expand
+Thought: 2.3s
+This is a hard-coded platform guard: on Windows, fs.constants.O_NOFOLLOW is 0 (or undefined), so the validator refuses to run. This is an environment limitation of the skill's validator on win32.
+
+Let me verify: on Windows, Node's fs.constants.O_NOFOLLOW is 0. And O_NONBLOCK is not defined on Windows (undefined). So the validator cannot run on Windows at all.
+
+This is a genuine blocker for running the skill's own validators. I should not modify the skill's validator (that would be tampering with the security skill's trust tooling). But I need to verify the ledger.
+
+Options:
+1. Check whether there's a supported override (env var, flag). Let me check the usage/main function.
+2. Use WSL / a POSIX environment to run the validator. Is WSL available? That's a reasonable path — running the skill's unmodified validator under a POSIX runtime satisfies the check.
+3. Report the limitation and record it in run-metadata.
+
+Let me check the main function and whether WSL is available.
+
+Actually — the skill likely has a documented platform requirement. Let me check the SKILL.md for a platform note, and check for WSL availability.
+
+Let me check both.
+El validador tiene una guarda de plataforma que rechaza Windows. Verifico opciones antes de decidir.
+$ Select-String -LiteralPath "C:\Users\csand\.agents\skills\security-audit\SKILL.md" -Pattern "O_NOFOLLOW|platform|Windows|posix|WSL|race|symlink" | ForEach-Object { "$($_.LineNumber): $($_.Line.Trim())" }; Write-Output "--- constants ---"; node -e "console.log(JSON.stringify({O_NOFOLLOW:require('fs').constants.O_NOFOLLOW,O_NONBLOCK:require('fs').constants.O_NONBLOCK}))"; Write-Output "--- wsl ---"; $w = Get-Command wsl -ErrorAction SilentlyContinue; if ($w) { "wsl found: $($w.Source)"; wsl -l -q 2>&1 | Out-String } else { "wsl NOT found" }
+19: ## Platform terminology
+24: - **Task tool** is the platform's delegation or sub-agent mechanism.
+29: Use equivalent platform capabilities while preserving role, write-isolation, prompt, and independence boundaries.
+66: Each hunter or verifier receives a unique root under `<output-dir>/agents/<agent-id>/`, with separate `scratch/` and `artifacts/` directories. Canonical agent IDs match `^[a-z0-9][a-z0-9_-]{0,63}$` and must not equal a Windows device name such as `con`, `prn`, `aux`, `nul`, `com1` through `com9`, or `lpt1` through `lpt9`. Lowercase IDs prevent case-fold collisions. The agent and every target-controlled process may write only to `scratch/`; retained `artifacts/` is parent-owned, is never exposed to the sandbox, and is writable only by trusted parent-side promotion code. Agents may not change shared files, target source, retained artifacts, or another agent's directory. Do not use `/tmp` or the host home directory as a writable fallback.
+70: 1. Validate the declared relative path: re…
+Click to expand
+Thought: 2.6s
+WSL with Ubuntu is available. fs.constants.O_NOFOLLOW is undefined on Windows (JSON.stringify dropped the undefined values → {}).
+
+The skill's own guidance at line 78: "Use equivalent race-safe APIs on non-POSIX systems." — that's about promotion code, not the validator. But the validator itself hard-rejects non-POSIX.
+
+The right move: run the skill's unmodified validator under WSL (POSIX), which satisfies its own safety guard honestly, rather than patching or bypassing the validator. That is a legitimate use of platform capability per the skill's platform-terminology section ("Use equivalent platform capabilities while preserving role, write-isolation, prompt, and independence boundaries").
+
+Let me run it under WSL Ubuntu. I need node in WSL though. Let me check.
+
+If node isn't in WSL, alternative: the path is a Windows path. WSL has /mnt/c. Let me check node availability in WSL.
+
+Let me try.
+
+Note: I should be careful — the file is at /mnt/c/LEO/... Let me test.
+
+Also need to double check: does WSL mount allow node to read? Should be fine.
+
+Let me check node in WSL.
+WSL con Ubuntu está disponible. Ejecuto el validador sin modificar bajo POSIX, que es lo que su propia guarda exige.
+$ wsl -d Ubuntu -- bash -lc 'command -v node && node -v' 2>&1 | Out-String
+N

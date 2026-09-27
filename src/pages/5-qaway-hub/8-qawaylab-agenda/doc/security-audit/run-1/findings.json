@@ -1,0 +1,58 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "0001_agenda_schema.sql:112+realtime-publication-pii-broadcast",
+    "title": "Realtime publication broadcasts full public.bookings rows to any authorized subscriber",
+    "description": "Migration 0001 line 112 adds public.bookings to the supabase_realtime publication. The published payload is the row image, including customer_name, customer_email, customer_phone, payment fields and cancel_token. The intended reader of bookings is only the owning business (owner_bookings, 0001:95) while anon SELECT is denied (anon_read_own_booking using (false), 0001:108). If the deployed Realtime service delivers postgres_changes without enforcing subscriber RLS, any visitor subscribing with the bundled anon key receives every tenant's booking rows as they change.",
+    "root_cause": "A PII-bearing table was added to a broadcast channel that inherits none of the table-level anon denial by construction; delivery depends entirely on platform-side RLS enforcement for postgres_changes, which is not configured or constrained anywhere in the target.",
+    "intended_behavior": "Only sessions whose role passes public.bookings SELECT policies should receive realtime events for that table, or the publication should expose a sanitized projection.",
+    "trace": [
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "scope": "database publication", "description": "alter publication supabase_realtime add table public.bookings - full row images enter the broadcast channel" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 108, "scope": "RLS", "description": "anon_read_own_booking using (false) denies REST reads; whether it also filters realtime delivery is the platform-side fact under validation" },
+      { "kind": "sink", "file": "supabase/config.toml", "line": 1, "scope": "deployment config", "description": "project_id is the only key in config.toml; no realtime authorization setting is source-visible in the target" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "description": "bookings is in the realtime publication" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 16, "description": "customer_name/customer_email/customer_phone columns exist on the broadcast row" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 63, "description": "cancel_token column exists on the broadcast row" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 108, "description": "anon REST select is denied, so any realtime leak is a channel that bypasses that control" }
+    ],
+    "conditions": [
+      { "kind": "system_configuration", "description": "The deployed Supabase Realtime must deliver postgres_changes without enforcing the subscriber's RLS, or the subscriber must hold a role whose SELECT policy on bookings passes." },
+      { "kind": "environmental_dependency", "description": "Supabase Realtime version/platform behavior for postgres_changes RLS enforcement is not determinable from the target source." }
+    ],
+    "execution": {
+      "attacker_perspective": "An anonymous visitor subscribes to postgres_changes on public.bookings using the anon key bundled in the built app and observes whether events arrive.",
+      "payloads": ["supabase.channel('probe').on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, console.log).subscribe()"],
+      "instructions": [
+        "In a browser console on the deployed app, run the payload with the existing window client.",
+        "Create or update one booking from a second browser session (a test booking against a dummy tenant).",
+        "Observe whether any event payload containing customer PII or cancel_token arrives."
+      ],
+      "observed_result": "Not executed in this run: target-controlled execution is prohibited on this host (no OS-enforced sandbox) and the decisive fact is the deployed Realtime platform behavior. Source evidence is complete; the behavioral check is the validation plan."
+    },
+    "remediation": {
+      "strategy": "Do not broadcast raw booking rows. Either remove bookings from the realtime publication and expose a sanitized view (like booked_slots) to the publication, or verify in the Supabase dashboard that Realtime enforces subscriber RLS for postgres_changes on this project before relying on the anon denial.",
+      "code_changes": [
+        { "file_name": "supabase/migrations/0003_realtime_no_bookings.sql", "fixed_code": "alter publication supabase_realtime drop table public.bookings;\n-- If live slot updates are needed, publish a sanitized projection instead:\n-- create or replace view public.booked_slots_live as select business_id, event_type_id, start_at, end_at from public.bookings where status in ('confirmed','pending_payment');\n-- alter publication supabase_realtime add table ... (only tables without PII)" }
+      ]
+    },
+    "severity": {
+      "likelihood": { "score": "medium", "reason": "The publication membership is certain; delivery to anon depends on platform RLS enforcement that the run could not verify, and no in-target code subscribes to bookings today." },
+      "impact": { "score": "medium", "description_scope": "demonstrated-by-source-shape", "reason": "If delivered, every tenant's customer PII and cancel tokens stream to any anonymous subscriber - cross-tenant PII disclosure with real consequences." },
+      "overall_severity": "medium"
+    },
+    "confidence": { "score": "high", "reason": "Source evidence is exact and unambiguous; only the platform delivery behavior remains open, which is why the record is needs_validation rather than confirmed." }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:112+realtime-publication-pii-broadcast-placeholder",
+    "title": "placeholder",
+    "description": "placeholder",
+    "claimed_root_cause": "placeholder",
+    "trace": [{ "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "scope": "database publication", "description": "placeholder" }],
+    "evidence": [{ "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "description": "placeholder" }],
+    "blockers": ["placeholder"],
+    "validation_plan": { "local": "placeholder" }
+  }
+]
