@@ -52,6 +52,23 @@
   color: var(--color-ink);
 }
 
+/* ── Themes ── */
+html.dark, [data-theme='dark'] {
+  color-scheme: dark;
+  --color-surface: #09090b;
+  --color-surface-muted: #18181b;
+  --color-ink: #f4f4f5;
+  --color-muted: #a1a1aa;
+}
+
+[data-theme='contraste'] {
+  color-scheme: dark;
+  --color-surface: #f4f4f5;
+  --color-surface-muted: #e4e4e7;
+  --color-ink: #09090b;
+  --color-muted: #71717a;
+}
+
 * {
   box-sizing: border-box;
 }
