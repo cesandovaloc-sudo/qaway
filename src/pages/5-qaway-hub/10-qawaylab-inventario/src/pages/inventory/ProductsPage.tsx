@@ -107,8 +107,12 @@ export default function ProductsPage() {
         />
       )}
 
-      {/* Toolbar — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 bg-white/95 backdrop-blur-md py-2 rounded-xl">
+      {/* Toolbar — sticky dentro del scroller de <main> (ref HubPanelPage.jsx:990).
+          El `top-0` se resuelve contra el contenedor de scroll del shell, no contra
+          el documento: el topbar negro vive fuera de ese scroller, así que la barra
+          se ancla justo debajo. Borde + sombra son los que dan definición al
+          translúcido cuando la lista pasa por debajo (como en :990). */}
+      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-3 bg-white/95 backdrop-blur-md border border-zinc-200 py-2 px-3.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />

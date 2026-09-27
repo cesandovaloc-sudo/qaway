@@ -55,7 +55,7 @@ export default function Header({
   }
 
   return (
-    <header className="h-[72px] bg-ink border-b border-white/10 flex items-center justify-between px-5 lg:px-6 relative z-50">
+    <header className="h-[72px] shrink-0 bg-ink border-b border-white/10 flex items-center justify-between px-5 lg:px-6 relative z-50">
       {/* Lado izquierdo: hamburguesa (colapso) + buscador, como el Hub */}
       <div className="flex items-center gap-2 lg:gap-3 flex-1 min-w-0">
         <button
