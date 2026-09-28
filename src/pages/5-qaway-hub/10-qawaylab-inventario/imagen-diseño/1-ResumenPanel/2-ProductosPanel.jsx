@@ -184,19 +184,19 @@ export default function ProductosPanel() {
   };
 
   const categories = useMemo(() => ["Todas", ...new Set(products.map(p => p.category))], [products]);
+
   const filtered = useMemo(() => products.filter(p => {
     const q = query.toLowerCase().trim();
     const matchesQ = !q || [p.name, p.sku, p.category, p.barcode, p.brand].some(v => String(v || "").toLowerCase().includes(q));
     const matchesCat = category === "Todas" || p.category === category;
-    const matchesStatus = status === "Todos" || p.status === status;
     const matchesStock = stockFilter === "Todos" || (stockFilter === "Con stock" && p.stock > 0) || (stockFilter === "Stock bajo" && p.stock > 0 && p.stock <= 10) || (stockFilter === "Sin stock" && p.stock === 0);
     const matchesComm = commercialStatus === "Todos" || p.status === commercialStatus;
     const matchesBrand = !brandFilter || (p.brand && p.brand.toLowerCase().includes(brandFilter.toLowerCase()));
     const matchesMinPrice = !minPrice || p.price >= Number(minPrice);
     const matchesMaxPrice = !maxPrice || p.price <= Number(maxPrice);
     const matchesLoc = locationFilter === "Todos" || p.location === locationFilter;
-    return matchesQ && matchesCat && matchesStatus && matchesStock && matchesComm && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
-  }), [products, query, category, status, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter]);
+    return matchesQ && matchesCat && matchesStock && matchesComm && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
+  }), [products, query, category, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
@@ -230,10 +230,6 @@ export default function ProductosPanel() {
       <style>{css}</style>
       <div className="pxp-layout">
         <main className="pxp-main">
-          <header className="pxp-topbar">
-            <div className="pxp-global-search"><Search size={15} style={{ color: "var(--muted)" }} /><input placeholder="Buscar productos, clientes, ventas, compras..." onChange={e => { setQuery(e.target.value); setPage(1); }} /><small>Ctrl K</small></div>
-            <div className="pxp-top-right"><span title="Notificaciones">♧<sup style={{ color: "#e11d48" }}>●</sup></span><span title="Tema">☾</span><div className="pxp-avatar">S</div><div><b style={{ display: "block", fontSize: 12, color: "#24324a" }}>S Admin</b><small>Administrador</small></div><span>⌄</span></div>
-          </header>
           <div className="pxp-content">
             <div className="pxp-heading" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 22, flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -278,13 +274,23 @@ export default function ProductosPanel() {
 
             <div className="pxp-toolbar" style={{ position: "relative" }}>
               <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
-              <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}><option value="Todas">◉　Categoría: Todas</option>{categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}</select>
-              <select className="pxp-select" value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}><option value="Todos">▣　Estado: Todos</option><option>Disponible</option><option>Stock bajo</option><option>Sin stock</option></select>
-              <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}><option value="Todos">☷　Stock: Todos</option><option>Con stock</option><option>Stock bajo</option><option>Sin stock</option></select>
               
-              {/* Botón Más filtros */}
+              {/* 2 Filtros Principales en la barra superior */}
+              <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
+                <option value="Todas">◉　Categoría: Todas</option>
+                {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
+              </select>
+
+              <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
+                <option value="Todos">☷　Stock: Todos</option>
+                <option>Con stock</option>
+                <option>Stock bajo</option>
+                <option>Sin stock</option>
+              </select>
+              
+              {/* Botón Más filtros con Icono Lucide */}
               <button
-                className={`pxp-btn ${showExtraFilters ? "primary" : ""}`}
+                className={`pxp-btn ${showExtraFilters ? "dark" : ""}`}
                 onClick={() => setShowExtraFilters(!showExtraFilters)}
                 style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
               >
