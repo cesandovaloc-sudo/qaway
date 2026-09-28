@@ -81,9 +81,9 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   return (
     <aside
-      className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-        collapsed ? 'w-[72px]' : 'w-64'
-      }`}
+      className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 ${
+        collapsed ? 'w-[72px] overflow-visible' : 'w-64 overflow-y-auto'
+      } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
     >
       {/* Logo Inventi Pro */}
       <div className="flex items-center gap-3 px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
@@ -128,7 +128,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       {/* Nav */}
       <nav className="flex-1 py-4 px-3">
         {navItems.map((item) => (
-          <div key={item.to}>
+          <div key={item.to} className="relative group">
             {item.section && (
               collapsed ? (
                 <div className="my-2.5 mx-auto w-7 h-[1px] bg-[var(--hub-border)]" />
@@ -141,6 +141,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             <NavLink
               to={getHref(item.to)}
               end={item.end}
+              title={item.label}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
@@ -152,6 +153,15 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               <span className="flex-shrink-0">{item.icon}</span>
               {!collapsed && <span>{item.label}</span>}
             </NavLink>
+
+            {/* Pop-up flotante al pasar el mouse por el ícono (modo colapsado) */}
+            {collapsed && (
+              <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:flex items-center z-50">
+                <div className="bg-[#0f172a] text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight">
+                  {item.label}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </nav>
@@ -179,17 +189,27 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       </button>
 
       {/* Settings */}
-      <NavLink
-        to={getHref('/config')}
-        className={({ isActive }) =>
-          `flex items-center gap-3 px-3 py-3 border-t border-white/10 text-sm transition-colors ${
-            isActive ? 'text-brand' : 'text-muted-light hover:text-white'
-          } ${collapsed ? 'justify-center' : ''}`
-        }
-      >
-        <Settings size={18} />
-        {!collapsed && <span>Configuración</span>}
-      </NavLink>
+      <div className="relative group">
+        <NavLink
+          to={getHref('/config')}
+          title="Configuración"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-3 border-t border-white/10 text-sm transition-colors ${
+              isActive ? 'text-brand' : 'text-muted-light hover:text-white'
+            } ${collapsed ? 'justify-center' : ''}`
+          }
+        >
+          <Settings size={18} />
+          {!collapsed && <span>Configuración</span>}
+        </NavLink>
+        {collapsed && (
+          <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:flex items-center z-50">
+            <div className="bg-[#0f172a] text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight">
+              Configuración
+            </div>
+          </div>
+        )}
+      </div>
     </aside>
   )
 }
