@@ -14,7 +14,6 @@ export interface AgendaAdapter {
   loadBusinessData(businessId: string): Promise<{ eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookings: Booking[] }>
   loadPublicData(slug: string): Promise<{ business: Business | null; eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookedSlots: unknown[] }>
   insertBooking(booking: Record<string, unknown>): Promise<{ data?: Booking; error?: { code?: string; message?: string } | null }>
-  insertReminders(reminders: Record<string, unknown>[]): Promise<{ error: { code?: string; message?: string } | null }>
   getBookingByToken(token: string): Promise<Booking | null>
   secureManageBooking(args: { token: string; action: string; newStart?: string; durationMinutes?: number }): Promise<{ data: unknown; error: unknown }>
   upsertEventType(payload: Record<string, unknown>): Promise<{ data: EventType | null; error: unknown }>
@@ -86,7 +85,9 @@ export const agendaAdapter: AgendaAdapter = {
   },
   async loadPublicData(slug) {
     try {
-      const { data: biz } = await supabase.from('businesses').select('*').eq('slug', slug).maybeSingle()
+      // Columnas explicitas: el anon no tiene acceso a owner_id,
+      // whatsapp_number ni branding (revoke por columna en la migracion).
+      const { data: biz } = await supabase.from('businesses').select('id, name, slug, timezone').eq('slug', slug).maybeSingle()
       if (biz) {
         const [ev, sch, exc, bok] = await Promise.all([
           supabase.from('event_types').select('*').eq('business_id', biz.id).eq('is_active', true),
@@ -169,19 +170,28 @@ export const agendaAdapter: AgendaAdapter = {
     }
   },
   async insertBooking(booking) {
-    const { data, error } = await supabase.from('bookings').insert(booking).select().single()
+    // Flujo publico via RPC SECURITY DEFINER: validacion de tenant
+    // binding, duracion del evento, horario y dias bloqueados en el
+    // servidor. El cancel_token lo acuna la DB (gen_random_uuid) y
+    // no llega PII completa ni campos de pago al anonimo.
+    const { data, error } = await supabase.rpc('secure_create_booking', {
+      p_business_id: booking.business_id,
+      p_event_type_id: booking.event_type_id,
+      p_customer_name: booking.customer_name,
+      p_customer_email: booking.customer_email,
+      p_customer_phone: booking.customer_phone,
+      p_start_at: booking.start_at,
+    })
     return { data: data as Booking, error }
   },
-  async insertReminders(reminders) {
-    // public.reminders is RLS-enabled with no policy, so this insert is
-    // rejected for every role (0001_agenda_schema.sql:89). The rejection is
-    // returned rather than discarded: swallowing it turns a hard control
-    // failure into a silent one.
-    const { error } = await supabase.from('reminders').insert(reminders)
-    return { error: error as { code?: string; message?: string } | null }
-  },
   async getBookingByToken(token) {
-    const { data } = await supabase.from('bookings').select('*, event_types(*), businesses(*)').eq('cancel_token', token).maybeSingle()
+    // Sin acceso directo de anon a bookings: la lectura por token se
+    // hace via RPC (accion info) que devuelve proyeccion reducida.
+    const { data, error } = await supabase.rpc('secure_manage_booking', {
+      p_token: token,
+      p_action: 'info',
+    })
+    if (error) return null
     return data as Booking | null
   },
   async secureManageBooking(args) {

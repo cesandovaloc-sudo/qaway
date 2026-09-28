@@ -213,25 +213,12 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
       if (error.code === 'PGRST116') {
         return { error: 'La reserva se guardo pero no pudimos mostrarte el enlace de gestion. Escribe al negocio para confirmar.' }
       }
-      if (error.code === '22P02' || error.code === '23503' || error.code === '23514') {
-        return { error: 'No pudimos completar la reserva. Contacta al negocio para recibir ayuda.' }
-      }
-      return { error: 'No pudimos completar la reserva. Intenta en unos momentos.' }
+      return { error: 'La reserva no pudo completarse en este horario. Contacta al negocio para recibir ayuda.' }
     }
 
-    // Reminders are best-effort: the booking itself already succeeded, so a
-    // rejection must not fail the reservation. It is reported instead of
-    // discarded, because the underlying RLS state needs to be visible.
-    const { error: reminderError } = await agendaAdapter.insertReminders([
-      { booking_id: data!.id, channel: 'email', kind: 'confirmation', send_at: new Date().toISOString() },
-      { booking_id: data!.id, channel: 'whatsapp', kind: 'confirmation', send_at: new Date().toISOString() },
-      { booking_id: data!.id, channel: 'email', kind: 'reminder', send_at: new Date(start.getTime() - 24 * 3600 * 1000).toISOString() },
-      { booking_id: data!.id, channel: 'whatsapp', kind: 'reminder', send_at: new Date(start.getTime() - 60 * 60 * 1000).toISOString() },
-    ])
-    if (reminderError) {
-      console.warn('[agenda] reminder insert rejected by RLS; booking stands:', reminderError.code)
-    }
-
+    // Los reminders (confirmacion + recordatorios) los crea un trigger
+    // AFTER INSERT en bookings (migracion de hardening); el cliente no
+    // inserta en public.reminders (sin policies, RLS deniega).
     return { data: data as Booking, paymentIntentId }
   }, [business])
 
