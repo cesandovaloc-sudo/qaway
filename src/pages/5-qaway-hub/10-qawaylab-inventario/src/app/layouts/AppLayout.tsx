@@ -43,7 +43,7 @@ export default function AppLayout() {
         style={{ marginLeft: collapsed ? 72 : 256 }}
       >
         <Header collapsed={collapsed} onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 min-h-0 overflow-y-auto bg-[var(--hub-bg)] text-[var(--hub-text)] transition-colors duration-200">
+        <main className="flex-1 min-h-0 overflow-y-auto transition-colors duration-200">
           <div className="p-6 min-h-full">
             <Outlet />
           </div>

@@ -69,6 +69,52 @@ html.dark, [data-theme='dark'] {
   --color-muted: #71717a;
 }
 
+/* Modo Oscuro integral para superficies de inventario */
+.hub-shell[data-mode='oscuro'] main {
+  background-color: #09090b !important;
+  color: #f4f4f5 !important;
+}
+
+.hub-shell[data-mode='oscuro'] main .bg-white {
+  background-color: #121215 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f4f4f5 !important;
+}
+
+.hub-shell[data-mode='oscuro'] main input,
+.hub-shell[data-mode='oscuro'] main select,
+.hub-shell[data-mode='oscuro'] main textarea {
+  background-color: #18181b !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
+.hub-shell[data-mode='oscuro'] main h1,
+.hub-shell[data-mode='oscuro'] main h2,
+.hub-shell[data-mode='oscuro'] main h3,
+.hub-shell[data-mode='oscuro'] main label {
+  color: #f4f4f5 !important;
+}
+
+.hub-shell[data-mode='oscuro'] main p {
+  color: #a1a1aa !important;
+}
+
+.hub-shell[data-mode='oscuro'] main .text-ink {
+  color: #f4f4f5 !important;
+}
+
+.hub-shell[data-mode='oscuro'] main .border-surface-muted {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Modo Contraste y Claro: Lienzo maestro limpio (#fafafa) */
+.hub-shell[data-mode='contraste'] main,
+.hub-shell[data-mode='claro'] main {
+  background-color: #fafafa !important;
+  color: #18181b !important;
+}
+
 * {
   box-sizing: border-box;
 }

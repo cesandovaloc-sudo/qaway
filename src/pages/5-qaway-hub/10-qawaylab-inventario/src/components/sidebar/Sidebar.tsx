@@ -81,7 +81,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
   return (
     <aside
-      className={`fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-surface)] border-r border-[var(--hub-border)] transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+      className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
         collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
@@ -91,7 +91,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           <Package size={18} className="text-white" />
         </div>
         {!collapsed && (
-          <span className="font-display text-white text-lg font-bold tracking-wide">
+          <span className="font-display text-[var(--hub-text)] text-lg font-bold tracking-wide">
             Inventario
           </span>
         )}
@@ -102,7 +102,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         {navItems.map((item) => (
           <div key={item.to}>
             {item.section && !collapsed && (
-              <div className="px-3 pt-4 pb-2 text-[10px] font-mono uppercase tracking-[0.15em] text-muted-light/60">
+              <div className="px-3 pt-4 pb-2 text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--hub-dim)]">
                 {item.section}
               </div>
             )}
@@ -112,8 +112,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-white/10 text-white [&_svg]:text-brand font-semibold'
-                    : 'text-white/65 hover:text-white hover:bg-white/10'
+                    ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] [&_svg]:text-brand font-semibold'
+                    : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
                 } ${collapsed ? 'justify-center' : ''}`
               }
             >
