@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 
@@ -29,23 +29,23 @@ export default function Header({
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
-  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>(() => {
-    return (localStorage.getItem('qaway.hubTheme') as 'claro' | 'contraste' | 'oscuro') || 'contraste'
+  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
+    const raw = localStorage.getItem('qaway.hubTheme')
+    if (raw === 'claro' || raw === 'blanco') return 'blanco'
+    if (raw === 'grises') return 'grises'
+    if (raw === 'oscuro') return 'oscuro'
+    return 'contraste'
   })
 
   // Sincronización del tema con document.documentElement y localStorage (HubPanelPage.jsx:2144-2148)
   useEffect(() => {
     localStorage.setItem('qaway.hubTheme', themeMode)
-    document.documentElement.style.colorScheme = themeMode === 'claro' ? 'light' : 'dark'
-    if (themeMode === 'claro') {
-      document.documentElement.classList.remove('dark')
-      document.documentElement.setAttribute('data-theme', 'light')
-    } else if (themeMode === 'oscuro') {
+    document.documentElement.style.colorScheme = (themeMode === 'blanco' || themeMode === 'grises') ? 'light' : 'dark'
+    document.documentElement.setAttribute('data-theme', themeMode)
+    if (themeMode === 'oscuro') {
       document.documentElement.classList.add('dark')
-      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark')
-      document.documentElement.setAttribute('data-theme', 'contraste')
     }
     window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
@@ -364,12 +364,20 @@ export default function Header({
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">Tema</span>
                     <div className="flex items-center gap-1">
                       <button
-                        onClick={() => setThemeMode('claro')}
-                        title="Claro"
-                        aria-label="Tema claro"
-                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'claro' ? 'text-[var(--hub-text)] bg-[var(--hub-hover)]' : 'text-[var(--hub-faint)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'}`}
+                        onClick={() => setThemeMode('blanco')}
+                        title="Blanco Puro (Inventi Pro)"
+                        aria-label="Tema blanco puro"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'blanco' ? 'text-[var(--hub-text)] bg-[var(--hub-hover)]' : 'text-[var(--hub-faint)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'}`}
                       >
                         <Sun size={14} />
+                      </button>
+                      <button
+                        onClick={() => setThemeMode('grises')}
+                        title="Escala de Grises"
+                        aria-label="Tema escala de grises"
+                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'grises' ? 'text-[var(--hub-text)] bg-[var(--hub-hover)]' : 'text-[var(--hub-faint)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'}`}
+                      >
+                        <Layers size={14} />
                       </button>
                       <button
                         onClick={() => setThemeMode('contraste')}
@@ -381,7 +389,7 @@ export default function Header({
                       </button>
                       <button
                         onClick={() => setThemeMode('oscuro')}
-                        title="Oscuro"
+                        title="Oscuro Total"
                         aria-label="Tema oscuro"
                         className={`p-1.5 rounded-lg transition-colors cursor-pointer ${themeMode === 'oscuro' ? 'text-[var(--hub-text)] bg-[var(--hub-hover)]' : 'text-[var(--hub-faint)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'}`}
                       >

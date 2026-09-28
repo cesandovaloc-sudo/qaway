@@ -69,7 +69,71 @@ html.dark, [data-theme='dark'] {
   --color-muted: #71717a;
 }
 
-/* Modo Oscuro integral para superficies de inventario */
+/* ── 1. MODO BLANCO PURO (Inventi Pro) ── */
+.hub-shell[data-mode='blanco'],
+.hub-shell[data-mode='claro'] {
+  --hub-bg: #ffffff;
+  --hub-surface: #ffffff;
+  --hub-surface-strong: #f8fafc;
+  --hub-pop: #ffffff;
+  --hub-chip: #f8fafc;
+  --hub-hover: #f1f5f9;
+  --hub-hover-strong: #e2e8f0;
+  --hub-border: #eef0f4;
+  --hub-border-soft: #f4f5f8;
+  --hub-text: #0f172a;
+  --hub-text-soft: #475569;
+  --hub-dim: #64748b;
+  --hub-faint: #94a3b8;
+  --hub-footer: #f8fafc;
+}
+.hub-shell[data-mode='blanco'] main,
+.hub-shell[data-mode='claro'] main {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* ── 2. MODO ESCALA DE GRISES ── */
+.hub-shell[data-mode='grises'] {
+  --hub-bg: #f6f6f7;
+  --hub-surface: #ffffff;
+  --hub-surface-strong: #f0f0f2;
+  --hub-pop: #ffffff;
+  --hub-chip: rgba(0, 0, 0, 0.04);
+  --hub-hover: rgba(0, 0, 0, 0.05);
+  --hub-hover-strong: rgba(0, 0, 0, 0.09);
+  --hub-border: rgba(0, 0, 0, 0.10);
+  --hub-border-soft: rgba(0, 0, 0, 0.06);
+  --hub-text: #18181b;
+  --hub-text-soft: rgba(0, 0, 0, 0.65);
+  --hub-dim: rgba(0, 0, 0, 0.55);
+  --hub-faint: rgba(0, 0, 0, 0.42);
+  --hub-footer: rgba(0, 0, 0, 0.03);
+}
+.hub-shell[data-mode='grises'] main {
+  background-color: #fafafa !important;
+  color: #18181b !important;
+}
+
+/* En modos claros/grises, asegurar legibilidad del chrome */
+.hub-shell[data-mode='blanco'] .hub-chrome *,
+.hub-shell[data-mode='claro'] .hub-chrome *,
+.hub-shell[data-mode='grises'] .hub-chrome * {
+  color: var(--hub-text);
+}
+.hub-shell[data-mode='blanco'] .hub-chrome .bg-brand *,
+.hub-shell[data-mode='claro'] .hub-chrome .bg-brand *,
+.hub-shell[data-mode='grises'] .hub-chrome .bg-brand * {
+  color: #ffffff !important;
+}
+
+/* ── 3. MODO CONTRASTE (Original) ── */
+.hub-shell[data-mode='contraste'] main {
+  background-color: #fafafa !important;
+  color: #18181b !important;
+}
+
+/* ── 4. MODO OSCURO INTEGRAL ── */
 .hub-shell[data-mode='oscuro'] main {
   background-color: #09090b !important;
   color: #f4f4f5 !important;
@@ -106,13 +170,6 @@ html.dark, [data-theme='dark'] {
 
 .hub-shell[data-mode='oscuro'] main .border-surface-muted {
   border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Modo Contraste y Claro: Lienzo maestro limpio (#fafafa) */
-.hub-shell[data-mode='contraste'] main,
-.hub-shell[data-mode='claro'] main {
-  background-color: #fafafa !important;
-  color: #18181b !important;
 }
 
 * {

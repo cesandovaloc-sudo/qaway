@@ -18,8 +18,12 @@ import Header from '@/components/header/Header'
  */
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
-  const [themeMode, setThemeMode] = useState<'claro' | 'contraste' | 'oscuro'>(() => {
-    return (localStorage.getItem('qaway.hubTheme') as 'claro' | 'contraste' | 'oscuro') || 'contraste'
+  const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
+    const raw = localStorage.getItem('qaway.hubTheme')
+    if (raw === 'claro' || raw === 'blanco') return 'blanco'
+    if (raw === 'grises') return 'grises'
+    if (raw === 'oscuro') return 'oscuro'
+    return 'contraste'
   })
 
   useEffect(() => {
