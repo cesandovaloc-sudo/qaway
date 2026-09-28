@@ -99,3 +99,52 @@ No SQL file was modified, so every Supabase-side anchor remains exactly valid.
 - `console` usage confirmed already present (`supabase.ts:9` uses `console.error`), so `console.warn` matches existing convention.
 - `insertReminders` has exactly one call site, updated; the interface signature, the implementation and the caller were all changed together.
 - **Not** performed: `tsc`, `vite build`, `eslint`, and any runtime test. No build was run, per instruction and per the no-network constraint.
+
+---
+
+## 7. Backend remediation — applied by a specialised agent
+
+**Status update, `2754cbd8` (`2026-09-28 15:39`):** the six Supabase-side findings excluded in §3 were implemented by a specialised agent. This section is the record of what actually landed. It was written by reading the applied migration, not by the agent that wrote it.
+
+**Location matters.** The change is **not** in this run's directory. It went to the monorepo's central migration chain:
+
+```
+supabase/migrations/20260928160000_fix_agenda_security_hardening.sql   (345 lines, 12,759 bytes)
+```
+
+Its header declares the dependency `20260920102000_agenda_coupled_central.sql`, which exists and sorts earlier, so migration order is correct.
+
+### Disposition of the six excluded findings
+
+| Finding | Status | Evidence in the applied migration |
+|---|---|---|
+| #1 reschedule unvalidated | **resolved** | L72 token-expiry check, L78 `v_duration := coalesce(v_ev.duration_minutes, 30)`, L113 rejects a caller duration that differs from the event type, L121-125 checks `availability_exceptions`, L136 checks `schedules` |
+| #4 tenant binding missing | **resolved** | L231 `if v_ev.business_id is distinct from p_business_id then` inside `secure_create_booking` |
+| #5 unbounded interval | **resolved** | L241 derives duration from the event type; L254 and L264 validate exceptions and schedules on the create path |
+| #6 definer RPC returns full composite | **resolved** | L187 introduces `secure_create_booking`, which returns only `cancel_token, token_expires_at, token_consumed_at` (L292) instead of the row |
+| #7 anon `USING (true)` policies | **resolved** | L19 `revoke all on public.bookings from anon`, L21-23 drop the three anon policies on `bookings`, L30 `revoke select (owner_id, whatsapp_number, branding) on public.businesses from anon` |
+| #8 token has no lifecycle | **resolved** | L12 `token_expires_at timestamptz default (now() + interval '30 days')`, L14 `token_consumed_at`, L165 rotation on reschedule, consumption on cancel |
+
+### Two findings were also closed that this run had left open
+
+- **The `RETURNING`-blocked-by-RLS blocker from §4 is resolved.** L17-18 declare that the public flow now goes entirely through an RPC: `revoke all on public.bookings from anon` means anon has no direct `INSERT`, so the `.insert().select().single()` path that produced `PGRST116` is gone. The booking flow no longer depends on an anon SELECT policy.
+- **The missing `reminders` RLS policy is resolved.** L322 adds `agenda_auto_reminders()`, so reminders are created server-side by trigger rather than by the client insert that RLS was rejecting. The §1 Fix D observability change remains valid and is now informational rather than load-bearing.
+
+### Not addressed
+
+- **Server-side `buffer_minutes` enforcement.** A search for `buffer` in the migration returns nothing. The `EXCLUDE USING gist` constraint at `0001:66` only tests raw `start_at`/`end_at` overlap, so two back-to-back bookings can still ignore the configured buffer. The buffer is applied in the client slot generator (`AgendaContext.tsx:155`) and displayed in the panel, but nothing prevents a direct write from violating it. This was recorded in §1 as a product gap rather than a security finding, and it is still open.
+- **The Realtime publication.** `0001:112` still adds `public.bookings` to `supabase_realtime`, and the applied migration does not remove it. Whether that leaks PII depends on deployed Realtime RLS enforcement, which remains unverified. This was never one of the 11 canonical findings because it is a `needs_validation` question, but it is unresolved.
+- **The 8 `needs_validation` findings in `NEEDS-VALIDATION.md` have not been re-run.** Several of them were `needs_validation` precisely because they depended on effective grants; the grants changed materially in `2754cbd8`, so their local and deployment checks should be re-executed before any of them is promoted or retired.
+
+### Encoding note
+
+Lines 10, 16, 27 and others contain mojibake in their comment separators (`�"?�"?` instead of a box-drawing character). It is confined to comments and has no functional effect, but it will not render correctly in a diff review.
+
+### Two migration sources exist for the agenda schema
+
+This is an architectural question this audit did not raise and should be settled before deployment:
+
+- **App-local:** `src/pages/5-qaway-hub/8-qawaylab-agenda/supabase/migrations/` — `0001_agenda_schema.sql`, `0002_booking_free_only.sql`
+- **Central:** `supabase/migrations/` — 55 migrations including `20260920102000_agenda_coupled_central.sql` and the new `20260928160000_fix_agenda_security_hardening.sql`
+
+The new hardening migration targets the central schema and hard-codes policy names that exist in the app-local `0001` (`anon_insert_booking`, `anon_read_own_booking`, `anon_update_own_booking`). It is therefore not clear which chain is authoritative. If the app-local files are legacy, they should be archived or annotated as such, because a future contributor applying them to a fresh database would reconstruct the vulnerable policies this audit just removed. **This is the single highest-value follow-up item.**
