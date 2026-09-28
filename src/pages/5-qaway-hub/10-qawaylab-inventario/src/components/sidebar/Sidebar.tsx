@@ -85,15 +85,36 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         collapsed ? 'w-[72px]' : 'w-64'
       }`}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
-        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center flex-shrink-0">
-          <Package size={18} className="text-white" />
+      {/* Logo Inventi Pro */}
+      <div className="flex items-center gap-3 px-4 h-[72px] shrink-0 border-b border-[var(--hub-border)]">
+        <div
+          className="w-[30px] h-[30px] flex-shrink-0 relative"
+          style={{
+            background: 'linear-gradient(135deg, #38a5ff, #1853d9)',
+            clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+          }}
+        >
+          <div
+            className="absolute inset-[8px] bg-white dark:bg-[#121215]"
+            style={{
+              clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+            }}
+          />
         </div>
         {!collapsed && (
-          <span className="font-display text-[var(--hub-text)] text-lg font-bold tracking-wide">
-            Inventario
-          </span>
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5 leading-none">
+              <span className="text-[20px] font-bold tracking-[-0.7px] text-[var(--hub-text)]">
+                Inventi
+              </span>
+              <span className="text-[11px] font-semibold text-[#1261e9] bg-[#eaf2ff] dark:bg-blue-950/60 dark:text-blue-300 rounded-[6px] px-[7px] py-[3px] leading-none">
+                Pro
+              </span>
+            </div>
+            <span className="text-[11px] text-[var(--hub-dim)] mt-[3px] leading-none whitespace-nowrap">
+              Inventario &amp; ERP Comercial
+            </span>
+          </div>
         )}
       </div>
 
@@ -112,7 +133,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[var(--hub-hover)] text-[var(--hub-text)] [&_svg]:text-brand font-semibold'
+                    ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
                     : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
                 } ${collapsed ? 'justify-center' : ''}`
               }
