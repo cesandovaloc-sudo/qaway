@@ -99,17 +99,6 @@ export default function ProductosPanel() {
     <div className="pxp-root">
       <style>{css}</style>
       <div className="pxp-layout">
-        <aside className="pxp-sidebar">
-          <div className="pxp-brand"><div className="pxp-logo" /><div><div><b>Inventi</b><span className="pxp-pro">Pro</span></div><small>Inventario &amp; ERP Comercial</small></div></div>
-          <nav className="pxp-nav">
-            {["▦  Resumen", "⬡  Productos", "▱  Categorías", "♧  Ubicaciones", "⇄  Movimientos"].map((x, i) => <button key={x} className={i === 1 ? "active" : ""} onClick={() => i !== 1 && showToast("Sección de demostración")}><span>{x.split("  ")[0]}</span>{x.split("  ")[1]}</button>)}
-            <div className="sep" />
-            {["♙  Clientes", "▤  Cotizaciones", "▣  Ventas", "▧  Pedidos web", "🛒  Compras", "♙  Proveedores"].map(x => <button key={x} onClick={() => showToast("Sección de demostración")}>{x.split("  ")[0]} {x.split("  ")[1]}</button>)}
-            <div className="sep" />
-            {["♧  Precios", "▣  Paquetes / Kits", "◇  Promociones", "▤  Liquidaciones", "▣  Catálogos", "▣  Caja", "▧  Gastos", "▤  Contabilidad", "▥  Reportes", "⚙  Configuración"].map(x => <button key={x} onClick={() => showToast("Sección de demostración")}>{x.split("  ")[0]} {x.split("  ")[1]}</button>)}
-          </nav>
-          <div className="pxp-plan"><b>♛　Plan Profesional</b><small>Inventi Pro</small><div className="pxp-progress"><i /></div><small>800 de 2,000 productos</small><div style={{ marginTop: 8, color: "#1763ed", fontSize: 12 }}>Ver últimos beneficios →</div></div>
-        </aside>
         <main className="pxp-main">
           <header className="pxp-topbar">
             <div className="pxp-global-search"><Icon>⌕</Icon><input placeholder="Buscar productos, clientes, ventas, compras..." onChange={e => { setQuery(e.target.value); setPage(1); }} /><small>Ctrl K</small></div>

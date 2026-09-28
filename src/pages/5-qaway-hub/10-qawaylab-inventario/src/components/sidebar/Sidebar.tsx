@@ -95,8 +95,9 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           }}
         >
           <div
-            className="absolute inset-[8px] bg-white dark:bg-[#121215]"
+            className="absolute inset-[8px]"
             style={{
+              background: 'var(--hub-bg)',
               clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
             }}
           />
@@ -107,7 +108,13 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               <span className="text-[20px] font-bold tracking-[-0.7px] text-[var(--hub-text)]">
                 Inventi
               </span>
-              <span className="text-[11px] font-semibold text-[#1261e9] bg-[#eaf2ff] dark:bg-blue-950/60 dark:text-blue-300 rounded-[6px] px-[7px] py-[3px] leading-none">
+              <span
+                className="text-[11px] font-semibold rounded-[6px] px-[7px] py-[3px] leading-none"
+                style={{
+                  backgroundColor: '#eaf2ff',
+                  color: '#1261e9',
+                }}
+              >
                 Pro
               </span>
             </div>
