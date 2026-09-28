@@ -1,58 +1,355 @@
 [
   {
     "verdict": "confirmed",
-    "fingerprint": "0001_agenda_schema.sql:112+realtime-publication-pii-broadcast",
-    "title": "Realtime publication broadcasts full public.bookings rows to any authorized subscriber",
-    "description": "Migration 0001 line 112 adds public.bookings to the supabase_realtime publication. The published payload is the row image, including customer_name, customer_email, customer_phone, payment fields and cancel_token. The intended reader of bookings is only the owning business (owner_bookings, 0001:95) while anon SELECT is denied (anon_read_own_booking using (false), 0001:108). If the deployed Realtime service delivers postgres_changes without enforcing subscriber RLS, any visitor subscribing with the bundled anon key receives every tenant's booking rows as they change.",
-    "root_cause": "A PII-bearing table was added to a broadcast channel that inherits none of the table-level anon denial by construction; delivery depends entirely on platform-side RLS enforcement for postgres_changes, which is not configured or constrained anywhere in the target.",
-    "intended_behavior": "Only sessions whose role passes public.bookings SELECT policies should receive realtime events for that table, or the publication should expose a sanitized projection.",
+    "fingerprint": "0001_agenda_schema.sql:138+secure-manage-booking-reschedule-unvalidated",
+    "title": "secure_manage_booking reschedule applies attacker-chosen p_new_start and p_duration_minutes with no calendar validation, and the function is granted to anon",
+    "description": "The reschedule branch of public.secure_manage_booking (0001:138-148) takes p_new_start and p_duration_minutes straight from the caller and writes them into start_at and end_at. The only server-side control on the new interval is the EXCLUDE constraint at 0001:66, which prevents the new range from OVERLAPPING an existing booking. Nothing validates that the new start falls on a day the business is open (public.schedules, 0001:33-40), that it is not an availability_exceptions blackout day (0001:42-49), that it is in the future, or that p_duration_minutes matches the event type's own duration_minutes (0001:23). The function is declared SECURITY DEFINER (0001:123) and explicitly granted to anon at 0001:157, so the caller needs no privilege beyond holding a booking's cancel_token. A caller can therefore relocate any booking they hold a token for to an arbitrary datetime, or inflate the duration to occupy an arbitrarily long window, creating a durable availability denial for that tenant without touching the owner's account.",
+    "root_cause": "The RPC treats its two interval parameters as trusted input. Overlap is enforced declaratively at 0001:66, which the code comment at 0001:142 correctly acknowledges, but that constraint was treated as if it validated the whole booking interval. It validates collision only. The business-calendar inputs (schedules, availability_exceptions, event duration) are never read inside the function body at 0001:126-154, so the definer context has the authority to write the row and no rule constrains what it writes.",
+    "intended_behavior": "A reschedule should be constrained to the same event type's duration and to the owning business's published availability windows, should reject past timestamps, and should not be callable by an unauthenticated principal at all without a stronger capability than a single bearer token.",
     "trace": [
-      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "scope": "database publication", "description": "alter publication supabase_realtime add table public.bookings - full row images enter the broadcast channel" },
-      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 108, "scope": "RLS", "description": "anon_read_own_booking using (false) denies REST reads; whether it also filters realtime delivery is the platform-side fact under validation" },
-      { "kind": "sink", "file": "supabase/config.toml", "line": 1, "scope": "deployment config", "description": "project_id is the only key in config.toml; no realtime authorization setting is source-visible in the target" }
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 157, "scope": "database grant", "description": "grant execute on function public.secure_manage_booking(uuid, text, timestamptz, int) to anon, authenticated - the RPC is reachable by the anon role" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 138, "scope": "definer function body", "description": "elsif p_action = 'reschedule' branch entered with caller-supplied p_new_start and p_duration_minutes" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 143, "scope": "definer function body", "description": "update public.bookings set start_at = p_new_start, end_at = p_new_start + (p_duration_minutes || ' minutes')::interval - unvalidated values written under SECURITY DEFINER" },
+      { "kind": "sink", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 66, "scope": "table constraint", "description": "exclude using gist (business_id with =, slot_range with &&) where status in ('confirmed','pending_payment') - the only control on the new interval, and it blocks collision only, not date or duration" }
     ],
     "evidence": [
-      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "description": "bookings is in the realtime publication" },
-      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 16, "description": "customer_name/customer_email/customer_phone columns exist on the broadcast row" },
-      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 63, "description": "cancel_token column exists on the broadcast row" },
-      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 108, "description": "anon REST select is denied, so any realtime leak is a channel that bypasses that control" }
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 138, "description": "reschedule branch reads p_new_start and p_duration_minutes with no lookup of event_types or schedules" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 144, "description": "start_at = p_new_start is assigned directly from the parameter" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 145, "description": "end_at derived from p_duration_minutes with no bound and no comparison to event_types.duration_minutes (0001:23)" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 157, "description": "execute granted to anon, so no authenticated session is required" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 66, "description": "the EXCLUDE constraint is the sole interval control and only prevents overlap" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 142, "description": "comment asserts the EXCLUDE restriction validates the new slot, which is true for collisions only" }
     ],
     "conditions": [
-      { "kind": "system_configuration", "description": "The deployed Supabase Realtime must deliver postgres_changes without enforcing the subscriber's RLS, or the subscriber must hold a role whose SELECT policy on bookings passes." },
-      { "kind": "environmental_dependency", "description": "Supabase Realtime version/platform behavior for postgres_changes RLS enforcement is not determinable from the target source." }
+      { "kind": "authorization_role", "description": "The attacker must reach the function as the anon role, which 0001:157 grants explicitly, and must supply a cancel_token belonging to an existing booking (lookup at 0001:130)." },
+      { "kind": "user_interaction", "description": "No interaction with the owner is required; the attacker acts entirely with the token returned to the booking customer." }
     ],
     "execution": {
-      "attacker_perspective": "An anonymous visitor subscribes to postgres_changes on public.bookings using the anon key bundled in the built app and observes whether events arrive.",
-      "payloads": ["supabase.channel('probe').on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, console.log).subscribe()"],
-      "instructions": [
-        "In a browser console on the deployed app, run the payload with the existing window client.",
-        "Create or update one booking from a second browser session (a test booking against a dummy tenant).",
-        "Observe whether any event payload containing customer PII or cancel_token arrives."
+      "attacker_perspective": "A customer or anyone holding a cancel_token calls secure_manage_booking with action='reschedule' and a p_new_start far outside the business's published hours, or with an inflated p_duration_minutes, and observes the booking move.",
+      "payloads": [
+        "select public.secure_manage_booking('<token>'::uuid, 'reschedule', '2030-01-01 03:00:00+00', 600);"
       ],
-      "observed_result": "Not executed in this run: target-controlled execution is prohibited on this host (no OS-enforced sandbox) and the decisive fact is the deployed Realtime platform behavior. Source evidence is complete; the behavioral check is the validation plan."
+      "instructions": [
+        "Complete a real booking through the public form and capture the cancel_token from the manage link.",
+        "Call the RPC with action 'reschedule', a start outside the tenant's schedules rows, and p_duration_minutes far above the event type's duration.",
+        "Confirm the row moved and that no error was raised."
+      ],
+      "observed_result": "Not executed in this run: target execution is prohibited on this host and no live Supabase project is in scope. The defect is proven by reading the function body, which contains no calendar lookup of any kind between 0001:126 and 0001:154."
     },
     "remediation": {
-      "strategy": "Do not broadcast raw booking rows. Either remove bookings from the realtime publication and expose a sanitized view (like booked_slots) to the publication, or verify in the Supabase dashboard that Realtime enforces subscriber RLS for postgres_changes on this project before relying on the anon denial.",
+      "strategy": "Constrain the reschedule branch inside the function: reject p_new_start in the past, derive the duration from the event type instead of accepting it from the caller, verify the new start falls inside a public.schedules window and is not an availability_exceptions blackout for that business_id, and re-check tenant consistency between business_id and event_type_id. Prefer moving capability management to an authenticated RPC and reserving the anon grant for a narrow, validated read-only operation.",
       "code_changes": [
-        { "file_name": "supabase/migrations/0003_realtime_no_bookings.sql", "fixed_code": "alter publication supabase_realtime drop table public.bookings;\n-- If live slot updates are needed, publish a sanitized projection instead:\n-- create or replace view public.booked_slots_live as select business_id, event_type_id, start_at, end_at from public.bookings where status in ('confirmed','pending_payment');\n-- alter publication supabase_realtime add table ... (only tables without PII)" }
+        { "file_name": "supabase/migrations/0003_secure_manage_booking_hardening.sql", "fixed_code": "-- inside the reschedule branch, before the update\nif p_new_start < now() then\n  raise exception 'Reprogramacion en el pasado no permitida';\nend if;\n\nselect et.duration_minutes, et.business_id into v_duration, v_business\n  from public.event_types et where et.id = v_booking.event_type_id;\n\nif v_business <> v_booking.business_id then\n  raise exception 'Inconsistencia tenant';\nend if;\n\nif p_duration_minutes <> v_duration then\n  raise exception 'Duracion no permitida';\nend if;\n\nif not exists (\n  select 1 from public.schedules s\n  where s.business_id = v_booking.business_id\n    and extract(isodow from p_new_start at time zone 'UTC')::int = s.day_of_week\n    and (p_new_start at time zone 'UTC')::time >= s.start_time\n    and (p_new_start at time zone 'UTC')::time < s.end_time\n) then\n  raise exception 'Horario fuera de disponibilidad';\nend if;\n\nif exists (\n  select 1 from public.availability_exceptions x\n  where x.business_id = v_booking.business_id\n    and x.exception_date = (p_new_start at time zone 'UTC')::date\n    and x.is_available = false\n) then\n  raise exception 'Fecha bloqueada';\nend if;" }
       ]
     },
     "severity": {
-      "likelihood": { "score": "medium", "reason": "The publication membership is certain; delivery to anon depends on platform RLS enforcement that the run could not verify, and no in-target code subscribes to bookings today." },
-      "impact": { "score": "medium", "description_scope": "demonstrated-by-source-shape", "reason": "If delivered, every tenant's customer PII and cancel tokens stream to any anonymous subscriber - cross-tenant PII disclosure with real consequences." },
+      "likelihood": { "score": "high", "reason": "The anon grant is explicit in source at 0001:157 and the token is handed to the customer by design, so no privilege escalation or victim interaction is needed." },
+      "impact": { "score": "high", "reason": "Demonstrated by source shape. Arbitrary relocation and unbounded duration of a real tenant's bookings is an integrity break plus a durable availability denial against that tenant's calendar, reachable by an unauthenticated token holder." },
+      "overall_severity": "high"
+    },
+    "confidence": { "score": "high", "reason": "The function body was read in full; it contains no read of public.schedules, public.availability_exceptions or public.event_types, so the absence of validation is directly observable rather than inferred." }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "src/agenda/context/AgendaContext.tsx:183+client-overrides-cancel-token-default",
+    "title": "The client overwrites the schema's gen_random_uuid() cancel_token with a 'demo-token-' Math.random() string that is not even a valid uuid, so booking inserts fail closed for every non-demo tenant",
+    "description": "public.bookings.cancel_token is declared uuid with default gen_random_uuid() at 0001:63, and the database is the intended authority for minting that capability. The client instead constructs the value itself at AgendaContext.tsx:183 as 'demo-token-' + Math.random().toString(36).substring(2, 9), and agendaAdapter.insertBooking sends the whole object to PostgREST at agendaAdapter.ts:172. Two defects follow. First, the literal prefix means the value is not a syntactically valid uuid, so PostgREST returns 22P02 invalid input syntax for type uuid and the insert is rejected for every tenant whose id does not start with 'demo-' - the failure path at AgendaContext.tsx:198-203. Second, and independent of that failure, letting the caller choose its own capability value is the design error: had the string been a well-formed uuid, the server default at 0001:63 would have been bypassed and the bearer capability controlling cancellation and reschedule would have been client-derived. The demo branch at AgendaContext.tsx:186-196 never reaches the database at all and fabricates the booking in local React state.",
+    "root_cause": "A server-authoritative default was treated as an optional field by the client. The value that must never be attacker-influenced is generated in the browser and inserted explicitly, and the surrounding demo-mode code path was placed on the production code path rather than isolated, so its demo string leaks into the real insert at agendaAdapter.ts:172.",
+    "intended_behavior": "The client should omit cancel_token entirely and let gen_random_uuid() at 0001:63 mint it, then read the returned value from the insert's RETURNING clause. Demo mode should be gated so it cannot run on the production booking path.",
+    "trace": [
+      { "kind": "entrypoint", "file": "src/agenda/context/AgendaContext.tsx", "line": 183, "scope": "client booking payload", "description": "cancel_token: 'demo-token-' + Math.random().toString(36).substring(2, 9) - the client mints the capability value" },
+      { "kind": "propagation", "file": "src/agenda/context/AgendaContext.tsx", "line": 198, "scope": "client booking flow", "description": "agendaAdapter.insertBooking(booking) is called with the client-chosen token for every tenant that is not demo-" },
+      { "kind": "sink", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 63, "scope": "column type", "description": "cancel_token uuid default gen_random_uuid() - the column rejects the non-uuid string, so the insert fails closed" },
+      { "kind": "propagation", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 172, "scope": "PostgREST insert", "description": "supabase.from('bookings').insert(booking).select().single() forwards the malformed value to the uuid column" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 63, "description": "cancel_token uuid default gen_random_uuid() - server-side authority for the value" },
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 183, "description": "client replaces that default with a Math.random() string carrying a literal 'demo-token-' prefix" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 172, "description": "insert sends the whole client object, cancel_token included" },
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 186, "description": "demo-mode branch is keyed on the business id prefix and short-circuits the real insert" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 183, "description": "getBookingByToken looks the row up by cancel_token alone, confirming the token is the sole bearer for the row" }
+    ],
+    "conditions": [
+      { "kind": "data_state", "description": "For tenants whose businesses.id does not start with 'demo-', the malformed token reaches PostgREST and is rejected by the uuid cast, so the booking is never persisted." }
+    ],
+    "execution": {
+      "attacker_perspective": "No attacker is required. The defect is reachable on the ordinary public booking path by any visitor submitting the form for a real tenant.",
+      "payloads": [
+        "cancel_token: 'demo-token-' + Math.random().toString(36).substring(2, 9)"
+      ],
+      "instructions": [
+        "Open the public booking page for a real tenant and submit any slot.",
+        "Observe that the insert is rejected and the customer is shown a raw database error.",
+        "Confirm no booking row exists afterwards."
+      ],
+      "observed_result": "Not executed in this run: target execution is prohibited. The rejection is deterministic from the column type at 0001:63 and the literal prefix at AgendaContext.tsx:183."
+    },
+    "remediation": {
+      "strategy": "Remove cancel_token from the client payload so 0001:63 mints it, read the token back from the insert's RETURNING clause, and move the demo branch behind an explicit environment guard so it cannot execute on the production booking path.",
+      "code_changes": [
+        { "file_name": "src/agenda/context/AgendaContext.tsx", "fixed_code": "// delete line 183 entirely: the server default at 0001:63 mints the token\n// guard the demo branch instead:\nif (import.meta.env.DEV && business.id.startsWith('demo-')) { /* ... */ }" }
+      ]
+    },
+    "severity": {
+      "likelihood": { "score": "high", "reason": "Every real booking attempt hits this path; no attacker precondition is needed." },
+      "impact": { "score": "medium", "reason": "Demonstrated by source shape. The immediate effect fails closed - the public booking flow is non-functional for real tenants, which is availability rather than confidentiality. The latent risk is that the same override, once made syntactically valid, would place a client-derived bearer capability in control of cancellation and reschedule for a table that also carries customer PII." },
       "overall_severity": "medium"
     },
-    "confidence": { "score": "high", "reason": "Source evidence is exact and unambiguous; only the platform delivery behavior remains open, which is why the record is needs_validation rather than confirmed." }
+    "confidence": { "score": "high", "reason": "Both the column type and the client-side assignment were read directly; the type mismatch is deterministic." }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "src/agenda/utils/calendarLinks.ts:38+ics-summary-unescaped",
+    "title": "The ICS builder writes SUMMARY, LOCATION and DESCRIPTION without RFC 5545 text escaping, so an owner-controlled event title or description is injected verbatim into a downloaded .ics file",
+    "description": "downloadIcsFile builds the VCALENDAR body at calendarLinks.ts:31-47 and joins it with CRLF. The SUMMARY property at calendarLinks.ts:38 is the event title interpolated with no transformation, LOCATION at line 40 is likewise raw, and DESCRIPTION at line 39 escapes newlines but nothing else. RFC 5545 section 3.3.11 requires that backslash, semicolon, comma and newline be escaped inside TEXT values, because each is a property delimiter. event_types.title is text not null at 0001:20 and event_types.description is text at 0001:22, both written by the authenticated owner through agendaAdapter.ts:194-195 and agendaAdapter.ts:211-212. The resulting string is handed to a Blob at calendarLinks.ts:49 and saved to disk, after which the consuming calendar client parses the injected delimiters as structure.",
+    "root_cause": "The builder applied a newline replacement to exactly one property and treated that as escaping. Delimiter characters inside a TEXT value are not neutralised, so any owner-supplied title or description can inject additional iCalendar properties or lines into a file that the customer's calendar application will parse.",
+    "intended_behavior": "Every TEXT-valued iCalendar property should pass through a single RFC 5545 escape routine that encodes backslash, semicolon, comma and newline before being placed in the VCALENDAR body.",
+    "trace": [
+      { "kind": "entrypoint", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 194, "scope": "owner write path", "description": "supabase.from('event_types').update(payload) - the owner persists title and description" },
+      { "kind": "propagation", "file": "src/agenda/utils/calendarLinks.ts", "line": 38, "scope": "serialization", "description": "SUMMARY:${event.title} interpolated with no escaping" },
+      { "kind": "propagation", "file": "src/agenda/utils/calendarLinks.ts", "line": 47, "scope": "serialization", "description": "the array is joined with CRLF, so any newline or delimiter already present in the value becomes structure" },
+      { "kind": "sink", "file": "src/agenda/utils/calendarLinks.ts", "line": 49, "scope": "file emission", "description": "new Blob([icsContent], { type: 'text/calendar;charset=utf-8' }) - the injected content is written to the user's disk and parsed by their calendar client" }
+    ],
+    "evidence": [
+      { "file": "src/agenda/utils/calendarLinks.ts", "line": 38, "description": "SUMMARY is interpolated raw; no escape routine is applied" },
+      { "file": "src/agenda/utils/calendarLinks.ts", "line": 39, "description": "DESCRIPTION escapes only newline, leaving backslash, semicolon and comma unhandled" },
+      { "file": "src/agenda/utils/calendarLinks.ts", "line": 40, "description": "LOCATION is interpolated raw" },
+      { "file": "src/agenda/utils/calendarLinks.ts", "line": 47, "description": "join('\\r\\n') turns embedded delimiters into new properties" },
+      { "file": "src/agenda/utils/calendarLinks.ts", "line": 49, "description": "Blob emission of the unescaped body" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 20, "description": "event_types.title text not null is the owner-controlled value reaching SUMMARY" }
+    ],
+    "conditions": [
+      { "kind": "authorization_role", "description": "Requires the authenticated role for the owning tenant, or any principal that can write event_types.title for the tenant whose .ics file is generated." },
+      { "kind": "user_interaction", "description": "The customer must generate and open the .ics file; the injection then executes in the local calendar application, not on a server." }
+    ],
+    "execution": {
+      "attacker_perspective": "A tenant owner sets an event title containing iCalendar delimiters, then any customer who downloads the booking file parses the injected structure.",
+      "payloads": [
+        "title = 'Consulta\\;X-ATTENDEE;RSVP=TRUE:attacker@evil.example\\nORGANIZER:mailto:attacker@evil.example'"
+      ],
+      "instructions": [
+        "As the tenant owner, set an event title containing a semicolon and an escaped CRLF sequence.",
+        "Have a customer generate and open the downloaded .ics file.",
+        "Inspect the parsed event in the calendar application for the injected properties."
+      ],
+      "observed_result": "Not executed in this run: target execution is prohibited. calendarLinks.ts was read in full and contains no escape routine for SUMMARY, LOCATION or the non-newline characters in DESCRIPTION."
+    },
+    "remediation": {
+      "strategy": "Introduce one RFC 5545 escape helper and apply it to every TEXT-valued property, escaping backslash first, then semicolon, comma and newline.",
+      "code_changes": [
+        { "file_name": "src/agenda/utils/calendarLinks.ts", "fixed_code": "const icsEscape = (v: string) =>\n  v.replace(/\\\\/g, '\\\\\\\\').replace(/;/g, '\\\\;').replace(/,/g, '\\\\,').replace(/\\r?\\n/g, '\\\\n');\n\n// then use:\n`SUMMARY:${icsEscape(event.title)}`,\n`DESCRIPTION:${icsEscape(event.description || '')}`,\n`LOCATION:${icsEscape(event.location || '')}`," }
+      ]
+    },
+    "severity": {
+      "likelihood": { "score": "medium", "reason": "Requires owner-level write access to the event title and a customer who downloads the file; both are ordinary use, not privileged." },
+      "impact": { "score": "medium", "reason": "Demonstrated by source shape. Property injection into a file parsed by the customer's calendar application, enabling forged event content and manipulated attendee or organiser fields in a local client." },
+      "overall_severity": "medium"
+    },
+    "confidence": { "score": "high", "reason": "The full builder was read; only one of three TEXT properties receives any transformation and it is not RFC 5545 escaping." }
   },
   {
     "verdict": "needs_validation",
-    "fingerprint": "0001_agenda_schema.sql:112+realtime-publication-pii-broadcast-placeholder",
-    "title": "placeholder",
-    "description": "placeholder",
-    "claimed_root_cause": "placeholder",
-    "trace": [{ "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "scope": "database publication", "description": "placeholder" }],
-    "evidence": [{ "file": "supabase/migrations/0001_agenda_schema.sql", "line": 112, "description": "placeholder" }],
-    "blockers": ["placeholder"],
-    "validation_plan": { "local": "placeholder" }
+    "fingerprint": "0002_booking_free_only.sql:8+anon-insert-unbound-business-id",
+    "title": "The anon INSERT policy validates the event type but never binds it to business_id, so a caller can write a booking row onto any tenant using any free active event type id",
+    "description": "The anon insert policy rebuilt in 0002:8-19 constrains status, payment_status and payment_intent_id, then verifies only that event_type_id exists, is active and is free. It does not require that the event type's own business_id equals the business_id being written. The client supplies both values independently at AgendaContext.tsx:173-174, and PostgREST accepts the row at agendaAdapter.ts:172. A caller can therefore pair a legitimate free event type id from one tenant with the business_id of any other tenant and insert customer rows that appear, to the owner, to be real bookings for their business.",
+    "claimed_root_cause": "The free-only check was written to close a payment-forgery hole reported in the migration header at 0002:1-2, and it re-derives the event type but stops one predicate short of asserting the tenant binding that would make the row coherent.",
+    "trace": [
+      { "kind": "entrypoint", "file": "src/agenda/context/AgendaContext.tsx", "line": 173, "scope": "client payload", "description": "business_id and event_type_id are chosen independently by the caller" },
+      { "kind": "propagation", "file": "supabase/migrations/0002_booking_free_only.sql", "line": 8, "scope": "RLS policy", "description": "with check asserts status, payment_status, payment_intent_id and an exists subquery on event_types that never compares e.business_id to business_id" },
+      { "kind": "sink", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 172, "scope": "PostgREST insert", "description": "the row is written to public.bookings and attributed to the chosen business_id" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0002_booking_free_only.sql", "line": 8, "description": "the rebuilt anon_insert_booking policy contains no business_id comparison" },
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 173, "description": "business_id: business.id is caller-supplied" },
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 174, "description": "event_type_id: eventType.id is caller-supplied and unrelated to the tenant" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 53, "description": "bookings.business_id references businesses.id, so the forged value is a valid tenant reference" }
+    ],
+    "blockers": [
+      "Neither migration issues grant insert on public.bookings to anon, so the effective privilege of the anon role on this table is a live-project fact that source cannot establish.",
+      "The bookings insert currently fails earlier on the malformed cancel_token described in the separate client-override finding, so reaching this write requires that value to be valid."
+    ],
+    "validation_plan": {
+      "local": "In a local Supabase stack, apply both migrations, then as the anon role run: select has_table_privilege('anon','public.bookings','INSERT'); and insert into public.bookings (business_id,event_type_id,customer_name,customer_email,customer_phone,start_at,end_at,status,payment_status) values ('<business A>','<free event type of business B>','x','x@x','1',now(),now()+interval '30 min','confirmed','pending'); and confirm whether the row is accepted.",
+      "deployment": "On the live project run the same has_table_privilege query and inspect pg_policies for public.bookings, then attempt the insert against a staging tenant and check whether the owner's panel shows the injected row."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:58+anon-insert-unbounded-interval",
+    "title": "The anon insert policy imposes no bound on start_at or end_at, so one anonymous row can occupy an arbitrarily long window in a tenant's calendar",
+    "description": "Neither the base policy at 0001:103-105 nor its rebuild at 0002:8-19 references start_at or end_at. The EXCLUDE constraint at 0001:66 stops a new range from overlapping an existing one, but it does not bound the length of that range, reject a start in the past, or require end_at to follow start_at by the event type's duration_minutes at 0001:23. A caller who can insert anonymously can write a single row spanning an arbitrary interval and no subsequent legitimate booking for that business_id will fit inside it, because every later insert collides. The comment at 0001:107 shows the design intent is that anon participates in slot calculation.",
+    "claimed_root_cause": "Interval validity was treated as a client-side concern in the booking flow, so the only server-side interval control is the collision constraint, which is a different property from bounds.",
+    "trace": [
+      { "kind": "entrypoint", "file": "src/agenda/context/AgendaContext.tsx", "line": 178, "scope": "client payload", "description": "start_at: toISO(start) with no server-side bound on the resulting range" },
+      { "kind": "propagation", "file": "supabase/migrations/0002_booking_free_only.sql", "line": 8, "scope": "RLS policy", "description": "the with check never mentions start_at or end_at" },
+      { "kind": "sink", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 66, "scope": "table constraint", "description": "the EXCLUDE constraint blocks overlap only, so one wide row permanently occupies the range for that business_id" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0002_booking_free_only.sql", "line": 8, "description": "no predicate on start_at or end_at" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 103, "description": "the original anon_insert_booking policy likewise omits both columns" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 66, "description": "collision-only constraint, no duration or lower-bound constraint" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 23, "description": "event_types.duration_minutes exists but is not referenced by any write-time check" }
+    ],
+    "blockers": [
+      "Effective anon INSERT privilege on public.bookings is not stated in either migration.",
+      "Supabase's default privileges for the anon role are a live-project fact."
+    ],
+    "validation_plan": {
+      "local": "Apply both migrations locally, then as anon insert a row with start_at = now() and end_at = now() + interval '10 years' for a free active event type, and attempt a normal 30-minute booking for the same business_id to confirm the exclusion error 23P01.",
+      "deployment": "Run select has_table_privilege('anon','public.bookings','INSERT') and, in a staging tenant, reproduce the wide-range insert and the follow-on collision."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:122+definer-rpc-returns-full-booking-composite",
+    "title": "The SECURITY DEFINER RPC returns the entire public.bookings composite to the anon role, so any holder of a cancel_token reads back customer PII and payment fields",
+    "description": "secure_manage_booking is declared to return public.bookings at 0001:122 and returns the whole row variable at 0001:153, with execute granted to anon at 0001:157. The design intent stated at 0001:106-107 is that customer PII must not reach the anonymous principal, enforced for direct reads by anon_read_own_booking using (false) at 0001:108. The RPC reproduces exactly the row that control hides, and it requires only the cancel_token, which is a bearer value returned to the customer. The client additionally reads the same row directly by token at agendaAdapter.ts:183.",
+    "claimed_root_cause": "The function was written to return the updated row for convenience, and its return type was never reduced to the fields a manage-booking response actually needs.",
+    "trace": [
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 157, "scope": "database grant", "description": "execute granted to anon" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 130, "scope": "definer function body", "description": "the row is selected by cancel_token alone, with no principal binding" },
+      { "kind": "sink", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 153, "scope": "definer function body", "description": "return v_booking returns the full composite including customer_name, customer_email, customer_phone and cancel_token to the anon caller" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 122, "description": "returns public.bookings - the composite type, not a reduced projection" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 153, "description": "return v_booking hands the full row back" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 108, "description": "anon_read_own_booking using (false) shows the intent to withhold this row from anon" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 55, "description": "customer_name is part of the returned composite" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 183, "description": "the client already performs the equivalent direct token lookup" }
+    ],
+    "blockers": [
+      "Obtaining a working cancel_token depends on the insert path, which is currently broken by the client-supplied non-uuid token recorded separately in this report.",
+      "Whether a live deployment issues usable tokens at all is a deployed-state fact."
+    ],
+    "validation_plan": {
+      "local": "Apply both migrations locally, insert a booking as an owner with a valid uuid cancel_token, then as anon call select public.secure_manage_booking('<token>'::uuid,'cancel') and confirm the returned row exposes customer_email and customer_phone.",
+      "deployment": "In staging, repeat the call and inspect the JSON response shape for the full composite."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:97+anon-read-policies-using-true",
+    "title": "Four anon SELECT policies use USING (true) with no tenant scoping or column restriction, exposing every tenant's business profile and working hours",
+    "description": "anon_read_business at 0001:97, anon_read_schedules at 0001:99 and anon_read_exceptions at 0001:100 are USING (true) across the whole table, and anon_read_active_events at 0001:98 filters only is_active. No migration issues a column-level grant or a row restriction for these, so any principal with the default anon SELECT privilege reads the businesses of every tenant including owner_id at 0001:10, whatsapp_number at 0001:12, branding at 0001:13, and the complete weekly schedules and blackout dates of every tenant. The public booking flow needs only the single tenant resolved by slug at agendaAdapter.ts:89-95.",
+    "claimed_root_cause": "The public page needs tenant data to render, and the policies were opened to the whole table rather than scoped to the tenant the request is actually for, relying on the client's own eq('business_id', ...) filters as if they were the access control.",
+    "trace": [
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 97, "scope": "RLS policy", "description": "create policy anon_read_business ... for select to anon using (true) - every row of every tenant" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 99, "scope": "RLS policy", "description": "anon_read_schedules ... using (true) exposes complete weekly working hours for all tenants" },
+      { "kind": "sink", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 89, "scope": "table definition", "description": "businesses.owner_id, whatsapp_number and branding are all readable through the open policy" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 97, "description": "anon_read_business using (true)" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 99, "description": "anon_read_schedules using (true)" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 100, "description": "anon_read_exceptions using (true)" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 10, "description": "owner_id is inside the publicly readable row" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 93, "description": "the app's own reads are correctly tenant-scoped, confirming the broad grant is unnecessary" }
+    ],
+    "blockers": [
+      "No explicit grant select on these tables to anon appears in either migration, so effective privilege is a live-project fact.",
+      "Supabase's default privileges for anon are platform configuration, not visible in this target."
+    ],
+    "validation_plan": {
+      "local": "Apply both migrations locally, then as anon run: select * from public.businesses; and select count(*) from public.schedules; and confirm rows from multiple tenants are returned.",
+      "deployment": "Run the same two queries with the anon key from the deployed bundle and count distinct business_id values returned."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:63+cancel-token-no-expiry-or-rotation",
+    "title": "cancel_token is a permanent, non-rotating, non-single-use bearer with no principal binding, and it is the sole key to cancellation, reschedule and PII readback",
+    "description": "The column at 0001:63 carries no expiry and no rotation state. The RPC looks the row up by token alone at 0001:130, with no check that the caller is the customer who made the booking, and the cancel branch at 0001:135-137 does not invalidate or mark the token as consumed, so the same value remains usable after a cancellation and after a reschedule. The client reads the row by token at agendaAdapter.ts:183. The token therefore accumulates in booking confirmation emails and manage links indefinitely, and any party who obtains it retains cancel, reschedule and full-row readback rights with no revocation path.",
+    "claimed_root_cause": "The capability was modelled as an identifier rather than as a revocable session, and no lifecycle columns or consumption semantics were added to the schema.",
+    "trace": [
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 130, "scope": "definer function body", "description": "select * into v_booking where cancel_token = p_token - lookup by token alone, no principal binding" },
+      { "kind": "propagation", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 135, "scope": "definer function body", "description": "cancel branch updates status without invalidating the token, so the capability survives use" },
+      { "kind": "sink", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 183, "scope": "client read", "description": "getBookingByToken reads the full row, including nested event_types and businesses, from the token alone" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 63, "description": "cancel_token uuid default gen_random_uuid() - no expires_at, no used_at, no revoked_at" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 130, "description": "token-only lookup, no binding to the booking's customer identity" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 136, "description": "cancel sets status only; the token is not consumed or rotated" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 183, "description": "client-side token lookup selects the full row with joins" }
+    ],
+    "blockers": [
+      "Whether a usable token is ever issued is currently blocked by the malformed client-supplied token recorded separately in this report.",
+      "Actual token exposure depends on how the manage link is delivered, which is outside this target."
+    ],
+    "validation_plan": {
+      "local": "Apply both migrations locally, create a booking as an owner with a valid uuid token, call the RPC with action 'cancel', then call it again with the same token and confirm it still succeeds.",
+      "deployment": "In staging, verify the same reuse behaviour and confirm no token rotation occurs after cancellation."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "index.html:1+no-csp-frame-ancestors",
+    "title": "No Content-Security-Policy is declared anywhere in the repository, so the authenticated owner surface that performs single-call destructive deletes has no framing defence",
+    "description": "index.html:1-16 contains no meta http-equiv Content-Security-Policy and the repository contains no server or proxy configuration that could emit one, because the SPA is served without any first-party backend in this target. That leaves frame-ancestors unrestricted by default. The owner panel issues destructive single-request deletes - agendaAdapter.ts:199 for event types, agendaAdapter.ts:207 for schedules and agendaAdapter.ts:212 onward for availability exceptions - and the login-as-demo path at AdminPanelPage.tsx lowers the bar for reaching that surface. Framing plus a same-origin user is the prerequisite for clickjacking those actions.",
+    "claimed_root_cause": "The SPA is deployed as static assets, so the response header that would carry frame-ancestors is emitted by infrastructure that lives outside this repository and was never constrained from within it.",
+    "trace": [
+      { "kind": "entrypoint", "file": "index.html", "line": 14, "scope": "SPA entry", "description": "the single HTML entry document is served with no CSP meta element anywhere in the file" },
+      { "kind": "propagation", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 199, "scope": "destructive owner action", "description": "delete on event_types issued directly with no confirmation step server-side" },
+      { "kind": "sink", "file": "src/agenda/pages/AdminPanelPage.tsx", "line": 63, "scope": "owner surface", "description": "the admin surface reachable in the same document, with demo mode available as an entry path" }
+    ],
+    "evidence": [
+      { "file": "index.html", "line": 1, "description": "the document head contains no Content-Security-Policy meta element" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 199, "description": "destructive delete on event_types" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 207, "description": "destructive delete on schedules" }
+    ],
+    "blockers": [
+      "The actual response headers are emitted by the deployment edge or the parent hub, neither of which is inside this target, so a source-only review cannot confirm the absence of a server-side header."
+    ],
+    "validation_plan": {
+      "local": "Serve the built assets and inspect the response: curl -sI http://localhost:5173/ | grep -i content-security-policy - and confirm the header is absent.",
+      "deployment": "curl -sI https://<deployed-host>/<agenda-route>/ and check for content-security-policy, then load the owner panel inside a cross-origin iframe and confirm it renders."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "0001_agenda_schema.sql:89+reminders-rls-no-policies-client-swallows-error",
+    "title": "public.reminders is RLS-enabled with zero policies while the client discards the rejection, so reminder creation silently fails with no signal",
+    "description": "RLS is enabled on public.reminders at 0001:89, but no policy for reminders is created anywhere in either migration, in contrast to the other six tables at 0001:91-95. Under RLS with no policy, every insert is rejected for every role including authenticated. The client calls insertReminders at agendaAdapter.ts:175-181 and wraps the call in a try/catch whose empty body carries only the comment no bloquea la reserva, so the rejection is discarded and the caller at AgendaContext.tsx:199 onward proceeds as if reminders were created. The result is a security control that fails closed without any operational signal, and no confirmed source-side exploit follows from it.",
+    "claimed_root_cause": "The reminders table was added to the RLS sweep at 0001:89 but never received the policy it needs, and the client treated the insert as best-effort, which converted a hard failure into a silent one.",
+    "trace": [
+      { "kind": "entrypoint", "file": "supabase/migrations/0001_agenda_schema.sql", "line": 89, "scope": "table definition", "description": "alter table public.reminders enable row level security with no accompanying policy" },
+      { "kind": "propagation", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 177, "scope": "client insert", "description": "supabase.from('reminders').insert(reminders) is rejected by the RLS default-deny" },
+      { "kind": "sink", "file": "src/agenda/adapters/agendaAdapter.ts", "line": 178, "scope": "error handling", "description": "the catch block has an empty body, so the rejection produces no error signal to the caller" }
+    ],
+    "evidence": [
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 89, "description": "RLS enabled on reminders" },
+      { "file": "supabase/migrations/0001_agenda_schema.sql", "line": 95, "description": "the bookings policies stop at line 95; no reminders policy exists in the file" },
+      { "file": "src/agenda/adapters/agendaAdapter.ts", "line": 178, "description": "empty catch body discards the RLS rejection" }
+    ],
+    "blockers": [
+      "Confirming that no policy was added outside the two migration files requires the live project's pg_policies view, and migrations applied out of band would not be visible in this target."
+    ],
+    "validation_plan": {
+      "local": "Apply both migrations locally, then as the authenticated owner attempt an insert into public.reminders and confirm the RLS rejection, and confirm the client continues as if it succeeded.",
+      "deployment": "Run select * from pg_policies where tablename = 'reminders'; and check the reminders table for rows to confirm none were ever created."
+    }
+  },
+  {
+    "verdict": "needs_validation",
+    "fingerprint": "src/agenda/context/AgendaContext.tsx:203+raw-upstream-error-rendered-to-anonymous",
+    "title": "Raw upstream database error text is returned and rendered to unauthenticated visitors, exposing schema and constraint detail and acting as an enumeration oracle",
+    "description": "The booking flow returns the upstream error message verbatim at AgendaContext.tsx:203, and the public form stores it directly at PublicBookingPage.tsx:107 for display to a visitor who has not authenticated. The message originates from PostgREST and therefore can contain table names, column names, constraint names and SQLSTATE codes. The code at AgendaContext.tsx:200 additionally branches on the SQLSTATE 23P01 and on a regex matching exclude or overlap, which confirms the raw upstream text reaches this layer rather than a sanitized error.",
+    "claimed_root_cause": "The adapter forwards the driver's error object unchanged and the page renders whatever it is given, so an upstream-internal diagnostic becomes user-facing copy on the unauthenticated surface.",
+    "trace": [
+      { "kind": "entrypoint", "file": "src/agenda/context/AgendaContext.tsx", "line": 200, "scope": "error handling", "description": "branches on error.code === '23P01' and matches /exclude|overlap/i against error.message, proving the raw text is inspected here" },
+      { "kind": "propagation", "file": "src/agenda/context/AgendaContext.tsx", "line": 203, "scope": "error propagation", "description": "return { error: error.message || 'Error al reservar' } forwards the upstream text unchanged" },
+      { "kind": "sink", "file": "src/agenda/pages/PublicBookingPage.tsx", "line": 107, "scope": "anonymous UI", "description": "setError(res.error) stores it for display to an unauthenticated visitor" }
+    ],
+    "evidence": [
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 203, "description": "raw error.message returned to the caller" },
+      { "file": "src/agenda/context/AgendaContext.tsx", "line": 200, "description": "SQLSTATE and constraint-name matching on the upstream message" },
+      { "file": "src/agenda/pages/PublicBookingPage.tsx", "line": 107, "description": "the message is stored for display on the public form" }
+    ],
+    "blockers": [
+      "The precise set of disclosed details depends on the PostgREST error verbosity configured on the live project, which is a deployed setting.",
+      "The exact rendering of the error in the DOM could not be confirmed by execution in this run."
+    ],
+    "validation_plan": {
+      "local": "Serve the app, submit a booking that triggers the exclusion constraint, and inspect the message shown on the public form for table, column, constraint or SQLSTATE detail.",
+      "deployment": "Repeat against a staging tenant and set PostgREST error verbosity to its current value before comparing."
+    }
   }
 ]

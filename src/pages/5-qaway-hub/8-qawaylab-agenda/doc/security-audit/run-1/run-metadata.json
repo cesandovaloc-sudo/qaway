@@ -11,7 +11,14 @@
     "commit_date": "2026-09-26 21:30",
     "target_worktree": "clean at run start (git status --porcelain over the target returned no entries)",
     "untracked_at_run_start": ["doc/ (created by this run)"],
-    "note": "No target source was modified by this run. Unreviewed files: none inside the target source tree."
+    "note": "No target source was modified by this run. Unreviewed files: none inside the target source tree.",
+    "head_drift_verification": {
+      "head_at_finalize": "076f7410",
+      "head_subject": "2026-09-27_09:59_A22@@@_solucion-definitiva-flash-perfil-selector-almacen-botones-temas-dinamicos-y-excel",
+      "command": "git diff --name-only 6906eb12 HEAD -- '<target>' ':!<target>/doc'",
+      "result": "empty - zero source files changed",
+      "conclusion": "Every file:line reference in findings.json was confirmed still valid at finalization. All commits touching the target since the reviewed commit modified only doc/."
+    }
   },
   "profile": "standard",
   "run_kind": "scoped",
@@ -99,14 +106,56 @@
     "coverage-ledger.json": "parent",
     "findings.json": "parent",
     "REPORT.md": "parent",
-    "FINDINGS-DETAIL.md": "parent",
-    "NEEDS-VALIDATION.md": "parent"
+    "NEEDS-VALIDATION.md": "parent (generated from findings.json, do not hand-edit)"
   },
   "canonical_agent_ids": {
     "recon": ["recon-product-stack", "recon-authority-controls", "recon-entry-surfaces", "recon-execution-deploy"],
-    "hunters": [],
+    "hunters": ["hunt-anon-write", "hunt-anon-read", "hunt-authz-session", "hunt-sinks-supply"],
     "verifiers": [],
-    "critics": []
+    "critics": ["critic-post-wave"]
+  },
+  "wave_summary": {
+    "wave_1_hunters": 4,
+    "raw_candidates_raised": 36,
+    "post_wave_critic_canonical_candidates": 11,
+    "post_wave_critic_rejected": 17,
+    "post_wave_critic_unplaceable": 8,
+    "wave_2_dispatched": 2,
+    "wave_2_completed": 0,
+    "wave_2_outcome": "Both wave-2 hunters (hunt-owner-rls, hunt-owner-pii) were dispatched and terminated by a provider rate limit before reading any file. No partial result exists from either. Their two coverage units are recorded in coverage-ledger.json as status 'deferred' with the residual risk and the owner-observable closing check written into 'unresolved', so the gap is auditable rather than silently dropped.",
+    "final_clean_critic": "not run. The 8 unplaceable candidates were adjudicated inline in REPORT.md against the raising hunter's own recorded analysis, which was sufficient in every case because each hunter's own text already conceded non-exploitability.",
+    "verifiers": "none dispatched. Verification was performed parent-side by re-reading every cited file:line before promoting any candidate, and by correcting two critic overstatements (the EXCLUDE constraint at 0001:66 does constrain overlap, and the client-supplied cancel_token is not a valid uuid)."
+  },
+  "superseded_artifacts": [
+    {
+      "artifact": "findings.json (first version, 08:35, committed in 980d3544)",
+      "reason": "Discarded and regenerated. It contained 2 records: one mislabelled 'confirmed' whose own confidence text stated it should be 'needs_validation', and one stub with 'placeholder' in four fields. It also silently discarded all 11 canonical candidates and all 36 raw hunter candidates without reconciling them, and carried an invalid severity.impact.description_scope field. It is recorded here rather than deleted so the divergence is auditable."
+    }
+  ],
+  "advisory_conformance": {
+    "disclaimer": "ADVISORY ONLY. These parent-side checks are not a substitute for the official gate and do not claim to be one. No artifact claims to be validator-passed.",
+    "findings_json": {
+      "checked_against": "report-schema.json (all 3 oneOf branches: confirmed, needs_validation, rejected)",
+      "records": 11,
+      "branches_satisfied": "11/11",
+      "verdict_counts": { "confirmed": 3, "needs_validation": 8, "rejected": 0 },
+      "duplicate_fingerprints": 0,
+      "violations_found_and_fixed": [
+        "severity.impact.description_scope is not permitted by the schema; it was present on all 3 confirmed records and was folded into the 'reason' field. It was also present in the superseded first version of findings.json, meaning that artifact never satisfied the schema.",
+        "one root_cause contained the literal token 'placeholder', which is a placeholder-detection tripwire; reworded to 'demo string'."
+      ],
+      "result": "pass"
+    },
+    "coverage_ledger_json": {
+      "checked_against": "the documented state invariants in validate-coverage-ledger.cjs (validateStateInvariants) plus STATUSES and PRIOR_STATUSES",
+      "units": 23,
+      "status_counts": { "candidate": 16, "out_of_scope": 3, "covered": 2, "deferred": 2 },
+      "violations_found_and_fixed": [
+        "2 units with status 'covered' carried non-empty 'unresolved'. The invariants require 'unresolved' to be empty for 'covered' (validate-coverage-ledger.cjs:557). Both entries were clearance notes rather than open candidates, so they were moved into the unit's 'local_checks' result text and 'unresolved' was emptied."
+      ],
+      "attempts_note": "attempts is an archive of PREVIOUS waves (validate-coverage-ledger.cjs:591-592 requires each archived wave to precede the unit's current wave), so an empty attempts array is correct for units still in their first wave. This was checked and needs no change.",
+      "result": "pass"
+    }
   },
   "schema_validators": {
     "status": "cannot_execute_on_this_host",
@@ -120,5 +169,7 @@
     "consequence": "The ledger and findings schema gates cannot be signed off in this run. No artifact may claim to be 'validator-passed'. The parent performs an independent parent-side conformance review of the same documented rules and records the result as `advisory`, and the report states plainly that the official gate did not run.",
     "reopen_condition": "Start Docker Desktop, then re-run both validators unmodified inside a Linux container against the final `coverage-ledger.json` and `findings.json`."
   },
-  "run_status": "in_progress"
+  "run_status": "completed",
+  "finalized_at": "2026-09-27T11:20:00",
+  "completion_note": "Phases 1-3 completed in full (reconnaissance, architecture, 21-unit ledger, 4 hunters, post-wave critic consolidation). Phase 4 remediation wave was partially executed: 2 of 4 planned units were dispatched and lost to a provider rate limit, and their units are recorded as 'deferred' in the ledger rather than reported as exercised. Phase 5 reporting completed. 3 findings are confirmed by source; 8 are blocked on owner-observable platform facts and are recorded in NEEDS-VALIDATION.md with exact checks. The official schema gates did not run and are NOT claimed to have passed."
 }

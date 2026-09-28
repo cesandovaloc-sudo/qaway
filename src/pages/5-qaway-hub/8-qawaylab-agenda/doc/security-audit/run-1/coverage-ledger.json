@@ -1065,13 +1065,24 @@
         "method": "source",
         "result": "Cleared. No candidate survived. All attacker-controlled values on this unit were traced to their sinks and each named control was verified to hold at its source line.",
         "artifact": null
+      },
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/context/AgendaContext.tsx",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/adapters/agendaAdapter.ts",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Resolve each residual question raised during the walk by deciding whether a source-visible boundary is actually crossed; a caveat with no reachable disclosure path is a clearance, not a candidate.",
+        "method": "source",
+        "result": "Residual questions examined and cleared as non-findings. (1) The demo button permanently overwrites the panel state of an already signed-in owner, and nothing restores the real data until the next loadBusinessData triggered by a genuine auth change. Today this is display-only; it becomes consequential the moment any booking-status action is added to the panel, which is future code, not a present path. (2) signOut does not clear the fabricated demo arrays: it nulls session and business but leaves the demo eventTypes/schedules/bookings in state. They stay unrendered behind the !session gate, so there is no present disclosure, but the clear is asymmetric with the rest of the sign-out path.",
+        "artifact": null
       }
     ],
     "result_fingerprints": [],
-    "unresolved": [
-      "The demo button permanently overwrites the panel state of an already signed-in owner, and nothing restores the real data until the next loadBusinessData triggered by a genuine auth change. Today this is display-only; it becomes consequential the moment any booking-status action is added to the panel, which is future code, not a present path.",
-      "signOut does not clear the fabricated demo arrays: it nulls session and business but leaves the demo eventTypes/schedules/bookings in state. They stay unrendered behind the !session gate, so there is no present disclosure, but the clear is asymmetric with the rest of the sign-out path."
-    ]
+    "unresolved": []
   },
   {
     "coverage_id": "src%2Fagenda%2Fpages%2FAdminPanelPage.tsx%23if%20not%20session%20LoginView::supabase%2Fmigrations%2F0001_agenda_schema.sql%23owner_business%20using%20owner_id%20eq%20auth%20uid::src%2Fagenda%2Fpages::ATTACK-CLASSES.md%23Access%20control",
@@ -1145,14 +1156,27 @@
         "method": "source",
         "result": "Cleared. No candidate survived. All attacker-controlled values on this unit were traced to their sinks and each named control was verified to hold at its source line.",
         "artifact": null
+      },
+      {
+        "agent_id": "hunt-authz-session",
+        "reviewed_paths": [
+          "src/agenda/adapters/agendaAdapter.ts",
+          "src/agenda/pages/AdminPanelPage.tsx",
+          "src/agenda/context/AgendaContext.tsx",
+          "src/config/supabase.ts",
+          "index.html",
+          "AgendaAppPage.jsx",
+          "supabase/migrations/0001_agenda_schema.sql",
+          "supabase/migrations/0002_booking_free_only.sql"
+        ],
+        "invariant": "Resolve each residual question raised during the walk by deciding whether a source-visible boundary is actually crossed; a caveat with no reachable disclosure path is a clearance, not a candidate.",
+        "method": "source",
+        "result": "Residual questions examined and cleared as non-findings. (1) Customer PII survives sign-out in provider state: AgendaContext.tsx:355-359 clears session and business but not bookings/eventTypes/schedules/exceptions. No consumer renders them without the !session gate, so there is no source-visible disclosure path today; recorded because the missing clear is exactly those lines. (2) loadBusinessData is fired by an unawaited effect with no cancellation or generation guard, so a slow response for principal A can resolve after principal B signs in and overwrite B's panel data. A stale in-browser view, not a boundary crossing; reachability in a shared browser is a deployment question outside the folder. (3) Whether the parent hub wraps the panel route in its own protected route, and therefore whether the agenda panel is reachable pre-login by design, cannot be settled from this folder.",
+        "artifact": null
       }
     ],
     "result_fingerprints": [],
-    "unresolved": [
-      "Customer PII survives sign-out in provider state: AgendaContext.tsx:355-359 clears session and business but not bookings/eventTypes/schedules/exceptions. No consumer renders them without the !session gate, so there is no source-visible disclosure path today; recorded because the missing clear is exactly those lines.",
-      "loadBusinessData is fired by an unawaited effect with no cancellation or generation guard, so a slow response for principal A can resolve after principal B signs in and overwrite B's panel data. A stale in-browser view, not a boundary crossing; reachability in a shared browser is a deployment question outside the folder.",
-      "Whether the parent hub wraps the panel route in its own protected route, and therefore whether the agenda panel is reachable pre-login by design, cannot be settled from this folder."
-    ]
+    "unresolved": []
   },
   {
     "coverage_id": "src%2Fagenda%2Fpages%2FManageBookingPage.tsx%23cancel_token%20from%20route%20param::supabase%2Fmigrations%2F0001_agenda_schema.sql%23cancel_token%20uuid%20default%20gen_random_uuid::supabase%2Fmigrations::ATTACK-CLASSES.md%23Cryptography%20and%20secrets",
@@ -1456,6 +1480,78 @@
       "Storage-scope cross-talk with the hub cannot be settled from this folder. Because storageKey is namespaced, a hub client using the default sb-<ref>-auth-token key neither shares nor clears this session, so whether hub logout leaves a live agenda session in localStorage is an out-of-target fact.",
       "index.html carries no CSP, no frame-ancestors and no Referrer-Policy, and the live document is served by a host outside the folder; the deployed header set is the blocker on the framed-click dimension of the delete-cascade candidate.",
       "Whether any same-origin script outside this folder reads the namespaced storage key is unverifiable here. Inside the folder the key has exactly one writer and one reader, and no XSS sink was found that could turn that into a lesser-authority disclosure."
+    ]
+  },
+  {
+    "coverage_id": "src/agenda/adapters/agendaAdapter.ts#every authenticated read and write the panel issues::supabase/migrations/0001_agenda_schema.sql#owner_business owner_event_types owner_schedules owner_exceptions owner_bookings::supabase/migrations::ATTACK-CLASSES.md#Access control",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#every authenticated read and write the panel issues",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business owner_event_types owner_schedules owner_exceptions owner_bookings",
+      "subsystem": "supabase/migrations",
+      "attack_class": "ATTACK-CLASSES.md#Access control"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#every authenticated read and write the panel issues",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_business owner_event_types owner_schedules owner_exceptions owner_bookings",
+    "subsystem": "supabase/migrations",
+    "attack_class": "ATTACK-CLASSES.md#Access control",
+    "starting_paths": [],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Access control",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Missing tenant or owner enforcement",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Policy and query disagreement",
+      "WEB-PROTOCOL-AND-AUTH.md#JWT verification and claim binding"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 2,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "NOT EXERCISED in this run. The post-wave critic raised that the five owner_* policies at 0001:91-95 are the sole enforcement for every authenticated path yet were only ever asserted safe in passing, never walked as a unit.",
+      "Deferred deliberately to avoid blocking report delivery. The dedicated hunt-owner-rls agent was dispatched and terminated by a provider rate limit before it could read a single file, so no partial result from it exists.",
+      "Residual risk, stated so it is not lost: the subquery-in-policy pattern and the uniform for all clause were NOT walked for cross-tenant UPDATE and DELETE effects, and no migration in this target issues a table-level GRANT, so the intended privilege model rests entirely on Supabase defaults that are invisible in source.",
+      "Owner-observable check that would close it: select schemaname, tablename, policyname, cmd, qual, with_check from pg_policies where schemaname = 'public'; plus select relname, relrowsecurity, relforcerowsecurity, pg_get_userbyid(relowner) from pg_class where relnamespace = 'public'::regnamespace; plus select has_table_privilege('authenticated', 'public.bookings', 'DELETE')."
+    ]
+  },
+  {
+    "coverage_id": "src/agenda/adapters/agendaAdapter.ts#bookings select star on the owner path (line 78)::supabase/migrations/0001_agenda_schema.sql#owner_bookings for all (line 95) over cancel_token (line 63) and customer columns (lines 55-57)::src/agenda/adapters::ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "canonical_refs": {
+      "surface": "src/agenda/adapters/agendaAdapter.ts#bookings select star on the owner path (line 78)",
+      "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_bookings for all (line 95) over cancel_token (line 63) and customer columns (lines 55-57)",
+      "subsystem": "src/agenda/adapters",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "src/agenda/adapters/agendaAdapter.ts#bookings select star on the owner path (line 78)",
+    "boundary": "supabase/migrations/0001_agenda_schema.sql#owner_bookings for all (line 95) over cancel_token (line 63) and customer columns (lines 55-57)",
+    "subsystem": "src/agenda/adapters",
+    "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "starting_paths": [],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Core discipline",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Excessive data exposure and retention limits",
+      "DATA-ISOLATION-AND-LIFECYCLE.md#Retention and queued-work overrun",
+      "CLIENT-SIDE.md#Browser-storage disclosure and stale authorization"
+    ],
+    "excluded_blocks": [],
+    "prior_status": "new",
+    "attempts": [],
+    "wave": 2,
+    "status": "deferred",
+    "agent_id": null,
+    "reviewed_paths": [],
+    "local_checks": [],
+    "result_fingerprints": [],
+    "unresolved": [
+      "NOT EXERCISED in this run. The post-wave critic raised that owner_bookings is for all with no column restriction and the adapter issues select('*') at adapter:78, so the owning tenant receives every cancel_token for its own customers alongside the PII it already legitimately sees.",
+      "Deferred deliberately to avoid blocking report delivery. The dedicated hunt-owner-pii agent was dispatched and terminated by a provider rate limit before it could read a single file, so no partial result from it exists.",
+      "Residual risk, stated so it is not lost: whether holding cancel_token grants a materially greater capability than the PII the owner already reads was NOT adjudicated, and no retention or erasure path for customer PII across the cascade deletes at 0001:10,19,35,43,53,71 was established.",
+      "Owner-observable check that would close it: inspect the deployed column-level grants for public.bookings, and confirm whether any customer-facing deletion or export path exists outside this target."
     ]
   }
 ]
