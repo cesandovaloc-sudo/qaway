@@ -148,6 +148,7 @@ export default function ProductosPanel() {
   const [menuId, setMenuId] = useState(null);
   const [selected, setSelected] = useState([]);
   const [detailProduct, setDetailProduct] = useState(null);
+  const [fullProduct, setFullProduct] = useState(null);
   const [detailTab, setDetailTab] = useState("Resumen");
   const [modal, setModal] = useState("");
   const [importStep, setImportStep] = useState(1);
@@ -245,12 +246,12 @@ export default function ProductosPanel() {
   const selectAll = checked => setSelected(checked ? pageRows.map(p => p.id) : []);
   const resetImport = () => { setImportStep(1); setImportFile(null); setModal("import"); };
 
-  if (detailProduct) {
+  if (fullProduct) {
     return (
       <div className="pxp-root" style={{ background: "#fff", minHeight: "100vh", padding: "28px 36px" }}>
         <style>{css}</style>
         <button
-          onClick={() => setDetailProduct(null)}
+          onClick={() => setFullProduct(null)}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -282,10 +283,10 @@ export default function ProductosPanel() {
               overflow: "hidden",
             }}
           >
-            {detailProduct.imageUrl ? (
+            {fullProduct.imageUrl ? (
               <img
-                src={detailProduct.imageUrl}
-                alt={detailProduct.name}
+                src={fullProduct.imageUrl}
+                alt={fullProduct.name}
                 style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />
             ) : (
@@ -300,29 +301,29 @@ export default function ProductosPanel() {
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
               <span style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                {detailProduct.sku}
+                {fullProduct.sku}
               </span>
-              <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>
-                {detailProduct.status}
+              <span className={`pxp-badge ${statusClass(fullProduct.status)}`}>
+                {fullProduct.status}
               </span>
             </div>
 
             <h1 style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", letterSpacing: "-0.5px" }}>
-              {detailProduct.name}
+              {fullProduct.name}
             </h1>
             <p style={{ color: "#64748b", lineHeight: 1.6, fontSize: 14, margin: "0 0 24px" }}>
-              {detailProduct.description ||
+              {fullProduct.description ||
                 "Lleva tus habilidades al siguiente nivel con este producto."}
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Precio base</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{money(detailProduct.price)}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{money(fullProduct.price)}</div>
               </div>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Stock</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{detailProduct.stock}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{fullProduct.stock}</div>
               </div>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Condición</div>
@@ -335,23 +336,23 @@ export default function ProductosPanel() {
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 20px", fontSize: 13, color: "#64748b", marginBottom: 24 }}>
-              <div>Tipo: <b style={{ color: "#1e293b" }}>{detailProduct.category}</b></div>
-              <div>Marca: <b style={{ color: "#1e293b" }}>{detailProduct.brand || "—"}</b></div>
-              <div>Ubicación: <b style={{ color: "#1e293b" }}>{detailProduct.location || "—"}</b></div>
+              <div>Tipo: <b style={{ color: "#1e293b" }}>{fullProduct.category}</b></div>
+              <div>Marca: <b style={{ color: "#1e293b" }}>{fullProduct.brand || "—"}</b></div>
+              <div>Ubicación: <b style={{ color: "#1e293b" }}>{fullProduct.location || "—"}</b></div>
               <div>Creado: <b style={{ color: "#1e293b" }}>18 set. 2026</b></div>
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button className="pxp-btn primary" onClick={() => openEdit(detailProduct)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <button className="pxp-btn primary" onClick={() => openEdit(fullProduct)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <Edit size={15} /> Editar
               </button>
               <button
                 className="pxp-btn"
                 style={{ color: "#e11d48", borderColor: "#fecdd3", display: "inline-flex", alignItems: "center", gap: 6 }}
                 onClick={() => {
-                  if (window.confirm(`¿Eliminar "${detailProduct.name}"?`)) {
-                    setProducts(prev => prev.filter(x => x.id !== detailProduct.id));
-                    setDetailProduct(null);
+                  if (window.confirm(`¿Eliminar "${fullProduct.name}"?`)) {
+                    setProducts(prev => prev.filter(x => x.id !== fullProduct.id));
+                    setFullProduct(null);
                     showToast("Producto eliminado");
                   }
                 }}
@@ -632,7 +633,7 @@ export default function ProductosPanel() {
                 <tbody>
                   {pageRows.map(p => <tr key={p.id}>
                     <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
-                    {visibleColumns.includes("product") && <td><div className="pxp-product-cell"><ProductThumb id={p.id} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
+                    {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
                     {visibleColumns.includes("sku") && <td>{p.sku}</td>}
                     {visibleColumns.includes("barcode") && <td>{p.barcode || "—"}</td>}
                     {visibleColumns.includes("category") && <td>{p.category}</td>}
@@ -658,8 +659,8 @@ export default function ProductosPanel() {
                   {pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : <div className="pxp-grid">{pageRows.map(p => (
-                <article className="pxp-product-card" key={p.id}>
-                  <div className="pxp-card-top">
+                <article className="pxp-product-card" key={p.id} onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}>
+                  <div className="pxp-card-top" onClick={e => e.stopPropagation()}>
                     <input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} />
                     <span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span>
                   </div>
@@ -672,7 +673,7 @@ export default function ProductosPanel() {
                     <span className="pxp-card-price">{money(p.price)}</span>
                     <span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} un.</span>
                   </div>
-                  <div className="pxp-card-actions">
+                  <div className="pxp-card-actions" onClick={e => e.stopPropagation()}>
                     <button className="pxp-btn small" onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); }}>Ver detalle</button>
                     <button className="pxp-btn small" onClick={() => openEdit(p)}>Editar</button>
                   </div>
@@ -683,6 +684,50 @@ export default function ProductosPanel() {
           </div>
         </main>
       </div>
+
+      {detailProduct && (
+        <>
+          <div className="pxp-overlay" onClick={() => setDetailProduct(null)} />
+          <aside className="pxp-detail">
+            <button className="pxp-icon-btn pxp-detail-close" onClick={() => setDetailProduct(null)} title="Cerrar panel">×</button>
+            <div className="pxp-detail-head">
+              <div className="pxp-detail-product">
+                <div className="pxp-detail-art"><ProductThumb id={detailProduct.id} size={75} /></div>
+                <div>
+                  <h2 className="pxp-detail-title">{detailProduct.name}</h2>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>{detailProduct.status === "Sin stock" ? "Sin stock" : "Activo"}</span>
+                    <span className="pxp-badge" style={{ background: "#f0f3f8", color: "#52617a" }}>{detailProduct.category}</span>
+                    {detailProduct.detail && <span className="pxp-badge" style={{ background: "#eaf2ff", color: "#2165ed" }}>{detailProduct.detail}</span>}
+                  </div>
+                  <div style={{ color: "var(--muted)", fontSize: 12 }}>{detailProduct.description}</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
+                <button className="pxp-btn small" onClick={() => openEdit(detailProduct)}>✎ Editar producto</button>
+                <button className="pxp-btn small" onClick={() => { setEditing(detailProduct); setForm({ name: detailProduct.name, sku: detailProduct.sku, category: detailProduct.category, stock: detailProduct.stock, price: detailProduct.price, location: detailProduct.location, description: detailProduct.description || "" }); setModal("stock"); }}>▤ Ajustar stock</button>
+              </div>
+              <div className="pxp-detail-grid" style={{ marginTop: 18 }}>
+                <div className="pxp-detail-box"><div className="pxp-kv"><span>SKU</span><b>{detailProduct.sku}</b></div><div className="pxp-kv"><span>Código de barras</span><b>{detailProduct.barcode || "—"}</b></div></div>
+                <div className="pxp-detail-box"><div className="pxp-kv"><span>Precio base</span><b>{money(detailProduct.price)}</b></div><div className="pxp-kv"><span>Stock total</span><b className={`pxp-stock ${statusClass(detailProduct.status)}`}>{detailProduct.stock} un.</b></div></div>
+              </div>
+            </div>
+            <div className="pxp-detail-tabs">{["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas", "Más datos"].map(t => <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>{t}</button>)}</div>
+            <div className="pxp-detail-content">
+              {detailTab === "Resumen" && <div className="pxp-detail-grid">
+                <div className="pxp-detail-box"><h3>▣　Stock por almacén</h3><table className="pxp-detail-table"><thead><tr><th>Almacén</th><th>Stock</th><th>Stock mín.</th></tr></thead><tbody>{(detailProduct.warehouse || [{ name: detailProduct.location, stock: detailProduct.stock, min: 0 }]).map(w => <tr key={w.name}><td>{w.name}</td><td style={{ color: "#059669", fontWeight: 700 }}>{w.stock} un.</td><td>{w.min ?? "—"}</td></tr>)}</tbody></table><div className="pxp-kv"><b>Stock total</b><b>{detailProduct.stock} un.</b></div></div>
+                <div className="pxp-detail-box"><h3>▧　Imagen y archivos</h3><div style={{ height: 155, borderRadius: 8, background: "#f7f9fc", display: "grid", placeItems: "center" }}><ProductThumb id={detailProduct.id} size={90} /></div><div style={{ color: "var(--muted)", fontSize: 11, marginTop: 8 }}>Vista previa ilustrativa del producto</div></div>
+                <div className="pxp-detail-box"><h3>▤　Información general</h3>{[["Categoría", detailProduct.category], ["Marca", detailProduct.brand || "—"], ["Presentación", detailProduct.presentation || "—"], ["Unidad de medida", detailProduct.unit || "un."], ["Peso", detailProduct.weight || "—"], ["Dimensiones", detailProduct.dimensions || "—"], ["Estado", detailProduct.status]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
+                <div className="pxp-detail-box"><h3>▣　Precios</h3>{[["Precio base", money(detailProduct.price)], ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)], ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)], ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)], ["Moneda", "PEN"], ["Impuesto (IGV)", "18%"]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
+                <div className="pxp-detail-box full"><h3>▣　Descripción</h3><p style={{ color: "#53627d", lineHeight: 1.7, margin: 0 }}>{detailProduct.description || "Sin descripción registrada."}</p></div>
+              </div>}
+              {detailTab === "Inventario" && <div className="pxp-detail-box"><h3>Stock por ubicación</h3><table className="pxp-detail-table"><thead><tr><th>Almacén</th><th>Stock</th><th>Stock mínimo</th></tr></thead><tbody>{(detailProduct.warehouse || [{ name: detailProduct.location, stock: detailProduct.stock, min: 0 }]).map(w => <tr key={w.name}><td>{w.name}</td><td>{w.stock} un.</td><td>{w.min ?? "—"}</td></tr>)}</tbody></table><button className="pxp-btn small" style={{ marginTop: 12 }} onClick={() => { setEditing(detailProduct); setForm({ name: detailProduct.name, sku: detailProduct.sku, category: detailProduct.category, stock: detailProduct.stock, price: detailProduct.price, location: detailProduct.location, description: detailProduct.description || "" }); setModal("stock"); }}>Ajustar stock</button></div>}
+              {detailTab === "Precios" && <div className="pxp-detail-box"><h3>Información de precios</h3>{[["Precio base", money(detailProduct.price)], ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)], ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)], ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>}
+              {["Movimientos", "Proveedores", "Ventas", "Más datos"].includes(detailTab) && <div className="pxp-detail-box"><h3>{detailTab}</h3><p className="pxp-muted">No hay registros disponibles en esta vista de demostración. Esta sección queda preparada para conectarse a los datos del sistema.</p></div>}
+            </div>
+          </aside>
+        </>
+      )}
 
 
 
