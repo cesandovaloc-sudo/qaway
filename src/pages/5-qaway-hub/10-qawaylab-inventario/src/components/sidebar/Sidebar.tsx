@@ -129,10 +129,14 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       <nav className="flex-1 py-4 px-3">
         {navItems.map((item) => (
           <div key={item.to}>
-            {item.section && !collapsed && (
-              <div className="px-3 pt-4 pb-2 text-[10px] font-mono uppercase tracking-[0.15em] text-[var(--hub-dim)]">
-                {item.section}
-              </div>
+            {item.section && (
+              collapsed ? (
+                <div className="my-2.5 mx-auto w-7 h-[1px] bg-[var(--hub-border)]" />
+              ) : (
+                <div className="px-3 pt-4 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--hub-dim)]">
+                  {item.section}
+                </div>
+              )
             )}
             <NavLink
               to={getHref(item.to)}
