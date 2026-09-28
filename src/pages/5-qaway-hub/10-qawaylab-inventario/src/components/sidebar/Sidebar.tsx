@@ -157,8 +157,13 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             {collapsed && (
               <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
                 <div
-                  className="bg-[#0f172a] text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight"
-                  style={{ color: '#ffffff' }}
+                  className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
+                  style={{
+                    backgroundColor: 'var(--hub-surface, #ffffff)',
+                    color: 'var(--hub-text, #0f172a)',
+                    border: '1px solid var(--hub-border, #e2e8f0)',
+                    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                  }}
                 >
                   {item.label}
                 </div>
@@ -206,8 +211,13 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         {collapsed && (
           <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
             <div
-              className="bg-[#0f172a] text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight"
-              style={{ color: '#ffffff' }}
+              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
+              style={{
+                backgroundColor: 'var(--hub-surface, #ffffff)',
+                color: 'var(--hub-text, #0f172a)',
+                border: '1px solid var(--hub-border, #e2e8f0)',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+              }}
             >
               Configuración
             </div>
