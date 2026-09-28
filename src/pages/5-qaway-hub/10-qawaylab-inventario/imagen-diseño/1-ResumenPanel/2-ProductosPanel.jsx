@@ -1,4 +1,18 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import {
+  FileSpreadsheet,
+  Download,
+  Camera,
+  Plus,
+  Filter,
+  List,
+  Grid3X3,
+  SlidersHorizontal,
+  Check,
+  Search,
+  X,
+  ChevronDown,
+} from "lucide-react";
 
 /**
  * ProductosPanel.jsx
@@ -73,12 +87,41 @@ function ProductThumb({ id, size = 40 }) {
   );
 }
 
+const AVAILABLE_COLUMNS = [
+  { key: "product", label: "Producto" },
+  { key: "sku", label: "SKU" },
+  { key: "barcode", label: "Cód. Barras" },
+  { key: "category", label: "Categoría" },
+  { key: "stock", label: "Stock" },
+  { key: "price", label: "Precio base" },
+  { key: "wholesale", label: "Precio mayorista" },
+  { key: "status", label: "Estado" },
+  { key: "location", label: "Ubicación" },
+];
+
 export default function ProductosPanel() {
   const [products, setProducts] = useState(initialProducts);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
   const [status, setStatus] = useState("Todos");
   const [stockFilter, setStockFilter] = useState("Todos");
+  const [commercialStatus, setCommercialStatus] = useState("Todos");
+  const [brandFilter, setBrandFilter] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [locationFilter, setLocationFilter] = useState("Todos");
+  const [showExtraFilters, setShowExtraFilters] = useState(false);
+  const [showColumnPicker, setShowColumnPicker] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState([
+    "product",
+    "sku",
+    "category",
+    "stock",
+    "price",
+    "status",
+    "location",
+  ]);
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [view, setView] = useState("list");
@@ -94,15 +137,67 @@ export default function ProductosPanel() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", sku: "", category: "Mascotas", stock: 0, price: "", location: "Almacén Principal", description: "" });
 
+  const columnPickerRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (columnPickerRef.current && !columnPickerRef.current.contains(event.target)) {
+        setShowColumnPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleColumn = key => {
+    setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
+
+  const handleExportCSV = () => {
+    if (!filtered || filtered.length === 0) {
+      showToast("No hay productos para exportar");
+      return;
+    }
+    const headers = ["ID", "Producto", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
+    const rows = filtered.map(p => [
+      p.id,
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      `"${p.sku || ''}"`,
+      `"${p.barcode || ''}"`,
+      `"${p.category || ''}"`,
+      `"${p.brand || ''}"`,
+      p.stock || 0,
+      p.price || 0,
+      p.wholesale || p.price || 0,
+      `"${p.status || ''}"`,
+      `"${p.location || ''}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `inventi_productos_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Catálogo exportado en CSV");
+  };
+
   const categories = useMemo(() => ["Todas", ...new Set(products.map(p => p.category))], [products]);
   const filtered = useMemo(() => products.filter(p => {
     const q = query.toLowerCase().trim();
-    const matchesQ = !q || [p.name, p.sku, p.category, p.barcode].some(v => String(v || "").toLowerCase().includes(q));
+    const matchesQ = !q || [p.name, p.sku, p.category, p.barcode, p.brand].some(v => String(v || "").toLowerCase().includes(q));
     const matchesCat = category === "Todas" || p.category === category;
     const matchesStatus = status === "Todos" || p.status === status;
     const matchesStock = stockFilter === "Todos" || (stockFilter === "Con stock" && p.stock > 0) || (stockFilter === "Stock bajo" && p.stock > 0 && p.stock <= 10) || (stockFilter === "Sin stock" && p.stock === 0);
-    return matchesQ && matchesCat && matchesStatus && matchesStock;
-  }), [products, query, category, status, stockFilter]);
+    const matchesComm = commercialStatus === "Todos" || p.status === commercialStatus;
+    const matchesBrand = !brandFilter || (p.brand && p.brand.toLowerCase().includes(brandFilter.toLowerCase()));
+    const matchesMinPrice = !minPrice || p.price >= Number(minPrice);
+    const matchesMaxPrice = !maxPrice || p.price <= Number(maxPrice);
+    const matchesLoc = locationFilter === "Todos" || p.location === locationFilter;
+    return matchesQ && matchesCat && matchesStatus && matchesStock && matchesComm && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
+  }), [products, query, category, status, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter]);
+
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
   const totalStock = products.reduce((s, p) => s + p.stock, 0);
@@ -136,17 +231,40 @@ export default function ProductosPanel() {
       <div className="pxp-layout">
         <main className="pxp-main">
           <header className="pxp-topbar">
-            <div className="pxp-global-search"><Icon>⌕</Icon><input placeholder="Buscar productos, clientes, ventas, compras..." onChange={e => { setQuery(e.target.value); setPage(1); }} /><small>Ctrl K</small></div>
+            <div className="pxp-global-search"><Search size={15} style={{ color: "var(--muted)" }} /><input placeholder="Buscar productos, clientes, ventas, compras..." onChange={e => { setQuery(e.target.value); setPage(1); }} /><small>Ctrl K</small></div>
             <div className="pxp-top-right"><span title="Notificaciones">♧<sup style={{ color: "#e11d48" }}>●</sup></span><span title="Tema">☾</span><div className="pxp-avatar">S</div><div><b style={{ display: "block", fontSize: 12, color: "#24324a" }}>S Admin</b><small>Administrador</small></div><span>⌄</span></div>
           </header>
           <div className="pxp-content">
-            <div className="pxp-heading">
-              <div className="pxp-heading-icon">⬡</div>
-              <div><h1>Productos</h1><p>Gestiona tu catálogo de productos, variantes y stock en todos tus almacenes.</p></div>
-              <div className="pxp-heading-actions">
-                <button className="pxp-btn" onClick={resetImport}>⇩　Importar</button>
-                <button className="pxp-btn" onClick={() => showToast("La exportación se conectará al backend")}>⇧　Exportar</button>
-                <button className="pxp-btn primary" onClick={openNew}>＋　Nuevo producto　⌄</button>
+            <div className="pxp-heading" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 22, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div className="pxp-heading-icon">⬡</div>
+                <div>
+                  <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
+                  <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>{products.length} productos en tu inventario.</p>
+                </div>
+              </div>
+              <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <button className="pxp-btn" onClick={resetImport} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                  <FileSpreadsheet size={15} /> Importar
+                </button>
+                <button className="pxp-btn" onClick={handleExportCSV} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                  <Download size={15} /> Exportar
+                </button>
+                <button
+                  className="pxp-btn"
+                  style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 7 }}
+                  onClick={() => {
+                    const isHub = typeof window !== "undefined" && window.location.pathname.startsWith("/hub/inventario");
+                    if (window.location) {
+                      window.location.href = isHub ? "/hub/inventario/captura" : "/captura";
+                    }
+                  }}
+                >
+                  <Camera size={15} /> Capturar
+                </button>
+                <button className="pxp-btn primary" onClick={openNew} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                  <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
+                </button>
               </div>
             </div>
 
@@ -158,24 +276,136 @@ export default function ProductosPanel() {
               <Metric icon="▤" label="Valor de inventario" value={money(inventoryValue)} note={<span className="pxp-up">↑ 9%　vs. mes anterior</span>} />
             </section>
 
-            <div className="pxp-toolbar">
-              <div className="pxp-search"><Icon>⌕</Icon><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /><span>⌕</span></div>
+            <div className="pxp-toolbar" style={{ position: "relative" }}>
+              <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}><option value="Todas">◉　Categoría: Todas</option>{categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}</select>
               <select className="pxp-select" value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}><option value="Todos">▣　Estado: Todos</option><option>Disponible</option><option>Stock bajo</option><option>Sin stock</option></select>
               <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}><option value="Todos">☷　Stock: Todos</option><option>Con stock</option><option>Stock bajo</option><option>Sin stock</option></select>
-              <button className="pxp-btn" onClick={() => { setCategory("Todas"); setStatus("Todos"); setStockFilter("Todos"); setQuery(""); setPage(1); }}>☷　Más filtros</button>
-              <div className="pxp-view-toggle"><button className={`pxp-icon-btn ${view === "list" ? "selected" : ""}`} onClick={() => setView("list")} title="Vista de lista">☷</button><button className={`pxp-icon-btn ${view === "grid" ? "selected" : ""}`} onClick={() => setView("grid")} title="Vista de tarjetas">▦</button></div>
+              
+              {/* Botón Más filtros */}
+              <button
+                className={`pxp-btn ${showExtraFilters ? "primary" : ""}`}
+                onClick={() => setShowExtraFilters(!showExtraFilters)}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
+                <Filter size={14} /> Más filtros
+              </button>
+
+              {/* Selector de Columnas / Mostrar otros datos */}
+              <div style={{ position: "relative" }} ref={columnPickerRef}>
+                <button
+                  className={`pxp-btn ${showColumnPicker ? "dark" : ""}`}
+                  onClick={() => setShowColumnPicker(!showColumnPicker)}
+                  title="Mostrar u ocultar columnas de datos"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                >
+                  <SlidersHorizontal size={14} /> Columnas
+                </button>
+                {showColumnPicker && (
+                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 8px)", width: 220, background: "#fff", border: "1px solid var(--line)", borderRadius: 10, padding: 10, zIndex: 40, boxShadow: "0 12px 35px #182c4a20" }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#111b2d", paddingBottom: 6, marginBottom: 6, borderBottom: "1px solid var(--line)", textTransform: "uppercase" }}>
+                      Datos / Columnas visibles
+                    </div>
+                    {AVAILABLE_COLUMNS.map(col => {
+                      const isChecked = visibleColumns.includes(col.key);
+                      return (
+                        <button
+                          key={col.key}
+                          onClick={() => toggleColumn(col.key)}
+                          style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", border: 0, background: "transparent", borderRadius: 6, cursor: "pointer", fontSize: 12, color: isChecked ? "#111b2d" : "#71809e", fontWeight: isChecked ? 600 : 400, textAlign: "left" }}
+                          onMouseEnter={e => e.currentTarget.style.background = "#f0f4f8"}
+                          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                        >
+                          <span>{col.label}</span>
+                          <span style={{ width: 16, height: 16, borderRadius: 4, border: isChecked ? "1px solid #2165ed" : "1px solid #c7d2e2", background: isChecked ? "#2165ed" : "#fff", color: "#fff", display: "grid", placeItems: "center", fontSize: 10, fontWeight: 700 }}>
+                            {isChecked ? "✓" : ""}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="pxp-view-toggle"><button className={`pxp-icon-btn ${view === "list" ? "selected" : ""}`} onClick={() => setView("list")} title="Vista de lista"><List size={16} /></button><button className={`pxp-icon-btn ${view === "grid" ? "selected" : ""}`} onClick={() => setView("grid")} title="Vista de tarjetas"><Grid3X3 size={16} /></button></div>
             </div>
+
+            {/* Panel Desplegable de Filtros Adicionales */}
+            {showExtraFilters && (
+              <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: "11px", padding: "16px 20px", marginBottom: "12px", boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
+                    <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={commercialStatus} onChange={e => { setCommercialStatus(e.target.value); setPage(1); }}>
+                      <option value="Todos">Todos</option>
+                      <option value="Disponible">Disponible</option>
+                      <option value="Stock bajo">Stock bajo</option>
+                      <option value="Sin stock">Sin stock</option>
+                      <option value="Reservado">Reservado</option>
+                      <option value="Agotado">Agotado</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Marca</label>
+                    <input style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 12px", fontSize: 13, color: "var(--ink)", background: "#fff" }} placeholder="Buscar marca..." value={brandFilter} onChange={e => { setBrandFilter(e.target.value); setPage(1); }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Precio</label>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                      <input type="number" placeholder="Min" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={minPrice} onChange={e => { setMinPrice(e.target.value); setPage(1); }} />
+                      <span style={{ color: "var(--muted)" }}>—</span>
+                      <input type="number" placeholder="Max" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={maxPrice} onChange={e => { setMaxPrice(e.target.value); setPage(1); }} />
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Almacén / Ubicación</label>
+                    <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={locationFilter} onChange={e => { setLocationFilter(e.target.value); setPage(1); }}>
+                      <option value="Todos">Todos los almacenes</option>
+                      <option value="Almacén Principal">Almacén Principal</option>
+                      <option value="Tienda Sur">Tienda Sur</option>
+                      <option value="Tienda Online">Tienda Online</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>
+                  <button className="pxp-btn small" onClick={() => { setCommercialStatus("Todos"); setBrandFilter(""); setMinPrice(""); setMaxPrice(""); setLocationFilter("Todos"); setShowExtraFilters(false); }}>
+                    Cancelar / Limpiar
+                  </button>
+                  <button className="pxp-btn small" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff", fontWeight: 700 }} onClick={() => setShowExtraFilters(false)}>
+                    Aplicar filtros
+                  </button>
+                </div>
+              </div>
+            )}
 
             <section className="pxp-table-wrap">
               {selected.length > 0 && <div style={{ padding: "10px 16px", background: "#eef5ff", display: "flex", alignItems: "center", gap: 12, color: "#2457a6" }}><b>{selected.length} seleccionados</b><button className="pxp-btn small" onClick={() => showToast("Acción masiva pendiente de conectar")}>Acciones masivas　⌄</button><button className="pxp-link" onClick={() => setSelected([])}>Limpiar selección</button></div>}
               {view === "list" ? <div className="pxp-table-scroll"><table className="pxp-table">
-                <thead><tr><th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th><th>Producto ↕</th><th>SKU ↕</th><th>Categoría</th><th>Stock ↕</th><th>Precio base</th><th>Estado</th><th>Ubicación principal</th><th style={{ textAlign: "right" }}>Acciones</th></tr></thead>
+                <thead><tr>
+                  <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
+                  {visibleColumns.includes("product") && <th>Producto ↕</th>}
+                  {visibleColumns.includes("sku") && <th>SKU ↕</th>}
+                  {visibleColumns.includes("barcode") && <th>Cód. Barras</th>}
+                  {visibleColumns.includes("category") && <th>Categoría</th>}
+                  {visibleColumns.includes("stock") && <th>Stock ↕</th>}
+                  {visibleColumns.includes("price") && <th>Precio base</th>}
+                  {visibleColumns.includes("wholesale") && <th>Precio mayorista</th>}
+                  {visibleColumns.includes("status") && <th>Estado</th>}
+                  {visibleColumns.includes("location") && <th>Ubicación principal</th>}
+                  <th style={{ textAlign: "right" }}>Acciones</th>
+                </tr></thead>
                 <tbody>
                   {pageRows.map(p => <tr key={p.id}>
                     <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
-                    <td><div className="pxp-product-cell"><ProductThumb id={p.id} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>
-                    <td>{p.sku}</td><td>{p.category}</td><td><span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} un.</span></td><td>{money(p.price)}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td><td>{p.location}</td>
+                    {visibleColumns.includes("product") && <td><div className="pxp-product-cell"><ProductThumb id={p.id} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
+                    {visibleColumns.includes("sku") && <td>{p.sku}</td>}
+                    {visibleColumns.includes("barcode") && <td>{p.barcode || "—"}</td>}
+                    {visibleColumns.includes("category") && <td>{p.category}</td>}
+                    {visibleColumns.includes("stock") && <td><span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} un.</span></td>}
+                    {visibleColumns.includes("price") && <td>{money(p.price)}</td>}
+                    {visibleColumns.includes("wholesale") && <td>{money(p.wholesale || p.price)}</td>}
+                    {visibleColumns.includes("status") && <td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td>}
+                    {visibleColumns.includes("location") && <td>{p.location}</td>}
                     <td><div className="pxp-actions"><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
                       {menuId === p.id && <div className="pxp-action-menu">
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
@@ -190,7 +420,7 @@ export default function ProductosPanel() {
                       </div>}
                     </div></td>
                   </tr>)}
-                  {pageRows.length === 0 && <tr><td colSpan="9"><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
+                  {pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : <div className="pxp-grid">{pageRows.map(p => <article className="pxp-product-card" key={p.id}><div className="pxp-card-top"><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></div><div className="pxp-card-art"><ProductThumb id={p.id} size={58} /></div><div className="pxp-card-name">{p.name}</div><div className="pxp-card-meta">{p.sku} · {p.category}</div><div className="pxp-card-bottom"><b>{money(p.price)}</b><span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} un.</span></div><div style={{ display: "flex", gap: 7, marginTop: 13 }}><button className="pxp-btn small" onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); }}>Ver detalle</button><button className="pxp-btn small" onClick={() => openEdit(p)}>Editar</button></div></article>)}{pageRows.length === 0 && <div className="pxp-empty">No se encontraron productos.</div>}</div>}
               <div className="pxp-table-footer"><span>Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0} a {Math.min(page * pageSize, filtered.length)} de {filtered.length.toLocaleString("es-PE")} productos</span><div className="pxp-footer-spacer" /><span>Filas por página</span><select className="pxp-select" style={{ height: 34, minWidth: 68 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select><div className="pxp-pagination"><button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>{Array.from({ length: Math.min(pages, 5) }, (_, i) => { const n = i + 1; return <button key={n} className={page === n ? "active" : ""} onClick={() => setPage(n)}>{n}</button>; })}<button disabled={page >= pages} onClick={() => setPage(p => Math.min(pages, p + 1))}>›</button></div></div>
