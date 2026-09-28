@@ -1,15 +1,37 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Plus, Camera, Search, Filter, Grid3X3, List, X, FileSpreadsheet } from 'lucide-react'
+import {
+  Plus,
+  Camera,
+  Search,
+  Filter,
+  Grid3X3,
+  List,
+  X,
+  FileSpreadsheet,
+  Download,
+  SlidersHorizontal,
+  Check,
+} from 'lucide-react'
 import { useProducts } from '@/hooks/useProducts'
 import ProductTable from '@/components/products/ProductTable'
 import ProductGrid from '@/components/products/ProductGrid'
 import ProductImport from '@/components/products/ProductImport'
 import type { Product, ProductFilters } from '@/types'
-// @ts-ignore
-import ProductosPanel from '../../../imagen-diseño/1-ResumenPanel/2-ProductosPanel'
 
 type ViewMode = 'table' | 'grid'
+
+const AVAILABLE_COLUMNS = [
+  { key: 'sku', label: 'SKU' },
+  { key: 'name', label: 'Producto y Marca' },
+  { key: 'barcode', label: 'Código de barras' },
+  { key: 'category', label: 'Categoría' },
+  { key: 'stock', label: 'Stock' },
+  { key: 'location', label: 'Ubicación' },
+  { key: 'price', label: 'Precio base' },
+  { key: 'min_price', label: 'Precio mínimo' },
+  { key: 'status', label: 'Estado comercial' },
+]
 
 export default function ProductsPage() {
   const navigate = useNavigate()
@@ -21,11 +43,34 @@ export default function ProductsPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [activeFilters, setActiveFilters] = useState<ProductFilters>({})
   const [importOpen, setImportOpen] = useState(false)
+  const [showColumnPicker, setShowColumnPicker] = useState(false)
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    'sku',
+    'name',
+    'category',
+    'stock',
+    'location',
+    'price',
+    'status',
+  ])
+
+  const columnPickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (columnPickerRef.current && !columnPickerRef.current.contains(event.target as Node)) {
+        setShowColumnPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const isHub = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')
 
   const handleProductClick = useCallback((product: Product) => {
-    const isHub = typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario')
     navigate(isHub ? `/hub/inventario/logistica/${product.id}` : `/inventario/${product.id}`)
-  }, [navigate])
+  }, [navigate, isHub])
 
   const handleSearch = useCallback(
     (value: string) => {
@@ -48,7 +93,6 @@ export default function ProductsPage() {
     (field: string, order: 'asc' | 'desc') => {
       setSortField(field)
       setSortOrder(order)
-      // Note: sorting would be handled by the adapter in a real implementation
     },
     []
   )
@@ -59,42 +103,75 @@ export default function ProductsPage() {
     setFilters({})
   }
 
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    )
+  }
+
+  const handleExportCSV = () => {
+    if (!products || products.length === 0) return
+    const headers = ['SKU', 'Producto', 'Categoría', 'Stock', 'Ubicación', 'Precio', 'Estado']
+    const rows = products.map((p) => [
+      `"${p.sku || ''}"`,
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      `"${p.category_id || ''}"`,
+      p.stock || 0,
+      `"${p.location_id || ''}"`,
+      p.base_price || 0,
+      `"${p.commercial_status || ''}"`,
+    ])
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement('a')
+    link.setAttribute('href', encodedUri)
+    link.setAttribute('download', `inventario_productos_${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const hasActiveFilters = Object.keys(activeFilters).some((k) => activeFilters[k as keyof ProductFilters] !== undefined)
 
   return (
     <div className="space-y-6">
-      <ProductosPanel />
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Header Superior con Tipografía y Botones */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
             Productos
           </h1>
-          <p className="text-sm text-muted mt-1">
+          <p className="text-sm text-muted mt-0.5">
             {total} producto{total !== 1 ? 's' : ''} en tu inventario.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => setImportOpen(true)}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white text-ink border border-surface-muted rounded-lg text-sm font-medium hover:border-brand/30 transition-colors"
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-white text-ink border border-zinc-200 rounded-xl text-xs md:text-sm font-semibold hover:border-brand/40 hover:bg-zinc-50/50 transition-colors shadow-xs cursor-pointer"
           >
-            <FileSpreadsheet size={14} />
+            <FileSpreadsheet size={15} className="text-zinc-600" />
             Importar
           </button>
-          <Link
-            to={typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/captura' : '/captura'}
-            className="inline-flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl text-sm font-bold hover:bg-brand-hover transition-colors"
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 px-3.5 py-2 bg-white text-ink border border-zinc-200 rounded-xl text-xs md:text-sm font-semibold hover:border-brand/40 hover:bg-zinc-50/50 transition-colors shadow-xs cursor-pointer"
           >
-            <Camera size={14} />
+            <Download size={15} className="text-zinc-600" />
+            Exportar
+          </button>
+          <Link
+            to={isHub ? '/hub/inventario/captura' : '/captura'}
+            className="inline-flex items-center gap-2 h-9 md:h-10 px-4 md:px-5 bg-brand text-white rounded-xl text-xs md:text-sm font-bold hover:bg-brand-hover transition-colors shadow-xs"
+          >
+            <Camera size={15} />
             Capturar
           </Link>
           <Link
-            to={typeof window !== 'undefined' && window.location.pathname.startsWith('/hub/inventario') ? '/hub/inventario/logistica/nuevo' : '/inventario/nuevo'}
-            className="inline-flex items-center gap-2 px-3 py-2 bg-white text-ink border border-surface-muted rounded-lg text-sm font-medium hover:border-brand/30 transition-colors"
+            to={isHub ? '/hub/inventario/logistica/nuevo' : '/inventario/nuevo'}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white text-ink border border-zinc-200 rounded-xl text-xs md:text-sm font-semibold hover:border-brand/40 hover:bg-zinc-50/50 transition-colors shadow-xs"
           >
-            <Plus size={14} />
+            <Plus size={15} className="text-zinc-700" />
             Nuevo
           </Link>
         </div>
@@ -105,20 +182,15 @@ export default function ProductsPage() {
         <ProductImport
           onClose={() => setImportOpen(false)}
           onImported={() => {
-            // El modal muestra el mensaje de éxito; el usuario lo cierra. La lista ya se refresca.
             refresh()
           }}
         />
       )}
 
-      {/* Toolbar — sticky dentro del scroller de <main> (ref HubPanelPage.jsx:990).
-          El `top-0` se resuelve contra el contenedor de scroll del shell, no contra
-          el documento: el topbar negro vive fuera de ese scroller, así que la barra
-          se ancla justo debajo. Borde + sombra son los que dan definición al
-          translúcido cuando la lista pasa por debajo (como en :990). */}
-      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-3 bg-white/95 backdrop-blur-md border border-zinc-200 py-2 px-3.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
+      {/* Toolbar */}
+      <div className="sticky top-0 z-30 flex items-center flex-wrap gap-2.5 bg-white/95 backdrop-blur-md border border-zinc-200 py-2 px-3.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
         {/* Search */}
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             type="text"
@@ -132,7 +204,7 @@ export default function ProductsPage() {
         {/* Filter button */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs md:text-sm font-semibold transition-colors cursor-pointer ${
             showFilters || hasActiveFilters
               ? 'bg-ink text-white'
               : 'bg-white text-muted border border-surface-muted hover:text-ink hover:border-brand/30'
@@ -141,7 +213,7 @@ export default function ProductsPage() {
           <Filter size={14} />
           Filtros
           {hasActiveFilters && (
-            <span className="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center">
+            <span className="w-5 h-5 rounded-full bg-brand text-white text-[10px] flex items-center justify-center font-bold">
               {Object.keys(activeFilters).filter((k) => activeFilters[k as keyof ProductFilters] !== undefined).length}
             </span>
           )}
@@ -151,18 +223,60 @@ export default function ProductsPage() {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1 px-2 py-1.5 text-xs text-muted hover:text-ink transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-muted hover:text-ink transition-colors cursor-pointer"
           >
             <X size={12} />
             Limpiar
           </button>
         )}
 
+        {/* Column Picker Button & Popover */}
+        <div className="relative" ref={columnPickerRef}>
+          <button
+            onClick={() => setShowColumnPicker(!showColumnPicker)}
+            title="Seleccionar datos y columnas visibles"
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-muted border border-surface-muted rounded-lg text-xs md:text-sm font-semibold hover:text-ink hover:border-brand/30 transition-colors cursor-pointer"
+          >
+            <SlidersHorizontal size={14} />
+            <span className="hidden sm:inline">Columnas</span>
+          </button>
+
+          {showColumnPicker && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-zinc-200 rounded-xl shadow-lg p-2.5 z-40 space-y-1">
+              <div className="px-2 py-1 border-b border-zinc-100 mb-1">
+                <span className="text-xs font-bold text-zinc-800">Columnas visibles</span>
+              </div>
+              {AVAILABLE_COLUMNS.map((col) => {
+                const checked = visibleColumns.includes(col.key)
+                return (
+                  <button
+                    key={col.key}
+                    onClick={() => toggleColumn(col.key)}
+                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left hover:bg-zinc-50 transition-colors cursor-pointer"
+                  >
+                    <span className={checked ? 'text-zinc-900 font-medium' : 'text-zinc-500'}>
+                      {col.label}
+                    </span>
+                    <div
+                      className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        checked ? 'bg-brand border-brand text-white' : 'border-zinc-300 bg-white'
+                      }`}
+                    >
+                      {checked && <Check size={10} strokeWidth={3} />}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         {/* View toggle */}
         <div className="flex items-center bg-white border border-surface-muted rounded-lg overflow-hidden ml-auto">
           <button
             onClick={() => setViewMode('table')}
-            className={`p-2 transition-colors ${
+            title="Vista de lista / tabla"
+            className={`p-2 transition-colors cursor-pointer ${
               viewMode === 'table' ? 'bg-ink text-white' : 'text-muted hover:text-ink'
             }`}
           >
@@ -170,7 +284,8 @@ export default function ProductsPage() {
           </button>
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 transition-colors ${
+            title="Vista de cuadrícula"
+            className={`p-2 transition-colors cursor-pointer ${
               viewMode === 'grid' ? 'bg-ink text-white' : 'text-muted hover:text-ink'
             }`}
           >
@@ -205,6 +320,12 @@ export default function ProductsPage() {
               onRemove={() => handleFilter({ ...activeFilters, brand: undefined })}
             />
           )}
+          {(activeFilters.min_price !== undefined || activeFilters.max_price !== undefined) && (
+            <FilterChip
+              label={`Precio: S/ ${activeFilters.min_price ?? 0} - S/ ${activeFilters.max_price ?? '∞'}`}
+              onRemove={() => handleFilter({ ...activeFilters, min_price: undefined, max_price: undefined })}
+            />
+          )}
         </div>
       )}
 
@@ -213,6 +334,7 @@ export default function ProductsPage() {
         <ProductTable
           products={products}
           loading={loading}
+          visibleColumns={visibleColumns}
           onProductClick={handleProductClick}
           onSort={handleSort}
           sortField={sortField}
