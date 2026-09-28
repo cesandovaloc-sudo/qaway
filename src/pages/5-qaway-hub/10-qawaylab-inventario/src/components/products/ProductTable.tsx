@@ -5,7 +5,6 @@ import type { Product } from '@/types'
 interface ProductTableProps {
   products: Product[]
   loading: boolean
-  visibleColumns?: string[]
   onProductClick?: (product: Product) => void
   onSort?: (field: string, order: 'asc' | 'desc') => void
   sortField?: string
@@ -20,7 +19,7 @@ type Column = {
   render?: (product: Product) => React.ReactNode
 }
 
-const allColumns: Column[] = [
+const columns: Column[] = [
   {
     key: 'sku',
     label: 'SKU',
@@ -46,14 +45,6 @@ const allColumns: Column[] = [
           )}
         </div>
       </div>
-    ),
-  },
-  {
-    key: 'barcode',
-    label: 'Cód. Barras',
-    width: 'w-32',
-    render: (p) => (
-      <span className="font-mono text-xs text-muted">{p.barcode || '—'}</span>
     ),
   },
   {
@@ -91,16 +82,6 @@ const allColumns: Column[] = [
     render: (p) => (
       <span className="text-sm font-medium text-ink">
         {p.base_price ? `S/ ${p.base_price.toFixed(2)}` : '—'}
-      </span>
-    ),
-  },
-  {
-    key: 'min_price',
-    label: 'Precio Mín.',
-    width: 'w-24',
-    render: (p) => (
-      <span className="text-sm font-medium text-muted">
-        {p.min_price ? `S/ ${p.min_price.toFixed(2)}` : '—'}
       </span>
     ),
   },
@@ -145,17 +126,12 @@ const allColumns: Column[] = [
 export default function ProductTable({
   products,
   loading,
-  visibleColumns,
   onProductClick,
   onSort,
   sortField,
   sortOrder,
 }: ProductTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-
-  const columns = visibleColumns && visibleColumns.length > 0
-    ? allColumns.filter((col) => col.key === 'actions' || visibleColumns.includes(col.key))
-    : allColumns.filter((col) => col.key !== 'barcode' && col.key !== 'min_price')
 
   const handleSelectAll = () => {
     if (selectedIds.size === products.length) {
