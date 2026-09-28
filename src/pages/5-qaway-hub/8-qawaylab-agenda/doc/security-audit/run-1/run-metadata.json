@@ -106,7 +106,8 @@
     "coverage-ledger.json": "parent",
     "findings.json": "parent",
     "REPORT.md": "parent",
-    "NEEDS-VALIDATION.md": "parent (generated from findings.json, do not hand-edit)"
+    "NEEDS-VALIDATION.md": "parent (generated from findings.json, do not hand-edit)",
+    "REMEDIATION-APPLIED.md": "parent"
   },
   "canonical_agent_ids": {
     "recon": ["recon-product-stack", "recon-authority-controls", "recon-entry-surfaces", "recon-execution-deploy"],
@@ -168,6 +169,38 @@
     ],
     "consequence": "The ledger and findings schema gates cannot be signed off in this run. No artifact may claim to be 'validator-passed'. The parent performs an independent parent-side conformance review of the same documented rules and records the result as `advisory`, and the report states plainly that the official gate did not run.",
     "reopen_condition": "Start Docker Desktop, then re-run both validators unmodified inside a Linux container against the final `coverage-ledger.json` and `findings.json`."
+  },
+  "remediation_pass": {
+    "baseline_commit": "ec257159",
+    "scope": "client-side, non-Supabase findings only",
+    "build_or_typecheck_run": false,
+    "build_constraint": "No build, no typecheck, no test, no lint. node_modules is absent and installing requires network, which this run prohibits. Changes were verified by reading the resulting code and by a brace-balance check only. The owner must run tsc --noEmit and the suite before merging.",
+    "fixed": [
+      "src/agenda/context/AgendaContext.tsx - removed the client-supplied cancel_token so 0001:63 mints it; demo branch gated to import.meta.env.DEV; demo token is now a real UUID. (finding #2, confirmed)",
+      "src/agenda/utils/calendarLinks.ts - added a single RFC 5545 icsEscape() applied to SUMMARY, DESCRIPTION and LOCATION. (finding #3, confirmed)",
+      "src/agenda/context/AgendaContext.tsx - raw upstream error text replaced with fixed messages branched on SQLSTATE. (finding #11)",
+      "src/agenda/adapters/agendaAdapter.ts + AgendaContext.tsx - the reminders RLS rejection is returned and reported by code instead of discarded. (finding #10, silence closed; the missing policy is not)"
+    ],
+    "documented_not_fixed": [
+      "src/.../index.html finding #9 CSP: frame-ancestors is ignored in a meta tag, and the only header config is a root .htaccess shared by every sibling app. A route-scoped Header block is provided in REMEDIATION-APPLIED.md section 2 rather than applied blind."
+    ],
+    "excluded_for_supabase_agent": [
+      "finding #1 secure_manage_booking reschedule unvalidated (high, confirmed) - 0001:138-148, grant at 0001:157",
+      "finding #4 anon insert does not bind business_id to event_type.business_id - 0002:8-19",
+      "finding #5 no bound on start_at/end_at - 0001:58-59",
+      "finding #6 definer RPC returns the full bookings composite - 0001:122, 0001:153",
+      "finding #7 four anon SELECT policies using (true) - 0001:97-100",
+      "finding #8 cancel_token has no expiry, rotation or single-use consumption - 0001:63, 0001:130"
+    ],
+    "residual_blocker_discovered": "agendaAdapter.ts:172 performs insert().select().single(), but 0001:108 denies SELECT to anon, so the inserted row can never be read back and cancel_token can never reach the client. The public booking flow stays non-functional after Fix A. This is Supabase-side and has three candidate solutions listed in REMEDIATION-APPLIED.md section 4. A friendly PGRST116 message was added as mitigation only.",
+    "files_modified": [
+      "src/agenda/context/AgendaContext.tsx",
+      "src/agenda/utils/calendarLinks.ts",
+      "src/agenda/adapters/agendaAdapter.ts"
+    ],
+    "sql_files_modified": [],
+    "line_anchor_drift": "findings.json describes commit ec257159. Three client files were edited afterwards and their anchors shifted (AgendaContext.tsx 382 to 402 lines, calendarLinks.ts 58 to 66, agendaAdapter.ts 215 to 215 with a changed body). No SQL file was touched, so every Supabase-side anchor remains exact. Table in REMEDIATION-APPLIED.md section 5.",
+    "documentation": "REMEDIATION-APPLIED.md"
   },
   "run_status": "completed",
   "finalized_at": "2026-09-27T11:20:00",

@@ -14,7 +14,7 @@ export interface AgendaAdapter {
   loadBusinessData(businessId: string): Promise<{ eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookings: Booking[] }>
   loadPublicData(slug: string): Promise<{ business: Business | null; eventTypes: EventType[]; schedules: Schedule[]; exceptions: AvailabilityException[]; bookedSlots: unknown[] }>
   insertBooking(booking: Record<string, unknown>): Promise<{ data?: Booking; error?: { code?: string; message?: string } | null }>
-  insertReminders(reminders: Record<string, unknown>[]): Promise<void>
+  insertReminders(reminders: Record<string, unknown>[]): Promise<{ error: { code?: string; message?: string } | null }>
   getBookingByToken(token: string): Promise<Booking | null>
   secureManageBooking(args: { token: string; action: string; newStart?: string; durationMinutes?: number }): Promise<{ data: unknown; error: unknown }>
   upsertEventType(payload: Record<string, unknown>): Promise<{ data: EventType | null; error: unknown }>
@@ -173,11 +173,12 @@ export const agendaAdapter: AgendaAdapter = {
     return { data: data as Booking, error }
   },
   async insertReminders(reminders) {
-    try {
-      await supabase.from('reminders').insert(reminders)
-    } catch (_e) {
-      // no bloquea la reserva
-    }
+    // public.reminders is RLS-enabled with no policy, so this insert is
+    // rejected for every role (0001_agenda_schema.sql:89). The rejection is
+    // returned rather than discarded: swallowing it turns a hard control
+    // failure into a silent one.
+    const { error } = await supabase.from('reminders').insert(reminders)
+    return { error: error as { code?: string; message?: string } | null }
   },
   async getBookingByToken(token) {
     const { data } = await supabase.from('bookings').select('*, event_types(*), businesses(*)').eq('cancel_token', token).maybeSingle()

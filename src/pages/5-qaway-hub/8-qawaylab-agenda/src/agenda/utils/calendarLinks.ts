@@ -25,6 +25,20 @@ export function generateGoogleCalendarUrl(event: CalendarEventDetails): string {
   return `${baseUrl}&${params.toString()}`
 }
 
+/**
+ * RFC 5545 section 3.3.11 TEXT escaping.
+ * Order matters: backslash must be escaped first, otherwise the escapes
+ * added for the other characters would themselves be re-escaped.
+ */
+function icsEscape(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,')
+    .replace(/\r/g, '')
+    .replace(/\n/g, '\\n')
+}
+
 export function downloadIcsFile(event: CalendarEventDetails, filename = 'reserva.ics') {
   const start = new Date(event.startAt)
   const end = new Date(event.endAt)
@@ -35,9 +49,9 @@ export function downloadIcsFile(event: CalendarEventDetails, filename = 'reserva
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `SUMMARY:${event.title}`,
-    `DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}`,
-    `LOCATION:${event.location || ''}`,
+    `SUMMARY:${icsEscape(event.title)}`,
+    `DESCRIPTION:${icsEscape(event.description || '')}`,
+    `LOCATION:${icsEscape(event.location || '')}`,
     `DTSTART:${formatDateForCalendar(start)}`,
     `DTEND:${formatDateForCalendar(end)}`,
     `DTSTAMP:${formatDateForCalendar(new Date())}`,

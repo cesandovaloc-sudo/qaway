@@ -169,6 +169,9 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
       return { error: 'Evento con precio: coordina tu pago por WhatsApp y el staff confirmará tu reserva.' }
     }
 
+    // cancel_token is deliberately NOT sent: the database mints it with
+    // gen_random_uuid() (0001_agenda_schema.sql:63). A client-supplied value
+    // would override that server-authoritative default.
     const booking: Record<string, unknown> = {
       business_id: business.id,
       event_type_id: eventType.id,
@@ -180,13 +183,15 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
       status: Number(eventType.price) > 0 ? 'pending_payment' : 'confirmed',
       payment_status: paymentStatus,
       payment_intent_id: paymentIntentId,
-      cancel_token: 'demo-token-' + Math.random().toString(36).substring(2, 9),
     }
 
-    if (business.id.startsWith('demo-')) {
+    // Demo bookings are fabricated in local state and never reach the database.
+    // The branch is hard-gated to development so it can never run in production.
+    if (import.meta.env.DEV && business.id.startsWith('demo-')) {
       const mockCreated = {
         ...booking,
         id: 'bok-' + Date.now(),
+        cancel_token: crypto.randomUUID(),
         created_at: new Date().toISOString(),
         event_types: { title: eventType.title },
         businesses: { name: business.name },
@@ -200,17 +205,32 @@ export function AgendaProvider({ children }: { children: ReactNode }) {
       if (error.code === '23P01' || /exclude|overlap/i.test(error.message || '')) {
         return { error: 'Lo sentimos, este horario acaba de ser reservado. Elige otro.' }
       }
-      return { error: error.message || 'Error al reservar' }
+      // Never surface the upstream message: it carries table, column,
+      // constraint and SQLSTATE detail to unauthenticated visitors.
+      if (error.code === '42501') {
+        return { error: 'No pudimos completar la reserva. Contacta al negocio para recibir ayuda.' }
+      }
+      if (error.code === 'PGRST116') {
+        return { error: 'La reserva se guardo pero no pudimos mostrarte el enlace de gestion. Escribe al negocio para confirmar.' }
+      }
+      if (error.code === '22P02' || error.code === '23503' || error.code === '23514') {
+        return { error: 'No pudimos completar la reserva. Contacta al negocio para recibir ayuda.' }
+      }
+      return { error: 'No pudimos completar la reserva. Intenta en unos momentos.' }
     }
 
-    try {
-      await agendaAdapter.insertReminders([
-        { booking_id: data!.id, channel: 'email', kind: 'confirmation', send_at: new Date().toISOString() },
-        { booking_id: data!.id, channel: 'whatsapp', kind: 'confirmation', send_at: new Date().toISOString() },
-        { booking_id: data!.id, channel: 'email', kind: 'reminder', send_at: new Date(start.getTime() - 24 * 3600 * 1000).toISOString() },
-        { booking_id: data!.id, channel: 'whatsapp', kind: 'reminder', send_at: new Date(start.getTime() - 60 * 60 * 1000).toISOString() },
-      ])
-    } catch (_e) { /* no bloquea la reserva */ }
+    // Reminders are best-effort: the booking itself already succeeded, so a
+    // rejection must not fail the reservation. It is reported instead of
+    // discarded, because the underlying RLS state needs to be visible.
+    const { error: reminderError } = await agendaAdapter.insertReminders([
+      { booking_id: data!.id, channel: 'email', kind: 'confirmation', send_at: new Date().toISOString() },
+      { booking_id: data!.id, channel: 'whatsapp', kind: 'confirmation', send_at: new Date().toISOString() },
+      { booking_id: data!.id, channel: 'email', kind: 'reminder', send_at: new Date(start.getTime() - 24 * 3600 * 1000).toISOString() },
+      { booking_id: data!.id, channel: 'whatsapp', kind: 'reminder', send_at: new Date(start.getTime() - 60 * 60 * 1000).toISOString() },
+    ])
+    if (reminderError) {
+      console.warn('[agenda] reminder insert rejected by RLS; booking stands:', reminderError.code)
+    }
 
     return { data: data as Booking, paymentIntentId }
   }, [business])

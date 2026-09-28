@@ -95,14 +95,23 @@ To close the real gate, start Docker Desktop and run both validators unmodified 
 
 `main-web` advanced from `6906eb12` to `076f7410` during the run, via commits from unrelated work. `git diff --name-only 6906eb12 HEAD -- <target> ':!<target>/doc'` returns **empty**: no source file changed. Every `file:line` in `findings.json` is still valid at finalization.
 
-## 7. Recommended order of work
+## 7. Remediation status
 
-1. **Fix #2 first** — it is a one-line change (drop `cancel_token` from the client payload) and it unblocks the entire public booking flow, which currently does not work at all for real tenants.
-2. **Fix #1** — harden the reschedule branch, and stop granting `anon` execute on the RPC.
-3. **Narrow the `USING (true)` policies** (#7) and add the tenant binding the free-only check is missing (#4).
-4. **Give `cancel_token` a lifecycle** (#8) and reduce the RPC's return type to the fields the manage page actually renders (#6).
-5. **Run every check in `NEEDS-VALIDATION.md`** and promote or retire the 8 blocked findings.
-6. **Close the two deferred units** in wave 2 when agent capacity allows.
+A remediation pass followed the audit and is recorded in full in **`REMEDIATION-APPLIED.md`**. Scope was deliberately limited to **client-side, non-Supabase** findings, because the Supabase-side changes are for a specialised agent.
+
+**Fixed (4):**
+- **#2** — the client no longer sends `cancel_token`; the database mints it. The demo branch is gated to `import.meta.env.DEV`. *(This was breaking the booking flow outright.)*
+- **#3** — a single RFC 5545 `icsEscape()` applied to `SUMMARY`, `DESCRIPTION` and `LOCATION`.
+- **#11** — raw upstream error text replaced with fixed messages branched on SQLSTATE; nothing internal reaches anonymous visitors.
+- **#10** — the `reminders` RLS rejection is returned and reported by code instead of being swallowed. The silent-failure half is closed; the missing policy is not.
+
+**Documented, not fixed (1):** **#9** CSP. `frame-ancestors` is ignored in a `<meta>` tag, and this repo's only header config is a root `.htaccess` shared by every sibling app. A ready-to-apply, route-scoped `Header` block is provided in `REMEDIATION-APPLIED.md` §2 rather than changed blind.
+
+**Excluded, Supabase side (6):** findings **#1, #4, #5, #6, #7, #8**. Ready-to-apply SQL for five of them is already in `findings.json`.
+
+**Still broken after remediation, and it is not a client-side problem.** Verifying fix #2 exposed a second failure in the same flow: `agendaAdapter.ts:172` does `.insert().select().single()`, but `0001:108` denies `SELECT` to `anon`, so the inserted row can never be read back and the `cancel_token` can never reach the client. The public booking flow remains non-functional until the Supabase side widens the read or adds an insert-returning RPC. Details and three options are in `REMEDIATION-APPLIED.md` §4.
+
+**No build or typecheck was run** — `node_modules` is absent and installing requires network. The changes were verified by reading the result and a brace-balance check. **Run `tsc --noEmit` and the suite before merging.**
 
 ## 8. Artifacts
 
@@ -112,7 +121,10 @@ To close the real gate, start Docker Desktop and run both validators unmodified 
 | `coverage-ledger.json` | 23 units with state invariants satisfied |
 | `findings.json` | 11 findings, schema-conformant |
 | `NEEDS-VALIDATION.md` | The 8 blocked findings with exact closing checks |
+| `REMEDIATION-APPLIED.md` | The 4 fixes, the CSP decision, the Supabase exclusions, the remaining blocker |
 | `candidates-wave1-digest.json` | Transcribed raw hunter evidence (`AR1..AR9`, `AS1..AS7`) |
 | `run-metadata.json` | Scope, execution policy, agent IDs, validator block, completion note |
+
+**Anchor drift:** `findings.json` describes commit `ec257159`. Three client files were edited afterwards, so their line anchors shifted; no SQL file was touched, so every Supabase anchor is still exact. The drift table is in `REMEDIATION-APPLIED.md` §5.
 
 **Deviation disclosed:** the output directory is `doc/security-audit/run-1`, inside the target, rather than the skill default outside it. `.gitignore` was not modified. Rationale is recorded in `run-metadata.json` under `output_dir_selection`.
