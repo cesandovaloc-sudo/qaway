@@ -141,7 +141,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
             <NavLink
               to={getHref(item.to)}
               end={item.end}
-              title={item.label}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
@@ -156,8 +155,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
 
             {/* Pop-up flotante al pasar el mouse por el ícono (modo colapsado) */}
             {collapsed && (
-              <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:flex items-center z-50">
-                <div className="bg-[#0f172a] text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight">
+              <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
+                <div
+                  className="bg-[#0f172a] text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight"
+                  style={{ color: '#ffffff' }}
+                >
                   {item.label}
                 </div>
               </div>
@@ -192,7 +194,6 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       <div className="relative group">
         <NavLink
           to={getHref('/config')}
-          title="Configuración"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-3 border-t border-white/10 text-sm transition-colors ${
               isActive ? 'text-brand' : 'text-muted-light hover:text-white'
@@ -203,8 +204,11 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
           {!collapsed && <span>Configuración</span>}
         </NavLink>
         {collapsed && (
-          <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:flex items-center z-50">
-            <div className="bg-[#0f172a] text-white text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight">
+          <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
+            <div
+              className="bg-[#0f172a] text-xs font-semibold px-2.5 py-1.5 rounded-md shadow-2xl whitespace-nowrap border border-white/10 tracking-tight"
+              style={{ color: '#ffffff' }}
+            >
               Configuración
             </div>
           </div>
