@@ -25,6 +25,7 @@ import WebOrdersPage from '@/pages/sales/WebOrdersPage'
 import SuppliersPage from '@/pages/suppliers/SuppliersPage'
 import PurchaseOrdersPage from '@/pages/purchases/PurchaseOrdersPage'
 import NewPurchaseOrderPage from '@/pages/purchases/NewPurchaseOrderPage'
+import ComprasPanelPage from '@/pages/purchases/ComprasPanelPage'
 import PettyCashPage from '@/pages/finance/PettyCashPage'
 import ExpensesPage from '@/pages/finance/ExpensesPage'
 import AccountingPage from '@/pages/finance/AccountingPage'
@@ -110,6 +111,10 @@ export default function AppRouter() {
           <Route path="compras/nueva" element={<NewPurchaseOrderPage />} />
           <Route path="compras/proveedores" element={<SuppliersPage />} />
           <Route path="compras/ordenes" element={<PurchaseOrdersPage />} />
+          {/* Módulo de compras del panel de diseño (órdenes, proveedores y
+              recepciones). Ruta propia y sin relación con /compras, que hoy
+              resuelve al alias del carrito declarado más arriba en L55. */}
+          <Route path="compras-panel" element={<ComprasPanelPage />} />
 
           {/* Promociones */}
           <Route path="promociones" element={<LiquidationPage />} />

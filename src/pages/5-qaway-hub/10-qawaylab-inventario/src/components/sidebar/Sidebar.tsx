@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ShoppingCart,
   Globe,
+  Layers,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -51,6 +52,7 @@ const navItems: NavItem[] = [
   { to: '/compras', label: 'Compras', icon: <ShoppingCart size={18} />, section: 'COMPRAS' },
   { to: '/compras/proveedores', label: 'Proveedores', icon: <Users size={18} /> },
   { to: '/compras/ordenes', label: 'Órdenes de Compra', icon: <ClipboardList size={18} /> },
+  { to: '/compras-panel', label: 'Compras (Diseño)', icon: <Layers size={18} /> },
 
   { to: '/promociones', label: 'Campañas', icon: <Zap size={18} />, section: 'PROMOCIONES', end: true },
   { to: '/promociones/catalogos', label: 'Catálogos', icon: <FileText size={18} /> },
