@@ -9,6 +9,7 @@ import {
   Package,
   Calendar,
   GraduationCap,
+  BookOpen,
   ExternalLink,
 } from "@/components/ui/icons/hubIcons";
 
@@ -168,6 +169,29 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
               <HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" />
             </div>
             <span>Hub Central de Aplicaciones</span>
+          </div>
+        </Link>
+
+        <Link
+          to="/hub/biblioteca"
+          onClick={onClose}
+          className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+            location.pathname.startsWith("/hub/biblioteca")
+              ? "bg-zinc-900 text-white shadow-sm"
+              : "text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                location.pathname.startsWith("/hub/biblioteca")
+                  ? "bg-white/10 text-white"
+                  : "bg-indigo-500/10 text-indigo-600"
+              }`}
+            >
+              <HubIcon icon={BookOpen} size={16} className="w-4 h-4" />
+            </div>
+            <span>Biblioteca de Recursos & IAs</span>
           </div>
         </Link>
       </div>
