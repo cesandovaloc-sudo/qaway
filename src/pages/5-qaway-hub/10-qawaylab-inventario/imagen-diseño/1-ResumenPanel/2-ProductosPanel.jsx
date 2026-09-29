@@ -132,7 +132,7 @@ const initialProducts = [
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
-.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:nth-child(even){background:#fafafa}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#18181b;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px;color:#45536d;font:inherit;max-width:190px}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
+.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#18181b;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px;color:#45536d;font:inherit;max-width:190px}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
 .pxp-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;padding:14px}
 .pxp-product-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease}
 .pxp-product-card:hover{border-color:#cbd5e1;box-shadow:0 6px 18px rgba(15,23,42,.06);transform:translateY(-2px)}
@@ -1422,7 +1422,7 @@ export default function ProductosPanel() {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 className="pxp-detail-title">{detailProduct.name}</h2>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>
                       {detailProduct.status === "Sin stock" ? "Sin stock" : "Activo"}
                     </span>
@@ -1435,12 +1435,6 @@ export default function ProductosPanel() {
                       </span>
                     )}
                   </div>
-                  {detailProduct.description && (
-                    <div style={{ color: "#64748b", fontSize: 13, lineHeight: 1.4, marginTop: 4 }}>
-                      {detailProduct.description.slice(0, 110)}
-                      {detailProduct.description.length > 110 ? "..." : ""}
-                    </div>
-                  )}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
@@ -1483,7 +1477,7 @@ export default function ProductosPanel() {
             </div>
 
             <div className="pxp-detail-tabs">
-              {["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas", "Más datos"].map(t => (
+              {["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas"].map(t => (
                 <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>
                   {t}
                 </button>
@@ -1493,47 +1487,16 @@ export default function ProductosPanel() {
             <div className="pxp-detail-content">
               {detailTab === "Resumen" && (
                 <div className="pxp-detail-grid">
-                  {/* Stock por almacén */}
+                  {/* Ficha Técnica */}
                   <div className="pxp-detail-box">
-                    <h3>▣ Stock por almacén</h3>
-                    <table className="pxp-detail-table">
-                      <thead>
-                        <tr>
-                          <th>Almacén</th>
-                          <th style={{ textAlign: "right" }}>Stock</th>
-                          <th style={{ textAlign: "right" }}>Mínimo</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(detailProduct.warehouse || [{ name: detailProduct.location || "Almacén Principal", stock: detailProduct.stock, min: 0 }]).map(w => (
-                          <tr key={w.name}>
-                            <td style={{ fontWeight: 600 }}>{w.name}</td>
-                            <td style={{ textAlign: "right", color: w.stock > 0 ? "#059669" : "#71717a", fontWeight: 700 }}>
-                              {w.stock} un.
-                            </td>
-                            <td style={{ textAlign: "right", color: "#64748b" }}>
-                              {w.min ?? "—"}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <div className="pxp-kv" style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #e2e8f0" }}>
-                      <b>Stock global total</b>
-                      <b style={{ color: "#059669", fontSize: 14 }}>{detailProduct.stock} un.</b>
-                    </div>
-                  </div>
-
-                  {/* Información general */}
-                  <div className="pxp-detail-box">
-                    <h3>▤ Información general</h3>
+                    <h3>▤ Ficha técnica</h3>
                     {[
                       ["Categoría", detailProduct.category],
                       ["Marca", detailProduct.brand || "—"],
                       ["Presentación", detailProduct.presentation || "—"],
                       ["Unidad de medida", detailProduct.unit || "un."],
                       ["Condición Qaway", `${detailProduct.condition || 10}/10`],
-                      ["Estado", detailProduct.status]
+                      ["Estado actual", detailProduct.status]
                     ].map(([k, v]) => (
                       <div className="pxp-kv" key={k}>
                         <span>{k}</span>
@@ -1542,27 +1505,27 @@ export default function ProductosPanel() {
                     ))}
                   </div>
 
-                  {/* Estructura de Precios */}
+                  {/* Disponibilidad y Valor */}
                   <div className="pxp-detail-box">
-                    <h3>▣ Estructura de precios</h3>
+                    <h3>▣ Disponibilidad y valor</h3>
                     {[
-                      ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)],
-                      ["Precio base", money(detailProduct.price)],
-                      ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)],
-                      ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)],
-                      ["Impuesto", "IGV (18%)"]
+                      ["Stock global disponible", `${detailProduct.stock} un.`],
+                      ["Valorización en inventario", money(detailProduct.stock * detailProduct.price)],
+                      ["Ubicación principal", detailProduct.location || "Almacén Principal"],
+                      ["Precio de venta regular", money(detailProduct.salePrice ?? detailProduct.price)],
+                      ["Régimen tributario", "IGV (18% Gravado)"]
                     ].map(([k, v]) => (
                       <div className="pxp-kv" key={k}>
                         <span>{k}</span>
-                        <b>{v}</b>
+                        <b style={{ color: k.includes("Stock") ? "#059669" : "#0f172a" }}>{v}</b>
                       </div>
                     ))}
                   </div>
 
-                  {/* Descripción detallada */}
-                  <div className="pxp-detail-box">
-                    <h3>▣ Descripción</h3>
-                    <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.65, margin: 0 }}>
+                  {/* Descripción oficial (único lugar) */}
+                  <div className="pxp-detail-box full">
+                    <h3>▣ Descripción oficial del producto</h3>
+                    <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.7, margin: 0 }}>
                       {detailProduct.description || "Sin descripción registrada para este producto."}
                     </p>
                   </div>
@@ -1571,7 +1534,7 @@ export default function ProductosPanel() {
 
               {detailTab === "Inventario" && (
                 <div className="pxp-detail-box">
-                  <h3>Stock por ubicación física</h3>
+                  <h3>▣ Stock detallado por sede / almacén</h3>
                   <table className="pxp-detail-table">
                     <thead>
                       <tr>
@@ -1584,42 +1547,48 @@ export default function ProductosPanel() {
                       {(detailProduct.warehouse || [{ name: detailProduct.location || "Almacén Principal", stock: detailProduct.stock, min: 0 }]).map(w => (
                         <tr key={w.name}>
                           <td style={{ fontWeight: 600 }}>{w.name}</td>
-                          <td style={{ textAlign: "right", color: "#059669", fontWeight: 700 }}>{w.stock} un.</td>
+                          <td style={{ textAlign: "right", color: w.stock > 0 ? "#059669" : "#71717a", fontWeight: 700 }}>{w.stock} un.</td>
                           <td style={{ textAlign: "right", color: "#64748b" }}>{w.min ?? "—"}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  <button
-                    className="pxp-btn small"
-                    style={{ marginTop: 14 }}
-                    onClick={() => {
-                      setEditing(detailProduct);
-                      setForm({
-                        name: detailProduct.name,
-                        sku: detailProduct.sku,
-                        category: detailProduct.category,
-                        stock: detailProduct.stock,
-                        price: detailProduct.price,
-                        location: detailProduct.location,
-                        description: detailProduct.description || ""
-                      });
-                      setModal("stock");
-                    }}
-                  >
-                    ▤ Ajustar stock
-                  </button>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
+                    <div style={{ fontSize: 13, color: "#64748b" }}>
+                      Total consolidado: <b style={{ color: "#059669" }}>{detailProduct.stock} unidades</b>
+                    </div>
+                    <button
+                      className="pxp-btn small"
+                      style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
+                      onClick={() => {
+                        setEditing(detailProduct);
+                        setForm({
+                          name: detailProduct.name,
+                          sku: detailProduct.sku,
+                          category: detailProduct.category,
+                          stock: detailProduct.stock,
+                          price: detailProduct.price,
+                          location: detailProduct.location,
+                          description: detailProduct.description || ""
+                        });
+                        setModal("stock");
+                      }}
+                    >
+                      ▤ Ajustar stock
+                    </button>
+                  </div>
                 </div>
               )}
 
               {detailTab === "Precios" && (
                 <div className="pxp-detail-box">
-                  <h3>Matriz completa de precios</h3>
+                  <h3>▣ Matriz comercial y listas de precios</h3>
                   {[
-                    ["Precio de venta final", money(detailProduct.salePrice ?? detailProduct.price)],
-                    ["Precio base / lista", money(detailProduct.price)],
+                    ["Precio de venta final (PVP)", money(detailProduct.salePrice ?? detailProduct.price)],
+                    ["Precio base / lista neto", money(detailProduct.price)],
                     ["Precio mayorista (volumen)", money(detailProduct.wholesale ?? detailProduct.price)],
-                    ["Precio mínimo permitido", money(detailProduct.minPrice ?? detailProduct.price)],
+                    ["Precio mínimo permitido (piso)", money(detailProduct.minPrice ?? detailProduct.price)],
+                    ["Costo referencial de compra", money(detailProduct.cost ?? (detailProduct.price * 0.5))],
                     ["Moneda de operación", "PEN (S/)"],
                     ["Régimen tributario", "IGV 18% Gravado"]
                   ].map(([k, v]) => (
@@ -1631,12 +1600,33 @@ export default function ProductosPanel() {
                 </div>
               )}
 
-              {["Movimientos", "Proveedores", "Ventas", "Más datos"].includes(detailTab) && (
+              {detailTab === "Movimientos" && (
                 <div className="pxp-detail-box">
-                  <h3>{detailTab}</h3>
-                  <p style={{ color: "#64748b", fontSize: 13.5, lineHeight: 1.6, margin: 0 }}>
-                    No hay registros históricos vinculados para este ítem. Esta sección se alimenta automáticamente al registrar ventas o movimientos de almacén.
-                  </p>
+                  <h3>⇄ Historial y Kardex de movimientos</h3>
+                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Registro de entradas y salidas</p>
+                    <p style={{ margin: 0, fontSize: 13 }}>Se generarán automáticamente al emitir ventas, registrar compras o realizar ajustes de inventario.</p>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === "Proveedores" && (
+                <div className="pxp-detail-box">
+                  <h3>🏢 Proveedores y Abastecimiento</h3>
+                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin proveedor principal vinculado</p>
+                    <p style={{ margin: 0, fontSize: 13 }}>Puedes asignar proveedores de origen desde el módulo de Compras y Proveedores.</p>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === "Ventas" && (
+                <div className="pxp-detail-box">
+                  <h3>🛒 Historial de Ventas y Salidas</h3>
+                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin ventas registradas en esta demo</p>
+                    <p style={{ margin: 0, fontSize: 13 }}>Las órdenes y boletas/facturas generadas en el POS se listarán aquí en tiempo real.</p>
+                  </div>
                 </div>
               )}
             </div>
