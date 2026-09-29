@@ -1042,17 +1042,24 @@ export default function ProductosPanel() {
       setPage(1);
       showToast("Producto creado");
       try {
-        await productService.createProduct({
+        const created = await productService.createProduct({
           name: form.name,
           sku: form.sku,
           base_price: price,
           stock,
-          unit: form.unit,
+          unit: form.unit || "un.",
           cost,
-          brand: form.brand,
-          description: form.description,
-          status: 'active'
+          brand: form.brand || "Marca Propia",
+          description: form.description || "",
+          category: form.category || "Alimentos",
+          status: "active",
+          type: "simple",
+          commercial_status: "available",
+          condition: 10
         });
+        if (created?.id) {
+          setProducts(prev => prev.map(p => p.id === newP.id ? { ...p, id: created.id } : p));
+        }
       } catch (err) {
         console.warn("[Inventi] Supabase create warning:", err);
       }
