@@ -29,35 +29,40 @@ Documento técnico del módulo. Su función es la de *readme* operativo: qué es
 
 ## Módulos
 
-| Módulo | Qué resuelve |
-|---|---|
-| **Portal del cliente** | Listado de negocios, agenda pública, reserva de horario sin cuenta, gestión de la cita por token |
-| **Reserva** | Selección de servicio y fecha, validación de disponibilidad en cliente, alta del booking y entrega de `cancel_token` |
-| **Agenda del negocio** | Calendario de citas, filtro de personal, cambio de estado, reprogramación y cancelación |
-| **Configuración de servicios** | Catálogo de servicios, duración, precio, color, duración de la cita y `buffer_minutes` entre citas |
-| **Disponibilidad** | Horarios semanales, días bloqueados, feriados y excepciones por fecha |
-| **Gestión de personal** | Alta de profesionales y asignación de servicios |
-| **Panel del cliente** | `"Mi agenda"`: ver, reprogramar o cancelar la cita con el `cancel_token` recibido |
-| **Identidad visual** | Logo, colores y nombre por negocio. Aplica `theming.tsx` global para todos los módulos |
+Lo que existe son **4 páginas**. Cualquier otro módulo es diseño, no código.
+
+| Módulo | Estado | Qué resuelve |
+|---|---|---|
+| **Página de entrada** | Implementado | `HomePage`: presentación y enlace de reserva |
+| **Agenda pública y reserva** | Implementado | `PublicBookingPage`: catálogo, horarios disponibles, reserva sin cuenta |
+| **Gestión de la cita** | Implementado | `ManageBookingPage`: ver, reprogramar o cancelar con `cancel_token` |
+| **Panel de administración** | Implementado | `AdminPanelPage`: servicios, horarios, excepciones, reservas |
+| **Identidad visual** | Parcial | Color y marca por negocio. **No** hay `theming.tsx` ni `lib/`; el tema vive en las páginas |
+| **Equipo y profesionales** | **No existe** | Sin tabla de personal, sin `staff_id` en `bookings`. El "filtro de personal" del panel no puede existir |
+| **CRM de clientes** | **No existe** | Los datos de cliente viven dentro de cada `booking`, sin entidad propia |
+| **Notificaciones** | **Parcial** | Tabla `reminders` y trigger de servidor. Sin envío real verificado |
+| **Reportes** | **No existe** | Sin módulo analítico |
 
 ---
 
 ## Estructura de `src/agenda/`
 
+El módulo es **muy pequeño: 8 archivos**. No hay carpeta `components/`, ni `lib/`, ni barrel files.
+
 ```
-context/     AgendaContext.tsx          Estado global: sesión, disponibilidad, slot generator, create/cancel
-adapters/    agendaAdapter.ts           Única capa que habla con Supabase
-pages/       Portal, Agenda, Settings, MyAgenda
-components/  BookingPanel, BookingWizard, ServiceCard, CalendarGrid, AgendaCalendar,
-             StatusPill, EmptyState, Modal, TimezoneLabel
-lib/         businessRepo.ts            Acceso a negocios
-             calendarLinks.ts           Enlaces ICS y Google Calendar
-             theming.tsx                Proveedor de tema y CSS variables
-types.ts                             Interfaces de dominio
-utils/       time.ts, ics.ts
+types.ts                      Interfaces de dominio
+adapters/agendaAdapter.ts     Única capa que habla con Supabase
+context/AgendaContext.tsx     Estado global: sesión, disponibilidad, generador de slots, create/cancel
+pages/HomePage.tsx            Página de entrada del módulo
+pages/PublicBookingPage.tsx   Agenda pública y reserva sin cuenta
+pages/ManageBookingPage.tsx   Gestión de la cita mediante cancel_token
+pages/AdminPanelPage.tsx      Panel de administración
+utils/calendarLinks.ts        Enlaces ICS y Google Calendar
 ```
 
 **Por qué importa:** `agendaAdapter.ts` es el único archivo que debe conocer la forma de la base de datos. Si una regla de negocio aparece en un componente, está en el lugar equivocado.
+
+**El modelo de datos son 6 tablas:** `businesses`, `event_types`, `schedules`, `availability_exceptions`, `bookings`, `reminders`. No existe tabla de personal ni de recursos, y `bookings` no tiene `staff_id` ni `resource_id`. La asignación de profesionales **no está construida**.
 
 ---
 
@@ -71,7 +76,9 @@ utils/       time.ts, ics.ts
 | `npm run typecheck` | `tsc --noEmit`. **Nunca se ha ejecutado en este proyecto** |
 | `supabase` CLI | **No conectar.** El acceso a la base va exclusivamente por un agente especializado |
 
-No hay suite de tests. `touched-surface.test.ts` tiene un único smoke test, deliberadamente en archivo separado para no activar la regla de no-`co-locate` de la skill de tests.
+No hay suite de tests. **Cero archivos de test en el módulo** (`*.test.*` / `*.spec.*`). Toda la remediación de la auditoría run-1 se validó por lectura y inspección, no por ejecución.
+
+`npm run build` ejecuta `tsc --noEmit && vite build`: el typecheck va incluido, así que un build fallido es un typecheck fallido.
 
 ---
 

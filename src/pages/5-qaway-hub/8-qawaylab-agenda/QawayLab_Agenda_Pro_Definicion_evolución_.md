@@ -366,7 +366,116 @@ La aplicación queda subordinada al modelo central de tenants, identidad y permi
 
 ---
 
-## 11. Resumen ejecutivo
+## 11. De app independiente a módulo del Hub
+
+**Estado:** consumado. Este apartado documenta un cambio ya ejecutado para que no se revierta por inercia.
+
+### 11.1 Qué cambió
+
+Hasta el 28 de septiembre de 2026 la agenda se documentaba y se configuraba como una aplicación autónoma. Ese modelo queda **derogado**. La agenda es un módulo del Hub, gobernado por Qaway Lab.
+
+| Antes | Ahora |
+|---|---|
+| App independiente, portátil y vendible por separado | Módulo interno del Hub |
+| Proyecto Supabase propio | Comparte la base central del Hub |
+| Conexión con otras apps solo por enlaces | Composición dentro del Hub |
+| Autonomía sobre tenants y permisos | Consume identidad, tenant, plan y permisos del Hub |
+
+### 11.2 Los cuatro artefactos del modelo derogado
+
+| Artefacto | Qué sostenía | Estado |
+|---|---|---|
+| `AGENTS.md` | Declaraba la app independiente, portátil, vendible por separado, con proyecto Supabase propio y sin depender de otras apps. | **Derogado.** Reescrito el 28-09-2026 con la doctrina del Hub. |
+| `index.html` local | Residuo de poder servirse por separado. | **Pendiente.** No se usa. Debe eliminarse o anotarse como residuo. |
+| `supabase/migrations/0001` y `0002` | Cadena de migraciones propia, paralela a la central. | **Pendiente.** Legado. No aplicarlos a ninguna base. |
+| Patrón `2-qawaylab-academy` | Modelo a copiar para construir apps independientes. | **Derogado** como patrón de referencia para este módulo. |
+
+### 11.3 Por qué esto no es cosmético
+
+La doctrina derogada contenía **afirmaciones que el código contradecía**:
+
+- Declaraba que la agenda tenía proyecto Supabase propio. **Falso**: su esquema vive en la cadena central y `businesses.tenant_id` referencia la tabla central `tenants`.
+- Declaraba lógica server-side en Edge Functions. **Falso**: `supabase/functions` está vacío; la lógica vive en Postgres.
+- Citar React Router 7 como dependencia. **Falso**: no figura en `package.json`.
+
+Una instrucción falsa en un archivo de agente no es un error de redacción: es una instrucción que el siguiente agente obedece. Por eso este apartado se conserva como registro, y no solo como decisión.
+
+### 11.4 Regla permanente
+
+Ante cualquier duda sobre si algo es autónomo o gobernado por el Hub, **manda el esquema**: si una tabla de la agenda referencia `tenants`, referencia `saas_apps` o aparece en `supabase/migrations/` del monorepo, es del Hub. La documentación que diga lo contrario está desactualizada.
+
+---
+
+## 12. Anexo de hallazgos verificados en código
+
+**Estado:** verificado por lectura directa del código el 28-09-2026. Estos puntos no pueden deducirse del diseño funcional y no aparecen en las secciones anteriores.
+
+### 12.1 Exposición pública de la agenda de reservas — hallazgo prioritario
+
+```sql
+-- 20260920102000_agenda_coupled_central.sql:188
+create or replace view public.booked_slots as
+  select business_id, event_type_id, start_at, end_at
+  from public.bookings
+  where status in ('confirmed', 'pending_payment');
+```
+
+La vista **no declara `security_invoker`**. En PostgreSQL, una vista sin ese atributo se ejecuta con los permisos de su propietario, no de quien consulta. Consecuencia directa: el hardening hizo `revoke all on public.bookings from anon` y a la vez `grant select on public.booked_slots to anon`, de modo que **la revocación queda sorteada por la vista**.
+
+No es una fuga de datos personales —no expone nombre, correo, teléfono ni `cancel_token`— pero **publica la agenda completa de todos los negocios de la plataforma, con `business_id` incluido**, sin autenticación ni límite de peticiones. Permite reconstruir por negocio las horas pico, el tipo de servicio contratado y la tasa de utilización.
+
+Esto contradice el propósito declarado en la propia migración de hardening («la RPC es el único camino, defensa en profundidad»).
+
+**Dirección de solución:** sustituir la vista por una función de consulta que responda a una pregunta concreta —«¿está libre el negocio X, el servicio Y, en la fecha Z?»— y devuelva un resultado acotado, en lugar de exponer la tabla. Es el mismo patrón que ya se aplicó correctamente a la reserva con `secure_create_booking`. La alternativa de añadir `security_invoker` haría que `anon` no viera filas y el portal perdería la consulta de disponibilidad.
+
+### 12.2 Dos cadenas de migraciones — riesgo real, pero acotado
+
+Existen dos ubicaciones de esquema para la agenda:
+
+- **Local de la app:** `supabase/migrations/0001_agenda_schema.sql` y `0002_booking_free_only.sql` — **legado**.
+- **Central del monorepo:** `supabase/migrations/`, 55 migraciones, incluida `20260920102000_agenda_coupled_central.sql` y el hardening `20260928160000_fix_agenda_security_hardening.sql`.
+
+**Matiz importante:** aplicada en orden de timestamp, la cadena central produce un estado final correcto, porque el hardening (28-09) se ejecuta después de la definición coupled (20-09). El peligro no está en un despliegue automatizado.
+
+El peligro real es acotado y concreto: la migración de hardening nombra políticas que existen en la `0001` local (`anon_insert_booking`, `anon_read_own_booking`, `anon_update_own_booking`). Si alguien aplica los archivos locales a una base nueva, **reconstruye exactamente las políticas que el hardening eliminó**.
+
+**Acción:** archivar o anotar los archivos locales como legados. No es una emergencia; es higiene que evita un incidente futuro.
+
+### 12.3 Ciclo de vida del tenant — estado indefinido
+
+```sql
+-- 20260920102000_agenda_coupled_central.sql:14
+tenant_id uuid references public.tenants (id) on delete set null
+```
+
+Con `on delete set null`, **eliminar un tenant deja los negocios vivos pero desasociados**. El negocio queda en un estado no definido: cualquier regla que dependa de `tenant_id` deja de aplicarse, y si esas reglas son de denegación, la ausencia del valor se resuelve de forma no obvia.
+
+Esto debe resolverse antes de operar con múltiples negocios: o el negocio se elimina con su tenant, o queda explícitamente en un estado "sin tenant" con permisos definidos. Lo que no puede quedar es un estado ambiguo.
+
+### 12.4 Verificación de hospedaje: no existe lógica de hospedaje
+
+Se verificó exhaustivamente que **no existe lógica de hospedaje en este repositorio**. Alcance de la búsqueda: toda la app, las 26 aplicaciones del Hub y las 55 migraciones centrales.
+
+| Búsqueda | Resultado |
+|---|---|
+| Tablas o vistas con `habitacion`, `room`, `unit_`, `nightly`, `hospedaje` | **0** |
+| Frases de hospedaje en código (`tarifa por noche`, `ocupación de hab.`, `estancia`, `huésped`, `check_in/out`) | **11 coincidencias, ninguna funcional** |
+| Nombres de archivo con terminología de hospedaje | Todos son `Checkout` de carrito de comercio, sin relación |
+
+Las 11 coincidencias se descomponen así:
+
+- **7** están en este mismo documento, corresponde a la decisión de mantener hospedaje fuera del núcleo.
+- **2** son saludos («Buenas noches») en la app Academy.
+- **1** es copy de marketing («Noches 8:00 PM»).
+- **1** es la cadena `"Hospedaje"` en el array `RUBROS` de `HubOnboardingPage.jsx:26`, que es una **etiqueta de sector** del formulario de onboarding, no un módulo ni un modelo de datos.
+
+**Consecuencia práctica:** no hay nada que desacoplar ni preservar. Lo que debe conservarse es la **decisión arquitectónica** de que hospedaje viva en otra aplicación del Hub, que es lo que este documento establece. El riesgo real es el inverso: que un documento futuro asuma que existe hospedaje aquí y lo reconstruya sobre `bookings`.
+
+Observación de producto, no de código: el onboarding del Hub ofrece «Hospedaje» como sector seleccionable, lo que sugiere una cobertura que hoy no existe como aplicación. Conviene alinear esa promesa con el catálogo real.
+
+---
+
+## 13. Resumen ejecutivo
 
 **Qaway Lab Agenda Pro** es el módulo de gestión de agendas de atención por citas del Hub Qaway Lab.
 
