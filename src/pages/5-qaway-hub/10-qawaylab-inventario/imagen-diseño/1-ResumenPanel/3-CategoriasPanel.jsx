@@ -125,7 +125,117 @@ export default function CategoriasPanel() {
   const toggleOne = id => setSelectedIds(prev=>prev.includes(id)?prev.filter(x=>x!==id):[...prev,id]);
 
   return <div className="cat-root">
-    <style>{css}</style>
+     <style>{css}</style>
+     <style>{`
+       /* Unifica la superficie del tablero con el estándar visual de Productos. */
+       .cat-root {
+         --blue: #ff4b0b;
+         --line: #e5ebf4;
+         --muted: #71809e;
+         background: #f7f9fc;
+         font-size: 14px;
+       }
+       .cat-content { padding: 22px 20px; max-width: 1800px; }
+       .cat-heading { gap: 14px; margin-bottom: 22px; }
+       .cat-heading-icon {
+         width: 38px;
+         height: 38px;
+         border-radius: 10px;
+         background: #f4f4f5;
+         border: 1px solid #e4e4e7;
+         color: #ff4b0b;
+         font-size: 20px;
+       }
+       .cat-heading h1 {
+         font-size: 28px;
+         font-weight: 700;
+         letter-spacing: -0.8px;
+         color: #111b2d;
+       }
+       .cat-metrics { gap: 12px; margin-bottom: 14px; }
+       .cat-metric {
+         border: 1px solid #e4e4e7;
+         border-radius: 12px;
+         padding: 14px 16px;
+         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+       }
+       .cat-metric-icon {
+         width: 28px;
+         height: 28px;
+         border-radius: 8px;
+         font-size: 16px;
+         background: #f4f4f5;
+         color: #52525b;
+       }
+       .cat-metric-icon.green,
+       .cat-metric-icon.red,
+       .cat-metric-icon.purple {
+         background: #f4f4f5;
+         color: #52525b;
+       }
+       .cat-metric-label { font-size: 12px; font-weight: 600; color: #52525b; }
+       .cat-metric-value { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: #0f172a; }
+       .cat-metric-note { font-size: 11px; font-weight: 500; color: #71717a; }
+       .cat-toolbar {
+         position: sticky;
+         top: 0;
+         z-index: 20;
+         padding: 12px;
+         gap: 10px;
+         border: 1px solid #e5ebf4;
+         border-radius: 11px;
+         background: rgba(255, 255, 255, 0.96);
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+         backdrop-filter: blur(8px);
+       }
+       .cat-search {
+         height: 38px;
+         min-width: 220px;
+         max-width: 480px;
+         border: 1px solid #e5ebf4;
+         border-radius: 8px;
+         background: #f9fbfd;
+       }
+       .cat-select {
+         height: 38px;
+         border: 1px solid #e2e8f0;
+         border-radius: 8px;
+         background: #fff;
+         color: #334155;
+         font-size: 13px;
+         font-weight: 500;
+       }
+       .cat-table-card {
+         background: #fff;
+         border: 1px solid #e5ebf4;
+         border-radius: 12px;
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+       }
+       .cat-table { min-width: 940px; border-collapse: collapse; }
+       .cat-table th {
+         background: #f8fafc;
+         padding: 15px 16px;
+         border-bottom: 1px solid #e2e8f0;
+         font-size: 13px;
+         font-weight: 700;
+         letter-spacing: 0.2px;
+         color: #475569;
+       }
+       .cat-table td {
+         padding: 16px;
+         border-bottom: 1px solid #f1f5f9;
+         font-size: 14.5px;
+         color: #334155;
+       }
+       .cat-table tbody tr:nth-child(even) { background: #fafafa; }
+       .cat-table tbody tr:hover { background: #f8fafc; }
+       .cat-table tbody tr.selected { background: rgba(255, 75, 11, 0.05); }
+       .cat-icon-box {
+         border-radius: 10px;
+         border: 1px solid #e2e8f0;
+       }
+       .cat-pagination { border-top: 1px solid #f1f5f9; }
+     `}</style>
     <div className="cat-layout">
       <div className="cat-main">
         <div className="cat-content">

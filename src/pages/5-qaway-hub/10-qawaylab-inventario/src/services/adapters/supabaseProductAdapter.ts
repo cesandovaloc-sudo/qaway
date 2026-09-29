@@ -118,7 +118,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     if (error) {
       console.error('Error creating product:', error)
-      return null
+      throw new Error(error.message || 'Error al crear producto en base de datos')
     }
     return data
   },
@@ -146,7 +146,7 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     if (error) {
       console.error('Error updating product:', error)
-      return null
+      throw new Error(error.message || 'Error al actualizar producto en base de datos')
     }
     return data
   },

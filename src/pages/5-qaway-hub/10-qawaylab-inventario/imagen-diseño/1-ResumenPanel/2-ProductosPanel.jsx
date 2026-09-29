@@ -970,23 +970,21 @@ export default function ProductosPanel() {
     const statusText = stock === 0 ? "Sin stock" : stock <= minStock ? "Stock bajo" : "Disponible";
 
     if (editing) {
-      setProducts(prev => prev.map(p => p.id === editing.id ? {
-        ...p,
-        ...form,
-        stock,
-        price,
-        cost,
-        wholesale,
-        minPrice,
-        status: statusText,
-        warehouse: [
-          { name: form.location, stock, min: minStock },
-          ...(p.warehouse?.filter(w => w.name !== form.location) || [])
-        ]
-      } : p));
-      if (detailProduct?.id === editing.id) {
-        setDetailProduct(prev => ({
-          ...prev,
+      try {
+        if (typeof editing.id === 'string' && !editing.id.startsWith('prod-')) {
+          await productService.updateProduct(editing.id, {
+            name: form.name,
+            sku: form.sku,
+            base_price: price,
+            price: price,
+            stock,
+            unit: form.unit || "un.",
+            brand: form.brand || "Marca Propia",
+            description: form.description || ""
+          });
+        }
+        setProducts(prev => prev.map(p => p.id === editing.id ? {
+          ...p,
           ...form,
           stock,
           price,
@@ -996,59 +994,40 @@ export default function ProductosPanel() {
           status: statusText,
           warehouse: [
             { name: form.location, stock, min: minStock },
-            ...(prev.warehouse?.filter(w => w.name !== form.location) || [])
+            ...(p.warehouse?.filter(w => w.name !== form.location) || [])
           ]
-        }));
-      }
-      showToast("Producto actualizado");
-      try {
-        if (typeof editing.id === 'string' && !editing.id.startsWith('prod-')) {
-          await productService.updateProduct(editing.id, {
-            name: form.name,
-            sku: form.sku,
-            base_price: price,
+        } : p));
+        if (detailProduct?.id === editing.id) {
+          setDetailProduct(prev => ({
+            ...prev,
+            ...form,
             stock,
-            unit: form.unit,
+            price,
             cost,
-            brand: form.brand,
-            description: form.description
-          });
+            wholesale,
+            minPrice,
+            status: statusText,
+            warehouse: [
+              { name: form.location, stock, min: minStock },
+              ...(prev.warehouse?.filter(w => w.name !== form.location) || [])
+            ]
+          }));
         }
+        showToast("Producto actualizado correctamente");
+        setModal("");
       } catch (err) {
-        console.warn("[Inventi] Supabase update warning:", err);
+        console.error("[Inventi] Error al actualizar producto:", err);
+        showToast(`Error al actualizar: ${err.message || 'Error en base de datos'}`);
       }
     } else {
-      const newP = {
-        ...form,
-        id: `prod-${Date.now()}`,
-        stock,
-        price,
-        cost,
-        wholesale,
-        minPrice,
-        status: statusText,
-        detail: form.description ? form.description.slice(0, 35) : "",
-        image: "📦",
-        barcode: form.barcode || form.sku,
-        brand: form.brand || "Marca Propia",
-        presentation: form.unit || "un.",
-        unit: form.unit || "un.",
-        weight: form.weight || "—",
-        dimensions: form.dimensions || "—",
-        condition: form.condition || 10,
-        warehouse: [{ name: form.location, stock, min: minStock }]
-      };
-      setProducts(prev => [newP, ...prev]);
-      setPage(1);
-      showToast("Producto creado");
       try {
         const created = await productService.createProduct({
           name: form.name,
-          sku: form.sku,
+          sku: form.sku || undefined,
           base_price: price,
+          price: price,
           stock,
           unit: form.unit || "un.",
-          cost,
           brand: form.brand || "Marca Propia",
           description: form.description || "",
           category: form.category || "Alimentos",
@@ -1057,14 +1036,37 @@ export default function ProductosPanel() {
           commercial_status: "available",
           condition: 10
         });
-        if (created?.id) {
-          setProducts(prev => prev.map(p => p.id === newP.id ? { ...p, id: created.id } : p));
-        }
+
+        const newP = {
+          ...form,
+          id: created?.id || `prod-${Date.now()}`,
+          stock,
+          price,
+          cost,
+          wholesale,
+          minPrice,
+          status: statusText,
+          detail: form.description ? form.description.slice(0, 35) : "",
+          image: "📦",
+          barcode: form.barcode || form.sku,
+          brand: form.brand || "Marca Propia",
+          presentation: form.unit || "un.",
+          unit: form.unit || "un.",
+          weight: form.weight || "—",
+          dimensions: form.dimensions || "—",
+          condition: form.condition || 10,
+          warehouse: [{ name: form.location, stock, min: minStock }]
+        };
+
+        setProducts(prev => [newP, ...prev]);
+        setPage(1);
+        showToast("Producto creado correctamente en base de datos");
+        setModal("");
       } catch (err) {
-        console.warn("[Inventi] Supabase create warning:", err);
+        console.error("[Inventi] Error al crear producto en Supabase:", err);
+        showToast(`Error al guardar producto: ${err.message || 'Error en base de datos'}`);
       }
-    }
-    setModal(""); 
+    } 
   };
   const handleImportFile = file => { if (!file) return; setImportFile(file); setImportStep(2); };
   const finishImport = () => { showToast(importFile ? `Archivo "${importFile.name}" listo para procesar (demo)` : "Selecciona un archivo para continuar"); setModal(""); setImportStep(1); setImportFile(null); };
