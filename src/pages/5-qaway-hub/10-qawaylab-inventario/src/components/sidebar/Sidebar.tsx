@@ -34,7 +34,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/', label: 'Resumen', icon: <LayoutDashboard size={18} />, end: true },
 
-  { to: '/logistica', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
+  { to: '/productos', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
   { to: '/logistica/categorias', label: 'Categorías', icon: <FolderTree size={18} /> },
   { to: '/logistica/movimientos', label: 'Movimientos', icon: <ArrowLeftRight size={18} /> },
   { to: '/sedes', label: 'Sedes', icon: <Building2 size={18} /> },

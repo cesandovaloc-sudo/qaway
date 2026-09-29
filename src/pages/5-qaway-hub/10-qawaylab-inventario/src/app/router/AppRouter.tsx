@@ -65,10 +65,9 @@ export default function AppRouter() {
           {/* Dashboard: cualquier autenticado (el detalle de datos lo decide el RLS) */}
           <Route index element={<DashboardPage />} />
 
-          {/* Logística / Inventario — lectura: cualquier autenticado */}
-          {/* Módulo de sedes del panel de diseño (sedes, almacenes,
-              configuración por sede). Ruta nueva: "sedes" no existía y no
-              pisa /logistica/* ni /inventario/*. */}
+          {/* Productos / Inventario — lectura: cualquier autenticado */}
+          <Route path="productos" element={<ProductsPage />} />
+          <Route path="productos/:id" element={<ProductDetailPage />} />
           <Route path="sedes" element={<SedesPanelPage />} />
           <Route path="logistica" element={<ProductsPage />} />
           <Route path="logistica/:id" element={<ProductDetailPage />} />
@@ -81,6 +80,7 @@ export default function AppRouter() {
           {/* C-4: creación de productos exige el permiso del modelo de roles
               (guest/viewer niegan can_create_products en rolePermissions) */}
           <Route element={<RequirePermission permission="can_create_products" />}>
+            <Route path="productos/nuevo" element={<NewProductPage />} />
             <Route path="logistica/nuevo" element={<NewProductPage />} />
             <Route path="inventario/nuevo" element={<NewProductPage />} />
             <Route path="nuevo" element={<NewProductPage />} />
