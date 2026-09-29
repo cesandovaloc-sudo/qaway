@@ -1,19 +1,20 @@
 import { useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { HubIcon } from "@/components/ui/icons";
 import {
   Globe,
   LayoutGrid,
   FileEdit,
   BarChart3,
-  Kanban,
-  Video,
+  Package,
+  Calendar,
   GraduationCap,
   ExternalLink,
 } from "@/components/ui/icons/hubIcons";
 
 export function AppSwitcherDropdown({ isOpen, onClose }) {
   const dropdownRef = useRef(null);
+  const location = useLocation();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -39,12 +40,18 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
 
   const APPS = [
     {
-      name: "Gestor de Proyectos",
-      desc: "Frameworks Agile, PMB 6 Hitos y SOW",
-      path: "/hub/gestor-proyectos-v2",
-      icon: Kanban,
-      active: true,
-      badge: "V2 Activa"
+      name: "CRM Comercial & Leads",
+      desc: "Gestión de oportunidades y pipeline",
+      path: "/hub/crm",
+      icon: BarChart3,
+      badge: "Pro"
+    },
+    {
+      name: "Inventario & ERP Comercial",
+      desc: "Control de stock, compras y facturación",
+      path: "/hub/inventario",
+      icon: Package,
+      badge: "Pro"
     },
     {
       name: "Editor de Blog & Artículos",
@@ -54,18 +61,11 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
       badge: "Pro"
     },
     {
-      name: "CRM Comercial & Leads",
-      desc: "Gestión de oportunidades y pipeline",
-      path: "/hub/crm",
-      icon: BarChart3,
+      name: "Agenda & Citas",
+      desc: "Gestión de citas, calendario y reservas",
+      path: "/hub/agenda",
+      icon: Calendar,
       badge: "Pro"
-    },
-    {
-      name: "Creador de Contenido",
-      desc: "Fábrica viral con IA y radar de retención",
-      path: "/hub/creador-contenido",
-      icon: Video,
-      badge: "Nuevo"
     },
     {
       name: "Qaway Academy",
@@ -89,20 +89,21 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
         <div className="space-y-1 mt-1">
           {APPS.map((app) => {
             const Icon = app.icon;
+            const isCurrent = location.pathname.startsWith(app.path);
             return (
               <Link
                 key={app.name}
                 to={app.path}
                 onClick={onClose}
                 className={`flex items-start gap-3 p-2.5 rounded-xl transition-all ${
-                  app.active
+                  isCurrent
                     ? "bg-zinc-900 text-white font-medium shadow-sm"
                     : "hover:bg-zinc-50 text-zinc-700 hover:text-zinc-950"
                 }`}
               >
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                    app.active
+                    isCurrent
                       ? "bg-white/10 text-white"
                       : "bg-zinc-100 text-zinc-700"
                   }`}
@@ -114,7 +115,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
                     <span className="text-xs font-bold truncate">{app.name}</span>
                     <span
                       className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                        app.active
+                        isCurrent
                           ? "bg-orange-500 text-white"
                           : "bg-zinc-100 text-zinc-600"
                       }`}
@@ -124,7 +125,7 @@ export function AppSwitcherDropdown({ isOpen, onClose }) {
                   </div>
                   <p
                     className={`text-[11px] truncate mt-0.5 ${
-                      app.active ? "text-zinc-300" : "text-zinc-500"
+                      isCurrent ? "text-zinc-300" : "text-zinc-500"
                     }`}
                   >
                     {app.desc}
