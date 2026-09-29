@@ -30,11 +30,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (mounted) setLoading(false)
     }, 1500)
 
+    // Validar sesión persistida
     supabase.auth
       .getSession()
-      .then(({ data }) => {
+      .then(async ({ data: sessionData, error: sessionErr }) => {
         if (!mounted) return
-        setSession(data.session)
+        if (sessionErr || !sessionData?.session) {
+          setSession(null)
+          return
+        }
+
+        // Validación activa contra Supabase Auth: confirma si el token no fue revocado en servidor
+        const { data: userData, error: userErr } = await supabase.auth.getUser()
+        if (!mounted) return
+
+        if (userErr || !userData?.user) {
+          // Token inválido, expirado en servidor o revocado
+          setSession(null)
+          setProfile(null)
+        } else {
+          setSession(sessionData.session)
+        }
       })
       .catch(() => {
         if (mounted) setSession(null)
@@ -43,8 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (mounted) setLoading(false)
       })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
+      if (!mounted) return
+      if (event === 'SIGNED_OUT' || !nextSession) {
+        setSession(null)
+        setProfile(null)
+      } else {
+        setSession(nextSession)
+      }
     })
 
     return () => {
