@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   Package,
   FolderTree,
-  MapPin,
   ArrowLeftRight,
   Tag,
   Tags,
@@ -36,7 +35,6 @@ const navItems: NavItem[] = [
 
   { to: '/logistica', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
   { to: '/logistica/categorias', label: 'Categorías', icon: <FolderTree size={18} /> },
-  { to: '/logistica/ubicaciones', label: 'Ubicaciones', icon: <MapPin size={18} /> },
   { to: '/logistica/movimientos', label: 'Movimientos', icon: <ArrowLeftRight size={18} /> },
 
   { to: '/clientes', label: 'Clientes', icon: <Users size={18} />, section: 'COMERCIAL' },

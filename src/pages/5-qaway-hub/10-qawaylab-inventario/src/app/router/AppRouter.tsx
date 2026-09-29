@@ -8,7 +8,6 @@ import ProductsPage from '@/pages/inventory/ProductsPage'
 import ProductDetailPage from '@/pages/inventory/ProductDetailPage'
 import NewProductPage from '@/pages/inventory/NewProductPage'
 import CategoriesPage from '@/pages/inventory/CategoriesPage'
-import LocationsPage from '@/pages/inventory/LocationsPage'
 import MovementsPage from '@/pages/inventory/MovementsPage'
 import PriceListsPage from '@/pages/pricing/PriceListsPage'
 import PreciosPanelPage from '@/pages/pricing/PreciosPanelPage'
@@ -69,7 +68,6 @@ export default function AppRouter() {
           <Route path="logistica" element={<ProductsPage />} />
           <Route path="logistica/:id" element={<ProductDetailPage />} />
           <Route path="logistica/categorias" element={<CategoriesPage />} />
-          <Route path="logistica/ubicaciones" element={<LocationsPage />} />
           <Route path="logistica/movimientos" element={<MovementsPage />} />
           <Route path="inventario" element={<ProductsPage />} />
           <Route path="inventario/:id" element={<ProductDetailPage />} />
