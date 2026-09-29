@@ -13,6 +13,7 @@ import MovementsPage from '@/pages/inventory/MovementsPage'
 import PriceListsPage from '@/pages/pricing/PriceListsPage'
 import PreciosPanelPage from '@/pages/pricing/PreciosPanelPage'
 import PackagesPage from '@/pages/packages/PackagesPage'
+import KitsPage from '@/pages/kits/KitsPage'
 import LiquidationPage from '@/pages/liquidation/LiquidationPage'
 import CatalogsPage from '@/pages/liquidation/CatalogsPage'
 import CustomersPage from '@/pages/customers/CustomersPage'
@@ -90,6 +91,10 @@ export default function AppRouter() {
               /precios/listas siguen siendo PriceListsPage. */}
           <Route path="precios-panel" element={<PreciosPanelPage />} />
           <Route path="paquetes" element={<PackagesPage />} />
+          {/* Módulo de kits y paquetes armables. Este módulo no existía: no
+              había ruta, página ni entrada de menú. /paquetes sigue siendo
+              PackagesPage, sin tocar. */}
+          <Route path="kits" element={<KitsPage />} />
           <Route path="cotizaciones" element={<QuotationsPage />} />
 
           {/* Ventas — lectura: exige can_view_sales (guest lo niega) */}
