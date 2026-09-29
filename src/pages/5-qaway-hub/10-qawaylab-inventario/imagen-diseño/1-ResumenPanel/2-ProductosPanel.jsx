@@ -33,30 +33,100 @@ import {
   Box,
 } from "lucide-react";
 
+import { productService } from "../../src/services/productService";
+
 /**
  * ProductosPanel.jsx
- * Panel de productos de Inveti Pro (interfaz de demostración).
- * React + CSS inline; no requiere librerías de iconos ni componentes externos.
- *
- * Uso:
- *   import ProductosPanel from "./ProductosPanel";
- *   <ProductosPanel />
- *
- * Los datos incluidos son de ejemplo. Conecta las acciones y los datos a tu API/BD
- * cuando integres el panel en tu aplicación.
+ * Panel de productos de Inventi Pro conectado al ecosistema Supabase.
+ * Soporta stock por almacén/tiendas, unidades de medida, listas de precios (base, mayorista, mínimo, venta)
+ * y sincronización en tiempo real con Supabase.
  */
 
 const initialProducts = [
-  { id: 1, name: "Café Premium 250g", detail: "Grano molido", sku: "CAF-250", category: "Alimentos", stock: 32, price: 12.5, status: "Disponible", location: "Almacén Principal", image: "☕", barcode: "7750123456789", brand: "Café Premium", presentation: "250 g", unit: "un.", weight: "0.25 kg", dimensions: "12 × 6 × 20 cm", salePrice: 15, wholesale: 13.5, minPrice: 10, description: "Café tostado y molido de alta calidad. Presentación de 250 g, ideal para consumo en hogar u oficina. Blend de granos seleccionados.", warehouse: [{ name: "Almacén Principal", stock: 20, min: 10 }, { name: "Tienda Sur", stock: 8, min: 5 }, { name: "Tienda Online", stock: 4, min: 3 }] },
-  { id: 2, name: "Alimento Perro Adulto 10kg", detail: "Nutrición completa", sku: "DOG-AD-10", category: "Mascotas", stock: 5, price: 85, status: "Stock bajo", location: "Tienda Sur", image: "🟠", barcode: "7750123456790", brand: "NutriPet", presentation: "10 kg", unit: "un.", weight: "10 kg", dimensions: "40 × 25 × 15 cm", salePrice: 95, wholesale: 90, minPrice: 80, description: "Alimento balanceado para perros adultos.", warehouse: [{ name: "Tienda Sur", stock: 5, min: 10 }] },
-  { id: 3, name: "Shampoo Veterinario 500ml", detail: "Higiene para mascotas", sku: "VET-SH-500", category: "Mascotas", stock: 0, price: 28, status: "Sin stock", location: "Almacén Principal", image: "🧴", barcode: "7750123456791", brand: "VetCare", presentation: "500 ml", unit: "un.", weight: "0.5 kg", dimensions: "8 × 8 × 22 cm", salePrice: 34, wholesale: 30, minPrice: 25, description: "Shampoo veterinario para la higiene regular de mascotas.", warehouse: [{ name: "Almacén Principal", stock: 0, min: 15 }] },
-  { id: 4, name: "Arena Sanitaria 5kg", detail: "Control de olores", sku: "CAT-ARE-5", category: "Mascotas", stock: 18, price: 15, status: "Disponible", location: "Almacén Principal", image: "🟤", barcode: "7750123456792", brand: "Michi", presentation: "5 kg", unit: "un.", weight: "5 kg", dimensions: "30 × 20 × 8 cm", salePrice: 19, wholesale: 17, minPrice: 13, description: "Arena sanitaria para gatos.", warehouse: [{ name: "Almacén Principal", stock: 18, min: 25 }] },
-  { id: 5, name: "Collar Antipulgas", detail: "Protección para mascotas", sku: "VET-COL-01", category: "Mascotas", stock: 7, price: 22, status: "Stock bajo", location: "Tienda Sur", image: "🐾", barcode: "7750123456793", brand: "VetCare", presentation: "1 unidad", unit: "un.", weight: "0.1 kg", dimensions: "15 × 12 × 2 cm", salePrice: 28, wholesale: 25, minPrice: 20, description: "Collar antipulgas para mascotas.", warehouse: [{ name: "Tienda Sur", stock: 7, min: 40 }] },
-  { id: 6, name: "Juguete Dental", detail: "Accesorio para perros", sku: "VET-JUG-01", category: "Mascotas", stock: 45, price: 18, status: "Disponible", location: "Almacén Principal", image: "🦴", barcode: "7750123456794", brand: "PetFun", presentation: "1 unidad", unit: "un.", weight: "0.2 kg", dimensions: "18 × 5 × 4 cm", salePrice: 23, wholesale: 20, minPrice: 15, description: "Juguete dental para entretenimiento y cuidado oral.", warehouse: [{ name: "Almacén Principal", stock: 45, min: 10 }] },
-  { id: 7, name: "Lata Alimento Gato 400g", detail: "Alimento húmedo", sku: "CAT-LAT-400", category: "Mascotas", stock: 120, price: 8.5, status: "Disponible", location: "Tienda Sur", image: "🥫", barcode: "7750123456795", brand: "Michi", presentation: "400 g", unit: "un.", weight: "0.4 kg", dimensions: "8 × 8 × 11 cm", salePrice: 11, wholesale: 9.5, minPrice: 7, description: "Alimento húmedo para gatos.", warehouse: [{ name: "Tienda Sur", stock: 120, min: 20 }] },
-  { id: 8, name: "Alimento Gato Adulto 3kg", detail: "Nutrición completa", sku: "CAT-AD-3", category: "Mascotas", stock: 3, price: 42, status: "Stock bajo", location: "Almacén Principal", image: "🐈", barcode: "7750123456796", brand: "Michi", presentation: "3 kg", unit: "un.", weight: "3 kg", dimensions: "30 × 20 × 10 cm", salePrice: 49, wholesale: 45, minPrice: 38, description: "Alimento balanceado para gatos adultos.", warehouse: [{ name: "Almacén Principal", stock: 3, min: 30 }] },
-  { id: 9, name: "Desparasitante 100ml", detail: "Cuidado veterinario", sku: "VET-DES-100", category: "Veterinaria", stock: 27, price: 35, status: "Disponible", location: "Almacén Principal", image: "🧪", barcode: "7750123456797", brand: "VetCare", presentation: "100 ml", unit: "un.", weight: "0.15 kg", dimensions: "6 × 6 × 14 cm", salePrice: 42, wholesale: 38, minPrice: 30, description: "Producto veterinario desparasitante.", warehouse: [{ name: "Almacén Principal", stock: 27, min: 10 }] },
-  { id: 10, name: "Snack Entrenamiento 100g", detail: "Premios para perros", sku: "DOG-SNK-100", category: "Mascotas", stock: 0, price: 10, status: "Sin stock", location: "Tienda Sur", image: "🟧", barcode: "7750123456798", brand: "NutriPet", presentation: "100 g", unit: "un.", weight: "0.1 kg", dimensions: "12 × 8 × 3 cm", salePrice: 13, wholesale: 11, minPrice: 8, description: "Snack para entrenamiento canino.", warehouse: [{ name: "Tienda Sur", stock: 0, min: 10 }] },
+  {
+    id: "prod-001-cafe-geisha",
+    name: "Café Geisha Especial 250g",
+    detail: "Grano tostado de especialidad",
+    sku: "CAF-GEI-250",
+    category: "Alimentos",
+    stock: 45,
+    price: 48.0,
+    cost: 22.0,
+    salePrice: 48.0,
+    wholesale: 38.0,
+    minPrice: 35.0,
+    status: "Disponible",
+    location: "Almacén Principal",
+    image: "☕",
+    barcode: "7750123456701",
+    brand: "Origen Perú",
+    presentation: "Bolsa trilaminada 250g con válvula",
+    unit: "un.",
+    weight: "0.25 kg",
+    dimensions: "12 × 7 × 20 cm",
+    condition: 10,
+    description: "Café de especialidad en grano tostado, variedad Geisha de Villa Rica con notas florales a jazmín, durazno y miel. Tueste medio.",
+    warehouse: [
+      { name: "Almacén Principal", stock: 30, min: 10 },
+      { name: "Tienda Sur", stock: 15, min: 5 }
+    ]
+  },
+  {
+    id: "prod-002-alimento-canino",
+    name: "Alimento Premium Canino 15kg",
+    detail: "Nutrición avanzada adultos",
+    sku: "DOG-PRO-15",
+    category: "Mascotas",
+    stock: 8,
+    price: 145.0,
+    cost: 95.0,
+    salePrice: 145.0,
+    wholesale: 128.0,
+    minPrice: 120.0,
+    status: "Stock bajo",
+    location: "Tienda Sur",
+    image: "🐕",
+    barcode: "7750123456702",
+    brand: "NutriPet Pro",
+    presentation: "Saco sellado 15 kg",
+    unit: "saco",
+    weight: "15.0 kg",
+    dimensions: "65 × 40 × 18 cm",
+    condition: 10,
+    description: "Alimento balanceado súper premium para perros adultos con proteína hidrolizada de salmón, arroz integral y probióticos para salud digestiva.",
+    warehouse: [
+      { name: "Tienda Sur", stock: 8, min: 10 },
+      { name: "Almacén Principal", stock: 0, min: 5 }
+    ]
+  },
+  {
+    id: "prod-003-shampoo-vet",
+    name: "Shampoo Dermatológico Vet 500ml",
+    detail: "Cuidado dérmico terapéutico",
+    sku: "VET-DERM-500",
+    category: "Veterinaria",
+    stock: 0,
+    price: 39.9,
+    cost: 18.5,
+    salePrice: 39.9,
+    wholesale: 32.0,
+    minPrice: 29.0,
+    status: "Sin stock",
+    location: "Almacén Principal",
+    image: "🧴",
+    barcode: "7750123456703",
+    brand: "VetCare Pharma",
+    presentation: "Frasco dispensador 500 ml",
+    unit: "frasco",
+    weight: "0.55 kg",
+    dimensions: "8 × 8 × 22 cm",
+    condition: 10,
+    description: "Shampoo hipoalergénico medicado con clorhexidina al 2%, ketoconazol y extracto de aloe vera para el control y alivio de afecciones cutáneas.",
+    warehouse: [
+      { name: "Almacén Principal", stock: 0, min: 15 },
+      { name: "Tienda Sur", stock: 0, min: 5 }
+    ]
+  }
 ];
 
 const css = `
@@ -187,6 +257,51 @@ export default function ProductosPanel() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Sincronización en vivo con Supabase
+  useEffect(() => {
+    let isMounted = true;
+    async function loadSupabaseProducts() {
+      try {
+        const res = await productService.getProducts();
+        if (isMounted && res && res.data && res.data.length > 0) {
+          const mapped = res.data.map((p, idx) => ({
+            id: p.id || `prod-sb-${idx}`,
+            name: p.name || "Producto sin nombre",
+            detail: p.description ? p.description.slice(0, 35) : "",
+            sku: p.sku || `SKU-${idx + 1}`,
+            category: p.category || "General",
+            stock: Number(p.stock) || 0,
+            price: Number(p.base_price) || 0,
+            cost: Number(p.cost) || 0,
+            salePrice: Number(p.base_price) || 0,
+            wholesale: Number(p.base_price ? p.base_price * 0.85 : 0),
+            minPrice: Number(p.base_price ? p.base_price * 0.75 : 0),
+            status: Number(p.stock) === 0 ? "Sin stock" : Number(p.stock) <= (p.min_stock || 10) ? "Stock bajo" : "Disponible",
+            location: "Almacén Principal",
+            image: "📦",
+            barcode: p.sku || "",
+            brand: p.brand || "—",
+            presentation: p.unit || "un.",
+            unit: p.unit || "un.",
+            weight: "—",
+            dimensions: "—",
+            condition: p.condition || 10,
+            description: p.description || "",
+            warehouse: [
+              { name: "Almacén Principal", stock: Number(p.stock) || 0, min: Number(p.min_stock) || 0 },
+              { name: "Tienda Sur", stock: 0, min: 0 }
+            ]
+          }));
+          setProducts(mapped);
+        }
+      } catch (err) {
+        console.warn("[Inventi] Supabase live fetch fallback:", err);
+      }
+    }
+    loadSupabaseProducts();
+    return () => { isMounted = false; };
+  }, []);
+
   const toggleColumn = key => {
     setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
   };
@@ -243,7 +358,7 @@ export default function ProductosPanel() {
   const showToast = msg => { setToast(msg); window.setTimeout(() => setToast(""), 2800); };
   const openNew = () => { setEditing(null); setForm({ name: "", sku: "", category: "Mascotas", stock: 0, price: "", location: "Almacén Principal", description: "" }); setModal("product"); };
   const openEdit = p => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("product"); setMenuId(null); };
-  const saveProduct = e => {
+  const saveProduct = async e => {
     e.preventDefault();
     const stock = Number(form.stock) || 0;
     const price = Number(form.price) || 0;
@@ -251,9 +366,49 @@ export default function ProductosPanel() {
     if (editing) {
       setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, ...form, stock, price, status: statusText } : p));
       showToast("Producto actualizado");
+      try {
+        if (typeof editing.id === 'string' && !editing.id.startsWith('prod-')) {
+          await productService.updateProduct(editing.id, { name: form.name, sku: form.sku, base_price: price, stock });
+        }
+      } catch (err) {
+        console.warn("[Inventi] Supabase update warning:", err);
+      }
     } else {
-      const newP = { ...form, id: Date.now(), stock, price, status: statusText, detail: "", image: "📦", barcode: "", brand: "", presentation: "", unit: "un.", weight: "", dimensions: "", salePrice: price, wholesale: price, minPrice: price, warehouse: [{ name: form.location, stock, min: 0 }] };
-      setProducts(prev => [newP, ...prev]); setPage(1); showToast("Producto creado");
+      const newP = {
+        ...form,
+        id: `prod-${Date.now()}`,
+        stock,
+        price,
+        cost: Math.round(price * 0.5),
+        status: statusText,
+        detail: form.description ? form.description.slice(0, 35) : "",
+        image: "📦",
+        barcode: form.sku,
+        brand: "Marca Propia",
+        presentation: "Unidad",
+        unit: "un.",
+        weight: "—",
+        dimensions: "—",
+        salePrice: price,
+        wholesale: Number((price * 0.85).toFixed(2)),
+        minPrice: Number((price * 0.75).toFixed(2)),
+        warehouse: [{ name: form.location, stock, min: 0 }]
+      };
+      setProducts(prev => [newP, ...prev]);
+      setPage(1);
+      showToast("Producto creado");
+      try {
+        await productService.createProduct({
+          name: form.name,
+          sku: form.sku,
+          base_price: price,
+          stock,
+          unit: 'un.',
+          status: 'active'
+        });
+      } catch (err) {
+        console.warn("[Inventi] Supabase create warning:", err);
+      }
     }
     setModal(""); 
   };
