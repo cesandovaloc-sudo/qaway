@@ -41,6 +41,7 @@ const navItems: NavItem[] = [
   { to: '/clientes', label: 'Clientes', icon: <Users size={18} />, section: 'COMERCIAL' },
   { to: '/precios', label: 'Precios', icon: <Tag size={18} /> },
   { to: '/precios/listas', label: 'Listas', icon: <Tags size={18} /> },
+  { to: '/precios-panel', label: 'Precios (Diseño)', icon: <Layers size={18} /> },
   { to: '/paquetes', label: 'Paquetes', icon: <Gift size={18} /> },
   { to: '/cotizaciones', label: 'Cotizaciones', icon: <ClipboardList size={18} /> },
 

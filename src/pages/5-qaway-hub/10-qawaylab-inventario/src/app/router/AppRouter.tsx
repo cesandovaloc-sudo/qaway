@@ -11,6 +11,7 @@ import CategoriesPage from '@/pages/inventory/CategoriesPage'
 import LocationsPage from '@/pages/inventory/LocationsPage'
 import MovementsPage from '@/pages/inventory/MovementsPage'
 import PriceListsPage from '@/pages/pricing/PriceListsPage'
+import PreciosPanelPage from '@/pages/pricing/PreciosPanelPage'
 import PackagesPage from '@/pages/packages/PackagesPage'
 import LiquidationPage from '@/pages/liquidation/LiquidationPage'
 import CatalogsPage from '@/pages/liquidation/CatalogsPage'
@@ -84,6 +85,10 @@ export default function AppRouter() {
           <Route path="clientes" element={<CustomersPage />} />
           <Route path="precios" element={<PriceListsPage />} />
           <Route path="precios/listas" element={<PriceListsPage />} />
+          {/* Módulo de precios del panel de diseño (lista, cliente, canal,
+              promociones, historial, configuración). Ruta propia: /precios y
+              /precios/listas siguen siendo PriceListsPage. */}
+          <Route path="precios-panel" element={<PreciosPanelPage />} />
           <Route path="paquetes" element={<PackagesPage />} />
           <Route path="cotizaciones" element={<QuotationsPage />} />
 
