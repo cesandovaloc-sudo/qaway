@@ -7,7 +7,7 @@ import {
   Eye, Pencil, Copy, Send, Printer, FileDown, Ban, Trash2, MapPinned,
   ClipboardList, Box, CreditCard, Navigation, Mail, Phone, MessageCircle,
   Warehouse, Flag, CircleDollarSign, Check, ExternalLink, RotateCcw,
-  FileText, Store, Instagram, Facebook, Smartphone, PackageCheck, ShieldCheck,
+  FileText, Store, Camera, Share2, Smartphone, PackageCheck, ShieldCheck,
   CircleHelp, Save, X, ChevronRight as RightIcon
 } from "lucide-react";
 
@@ -98,8 +98,8 @@ function channelIcon(c) {
   if(c==="WhatsApp") return <MessageCircle size={17}/>;
   if(c==="Tienda online") return <ShoppingCart size={17}/>;
   if(c==="Tienda física") return <Store size={17}/>;
-  if(c==="Instagram") return <Instagram size={17}/>;
-  if(c==="Facebook") return <Facebook size={17}/>;
+  if(c==="Instagram") return <Camera size={17}/>;
+  if(c==="Facebook") return <Share2 size={17}/>;
   if(c==="Teléfono") return <Phone size={16}/>;
   return <CircleHelp size={16}/>;
 }

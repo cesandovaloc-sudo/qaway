@@ -18,6 +18,7 @@ import CustomersPage from '@/pages/customers/CustomersPage'
 import QuotationsPage from '@/pages/quotations/QuotationsPage'
 import SalesPage from '@/pages/sales/SalesPage'
 import RegistroVentasPage from '@/pages/sales/RegistroVentasPage'
+import PedidosPage from '@/pages/orders/PedidosPage'
 import NewSalePage from '@/pages/sales/NewSalePage'
 import SaleDetailPage from '@/pages/sales/SaleDetailPage'
 import WebOrdersPage from '@/pages/sales/WebOrdersPage'
@@ -92,6 +93,9 @@ export default function AppRouter() {
                 mostrador, que sigue en /ventas y /ventas/nueva. */}
             <Route path="ventas/registro" element={<RegistroVentasPage />} />
             <Route path="ventas/pedidos-web" element={<WebOrdersPage />} />
+            {/* Gestión de pedidos por canal. Aparte de Pedidos Web, que sigue
+                intacto; la fusión se evalúa más adelante. */}
+            <Route path="pedidos" element={<PedidosPage />} />
             <Route path="ventas/:id" element={<SaleDetailPage />} />
           </Route>
 
