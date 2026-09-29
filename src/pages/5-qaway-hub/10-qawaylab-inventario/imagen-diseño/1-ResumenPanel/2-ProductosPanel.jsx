@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileSpreadsheet,
   Download,
@@ -708,6 +709,23 @@ function ProductModal({ editing, form, setForm, showAdvanced, setShowAdvanced, c
 }
 
 export default function ProductosPanel() {
+  let navigate = null;
+  try {
+    navigate = useNavigate();
+  } catch (e) {
+    navigate = null;
+  }
+
+  const handleNavigateCapture = () => {
+    const isHub = typeof window !== "undefined" && window.location.pathname.startsWith("/hub/inventario");
+    const targetUrl = isHub ? "/hub/inventario/captura" : "/captura";
+    if (navigate) {
+      navigate(targetUrl);
+    } else if (typeof window !== "undefined") {
+      window.location.href = targetUrl;
+    }
+  };
+
   const [products, setProducts] = useState(initialProducts);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
@@ -1238,12 +1256,8 @@ export default function ProductosPanel() {
                 <button
                   className="pxp-btn"
                   style={{ background: "#1e293b", borderColor: "#1e293b", color: "#fff", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 7 }}
-                  onClick={() => {
-                    const isHub = typeof window !== "undefined" && window.location.pathname.startsWith("/hub/inventario");
-                    if (window.location) {
-                      window.location.href = isHub ? "/hub/inventario/captura" : "/captura";
-                    }
-                  }}
+                  onClick={handleNavigateCapture}
+                  title="Capturar y digitalizar producto con IA / Cámara"
                 >
                   <Camera size={15} /> Capturar
                 </button>
