@@ -5,6 +5,7 @@ import RequirePermission from '@/app/router/RequirePermission'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProductsPage from '@/pages/inventory/ProductsPage'
+import SedesPanelPage from '@/pages/inventory/SedesPanelPage'
 import ProductDetailPage from '@/pages/inventory/ProductDetailPage'
 import NewProductPage from '@/pages/inventory/NewProductPage'
 import CategoriesPage from '@/pages/inventory/CategoriesPage'
@@ -65,6 +66,10 @@ export default function AppRouter() {
           <Route index element={<DashboardPage />} />
 
           {/* Logística / Inventario — lectura: cualquier autenticado */}
+          {/* Módulo de sedes del panel de diseño (sedes, almacenes,
+              configuración por sede). Ruta nueva: "sedes" no existía y no
+              pisa /logistica/* ni /inventario/*. */}
+          <Route path="sedes" element={<SedesPanelPage />} />
           <Route path="logistica" element={<ProductsPage />} />
           <Route path="logistica/:id" element={<ProductDetailPage />} />
           <Route path="logistica/categorias" element={<CategoriesPage />} />

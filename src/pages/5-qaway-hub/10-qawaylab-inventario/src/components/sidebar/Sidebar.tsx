@@ -19,6 +19,7 @@ import {
   Globe,
   Layers,
   Receipt,
+  Building2,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -36,6 +37,7 @@ const navItems: NavItem[] = [
   { to: '/logistica', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
   { to: '/logistica/categorias', label: 'Categorías', icon: <FolderTree size={18} /> },
   { to: '/logistica/movimientos', label: 'Movimientos', icon: <ArrowLeftRight size={18} /> },
+  { to: '/sedes', label: 'Sedes', icon: <Building2 size={18} /> },
 
   { to: '/clientes', label: 'Clientes', icon: <Users size={18} />, section: 'COMERCIAL' },
   { to: '/precios', label: 'Precios', icon: <Tag size={18} /> },
