@@ -165,22 +165,33 @@ function getProductStockImage(product) {
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
-.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px;color:#45536d;font:inherit;max-width:190px}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
-.pxp-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;padding:14px}
-.pxp-product-card{border:1px solid var(--line);border-radius:14px;background:#fff;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease}
-.pxp-product-card:hover{border-color:#cbd5e1;box-shadow:0 10px 25px rgba(15,23,42,.08);transform:translateY(-2px)}
-.pxp-card-media{position:relative;width:100%;height:140px;background:#f1f5f9;overflow:hidden}
+.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select-wrap{position:relative;display:inline-flex;align-items:center}.pxp-select{height:38px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:0 34px 0 12px;color:#334155;font:inherit;font-size:13px;font-weight:500;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;transition:border-color .15s ease}.pxp-select:hover{border-color:#cbd5e1}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.1)}.pxp-select-chevron{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
+.pxp-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:14px 0}
+.pxp-product-card{border:1px solid #e2e8f0;border-radius:14px;background:#fff;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.02);transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease}
+.pxp-product-card:hover{border-color:#cbd5e1;box-shadow:0 12px 28px rgba(15,23,42,.08);transform:translateY(-3px)}
+.pxp-card-media{position:relative;width:100%;aspect-ratio:16/10.5;min-height:175px;background:#f1f5f9;overflow:hidden}
 .pxp-card-img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.16,1,.3,1);display:block}
 .pxp-product-card:hover .pxp-card-img{transform:scale(1.03)}
-.pxp-card-floating-bar{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;z-index:2}
-.pxp-card-floating-check{background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);padding:4px 6px;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.15);display:flex;align-items:center}
-.pxp-card-body{padding:12px 14px 14px;display:flex;flex-direction:column;flex:1}
-.pxp-card-meta{color:#8898aa;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-.pxp-card-name{font-weight:700;font-size:13.5px;color:#0f172a;line-height:1.35;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px}
-.pxp-card-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:8px;border-top:1px dashed #edf2f7}
-.pxp-card-price{font-size:14px;font-weight:800;color:#0f172a}
-.pxp-card-actions{display:flex;gap:6px;margin-top:10px}
-.pxp-card-actions .pxp-btn{flex:1;justify-content:center;padding:6px 4px;font-size:11.5px;font-weight:600;border-radius:6px}
+.pxp-card-floating-bar{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;align-items:center;z-index:2}
+.pxp-card-select-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid rgba(255,255,255,0.85);background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:all .15s ease}
+.pxp-card-select-btn.selected{background:#0f172a;border-color:#0f172a;color:#fff}
+.pxp-card-select-btn:hover:not(.selected){background:#fff;border-color:#cbd5e1}
+.pxp-card-badge{display:inline-flex;align-items:center;border-radius:9999px;padding:3.5px 10px;font-size:11.5px;font-weight:650;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.pxp-card-badge.ok{background:rgba(240,253,244,0.92);color:#15803d;border:1px solid rgba(187,247,208,0.8)}
+.pxp-card-badge.low{background:rgba(255,251,235,0.92);color:#b45309;border:1px solid rgba(253,230,138,0.8)}
+.pxp-card-badge.zero{background:rgba(244,244,245,0.92);color:#52525b;border:1px solid rgba(228,228,231,0.8)}
+.pxp-card-body{padding:14px 16px 16px;display:flex;flex-direction:column;flex:1}
+.pxp-card-meta{color:#64748b;font-size:11.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.pxp-card-name{font-weight:700;font-size:15px;color:#0f172a;line-height:1.35;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px}
+.pxp-card-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:10px;border-top:1px solid #f1f5f9}
+.pxp-card-price{font-size:17px;font-weight:800;color:#0f172a;letter-spacing:-.3px}
+.pxp-card-stock-pill{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:5px}
+.pxp-card-stock-pill.ok{color:#15803d}
+.pxp-card-stock-pill.low{color:#b45309}
+.pxp-card-stock-pill.zero{color:#71717a}
+.pxp-card-actions{display:flex;gap:8px;margin-top:12px}
+.pxp-card-actions .pxp-btn{flex:1;justify-content:center;padding:7px 8px;font-size:12px;font-weight:600;border-radius:8px;background:#f8fafc;border:1px solid #e2e8f0;color:#334155}
+.pxp-card-actions .pxp-btn:hover{background:#f1f5f9;border-color:#cbd5e1;color:#0f172a}
 .pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(760px,95vw);background:#fff;box-shadow:-20px 0 60px rgba(15,23,42,0.16);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}.pxp-detail-head{padding:24px 28px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:18px;top:18px;z-index:10;width:34px;height:34px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#fee2e2;color:#ef4444;border-color:#fca5a5}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:48px}.pxp-detail-art{width:68px;height:68px;border-radius:12px;background:#f8fafc;display:grid;place-items:center;flex-shrink:0;border:1px solid #e2e8f0}.pxp-detail-title{font-size:21px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;color:#0f172a}.pxp-detail-tabs{display:flex;gap:2px;overflow-x:auto;padding:0 24px;border-bottom:1px solid var(--line);background:#fafafa}.pxp-detail-tabs button{padding:12px 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64748b;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:color .15s ease}.pxp-detail-tabs button:hover{color:#0f172a}.pxp-detail-tabs button.active{color:#ff4b0b;border-color:#ff4b0b;font-weight:700}.pxp-detail-content{padding:22px 28px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pxp-detail-box{border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.02)}.pxp-detail-box h3{margin:0 0 12px;font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f8fafc;font-size:13px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:#64748b;font-weight:500}.pxp-kv b{text-align:right;font-weight:650;color:#0f172a}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:13px}.pxp-detail-table th{background:#f8fafc;color:#475569;font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12.5px}.pxp-detail-table td{text-align:left;padding:10px 10px;border-bottom:1px solid #f1f5f9;color:#334155}.pxp-detail-table tr:last-child td{border-bottom:0}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
 @media(max-width:1500px){.pxp-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 @media(max-width:1150px){.pxp-sidebar{width:190px}.pxp-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.pxp-metric-value{font-size:22px}.pxp-import-columns{grid-template-columns:1fr}}
@@ -1279,17 +1290,23 @@ export default function ProductosPanel() {
               <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
-              <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
-                <option value="Todas">Categoría: Todas</option>
-                {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-              </select>
+              <div className="pxp-select-wrap">
+                <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
+                  <option value="Todas">Categoría: Todas</option>
+                  {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
+                </select>
+                <ChevronDown size={14} className="pxp-select-chevron" />
+              </div>
 
-              <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
-                <option value="Todos">Stock: Todos</option>
-                <option>Con stock</option>
-                <option>Stock bajo</option>
-                <option>Sin stock</option>
-              </select>
+              <div className="pxp-select-wrap">
+                <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
+                  <option value="Todos">Stock: Todos</option>
+                  <option>Con stock</option>
+                  <option>Stock bajo</option>
+                  <option>Sin stock</option>
+                </select>
+                <ChevronDown size={14} className="pxp-select-chevron" />
+              </div>
               
               {/* Botón Más filtros con Icono Lucide */}
               <button
@@ -1338,8 +1355,8 @@ export default function ProductosPanel() {
 
               {/* Selector de densidad (+ / - Columnas en modo grid) */}
               {view === "grid" && (
-                <div style={{ display: "flex", alignItems: "center", gap: 3, background: "#f1f5f9", padding: "3px 6px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b", marginRight: 2 }}>Columnas:</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: "#f8fafc", padding: "3px 4px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#64748b", margin: "0 4px 0 2px" }}>Columnas:</span>
                   {[3, 4, 5, 6].map(cols => (
                     <button
                       key={cols}
@@ -1350,11 +1367,11 @@ export default function ProductosPanel() {
                         borderRadius: 6,
                         border: 0,
                         fontSize: 11.5,
-                        fontWeight: 700,
+                        fontWeight: 650,
                         cursor: "pointer",
-                        background: gridCols === cols ? "#fff" : "transparent",
-                        color: gridCols === cols ? "#ff4b0b" : "#64748b",
-                        boxShadow: gridCols === cols ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                        background: gridCols === cols ? "#ffffff" : "transparent",
+                        color: gridCols === cols ? "#0f172a" : "#64748b",
+                        boxShadow: gridCols === cols ? "0 1px 3px rgba(15,23,42,0.12)" : "none",
                         transition: "all .15s ease"
                       }}
                       title={`Mostrar en ${cols} columnas`}
@@ -1377,14 +1394,17 @@ export default function ProductosPanel() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
-                    <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={commercialStatus} onChange={e => { setCommercialStatus(e.target.value); setPage(1); }}>
-                      <option value="Todos">Todos</option>
-                      <option value="Disponible">Disponible</option>
-                      <option value="Stock bajo">Stock bajo</option>
-                      <option value="Sin stock">Sin stock</option>
-                      <option value="Reservado">Reservado</option>
-                      <option value="Agotado">Agotado</option>
-                    </select>
+                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
+                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={commercialStatus} onChange={e => { setCommercialStatus(e.target.value); setPage(1); }}>
+                        <option value="Todos">Todos</option>
+                        <option value="Disponible">Disponible</option>
+                        <option value="Stock bajo">Stock bajo</option>
+                        <option value="Sin stock">Sin stock</option>
+                        <option value="Reservado">Reservado</option>
+                        <option value="Agotado">Agotado</option>
+                      </select>
+                      <ChevronDown size={14} className="pxp-select-chevron" />
+                    </div>
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Marca</label>
@@ -1400,12 +1420,15 @@ export default function ProductosPanel() {
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Almacén / Ubicación</label>
-                    <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={locationFilter} onChange={e => { setLocationFilter(e.target.value); setPage(1); }}>
-                      <option value="Todos">Todos los almacenes</option>
-                      <option value="Almacén Principal">Almacén Principal</option>
-                      <option value="Tienda Sur">Tienda Sur</option>
-                      <option value="Tienda Online">Tienda Online</option>
-                    </select>
+                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
+                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={locationFilter} onChange={e => { setLocationFilter(e.target.value); setPage(1); }}>
+                        <option value="Todos">Todos los almacenes</option>
+                        <option value="Almacén Principal">Almacén Principal</option>
+                        <option value="Tienda Sur">Tienda Sur</option>
+                        <option value="Tienda Online">Tienda Online</option>
+                      </select>
+                      <ChevronDown size={14} className="pxp-select-chevron" />
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>
@@ -1420,7 +1443,15 @@ export default function ProductosPanel() {
             )}
 
             <section className="pxp-table-wrap">
-              {selected.length > 0 && <div style={{ padding: "10px 16px", background: "#eef5ff", display: "flex", alignItems: "center", gap: 12, color: "#2457a6" }}><b>{selected.length} seleccionados</b><button className="pxp-btn small" onClick={() => showToast("Acción masiva pendiente de conectar")}>Acciones masivas　⌄</button><button className="pxp-link" onClick={() => setSelected([])}>Limpiar selección</button></div>}
+              {selected.length > 0 && (
+                <div style={{ padding: "10px 16px", background: "#eef5ff", display: "flex", alignItems: "center", gap: 12, color: "#2457a6" }}>
+                  <b>{selected.length} seleccionados</b>
+                  <button className="pxp-btn small" onClick={() => showToast("Acción masiva pendiente de conectar")} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    Acciones masivas <ChevronDown size={13} />
+                  </button>
+                  <button className="pxp-link" onClick={() => setSelected([])}>Limpiar selección</button>
+                </div>
+              )}
               {view === "list" ? <div className="pxp-table-scroll"><table className="pxp-table">
                 <thead><tr>
                   <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
@@ -1470,54 +1501,56 @@ export default function ProductosPanel() {
                     gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
                   }}
                 >
-                  {pageRows.map(p => (
-                    <article className="pxp-product-card" key={p.id} onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}>
-                      <div className="pxp-card-media">
-                        <img
-                          src={getProductStockImage(p)}
-                          alt={p.name}
-                          className="pxp-card-img"
-                          loading="lazy"
-                          onError={e => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = STOCK_IMAGES.default;
-                          }}
-                        />
-                        <div className="pxp-card-floating-bar" onClick={e => e.stopPropagation()}>
-                          <div className="pxp-card-floating-check">
-                            <input
-                              className="pxp-check"
-                              type="checkbox"
-                              checked={selected.includes(p.id)}
-                              onChange={() => toggleSelected(p.id)}
-                            />
+                  {pageRows.map(p => {
+                    const isSelected = selected.includes(p.id);
+                    return (
+                      <article className="pxp-product-card" key={p.id} onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}>
+                        <div className="pxp-card-media">
+                          <img
+                            src={getProductStockImage(p)}
+                            alt={p.name}
+                            className="pxp-card-img"
+                            loading="lazy"
+                            onError={e => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = STOCK_IMAGES.default;
+                            }}
+                          />
+                          <div className="pxp-card-floating-bar" onClick={e => e.stopPropagation()}>
+                            <button
+                              type="button"
+                              className={`pxp-card-select-btn ${isSelected ? "selected" : ""}`}
+                              onClick={() => toggleSelected(p.id)}
+                              title={isSelected ? "Deseleccionar" : "Seleccionar"}
+                            >
+                              {isSelected && <Check size={14} strokeWidth={2.5} />}
+                            </button>
+                            <span className={`pxp-card-badge ${statusClass(p.status)}`}>
+                              {p.status}
+                            </span>
                           </div>
-                          <span className={`pxp-badge ${statusClass(p.status)}`} style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.12)", backdropFilter: "blur(4px)" }}>
-                            {p.status}
-                          </span>
                         </div>
-                      </div>
 
-                      <div className="pxp-card-body">
-                        <div className="pxp-card-meta">{p.sku} · {p.category}</div>
-                        <div className="pxp-card-name" title={p.name}>{p.name}</div>
-                        <div className="pxp-card-bottom">
-                          <div>
-                            <span style={{ fontSize: 10.5, color: "#64748b", display: "block", textTransform: "uppercase", fontWeight: 600 }}>Precio</span>
-                            <span className="pxp-card-price">{money(p.price)}</span>
+                        <div className="pxp-card-body">
+                          <div className="pxp-card-meta">{p.sku} · {p.category}</div>
+                          <div className="pxp-card-name" title={p.name}>{p.name}</div>
+                          <div className="pxp-card-bottom">
+                            <div>
+                              <span className="pxp-card-price">{money(p.price)}</span>
+                            </div>
+                            <div className="pxp-card-stock-pill">
+                              <span className={`pxp-stock-dot ${p.stock > 10 ? "green" : p.stock > 0 ? "amber" : "gray"}`} />
+                              <span>{p.stock} {p.unit || "un."}</span>
+                            </div>
                           </div>
-                          <div style={{ textAlign: "right" }}>
-                            <span style={{ fontSize: 10.5, color: "#64748b", display: "block", textTransform: "uppercase", fontWeight: 600 }}>Stock</span>
-                            <span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} {p.unit || "un."}</span>
+                          <div className="pxp-card-actions" onClick={e => e.stopPropagation()}>
+                            <button className="pxp-btn small" onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); }}>Ver detalle</button>
+                            <button className="pxp-btn small" onClick={() => openEdit(p)}>Editar</button>
                           </div>
                         </div>
-                        <div className="pxp-card-actions" onClick={e => e.stopPropagation()}>
-                          <button className="pxp-btn small" onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); }}>Ver detalle</button>
-                          <button className="pxp-btn small" onClick={() => openEdit(p)}>Editar</button>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    );
+                  })}
                   {pageRows.length === 0 && <div className="pxp-empty">No se encontraron productos.</div>}
                 </div>
               )}
