@@ -907,6 +907,7 @@ export default function ProductosPanel() {
       currency: "PEN"
     });
     setShowAdvanced(false);
+    setDetailProduct(null);
     setModal("product");
     setMenuId(null);
   };
@@ -1421,17 +1422,17 @@ export default function ProductosPanel() {
                   <ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={60} />
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 className="pxp-detail-title">{detailProduct.name}</h2>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>
-                      {detailProduct.status === "Sin stock" ? "Sin stock" : "Activo"}
+                  <h2 className="pxp-detail-title" style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#0f172a" }}>{detailProduct.name}</h2>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, flexWrap: "wrap" }}>
+                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`} style={{ fontSize: 12 }}>
+                      {detailProduct.status}
                     </span>
-                    <span className="pxp-badge" style={{ background: "#f1f5f9", color: "#475569" }}>
-                      {detailProduct.category}
+                    <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>
+                      · {detailProduct.category}
                     </span>
-                    {detailProduct.detail && (
-                      <span className="pxp-badge" style={{ background: "#eff6ff", color: "#2563eb" }}>
-                        {detailProduct.detail}
+                    {detailProduct.brand && detailProduct.brand !== "—" && (
+                      <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>
+                        · {detailProduct.brand}
                       </span>
                     )}
                   </div>
@@ -1493,8 +1494,8 @@ export default function ProductosPanel() {
                     {[
                       ["Categoría", detailProduct.category],
                       ["Marca", detailProduct.brand || "—"],
-                      ["Presentación", detailProduct.presentation || "—"],
-                      ["Unidad de medida", detailProduct.unit || "un."],
+                      ["Presentación", detailProduct.presentation ? (detailProduct.presentation.length > 2 && detailProduct.presentation === detailProduct.presentation.toUpperCase() ? detailProduct.presentation.charAt(0).toUpperCase() + detailProduct.presentation.slice(1).toLowerCase() : detailProduct.presentation) : "—"],
+                      ["Unidad de medida", detailProduct.unit ? (detailProduct.unit.length > 2 && detailProduct.unit === detailProduct.unit.toUpperCase() ? detailProduct.unit.charAt(0).toUpperCase() + detailProduct.unit.slice(1).toLowerCase() : detailProduct.unit) : "un."],
                       ["Condición Qaway", `${detailProduct.condition || 10}/10`],
                       ["Estado actual", detailProduct.status]
                     ].map(([k, v]) => (
