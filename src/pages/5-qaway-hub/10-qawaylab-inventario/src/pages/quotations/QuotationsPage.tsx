@@ -8,6 +8,9 @@ import { quotationService } from '@/services/quotationService'
 import type { Quotation } from '@/types'
 import type { QuotationWithItems } from '@/services/quotationService'
 
+// @ts-ignore
+import CotizacionesPanel from '../../../imagen-diseño/1-ResumenPanel/6-CotizacionesPanel'
+
 export default function QuotationsPage() {
   const { quotations, loading, error, pagination, setPage, createQuotation, updateQuotation, updateStatus, deleteQuotation } = useQuotations()
   const [searchTerm, setSearchTerm] = useState('')
@@ -58,6 +61,9 @@ export default function QuotationsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Panel de diseño acoplado — la página original se conserva completa debajo */}
+      <CotizacionesPanel />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
