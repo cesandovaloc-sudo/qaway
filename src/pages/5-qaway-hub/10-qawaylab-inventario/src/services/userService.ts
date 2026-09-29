@@ -1,19 +1,26 @@
 import { supabase } from '@/config/supabase'
 import type { User, UserRole, UserPermissions, SharedAccessLink } from '@/types/user'
-import { rolePermissions, resolvePermissions } from '@/types/user'
-
-// ── User Service ──
+import { rolePermissions, resolvePermissions } from '@/types/user'// ── User Service ──
 export const userService = {
   // Get current user profile
+  // Optimización de arranque: `auth.getUser` es imprescindible primero, pero
+  // la fila `users` y el RPC `user_app_role` se lanzan EN PARALELO en cuanto
+  // hay user id (antes: users → RPC → perfiles encadenados ≈ +450ms por
+  // salto con ~450ms de RTT a Supabase).
   async getCurrentUser(): Promise<User | null> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    const { data, error } = await supabase
+    // Ambas llamadas parten a la vez; ninguna depende de la otra.
+    const usersQuery = supabase
       .from('users')
       .select('*')
       .eq('id', user.id)
       .single()
+    const appRoleQuery = supabase.rpc('user_app_role', { p_app_slug: 'inventario' })
+
+    const [{ data, error }, appRoleResult] = await Promise.all([usersQuery, appRoleQuery])
+    const appRole = appRoleResult.data
 
     if (error || !data) {
       // Fallback a public.profiles o metadata de auth para superadministrador
@@ -40,15 +47,10 @@ export const userService = {
 
     // Rol autoritativo de ESTA app: user_app_roles (SaaS). Si no hay fila
     // (acceso legacy/plataforma), se conserva users.role (comportamiento actual).
+    const isPlatformAdmin = data.is_platform_admin === true
     let effectiveRole = data.role as UserRole
-    try {
-      const { data: appRole } = await supabase.rpc('user_app_role', { p_app_slug: 'inventario' })
-      const isPlatformAdmin = data.is_platform_admin === true
-      if (appRole && !isPlatformAdmin && ['admin', 'editor', 'viewer', 'guest'].includes(appRole)) {
-        effectiveRole = appRole as UserRole
-      }
-    } catch {
-      // Sin RPC disponible (legacy/offline): mantener users.role.
+    if (appRole && !isPlatformAdmin && ['admin', 'editor', 'viewer', 'guest'].includes(appRole)) {
+      effectiveRole = appRole as UserRole
     }
 
     return {

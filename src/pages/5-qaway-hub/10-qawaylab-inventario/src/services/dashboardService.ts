@@ -322,38 +322,46 @@ export const dashboardService = {
   },
 
   // Get sales data for charts (last 6 months)
+  // Optimización: 1 sola query para todo el rango (antes: 1 query por mes,
+  // 6 round-trips secuenciales ≈ 2.7s con ~450ms de latencia por llamada).
   async getSalesData(): Promise<SalesData[]> {
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
     const now = new Date()
-    const salesData: SalesData[] = []
 
-    // Get last 6 months
+    // Ventana completa: desde el 1° del mes hace 5 meses hasta hoy
+    const rangeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString()
+
+    const { data: quotations } = await supabase
+      .from('quotations')
+      .select('id, total, status, created_at')
+      .gte('created_at', rangeStart)
+
+    // Buckets por año-mes para evitar colisiones de nombre entre años
+    const buckets = new Map<number, SalesData>()
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const monthName = months[date.getMonth()]
-      
-      // Get quotations for this month
-      const startDate = date.toISOString()
-      const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString()
-
-      const { data: quotations } = await supabase
-        .from('quotations')
-        .select('id, total, status, created_at')
-        .gte('created_at', startDate)
-        .lte('created_at', endDate)
-
-      const monthQuotations = quotations || []
-      const acceptedQuotations = monthQuotations.filter((q: SupabaseResult) => q.status === 'accepted')
-      
-      salesData.push({
-        month: monthName,
-        ventas: acceptedQuotations.length,
-        cotizaciones: monthQuotations.length,
-        ingresos: acceptedQuotations.reduce((sum: number, q: SupabaseResult) => sum + (q.total || 0), 0),
+      const key = date.getFullYear() * 12 + date.getMonth()
+      buckets.set(key, {
+        month: months[date.getMonth()],
+        ventas: 0,
+        cotizaciones: 0,
+        ingresos: 0,
       })
     }
 
-    return salesData
+    ;(quotations || []).forEach((q: SupabaseResult) => {
+      const d = new Date(q.created_at)
+      const key = d.getFullYear() * 12 + d.getMonth()
+      const bucket = buckets.get(key)
+      if (!bucket) return
+      bucket.cotizaciones++
+      if (q.status === 'accepted') {
+        bucket.ventas++
+        bucket.ingresos += q.total || 0
+      }
+    })
+
+    return [...buckets.values()]
   },
 
   // Get category distribution
@@ -379,37 +387,47 @@ export const dashboardService = {
   },
 
   // Get trend data (last 7 days)
+  // Optimización: 1 sola query para los 7 días (antes: 1 query por día,
+  // 7 round-trips secuenciales ≈ 3.1s con ~450ms de latencia por llamada).
   async getTrendData(): Promise<TrendData[]> {
     const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     const now = new Date()
-    const trendData: TrendData[] = []
 
-    // Get last 7 days
+    // Ventana completa: inicio del día hace 6 días
+    const windowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString()
+
+    const { data: products } = await supabase
+      .from('products')
+      .select('id, stock, base_price, created_at')
+      .gte('created_at', windowStart)
+
+    // Buckets por día (medianoche local como llave), pre-creados en orden
+    const buckets = new Map<number, TrendData & { order: number }>()
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now)
       date.setDate(date.getDate() - i)
-      const dayName = days[date.getDay()]
-
-      // Get products created on this day
-      const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString()
-      const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).toISOString()
-
-      const { data: products } = await supabase
-        .from('products')
-        .select('id, stock, base_price')
-        .gte('created_at', startDate)
-        .lt('created_at', endDate)
-
-      const dayProducts = products || []
-      
-      trendData.push({
-        day: dayName,
-        productos: dayProducts.length,
-        stock: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + (p.stock || 0), 0),
-        valor: dayProducts.reduce((sum: number, p: SupabaseResult) => sum + ((p.base_price || 0) * (p.stock || 0)), 0),
+      const key = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+      buckets.set(key, {
+        order: 6 - i,
+        day: days[date.getDay()],
+        productos: 0,
+        stock: 0,
+        valor: 0,
       })
     }
 
-    return trendData
+    ;(products || []).forEach((p: SupabaseResult) => {
+      const d = new Date(p.created_at)
+      const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+      const bucket = buckets.get(key)
+      if (!bucket) return
+      bucket.productos++
+      bucket.stock += p.stock || 0
+      bucket.valor += (p.base_price || 0) * (p.stock || 0)
+    })
+
+    return [...buckets.values()]
+      .sort((a, b) => a.order - b.order)
+      .map(({ order: _order, ...rest }) => rest)
   },
 }
