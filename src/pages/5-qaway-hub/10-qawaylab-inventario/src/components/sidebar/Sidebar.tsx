@@ -19,6 +19,7 @@ import {
   ShoppingCart,
   Globe,
   Layers,
+  Receipt,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -31,7 +32,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/', label: 'Resumen', icon: <LayoutDashboard size={18} /> },
+  { to: '/', label: 'Resumen', icon: <LayoutDashboard size={18} />, end: true },
 
   { to: '/logistica', label: 'Productos', icon: <Package size={18} />, section: 'LOGÍSTICA', end: true },
   { to: '/logistica/categorias', label: 'Categorías', icon: <FolderTree size={18} /> },
@@ -58,6 +59,7 @@ const navItems: NavItem[] = [
 
   { to: '/promociones', label: 'Campañas', icon: <Zap size={18} />, section: 'PROMOCIONES', end: true },
   { to: '/promociones/catalogos', label: 'Catálogos', icon: <FileText size={18} /> },
+  { to: '/liquidaciones', label: 'Liquidaciones', icon: <Receipt size={18} /> },
 
   { to: '/caja', label: 'Caja Chica', icon: <Tag size={18} />, section: 'FINANZAS' },
   { to: '/gastos', label: 'Gastos', icon: <Tag size={18} /> },
@@ -88,7 +90,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
   return (
     <aside
       className={`hub-chrome fixed left-0 top-0 bottom-0 z-40 flex flex-col bg-[var(--hub-bg)] border-r border-[var(--hub-border)] transition-all duration-300 ${
-        collapsed ? 'w-[72px] overflow-visible' : 'w-64 overflow-y-auto'
+        collapsed ? 'w-[72px] overflow-visible' : 'w-64 overflow-hidden'
       } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
     >
       {/* Logo Inventi Pro */}
@@ -132,7 +134,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 px-3">
+      <nav className="flex-1 min-h-0 overflow-y-auto py-4 px-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {navItems.map((item) => (
           <div key={item.to} className="relative group">
             {item.section && (

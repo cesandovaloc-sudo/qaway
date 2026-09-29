@@ -15,6 +15,7 @@ import PreciosPanelPage from '@/pages/pricing/PreciosPanelPage'
 import PackagesPage from '@/pages/packages/PackagesPage'
 import KitsPage from '@/pages/kits/KitsPage'
 import LiquidationPage from '@/pages/liquidation/LiquidationPage'
+import LiquidacionesPanelPage from '@/pages/liquidation/LiquidacionesPanelPage'
 import CatalogsPage from '@/pages/liquidation/CatalogsPage'
 import CustomersPage from '@/pages/customers/CustomersPage'
 import QuotationsPage from '@/pages/quotations/QuotationsPage'
@@ -129,6 +130,9 @@ export default function AppRouter() {
           {/* Promociones */}
           <Route path="promociones" element={<LiquidationPage />} />
           <Route path="promociones/catalogos" element={<CatalogsPage />} />
+          {/* Liquidaciones a proveedores y clientes. Distinto de /promociones,
+              que liquida stock para vender (LiquidationPage). */}
+          <Route path="liquidaciones" element={<LiquidacionesPanelPage />} />
 
           {/* C-4: finanzas/contabilidad = sección fiscal (admin; el modelo de
               roles niega can_access_fiscal_settings a editor/viewer/guest) */}

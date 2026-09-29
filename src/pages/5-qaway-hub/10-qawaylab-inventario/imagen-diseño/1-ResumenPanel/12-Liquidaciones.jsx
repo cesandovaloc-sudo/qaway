@@ -7,7 +7,7 @@ import {
   Paperclip, Trash2, Upload, Receipt, ChartNoAxesColumn, CreditCard,
   SlidersHorizontal, X, Check, FileCheck2, Landmark
 } from "lucide-react";
-import "./Liquidaciones.css";
+import "./12-Liquidaciones.css";
 
 const initialLiquidations = [
   { id:"LIQ-2026-0012", date:"25/09/2026", party:"Brew Coffee SAC", subtitle:"Suministro de café", initials:"BC", type:"Proveedor", period:"01/09 - 25/09", total:1250, status:"Pagado", paidDate:"26/09/2026", method:"Transferencia", receipt:"TRF-001245" },
