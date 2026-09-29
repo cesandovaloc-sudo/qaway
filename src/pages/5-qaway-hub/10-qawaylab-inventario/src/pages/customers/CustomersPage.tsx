@@ -4,6 +4,8 @@ import { useCustomers } from '@/hooks/useCustomers'
 import { CustomerCard } from '@/components/customers/CustomerCard'
 import { CustomerForm } from '@/components/customers/CustomerForm'
 import type { Customer } from '@/types'
+// @ts-ignore
+import ClientsPanel from '../../../imagen-diseño/1-ResumenPanel/5-ClientsPage'
 
 export default function CustomersPage() {
   const { customers, loading, error, pagination, setPage, createCustomer, updateCustomer, deleteCustomer } = useCustomers()
@@ -41,6 +43,8 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
+      <ClientsPanel />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
