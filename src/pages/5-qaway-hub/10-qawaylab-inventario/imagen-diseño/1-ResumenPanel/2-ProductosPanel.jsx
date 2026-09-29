@@ -144,7 +144,7 @@ const css = `
 .pxp-card-price{font-size:13.5px;font-weight:750;color:#0f172a}
 .pxp-card-actions{display:flex;gap:6px;margin-top:10px}
 .pxp-card-actions .pxp-btn{flex:1;justify-content:center;padding:6px 4px;font-size:11px;font-weight:600;border-radius:6px}
-.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(580px,92vw);background:#fff;box-shadow:-15px 0 50px rgba(15,23,42,0.18);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}@keyframes pxpSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.pxp-detail-head{padding:26px 24px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:16px;top:16px;z-index:10;width:36px;height:36px;border-radius:8px;background:#f1f5f9;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#e2e8f0;color:#0f172a}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:55px}.pxp-detail-art{width:105px;height:105px;border-radius:12px;background:#f1f5f9;display:grid;place-items:center;font-size:50px;flex-shrink:0}.pxp-detail-title{font-size:24px;font-weight:750;letter-spacing:-.6px;margin:0 0 8px}.pxp-detail-tabs{display:flex;gap:3px;overflow-x:auto;padding:0 18px;border-bottom:1px solid var(--line)}.pxp-detail-tabs button{padding:14px 11px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64728b;font:inherit;cursor:pointer;white-space:nowrap}.pxp-detail-tabs button.active{color:var(--blue);border-color:var(--blue);font-weight:650}.pxp-detail-content{padding:20px 22px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pxp-detail-box{border:1px solid var(--line);border-radius:10px;padding:15px;min-width:0}.pxp-detail-box h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:8px}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eff2f7;font-size:12px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:var(--muted)}.pxp-kv b{text-align:right;font-weight:600}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-detail-table th,.pxp-detail-table td{text-align:left;padding:10px 5px;border-bottom:1px solid var(--line)}.pxp-detail-table th{color:var(--muted);font-weight:600}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
+.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(760px,95vw);background:#fff;box-shadow:-20px 0 60px rgba(15,23,42,0.16);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}.pxp-detail-head{padding:24px 28px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:18px;top:18px;z-index:10;width:34px;height:34px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#fee2e2;color:#ef4444;border-color:#fca5a5}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:48px}.pxp-detail-art{width:68px;height:68px;border-radius:12px;background:#f8fafc;display:grid;place-items:center;flex-shrink:0;border:1px solid #e2e8f0}.pxp-detail-title{font-size:21px;font-weight:800;letter-spacing:-.4px;margin:0 0 6px;color:#0f172a}.pxp-detail-tabs{display:flex;gap:2px;overflow-x:auto;padding:0 24px;border-bottom:1px solid var(--line);background:#fafafa}.pxp-detail-tabs button{padding:12px 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64748b;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:color .15s ease}.pxp-detail-tabs button:hover{color:#0f172a}.pxp-detail-tabs button.active{color:#ff4b0b;border-color:#ff4b0b;font-weight:700}.pxp-detail-content{padding:22px 28px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.pxp-detail-box{border:1px solid #e2e8f0;border-radius:12px;padding:16px 18px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.02)}.pxp-detail-box h3{margin:0 0 12px;font-size:14px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f8fafc;font-size:13px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:#64748b;font-weight:500}.pxp-kv b{text-align:right;font-weight:650;color:#0f172a}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:13px}.pxp-detail-table th{background:#f8fafc;color:#475569;font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid #e2e8f0;font-size:12.5px}.pxp-detail-table td{text-align:left;padding:10px 10px;border-bottom:1px solid #f1f5f9;color:#334155}.pxp-detail-table tr:last-child td{border-bottom:0}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
 @media(max-width:1500px){.pxp-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:1250px){.pxp-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:1150px){.pxp-sidebar{width:190px}.pxp-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.pxp-metric-value{font-size:20px}.pxp-import-columns{grid-template-columns:1fr}}
@@ -1417,38 +1417,228 @@ export default function ProductosPanel() {
             <button className="pxp-icon-btn pxp-detail-close" onClick={() => setDetailProduct(null)} title="Cerrar panel">×</button>
             <div className="pxp-detail-head">
               <div className="pxp-detail-product">
-                <div className="pxp-detail-art"><ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={75} /></div>
-                <div>
+                <div className="pxp-detail-art">
+                  <ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={60} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <h2 className="pxp-detail-title">{detailProduct.name}</h2>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
-                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>{detailProduct.status === "Sin stock" ? "Sin stock" : "Activo"}</span>
-                    <span className="pxp-badge" style={{ background: "#f0f3f8", color: "#52617a" }}>{detailProduct.category}</span>
-                    {detailProduct.detail && <span className="pxp-badge" style={{ background: "#eaf2ff", color: "#2165ed" }}>{detailProduct.detail}</span>}
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6 }}>
+                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`}>
+                      {detailProduct.status === "Sin stock" ? "Sin stock" : "Activo"}
+                    </span>
+                    <span className="pxp-badge" style={{ background: "#f1f5f9", color: "#475569" }}>
+                      {detailProduct.category}
+                    </span>
+                    {detailProduct.detail && (
+                      <span className="pxp-badge" style={{ background: "#eff6ff", color: "#2563eb" }}>
+                        {detailProduct.detail}
+                      </span>
+                    )}
                   </div>
-                  <div style={{ color: "var(--muted)", fontSize: 12 }}>{detailProduct.description}</div>
+                  {detailProduct.description && (
+                    <div style={{ color: "#64748b", fontSize: 13, lineHeight: 1.4, marginTop: 4 }}>
+                      {detailProduct.description.slice(0, 110)}
+                      {detailProduct.description.length > 110 ? "..." : ""}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 18, flexWrap: "wrap" }}>
-                <button className="pxp-btn small" onClick={() => openEdit(detailProduct)}>✎ Editar producto</button>
-                <button className="pxp-btn small" onClick={() => { setEditing(detailProduct); setForm({ name: detailProduct.name, sku: detailProduct.sku, category: detailProduct.category, stock: detailProduct.stock, price: detailProduct.price, location: detailProduct.location, description: detailProduct.description || "" }); setModal("stock"); }}>▤ Ajustar stock</button>
+              <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
+                <button
+                  className="pxp-btn small"
+                  style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
+                  onClick={() => openEdit(detailProduct)}
+                >
+                  ✎ Editar producto
+                </button>
+                <button
+                  className="pxp-btn small"
+                  onClick={() => {
+                    setEditing(detailProduct);
+                    setForm({
+                      name: detailProduct.name,
+                      sku: detailProduct.sku,
+                      category: detailProduct.category,
+                      stock: detailProduct.stock,
+                      price: detailProduct.price,
+                      location: detailProduct.location,
+                      description: detailProduct.description || ""
+                    });
+                    setModal("stock");
+                  }}
+                >
+                  ▤ Ajustar stock
+                </button>
               </div>
-              <div className="pxp-detail-grid" style={{ marginTop: 18 }}>
-                <div className="pxp-detail-box"><div className="pxp-kv"><span>SKU</span><b>{detailProduct.sku}</b></div><div className="pxp-kv"><span>Código de barras</span><b>{detailProduct.barcode || "—"}</b></div></div>
-                <div className="pxp-detail-box"><div className="pxp-kv"><span>Precio base</span><b>{money(detailProduct.price)}</b></div><div className="pxp-kv"><span>Stock total</span><b className={`pxp-stock ${statusClass(detailProduct.status)}`}>{detailProduct.stock} un.</b></div></div>
+              <div className="pxp-detail-grid" style={{ marginTop: 16 }}>
+                <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
+                  <div className="pxp-kv"><span>SKU</span><b>{detailProduct.sku}</b></div>
+                  <div className="pxp-kv"><span>Código de barras</span><b>{detailProduct.barcode || "—"}</b></div>
+                </div>
+                <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
+                  <div className="pxp-kv"><span>Precio de venta</span><b>{money(detailProduct.salePrice ?? detailProduct.price)}</b></div>
+                  <div className="pxp-kv"><span>Stock total</span><b className={`pxp-stock ${statusClass(detailProduct.status)}`}>{detailProduct.stock} un.</b></div>
+                </div>
               </div>
             </div>
-            <div className="pxp-detail-tabs">{["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas", "Más datos"].map(t => <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>{t}</button>)}</div>
+
+            <div className="pxp-detail-tabs">
+              {["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas", "Más datos"].map(t => (
+                <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>
+                  {t}
+                </button>
+              ))}
+            </div>
+
             <div className="pxp-detail-content">
-              {detailTab === "Resumen" && <div className="pxp-detail-grid">
-                <div className="pxp-detail-box"><h3>▣　Stock por almacén</h3><table className="pxp-detail-table"><thead><tr><th>Almacén</th><th>Stock</th><th>Stock mín.</th></tr></thead><tbody>{(detailProduct.warehouse || [{ name: detailProduct.location, stock: detailProduct.stock, min: 0 }]).map(w => <tr key={w.name}><td>{w.name}</td><td style={{ color: "#059669", fontWeight: 700 }}>{w.stock} un.</td><td>{w.min ?? "—"}</td></tr>)}</tbody></table><div className="pxp-kv"><b>Stock total</b><b>{detailProduct.stock} un.</b></div></div>
-                <div className="pxp-detail-box"><h3>▧　Imagen y archivos</h3><div style={{ height: 155, borderRadius: 8, background: "#f7f9fc", display: "grid", placeItems: "center" }}><ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={90} /></div><div style={{ color: "var(--muted)", fontSize: 11, marginTop: 8 }}>Vista previa ilustrativa del producto</div></div>
-                <div className="pxp-detail-box"><h3>▤　Información general</h3>{[["Categoría", detailProduct.category], ["Marca", detailProduct.brand || "—"], ["Presentación", detailProduct.presentation || "—"], ["Unidad de medida", detailProduct.unit || "un."], ["Peso", detailProduct.weight || "—"], ["Dimensiones", detailProduct.dimensions || "—"], ["Estado", detailProduct.status]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
-                <div className="pxp-detail-box"><h3>▣　Precios</h3>{[["Precio base", money(detailProduct.price)], ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)], ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)], ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)], ["Moneda", "PEN"], ["Impuesto (IGV)", "18%"]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
-                <div className="pxp-detail-box full"><h3>▣　Descripción</h3><p style={{ color: "#53627d", lineHeight: 1.7, margin: 0 }}>{detailProduct.description || "Sin descripción registrada."}</p></div>
-              </div>}
-              {detailTab === "Inventario" && <div className="pxp-detail-box"><h3>Stock por ubicación</h3><table className="pxp-detail-table"><thead><tr><th>Almacén</th><th>Stock</th><th>Stock mínimo</th></tr></thead><tbody>{(detailProduct.warehouse || [{ name: detailProduct.location, stock: detailProduct.stock, min: 0 }]).map(w => <tr key={w.name}><td>{w.name}</td><td>{w.stock} un.</td><td>{w.min ?? "—"}</td></tr>)}</tbody></table><button className="pxp-btn small" style={{ marginTop: 12 }} onClick={() => { setEditing(detailProduct); setForm({ name: detailProduct.name, sku: detailProduct.sku, category: detailProduct.category, stock: detailProduct.stock, price: detailProduct.price, location: detailProduct.location, description: detailProduct.description || "" }); setModal("stock"); }}>Ajustar stock</button></div>}
-              {detailTab === "Precios" && <div className="pxp-detail-box"><h3>Información de precios</h3>{[["Precio base", money(detailProduct.price)], ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)], ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)], ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>}
-              {["Movimientos", "Proveedores", "Ventas", "Más datos"].includes(detailTab) && <div className="pxp-detail-box"><h3>{detailTab}</h3><p className="pxp-muted">No hay registros disponibles en esta vista de demostración. Esta sección queda preparada para conectarse a los datos del sistema.</p></div>}
+              {detailTab === "Resumen" && (
+                <div className="pxp-detail-grid">
+                  {/* Stock por almacén */}
+                  <div className="pxp-detail-box">
+                    <h3>▣ Stock por almacén</h3>
+                    <table className="pxp-detail-table">
+                      <thead>
+                        <tr>
+                          <th>Almacén</th>
+                          <th style={{ textAlign: "right" }}>Stock</th>
+                          <th style={{ textAlign: "right" }}>Mínimo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(detailProduct.warehouse || [{ name: detailProduct.location || "Almacén Principal", stock: detailProduct.stock, min: 0 }]).map(w => (
+                          <tr key={w.name}>
+                            <td style={{ fontWeight: 600 }}>{w.name}</td>
+                            <td style={{ textAlign: "right", color: w.stock > 0 ? "#059669" : "#71717a", fontWeight: 700 }}>
+                              {w.stock} un.
+                            </td>
+                            <td style={{ textAlign: "right", color: "#64748b" }}>
+                              {w.min ?? "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div className="pxp-kv" style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #e2e8f0" }}>
+                      <b>Stock global total</b>
+                      <b style={{ color: "#059669", fontSize: 14 }}>{detailProduct.stock} un.</b>
+                    </div>
+                  </div>
+
+                  {/* Información general */}
+                  <div className="pxp-detail-box">
+                    <h3>▤ Información general</h3>
+                    {[
+                      ["Categoría", detailProduct.category],
+                      ["Marca", detailProduct.brand || "—"],
+                      ["Presentación", detailProduct.presentation || "—"],
+                      ["Unidad de medida", detailProduct.unit || "un."],
+                      ["Condición Qaway", `${detailProduct.condition || 10}/10`],
+                      ["Estado", detailProduct.status]
+                    ].map(([k, v]) => (
+                      <div className="pxp-kv" key={k}>
+                        <span>{k}</span>
+                        <b>{v}</b>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Estructura de Precios */}
+                  <div className="pxp-detail-box">
+                    <h3>▣ Estructura de precios</h3>
+                    {[
+                      ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)],
+                      ["Precio base", money(detailProduct.price)],
+                      ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)],
+                      ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)],
+                      ["Impuesto", "IGV (18%)"]
+                    ].map(([k, v]) => (
+                      <div className="pxp-kv" key={k}>
+                        <span>{k}</span>
+                        <b>{v}</b>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Descripción detallada */}
+                  <div className="pxp-detail-box">
+                    <h3>▣ Descripción</h3>
+                    <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.65, margin: 0 }}>
+                      {detailProduct.description || "Sin descripción registrada para este producto."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {detailTab === "Inventario" && (
+                <div className="pxp-detail-box">
+                  <h3>Stock por ubicación física</h3>
+                  <table className="pxp-detail-table">
+                    <thead>
+                      <tr>
+                        <th>Almacén / Tienda</th>
+                        <th style={{ textAlign: "right" }}>Stock disponible</th>
+                        <th style={{ textAlign: "right" }}>Alerta mínima</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(detailProduct.warehouse || [{ name: detailProduct.location || "Almacén Principal", stock: detailProduct.stock, min: 0 }]).map(w => (
+                        <tr key={w.name}>
+                          <td style={{ fontWeight: 600 }}>{w.name}</td>
+                          <td style={{ textAlign: "right", color: "#059669", fontWeight: 700 }}>{w.stock} un.</td>
+                          <td style={{ textAlign: "right", color: "#64748b" }}>{w.min ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button
+                    className="pxp-btn small"
+                    style={{ marginTop: 14 }}
+                    onClick={() => {
+                      setEditing(detailProduct);
+                      setForm({
+                        name: detailProduct.name,
+                        sku: detailProduct.sku,
+                        category: detailProduct.category,
+                        stock: detailProduct.stock,
+                        price: detailProduct.price,
+                        location: detailProduct.location,
+                        description: detailProduct.description || ""
+                      });
+                      setModal("stock");
+                    }}
+                  >
+                    ▤ Ajustar stock
+                  </button>
+                </div>
+              )}
+
+              {detailTab === "Precios" && (
+                <div className="pxp-detail-box">
+                  <h3>Matriz completa de precios</h3>
+                  {[
+                    ["Precio de venta final", money(detailProduct.salePrice ?? detailProduct.price)],
+                    ["Precio base / lista", money(detailProduct.price)],
+                    ["Precio mayorista (volumen)", money(detailProduct.wholesale ?? detailProduct.price)],
+                    ["Precio mínimo permitido", money(detailProduct.minPrice ?? detailProduct.price)],
+                    ["Moneda de operación", "PEN (S/)"],
+                    ["Régimen tributario", "IGV 18% Gravado"]
+                  ].map(([k, v]) => (
+                    <div className="pxp-kv" key={k}>
+                      <span>{k}</span>
+                      <b>{v}</b>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {["Movimientos", "Proveedores", "Ventas", "Más datos"].includes(detailTab) && (
+                <div className="pxp-detail-box">
+                  <h3>{detailTab}</h3>
+                  <p style={{ color: "#64748b", fontSize: 13.5, lineHeight: 1.6, margin: 0 }}>
+                    No hay registros históricos vinculados para este ítem. Esta sección se alimenta automáticamente al registrar ventas o movimientos de almacén.
+                  </p>
+                </div>
+              )}
             </div>
           </aside>
         </>
