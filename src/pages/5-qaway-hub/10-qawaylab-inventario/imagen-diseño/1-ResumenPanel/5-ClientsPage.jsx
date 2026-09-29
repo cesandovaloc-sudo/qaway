@@ -89,37 +89,6 @@ function IconButton({ children, onClick, title, className = "" }) {
   return <button title={title} onClick={onClick} className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-950 transition hover:bg-blue-50 ${className}`}>{children}</button>;
 }
 
-function Sidebar() {
-  const [open, setOpen] = useState(true);
-  const nav = [
-    [LayoutDashboard, "Resumen"], [Package, "Productos"], [Folder, "Categorías"], [MapPin, "Movimientos"],
-    ["divider"], [Users, "Clientes", true], [FileText, "Cotizaciones"], [ReceiptText, "Ventas", false, true], [CircleDollarSign, "Pedidos web"],
-    ["divider"], [ShoppingCart, "Compras", false, true], [UserRound, "Proveedores"],
-    ["divider"], [Building2, "Precios", false, true], [Gift, "Paqutes / Kits"], [Tag, "Promociones"], [ReceiptText, "Liquidaciones"], [ClipboardList, "Catálogos"],
-    ["divider"], [Building2, "Organización", false, true], [Building2, "  Sedes"], [Warehouse, "  Almacenes"], [Contact, "  Usuarios"],
-    ["divider"], [Settings, "Configuración"],
-  ];
-  return <aside className="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
-    <div className="flex h-[68px] items-center gap-3 border-b border-slate-100 px-5">
-      <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-cyan-400 to-blue-700 text-lg font-black text-white">I</div>
-      <div><div className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-950">Inventi <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-700">Pro</span></div><div className="text-[11px] text-slate-500">Inventario & ERP Comercial</div></div>
-    </div>
-    <nav className="flex-1 overflow-y-auto px-3 py-3 text-[13px] text-slate-800">
-      {nav.map((item, i) => item[0] === "divider" ? <div key={i} className="my-3 border-t border-slate-100" /> : <button key={i} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 ${item[2] ? "bg-blue-50 font-medium text-slate-950" : "hover:bg-slate-50"} ${item[1].startsWith("  ") ? "pl-7" : ""}`}>
-        {typeof item[0] !== "string" && React.createElement(item[0], { size: 17, className: item[2] ? "text-blue-600" : "text-blue-950" })}
-        <span className="flex-1 text-left">{item[1].trim()}</span>{item[3] && <ChevronDown size={14} className="text-slate-500" />}
-      </button>)}
-    </nav>
-    <div className="m-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-      <div className="flex items-center gap-2 font-medium"><Crown size={17} className="text-blue-700"/> Plan Profesional</div>
-      <div className="mt-1 text-xs text-slate-500">Inventi Pro</div>
-      <div className="mt-3 h-1.5 rounded-full bg-slate-200"><div className="h-1.5 w-2/5 rounded-full bg-blue-500"/></div>
-      <div className="mt-2 text-[11px] text-slate-500">800 de 2,000 productos</div>
-      <button className="mt-3 text-xs font-medium text-blue-700">Ver últimos beneficios →</button>
-    </div>
-  </aside>;
-}
-
 function Topbar() {
   return <header className="flex h-[68px] items-center gap-5 border-b border-slate-200 bg-white px-5 lg:px-6">
     <div className="relative max-w-[635px] flex-1"><Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-950"/><input className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/60 pl-10 pr-16 text-sm outline-none focus:border-blue-400" placeholder="Buscar productos, clientes, ventas, compras..."/><span className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-500">Ctrl K</span></div>
@@ -317,7 +286,6 @@ export default function ClientsPage() {
   };
 
   return <div className="flex min-h-screen bg-slate-50 text-slate-900">
-    <Sidebar/>
     <main className="min-w-0 flex-1">
       <Topbar/>
       {editing ? <ClientForm client={editing.id?editing:null} onCancel={()=>setEditing(null)} onSave={saveClient}/> : <div className="p-4 lg:p-5">

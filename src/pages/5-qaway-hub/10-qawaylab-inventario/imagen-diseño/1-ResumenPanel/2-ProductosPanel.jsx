@@ -121,7 +121,7 @@ function statusClass(status) { return status === "Disponible" ? "ok" : status ==
 
 function ProductThumb({ id, category = "", name = "", size = 40 }) {
   const iconSize = Math.round(size * 0.48);
-  const neutralStyle = { bg: "#f8fafc", border: "#e2e8f0", color: "#64748b" };
+  const neutralStyle = { bg: "#f1f5f9", border: "#cbd5e1", color: "#64748b" };
   
   const text = `${name} ${category} ${id}`.toLowerCase();
   let iconComponent = <Box size={iconSize} strokeWidth={1.75} />;
