@@ -158,22 +158,34 @@ function Icon({ children }) { return <span aria-hidden="true" style={{ display: 
 function money(value) { return new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN", minimumFractionDigits: 2 }).format(value).replace("PEN", "S/"); }
 function statusClass(status) { return status === "Disponible" ? "ok" : status === "Stock bajo" ? "low" : "zero"; }
 
-function ProductThumb({ id, size = 40 }) {
+function ProductThumb({ id, category = "", name = "", size = 40 }) {
   const iconSize = Math.round(size * 0.48);
   const neutralStyle = { bg: "#f8fafc", border: "#e2e8f0", color: "#64748b" };
-  const icons = {
-    1: <Coffee size={iconSize} strokeWidth={1.75} />,
-    2: <Dog size={iconSize} strokeWidth={1.75} />,
-    3: <Sparkles size={iconSize} strokeWidth={1.75} />,
-    4: <Package size={iconSize} strokeWidth={1.75} />,
-    5: <Shield size={iconSize} strokeWidth={1.75} />,
-    6: <Gamepad2 size={iconSize} strokeWidth={1.75} />,
-    7: <Layers size={iconSize} strokeWidth={1.75} />,
-    8: <Cat size={iconSize} strokeWidth={1.75} />,
-    9: <FlaskConical size={iconSize} strokeWidth={1.75} />,
-    10: <Cookie size={iconSize} strokeWidth={1.75} />,
-  };
-  const iconComponent = icons[id] || <Box size={iconSize} strokeWidth={1.75} />;
+  
+  const text = `${name} ${category} ${id}`.toLowerCase();
+  let iconComponent = <Box size={iconSize} strokeWidth={1.75} />;
+
+  if (text.includes("café") || text.includes("cafe")) {
+    iconComponent = <Coffee size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("canino") || text.includes("perro") || text.includes("dog")) {
+    iconComponent = <Dog size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("gato") || text.includes("cat") || text.includes("michi")) {
+    iconComponent = <Cat size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("shampoo") || text.includes("derm") || text.includes("vet") || text.includes("veterinaria")) {
+    iconComponent = <FlaskConical size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("snack") || text.includes("galleta") || text.includes("cookie")) {
+    iconComponent = <Cookie size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("collar") || text.includes("proteccion") || text.includes("shield")) {
+    iconComponent = <Shield size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("juguete") || text.includes("game")) {
+    iconComponent = <Gamepad2 size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("arena") || text.includes("sanitaria")) {
+    iconComponent = <Sparkles size={iconSize} strokeWidth={1.75} />;
+  } else if (text.includes("paquete") || text.includes("pack")) {
+    iconComponent = <Package size={iconSize} strokeWidth={1.75} />;
+  } else {
+    iconComponent = <Boxes size={iconSize} strokeWidth={1.75} />;
+  }
   
   return (
     <div
@@ -805,7 +817,7 @@ export default function ProductosPanel() {
                 <tbody>
                   {pageRows.map(p => <tr key={p.id}>
                     <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
-                    {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
+                    {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} category={p.category} name={p.name} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
                     {visibleColumns.includes("sku") && <td>{p.sku}</td>}
                     {visibleColumns.includes("barcode") && <td>{p.barcode || "—"}</td>}
                     {visibleColumns.includes("category") && <td>{p.category}</td>}
@@ -837,7 +849,7 @@ export default function ProductosPanel() {
                     <span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span>
                   </div>
                   <div className="pxp-card-art-web">
-                    <ProductThumb id={p.id} size={48} />
+                    <ProductThumb id={p.id} category={p.category} name={p.name} size={48} />
                   </div>
                   <div className="pxp-card-meta">{p.sku} · {p.category}</div>
                   <div className="pxp-card-name" title={p.name}>{p.name}</div>
@@ -864,7 +876,7 @@ export default function ProductosPanel() {
             <button className="pxp-icon-btn pxp-detail-close" onClick={() => setDetailProduct(null)} title="Cerrar panel">×</button>
             <div className="pxp-detail-head">
               <div className="pxp-detail-product">
-                <div className="pxp-detail-art"><ProductThumb id={detailProduct.id} size={75} /></div>
+                <div className="pxp-detail-art"><ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={75} /></div>
                 <div>
                   <h2 className="pxp-detail-title">{detailProduct.name}</h2>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
@@ -888,7 +900,7 @@ export default function ProductosPanel() {
             <div className="pxp-detail-content">
               {detailTab === "Resumen" && <div className="pxp-detail-grid">
                 <div className="pxp-detail-box"><h3>▣　Stock por almacén</h3><table className="pxp-detail-table"><thead><tr><th>Almacén</th><th>Stock</th><th>Stock mín.</th></tr></thead><tbody>{(detailProduct.warehouse || [{ name: detailProduct.location, stock: detailProduct.stock, min: 0 }]).map(w => <tr key={w.name}><td>{w.name}</td><td style={{ color: "#059669", fontWeight: 700 }}>{w.stock} un.</td><td>{w.min ?? "—"}</td></tr>)}</tbody></table><div className="pxp-kv"><b>Stock total</b><b>{detailProduct.stock} un.</b></div></div>
-                <div className="pxp-detail-box"><h3>▧　Imagen y archivos</h3><div style={{ height: 155, borderRadius: 8, background: "#f7f9fc", display: "grid", placeItems: "center" }}><ProductThumb id={detailProduct.id} size={90} /></div><div style={{ color: "var(--muted)", fontSize: 11, marginTop: 8 }}>Vista previa ilustrativa del producto</div></div>
+                <div className="pxp-detail-box"><h3>▧　Imagen y archivos</h3><div style={{ height: 155, borderRadius: 8, background: "#f7f9fc", display: "grid", placeItems: "center" }}><ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={90} /></div><div style={{ color: "var(--muted)", fontSize: 11, marginTop: 8 }}>Vista previa ilustrativa del producto</div></div>
                 <div className="pxp-detail-box"><h3>▤　Información general</h3>{[["Categoría", detailProduct.category], ["Marca", detailProduct.brand || "—"], ["Presentación", detailProduct.presentation || "—"], ["Unidad de medida", detailProduct.unit || "un."], ["Peso", detailProduct.weight || "—"], ["Dimensiones", detailProduct.dimensions || "—"], ["Estado", detailProduct.status]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
                 <div className="pxp-detail-box"><h3>▣　Precios</h3>{[["Precio base", money(detailProduct.price)], ["Precio de venta", money(detailProduct.salePrice ?? detailProduct.price)], ["Precio mayorista", money(detailProduct.wholesale ?? detailProduct.price)], ["Precio mínimo", money(detailProduct.minPrice ?? detailProduct.price)], ["Moneda", "PEN"], ["Impuesto (IGV)", "18%"]].map(([k, v]) => <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>)}</div>
                 <div className="pxp-detail-box full"><h3>▣　Descripción</h3><p style={{ color: "#53627d", lineHeight: 1.7, margin: 0 }}>{detailProduct.description || "Sin descripción registrada."}</p></div>
