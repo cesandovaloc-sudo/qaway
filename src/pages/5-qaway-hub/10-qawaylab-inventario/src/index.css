@@ -52,6 +52,15 @@
   color: var(--color-ink);
 }
 
+select {
+  color-scheme: light;
+}
+
+option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 /* ── Themes ── */
 html.dark, [data-theme='dark'] {
   color-scheme: dark;
