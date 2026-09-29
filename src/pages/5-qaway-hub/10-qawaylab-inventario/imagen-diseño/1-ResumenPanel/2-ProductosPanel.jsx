@@ -848,26 +848,10 @@ export default function ProductosPanel() {
             ]
         }));
 
-        // Recuperar productos creados localmente por el usuario
-        let localSaved = [];
-        try {
-          localSaved = JSON.parse(localStorage.getItem("inventi_user_products") || "[]");
-        } catch (e) {
-          localSaved = [];
-        }
-        // Combinar evitando duplicados por SKU o ID
-        const existingSkus = new Set(mapped.map(m => m.sku));
-        const nonDuplicateLocal = localSaved.filter(lp => !existingSkus.has(lp.sku));
-        const combined = [...nonDuplicateLocal, ...mapped];
-
-        if (isMounted) setProducts(combined);
+        if (isMounted) setProducts(mapped);
       } catch (err) {
         console.warn("[Inventi] Supabase live fetch fallback:", err);
-        let localSaved = [];
-        try {
-          localSaved = JSON.parse(localStorage.getItem("inventi_user_products") || "[]");
-        } catch (e) {}
-        if (isMounted) setProducts(localSaved);
+        if (isMounted) setProducts([]);
       } finally {
         if (isMounted) setIsLoadingProducts(false);
       }
@@ -1054,11 +1038,6 @@ export default function ProductosPanel() {
         condition: form.condition || 10,
         warehouse: [{ name: form.location, stock, min: minStock }]
       };
-      try {
-        const existing = JSON.parse(localStorage.getItem("inventi_user_products") || "[]");
-        localStorage.setItem("inventi_user_products", JSON.stringify([newP, ...existing.filter(x => x.sku !== newP.sku)]));
-      } catch (e) {}
-
       setProducts(prev => [newP, ...prev]);
       setPage(1);
       showToast("Producto creado");
