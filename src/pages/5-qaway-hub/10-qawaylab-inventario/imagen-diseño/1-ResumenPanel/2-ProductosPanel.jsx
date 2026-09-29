@@ -45,93 +45,6 @@ import { productService } from "../../src/services/productService";
  * y sincronización en tiempo real con Supabase.
  */
 
-const initialProducts = [
-  {
-    id: "prod-001-cafe-geisha",
-    name: "Café Geisha Especial 250g",
-    detail: "Grano tostado de especialidad",
-    sku: "CAF-GEI-250",
-    category: "Alimentos",
-    stock: 45,
-    price: 48.0,
-    cost: 22.0,
-    salePrice: 48.0,
-    wholesale: 38.0,
-    minPrice: 35.0,
-    status: "Disponible",
-    location: "Almacén Principal",
-    image: "☕",
-    barcode: "7750123456701",
-    brand: "Origen Perú",
-    presentation: "Bolsa trilaminada 250g con válvula",
-    unit: "un.",
-    weight: "0.25 kg",
-    dimensions: "12 × 7 × 20 cm",
-    condition: 10,
-    description: "Café de especialidad en grano tostado, variedad Geisha de Villa Rica con notas florales a jazmín, durazno y miel. Tueste medio.",
-    warehouse: [
-      { name: "Almacén Principal", stock: 30, min: 10 },
-      { name: "Tienda Sur", stock: 15, min: 5 }
-    ]
-  },
-  {
-    id: "prod-002-alimento-canino",
-    name: "Alimento Premium Canino 15kg",
-    detail: "Nutrición avanzada adultos",
-    sku: "DOG-PRO-15",
-    category: "Mascotas",
-    stock: 8,
-    price: 145.0,
-    cost: 95.0,
-    salePrice: 145.0,
-    wholesale: 128.0,
-    minPrice: 120.0,
-    status: "Stock bajo",
-    location: "Tienda Sur",
-    image: "🐕",
-    barcode: "7750123456702",
-    brand: "NutriPet Pro",
-    presentation: "Saco sellado 15 kg",
-    unit: "saco",
-    weight: "15.0 kg",
-    dimensions: "65 × 40 × 18 cm",
-    condition: 10,
-    description: "Alimento balanceado súper premium para perros adultos con proteína hidrolizada de salmón, arroz integral y probióticos para salud digestiva.",
-    warehouse: [
-      { name: "Tienda Sur", stock: 8, min: 10 },
-      { name: "Almacén Principal", stock: 0, min: 5 }
-    ]
-  },
-  {
-    id: "prod-003-shampoo-vet",
-    name: "Shampoo Dermatológico Vet 500ml",
-    detail: "Cuidado dérmico terapéutico",
-    sku: "VET-DERM-500",
-    category: "Veterinaria",
-    stock: 0,
-    price: 39.9,
-    cost: 18.5,
-    salePrice: 39.9,
-    wholesale: 32.0,
-    minPrice: 29.0,
-    status: "Sin stock",
-    location: "Almacén Principal",
-    image: "🧴",
-    barcode: "7750123456703",
-    brand: "VetCare Pharma",
-    presentation: "Frasco dispensador 500 ml",
-    unit: "frasco",
-    weight: "0.55 kg",
-    dimensions: "8 × 8 × 22 cm",
-    condition: 10,
-    description: "Shampoo hipoalergénico medicado con clorhexidina al 2%, ketoconazol y extracto de aloe vera para el control y alivio de afecciones cutáneas.",
-    warehouse: [
-      { name: "Almacén Principal", stock: 0, min: 15 },
-      { name: "Tienda Sur", stock: 0, min: 5 }
-    ]
-  }
-];
-
 const STOCK_IMAGES = {
   cafe: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=600&q=80",
   canino: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&w=600&q=80",
@@ -740,7 +653,9 @@ export default function ProductosPanel() {
     }
   };
 
-  const [products, setProducts] = useState(initialProducts);
+  // Do not render demo inventory while the authoritative source is loading.
+  const [products, setProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
   const [status, setStatus] = useState("Todos");
@@ -903,8 +818,8 @@ export default function ProductosPanel() {
     async function loadSupabaseProducts() {
       try {
         const res = await productService.getProducts();
-        if (isMounted && res && res.data && res.data.length > 0) {
-          const mapped = res.data.map((p, idx) => ({
+        const sourceProducts = Array.isArray(res?.data) ? res.data : [];
+        const mapped = sourceProducts.map((p, idx) => ({
             id: p.id || `prod-sb-${idx}`,
             name: p.name || "Producto sin nombre",
             detail: p.description ? p.description.slice(0, 35) : "",
@@ -931,11 +846,14 @@ export default function ProductosPanel() {
               { name: "Almacén Principal", stock: Number(p.stock) || 0, min: Number(p.min_stock) || 0 },
               { name: "Tienda Sur", stock: 0, min: 0 }
             ]
-          }));
-          setProducts(mapped);
-        }
+        }));
+
+        if (isMounted) setProducts(mapped);
       } catch (err) {
         console.warn("[Inventi] Supabase live fetch fallback:", err);
+        if (isMounted) setProducts([]);
+      } finally {
+        if (isMounted) setIsLoadingProducts(false);
       }
     }
     loadSupabaseProducts();
@@ -1321,7 +1239,9 @@ export default function ProductosPanel() {
                 <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
                   <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
-                  <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>{products.length} productos en tu inventario.</p>
+                  <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
+                    {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
+                  </p>
                 </div>
               </div>
               <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -1346,11 +1266,11 @@ export default function ProductosPanel() {
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Total de productos" value={products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> Data en vivo</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
-              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Con stock" value={products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
-              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Stock bajo" value={products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
-              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Sin stock" value={products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
-              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor de inventario" value={money(inventoryValue)} note={<span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
+              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Total de productos" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Con stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Stock bajo" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
+              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Sin stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
+              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor de inventario" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
             </section>
 
             <div className="pxp-toolbar">
@@ -1656,7 +1576,13 @@ export default function ProductosPanel() {
                   <th style={{ textAlign: "right" }}>Acciones</th>
                 </tr></thead>
                 <tbody>
-                  {pageRows.map(p => <tr key={p.id}>
+                  {isLoadingProducts ? Array.from({ length: 6 }, (_, index) => (
+                    <tr key={`loading-${index}`} aria-busy="true">
+                      <td colSpan={visibleColumns.length + 2}>
+                        <div style={{ height: 22, borderRadius: 6, background: "#f1f5f9", animation: "pulse 1.5s ease-in-out infinite" }} />
+                      </td>
+                    </tr>
+                  )) : pageRows.map(p => <tr key={p.id}>
                     <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
                     {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} category={p.category} name={p.name} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
                     {visibleColumns.includes("sku") && <td>{p.sku}</td>}
@@ -1681,7 +1607,7 @@ export default function ProductosPanel() {
                       </div>}
                     </div></td>
                   </tr>)}
-                  {pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
+                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : (
                 <div
