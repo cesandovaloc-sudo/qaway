@@ -1,0 +1,12 @@
+# doc/ — bitácora del agente sobre Inventario
+# Los .md de implementación y bitácora SÍ se versionan (van al commit global).
+# Aquí se excluye solo lo efímero: notas de trabajo, adjuntos pesados y salidas de herramientas.
+
+*.tmp
+*.bak
+*.log
+adjuntos/
+capturas/
+salidas/
+scratch/
+node_modules/

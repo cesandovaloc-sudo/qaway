@@ -90,7 +90,7 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         <div
           className="w-[30px] h-[30px] flex-shrink-0 relative"
           style={{
-            background: 'linear-gradient(135deg, #38a5ff, #1853d9)',
+            background: 'linear-gradient(135deg, #ff6b35, #ff4b0b)',
             clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
           }}
         >
@@ -111,8 +111,8 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
               <span
                 className="text-[11px] font-semibold rounded-[6px] px-[7px] py-[3px] leading-none"
                 style={{
-                  backgroundColor: '#eaf2ff',
-                  color: '#1261e9',
+                  backgroundColor: '#fff2eb',
+                  color: '#ff4b0b',
                 }}
               >
                 Pro
