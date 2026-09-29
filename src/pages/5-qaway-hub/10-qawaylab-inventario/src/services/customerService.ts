@@ -9,7 +9,14 @@ import type {
   FiscalDocLookupResult,
   PaginatedResponse,
   PaginationParams,
+  QuotationStatus,
 } from '@/types'
+
+/**
+ * Estados de cotización que cuentan como compra. `rejected` y `expired` se
+ * excluyen porque son operaciones que no llegaron a concretarse.
+ */
+const QUOTATION_STATUSES_COUNTED: QuotationStatus[] = ['draft', 'sent', 'accepted']
 
 // ── Customer Service ──
 export const customerService = {
@@ -106,6 +113,31 @@ export const customerService = {
       .eq('id', id)
 
     if (error) throw error
+  },
+
+  // Agregados de compras de varios clientes en UNA sola consulta.
+  // Evita el N+1 de getCustomerStats, que se mantiene intacto para sus otros usos.
+  async getStatsForCustomers(
+    ids: string[]
+  ): Promise<Record<string, { total: number; purchases: number; lastPurchase: string | null }>> {
+    if (!ids.length) return {}
+    const { data, error } = await supabase
+      .from('quotations')
+      .select('customer_id, total, created_at, status')
+      .in('customer_id', ids)
+
+    if (error) throw error
+
+    const out: Record<string, { total: number; purchases: number; lastPurchase: string | null }> = {}
+    for (const q of data || []) {
+      if (!q.customer_id || !QUOTATION_STATUSES_COUNTED.includes(q.status as QuotationStatus)) continue
+      const cur = out[q.customer_id] || { total: 0, purchases: 0, lastPurchase: null }
+      cur.total += Number(q.total) || 0
+      cur.purchases += 1
+      if (!cur.lastPurchase || q.created_at > cur.lastPurchase) cur.lastPurchase = q.created_at
+      out[q.customer_id] = cur
+    }
+    return out
   },
 
   // Get customer stats

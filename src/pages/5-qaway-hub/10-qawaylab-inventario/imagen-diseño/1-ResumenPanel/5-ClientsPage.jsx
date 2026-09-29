@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Search, Building2, Bell, Moon, ChevronDown, ChevronUp, ChevronLeft,
   ChevronRight, Users, Package, Folder, MapPin, FileText, ShoppingCart,
@@ -9,6 +9,8 @@ import {
   LayoutDashboard, Boxes, Truck, BadgePercent, NotebookPen, Contact,
   CircleDollarSign, ChevronRight as RightIcon
 } from "lucide-react";
+import { customerService } from "../../src/services/customerService";
+import { docTypeOptions, isValidDocNumber, normalizeDocNumber } from "../../src/utils/fiscal";
 
 const initialClients = [
   { id: 1, initials: "CM", name: "Comercial Martínez SAC", subtitle: "Empresa", type: "Empresa", document: "RUC 20567890123", phone: "(01) 987 654 321", email: "ventas@cmartinez.pe", city: "Lima", total: 12450, purchases: 15, lastPurchase: "22/09/2026", status: "Activo", category: "Cliente retail", commercialName: "Comercial Martínez", address: "Av. Los Olivos 123", district: "San Martín de Porres", province: "Lima", department: "Lima", credit: "0.00", paymentTerm: 0, discount: 0, priceList: "Precio general", registered: "15/08/2025", notes: "Cliente frecuente. Realiza compras mensuales.", contactName: "Carlos Martínez" },
@@ -23,6 +25,65 @@ const initialClients = [
 
 const money = (n) => new Intl.NumberFormat("es-PE", { style: "currency", currency: "PEN" }).format(n).replace("PEN", "S/");
 const initialsColors = ["bg-blue-50 text-blue-600", "bg-emerald-50 text-emerald-600", "bg-purple-50 text-purple-600", "bg-rose-50 text-rose-600", "bg-amber-50 text-amber-600"];
+
+// ── Puente con la tabla real `customers` ───────────────────────────────
+// El panel pinta más campos de los que la tabla tiene. Los que sí existen
+// (name, company, email, phone, type, doc_type, doc_number, fiscal_name,
+// address, notes) se leen y se escriben tal cual. El resto —categoría,
+// estado, crédito, plazo de pago, descuento, lista de precios, país,
+// departamento, provincia, distrito, código postal y contacto— vive en
+// `extra_data`, que es una columna jsonb creada exactamente para "datos
+// adicionales". Por eso este acople NO necesita migración de base de datos.
+const PANEL_TYPE = { company: "Empresa", individual: "Persona", wholesale: "Mayorista", reseller: "Distribuidor" };
+const DB_TYPE = { Empresa: "company", Persona: "individual", Mayorista: "wholesale", Distribuidor: "reseller" };
+const DEFAULT_EXTRA = { status: "Activo", category: "Cliente retail", country: "Perú", credit: "0.00", paymentTerm: 0, discount: 0, priceList: "Precio general" };
+const initialsOf = (name) => (name || "").trim().split(/\s+/).slice(0, 2).map(s => s[0]).join("").toUpperCase() || "?";
+const formatDate = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return "—";
+  return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+};
+const toRow = (c, stat = {}) => {
+  const x = { ...DEFAULT_EXTRA, ...c.extra_data };
+  return {
+    id: c.id, name: c.name || "", initials: initialsOf(c.name),
+    subtitle: x.category || PANEL_TYPE[c.type] || "Cliente",
+    type: PANEL_TYPE[c.type] || "Persona",
+    doc_type: c.doc_type || "SIN_DOC", document: c.doc_number || "—",
+    phone: c.phone || "—", email: c.email || "", company: c.company || "",
+    commercialName: c.fiscal_name || c.company || "",
+    city: x.city || "—", address: c.address || "",
+    district: x.district || "", province: x.province || "", department: x.department || "",
+    country: x.country || "Perú", postalCode: x.postalCode || "",
+    category: x.category || "Cliente retail", status: x.status || "Activo",
+    credit: x.credit || "0.00", paymentTerm: x.paymentTerm || 0, discount: x.discount || 0,
+    priceList: x.priceList || "Precio general",
+    total: stat.total || 0, purchases: stat.purchases || 0, lastPurchase: formatDate(stat.lastPurchase),
+    notes: c.notes || "", registered: formatDate(c.created_at),
+    contactName: x.contactName || c.name || "",
+    __extra: x,
+  };
+};
+const toPayload = (r) => {
+  const hasDoc = !!r.document && r.document !== "—";
+  return {
+    name: (r.name || "").trim() || (r.commercialName || "").trim(),
+    company: r.company || null, email: r.email || null,
+    phone: r.phone && r.phone !== "—" ? r.phone : null,
+    type: DB_TYPE[r.type] || "individual",
+    doc_type: hasDoc ? (r.doc_type || "SIN_DOC") : "SIN_DOC",
+    doc_number: hasDoc ? normalizeDocNumber(r.document) : null,
+    fiscal_name: r.commercialName || null, address: r.address || null,
+    notes: r.notes || null,
+    extra_data: {
+      status: r.status, category: r.category, country: r.country, credit: r.credit,
+      paymentTerm: r.paymentTerm, discount: r.discount, priceList: r.priceList,
+      city: r.city, district: r.district, province: r.province, department: r.department,
+      postalCode: r.postalCode, contactName: r.contactName,
+    },
+  };
+};
 
 function IconButton({ children, onClick, title, className = "" }) {
   return <button title={title} onClick={onClick} className={`inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-blue-950 transition hover:bg-blue-50 ${className}`}>{children}</button>;
@@ -75,19 +136,51 @@ function StatCard({ icon: Icon, title, value, sub, tone = "blue", trend }) {
 }
 
 function ClientForm({ client, onCancel, onSave }) {
-  const [form, setForm] = useState(client || { type: "Empresa", status: "Activo", country: "Perú", department: "Lima", province: "Lima", category: "Cliente retail", credit: "0.00", paymentTerm: 0, discount: 0, priceList: "Precio general" });
+  const [form, setForm] = useState(client || { type: "Empresa", doc_type: "SIN_DOC", status: "Activo", country: "Perú", department: "Lima", province: "Lima", category: "Cliente retail", credit: "0.00", paymentTerm: 0, discount: 0, priceList: "Precio general" });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const [lookingUp, setLookingUp] = useState(false);
+  const [lookupInfo, setLookupInfo] = useState(null);
   const update = (key, value) => setForm(p => ({ ...p, [key]: value }));
+  const canLookup = form.doc_type === "DNI" || form.doc_type === "RUC";
+  // Consulta SUNAT/RENIEC: autocompleta razón social y domicilio fiscal.
+  const handleLookup = async () => {
+    if (!canLookup || !(form.document || "").trim()) { setFormError("Ingresa un número de documento para consultar en SUNAT"); return; }
+    const docNumber = normalizeDocNumber(form.document);
+    if (!isValidDocNumber(form.doc_type, docNumber)) { setFormError("El " + form.doc_type + " ingresado no es válido"); return; }
+    try {
+      setLookingUp(true); setFormError(null); setLookupInfo(null);
+      const result = await customerService.lookupFiscalDoc(form.doc_type, docNumber);
+      setForm(p => ({ ...p, document: docNumber, commercialName: result.fiscal_name, address: result.address || p.address, name: (p.name || "").trim() ? p.name : result.fiscal_name }));
+      setLookupInfo("Datos obtenidos: " + result.fiscal_name + (result.address ? " · " + result.address : ""));
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Error al consultar SUNAT");
+    } finally { setLookingUp(false); }
+  };
+  const submit = async () => {
+    const payload = toPayload(form);
+    if (!payload.name) { setFormError("Completa el nombre o razón social del cliente."); return; }
+    if (payload.doc_number && payload.doc_type !== "SIN_DOC" && !isValidDocNumber(payload.doc_type, payload.doc_number)) {
+      setFormError("El número de " + payload.doc_type + " no es válido"); return;
+    }
+    setSaving(true); setFormError(null);
+    try { await onSave(form); }
+    catch (err) { setFormError(err instanceof Error ? err.message : "Error al guardar"); }
+    finally { setSaving(false); }
+  };
   const field = (label, key, placeholder = "", required = false, type = "text") => <label className="block text-[13px] font-medium text-slate-800">{label}{required && <span className="text-red-500"> *</span>}<input type={type} value={form[key] ?? ""} onChange={e => update(key, e.target.value)} placeholder={placeholder} className="mt-2 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-blue-500"/></label>;
   const select = (label, key, options) => <label className="block text-[13px] font-medium text-slate-800">{label}<select value={form[key] ?? options[0]} onChange={e => update(key, e.target.value)} className="mt-2 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-normal outline-none focus:border-blue-500">{options.map(o => <option key={o}>{o}</option>)}</select></label>;
   return <div className="min-h-full bg-slate-50/60 p-5 lg:p-6">
     <div className="mb-5 flex items-center gap-4"><IconButton onClick={onCancel}><ArrowLeft size={21}/></IconButton><div><h1 className="text-2xl font-semibold tracking-tight text-slate-950">{client ? "Editar cliente" : "Nuevo cliente"}</h1><p className="text-sm text-slate-500">Registra un cliente para gestionar sus compras, ventas y mantener su información actualizada.</p></div></div>
     <div className="space-y-3">
+      {formError && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{formError}</div>}
+      {lookupInfo && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-700">{lookupInfo}</div>}
       <section className="rounded-xl border border-slate-200 bg-white p-5"><div className="mb-5 flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-sm text-white">1</span><div><h2 className="font-semibold">Información general</h2><p className="text-sm text-slate-500">Datos básicos del cliente.</p></div></div>
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <div><div className="mb-2 text-[13px] font-medium">Tipo de cliente <span className="text-red-500">*</span></div><div className="flex gap-3"><button onClick={() => update("type","Empresa")} className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-md border text-sm ${form.type==="Empresa"?"border-blue-500 bg-blue-50 text-blue-700":"border-slate-200"}`}><Building2 size={16}/> Empresa</button><button onClick={() => update("type","Persona")} className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-md border text-sm ${form.type==="Persona"?"border-blue-500 bg-blue-50 text-blue-700":"border-slate-200"}`}><UserRound size={16}/> Persona</button></div></div>
+          <div><div className="mb-2 text-[13px] font-medium">Tipo de cliente <span className="text-red-500">*</span></div><div className="flex flex-wrap gap-3">{[["Empresa",Building2],["Persona",UserRound],["Mayorista",Crown],["Distribuidor",Tag]].map(([label,Ic])=><button key={label} onClick={() => update("type",label)} className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-md border text-sm ${form.type===label?"border-blue-500 bg-blue-50 text-blue-700":"border-slate-200"}`}><Ic size={16}/> {label}</button>)}</div></div>
           {field(form.type === "Empresa" ? "Nombre o Razón social" : "Nombre completo", "name", "Ej. Comercial Martínez SAC", true)}
-          {field(form.type === "Empresa" ? "RUC" : "DNI", "document", form.type === "Empresa" ? "Ej. 20123456789" : "Ej. 12345678", true)}
-          {form.type === "Empresa" && field("Nombre comercial", "commercialName", "Ej. Comercial Martínez")}
+          <div className="md:col-span-2"><div className="text-[13px] font-medium">Documento fiscal <span className="text-red-500">*</span></div><div className="mt-2 grid grid-cols-[130px_1fr_auto] gap-2"><select value={form.doc_type ?? "SIN_DOC"} onChange={e => update("doc_type", e.target.value)} className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500">{docTypeOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select><input value={form.document === "—" ? "" : (form.document ?? "")} onChange={e => update("document", e.target.value)} placeholder={form.doc_type === "RUC" ? "Ej. 20123456789" : form.doc_type === "DNI" ? "Ej. 12345678" : "Ej. número de documento"} className="h-10 min-w-0 rounded-md border border-slate-200 bg-white px-3 text-sm outline-none focus:border-blue-500"/><button type="button" onClick={handleLookup} disabled={!canLookup || lookingUp} title={canLookup ? "Consultar en SUNAT" : "Disponible para DNI y RUC"} className="flex h-10 items-center justify-center gap-2 rounded-md bg-slate-800 px-4 text-sm text-white disabled:opacity-40">{lookingUp ? "..." : "SUNAT"}</button></div><p className="mt-1 text-xs text-slate-400">DNI/RUC requeridos para facturar. El botón SUNAT autocompleta razón social y domicilio.</p></div>
+          {field("Nombre comercial / razón social legal", "commercialName", "Ej. Comercial Martínez SAC")}
           {field("Correo electrónico", "email", "Ej. ventas@empresa.pe")}
           <div><div className="text-[13px] font-medium">Teléfono <span className="text-red-500">*</span></div><div className="mt-2 flex gap-2"><select className="h-10 w-28 rounded-md border border-slate-200 bg-white px-2 text-sm"><option>🇵🇪 +51</option><option>🇨🇱 +56</option><option>🇨🇴 +57</option></select><input value={form.phone ?? ""} onChange={e=>update("phone",e.target.value)} placeholder="987 654 321" className="h-10 min-w-0 flex-1 rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-blue-500"/></div></div>
         </div>
@@ -96,7 +189,7 @@ function ClientForm({ client, onCancel, onSave }) {
       <section className="rounded-xl border border-slate-200 bg-white p-5"><div className="mb-5 flex items-center gap-3"><span className="grid h-8 w-8 place-items-center rounded-full bg-blue-600 text-sm text-white">3</span><div><h2 className="font-semibold">Información comercial</h2><p className="text-sm text-slate-500">Datos adicionales y configuración.</p></div></div><div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{select("Categoría","category",["Cliente retail","Mayorista","Distribuidor","Corporativo"])}{field("Límite de crédito (S/)","credit","0.00",false,"number")}{field("Plazo de pago (días)","paymentTerm","0",false,"number")}{field("Descuento predeterminado (%)","discount","0",false,"number")}{select("Lista de precios","priceList",["Precio general","Mayorista","Corporativo"])}<div><div className="text-[13px] font-medium">Estado</div><button onClick={()=>update("status",form.status==="Activo"?"Inactivo":"Activo")} className="mt-3 flex items-center gap-3"><span className={`relative h-6 w-11 rounded-full ${form.status==="Activo"?"bg-emerald-600":"bg-slate-300"}`}><span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-all ${form.status==="Activo"?"left-6":"left-1"}`} /></span><span className="text-sm">{form.status}</span></button><p className="mt-1 text-xs text-slate-400">El cliente podrá realizar compras y cotizaciones.</p></div></div></section>
       <section className="rounded-xl border border-slate-200 bg-white p-5"><div className="grid gap-5 md:grid-cols-[1fr_2fr]"><div><h2 className="font-semibold">4　Observaciones</h2><p className="text-sm text-slate-500">Añade información adicional si es necesario.</p></div><textarea value={form.notes ?? ""} onChange={e=>update("notes",e.target.value)} maxLength={500} placeholder="Escribe una observación sobre el cliente..." className="min-h-24 rounded-md border border-slate-200 p-3 text-sm outline-none focus:border-blue-500"/><div className="text-right text-xs text-slate-400 md:col-start-2">{(form.notes||"").length}/500</div></div></section>
     </div>
-    <div className="mt-4 flex justify-end gap-3"><button onClick={onCancel} className="h-10 rounded-lg border border-slate-200 bg-white px-6 text-sm">Cancelar</button><button onClick={()=>onSave(form)} className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-6 text-sm font-medium text-white hover:bg-blue-700"><Save size={16}/> Guardar cliente</button></div>
+    <div className="mt-4 flex justify-end gap-3"><button onClick={onCancel} className="h-10 rounded-lg border border-slate-200 bg-white px-6 text-sm">Cancelar</button><button onClick={submit} disabled={saving} className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-6 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"><Save size={16}/> {saving ? "Guardando..." : "Guardar cliente"}</button></div>
   </div>;
 }
 
@@ -131,7 +224,10 @@ function MiniStat({ icon: Icon, label, value, sub, tone }) {
 }
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState(initialClients);
+  const [clients, setClients] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("Todos");
@@ -144,34 +240,92 @@ export default function ClientsPage() {
   const [checked, setChecked] = useState([]);
   const [notice, setNotice] = useState("");
 
+  const load = async (p = page, size = Number(pageSize)) => {
+    setLoading(true); setLoadError(null);
+    try {
+      const res = await customerService.getCustomers({ page: p, per_page: size });
+      const stats = await customerService.getStatsForCustomers(res.data.map(c => c.id));
+      setClients(res.data.map(c => toRow(c, stats[c.id])));
+      setTotal(res.total);
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : "No se pudieron cargar los clientes");
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { load(page, Number(pageSize)); }, [page, pageSize]);
+
+  // La paginación es la del servidor; la búsqueda y los filtros se aplican
+  // sobre la página cargada. `hiddenByFilter` lo dice en pantalla para que
+  // nunca quede oculto que hay filas ocultas.
   const filtered = useMemo(() => clients.filter(c => {
     const q=search.toLowerCase();
-    return (!q || [c.name,c.document,c.phone,c.email,c.city].some(v=>(v||"").toLowerCase().includes(q))) &&
+    return (!q || [c.name,c.document,c.phone,c.email,c.city,c.company,c.commercialName].some(v=>(v||"").toLowerCase().includes(q))) &&
       (typeFilter==="Todos"||c.type===typeFilter) && (statusFilter==="Todos"||c.status===statusFilter) &&
       (categoryFilter==="Todos"||c.category===categoryFilter);
   }),[clients,search,typeFilter,statusFilter,categoryFilter]);
-  const pageCount=Math.max(1,Math.ceil(filtered.length/Number(pageSize)));
-  const rows=filtered.slice((page-1)*Number(pageSize),page*Number(pageSize));
+  const pageCount=Math.max(1,Math.ceil(total/Number(pageSize)));
+  const startPage=Math.min(Math.max(1,page-2),Math.max(1,pageCount-4));
+  const rows=filtered;
+  const hiddenByFilter=clients.length-rows.length;
   const activeCount=clients.filter(c=>c.status==="Activo").length;
-  const newClientCount=clients.filter(c=>c.lastPurchase && c.lastPurchase.split("/")[2]==="2026").length;
-  const saveClient = (data) => {
-    const name=(data.name||"").trim();
-    if(!name){setNotice("Completa el nombre o razón social del cliente.");return;}
-    const record={...data, id:data.id||Date.now(), initials:(name.split(/\s+/).slice(0,2).map(s=>s[0]).join("").toUpperCase()), subtitle:data.type==="Empresa"?"Empresa":"Cliente retail", document:data.document||"—", phone:data.phone||"—", email:data.email||"", city:data.province||data.department||"—", total:Number(data.total)||0, purchases:Number(data.purchases)||0, lastPurchase:data.lastPurchase||"—", status:data.status||"Activo"};
-    setClients(old=>data.id?old.map(c=>c.id===data.id?record:c):[record,...old]);
-    setEditing(null);setSelected(null);setNotice(data.id?"Cliente actualizado correctamente.":"Cliente creado correctamente.");
-    setTimeout(()=>setNotice(""),3000);
+  const frequentCount=clients.filter(c=>c.purchases>=10).length;
+  const newClientCount=clients.filter(c=>(c.registered||"").endsWith(String(new Date().getFullYear()))).length;
+  const saveClient = async (data) => {
+    const payload = toPayload(data);
+    if(!payload.name){setNotice("Completa el nombre o razón social del cliente.");return;}
+    if(payload.doc_number && payload.doc_type!=="SIN_DOC" && !isValidDocNumber(payload.doc_type,payload.doc_number)){
+      setNotice("El número de "+payload.doc_type+" no es válido");return;
+    }
+    try {
+      if(data.id) await customerService.updateCustomer(data.id,payload);
+      else await customerService.createCustomer(payload);
+      setEditing(null);setSelected(null);
+      setNotice(data.id?"Cliente actualizado correctamente.":"Cliente creado correctamente.");
+      setTimeout(()=>setNotice(""),3000);
+      await load();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "No se pudo guardar el cliente.");
+    }
   };
-  const changeStatus = (client) => setClients(old=>old.map(c=>c.id===client.id?{...c,status:c.status==="Activo"?"Inactivo":"Activo"}:c));
-  const duplicate = (client) => { const copy={...client,id:Date.now(),name:`${client.name} (copia)`,initials:client.initials};setClients(old=>[copy,...old]);setMenuId(null);setNotice("Cliente duplicado.");setTimeout(()=>setNotice(""),2500); };
+  const changeStatus = async (client) => {
+    const next = client.status==="Activo" ? "Inactivo" : "Activo";
+    try {
+      await customerService.updateCustomer(client.id,{ extra_data:{ ...client.__extra, status:next } });
+      setClients(old=>old.map(c=>c.id===client.id?{...c,status:next}:c));
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "No se pudo cambiar el estado.");
+    }
+  };
+  const duplicate = async (client) => {
+    const payload = toPayload(client);
+    try {
+      // El duplicado no puede heredar el RUC/DNI: es único.
+      await customerService.createCustomer({ ...payload, name:client.name+" (copia)", doc_type:"SIN_DOC", doc_number:null });
+      setMenuId(null);setNotice("Cliente duplicado.");setTimeout(()=>setNotice(""),2500);
+      await load();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "No se pudo duplicar el cliente.");
+    }
+  };
+  const removeClient = async (client) => {
+    try {
+      await customerService.deleteCustomer(client.id);
+      setMenuId(null);setNotice("Cliente eliminado.");setTimeout(()=>setNotice(""),2500);
+      await load();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "No se pudo eliminar el cliente.");
+    }
+  };
 
   return <div className="flex min-h-screen bg-slate-50 text-slate-900">
     <Sidebar/>
     <main className="min-w-0 flex-1">
       <Topbar/>
       {editing ? <ClientForm client={editing.id?editing:null} onCancel={()=>setEditing(null)} onSave={saveClient}/> : <div className="p-4 lg:p-5">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-600"><Users size={27}/></div><div><h1 className="text-3xl font-semibold tracking-tight text-slate-950">Clientes</h1><p className="mt-1 text-sm text-slate-500">Gestiona tu base de clientes, consulta su historial de compras y mantén su información actualizada.</p></div></div><button onClick={()=>setEditing({type:"Empresa",status:"Activo",country:"Perú",department:"Lima",province:"Lima",category:"Cliente retail",credit:"0.00",paymentTerm:0,discount:0,priceList:"Precio general"})} className="flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700"><Plus size={18}/> Nuevo cliente <span className="ml-2 border-l border-blue-400 pl-3"><ChevronDown size={15}/></span></button></div>
-        <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><StatCard icon={Users} title="Total de clientes" value={clients.length===8?"128":clients.length} sub="↑ 12% vs. mes anterior" trend="12%"/><StatCard icon={UserRound} title="Clientes activos" value={clients.length===8?"112":activeCount} sub={`${clients.length===8?"88%":Math.round(activeCount/Math.max(clients.length,1)*100)+"%"} del total`} tone="green"/><StatCard icon={UserRoundX} title="Clientes inactivos" value={clients.length===8?"16":clients.length-activeCount} sub={`${clients.length===8?"12%":Math.round((clients.length-activeCount)/Math.max(clients.length,1)*100)+"%"} del total`} tone="red"/><StatCard icon={Star} title="Clientes frecuentes" value={clients.length===8?"28":clients.filter(c=>c.purchases>=10).length} sub="Compras en los últimos 3 meses" tone="amber"/></div>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><div className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-blue-600"><Users size={27}/></div><div><h1 className="text-3xl font-semibold tracking-tight text-slate-950">Clientes</h1><p className="mt-1 text-sm text-slate-500">Gestiona tu base de clientes, consulta su historial de compras y mantén su información actualizada.</p></div></div><button onClick={()=>setEditing({type:"Empresa",doc_type:"SIN_DOC",status:"Activo",country:"Perú",department:"Lima",province:"Lima",category:"Cliente retail",credit:"0.00",paymentTerm:0,discount:0,priceList:"Precio general"})} className="flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white shadow-sm hover:bg-blue-700"><Plus size={18}/> Nuevo cliente <span className="ml-2 border-l border-blue-400 pl-3"><ChevronDown size={15}/></span></button></div>
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><StatCard icon={Users} title="Total de clientes" value={total} sub={`${newClientCount} registrado(s) en ${new Date().getFullYear()}`}/><StatCard icon={UserRound} title="Clientes activos" value={activeCount} sub={`${total ? Math.round(activeCount/total*100) : 0}% del total`} tone="green"/><StatCard icon={UserRoundX} title="Clientes inactivos" value={Math.max(total-activeCount,0)} sub={`${total ? Math.round((total-activeCount)/total*100) : 0}% del total`} tone="red"/><StatCard icon={Star} title="Clientes frecuentes" value={frequentCount} sub="Con 10 o más cotizaciones" tone="amber"/></div>
+        {loadError && <div className="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><span>{loadError}</span><button onClick={()=>load(page,Number(pageSize))} className="ml-auto rounded-lg border border-red-300 px-3 py-1.5">Reintentar</button></div>}
+        {loading && <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-500">Cargando clientes desde la base de datos…</div>}
+        {!loading && !loadError && total===0 && <div className="mb-4 rounded-xl border border-slate-200 bg-white p-8 text-center"><div className="text-base font-semibold text-slate-900">No hay clientes</div><p className="mt-1 text-sm text-slate-500">Agrega tu primer cliente para comenzar a crear cotizaciones.</p></div>}
         <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
           <div className="relative min-w-[220px] flex-1"><Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-950"/><input value={search} onChange={e=>{setSearch(e.target.value);setPage(1);}} placeholder="Buscar por nombre, RUC, DNI, teléfono o email..." className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-10 pr-3 text-sm outline-none focus:border-blue-400"/></div>
           <select value={typeFilter} onChange={e=>{setTypeFilter(e.target.value);setPage(1);}} className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm"><option>Todos</option><option>Empresa</option><option>Persona</option></select>
@@ -192,10 +346,10 @@ export default function ClientsPage() {
               <td className="px-3"><div className="font-medium text-slate-900">{money(c.total)}</div><div className="mt-1 text-xs text-slate-500">{c.purchases} compras</div></td>
               <td className="whitespace-nowrap px-3 text-slate-500">{c.lastPurchase}</td>
               <td className="px-3"><span className={`rounded-full px-3 py-1 text-xs ${c.status==="Activo"?"bg-emerald-100 text-emerald-700":"bg-rose-100 text-rose-700"}`}>{c.status}</span></td>
-              <td className="px-3"><div className="flex items-center gap-2"><IconButton title="Editar" onClick={()=>setEditing(c)}><Pencil size={16}/></IconButton><div className="relative"><IconButton title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)} className={menuId===c.id?"border-blue-500":""}><MoreHorizontal size={19}/></IconButton>{menuId===c.id&&<div className="absolute right-0 top-11 z-20 w-48 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">{[[Eye,"Ver detalles",()=>{setSelected(c);setMenuId(null);}],[Pencil,"Editar",()=>{setEditing(c);setMenuId(null);}],[Copy,"Duplicar",()=>duplicate(c)],[CheckCircle2,c.status==="Activo"?"Cambiar a inactivo":"Cambiar a activo",()=>{changeStatus(c);setMenuId(null);}],[Clock,"Ver historial",()=>{setSelected(c);setMenuId(null);}],[Mail,"Enviar correo",()=>{setNotice(`Acción de correo para ${c.name}`);setMenuId(null);}],[Trash2,"Eliminar",()=>{if(window.confirm(`¿Eliminar a ${c.name}?`)){setClients(old=>old.filter(x=>x.id!==c.id));setMenuId(null);}}]].map(([I,label,fn])=><button key={label} onClick={fn} className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${label==="Eliminar"?"text-red-600":""}`}><I size={16}/>{label}</button>)}</div>}</div></div></td>
+              <td className="px-3"><div className="flex items-center gap-2"><IconButton title="Editar" onClick={()=>setEditing(c)}><Pencil size={16}/></IconButton><div className="relative"><IconButton title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)} className={menuId===c.id?"border-blue-500":""}><MoreHorizontal size={19}/></IconButton>{menuId===c.id&&<div className="absolute right-0 top-11 z-20 w-48 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">{[[Eye,"Ver detalles",()=>{setSelected(c);setMenuId(null);}],[Pencil,"Editar",()=>{setEditing(c);setMenuId(null);}],[Copy,"Duplicar",()=>duplicate(c)],[CheckCircle2,c.status==="Activo"?"Cambiar a inactivo":"Cambiar a activo",()=>{changeStatus(c);setMenuId(null);}],[Clock,"Ver historial",()=>{setSelected(c);setMenuId(null);}],[Mail,"Enviar correo",()=>{setNotice(`Acción de correo para ${c.name}`);setMenuId(null);}],[Trash2,"Eliminar",()=>{if(window.confirm(`¿Eliminar a ${c.name}?`)){removeClient(c);setMenuId(null);}}]].map(([I,label,fn])=><button key={label} onClick={fn} className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${label==="Eliminar"?"text-red-600":""}`}><I size={16}/>{label}</button>)}</div>}</div></div></td>
             </tr>)}</tbody>
           </table></div>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 text-sm"><span className="text-slate-500">Mostrando {filtered.length?((page-1)*Number(pageSize)+1):0} a {Math.min(page*Number(pageSize),filtered.length)} de {filtered.length} clientes</span><div className="flex items-center gap-3"><label className="flex items-center gap-2 whitespace-nowrap">Filas por página <select value={pageSize} onChange={e=>{setPageSize(e.target.value);setPage(1);}} className="h-9 rounded-md border border-slate-200 bg-white px-3"><option>10</option><option>20</option><option>50</option></select></label><div className="flex items-center gap-1"><IconButton title="Anterior" onClick={()=>setPage(p=>Math.max(1,p-1))} className="h-9 w-9"><ChevronLeft size={17}/></IconButton>{Array.from({length:Math.min(pageCount,5)},(_,i)=><button key={i} onClick={()=>setPage(i+1)} className={`h-9 w-9 rounded-lg border text-sm ${page===i+1?"border-blue-600 bg-blue-600 text-white":"border-slate-200 bg-white"}`}>{i+1}</button>)}<IconButton title="Siguiente" onClick={()=>setPage(p=>Math.min(pageCount,p+1))} className="h-9 w-9"><ChevronRight size={17}/></IconButton></div></div></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 text-sm"><span className="text-slate-500">Mostrando {total?(page-1)*Number(pageSize)+1:0} a {Math.min(page*Number(pageSize),total)} de {total} clientes{hiddenByFilter>0&&<span className="ml-2 rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-700">{hiddenByFilter} oculto(s) por el filtro en esta página</span>}</span><div className="flex items-center gap-3"><label className="flex items-center gap-2 whitespace-nowrap">Filas por página <select value={pageSize} onChange={e=>{setPageSize(e.target.value);setPage(1);}} className="h-9 rounded-md border border-slate-200 bg-white px-3"><option>10</option><option>20</option><option>50</option></select></label><div className="flex items-center gap-1"><IconButton title="Anterior" onClick={()=>setPage(p=>Math.max(1,p-1))} className="h-9 w-9"><ChevronLeft size={17}/></IconButton>{Array.from({length:Math.min(pageCount,5)},(_,i)=>startPage+i).map(p=><button key={p} onClick={()=>setPage(p)} className={`h-9 w-9 rounded-lg border text-sm ${page===p?"border-blue-600 bg-blue-600 text-white":"border-slate-200 bg-white"}`}>{p}</button>)}<IconButton title="Siguiente" onClick={()=>setPage(p=>Math.min(pageCount,p+1))} className="h-9 w-9"><ChevronRight size={17}/></IconButton></div></div></div>
         </div>
       </div>}
     </main>
