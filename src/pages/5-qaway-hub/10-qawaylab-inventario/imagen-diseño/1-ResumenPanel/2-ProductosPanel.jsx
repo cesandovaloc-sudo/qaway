@@ -15,6 +15,22 @@ import {
   ArrowLeft,
   Trash2,
   Edit,
+  Coffee,
+  Dog,
+  Sparkles,
+  Package,
+  Shield,
+  Gamepad2,
+  Layers,
+  Cat,
+  FlaskConical,
+  Cookie,
+  Boxes,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  CircleDollarSign,
+  Box,
 } from "lucide-react";
 
 /**
@@ -73,21 +89,21 @@ function money(value) { return new Intl.NumberFormat("es-PE", { style: "currency
 function statusClass(status) { return status === "Disponible" ? "ok" : status === "Stock bajo" ? "low" : "zero"; }
 
 function ProductThumb({ id, size = 40 }) {
-  const iconSize = Math.round(size * 0.5);
+  const iconSize = Math.round(size * 0.48);
   const neutralStyle = { bg: "#f8fafc", border: "#e2e8f0", color: "#64748b" };
-  const svgs = {
-    1: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>,
-    2: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M10 5.172C10 3.782 8.423 2.679 6.5 3c-2.823.47-4.113 6.006-4 7 .08.703 1.725 1.722 3.5 1 1.695-.69 4-4.5 4-5.828z"/><path d="M14 5.172C14 3.782 15.577 2.679 17.5 3c2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.5 1-1.695-.69-4-4.5-4-5.828z"/><circle cx="12" cy="14" r="5"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>,
-    3: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3h6"/><path d="M10 9V3"/><path d="M14 9V3"/><path d="M7 10h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M10 14h4"/><path d="M12 12v4"/></svg>,
-    4: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
-    5: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v3"/><path d="M12 18v3"/></svg>,
-    6: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 10c.7-.7 1.6-1 2.5-.7 1.2.4 1.8 1.7 1.5 3-.3 1.2-1.3 2-2.5 2-1 0-1.8-.7-2.5-1.4l-6.1 6.1c-.7.7-1.4 1.5-1.4 2.5 0 1.2-.8 2.2-2 2.5-1.3.3-2.6-.3-3-1.5-.3-.9 0-1.8.7-2.5l6.1-6.1c-.7-.7-1.4-1.5-1.4-2.5 0-1.2.8-2.2 2-2.5 1.3-.3 2.6.3 3 1.5.3.9 0 1.8-.7 2.5Z"/></svg>,
-    7: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>,
-    8: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-1.42 8.42.67 1.13 1 2.39 1 3.58 0 4.42-3.58 8-8 8s-8-3.58-8-8c0-1.19.33-2.45 1-3.58C4 9.42 2.18 3 3.58 2.42c1.4-.58 4.64.26 6.42 2.26.65-.17 1.33-.26 2-.26z"/></svg>,
-    9: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3h6"/><path d="M10 9V3"/><path d="M14 9V3"/><path d="M6 18a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-5H6v5z"/></svg>,
-    10: <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h.01"/><path d="M12 16h.01"/><path d="M16 12h.01"/><path d="M12 8h.01"/></svg>
+  const icons = {
+    1: <Coffee size={iconSize} strokeWidth={1.75} />,
+    2: <Dog size={iconSize} strokeWidth={1.75} />,
+    3: <Sparkles size={iconSize} strokeWidth={1.75} />,
+    4: <Package size={iconSize} strokeWidth={1.75} />,
+    5: <Shield size={iconSize} strokeWidth={1.75} />,
+    6: <Gamepad2 size={iconSize} strokeWidth={1.75} />,
+    7: <Layers size={iconSize} strokeWidth={1.75} />,
+    8: <Cat size={iconSize} strokeWidth={1.75} />,
+    9: <FlaskConical size={iconSize} strokeWidth={1.75} />,
+    10: <Cookie size={iconSize} strokeWidth={1.75} />,
   };
-  const svg = svgs[id] || <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>;
+  const iconComponent = icons[id] || <Box size={iconSize} strokeWidth={1.75} />;
   
   return (
     <div
@@ -103,7 +119,7 @@ function ProductThumb({ id, size = 40 }) {
         placeItems: "center",
       }}
     >
-      {svg}
+      {iconComponent}
     </div>
   );
 }
@@ -397,7 +413,7 @@ export default function ProductosPanel() {
             <section className="pxp-modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
               <form onSubmit={saveProduct}>
                 <div className="pxp-modal-head">
-                  <div className="pxp-heading-icon">⬡</div>
+                  <div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div>
                   <div>
                     <h2>Editar producto</h2>
                     <p>Completa la información del producto.</p>
@@ -464,7 +480,7 @@ export default function ProductosPanel() {
           <div className="pxp-content">
             <div className="pxp-heading" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 22, flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <div className="pxp-heading-icon">⬡</div>
+                <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
                   <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
                   <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>{products.length} productos en tu inventario.</p>
@@ -496,11 +512,11 @@ export default function ProductosPanel() {
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon="⬡" label="Total de productos" value={products.length.toLocaleString("es-PE")} note={<><span className="pxp-up">↑ 12%</span>　vs. mes anterior</>} />
-              <Metric icon="⬡" tone="green" label="Con stock" value={products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} />
-              <Metric icon="⚠" tone="red" label="Stock bajo" value={products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={<span style={{ color: "#e11d48" }}>{Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total</span>} />
-              <Metric icon="⬡" tone="gray" label="Sin stock" value={products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} />
-              <Metric icon="▤" label="Valor de inventario" value={money(inventoryValue)} note={<span className="pxp-up">↑ 9%　vs. mes anterior</span>} />
+              <Metric icon={<Boxes size={20} strokeWidth={1.75} />} label="Total de productos" value={products.length.toLocaleString("es-PE")} note={<><span className="pxp-up">↑ 12%</span>　vs. mes anterior</>} />
+              <Metric icon={<CheckCircle2 size={20} strokeWidth={1.75} />} tone="green" label="Con stock" value={products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} />
+              <Metric icon={<AlertTriangle size={20} strokeWidth={1.75} />} tone="red" label="Stock bajo" value={products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={<span style={{ color: "#e11d48" }}>{Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total</span>} />
+              <Metric icon={<XCircle size={20} strokeWidth={1.75} />} tone="gray" label="Sin stock" value={products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={`${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} />
+              <Metric icon={<CircleDollarSign size={20} strokeWidth={1.75} />} label="Valor de inventario" value={money(inventoryValue)} note={<span className="pxp-up">↑ 9%　vs. mes anterior</span>} />
             </section>
 
             <div className="pxp-toolbar" style={{ position: "relative" }}>
@@ -508,12 +524,12 @@ export default function ProductosPanel() {
               
               {/* 2 Filtros Principales en la barra superior */}
               <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
-                <option value="Todas">◉　Categoría: Todas</option>
+                <option value="Todas">Categoría: Todas</option>
                 {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
               </select>
 
               <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
-                <option value="Todos">☷　Stock: Todos</option>
+                <option value="Todos">Stock: Todos</option>
                 <option>Con stock</option>
                 <option>Stock bajo</option>
                 <option>Sin stock</option>
@@ -733,24 +749,24 @@ export default function ProductosPanel() {
 
 
       {modal === "import" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" onClick={e => e.stopPropagation()}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon">⇧</div><div><h2>Importar productos</h2><p>Carga productos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
+        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar productos</h2><p>Carga productos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
         <div className="pxp-modal-body">
           <div className="pxp-stepper">{["Cargar archivo", "Mapear campos", "Validar datos", "Importar"].map((s, i) => <div key={s} className={`pxp-step ${importStep === i + 1 ? "active" : importStep > i + 1 ? "done" : ""}`}><span>{importStep > i + 1 ? "✓" : i + 1}</span><div><b>{s}</b><div className="pxp-muted">{["Selecciona tu archivo", "Relaciona las columnas", "Revisa los registros", "Confirma y procesa"][i]}</div></div></div>)}</div>
-          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}>⇧</div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>⇩　Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>ⓘ　Información importante</b><ul><li>Puedes importar productos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
+          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar productos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
           {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → SKU (obligatorio)", "Nombre del producto → Nombre (obligatorio)", "Categoría → Categoría", "Precio → Precio base", "Stock inicial → Stock", "Ubicación → Ubicación principal", "Descripción → Descripción", "Código de barras → Código de barras"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Stock</option><option>Precio base</option></select></div>)}</div>}
           {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>{products.slice(0, 5).map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.sku}</td><td>{p.name}</td><td>{p.category}</td><td>{p.price.toFixed(2)}</td><td>{p.stock}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td></tr>)}</tbody></table></div></div>}
           {importStep === 4 && <div className="pxp-info"><h3>4. Confirmar importación</h3><p>Revisa el modo de importación. La ejecución real requiere conectar el servicio de importación del backend.</p><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "merge"} onChange={() => setImportOption("merge")} /> Agregar nuevos y actualizar existentes</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "new"} onChange={() => setImportOption("new")} /> Solo agregar nuevos</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "update"} onChange={() => setImportOption("update")} /> Solo actualizar existentes</label></div>}
         </div>
-        <div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => importStep > 1 ? setImportStep(s => s - 1) : setModal("")}>{importStep > 1 ? "←　Anterior" : "Cancelar"}</button><button className="pxp-btn primary" onClick={() => { if (importStep < 4) { if (importStep === 1 && !importFile) { showToast("Selecciona un archivo para continuar"); return; } setImportStep(s => s + 1); } else finishImport(); }}>{importStep === 4 ? "Confirmar e importar" : "Continuar　→"}</button></div>
+        <div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => importStep > 1 ? setImportStep(s => s - 1) : setModal("")}>{importStep > 1 ? "← Anterior" : "Cancelar"}</button><button className="pxp-btn primary" onClick={() => { if (importStep < 4) { if (importStep === 1 && !importFile) { showToast("Selecciona un archivo para continuar"); return; } setImportStep(s => s + 1); } else finishImport(); }}>{importStep === 4 ? "Confirmar e importar" : "Continuar →"}</button></div>
       </section></div>}
 
       {modal === "product" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}><form onSubmit={saveProduct}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon">⬡</div><div><h2>{editing ? "Editar producto" : "Nuevo producto"}</h2><p>Completa la información del producto.</p></div><button type="button" className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
+        <div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>{editing ? "Editar producto" : "Nuevo producto"}</h2><p>Completa la información del producto.</p></div><button type="button" className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
         <div className="pxp-modal-body"><div className="pxp-map-row"><div className="pxp-field"><label>Nombre del producto *</label><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. Producto nuevo" /></div><div className="pxp-field"><label>SKU / Código *</label><input required value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="Ej. SKU-001" /></div></div><div className="pxp-map-row"><div className="pxp-field"><label>Categoría</label><select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}<option>Alimentos</option><option>Veterinaria</option><option>Mascotas</option></select></div><div className="pxp-field"><label>Ubicación principal</label><input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div></div><div className="pxp-map-row"><div className="pxp-field"><label>Precio base (S/) *</label><input required type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} /></div><div className="pxp-field"><label>Stock inicial</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div></div><div className="pxp-field"><label>Descripción</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Descripción del producto..." /></div></div>
         <div className="pxp-modal-foot"><button type="button" className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button type="submit" className="pxp-btn primary">{editing ? "Guardar cambios" : "Crear producto"}</button></div>
       </form></section></div>}
 
-      {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon">▤</div><div><h2>Ajustar stock</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Stock actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nuevo stock</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo del ajuste</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de inventario</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Stock actualizado"); }}>Guardar ajuste</button></div></section></div>}
+      {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>Ajustar stock</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Stock actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nuevo stock</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo del ajuste</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de inventario</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Stock actualizado"); }}>Guardar ajuste</button></div></section></div>}
 
       {toast && <div className="pxp-toast">{toast}</div>}
     </div>
