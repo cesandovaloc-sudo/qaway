@@ -31,6 +31,7 @@ import {
   XCircle,
   CircleDollarSign,
   Box,
+  Upload,
 } from "lucide-react";
 
 import { productService } from "../../src/services/productService";
@@ -131,7 +132,7 @@ const initialProducts = [
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
-.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#18181b;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px;color:#45536d;font:inherit;max-width:190px}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:visible}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:920px}.pxp-table th{background:#f8fafd;color:#45536d;font-size:12px;font-weight:650;text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);white-space:nowrap}.pxp-table td{padding:11px 12px;border-bottom:1px solid #edf1f7;color:#53627d;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:hover{background:#fafcff}.pxp-check{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}.pxp-product-cell{display:flex;align-items:center;gap:11px;min-width:230px}.pxp-product-thumb{width:40px;height:40px;flex-shrink:0;border-radius:8px;background:#f0f4f8;display:grid;place-items:center;font-size:22px;border:1px solid #edf1f5}.pxp-product-name{color:#34415b;font-weight:600}.pxp-product-sub{font-size:11px;color:#8996ac;margin-top:3px}.pxp-stock{font-weight:600}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:14px 16px;color:#8996ac;font-size:12px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
+.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:22px;font-weight:800;letter-spacing:-.5px;color:#18181b;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select{height:38px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 11px;color:#45536d;font:inherit;max-width:190px}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
 .pxp-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;padding:14px}
 .pxp-product-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease}
 .pxp-product-card:hover{border-color:#cbd5e1;box-shadow:0 6px 18px rgba(15,23,42,.06);transform:translateY(-2px)}
@@ -143,7 +144,7 @@ const css = `
 .pxp-card-price{font-size:13.5px;font-weight:750;color:#0f172a}
 .pxp-card-actions{display:flex;gap:6px;margin-top:10px}
 .pxp-card-actions .pxp-btn{flex:1;justify-content:center;padding:6px 4px;font-size:11px;font-weight:600;border-radius:6px}
-.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}.pxp-modal{background:#fff;border-radius:14px;width:min(900px,100%);max-height:92vh;overflow:auto;box-shadow:0 25px 80px #0c1b3533;z-index:9999}.pxp-modal-head{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px}.pxp-modal-head h2{margin:0;font-size:22px;letter-spacing:-.5px}.pxp-modal-head p{margin:4px 0 0;color:var(--muted)}.pxp-modal-head .close{margin-left:auto}.pxp-modal-body{padding:22px 24px}.pxp-stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}.pxp-step{display:flex;align-items:center;gap:9px;padding:12px 8px;border-bottom:2px solid var(--line);color:var(--muted);font-size:12px}.pxp-step span{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#eef1f6;color:#56647d;font-weight:700}.pxp-step.active{border-color:var(--blue);color:#1e2d48;font-weight:650}.pxp-step.active span,.pxp-step.done span{background:var(--blue);color:white}.pxp-import-columns{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.pxp-panel{border:1px solid var(--line);border-radius:10px;padding:16px}.pxp-panel h3{margin:0 0 6px;font-size:16px}.pxp-muted{color:var(--muted);font-size:12px}.pxp-dropzone{border:1.5px dashed #b7c9e8;border-radius:9px;background:#f8fbff;min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:18px;margin-top:12px}.pxp-dropzone input{max-width:100%;font-size:12px}.pxp-info{background:#eef5ff;border-radius:9px;padding:16px;color:#344a70;line-height:1.7}.pxp-link{color:#1763ed;background:none;border:0;cursor:pointer;font:inherit;padding:8px 0}.pxp-modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(580px,92vw);background:#fff;box-shadow:-15px 0 50px rgba(15,23,42,0.18);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}@keyframes pxpSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.pxp-detail-head{padding:26px 24px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:16px;top:16px;z-index:10;width:36px;height:36px;border-radius:8px;background:#f1f5f9;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#e2e8f0;color:#0f172a}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:55px}.pxp-detail-art{width:105px;height:105px;border-radius:12px;background:#f1f5f9;display:grid;place-items:center;font-size:50px;flex-shrink:0}.pxp-detail-title{font-size:24px;font-weight:750;letter-spacing:-.6px;margin:0 0 8px}.pxp-detail-tabs{display:flex;gap:3px;overflow-x:auto;padding:0 18px;border-bottom:1px solid var(--line)}.pxp-detail-tabs button{padding:14px 11px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64728b;font:inherit;cursor:pointer;white-space:nowrap}.pxp-detail-tabs button.active{color:var(--blue);border-color:var(--blue);font-weight:650}.pxp-detail-content{padding:20px 22px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pxp-detail-box{border:1px solid var(--line);border-radius:10px;padding:15px;min-width:0}.pxp-detail-box h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:8px}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eff2f7;font-size:12px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:var(--muted)}.pxp-kv b{text-align:right;font-weight:600}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-detail-table th,.pxp-detail-table td{text-align:left;padding:10px 5px;border-bottom:1px solid var(--line)}.pxp-detail-table th{color:var(--muted);font-weight:600}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
+.pxp-empty{padding:45px;text-align:center;color:var(--muted)}.pxp-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.45);backdrop-filter:blur(2px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px}.pxp-modal{background:#fff;border-radius:16px;width:min(640px,100%);max-height:92vh;overflow-y:auto;box-shadow:0 25px 80px rgba(12,27,53,0.22);z-index:9999}.pxp-modal-head{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}.pxp-modal-head h2{margin:0;font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-.4px}.pxp-modal-head .close{font-size:22px;color:#64748b;background:none;border:0;cursor:pointer;line-height:1}.pxp-modal-body{padding:22px 24px}.pxp-form-row{display:grid;grid-template-columns:160px 1fr;gap:16px;align-items:center;margin-bottom:15px}.pxp-form-label{font-size:13px;font-weight:650;color:#334155;line-height:1.3}.pxp-form-label span.req{color:#ef4444;margin-left:2px}.pxp-form-input{width:100%;border:1px solid transparent;background:#f4f4f6;border-radius:12px;padding:11px 14px;font:inherit;font-size:13.5px;color:#0f172a;outline:none;transition:all .18s ease}.pxp-form-input:focus{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound{display:flex;border-radius:12px;background:#f4f4f6;overflow:hidden;border:1px solid transparent}.pxp-compound:focus-within{background:#fff;border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-compound-sel{border:0;background:transparent;padding:0 12px;font-weight:700;color:#0f172a;outline:none;cursor:pointer;border-right:1px solid #e4e4e7}.pxp-compound-input{border:0;background:transparent;padding:11px 14px;flex:1;min-width:0;font:inherit;font-size:13.5px;color:#0f172a;outline:none}.pxp-compound-tag{display:flex;align-items:center;gap:4px;padding:0 12px;font-size:11.5px;font-weight:650;color:#166534;white-space:nowrap}.pxp-modal-foot{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-bottom-left-radius:16px;border-bottom-right-radius:16px}.pxp-field{display:grid;gap:6px;margin-bottom:13px}.pxp-field label{font-size:12px;color:#53627d;font-weight:600}.pxp-field input,.pxp-field select,.pxp-field textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px 11px;font:inherit;outline-color:#9ab9ff;background:white}.pxp-field textarea{min-height:90px;resize:vertical}.pxp-map-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.pxp-preview-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-preview-table th,.pxp-preview-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.pxp-preview-scroll{overflow:auto}.pxp-detail{position:fixed;z-index:9999;right:0;top:0;bottom:0;width:min(580px,92vw);background:#fff;box-shadow:-15px 0 50px rgba(15,23,42,0.18);overflow-y:auto;animation:pxpSlideIn .25s cubic-bezier(.16,1,.3,1)}@keyframes pxpSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}.pxp-detail-head{padding:26px 24px 18px;border-bottom:1px solid var(--line)}.pxp-detail-close{position:absolute;right:16px;top:16px;z-index:10;width:36px;height:36px;border-radius:8px;background:#f1f5f9;border:1px solid var(--line);color:#475569;display:grid;place-items:center;font-size:20px;cursor:pointer;transition:all .2s ease}.pxp-detail-close:hover{background:#e2e8f0;color:#0f172a}.pxp-detail-product{display:flex;gap:18px;align-items:center;padding-right:55px}.pxp-detail-art{width:105px;height:105px;border-radius:12px;background:#f1f5f9;display:grid;place-items:center;font-size:50px;flex-shrink:0}.pxp-detail-title{font-size:24px;font-weight:750;letter-spacing:-.6px;margin:0 0 8px}.pxp-detail-tabs{display:flex;gap:3px;overflow-x:auto;padding:0 18px;border-bottom:1px solid var(--line)}.pxp-detail-tabs button{padding:14px 11px;border:0;border-bottom:2px solid transparent;background:transparent;color:#64728b;font:inherit;cursor:pointer;white-space:nowrap}.pxp-detail-tabs button.active{color:var(--blue);border-color:var(--blue);font-weight:650}.pxp-detail-content{padding:20px 22px}.pxp-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.pxp-detail-box{border:1px solid var(--line);border-radius:10px;padding:15px;min-width:0}.pxp-detail-box h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:8px}.pxp-detail-box.full{grid-column:1/-1}.pxp-kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eff2f7;font-size:12px}.pxp-kv:last-child{border-bottom:0}.pxp-kv span{color:var(--muted)}.pxp-kv b{text-align:right;font-weight:600}.pxp-detail-table{width:100%;border-collapse:collapse;font-size:12px}.pxp-detail-table th,.pxp-detail-table td{text-align:left;padding:10px 5px;border-bottom:1px solid var(--line)}.pxp-detail-table th{color:var(--muted);font-weight:600}.pxp-toast{position:fixed;bottom:20px;right:20px;z-index:100;background:#14213c;color:#fff;padding:12px 18px;border-radius:9px;box-shadow:0 8px 25px #0e1e3b33}.pxp-mobile-menu{display:none}
 @media(max-width:1500px){.pxp-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:1250px){.pxp-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:1150px){.pxp-sidebar{width:190px}.pxp-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.pxp-metric-value{font-size:20px}.pxp-import-columns{grid-template-columns:1fr}}
@@ -218,6 +219,462 @@ const AVAILABLE_COLUMNS = [
   { key: "location", label: "Ubicación" },
 ];
 
+function ProductModal({ editing, form, setForm, showAdvanced, setShowAdvanced, categories, onClose, onSave }) {
+  return (
+    <div className="pxp-overlay" onClick={onClose}>
+      <section className="pxp-modal" style={{ maxWidth: 660 }} onClick={e => e.stopPropagation()}>
+        <form onSubmit={onSave}>
+          <div className="pxp-modal-head">
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="pxp-heading-icon" style={{ background: "#fff2eb", borderColor: "#fed7aa", color: "#ff4b0b" }}>
+                <Boxes size={20} strokeWidth={1.8} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
+                  {editing ? "Editar producto" : "Nuevo producto / servicio"}
+                </h2>
+                <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>
+                  {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
+                </p>
+              </div>
+            </div>
+            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar">×</button>
+          </div>
+
+          <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px" }}>
+            {/* Pill selectors: Con inventario vs Servicio */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+              <button
+                type="button"
+                className={`pxp-pill-btn ${form.hasStock ? "active" : ""}`}
+                onClick={() => setForm({ ...form, hasStock: true })}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  border: form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
+                  background: form.hasStock ? "#fff2eb" : "#fff",
+                  color: form.hasStock ? "#ff4b0b" : "#475569",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  transition: "all .15s ease"
+                }}
+              >
+                <span>✓</span> Con inventario / stock
+              </button>
+              <button
+                type="button"
+                className={`pxp-pill-btn ${!form.hasStock ? "active" : ""}`}
+                onClick={() => setForm({ ...form, hasStock: false })}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  border: !form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
+                  background: !form.hasStock ? "#fff2eb" : "#fff",
+                  color: !form.hasStock ? "#ff4b0b" : "#475569",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  transition: "all .15s ease"
+                }}
+              >
+                <span>🏷️</span> Servicio / Intangible
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {/* Nombre */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Nombre del producto <span style={{ color: "#ef4444" }}>*</span></div>
+                <input
+                  required
+                  className="pxp-form-input"
+                  value={form.name}
+                  onChange={e => setForm({ ...form, name: e.target.value })}
+                  placeholder="Ej. Café Geisha Villa Rica 250g"
+                />
+              </div>
+
+              {/* SKU / Código */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Código / SKU <span style={{ color: "#ef4444" }}>*</span></div>
+                <input
+                  required
+                  className="pxp-form-input"
+                  value={form.sku}
+                  onChange={e => setForm({ ...form, sku: e.target.value })}
+                  placeholder="Ej. CAF-GEI-250"
+                />
+              </div>
+
+              {/* Precio de venta con selector de moneda */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Precio de venta <span style={{ color: "#ef4444" }}>*</span></div>
+                <div className="pxp-compound">
+                  <select
+                    className="pxp-compound-sel"
+                    value={form.currency || "PEN"}
+                    onChange={e => setForm({ ...form, currency: e.target.value })}
+                  >
+                    <option value="PEN">S/ (PEN)</option>
+                    <option value="USD">$ (USD)</option>
+                  </select>
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="pxp-compound-input"
+                    value={form.price}
+                    onChange={e => {
+                      const newPrice = e.target.value;
+                      const costVal = Number(form.cost) || 0;
+                      let margin = form.marginProfit;
+                      if (costVal && Number(newPrice) > 0) {
+                        margin = Math.round(((Number(newPrice) - costVal) / Number(newPrice)) * 100);
+                      }
+                      setForm({ ...form, price: newPrice, marginProfit: margin });
+                    }}
+                    placeholder="0.00"
+                  />
+                  <div className="pxp-compound-tag">
+                    <span>Con impuestos ✓</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Impuesto */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Tipo de Impuesto</div>
+                <select
+                  className="pxp-form-input"
+                  value={form.igvType || "IGV (18.00%)"}
+                  onChange={e => setForm({ ...form, igvType: e.target.value })}
+                >
+                  <option value="IGV (18.00%)">IGV (18.00% - Gravado)</option>
+                  <option value="Exonerado (0.00%)">Exonerado (0.00% - Selva/Alimentos)</option>
+                  <option value="Inafecto (0.00%)">Inafecto (0.00%)</option>
+                </select>
+              </div>
+
+              {/* Unidad de medida */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Unidad de medida SUNAT</div>
+                <select
+                  className="pxp-form-input"
+                  value={form.unit || "un."}
+                  onChange={e => setForm({ ...form, unit: e.target.value })}
+                >
+                  <option value="un.">NIU - Unidades (Bienes)</option>
+                  <option value="kg">KGM - Kilogramos</option>
+                  <option value="l">LTR - Litros</option>
+                  <option value="serv.">ZZ - Servicio (Unidad)</option>
+                  <option value="caja">BX - Caja</option>
+                  <option value="bolsa">BG - Bolsa</option>
+                  <option value="frasco">FR - Frasco</option>
+                  <option value="saco">SA - Saco</option>
+                </select>
+              </div>
+
+              {/* Categoría y Sede */}
+              <div className="pxp-form-row">
+                <div className="pxp-form-label">Categoría y Sede</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <select
+                    className="pxp-form-input"
+                    value={form.category}
+                    onChange={e => setForm({ ...form, category: e.target.value })}
+                  >
+                    {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
+                    <option>Alimentos</option>
+                    <option>Veterinaria</option>
+                    <option>Mascotas</option>
+                    <option>Servicios</option>
+                    <option>General</option>
+                  </select>
+                  <select
+                    className="pxp-form-input"
+                    value={form.location}
+                    onChange={e => setForm({ ...form, location: e.target.value })}
+                  >
+                    <option value="Almacén Principal">Almacén Principal</option>
+                    <option value="Tienda Sur">Tienda Sur</option>
+                    <option value="Tienda Online">Tienda Online</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Stock inicial (si aplica) */}
+              {form.hasStock && (
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Stock y Alerta Mínima</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        className="pxp-form-input"
+                        value={form.stock}
+                        onChange={e => setForm({ ...form, stock: e.target.value })}
+                        placeholder="Stock inicial"
+                      />
+                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Stock inicial actual</span>
+                    </div>
+                    <div>
+                      <input
+                        type="number"
+                        min="0"
+                        className="pxp-form-input"
+                        value={form.minStock}
+                        onChange={e => setForm({ ...form, minStock: e.target.value })}
+                        placeholder="Alerta mínima"
+                      />
+                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Avisar cuando quede &le;</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Opciones avanzadas toggle */}
+              <div style={{ borderTop: "1px dashed #e2e8f0", paddingTop: 12, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  style={{
+                    background: "none",
+                    border: 0,
+                    color: "#ff4b0b",
+                    fontWeight: 700,
+                    fontSize: 13.5,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: 0
+                  }}
+                >
+                  <span>{showAdvanced ? "Ocultar opciones avanzadas ⌃" : "Opciones avanzadas ⌄"}</span>
+                </button>
+              </div>
+
+              {/* Acordeón Opciones avanzadas */}
+              {showAdvanced && (
+                <div style={{
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: 12,
+                  padding: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12
+                }}>
+                  {/* Costo de compra y Margen */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Costo de compra ({form.currency === "USD" ? "$" : "S/"})
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="pxp-form-input"
+                        value={form.cost}
+                        onChange={e => {
+                          const newCost = e.target.value;
+                          const priceVal = Number(form.price) || 0;
+                          let margin = form.marginProfit;
+                          if (priceVal > 0 && Number(newCost) > 0) {
+                            margin = Math.round(((priceVal - Number(newCost)) / priceVal) * 100);
+                          }
+                          setForm({ ...form, cost: newCost, marginProfit: margin });
+                        }}
+                        placeholder="Ej. 15.00"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Margen de ganancia (%)
+                      </label>
+                      <input
+                        type="number"
+                        className="pxp-form-input"
+                        value={form.marginProfit}
+                        onChange={e => setForm({ ...form, marginProfit: e.target.value })}
+                        placeholder="Ej. 40"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Precios escalonados: Mayorista y Mínimo */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Precio Mayorista (S/)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="pxp-form-input"
+                        value={form.wholesale}
+                        onChange={e => setForm({ ...form, wholesale: e.target.value })}
+                        placeholder="Precio por volumen"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Precio Mínimo de venta (S/)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="pxp-form-input"
+                        value={form.minPrice}
+                        onChange={e => setForm({ ...form, minPrice: e.target.value })}
+                        placeholder="Límite piso descuento"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Escala de condición Qaway (1-10) y Marca */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Condición / Calidad (Escala 1-10)
+                      </label>
+                      <select
+                        className="pxp-form-input"
+                        value={form.condition}
+                        onChange={e => setForm({ ...form, condition: Number(e.target.value) })}
+                      >
+                        {[10, 9, 8, 7, 6, 5].map(n => (
+                          <option key={n} value={n}>{n}/10 - {n === 10 ? "Nuevo / Óptimo" : n >= 8 ? "Excelente estado" : "Aceptable"}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Marca o Laboratorio
+                      </label>
+                      <input
+                        className="pxp-form-input"
+                        value={form.brand}
+                        onChange={e => setForm({ ...form, brand: e.target.value })}
+                        placeholder="Ej. Origen Perú / Bayer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Código de barras y Código SUNAT */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Código de barras (EAN-13)
+                      </label>
+                      <input
+                        className="pxp-form-input"
+                        value={form.barcode}
+                        onChange={e => setForm({ ...form, barcode: e.target.value })}
+                        placeholder="7750123456789"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Código SUNAT (Catálogo 25)
+                      </label>
+                      <input
+                        className="pxp-form-input"
+                        value={form.sunatCode}
+                        onChange={e => setForm({ ...form, sunatCode: e.target.value })}
+                        placeholder="Ej. 50201706"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Peso y Dimensiones */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Peso (kg / gr)
+                      </label>
+                      <input
+                        className="pxp-form-input"
+                        value={form.weight}
+                        onChange={e => setForm({ ...form, weight: e.target.value })}
+                        placeholder="Ej. 0.25 kg"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                        Dimensiones (L × A × Alto cm)
+                      </label>
+                      <input
+                        className="pxp-form-input"
+                        value={form.dimensions}
+                        onChange={e => setForm({ ...form, dimensions: e.target.value })}
+                        placeholder="Ej. 12 × 7 × 20 cm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Toggle Visible en POS */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0" }}>
+                    <div>
+                      <b style={{ fontSize: 13, color: "#1e293b", display: "block" }}>Visible en Punto de Venta (POS)</b>
+                      <span style={{ fontSize: 11.5, color: "#64748b" }}>Permitir cobrar este ítem en caja rápida</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      className="pxp-check"
+                      checked={form.inPos}
+                      onChange={e => setForm({ ...form, inPos: e.target.checked })}
+                    />
+                  </div>
+
+                  {/* Descripción */}
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      Descripción detallada
+                    </label>
+                    <textarea
+                      className="pxp-form-input"
+                      style={{ minHeight: 70, resize: "vertical" }}
+                      value={form.description}
+                      onChange={e => setForm({ ...form, description: e.target.value })}
+                      placeholder="Notas, especificaciones o ingredientes..."
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="pxp-modal-foot">
+            <button type="button" className="pxp-btn" onClick={onClose}>
+              Cancelar
+            </button>
+            <button type="submit" className="pxp-btn primary" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>
+              {editing ? "Guardar cambios" : "Crear producto"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 export default function ProductosPanel() {
   const [products, setProducts] = useState(initialProducts);
   const [query, setQuery] = useState("");
@@ -255,18 +712,60 @@ export default function ProductosPanel() {
   const [importOption, setImportOption] = useState("merge");
   const [toast, setToast] = useState("");
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", sku: "", category: "Mascotas", stock: 0, price: "", location: "Almacén Principal", description: "" });
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const defaultForm = {
+    name: "",
+    sku: "",
+    category: "Alimentos",
+    stock: 0,
+    minStock: 5,
+    price: "",
+    cost: "",
+    wholesale: "",
+    minPrice: "",
+    location: "Almacén Principal",
+    unit: "un.",
+    brand: "",
+    barcode: "",
+    weight: "",
+    dimensions: "",
+    condition: 10,
+    hasStock: true,
+    igvType: "IGV (18.00%)",
+    marginProfit: "",
+    discount: 0,
+    sunatCode: "",
+    inPos: true,
+    description: "",
+    currency: "PEN"
+  };
+
+  const [form, setForm] = useState(defaultForm);
 
   const columnPickerRef = useRef(null);
+  const actionsMenuRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (columnPickerRef.current && !columnPickerRef.current.contains(event.target)) {
         setShowColumnPicker(false);
       }
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
+        setMenuId(null);
+      }
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") {
+        setMenuId(null);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 
   // Sincronización en vivo con Supabase
@@ -368,19 +867,104 @@ export default function ProductosPanel() {
   const totalStock = products.reduce((s, p) => s + p.stock, 0);
   const inventoryValue = products.reduce((s, p) => s + p.stock * p.price, 0);
   const showToast = msg => { setToast(msg); window.setTimeout(() => setToast(""), 2800); };
-  const openNew = () => { setEditing(null); setForm({ name: "", sku: "", category: "Mascotas", stock: 0, price: "", location: "Almacén Principal", description: "" }); setModal("product"); };
-  const openEdit = p => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("product"); setMenuId(null); };
+  
+  const openNew = () => {
+    setEditing(null);
+    setForm(defaultForm);
+    setShowAdvanced(false);
+    setModal("product");
+  };
+
+  const openEdit = p => {
+    setEditing(p);
+    const pCost = p.cost ?? (p.price ? Math.round(p.price * 0.5) : "");
+    const pMargin = pCost && p.price ? Math.round(((p.price - pCost) / p.price) * 100) : "";
+    setForm({
+      ...defaultForm,
+      name: p.name || "",
+      sku: p.sku || "",
+      category: p.category || "Alimentos",
+      stock: p.stock ?? 0,
+      minStock: p.warehouse?.[0]?.min ?? 5,
+      price: p.price ?? "",
+      cost: pCost,
+      wholesale: p.wholesale ?? "",
+      minPrice: p.minPrice ?? "",
+      location: p.location || "Almacén Principal",
+      unit: p.unit || "un.",
+      brand: p.brand || "",
+      barcode: p.barcode || "",
+      weight: p.weight || "",
+      dimensions: p.dimensions || "",
+      condition: p.condition || 10,
+      hasStock: (p.stock ?? 0) > 0 || true,
+      igvType: "IGV (18.00%)",
+      marginProfit: pMargin,
+      discount: 0,
+      sunatCode: "",
+      inPos: true,
+      description: p.description || "",
+      currency: "PEN"
+    });
+    setShowAdvanced(false);
+    setModal("product");
+    setMenuId(null);
+  };
+
   const saveProduct = async e => {
     e.preventDefault();
     const stock = Number(form.stock) || 0;
     const price = Number(form.price) || 0;
-    const statusText = stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible";
+    const cost = Number(form.cost) || Math.round(price * 0.5);
+    const wholesale = Number(form.wholesale) || Number((price * 0.85).toFixed(2));
+    const minPrice = Number(form.minPrice) || Number((price * 0.75).toFixed(2));
+    const minStock = Number(form.minStock) || 5;
+    const statusText = stock === 0 ? "Sin stock" : stock <= minStock ? "Stock bajo" : "Disponible";
+
     if (editing) {
-      setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, ...form, stock, price, status: statusText } : p));
+      setProducts(prev => prev.map(p => p.id === editing.id ? {
+        ...p,
+        ...form,
+        stock,
+        price,
+        cost,
+        wholesale,
+        minPrice,
+        status: statusText,
+        warehouse: [
+          { name: form.location, stock, min: minStock },
+          ...(p.warehouse?.filter(w => w.name !== form.location) || [])
+        ]
+      } : p));
+      if (detailProduct?.id === editing.id) {
+        setDetailProduct(prev => ({
+          ...prev,
+          ...form,
+          stock,
+          price,
+          cost,
+          wholesale,
+          minPrice,
+          status: statusText,
+          warehouse: [
+            { name: form.location, stock, min: minStock },
+            ...(prev.warehouse?.filter(w => w.name !== form.location) || [])
+          ]
+        }));
+      }
       showToast("Producto actualizado");
       try {
         if (typeof editing.id === 'string' && !editing.id.startsWith('prod-')) {
-          await productService.updateProduct(editing.id, { name: form.name, sku: form.sku, base_price: price, stock });
+          await productService.updateProduct(editing.id, {
+            name: form.name,
+            sku: form.sku,
+            base_price: price,
+            stock,
+            unit: form.unit,
+            cost,
+            brand: form.brand,
+            description: form.description
+          });
         }
       } catch (err) {
         console.warn("[Inventi] Supabase update warning:", err);
@@ -391,20 +975,20 @@ export default function ProductosPanel() {
         id: `prod-${Date.now()}`,
         stock,
         price,
-        cost: Math.round(price * 0.5),
+        cost,
+        wholesale,
+        minPrice,
         status: statusText,
         detail: form.description ? form.description.slice(0, 35) : "",
         image: "📦",
-        barcode: form.sku,
-        brand: "Marca Propia",
-        presentation: "Unidad",
-        unit: "un.",
-        weight: "—",
-        dimensions: "—",
-        salePrice: price,
-        wholesale: Number((price * 0.85).toFixed(2)),
-        minPrice: Number((price * 0.75).toFixed(2)),
-        warehouse: [{ name: form.location, stock, min: 0 }]
+        barcode: form.barcode || form.sku,
+        brand: form.brand || "Marca Propia",
+        presentation: form.unit || "un.",
+        unit: form.unit || "un.",
+        weight: form.weight || "—",
+        dimensions: form.dimensions || "—",
+        condition: form.condition || 10,
+        warehouse: [{ name: form.location, stock, min: minStock }]
       };
       setProducts(prev => [newP, ...prev]);
       setPage(1);
@@ -415,7 +999,10 @@ export default function ProductosPanel() {
           sku: form.sku,
           base_price: price,
           stock,
-          unit: 'un.',
+          unit: form.unit,
+          cost,
+          brand: form.brand,
+          description: form.description,
           status: 'active'
         });
       } catch (err) {
@@ -576,62 +1163,16 @@ export default function ProductosPanel() {
         </div>
 
         {modal === "product" && (
-          <div className="pxp-overlay" onClick={() => setModal("")}>
-            <section className="pxp-modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}>
-              <form onSubmit={saveProduct}>
-                <div className="pxp-modal-head">
-                  <div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div>
-                  <div>
-                    <h2>Editar producto</h2>
-                    <p>Completa la información del producto.</p>
-                  </div>
-                  <button type="button" className="pxp-icon-btn close" onClick={() => setModal("")}>×</button>
-                </div>
-                <div className="pxp-modal-body">
-                  <div className="pxp-map-row">
-                    <div className="pxp-field">
-                      <label>Nombre del producto *</label>
-                      <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-                    </div>
-                    <div className="pxp-field">
-                      <label>SKU / Código *</label>
-                      <input required value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="pxp-map-row">
-                    <div className="pxp-field">
-                      <label>Categoría</label>
-                      <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                        {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-                      </select>
-                    </div>
-                    <div className="pxp-field">
-                      <label>Ubicación principal</label>
-                      <input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="pxp-map-row">
-                    <div className="pxp-field">
-                      <label>Precio base (S/) *</label>
-                      <input required type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
-                    </div>
-                    <div className="pxp-field">
-                      <label>Stock inicial</label>
-                      <input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="pxp-field">
-                    <label>Descripción</label>
-                    <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
-                  </div>
-                </div>
-                <div className="pxp-modal-foot">
-                  <button type="button" className="pxp-btn" onClick={() => setModal("")}>Cancelar</button>
-                  <button type="submit" className="pxp-btn primary">Guardar cambios</button>
-                </div>
-              </form>
-            </section>
-          </div>
+          <ProductModal
+            editing={editing}
+            form={form}
+            setForm={setForm}
+            showAdvanced={showAdvanced}
+            setShowAdvanced={setShowAdvanced}
+            categories={categories}
+            onClose={() => setModal("")}
+            onSave={saveProduct}
+          />
         )}
 
         {toast && <div className="pxp-toast">{toast}</div>}
@@ -826,7 +1367,7 @@ export default function ProductosPanel() {
                     {visibleColumns.includes("wholesale") && <td>{money(p.wholesale || p.price)}</td>}
                     {visibleColumns.includes("status") && <td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td>}
                     {visibleColumns.includes("location") && <td>{p.location}</td>}
-                    <td><div className="pxp-actions"><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
+                    <td><div className="pxp-actions" ref={menuId === p.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
                       {menuId === p.id && <div className="pxp-action-menu">
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
                         <button onClick={() => openEdit(p)}>✎　Editar producto</button>
@@ -927,11 +1468,18 @@ export default function ProductosPanel() {
         <div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => importStep > 1 ? setImportStep(s => s - 1) : setModal("")}>{importStep > 1 ? "← Anterior" : "Cancelar"}</button><button className="pxp-btn primary" onClick={() => { if (importStep < 4) { if (importStep === 1 && !importFile) { showToast("Selecciona un archivo para continuar"); return; } setImportStep(s => s + 1); } else finishImport(); }}>{importStep === 4 ? "Confirmar e importar" : "Continuar →"}</button></div>
       </section></div>}
 
-      {modal === "product" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 620 }} onClick={e => e.stopPropagation()}><form onSubmit={saveProduct}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>{editing ? "Editar producto" : "Nuevo producto"}</h2><p>Completa la información del producto.</p></div><button type="button" className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
-        <div className="pxp-modal-body"><div className="pxp-map-row"><div className="pxp-field"><label>Nombre del producto *</label><input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Ej. Producto nuevo" /></div><div className="pxp-field"><label>SKU / Código *</label><input required value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} placeholder="Ej. SKU-001" /></div></div><div className="pxp-map-row"><div className="pxp-field"><label>Categoría</label><select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}<option>Alimentos</option><option>Veterinaria</option><option>Mascotas</option></select></div><div className="pxp-field"><label>Ubicación principal</label><input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div></div><div className="pxp-map-row"><div className="pxp-field"><label>Precio base (S/) *</label><input required type="number" min="0" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} /></div><div className="pxp-field"><label>Stock inicial</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div></div><div className="pxp-field"><label>Descripción</label><textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Descripción del producto..." /></div></div>
-        <div className="pxp-modal-foot"><button type="button" className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button type="submit" className="pxp-btn primary">{editing ? "Guardar cambios" : "Crear producto"}</button></div>
-      </form></section></div>}
+      {modal === "product" && (
+        <ProductModal
+          editing={editing}
+          form={form}
+          setForm={setForm}
+          showAdvanced={showAdvanced}
+          setShowAdvanced={setShowAdvanced}
+          categories={categories}
+          onClose={() => setModal("")}
+          onSave={saveProduct}
+        />
+      )}
 
       {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>Ajustar stock</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Stock actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nuevo stock</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo del ajuste</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de inventario</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Stock actualizado"); }}>Guardar ajuste</button></div></section></div>}
 
