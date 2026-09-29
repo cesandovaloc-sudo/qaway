@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Activity, Bell, Box, Building2, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Copy, Eye, FileCheck, FileDown, FileText, Filter, Home, Mail, MapPin, Moon, MoreHorizontal, Package, Pencil, Plus, Printer, Receipt, RotateCcw, Search, Settings, ShoppingBag, ShoppingCart, Store, Tag, Truck, User, UserRound, Users, Wallet, X, Save, Phone, ExternalLink, ArrowLeft } from 'lucide-react';
-import './PanelVentas2.css';
+import { Activity, Bell, Box, Building2, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, CircleDollarSign, ClipboardList, Copy, Eye, FileCheck, FileDown, FileText, Filter, Home, Mail, MapPin, Moon, MoreHorizontal, Package, Pencil, Plus, Printer, Receipt, RotateCcw, Search, Settings, ShoppingBag, ShoppingCart, Store, Tag, Truck, User, UserRound, Users, Wallet, X, Save, Phone, ExternalLink, ArrowLeft } from 'lucide-react';
+import './7-PanelVentas2.css';
 
 const seed = [
  ['VEN-2026-0087','CM','blue','25/09/2026','16:30','Comercial Martínez SAC','Empresa','Tienda online','Factura','F001-000123',1250,'Completada','Pagado','PED-2026-045'],

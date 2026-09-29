@@ -17,6 +17,7 @@ import CatalogsPage from '@/pages/liquidation/CatalogsPage'
 import CustomersPage from '@/pages/customers/CustomersPage'
 import QuotationsPage from '@/pages/quotations/QuotationsPage'
 import SalesPage from '@/pages/sales/SalesPage'
+import RegistroVentasPage from '@/pages/sales/RegistroVentasPage'
 import NewSalePage from '@/pages/sales/NewSalePage'
 import SaleDetailPage from '@/pages/sales/SaleDetailPage'
 import WebOrdersPage from '@/pages/sales/WebOrdersPage'
@@ -87,6 +88,9 @@ export default function AppRouter() {
           {/* Ventas — lectura: exige can_view_sales (guest lo niega) */}
           <Route element={<RequirePermission permission="can_view_sales" />}>
             <Route path="ventas" element={<SalesPage />} />
+            {/* Registro administrativo de ventas. Distinto del POS de
+                mostrador, que sigue en /ventas y /ventas/nueva. */}
+            <Route path="ventas/registro" element={<RegistroVentasPage />} />
             <Route path="ventas/pedidos-web" element={<WebOrdersPage />} />
             <Route path="ventas/:id" element={<SaleDetailPage />} />
           </Route>
