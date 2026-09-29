@@ -1,7 +1,11 @@
-# doc/ — bitácora del agente sobre Inventario
-# Los .md de implementación y bitácora SÍ se versionan (van al commit global).
-# Aquí se excluye solo lo efímero: notas de trabajo, adjuntos pesados y salidas de herramientas.
+# doc/ — bitácora de trabajo del agente sobre Inventario.
+# TODO lo de esta carpeta queda fuera del repositorio: el avance se registra
+# aquí y no se commitea. El repo solo versiona el código acoplado.
+# La bitácora se ha escrito en UTF-8; las versiones anteriores tenían el
+# encabezado y los acentos corruptos por una escritura en otra codificación.
 
+*.md
+*.txt
 *.tmp
 *.bak
 *.log
