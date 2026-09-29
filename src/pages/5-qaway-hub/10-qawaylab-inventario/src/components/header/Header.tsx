@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+// @ts-ignore
+import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
 
 const roleLabels: Record<string, string> = {
   admin: 'Super Administrador',
@@ -28,6 +30,7 @@ export default function Header({
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
+  const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
   const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
@@ -146,19 +149,47 @@ export default function Header({
           <Menu size={20} className={collapsed ? '' : 'rotate-180'} />
         </button>
 
-        <button
-          type="button"
-          onClick={() => navigate('/hub')}
-          className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all cursor-pointer"
-          title="Ecosistema de Aplicaciones"
-        >
-          <span className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
-            {[...Array(9)].map((_, i) => (
-              <span key={i} className="w-[3px] h-[3px] rounded-full bg-[var(--hub-text-soft)] group-hover:bg-brand transition-colors" />
-            ))}
-          </span>
-          <span className="text-sm font-bold text-[var(--hub-text)] max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-300 whitespace-nowrap">Apps</span>
-        </button>
+        {/* Waffle App Switcher con Dropdown oficial del Hub */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsWaffleOpen(!isWaffleOpen)}
+            className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
+            title="Ecosistema de Aplicaciones"
+          >
+            <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
+              {[...Array(9)].map((_, i) => (
+                <span
+                  key={i}
+                  className="w-[3px] h-[3px] rounded-full bg-[var(--hub-text-soft)] group-hover:bg-[#ff4b0b] transition-colors"
+                />
+              ))}
+            </div>
+            <span className="text-sm font-bold text-[var(--hub-text)] max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
+              Apps
+            </span>
+            <ChevronDown className="w-3.5 h-3.5 text-[var(--hub-dim)] group-hover:text-[var(--hub-text)] transition-transform duration-200" />
+          </button>
+
+          <AppSwitcherDropdown
+            isOpen={isWaffleOpen}
+            onClose={() => setIsWaffleOpen(false)}
+          />
+        </div>
+
+        {/* Home Animado (Volver a /hub/panel) */}
+        <div className="hidden sm:block">
+          <button 
+            onClick={() => navigate('/hub/panel')}
+            className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
+            title="Volver al Panel del Hub (/hub/panel)"
+          >
+            <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
+            <span className="text-sm font-bold text-[var(--hub-text)] max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
+              Inicio
+            </span>
+          </button>
+        </div>
 
         {/* Selector moderno de Almacén (reutilizado de HubPanelPage.jsx:2600-2660) */}
         <div className="relative">
