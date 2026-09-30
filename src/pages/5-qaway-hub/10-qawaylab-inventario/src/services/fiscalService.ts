@@ -7,25 +7,23 @@ import type {
   InvoiceSeries,
 } from '@/types'
 
-const DEFAULT_BUSINESS_ID = '00000000-0000-0000-0000-000000000001'
-
 export const fiscalService = {
   // ── Negocio ──
-  async getBusinessSettings(): Promise<BusinessSettings> {
+  async getBusinessSettings(tenantId: string): Promise<BusinessSettings> {
     return safeQuery(() =>
       supabase
         .from('business_settings')
         .select('*')
-        .eq('id', DEFAULT_BUSINESS_ID)
+        .eq('tenant_id', tenantId)
         .single()
     )
   },
 
-  async updateBusinessSettings(updates: Partial<Omit<BusinessSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<BusinessSettings> {
+  async updateBusinessSettings(tenantId: string, updates: Partial<Omit<BusinessSettings, 'id' | 'tenant_id' | 'created_at' | 'updated_at'>>): Promise<BusinessSettings> {
     const { data, error } = await supabase
       .from('business_settings')
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', DEFAULT_BUSINESS_ID)
+      .eq('tenant_id', tenantId)
       .select()
       .single()
 
@@ -34,20 +32,21 @@ export const fiscalService = {
   },
 
   // ── Impuestos ──
-  async getTaxes(): Promise<Tax[]> {
+  async getTaxes(tenantId: string): Promise<Tax[]> {
     const { data, error } = await supabase
-      .from('taxes')
-      .select('*')
+        .from('taxes')
+        .select('*')
+        .eq('tenant_id', tenantId)
       .order('codigo')
 
     if (error) throw error
     return data || []
   },
 
-  async createTax(input: Omit<Tax, 'id' | 'created_at'>): Promise<Tax> {
+  async createTax(tenantId: string, input: Omit<Tax, 'id' | 'tenant_id' | 'created_at'>): Promise<Tax> {
     const { data, error } = await supabase
       .from('taxes')
-      .insert(input)
+        .insert({ ...input, tenant_id: tenantId })
       .select()
       .single()
 
@@ -55,11 +54,12 @@ export const fiscalService = {
     return data
   },
 
-  async updateTax(id: string, updates: Partial<Tax>): Promise<Tax> {
+  async updateTax(tenantId: string, id: string, updates: Partial<Omit<Tax, 'id' | 'tenant_id' | 'created_at'>>): Promise<Tax> {
     const { data, error } = await supabase
       .from('taxes')
-      .update(updates)
-      .eq('id', id)
+        .update(updates)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
       .select()
       .single()
 
@@ -67,26 +67,27 @@ export const fiscalService = {
     return data
   },
 
-  async deleteTax(id: string): Promise<void> {
-    const { error } = await supabase.from('taxes').delete().eq('id', id)
+  async deleteTax(tenantId: string, id: string): Promise<void> {
+    const { error } = await supabase.from('taxes').delete().eq('id', id).eq('tenant_id', tenantId)
     if (error) throw error
   },
 
   // ── Unidades SUNAT ──
-  async getUnits(): Promise<SunatUnit[]> {
+  async getUnits(tenantId: string): Promise<SunatUnit[]> {
     const { data, error } = await supabase
-      .from('sunat_units')
-      .select('*')
+        .from('sunat_units')
+        .select('*')
+        .eq('tenant_id', tenantId)
       .order('codigo')
 
     if (error) throw error
     return data || []
   },
 
-  async createUnit(input: Omit<SunatUnit, 'id' | 'created_at'>): Promise<SunatUnit> {
+  async createUnit(tenantId: string, input: Omit<SunatUnit, 'id' | 'tenant_id' | 'created_at'>): Promise<SunatUnit> {
     const { data, error } = await supabase
       .from('sunat_units')
-      .insert(input)
+        .insert({ ...input, tenant_id: tenantId })
       .select()
       .single()
 
@@ -94,11 +95,12 @@ export const fiscalService = {
     return data
   },
 
-  async updateUnit(id: string, updates: Partial<SunatUnit>): Promise<SunatUnit> {
+  async updateUnit(tenantId: string, id: string, updates: Partial<Omit<SunatUnit, 'id' | 'tenant_id' | 'created_at'>>): Promise<SunatUnit> {
     const { data, error } = await supabase
       .from('sunat_units')
-      .update(updates)
-      .eq('id', id)
+        .update(updates)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
       .select()
       .single()
 
@@ -106,16 +108,17 @@ export const fiscalService = {
     return data
   },
 
-  async deleteUnit(id: string): Promise<void> {
-    const { error } = await supabase.from('sunat_units').delete().eq('id', id)
+  async deleteUnit(tenantId: string, id: string): Promise<void> {
+    const { error } = await supabase.from('sunat_units').delete().eq('id', id).eq('tenant_id', tenantId)
     if (error) throw error
   },
 
   // ── Series de comprobantes ──
-  async getSeries(): Promise<InvoiceSeries[]> {
+  async getSeries(tenantId: string): Promise<InvoiceSeries[]> {
     const { data, error } = await supabase
-      .from('series')
-      .select('*')
+        .from('series')
+        .select('*')
+        .eq('tenant_id', tenantId)
       .order('tipo_doc')
       .order('serie')
 
@@ -123,10 +126,10 @@ export const fiscalService = {
     return data || []
   },
 
-  async createSeries(input: Omit<InvoiceSeries, 'id' | 'correlativo_actual' | 'created_at'>): Promise<InvoiceSeries> {
+  async createSeries(tenantId: string, input: Omit<InvoiceSeries, 'id' | 'tenant_id' | 'correlativo_actual' | 'created_at'>): Promise<InvoiceSeries> {
     const { data, error } = await supabase
       .from('series')
-      .insert({ ...input, correlativo_actual: 0 })
+        .insert({ ...input, tenant_id: tenantId, correlativo_actual: 0 })
       .select()
       .single()
 
@@ -134,11 +137,12 @@ export const fiscalService = {
     return data
   },
 
-  async updateSeries(id: string, updates: Partial<InvoiceSeries>): Promise<InvoiceSeries> {
+  async updateSeries(tenantId: string, id: string, updates: Partial<Omit<InvoiceSeries, 'id' | 'tenant_id' | 'created_at'>>): Promise<InvoiceSeries> {
     const { data, error } = await supabase
       .from('series')
-      .update(updates)
-      .eq('id', id)
+        .update(updates)
+        .eq('id', id)
+        .eq('tenant_id', tenantId)
       .select()
       .single()
 
@@ -146,8 +150,8 @@ export const fiscalService = {
     return data
   },
 
-  async deleteSeries(id: string): Promise<void> {
-    const { error } = await supabase.from('series').delete().eq('id', id)
+  async deleteSeries(tenantId: string, id: string): Promise<void> {
+    const { error } = await supabase.from('series').delete().eq('id', id).eq('tenant_id', tenantId)
     if (error) throw error
   },
 

@@ -238,6 +238,7 @@ export interface FiscalDocLookupResult {
 // ── Configuración fiscal (FASE 0) ──
 export interface BusinessSettings {
   id: string
+  tenant_id: string
   ruc: string | null
   razon_social: string | null
   nombre_comercial: string | null
@@ -255,6 +256,7 @@ export type TaxType = 'igv' | 'isc' | 'exonerado' | 'inafecto' | 'gratuito'
 
 export interface Tax {
   id: string
+  tenant_id: string
   codigo: string
   descripcion: string
   tasa: number | null
@@ -265,6 +267,7 @@ export interface Tax {
 
 export interface SunatUnit {
   id: string
+  tenant_id: string
   codigo: string
   descripcion: string
   active: boolean
@@ -273,6 +276,7 @@ export interface SunatUnit {
 
 export interface InvoiceSeries {
   id: string
+  tenant_id: string
   tipo_doc: '01' | '03' | '07' | '08'
   serie: string
   descripcion: string | null

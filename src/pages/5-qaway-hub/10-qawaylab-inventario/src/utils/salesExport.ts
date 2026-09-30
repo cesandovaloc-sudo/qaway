@@ -228,8 +228,9 @@ async function safeSelectAll<T extends { id: string }>(table: string, ids: strin
   return (data ?? []) as T[]
 }
 
-export async function fetchSalesReportData(filters: SalesReportFilters = {}): Promise<SalesReportData> {
+export async function fetchSalesReportData(filters: SalesReportFilters = {}, tenantId?: string): Promise<SalesReportData> {
   let query = supabase.from('sales').select('*').order('created_at', { ascending: true })
+  if (tenantId) query = query.eq('tenant_id', tenantId)
   if (filters.desde) query = query.gte('created_at', `${filters.desde}T00:00:00`)
   if (filters.hasta) query = query.lte('created_at', `${filters.hasta}T23:59:59.999`)
   const { data: sales, error } = await query
@@ -275,6 +276,7 @@ export async function fetchSalesReportData(filters: SalesReportFilters = {}): Pr
   const { data: settings, error: settingsError } = await supabase
     .from('business_settings')
     .select('razon_social, nombre_comercial, direccion, igv_rate')
+    .eq('tenant_id', tenantId || list[0].tenant_id)
     .limit(1)
   if (!settingsError && settings && settings[0]) {
     const s = settings[0] as { razon_social?: string | null; nombre_comercial?: string | null; direccion?: string | null; igv_rate?: number | string | null }

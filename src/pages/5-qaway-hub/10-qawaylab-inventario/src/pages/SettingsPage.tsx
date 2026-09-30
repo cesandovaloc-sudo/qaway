@@ -13,6 +13,7 @@ import {
   Link2,
 } from 'lucide-react'
 import { fiscalService } from '@/services/fiscalService'
+import { useTenant } from '@/context/TenantContext'
 import type { BusinessSettings, Tax, SunatUnit, InvoiceSeries, TaxType } from '@/types'
 
 type Tab = 'negocio' | 'series' | 'impuestos' | 'unidades'
@@ -87,18 +88,23 @@ export default function SettingsPage() {
 
 // ── Negocio ──
 function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
+  const { activeTenantId, activeTenant } = useTenant()
   const [settings, setSettings] = useState<BusinessSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
+    if (!activeTenantId) {
+      setLoading(false)
+      return
+    }
     fiscalService
-      .getBusinessSettings()
+      .getBusinessSettings(activeTenantId)
       .then(setSettings)
       .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar la configuración'))
       .finally(() => setLoading(false))
-  }, [onError])
+  }, [activeTenantId, onError])
 
   const update = (patch: Partial<BusinessSettings>) => {
     setSettings(prev => (prev ? { ...prev, ...patch } : prev))
@@ -109,7 +115,7 @@ function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
     if (!settings) return
     setSaving(true)
     try {
-      const updated = await fiscalService.updateBusinessSettings({
+      const updated = await fiscalService.updateBusinessSettings(activeTenantId!, {
         ruc: settings.ruc,
         razon_social: settings.razon_social,
         nombre_comercial: settings.nombre_comercial,
@@ -132,6 +138,14 @@ function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!activeTenantId) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+        Selecciona una empresa activa para consultar su configuración fiscal.
       </div>
     )
   }
@@ -268,25 +282,32 @@ function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
 
 // ── Series ──
 function SeriesTab({ onError }: { onError: (e: string | null) => void }) {
+  const { activeTenantId } = useTenant()
   const [series, setSeries] = useState<InvoiceSeries[]>([])
   const [loading, setLoading] = useState(true)
   const [newSerie, setNewSerie] = useState({ tipo_doc: '01' as const, serie: '', descripcion: '' })
 
   const load = () => {
+    if (!activeTenantId) {
+      setSeries([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     fiscalService
-      .getSeries()
+      .getSeries(activeTenantId)
       .then(setSeries)
       .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar series'))
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [onError])
+  useEffect(load, [activeTenantId, onError])
 
   const handleAdd = async () => {
     if (!newSerie.serie.trim()) return
     try {
-      await fiscalService.createSeries({ ...newSerie, active: true })
+      if (!activeTenantId) return
+      await fiscalService.createSeries(activeTenantId, { ...newSerie, active: true })
       setNewSerie({ tipo_doc: '01', serie: '', descripcion: '' })
       load()
     } catch (err) {
@@ -295,13 +316,15 @@ function SeriesTab({ onError }: { onError: (e: string | null) => void }) {
   }
 
   const handleToggle = async (s: InvoiceSeries) => {
-    await fiscalService.updateSeries(s.id, { active: !s.active })
+    if (!activeTenantId) return
+    await fiscalService.updateSeries(activeTenantId, s.id, { active: !s.active })
     load()
   }
 
   const handleDelete = async (s: InvoiceSeries) => {
     if (window.confirm(`¿Eliminar la serie ${s.serie}?`)) {
-      await fiscalService.deleteSeries(s.id)
+      if (!activeTenantId) return
+      await fiscalService.deleteSeries(activeTenantId, s.id)
       load()
     }
   }
@@ -418,25 +441,32 @@ function SeriesTab({ onError }: { onError: (e: string | null) => void }) {
 
 // ── Impuestos ──
 function TaxesTab({ onError }: { onError: (e: string | null) => void }) {
+  const { activeTenantId } = useTenant()
   const [taxes, setTaxes] = useState<Tax[]>([])
   const [loading, setLoading] = useState(true)
   const [newTax, setNewTax] = useState({ codigo: '10', descripcion: '', tasa: '', tipo: 'igv' as TaxType })
 
   const load = () => {
+    if (!activeTenantId) {
+      setTaxes([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     fiscalService
-      .getTaxes()
+      .getTaxes(activeTenantId)
       .then(setTaxes)
       .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar impuestos'))
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [onError])
+  useEffect(load, [activeTenantId, onError])
 
   const handleAdd = async () => {
     if (!newTax.codigo.trim() || !newTax.descripcion.trim()) return
     try {
-      await fiscalService.createTax({
+      if (!activeTenantId) return
+      await fiscalService.createTax(activeTenantId, {
         codigo: newTax.codigo.trim(),
         descripcion: newTax.descripcion.trim(),
         tasa: newTax.tasa === '' ? null : Number(newTax.tasa),
@@ -451,13 +481,15 @@ function TaxesTab({ onError }: { onError: (e: string | null) => void }) {
   }
 
   const handleToggle = async (t: Tax) => {
-    await fiscalService.updateTax(t.id, { active: !t.active })
+    if (!activeTenantId) return
+    await fiscalService.updateTax(activeTenantId, t.id, { active: !t.active })
     load()
   }
 
   const handleDelete = async (t: Tax) => {
     if (window.confirm(`¿Eliminar el impuesto ${t.codigo} - ${t.descripcion}?`)) {
-      await fiscalService.deleteTax(t.id)
+      if (!activeTenantId) return
+      await fiscalService.deleteTax(activeTenantId, t.id)
       load()
     }
   }
@@ -582,25 +614,32 @@ function TaxesTab({ onError }: { onError: (e: string | null) => void }) {
 
 // ── Unidades SUNAT ──
 function UnitsTab({ onError }: { onError: (e: string | null) => void }) {
+  const { activeTenantId } = useTenant()
   const [units, setUnits] = useState<SunatUnit[]>([])
   const [loading, setLoading] = useState(true)
   const [newUnit, setNewUnit] = useState({ codigo: '', descripcion: '' })
 
   const load = () => {
+    if (!activeTenantId) {
+      setUnits([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     fiscalService
-      .getUnits()
+      .getUnits(activeTenantId)
       .then(setUnits)
       .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar unidades'))
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [onError])
+  useEffect(load, [activeTenantId, onError])
 
   const handleAdd = async () => {
     if (!newUnit.codigo.trim() || !newUnit.descripcion.trim()) return
     try {
-      await fiscalService.createUnit({
+      if (!activeTenantId) return
+      await fiscalService.createUnit(activeTenantId, {
         codigo: newUnit.codigo.trim().toUpperCase(),
         descripcion: newUnit.descripcion.trim(),
         active: true,
@@ -613,13 +652,15 @@ function UnitsTab({ onError }: { onError: (e: string | null) => void }) {
   }
 
   const handleToggle = async (u: SunatUnit) => {
-    await fiscalService.updateUnit(u.id, { active: !u.active })
+    if (!activeTenantId) return
+    await fiscalService.updateUnit(activeTenantId, u.id, { active: !u.active })
     load()
   }
 
   const handleDelete = async (u: SunatUnit) => {
     if (window.confirm(`¿Eliminar la unidad ${u.codigo}?`)) {
-      await fiscalService.deleteUnit(u.id)
+      if (!activeTenantId) return
+      await fiscalService.deleteUnit(activeTenantId, u.id)
       load()
     }
   }

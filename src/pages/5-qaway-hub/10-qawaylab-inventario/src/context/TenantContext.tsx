@@ -6,6 +6,9 @@ export interface ScopedTenant {
   id: string
   name: string
   client_code?: string
+  legal_name?: string | null
+  branding?: Record<string, unknown> | null
+  content?: Record<string, unknown> | null
 }
 
 interface TenantContextValue {
@@ -46,6 +49,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   const [tenantOptions, setTenantOptions] = useState<ScopedTenant[]>([])
   const [loadingTenants, setLoadingTenants] = useState(false)
+  const [currentTenant, setCurrentTenant] = useState<ScopedTenant | null>(null)
 
   // Cargar lista de tenants activos si es Super Administrador
   useEffect(() => {
@@ -58,7 +62,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     setLoadingTenants(true)
     supabase
       .from('tenants')
-      .select('id, name, client_code, status')
+      .select('id, name, client_code, legal_name, branding, content, status')
       .eq('status', 'active')
       .order('name')
       .then(({ data, error }) => {
@@ -71,6 +75,9 @@ export function TenantProvider({ children }: { children: ReactNode }) {
             id: t.id,
             name: t.name,
             client_code: t.client_code,
+            legal_name: t.legal_name,
+            branding: t.branding,
+            content: t.content,
           })))
         }
       })
@@ -85,6 +92,38 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       alive = false
     }
   }, [isPlatformAdmin, session])
+
+  // Q Panel es la fuente de identidad compartida de la empresa. Inventario
+  // consume sus datos, pero no los administra desde su configuración fiscal.
+  const selectedTenantId = isPlatformAdmin ? scopedTenant?.id : profile?.tenant_id
+  useEffect(() => {
+    let alive = true
+    if (!selectedTenantId || !session) {
+      setCurrentTenant(null)
+      return
+    }
+
+    supabase
+      .from('tenants')
+      .select('id, name, client_code, legal_name, branding, content, status')
+      .eq('id', selectedTenantId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!alive) return
+        if (error || !data) {
+          setCurrentTenant(null)
+          return
+        }
+        setCurrentTenant(data)
+      })
+      .catch(() => {
+        if (alive) setCurrentTenant(null)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [selectedTenantId, session])
 
   // Modificar scopedTenant y sincronizarlo con sessionStorage y eventos
   const setScopedTenant = useCallback((tenant: ScopedTenant | null) => {
@@ -135,12 +174,9 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   // Si es usuario regular o tenant admin: se bloquea a su propio profile.tenant_id
   let activeTenant: ScopedTenant | null = null
   if (isPlatformAdmin) {
-    activeTenant = scopedTenant
+    activeTenant = scopedTenant ? (currentTenant || scopedTenant) : null
   } else if (profile?.tenant_id) {
-    activeTenant = {
-      id: profile.tenant_id,
-      name: 'Mi Empresa',
-    }
+    activeTenant = currentTenant || { id: profile.tenant_id, name: 'Mi Empresa' }
   }
 
   const activeTenantId = activeTenant?.id || null

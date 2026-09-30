@@ -66,6 +66,7 @@ Al terminar, detenerse y reportar los cambios realizados.
 FASE 2 — Conectar las tarjetas superiores
 
 Ahora debemos trasladar la lógica de las tarjetas del tablero inferior al tablero superior.
+Solo dejar 4 tarjetas máximo. Verificar que tantos los números, como la tendencia que se muestra este correctamente configurada
 
 Ejemplo:
 
