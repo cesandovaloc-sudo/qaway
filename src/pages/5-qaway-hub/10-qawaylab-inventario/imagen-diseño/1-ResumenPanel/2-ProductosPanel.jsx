@@ -1378,24 +1378,9 @@ export default function ProductosPanel() {
                 <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
                   <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
-                    <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
-                      {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
-                    </p>
-                    {isPlatformAdmin && (
-                      activeTenant ? (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 700, color: "#ff4b0b", background: "rgba(255,75,11,0.08)", padding: "2px 8px", borderRadius: "12px", border: "1px solid rgba(255,75,11,0.2)" }}>
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ff4b0b", display: "inline-block" }} />
-                          Empresa activa: {activeTenant.name}
-                        </span>
-                      ) : (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 700, color: "#d97706", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", border: "1px solid rgba(245,158,11,0.25)" }}>
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
-                          Sin empresa seleccionada
-                        </span>
-                      )
-                    )}
-                  </div>
+                  <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: "13px" }}>
+                    {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
+                  </p>
                 </div>
               </div>
               <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
