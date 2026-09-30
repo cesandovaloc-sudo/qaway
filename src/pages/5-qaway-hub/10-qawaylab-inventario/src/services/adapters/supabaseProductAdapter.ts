@@ -110,9 +110,28 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async createProduct(productData) {
+    let payload = { ...productData }
+    if (!payload.tenant_id) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('tenant_id')
+            .eq('id', user.id)
+            .single()
+          payload.tenant_id = userData?.tenant_id || '00000000-0000-0000-0000-000000000001'
+        } else {
+          payload.tenant_id = '00000000-0000-0000-0000-000000000001'
+        }
+      } catch {
+        payload.tenant_id = '00000000-0000-0000-0000-000000000001'
+      }
+    }
+
     const { data, error } = await supabase
       .from('products')
-      .insert(productData)
+      .insert(payload)
       .select()
       .single()
 
@@ -124,9 +143,27 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async createProducts(productsData) {
+    let resolvedTenantId = '00000000-0000-0000-0000-000000000001'
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('tenant_id')
+          .eq('id', user.id)
+          .single()
+        if (userData?.tenant_id) resolvedTenantId = userData.tenant_id
+      }
+    } catch {}
+
+    const payload = productsData.map(p => ({
+      ...p,
+      tenant_id: p.tenant_id || resolvedTenantId
+    }))
+
     const { data, error } = await supabase
       .from('products')
-      .insert(productsData)
+      .insert(payload)
       .select()
 
     if (error) {
