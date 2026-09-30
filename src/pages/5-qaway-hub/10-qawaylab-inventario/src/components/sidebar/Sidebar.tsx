@@ -12,9 +12,6 @@ import {
   Users,
   ClipboardList,
   Settings,
-  Camera,
-  ChevronLeft,
-  ChevronRight,
   ShoppingCart,
   Globe,
   Layers,
@@ -40,6 +37,7 @@ const navItems: NavItem[] = [
   { to: '/sedes', label: 'Sedes', icon: <Building2 size={18} /> },
 
   { to: '/clientes', label: 'Clientes', icon: <Users size={18} />, section: 'COMERCIAL' },
+  { to: '/promociones/catalogos', label: 'Catálogos', icon: <FileText size={18} /> },
   { to: '/precios', label: 'Precios', icon: <Tag size={18} /> },
   { to: '/precios/listas', label: 'Listas', icon: <Tags size={18} /> },
   { to: '/precios-panel', label: 'Precios (Diseño)', icon: <Layers size={18} /> },
@@ -59,7 +57,6 @@ const navItems: NavItem[] = [
   { to: '/compras-panel', label: 'Compras (Diseño)', icon: <Layers size={18} /> },
 
   { to: '/promociones', label: 'Campañas', icon: <Zap size={18} />, section: 'PROMOCIONES', end: true },
-  { to: '/promociones/catalogos', label: 'Catálogos', icon: <FileText size={18} /> },
   { to: '/liquidaciones', label: 'Liquidaciones', icon: <Receipt size={18} /> },
 
   { to: '/caja', label: 'Caja Chica', icon: <Tag size={18} />, section: 'FINANZAS' },
@@ -182,56 +179,38 @@ export default function Sidebar({ collapsed: collapsedProp }: { collapsed?: bool
         ))}
       </nav>
 
-      {/* Quick actions */}
-      {!collapsed && (
-        <div className="px-3 pb-3">
-          <NavLink
-            to={getHref('/captura')}
-            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-lg bg-brand text-white text-sm font-medium hover:bg-brand-hover transition-colors"
-          >
-            <Camera size={16} />
-            <span>Capturar con IA</span>
-          </NavLink>
-        </div>
-      )}
-
-      {/* Collapse toggle (respaldo; el primario vive en el topbar, como el Hub) */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        aria-label={collapsed ? 'Expandir menú' : 'Contraer menú'}
-        className="flex items-center justify-center h-12 border-t border-white/10 text-muted-light hover:text-white transition-colors"
-      >
-        {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-      </button>
-
       {/* Settings */}
-      <div className="relative group">
-        <NavLink
-          to={getHref('/config')}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-3 border-t border-white/10 text-sm transition-colors ${
-              isActive ? 'text-brand' : 'text-muted-light hover:text-white'
-            } ${collapsed ? 'justify-center' : ''}`
-          }
-        >
-          <Settings size={18} />
-          {!collapsed && <span>Configuración</span>}
-        </NavLink>
-        {collapsed && (
-          <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
-            <div
-              className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
-              style={{
-                backgroundColor: 'var(--hub-surface, #ffffff)',
-                color: 'var(--hub-text, #0f172a)',
-                border: '1px solid var(--hub-border, #e2e8f0)',
-                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
-              }}
-            >
-              Configuración
+      <div className="p-3 border-t border-[var(--hub-border)]">
+        <div className="relative group">
+          <NavLink
+            to={getHref('/config')}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-[var(--hub-nav-active-bg,var(--hub-hover))] text-[var(--hub-nav-active-text,var(--hub-text))] [&_svg]:text-[var(--hub-nav-active-icon,var(--color-brand))] font-semibold'
+                  : 'text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-chip)]'
+              } ${collapsed ? 'justify-center' : ''}`
+            }
+          >
+            <span className="flex-shrink-0"><Settings size={18} /></span>
+            {!collapsed && <span>Configuración</span>}
+          </NavLink>
+          {collapsed && (
+            <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2.5 hidden group-hover:flex items-center z-50">
+              <div
+                className="text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap tracking-tight"
+                style={{
+                  backgroundColor: 'var(--hub-surface, #ffffff)',
+                  color: 'var(--hub-text, #0f172a)',
+                  border: '1px solid var(--hub-border, #e2e8f0)',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.08)',
+                }}
+              >
+                Configuración
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </aside>
   )

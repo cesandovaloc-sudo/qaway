@@ -1,0 +1,334 @@
+TAREA: Migrar la lógica del tablero antiguo al tablero nuevo
+Contexto
+
+Estamos trabajando en:
+
+http://localhost:4100/hub/inventario/logistica/categorias
+
+En esta pantalla actualmente existen dos tableros:
+
+Tablero superior: diseño nuevo aprobado. Este será el tablero definitivo.
+Tablero inferior: diseño antiguo. Actualmente contiene la lógica funcional real del panel Categorías: datos, conexiones, acciones, cálculos, accesos y funcionalidades específicas.
+Objetivo
+
+Conservar visualmente el tablero superior y trasladarle toda la lógica que corresponda del tablero inferior.
+
+No queremos rediseñar el tablero superior.
+
+No queremos reconstruirlo desde cero.
+
+No queremos inventar funcionalidades.
+
+El tablero superior debe convertirse en el tablero definitivo de Categorías, utilizando su diseño actual como base y recuperando del tablero inferior todo aquello que funcionalmente corresponda.
+
+FASE 1 — Adaptar textos y contenido estático
+
+Primero revisar exclusivamente el contenido textual del tablero superior.
+
+Actualmente el tablero superior todavía utiliza textos correspondientes a Productos.
+
+Debes identificar cuáles son los textos correctos que ya existen en el tablero inferior de Categorías y adaptar el tablero superior.
+
+Ejemplo:
+
+Incorrecto:
+Total de productos
+
+Correcto:
+Total de categorías
+
+Esto aplica a:
+
+título del panel
+subtítulo
+títulos de tarjetas
+descripciones
+encabezados
+botones
+etiquetas
+textos auxiliares
+cualquier otro texto que todavía haga referencia a Productos.
+Regla
+
+No inventes textos nuevos si el tablero inferior ya contiene el texto correcto.
+
+Usa como fuente de verdad el contenido correspondiente al módulo Categorías.
+
+En esta fase:
+NO modificar lógica.
+NO eliminar el tablero inferior.
+NO modificar conexiones.
+NO cambiar funcionalidades.
+Solo adaptar contenido textual al contexto de Categorías.
+
+Al terminar, detenerse y reportar los cambios realizados.
+
+FASE 2 — Conectar las tarjetas superiores
+
+Ahora debemos trasladar la lógica de las tarjetas del tablero inferior al tablero superior.
+
+Ejemplo:
+
+El tablero superior actualmente muestra:
+
+Total de productos
+44
+
+Debe convertirse en:
+
+Total de categorías
+[NÚMERO REAL DE CATEGORÍAS]
+
+Aquí ya no es un cambio de texto.
+
+Debes identificar cómo el tablero inferior obtiene actualmente el número real de categorías y conectar esa misma fuente/lógica con la tarjeta superior.
+
+Aplicar el mismo criterio a todas las tarjetas superiores.
+
+Para cada tarjeta:
+
+Identificar qué representa.
+Identificar de dónde obtiene actualmente ese dato el tablero inferior.
+Identificar la conexión, servicio, hook, query, adapter o función utilizada.
+Trasladar esa lógica a la tarjeta equivalente del tablero superior.
+Mantener el diseño del tablero superior.
+Verificar que muestre datos reales.
+Importante
+
+No reemplazar simplemente:
+
+44
+
+por otro número fijo.
+
+Los datos deben quedar conectados a la fuente real.
+
+No inventar datos.
+
+No crear datos mock.
+
+FASE 3 — Conectar botones y acciones
+
+Revisar todos los botones y acciones existentes en el tablero superior.
+
+Para cada uno:
+
+Identificar qué debería hacer.
+Buscar cómo funciona actualmente esa acción en el tablero inferior.
+Identificar su conexión real.
+Trasladar la acción al tablero superior.
+Mantener el diseño/posición/estilo del botón superior.
+
+Esto incluye, cuando corresponda:
+
+botones principales
+botones secundarios
+filtros
+búsqueda
+acciones rápidas
+botones de navegación
+acciones de registros
+menús
+acciones de tarjetas
+cualquier CTA funcional.
+Regla
+
+La lógica debe provenir del módulo Categorías existente.
+
+No crear una implementación paralela si ya existe una funcionalidad funcional en el tablero inferior.
+
+FASE 4 — Conectar la información del tablero
+
+Este es un punto especialmente importante.
+
+El tablero superior actualmente fue construido tomando como referencia el tablero de Productos, por lo que parte de su información, estructuras o conexiones todavía corresponden a Productos.
+
+Debes revisar cada bloque informativo del tablero superior.
+
+Para cada bloque:
+
+¿Qué muestra actualmente?
+        ↓
+¿De dónde obtiene el dato?
+        ↓
+¿Ese dato corresponde a Categorías?
+        ↓
+Si no corresponde:
+        ↓
+buscar la fuente utilizada por el tablero inferior
+        ↓
+conectarla al tablero superior
+
+La fuente de verdad funcional será el tablero inferior de Categorías.
+
+El diseño continúa siendo el del tablero superior.
+
+En otras palabras:
+
+DISEÑO
+    ↓
+Tablero superior
+
+DATOS
+    ↓
+Lógica de Categorías del tablero inferior
+
+FUNCIONALIDAD
+    ↓
+Lógica de Categorías existente
+FASE 5 — Auditoría funcional comparativa
+
+Esta fase ocurre solamente después de completar las conexiones anteriores.
+
+Ahora comparar cuidadosamente ambos tableros:
+
+TABLERO SUPERIOR
+vs.
+TABLERO INFERIOR
+
+Determinar qué funcionalidades del tablero inferior todavía no están presentes o no están contempladas en el tablero superior.
+
+Revisar específicamente:
+
+funcionalidades
+conexiones
+filtros
+búsquedas
+cálculos
+indicadores
+acciones
+accesos rápidos
+navegación
+permisos
+estados
+modales
+formularios
+operaciones sobre registros
+información adicional
+cualquier lógica específica de Categorías.
+Objetivo de esta fase
+
+No copiar automáticamente todo lo que existe abajo.
+
+Primero analizar y reportar qué funcionalidades existen abajo y cuáles faltan arriba.
+
+Para cada diferencia indicar:
+
+Funcionalidad:
+Dónde existe:
+Qué hace:
+¿Está en el tablero superior?: Sí / No
+¿Debe incorporarse?: Evaluar
+Cómo debería integrarse sin romper el diseño superior:
+
+Si encuentras una funcionalidad importante que debería rescatarse, no la elimines ni la implementes arbitrariamente sin identificar primero su comportamiento actual.
+
+FASE 6 — NO eliminar todavía el tablero inferior
+
+El tablero inferior NO debe eliminarse en esta tarea.
+
+Aunque aparentemente toda la funcionalidad haya sido trasladada, debe permanecer disponible como referencia y respaldo.
+
+El proceso será:
+
+┌───────────────────────────┐
+│ TABLERO SUPERIOR          │
+│                           │
+│ Diseño definitivo         │
+│ + lógica migrada          │
+│ + datos conectados        │
+└───────────────────────────┘
+
+              +
+
+┌───────────────────────────┐
+│ TABLERO INFERIOR          │
+│                           │
+│ Referencia funcional      │
+│                           │
+│ NO ELIMINAR               │
+└───────────────────────────┘
+
+Solo después de que yo revise el resultado y dé explícitamente la orden de eliminarlo, se podrá retirar el tablero inferior.
+
+No asumir esa autorización.
+
+Reglas generales
+1. No inventar
+
+No inventar:
+
+datos
+conexiones
+fórmulas
+servicios
+funcionalidades
+comportamientos
+textos cuando ya existe una versión correcta abajo.
+2. No recrear innecesariamente
+
+Si la funcionalidad ya existe en el tablero inferior, investigar y reutilizar su implementación en lugar de crear otra desde cero.
+
+3. El diseño superior manda
+
+No modificar innecesariamente el diseño aprobado del tablero superior para hacerlo parecido al inferior.
+
+La dirección es:
+
+DISEÑO → ARRIBA
+LÓGICA → ABAJO
+
+No al revés.
+
+4. No eliminar el tablero inferior
+
+Hasta recibir autorización explícita.
+
+5. No modificar funcionalidades no relacionadas
+
+La tarea está limitada a trasladar/conectar la funcionalidad de Categorías al tablero superior.
+
+6. Verificación
+
+Después de cada fase comprobar que:
+
+la aplicación compila;
+no se rompieron rutas;
+no se rompieron conexiones;
+los datos son reales;
+las acciones funcionan;
+no se alteró innecesariamente la lógica existente.
+Al finalizar
+
+No elimines el tablero inferior.
+
+Entrega un informe indicando:
+
+FASE 1
+✓ Textos adaptados
+
+FASE 2
+✓ Tarjetas conectadas
+✓ Datos reales funcionando
+
+FASE 3
+✓ Botones/acciones conectados
+
+FASE 4
+✓ Información del tablero conectada
+
+FASE 5
+✓ Auditoría comparativa realizada
+
+FUNCIONALIDADES ENCONTRADAS ABAJO QUE NO ESTÁN ARRIBA:
+- ...
+- ...
+- ...
+
+PENDIENTES:
+- ...
+
+TABLERO INFERIOR:
+✓ Conservado para revisión
+
+Detente aquí y espera mi revisión. No elimines el tablero inferior.

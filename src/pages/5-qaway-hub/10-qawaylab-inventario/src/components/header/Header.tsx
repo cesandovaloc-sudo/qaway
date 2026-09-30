@@ -618,38 +618,6 @@ export default function Header({
                   </div>
                 </div>
 
-                {/* Selector contextual de Almacén (Regla 1-ResumenPanel.js:139-146 + Hub cápsula) */}
-                <div className="p-2 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]/40">
-                  <div className="px-2 py-1 text-[11px] font-semibold text-[var(--hub-dim)] uppercase tracking-wider flex items-center justify-between">
-                    <span className="flex items-center gap-1.5"><Warehouse size={13} className="text-brand" /> Almacén actual</span>
-                    <span className="text-[10px] text-[var(--hub-faint)]">{selectedWarehouse ? selectedWarehouse.code : 'GLOBAL'}</span>
-                  </div>
-                  <div className="mt-1 space-y-0.5 max-h-40 overflow-y-auto">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedWarehouse(null)}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold transition-colors cursor-pointer ${!selectedWarehouse ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${!selectedWarehouse ? 'bg-brand' : 'bg-[var(--hub-border)]'}`} />
-                      <span>Todos los almacenes</span>
-                    </button>
-                    {warehousesList.map((w) => (
-                      <button
-                        key={w.id}
-                        type="button"
-                        onClick={() => setSelectedWarehouse(w)}
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-xs font-semibold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-brand' : 'bg-[var(--hub-border)]'}`} />
-                          <span className="truncate">{w.name}</span>
-                        </div>
-                        <span className="text-[10px] text-[var(--hub-dim)] ml-2 font-mono shrink-0">{w.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Menú de navegación (Regla 1-ResumenPanel.js:147-155 + HubPanelPage.jsx:2940-2945) */}
                 <div className="p-2 space-y-0.5">
                   <button

@@ -235,6 +235,7 @@ export default function Checkout({
         unit_price: item.price || item.unit_price,
         quantity: item.quantity || 1,
       }))
+      const tenantId = items.find((item) => item?.metadata?.tenant_id)?.metadata?.tenant_id || null
 
       let order = null
       if (ordersService && ordersService.createOrder) {
@@ -259,6 +260,7 @@ export default function Checkout({
               contactSchedule: formData.contactSchedule || null,
             },
             notes: formData.notes,
+            tenantId,
           })
         } catch (err) {
           // N-04 fail-closed: se propaga al catch externo de submit() → el
@@ -291,17 +293,18 @@ export default function Checkout({
               amount: total,
               currency,
               provider,
+              tenantId,
               proofUrl,
               notes: SHOW_BENEFITS
                 ? `Distrito: ${formData.district}. Beneficio: ${selectedBenefit?.label ?? 'sin beneficio'}`
                 : `Distrito: ${formData.district}.`,
             })
           } catch (err) {
-            console.warn('[Checkout] Error en createPayment, usando fallback:', err)
-            payment = { id: `pay_${Date.now()}`, status: 'pending' }
+            console.error('[Checkout] createPayment rechazado:', err)
+            throw err
           }
         } else {
-          payment = { id: `pay_${Date.now()}`, status: 'pending' }
+          throw new Error('No se pudo registrar el pago: servicio de pagos no disponible.')
         }
       }
 

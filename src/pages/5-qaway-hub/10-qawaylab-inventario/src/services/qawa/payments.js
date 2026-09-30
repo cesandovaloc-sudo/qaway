@@ -31,7 +31,7 @@ export function createPaymentsService(supabase, options = {}) {
     }) {
       const paymentData = {
         user_id: userId,
-        tenant_id: tenantId,
+        ...(tenantId ? { tenant_id: tenantId } : {}),
         order_id: orderId,
         amount,
         currency,
@@ -43,35 +43,26 @@ export function createPaymentsService(supabase, options = {}) {
       if (productTitle) paymentData.product_title = productTitle
       if (proofUrl) paymentData.proof_url = proofUrl
 
-      // Invitado: id client-side y sin .select() (misma razón que en orders)
+      // Invitado: id client-side y sin .select() (misma razón que en orders).
+      // El error de persistencia se propaga: un pago local no confirmado no
+      // debe presentarse como pago registrado correctamente.
       if (!userId) {
         const payload = { id: genId(), created_at: new Date().toISOString(), ...paymentData }
-        try {
-          const { error } = await supabase.from('payments').insert(payload)
-          if (error) console.warn('[PaymentsService] Supabase payments warning:', error.message)
-        } catch (err) {
-          console.warn('[PaymentsService] Supabase payments fallback:', err)
-        }
+        const { error } = await supabase.from('payments').insert(payload)
+        if (error) throw error
         saveLocalPayment(payload)
         return payload
       }
 
-      try {
-        const { data: payment, error } = await supabase
-          .from('payments')
-          .insert(paymentData)
-          .select()
-          .single()
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .insert(paymentData)
+        .select()
+        .single()
 
-        if (error) throw error
-        saveLocalPayment(payment)
-        return payment
-      } catch (err) {
-        console.warn('[PaymentsService] Supabase payments fallback (user):', err)
-        const fallbackPayment = { id: genId(), created_at: new Date().toISOString(), ...paymentData }
-        saveLocalPayment(fallbackPayment)
-        return fallbackPayment
-      }
+      if (error) throw error
+      saveLocalPayment(payment)
+      return payment
     },
 
     async updatePaymentStatus(paymentId, status, { providerId = null, notes = null } = {}) {

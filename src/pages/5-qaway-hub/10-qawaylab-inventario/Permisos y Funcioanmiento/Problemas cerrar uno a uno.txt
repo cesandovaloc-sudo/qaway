@@ -1,0 +1,105 @@
+
+ESTADO DE TRABAJO - CHECKOUT / PEDIDOS / PAGOS
+Fecha: 2026-09-30
+
+OBJETIVO ACTUAL
+Cerrar y verificar uno a uno los problemas del flujo:
+carrito -> checkout -> pedido pendiente -> pago pendiente -> confirmacion -> pedido pagado.
+No se deben ejecutar pagos reales. Usar mocks/stubs.
+
+CAMBIOS REALIZADOS
+
+1. Tenant en pedidos y pagos
+- La migracion 20260917143000_tenant_orders_payments.sql agrega tenant_id obligatorio a orders y payments.
+- El codigo de orders.js acepta tenantId y lo envia al insert de orders.
+- El codigo de payments.js acepta tenantId y lo envia al insert de payments.
+- Si no existe tenantId en el carrito, no se envia null explicitamente; se permite que opere el default SQL del tenant maestro.
+- El checkout obtiene tenant_id desde metadata de los items del carrito y lo propaga al pedido y al pago.
+- PublicCatalogPage agrega tenant_id al item al agregarlo al carrito.
+- CartPage conserva tenant_id cuando precarga un producto mediante ?add=.
+
+2. Persistencia fail-closed
+- La creacion de pedidos invitados ya no oculta errores de Supabase ni devuelve un pedido ficticio si el insert falla.
+- La insercion de order_items ya no se trata como warning: si falla, el checkout falla.
+- La creacion de pagos invitados ya no guarda silenciosamente solo un fallback local cuando Supabase rechaza el insert.
+- La creacion de pagos autenticados tampoco devuelve un pago local ficticio si falla la persistencia.
+- Si el servicio de pagos no existe, el checkout muestra error y no reporta exito falso.
+
+3. Confirmacion de pago
+- updatePaymentStatus actualiza payments.
+- Cuando el estado pasa a completed y existe order_id, actualiza orders a paid y establece paid_at.
+- Si falla la actualizacion de orders, el error se propaga y no se confirma falsamente el pago.
+
+4. Estados y datos
+- El pedido se crea con status pending.
+- El pago se crea con status pending.
+- order_items conserva product_id, product_title, product_type, quantity, unit_price y subtotal.
+- El total del pedido se calcula redondeado a dos decimales.
+- El pago usa el order_id creado y el total del checkout.
+
+VERIFICACIONES EJECUTADAS
+
+- npm run typecheck: CORRECTO.
+- git diff --check: CORRECTO.
+- Prueba dirigida de CheckoutPage: NO EJECUTADA por configuracion de Vitest.
+  Motivo: Vitest excluye src/pages/5-qaway-hub/10-qawaylab-inventario/** y respondio:
+  No test files found.
+- No se ha ejecutado aun el build final despues de estos cambios.
+
+PROBLEMAS PENDIENTES, EN ORDEN
+
+1. Ejecutar las pruebas existentes usando el patron/ruta que acepte la configuracion real de Vitest.
+   Revisar vitest.config.* y package.json. No asumir que la ruta directa funciona.
+
+2. Agregar o completar pruebas de servicio con Supabase mockeado:
+   - pedido invitado persistido;
+   - pedido autenticado persistido;
+   - varios productos y calculo exacto del total;
+   - product_id, titulo, cantidad, precio unitario y subtotal;
+   - tenant_id;
+   - fallo de orders;
+   - fallo de order_items;
+   - fallo de payments;
+   - no crear fallback local exitoso en esos fallos.
+
+3. Probar updatePaymentStatus:
+   - completed actualiza payment y order a paid;
+   - paid_at se establece;
+   - failed no marca order como paid;
+   - confirmar dos veces no genera una segunda operacion incorrecta;
+   - error al actualizar order se propaga.
+
+4. Revisar integracion de pasarelas:
+   - no llamar APIs reales;
+   - verificar que taypi y mercadopago reciben orderId, no un total manipulable desde el navegador;
+   - comprobar retorno/confirmacion y limpieza del carrito solo despues de confirmacion valida.
+
+5. Ejecutar npm run build con timeout ampliado.
+   El intento anterior excedio 120 segundos sin mostrar error de compilacion.
+
+6. Revisar y eliminar artefactos generados no rastreados en dist/ si reaparecen.
+
+REGLAS DE ALCANCE
+
+- No modificar /remates/:slug.
+- No modificar precios, promociones, trials, snapshots ni add-ons.
+- catalogo_publico es independiente de app_plan_features.
+- El bypass comercial corresponde solo a public.is_platform_admin().
+- No depender de VITE_CART_ENABLED para decisiones comerciales del tenant.
+- No hacer pagos reales.
+
+ARCHIVOS PRINCIPALES
+
+- src/.../services/qawa/orders.js
+- src/.../services/qawa/payments.js
+- src/.../services/qawa/orders.d.ts
+- src/.../services/qawa/payments.d.ts
+- src/.../components/checkout/Checkout.jsx
+- src/.../pages/PublicCatalogPage.tsx
+- src/.../pages/CartPage.tsx
+- src/.../pages/__tests__/CheckoutPage.test.tsx
+- supabase/migrations/20260917143000_tenant_orders_payments.sql
+
+NOTA PARA CONTINUAR
+
+El siguiente paso recomendado es corregir primero la ejecucion de tests en Vitest y probar los servicios directamente. Despues ejecutar typecheck, tests validos, build y git diff --check.

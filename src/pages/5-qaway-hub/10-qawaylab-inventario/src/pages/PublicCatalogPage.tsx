@@ -23,7 +23,9 @@ export default function PublicCatalogPage() {
   const handleAdd = (product: Product | undefined) => {
     if (!product) return
     if (!cartEnabled) return
-    addToCart(qawaCommerceAdapter.toCartItem(product))
+    const cartItem = qawaCommerceAdapter.toCartItem(product)
+    cartItem.metadata = { ...cartItem.metadata, tenant_id: catalog?.tenant_id || null }
+    addToCart(cartItem)
     setJustAdded(product.id)
     window.setTimeout(() => setJustAdded((prev) => (prev === product.id ? null : prev)), 1500)
   }

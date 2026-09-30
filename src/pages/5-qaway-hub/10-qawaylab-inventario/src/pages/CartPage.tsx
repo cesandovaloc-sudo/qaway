@@ -73,6 +73,7 @@ export default function CartPage() {
             metadata: {
               sku: p.sku || null,
               description: p.description || p.short_description || null,
+              tenant_id: p.tenant_id || null,
             },
           })
         }

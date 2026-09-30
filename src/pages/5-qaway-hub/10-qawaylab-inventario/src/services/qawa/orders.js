@@ -37,7 +37,7 @@ export function createOrdersService(supabase) {
         const payload = {
           id,
           user_id: null,
-          tenant_id: tenantId,
+          ...(tenantId ? { tenant_id: tenantId } : {}),
           total,
           payment_method: paymentMethod,
           shipping_address: shippingAddress,
@@ -61,7 +61,7 @@ export function createOrdersService(supabase) {
             .from('orders')
             .insert({
               user_id: userId,
-              tenant_id: tenantId,
+              ...(tenantId ? { tenant_id: tenantId } : {}),
               total,
               payment_method: paymentMethod,
               shipping_address: shippingAddress,

@@ -49,11 +49,17 @@ export default function RequirePlanFeature({ feature, children }: {
 
   if (!allowed) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center p-6">
-        <div className="border border-zinc-200 rounded-2xl bg-white p-10 text-center max-w-md">
-          <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-zinc-100 text-muted"><Shield size={18} /></div>
-          <p className="mt-3 text-sm font-extrabold text-ink">Funcionalidad no incluida en tu plan</p>
-          <p className="mt-1 text-xs text-muted">Solicita a tu administrador actualizar el plan para acceder a esta funcionalidad.</p>
+      <div className="flex-1 min-h-[calc(100vh-12rem)] flex items-center justify-center p-6">
+        <div className="w-full max-w-md border border-zinc-200/90 rounded-2xl bg-white p-8 sm:p-10 text-center shadow-xs">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-zinc-100 text-zinc-700 border border-zinc-200/60 mb-5">
+            <Shield size={24} strokeWidth={1.8} />
+          </div>
+          <h2 className="text-base sm:text-lg font-bold text-zinc-900 tracking-tight">
+            Funcionalidad no incluida en tu plan
+          </h2>
+          <p className="mt-2 text-sm text-zinc-500 leading-relaxed max-w-sm mx-auto">
+            Tu plan actual no tiene habilitado este módulo. Solicita a tu administrador actualizar la suscripción para acceder.
+          </p>
         </div>
       </div>
     )
