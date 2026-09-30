@@ -12,9 +12,7 @@ interface Supplier {
   phone: string | null
   email: string | null
   customer_type: string
-  contact_name: string | null
-  contact_phone: string | null
-  contact_email: string | null
+  extra_data: Record<string, unknown> | null
   notes: string | null
 }
 
@@ -58,7 +56,8 @@ export default function SuppliersPage() {
       const { data, error: fetchError } = await supabase
         .from('customers')
         .select('*')
-        .eq('customer_type', 'proveedor')
+        .eq('type', 'company')
+        .contains('extra_data', { is_supplier: true })
         .order('name')
 
       if (fetchError) throw fetchError
@@ -109,11 +108,14 @@ export default function SuppliersPage() {
         address: form.address.trim() || null,
         phone: form.phone.trim() || null,
         email: form.email.trim() || null,
-        contact_name: form.contact_name.trim() || null,
-        contact_phone: form.contact_phone.trim() || null,
-        contact_email: form.contact_email.trim() || null,
+        type: 'company',
+        extra_data: {
+          is_supplier: true,
+          contact_name: form.contact_name.trim() || null,
+          contact_phone: form.contact_phone.trim() || null,
+          contact_email: form.contact_email.trim() || null,
+        },
         notes: form.notes.trim() || null,
-        customer_type: 'proveedor',
       })
 
       if (insertError) throw insertError
@@ -203,9 +205,9 @@ export default function SuppliersPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted ">
-                    {supplier.contact_name || '—'}
-                    {supplier.contact_phone && (
-                      <span className="block text-xs text-muted ">{supplier.contact_phone}</span>
+                     {(supplier.extra_data?.contact_name as string) || '—'}
+                     {(supplier.extra_data?.contact_phone as string) && (
+                       <span className="block text-xs text-muted ">{supplier.extra_data?.contact_phone as string}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted ">{supplier.address || '—'}</td>

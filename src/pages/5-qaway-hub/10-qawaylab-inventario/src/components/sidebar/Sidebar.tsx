@@ -47,7 +47,8 @@ const navItems: NavItem[] = [
   { to: '/kits', label: 'Kits', icon: <Layers size={18} /> },
   { to: '/cotizaciones', label: 'Cotizaciones', icon: <ClipboardList size={18} /> },
 
-  { to: '/ventas', label: 'Punto de Venta', icon: <ShoppingCart size={18} />, section: 'VENTAS' },
+  { to: '/ventas', label: 'Ventas', icon: <Receipt size={18} />, section: 'VENTAS', end: true },
+  { to: '/punto-de-venta', label: 'Punto de Venta', icon: <ShoppingCart size={18} /> },
   { to: '/ventas/registro', label: 'Registro de Ventas', icon: <FileText size={18} /> },
   { to: '/ventas/pedidos-web', label: 'Pedidos Web', icon: <Globe size={18} /> },
   { to: '/pedidos', label: 'Pedidos', icon: <Package size={18} /> },

@@ -66,7 +66,8 @@ export default function NewPurchaseOrderPage() {
     let supplierReq = supabase
       .from('customers')
       .select('*')
-      .eq('customer_type', 'proveedor')
+       .eq('type', 'company')
+       .contains('extra_data', { is_supplier: true })
     if (supplierFilter) supplierReq = supplierReq.or(supplierFilter)
     const { data } = await supplierReq
       .order('name')
@@ -104,7 +105,8 @@ export default function NewPurchaseOrderPage() {
           doc_number: newSupplierDoc.trim() || null,
           phone: newSupplierPhone.trim() || null,
           email: newSupplierEmail.trim() || null,
-          customer_type: 'proveedor',
+           type: 'company',
+           extra_data: { is_supplier: true },
         })
         .select()
         .single()
@@ -201,7 +203,7 @@ export default function NewPurchaseOrderPage() {
         await purchaseService.updateStatus(order.id, status)
       }
 
-      navigate('/compras')
+      navigate('..')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar la orden')
     } finally {
@@ -228,7 +230,7 @@ export default function NewPurchaseOrderPage() {
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
-            to="/compras"
+            to=".."
             className="p-2 text-muted hover:text-ink hover:bg-zinc-50 rounded-lg transition-colors"
           >
             <ArrowLeft size={20} />

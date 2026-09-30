@@ -115,9 +115,11 @@ export default function AppRouter() {
           </Route>
 
           {/* C-4: registrar ventas exige can_create_sales */}
-          <Route element={<RequirePermission permission="can_create_sales" />}>
-            <Route path="ventas/nueva" element={<NewSalePage />} />
-          </Route>
+           <Route element={<RequirePermission permission="can_create_sales" />}>
+             <Route path="ventas/nueva" element={<NewSalePage />} />
+             {/* Nombre explícito del POS; se conserva /ventas/nueva como alias compatible. */}
+             <Route path="punto-de-venta" element={<NewSalePage />} />
+           </Route>
 
           {/* Compras: lectura autenticada; la escritura la decide el RLS
               (purchase_orders recibe policies propias en el Bloque 2) */}

@@ -65,7 +65,7 @@ const quickAccessItems: QuickAccessItem[] = [
     icon: ShoppingCart,
     iconColor: 'text-emerald-600',
     iconBg: 'bg-emerald-500/10 group-hover:bg-emerald-500/20',
-    href: '/ventas/nueva',
+    href: '/punto-de-venta',
   },
 ]
 

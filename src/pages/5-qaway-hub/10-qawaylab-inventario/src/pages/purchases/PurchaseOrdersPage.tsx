@@ -63,7 +63,7 @@ export default function PurchaseOrdersPage() {
           <p className="text-muted text-sm mt-1">Gestión de compras a proveedores</p>
         </div>
         <Link
-          to="/compras/nueva"
+          to="../nueva"
           className="flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl hover:bg-brand-hover transition-colors text-sm font-bold"
         >
           <Plus size={16} />
