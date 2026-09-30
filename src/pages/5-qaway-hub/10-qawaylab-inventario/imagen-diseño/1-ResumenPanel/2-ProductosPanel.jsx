@@ -38,6 +38,7 @@ import {
 
 import { productService } from "../../src/services/productService";
 import { useTenant } from "../../src/context/TenantContext";
+import { useDismissOnEscapeOrOutside } from "../../../hooks/useDismissOnEscapeOrOutside";
 
 /**
  * ProductosPanel.jsx
@@ -180,8 +181,16 @@ const AVAILABLE_COLUMNS = [
   { key: "location", label: "Ubicación" },
 ];
 
+const TAX_OPTIONS = [
+  { value: "IGV (18.00%)", label: "IGV (18.00% - Gravado)" },
+  { value: "Exonerado (0.00%)", label: "Exonerado (0.00% - Selva/Alimentos)" },
+  { value: "Inafecto (0.00%)", label: "Inafecto (0.00%)" },
+];
+
 function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvanced, categories, onClose, onSave }) {
   const [form, setForm] = useState(initialForm || defaultForm);
+  const [isTaxOpen, setIsTaxOpen] = useState(false);
+  useDismissOnEscapeOrOutside(isTaxOpen, () => setIsTaxOpen(false));
 
   useEffect(() => {
     if (initialForm) {
@@ -197,8 +206,8 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
   };
 
   return (
-    <div className="pxp-overlay" onClick={onClose} style={{ colorScheme: "light" }}>
-      <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light" }} onClick={e => e.stopPropagation()}>
+    <div className="pxp-overlay" onClick={onClose}>
+      <section className="pxp-modal" style={{ maxWidth: 660 }} onClick={e => e.stopPropagation()}>
         <form onSubmit={handleSubmit}>
           <div className="pxp-modal-head">
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -381,24 +390,99 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               {/* Impuesto */}
               <div className="pxp-form-row">
                 <div className="pxp-form-label">Tipo de Impuesto</div>
-                <select
-                  className="pxp-form-input"
-                  value={form.igvType || "IGV (18.00%)"}
-                  onChange={e => {
-                    const newIgv = e.target.value;
-                    const isZero = newIgv.includes("0.00%");
-                    setForm(prev => ({
-                      ...prev,
-                      igvType: newIgv,
-                      includesIgv: isZero ? false : (prev.includesIgv !== false)
-                    }));
-                  }}
-                  style={{ colorScheme: "light" }}
-                >
-                  <option value="IGV (18.00%)">IGV (18.00% - Gravado)</option>
-                  <option value="Exonerado (0.00%)">Exonerado (0.00% - Selva/Alimentos)</option>
-                  <option value="Inafecto (0.00%)">Inafecto (0.00%)</option>
-                </select>
+                <div style={{ position: "relative", width: "100%" }} data-dismissable="true">
+                  <button
+                    type="button"
+                    onClick={() => setIsTaxOpen(o => !o)}
+                    className="pxp-form-input"
+                    data-dismissable="true"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                      width: "100%",
+                      textAlign: "left",
+                    }}
+                  >
+                    <span style={{ truncate: true, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {TAX_OPTIONS.find(o => o.value === form.igvType)?.label || form.igvType || "IGV (18.00% - Gravado)"}
+                    </span>
+                    <ChevronDown
+                      size={15}
+                      style={{
+                        transform: isTaxOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
+                        color: "var(--hub-dim, #64748b)",
+                        flexShrink: 0,
+                        marginLeft: 8
+                      }}
+                    />
+                  </button>
+
+                  {isTaxOpen && (
+                    <div
+                      data-dismissable="true"
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 4px)",
+                        left: 0,
+                        right: 0,
+                        background: "var(--hub-surface, #ffffff)",
+                        border: "1px solid var(--hub-border, #e2e8f0)",
+                        borderRadius: 12,
+                        boxShadow: "0 10px 30px rgba(0,0,0,0.14)",
+                        zIndex: 100,
+                        overflow: "hidden",
+                        padding: 4
+                      }}
+                    >
+                      {TAX_OPTIONS.map(opt => {
+                        const isSelected = (form.igvType || "IGV (18.00%)") === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              const isZero = opt.value.includes("0.00%");
+                              setForm(prev => ({
+                                ...prev,
+                                igvType: opt.value,
+                                includesIgv: isZero ? false : (prev.includesIgv !== false)
+                              }));
+                              setIsTaxOpen(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "9px 12px",
+                              borderRadius: 8,
+                              fontSize: 13,
+                              fontWeight: isSelected ? 700 : 500,
+                              color: isSelected ? "#ff4b0b" : "var(--hub-text, #0f172a)",
+                              background: isSelected ? "rgba(255, 75, 11, 0.08)" : "transparent",
+                              border: 0,
+                              cursor: "pointer",
+                              textAlign: "left",
+                              transition: "background 0.15s ease"
+                            }}
+                            onMouseEnter={e => {
+                              if (!isSelected) e.currentTarget.style.background = "var(--hub-hover, rgba(0,0,0,0.04))";
+                            }}
+                            onMouseLeave={e => {
+                              if (!isSelected) e.currentTarget.style.background = isSelected ? "rgba(255, 75, 11, 0.08)" : "transparent";
+                            }}
+                          >
+                            <span>{opt.label}</span>
+                            {isSelected && <Check size={14} style={{ color: "#ff4b0b", flexShrink: 0 }} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Unidad de medida */}
