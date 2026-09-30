@@ -124,6 +124,9 @@ $do$;
 
 -- products tiene políticas históricas con nombres propios y por eso se ajusta
 -- explícitamente para que una sesión autenticada no pueda escribir sin plan.
+drop policy if exists "products_tenant_insert" on public.products;
+drop policy if exists "products_tenant_update" on public.products;
+drop policy if exists "products_tenant_delete" on public.products;
 drop policy if exists "products_staff_insert" on public.products;
 create policy "products_staff_insert" on public.products
   for insert with check (
