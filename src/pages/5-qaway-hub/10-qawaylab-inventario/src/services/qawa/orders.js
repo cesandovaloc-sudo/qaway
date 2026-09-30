@@ -23,7 +23,7 @@ function saveLocalOrder(order) {
 
 export function createOrdersService(supabase) {
   return {
-    async createOrder(userId, items, { paymentMethod = null, shippingAddress = null, notes = null, discount = 0 } = {}) {
+    async createOrder(userId, items, { paymentMethod = null, shippingAddress = null, notes = null, discount = 0, tenantId = null } = {}) {
       const gross = items.reduce((sum, item) => sum + (item.unit_price * (item.quantity || 1)), 0)
       // El descuento del programa de beneficios se resta del total del pedido.
       // Es un valor de presentación: antes de cobrar, el backend debe recalcularlo.
@@ -37,6 +37,7 @@ export function createOrdersService(supabase) {
         const payload = {
           id,
           user_id: null,
+          tenant_id: tenantId,
           total,
           payment_method: paymentMethod,
           shipping_address: shippingAddress,
@@ -60,6 +61,7 @@ export function createOrdersService(supabase) {
             .from('orders')
             .insert({
               user_id: userId,
+              tenant_id: tenantId,
               total,
               payment_method: paymentMethod,
               shipping_address: shippingAddress,
@@ -94,9 +96,9 @@ export function createOrdersService(supabase) {
           .from('order_items')
           .insert(orderItems)
 
-        if (itemsError) console.warn('[OrdersService] Supabase order_items warning:', itemsError.message)
+        if (itemsError) throw itemsError
       } catch (err) {
-        console.warn('[OrdersService] Supabase order_items fallback:', err)
+        throw err
       }
 
       const completedOrder = { ...order, items: orderItems }

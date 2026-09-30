@@ -4,7 +4,6 @@ import { Check, Loader2, AlertCircle, Package, Phone, MessageCircle, ShoppingCar
 import { usePublicCatalog } from '@/hooks/useCatalogs'
 import { useCart } from '@/hooks/useCart'
 import { qawaCommerceAdapter } from '@/services/adapters/commerceAdapter'
-import { siteConfig } from '@/config/site'
 import { setPageMeta } from '@/utils/seo'
 import type { Product } from '@/types'
 
@@ -14,9 +13,16 @@ export default function PublicCatalogPage() {
   const { add: addToCart, count: cartCount, subtotal: cartSubtotal } = useCart()
   const [justAdded, setJustAdded] = useState<string | null>(null)
   const navigate = useNavigate()
+  const tenantBranding = catalog?.tenant?.branding || {}
+  const tenantContent = catalog?.tenant?.content || {}
+  const contact = (tenantContent.contact || {}) as { phone?: string; whatsapp?: string; email?: string }
+  const whatsapp = contact.whatsapp || contact.phone || null
+  const cartEnabled = catalog?.commerce?.cart === true
+  const logoUrl = typeof tenantBranding.logo_url === 'string' ? tenantBranding.logo_url : null
 
   const handleAdd = (product: Product | undefined) => {
     if (!product) return
+    if (!cartEnabled) return
     addToCart(qawaCommerceAdapter.toCartItem(product))
     setJustAdded(product.id)
     window.setTimeout(() => setJustAdded((prev) => (prev === product.id ? null : prev)), 1500)
@@ -65,6 +71,8 @@ export default function PublicCatalogPage() {
       <header className="bg-white border-b border-gray-200 py-6">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center">
+            {logoUrl && <img src={logoUrl} alt="" className="h-12 mx-auto mb-3 object-contain" />}
+            <p className="text-sm text-gray-500 mb-1">{catalog.tenant?.name || 'Catálogo'}</p>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{catalog.name}</h1>
             {catalog.description && (
               <p className="text-gray-600 max-w-2xl mx-auto">{catalog.description}</p>
@@ -146,7 +154,7 @@ export default function PublicCatalogPage() {
                   )}
 
                   {/* Agregar al carrito (módulo @qawaylab/pago) */}
-                  {siteConfig.cart.enabled && item.product && (
+                  {cartEnabled && item.product && (
                     <button
                       onClick={() => handleAdd(item.product)}
                       className={`mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
@@ -168,6 +176,17 @@ export default function PublicCatalogPage() {
                       )}
                     </button>
                   )}
+                  {!cartEnabled && item.product && whatsapp && (
+                    <a
+                      href={`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola, me interesa ${item.product.name}.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm font-medium"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Consultar por WhatsApp
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
@@ -176,7 +195,7 @@ export default function PublicCatalogPage() {
       </main>
 
       {/* Mini carrito flotante */}
-      {siteConfig.cart.enabled && cartCount > 0 && (
+      {cartEnabled && cartCount > 0 && (
         <div className="fixed bottom-4 right-4 z-50 bg-ink text-white rounded-xl shadow-elevated px-4 py-3 flex items-center gap-4">
           <div>
             <p className="text-xs text-muted-light">{cartCount} ítems</p>
@@ -199,9 +218,9 @@ export default function PublicCatalogPage() {
               Catálogo generado por Qaway Lab
             </p>
             <div className="flex items-center gap-3">
-              {siteConfig.whatsapp && (
+              {whatsapp && (
                 <a
-                  href={`https://wa.me/${siteConfig.whatsapp}`}
+                  href={`https://wa.me/${whatsapp.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -210,16 +229,16 @@ export default function PublicCatalogPage() {
                   WhatsApp
                 </a>
               )}
-              {siteConfig.phone && (
+              {contact.phone && (
                 <a
-                  href={`tel:+${siteConfig.phone}`}
+                  href={`tel:+${contact.phone.replace(/\D/g, '')}`}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                   Llamar
                 </a>
               )}
-              {!siteConfig.whatsapp && !siteConfig.phone && (
+              {!whatsapp && !contact.phone && (
                 <p className="text-sm text-gray-500">
                   Consulta por WhatsApp para más información
                 </p>

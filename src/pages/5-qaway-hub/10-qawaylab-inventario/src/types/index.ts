@@ -175,6 +175,7 @@ export interface LiquidationItem {
 // ── Catalog ──
 export interface Catalog {
   id: string
+  tenant_id?: string
   campaign_id: string | null
   name: string
   slug: string

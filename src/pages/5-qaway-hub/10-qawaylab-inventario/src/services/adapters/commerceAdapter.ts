@@ -30,7 +30,7 @@ export interface ToCartOptions {
 }
 
 export interface CommerceAdapter {
-  /** true cuando el carrito está configurado (VITE_CART_APP_URL) */
+  /** El adaptador local está disponible; el acceso comercial lo decide el tenant. */
   isConfigured(): boolean
   /** Convierte un producto del inventario a ítem de carrito (contrato commerce v1) */
   toCartItem(product: CommerceProductSource, options?: ToCartOptions): CartItem
@@ -47,7 +47,7 @@ function productImageUrl(product: CommerceProductSource): string | null {
 }
 
 export const qawaCommerceAdapter: CommerceAdapter = {
-  isConfigured: () => siteConfig.cart.enabled,
+  isConfigured: () => true,
 
   toCartItem(product, options = {}) {
     const price = options.priceOverride ?? product.base_price ?? 0

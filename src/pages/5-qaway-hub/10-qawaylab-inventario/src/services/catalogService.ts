@@ -29,6 +29,15 @@ export interface CatalogItemInput {
 
 // ── Catalog with full data ──
 export interface CatalogFull extends Catalog {
+  tenant?: {
+    id: string
+    name: string
+    branding: Record<string, unknown> | null
+    content: Record<string, unknown> | null
+  } | null
+  commerce?: {
+    cart: boolean
+  }
   campaign?: LiquidationCampaign
   items: (CatalogItem & {
     product?: Product
@@ -76,7 +85,7 @@ export const catalogService = {
   async getCatalogById(id: string): Promise<CatalogFull> {
     const { data: catalog, error: catalogError } = await supabase
       .from('catalogs')
-      .select('*')
+      .select('*, tenant:tenants(id, name, branding, content)')
       .eq('id', id)
       .single()
 
@@ -118,14 +127,21 @@ export const catalogService = {
   async getCatalogBySlug(slug: string): Promise<CatalogFull | null> {
     const { data: catalog, error } = await supabase
       .from('catalogs')
-      .select('*')
+      .select('id, tenant_id')
       .eq('slug', slug)
       .eq('is_public', true)
       .single()
 
     if (error || !catalog) return null
 
-    return this.getCatalogById(catalog.id)
+    const fullCatalog = await this.getCatalogById(catalog.id)
+    const { data: cartFeature } = await supabase.rpc('tenant_has_app_feature', {
+      p_tenant_id: catalog.tenant_id,
+      p_app_slug: 'inventario',
+      p_feature_key: 'cart',
+    })
+
+    return { ...fullCatalog, commerce: { cart: cartFeature === true } }
   },
 
   // Create catalog

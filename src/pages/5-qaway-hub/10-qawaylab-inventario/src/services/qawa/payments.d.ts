@@ -9,6 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export interface CreatePaymentPayload {
   userId: string | null
   orderId?: string | null
+  tenantId?: string | null
   productId?: string | null
   productTitle?: string | null
   amount: number

@@ -8,6 +8,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface CreateOrderOptions {
   paymentMethod?: Record<string, unknown> | null
+  tenantId?: string | null
   shippingAddress?: Record<string, unknown> | null
   notes?: string | null
   discount?: number

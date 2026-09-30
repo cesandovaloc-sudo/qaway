@@ -27,9 +27,11 @@ export function createPaymentsService(supabase, options = {}) {
       provider = 'manual',
       proofUrl = null,
       notes = null,
+      tenantId = null,
     }) {
       const paymentData = {
         user_id: userId,
+        tenant_id: tenantId,
         order_id: orderId,
         amount,
         currency,
@@ -88,17 +90,14 @@ export function createPaymentsService(supabase, options = {}) {
         if (error) throw error
 
         if (status === 'completed' && payment.order_id) {
-          try {
-            await supabase
+          const { error: orderError } = await supabase
               .from('orders')
               .update({
                 status: 'paid',
                 paid_at: new Date().toISOString(),
               })
               .eq('id', payment.order_id)
-          } catch (e) {
-            console.warn('[PaymentsService] Update orders paid fallback:', e)
-          }
+          if (orderError) throw orderError
         }
 
         if (status === 'completed' && onPaymentCompleted) {
@@ -107,8 +106,7 @@ export function createPaymentsService(supabase, options = {}) {
 
         return payment
       } catch (err) {
-        console.warn('[PaymentsService] Update status fallback:', err)
-        return { id: paymentId, status }
+        throw err
       }
     },
 

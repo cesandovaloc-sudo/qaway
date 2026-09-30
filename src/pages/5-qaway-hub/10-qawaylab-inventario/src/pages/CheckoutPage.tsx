@@ -5,7 +5,6 @@ import CheckoutSteps from '@/components/checkout/storefront/CheckoutSteps'
 import TiendaHeader from '@/components/checkout/storefront/TiendaHeader'
 import TiendaShell from '@/components/checkout/TiendaShell'
 import { supabase } from '@/config/supabase'
-import { siteConfig } from '@/config/site'
 import { setPageMeta } from '@/utils/seo'
 import { qawaServices } from '@/services/qawaService'
 import { useCart } from '@/hooks/useCart'
@@ -46,7 +45,7 @@ export default function CheckoutPage() {
   // Sin carrito no hay nada que pagar: se vuelve a «Mi pedido».
   // Tras confirmar el pedido (`orderDone`) o volver de pasarela (`isGatewayReturn`),
   // no se redirige, para que el comprador vea la confirmación del checkout.
-  if (!orderDone && !isGatewayReturn && (!siteConfig.cart.enabled || items.length === 0)) {
+  if (!orderDone && !isGatewayReturn && items.length === 0) {
     return <Navigate to="/carrito" replace />
   }
 
