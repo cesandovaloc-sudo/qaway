@@ -1,4 +1,5 @@
 // @ts-ignore
+import PanelVentasLiteral from '../../../imagen-diseño/1-ResumenPanel/7-PanelVentas1Literal'
 import PanelVentas from '../../../imagen-diseño/1-ResumenPanel/7-PanelVentas1'
 
 /**
@@ -16,6 +17,7 @@ import PanelVentas from '../../../imagen-diseño/1-ResumenPanel/7-PanelVentas1'
 export default function RegistroVentasPage() {
   return (
     <div className="space-y-6">
+      <PanelVentasLiteral />
       <PanelVentas />
     </div>
   )

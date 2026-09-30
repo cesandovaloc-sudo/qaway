@@ -9,6 +9,7 @@ import type { Quotation } from '@/types'
 import type { QuotationWithItems } from '@/services/quotationService'
 
 // @ts-ignore
+import CotizacionesPanelLiteral from '../../../imagen-diseño/1-ResumenPanel/6-CotizacionesPanelLiteral'
 import CotizacionesPanel from '../../../imagen-diseño/1-ResumenPanel/6-CotizacionesPanel'
 
 export default function QuotationsPage() {
@@ -62,6 +63,7 @@ export default function QuotationsPage() {
   return (
     <div className="space-y-6">
       {/* Panel de diseño acoplado — la página original se conserva completa debajo */}
+      <CotizacionesPanelLiteral />
       <CotizacionesPanel />
 
       {/* Header */}

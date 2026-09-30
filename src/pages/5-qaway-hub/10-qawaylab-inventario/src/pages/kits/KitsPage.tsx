@@ -1,4 +1,5 @@
 // @ts-ignore
+import KitsModuleLiteral from '../../../imagen-diseño/1-ResumenPanel/11-KitsModuleLiteral'
 import KitsModule from '../../../imagen-diseño/1-ResumenPanel/11-KitsModule'
 
 /**
@@ -34,6 +35,7 @@ import KitsModule from '../../../imagen-diseño/1-ResumenPanel/11-KitsModule'
 export default function KitsPage() {
   return (
     <div className="space-y-6">
+      <KitsModuleLiteral />
       <KitsModule />
     </div>
   )

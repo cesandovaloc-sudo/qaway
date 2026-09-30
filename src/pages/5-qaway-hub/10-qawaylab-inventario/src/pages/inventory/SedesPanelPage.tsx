@@ -1,4 +1,5 @@
 // @ts-ignore
+import SedesModuleLiteral from '../../../imagen-diseño/1-ResumenPanel/13-SedesModuleLiteral'
 import SedesModule from '../../../imagen-diseño/1-ResumenPanel/13-SedesModule'
 
 /**
@@ -28,6 +29,7 @@ import SedesModule from '../../../imagen-diseño/1-ResumenPanel/13-SedesModule'
 export default function SedesPanelPage() {
   return (
     <div className="space-y-6">
+      <SedesModuleLiteral />
       <SedesModule />
     </div>
   )

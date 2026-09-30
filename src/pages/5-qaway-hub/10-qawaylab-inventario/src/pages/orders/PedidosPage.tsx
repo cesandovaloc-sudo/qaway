@@ -1,4 +1,5 @@
 // @ts-ignore
+import PedidosPanelLiteral from '../../../imagen-diseño/1-ResumenPanel/8-PedidosPanelLiteral'
 import PedidosPanel from '../../../imagen-diseño/1-ResumenPanel/8-PedidosPanel'
 
 /**
@@ -15,6 +16,7 @@ import PedidosPanel from '../../../imagen-diseño/1-ResumenPanel/8-PedidosPanel'
 export default function PedidosPage() {
   return (
     <div className="space-y-6">
+      <PedidosPanelLiteral />
       <PedidosPanel />
     </div>
   )

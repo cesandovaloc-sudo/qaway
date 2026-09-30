@@ -1,4 +1,5 @@
 // @ts-ignore
+import LiquidacionesLiteral from '../../../imagen-diseño/1-ResumenPanel/12-LiquidacionesLiteral'
 import Liquidaciones from '../../../imagen-diseño/1-ResumenPanel/12-Liquidaciones'
 
 /**
@@ -31,6 +32,7 @@ import Liquidaciones from '../../../imagen-diseño/1-ResumenPanel/12-Liquidacion
 export default function LiquidacionesPage() {
   return (
     <div className="space-y-6">
+      <LiquidacionesLiteral />
       <Liquidaciones />
     </div>
   )

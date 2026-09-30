@@ -71,11 +71,13 @@ export default function CategoriasPanel() {
         setMenuId(null);
       }
     }
-    function handleEscape(event) {
-      if (event.key === "Escape") {
-        setMenuId(null);
+function handleEscape(event) {
+        if (event.key === "Escape") {
+          setMenuId(null);
+          setModal(false);
+          setDetail(null);
+        }
       }
-    }
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
     return () => {

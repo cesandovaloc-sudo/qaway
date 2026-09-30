@@ -227,9 +227,13 @@ export default function ClientsPage() {
     function handleClickOutside(event) {
       if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) setMenuId(null);
     }
-    function handleEscape(event) {
-      if (event.key === "Escape") setMenuId(null);
-    }
+function handleEscape(event) {
+        if (event.key === "Escape") {
+          setMenuId(null);
+          setSelected(null);
+          setEditing(null);
+        }
+      }
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
     return () => {

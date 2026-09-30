@@ -1,3 +1,4 @@
+import PrecioModuleLiteral from '../../../imagen-diseño/1-ResumenPanel/10-PrecioModuleLiteral'
 import PrecioModule from '../../../imagen-diseño/1-ResumenPanel/10-PrecioModule'
 
 /**
@@ -30,6 +31,7 @@ import PrecioModule from '../../../imagen-diseño/1-ResumenPanel/10-PrecioModule
 export default function PreciosPanelPage() {
   return (
     <div className="space-y-6">
+      <PrecioModuleLiteral />
       <PrecioModule />
     </div>
   )

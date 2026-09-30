@@ -33,7 +33,7 @@ export default function PanelVentas(){
  const actionsMenuRef=useRef(null);
  useEffect(()=>{
   function handleClickOutside(event){if(actionsMenuRef.current&&!actionsMenuRef.current.contains(event.target))setMenu('');}
-  function handleEscape(event){if(event.key==='Escape')setMenu('');}
+  function handleEscape(event){if(event.key==='Escape'){setMenu('');setSelected(null);}}
   document.addEventListener('mousedown',handleClickOutside);
   document.addEventListener('keydown',handleEscape);
   return ()=>{document.removeEventListener('mousedown',handleClickOutside);document.removeEventListener('keydown',handleEscape)};

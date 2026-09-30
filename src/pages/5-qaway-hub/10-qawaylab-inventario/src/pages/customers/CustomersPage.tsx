@@ -5,6 +5,7 @@ import { CustomerCard } from '@/components/customers/CustomerCard'
 import { CustomerForm } from '@/components/customers/CustomerForm'
 import type { Customer } from '@/types'
 // @ts-ignore
+import ClientsPanelLiteral from '../../../imagen-diseño/1-ResumenPanel/5-ClientsPageLiteral'
 import ClientsPanel from '../../../imagen-diseño/1-ResumenPanel/5-ClientsPage'
 
 export default function CustomersPage() {
@@ -43,6 +44,7 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
+      <ClientsPanelLiteral />
       <ClientsPanel />
 
       {/* Header */}

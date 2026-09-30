@@ -43,3 +43,17 @@ Revisión de la app de inventario (`/hub/inventario`) para que **todos los panel
 
 - `npm run typecheck` del subproyecto (`tsconfig.app.json`): los archivos modificados compilan sin errores. Quedan **2 errores pre-existentes ajenos** en `src/context/TenantContext.tsx` (sin relación con este cambio).
 - `npm run typecheck` y `npm run lint` (`oxlint .`) de la raíz: sin errores nuevos; solo warnings pre-existentes en `dist/` y otros proyectos.
+
+## Revisión 2 — paneles visibles de listados (reporte directo del usuario + auditoría del mismo patrón)
+
+Reporte: en `/hub/inventario/productos`, "Editar producto" y el panel lateral de "Ver detalle" (tres puntos) se cierran con click fuera pero **no con Escape**. Causa raíz: en los paneles de listado (`imagen-diseño/1-ResumenPanel/...`) el `handleEscape` global solo cerraba el menú de 3 puntos; los modales y paneles laterales con overlay no lo usaban.
+
+| # | Archivo | Corrección |
+|---|---------|------------|
+| 18 | `2-ProductosPanel.jsx` | `handleEscape` ahora también cierra `modal` (editar/nuevo/stock/importar) y el panel lateral `detailProduct`. |
+| 19 | `3-CategoriasPanel.jsx` | `handleEscape` ahora también cierra `modal` (editar categoría) y el panel lateral `detail`. |
+| 20 | `5-ClientsPage.jsx` | `handleEscape` ahora también cierra el drawer de `selected` y el formulario `editing` (clientes). |
+| 21 | `7-PanelVentas1.jsx` | `handleEscape` ahora también cierra el drawer de venta `selected`. |
+
+- Sin cambios en: `8-PedidosPanel.jsx` (panel lateral fijo del layout, sin overlay dismissable), `4-MovimientosPanel.jsx` (flujo por pantallas `screen`, sin overlays), `12-Liquidaciones.jsx` y `13-SedesModule.jsx` (ya cerraban su detalle/modal con Escape).
+- Las variantes `*Literal.jsx` no se tocaron (no son las que renderizan las rutas actuales).

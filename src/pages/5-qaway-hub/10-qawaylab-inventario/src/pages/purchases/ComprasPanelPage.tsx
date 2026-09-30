@@ -1,4 +1,5 @@
 // @ts-ignore
+import ComprasPanelLiteral from '../../../imagen-diseño/1-ResumenPanel/9-ComprasPanel2Literal'
 import ComprasPanel from '../../../imagen-diseño/1-ResumenPanel/9-ComprasPanel2'
 
 /**
@@ -28,6 +29,7 @@ import ComprasPanel from '../../../imagen-diseño/1-ResumenPanel/9-ComprasPanel2
 export default function ComprasPanelPage() {
   return (
     <div className="space-y-6">
+      <ComprasPanelLiteral />
       <ComprasPanel />
     </div>
   )
