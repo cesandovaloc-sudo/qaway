@@ -32,11 +32,6 @@ const RUBROS = [
   "Servicios profesionales",
   "Otro",
 ];
-// Modo prueba al confirmar apps: trial corto si el catálogo define uno,
-// y un respaldo generoso solo para las marcas que arrancan sin pricing.
-const TRIAL_DIAS = 5;
-const TRIAL_DIAS_FALLBACK = 14;
-
 function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength, error }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
@@ -395,14 +390,12 @@ export default function HubOnboardingPage() {
       const selectedSlugs = selected.map((raw) => alias[raw] || raw);
 
       const [preciosRes, appsRes] = await Promise.all([
-        supabase.from("app_plan_pricing").select("app_id, plan, trial_days, is_available").eq("plan", "basico"),
+        supabase.from("app_plan_pricing").select("app_id, plan, price, currency, is_available").eq("plan", "basico"),
         supabase.from("app_catalog").select("id, slug"),
       ]);
 
       const precios = preciosRes.data || [];
       const catalogApps = appsRes.data || [];
-      const ahora = new Date();
-
       const selectedAppIds = catalogApps.filter((a) => selectedSlugs.includes(a.slug)).map((a) => a.id);
 
       // Si el usuario desmarcó apps al retroceder, eliminamos las suscripciones desmarcadas:
@@ -418,20 +411,25 @@ export default function HubOnboardingPage() {
         const app = catalogApps.find((a) => a.slug === slug);
         if (!app) return Promise.resolve();
         const precio = precios.find((p) => p.app_id === app.id);
-        const trialDias = (precio && precio.is_available === true && precio.trial_days > 0)
-          ? precio.trial_days
-          : (precio ? TRIAL_DIAS : TRIAL_DIAS_FALLBACK);
-        const trialEnds = new Date(ahora.getTime() + trialDias * 864e5).toISOString();
+        // El onboarding no inventa trials. Una promoción se aplicará en el
+        // flujo de contratación y quedará guardada como snapshot.
+        const disponible = precio?.is_available === true && Number(precio.price) >= 0;
         return supabase.from("tenant_app_subscriptions").upsert(
           {
             tenant_id: tenant.id,
             app_id: app.id,
             plan: "basico",
-            status: "trialing",
-            trial_started_at: ahora.toISOString(),
-            trial_ends_at: trialEnds,
-            current_period_start: ahora.toISOString(),
-            current_period_end: trialEnds,
+            status: "pending",
+            trial_started_at: null,
+            trial_ends_at: null,
+            current_period_start: null,
+            current_period_end: null,
+            list_price_at_signup: disponible ? Number(precio.price) : null,
+             contracted_price: null,
+            price_currency: precio?.currency || "PEN",
+            trial_days_granted: 0,
+            trial_requires_card: false,
+            trial_source: null,
           },
           { onConflict: "tenant_id,app_id" },
         );
@@ -439,14 +437,12 @@ export default function HubOnboardingPage() {
 
       await Promise.all(upsertPromises);
 
-      // La marca pasa de borrador a activa al confirmar sus apps (modo prueba):
-      // así la invitación y las apps funcionan ya; el pago se decide después.
+      // La activación comercial debe ocurrir al contratar o al aplicar una
+      // oferta con trial. No se concede acceso por seleccionar una app.
       if (tenant.status !== "active") {
-        const { data: edgeData, error: edgeErr } = await conTimeout(
-          supabase.functions.invoke("activate-brand", { body: { tenant_id: tenant.id } }),
-          15000,
-        );
-        if (edgeErr || edgeData?.error) throw new Error((await leerErrorEdge(edgeErr)) || edgeData?.error);
+        setNote("Apps guardadas. Completa la contratación para activar la marca.");
+        if (goNext) next();
+        return;
       }
       setTenant((prev) => (prev ? { ...prev, status: "active" } : prev));
       if (goNext) next();
@@ -652,7 +648,7 @@ export default function HubOnboardingPage() {
             <div className="note trial-box">
               <div className="trial-badge">PRUEBA GRATUITA POR 14 DÍAS · ACCESO TOTAL</div>
               <b>Empieza tu prueba gratuita sin tarjeta de crédito</b>
-              <span>Tus aplicaciones seleccionadas se activan <b>100% GRATIS hoy</b>. Al finalizar los 14 días nada se cobra automáticamente: tú tienes el control total y decides en tu panel qué plan mantener.</span>
+               <span>Tus aplicaciones quedan pendientes de contratación. El acceso se activa cuando completes una contratación o una oferta comercial explícita que incluya un trial.</span>
             </div>
 
             <Notice error={noteIsError}>{note}</Notice>

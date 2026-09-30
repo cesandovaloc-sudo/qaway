@@ -1,0 +1,135 @@
+Inventario seguirá siendo una sola aplicación SaaS, no aplicaciones separadas por módulo.
+La separación existente funciona así:
+- tenant_app_subscriptions: empresa, aplicación y plan contratado.
+- user_app_roles: usuario, empresa, aplicación y rol.
+- UserPermissions: permisos granulares para operaciones específicas.
+La matriz propuesta de planes Básico, Intermedio y Premium está marcada como propuesta, no como una oferta comercial activa.
+Los precios actuales siguen pendientes:
+- price = 0
+- trial_days = 0
+- is_available = false
+Todavía no deben activarse restricciones de funcionalidades por plan.
+La tabla subscription_plans de Academy no debe reutilizarse para Inventario.
+En el futuro, un InventarioAccessContext debería cargar una sola vez el estado de acceso, plan, rol y permisos, evitando consultas repetidas.
+No deben crearse tablas, servicios, suscripciones ni implementaciones duplicadas por cada plan.
+
+
+Productos debe permanecer como **submodulo funcional de la app
+`inventario`**, no como una app adicional ni como tres productos distintos.
+La decision recomendada es:
+
+* **Básico:** catalogo, categorias, CRUD de productos, stock agregado,
+* **Basico:** catalogo, categorias, CRUD de productos, stock agregado,
+  ubicacion principal, busqueda y consulta basica.
+* **Intermedio:** todo lo anterior mas variantes, imagenes, movimientos,
+  importacion/exportacion, multiples listas de precios, paquetes y
+  operaciones de compras/ventas integradas.
+* **Premium:** todo lo anterior mas multisede/multialmacen avanzado, reglas
+  comerciales, catalogos publicos avanzados, liquidaciones, captura IA,
+  reportes avanzados e integraciones adicionales.
+
+Esta division es una propuesta comercial sobre el modelo existente. No debe
+Esta division es **una propuesta comercial, no una capacidad implementada**.
+Los registros actuales de `app_plan_pricing` fueron sembrados como
+pendientes (`price = 0`, `trial_days = 0`, `is_available = false`), por lo
+que no se debe presentar esta matriz como oferta activa ni usarla todavía
+para bloquear funcionalidades. No debe
+duplicarse como `products.plan`, `products.level` ni como tablas separadas
+para cada nivel. El plan pertenece a `tenant_app_subscriptions`; las
+capacidades deben resolverse mediante una matriz central de features.
+
+Un plan no reemplaza los permisos de usuario. Por ejemplo, una empresa
+Premium puede tener un usuario viewer que solo consulta; un usuario admin de
+una empresa Basico no debe obtener capacidades que el plan no contrato.
+
+### 11.4 Matriz minima de features
+### 11.4 Matriz propuesta de features
+
+Para optimizar recursos, la primera version solo necesita una matriz pequena
+de capacidades de producto:
+
+| `products.public_catalog` | No | Si | Avanzado |
+| `products.ai_capture` | No | No | Si |
+| `products.advanced_reports` | No | No | Si |
+
+La matriz puede vivir inicialmente en una constante compartida del frontend
+La siguiente matriz sirve como propuesta para producto y pricing; no es un
+contrato vigente ni debe activar gates por sí sola:
+
+| Feature | Basico | Intermedio | Premium |
+| --- | --- | --- | --- |
+| `products.core` | Si | Si | Si |
+| `products.stock` | Agregado | Movimientos | Multialmacen |
+| `products.images` | Basico | Si | Si |
+| `products.variants` | No | Si | Si |
+| `products.import_export` | No | Si | Si |
+| `products.pricing_lists` | No | Si | Reglas avanzadas |
+| `products.bundles` | No | Si | Si |
+| `products.public_catalog` | No | Si | Avanzado |
+| `products.ai_capture` | No | No | Si |
+| `products.advanced_reports` | No | No | Si |
+
+Mientras no exista una decisión comercial aprobada, el producto debe
+considerar que todas las capacidades disponibles siguen gobernadas por los
+permisos actuales y por el acceso global a la app. Una vez aprobada, la
+matriz puede vivir inicialmente en una constante compartida del frontend
+para controlar navegacion y UX, pero el bloqueo real debe implementarse en
+Supabase mediante una funcion RPC o helper de servidor. No debe confiarse en
+ocultar botones.
+
+
+* Mantener una sola app contratada: `inventario`.
+* Mantener una sola tabla maestra: `products`.
+* Mantener un solo servicio de productos y un solo adaptador Supabase.
+* Reutilizar `tenant_app_plan` para resolver el nivel comercial.
+* Reutilizar `tenant_app_plan` para resolver el nivel comercial cuando la
+  oferta de planes este aprobada y activa.
+* Reutilizar `user_app_role` y `UserPermissions` para el nivel de usuario.
+* No crear suscripciones propias para Productos, Precios, Paquetes o
+  Catalogos.
+* No copiar el listado de Productos para cada plan.
+  contexto de acceso de la app y derivar las capacidades en memoria.
+
+### 11.6 Orden de implementacion recomendado
+
+1. Centralizar un `InventarioAccessContext` que cargue una vez app, plan,
+   trial, rol y permisos.
+1. Antes de activar planes, centralizar un `InventarioAccessContext` que
+   cargue una vez app, estado de suscripcion, rol y permisos. El plan puede
+   cargarse como dato informativo, sin bloquear features.
+2. Definir la matriz de features en un unico archivo compartido.
+3. Aplicar gates de navegacion y UX a Productos, Precios, Paquetes,
+   Catalogos y Captura IA.
+4. Crear un helper/RPC de Supabase para validar plan mas feature en las
+   operaciones sensibles.
+4. Aprobar la oferta y precios en `app_plan_pricing`; despues crear un
+   helper/RPC de Supabase para validar plan mas feature en las operaciones
+   sensibles.
+5. Mantener los permisos granulares para operaciones, sin mezclarlos con el
+   plan comercial.
+6. Medir uso y errores antes de agregar nuevos niveles o excepciones por
+   cliente.
+
+
+supabase/migrations/20260921130000_saas_apps_plans_permissions.sql: catálogo de apps, suscripciones por empresa/app/plan, roles y helpers de acceso.
+supabase/migrations/20260921133000_platform_vs_brand_admin.sql: separación entre administrador de plataforma y administrador de empresa; políticas sobre suscripciones y roles.
+supabase/migrations/20260921134000_saas_pricing_trial.sql: precios por app/plan, trials y estados de suscripción; redefine la lógica de acceso.
+supabase/migrations/20260918150000_create_subscriptions_schema.sql: esquema general de suscripciones comerciales y planes.
+src/pages/5-qaway-hub/hooks/useAppAccess.js: consulta user_can_use_app para ocultar apps sin acceso.
+src/pages/5-qaway-hub/HubsuperAplicacionesModule.jsx: UI de aplicaciones, etiquetas de planes y administración visual de apps.
+src/pages/5-qaway-hub/HubOnboardingPage.jsx: selección de aplicaciones y creación inicial de suscripciones/trials.
+src/pages/5-qaway-hub/HubSuperSuscripcionesPanel.jsx: panel de suscripciones y agrupación por plan.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/app/router/AppRouter.tsx: rutas de Inventario y uso de RequirePermission.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/app/router/RequirePermission: protección interna por permisos.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/types/user.ts: roles y permisos granulares del módulo.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/context/TenantContext: contexto de empresa/tenant activo.
+src/pages/5-qaway-hub/10-qawaylab-inventario/Permisos y Funcioanmiento/Inventi_Pro_Modulo_Productos.md: documentación recién creada del módulo Productos.
+src/pages/5-qaway-hub/10-qawaylab-inventario/Permisos y Funcioanmiento/Inventi_Pro_Ventas_Pedidos_Logistica.md: documento existente de Ventas, Pedidos y Logística; conservar intacto.
+src/pages/5-qaway-hub/10-qawaylab-inventario/docs/decisions/007-producto-modular-vendible.md: decisión arquitectónica de módulos conmutables y desacoplados.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/services/productService.ts: CRUD, búsqueda y altas masivas de Productos.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/services/adapters/supabaseProductAdapter.ts: persistencia Supabase y resolución multi-tenant.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/types/index.ts: tipos de productos y relaciones.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/inventory/ProductsPage.tsx: wrapper del listado de Productos.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/inventory/ProductDetailPage.tsx: detalle, precios, historial e imágenes.
+src/pages/5-qaway-hub/10-qawaylab-inventario/src/pages/inventory/NewProductPage.tsx: creación de productos.
+src/pages/5-qaway-hub/10-qawaylab-inventario/imagen-diseño/1-ResumenPanel/2-ProductosPanel.jsx: panel original de Productos con filtros, acciones e importación/exportación.

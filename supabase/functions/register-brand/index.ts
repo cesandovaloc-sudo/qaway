@@ -51,23 +51,30 @@ serve(async (req: Request) => {
   }).eq('id', caller.id)
   if (uErr) return json({ error: 'No se pudo vincular' }, 500)
 
-  // Suscripciones por app elegida: trialing con fechas o pending de pago.
+  // Las condiciones comerciales se aplican en checkout, no al crear la marca.
+  // Este endpoint solo deja la contratación pendiente y captura el precio de
+  // lista vigente como referencia inicial.
   const wanted = Array.isArray(plans) ? plans : []
   for (const p of wanted) {
     if (!p || typeof p.slug !== 'string' || !['basico', 'intermedio', 'premium'].includes(p.plan)) continue
     const { data: app } = await admin.from('app_catalog').select('id').eq('slug', p.slug).single()
     if (!app) continue
     const { data: pricing } = await admin.from('app_plan_pricing')
-      .select('trial_days').eq('app_id', app.id).eq('plan', p.plan).eq('is_available', true).single()
-    const trialDays = pricing && pricing.trial_days > 0 ? pricing.trial_days : 0
-    const now = new Date()
+      .select('price, currency, is_available').eq('app_id', app.id).eq('plan', p.plan).eq('is_available', true).single()
+    if (!pricing) {
+      return json({ error: `Sin precio disponible para ${p.slug}/${p.plan}` }, 409)
+    }
     await admin.from('tenant_app_subscriptions').upsert({
       tenant_id: tenant.id,
       app_id: app.id,
       plan: p.plan,
-      status: trialDays > 0 ? 'trialing' : 'pending',
-      trial_started_at: trialDays > 0 ? now.toISOString() : null,
-      trial_ends_at: trialDays > 0 ? new Date(now.getTime() + trialDays * 864e5).toISOString() : null,
+      status: 'pending',
+      list_price_at_signup: pricing?.is_available ? Number(pricing.price) : null,
+       contracted_price: null,
+      price_currency: pricing?.currency || 'PEN',
+      trial_days_granted: 0,
+      trial_requires_card: false,
+      trial_source: null,
     }, { onConflict: 'tenant_id,app_id' })
     await admin.from('user_app_roles').upsert({
       user_id: caller.id, tenant_id: tenant.id, app_id: app.id, role: 'admin',

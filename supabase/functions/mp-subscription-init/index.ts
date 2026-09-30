@@ -51,11 +51,68 @@ Deno.serve(async (req) => {
     }
     const { data: app } = await supabase.from('app_catalog').select('id, name').eq('slug', it.app_slug).single()
     if (!app) return json({ error: `App inválida: ${it.app_slug}` }, 400)
-    const { data: pricing } = await supabase.from('app_plan_pricing')
-      .select('price, currency').eq('app_id', app.id).eq('plan', it.plan).eq('is_available', true).single()
-    if (!pricing) return json({ error: `Sin precio vigente para ${it.app_slug}/${it.plan}` }, 409)
-    total = Math.round((total + Number(pricing.price)) * 100) / 100
-    lines.push({ app_id: app.id, plan: it.plan, price: Number(pricing.price), currency: pricing.currency })
+    const addonSlug = typeof it.addon_slug === 'string' ? it.addon_slug.trim() : ''
+    const pricingQuery = addonSlug
+      ? supabase.from('saas_addon_pricing').select('price, currency').eq('addon_slug', addonSlug).eq('plan', it.plan).eq('is_available', true).single()
+      : supabase.from('app_plan_pricing').select('price, currency').eq('app_id', app.id).eq('plan', it.plan).eq('is_available', true).single()
+    const { data: pricing } = await pricingQuery
+    if (!pricing) return json({ error: `Sin precio vigente para ${addonSlug ? `${addonSlug}/${it.plan}` : `${it.app_slug}/${it.plan}`}` }, 409)
+    const offerCode = typeof it.offer_code === 'string' ? it.offer_code.trim() : ''
+    let offer: any = null
+    if (offerCode) {
+      let offerQuery = supabase.from('saas_commercial_offers')
+        .select('id, code, name, price_override, discount_percent, trial_days, trial_requires_card')
+        .eq('code', offerCode)
+        .eq('plan', it.plan)
+        .eq('is_active', true)
+        .or(`starts_at.is.null,starts_at.lte.${new Date().toISOString()}`)
+        .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+      offerQuery = addonSlug ? offerQuery.eq('addon_slug', addonSlug) : offerQuery.eq('app_id', app.id)
+      const { data: offerRow } = await offerQuery.maybeSingle()
+      if (!offerRow) return json({ error: `Oferta inválida o vencida: ${offerCode}` }, 409)
+      offer = offerRow
+    }
+    const { data: existingBase } = await supabase.from('tenant_app_subscriptions')
+      .select('id, list_price_at_signup, contracted_price, price_currency, status, commercial_offer_id')
+      .eq('tenant_id', tenant_id).eq('app_id', app.id).maybeSingle()
+    if (existingBase?.status && existingBase.status !== 'pending') {
+      return json({ error: `La suscripción ${it.app_slug} ya fue contratada o está activa` }, 409)
+    }
+    if (addonSlug && !existingBase) {
+      return json({ error: `El add-on ${addonSlug} requiere una suscripción base pendiente` }, 409)
+    }
+    const { data: existingAddon } = addonSlug && existingBase
+      ? await supabase.from('tenant_app_subscription_addons')
+        .select('list_price_at_signup, contracted_price, price_currency, commercial_offer_id, status')
+        .eq('subscription_id', existingBase.id).eq('addon_slug', addonSlug).maybeSingle()
+      : { data: null }
+    if (existingAddon?.status && existingAddon.status !== 'cancelled') {
+      return json({ error: `El add-on ${addonSlug} ya fue contratado` }, 409)
+    }
+    const listPrice = (addonSlug ? existingAddon?.list_price_at_signup : existingBase?.list_price_at_signup) ?? Number(pricing.price)
+    const offerPrice = offer
+      ? offer.price_override !== null
+        ? Number(offer.price_override)
+        : Math.round(Number(pricing.price) * (1 - Number(offer.discount_percent || 0) / 100) * 100) / 100
+      : Number(pricing.price)
+    const priorOfferId = addonSlug ? existingAddon?.commercial_offer_id : existingBase?.commercial_offer_id
+    const priorContractedPrice = addonSlug ? existingAddon?.contracted_price : existingBase?.contracted_price
+    const contractedPrice = priorOfferId
+      ? Number(priorContractedPrice)
+      : offerPrice
+    const lineCurrency = (addonSlug ? existingAddon?.price_currency : existingBase?.price_currency) || pricing.currency
+    total = Math.round((total + Number(contractedPrice)) * 100) / 100
+    lines.push({
+      app_id: app.id,
+      addon_slug: addonSlug || null,
+      subscription_id: existingBase?.id || null,
+      plan: it.plan,
+      list_price: Number(listPrice),
+      price: Number(contractedPrice),
+      currency: lineCurrency,
+      existing_status: (addonSlug ? existingAddon?.status : existingBase?.status) || null,
+      offer,
+    })
   }
   const currency = lines[0]?.currency || 'PEN'
 
@@ -88,15 +145,42 @@ Deno.serve(async (req) => {
     return json({ error: 'Mercado Pago rechazó la suscripción' }, 502)
   }
 
-  // Filas pending + preapproval id (upsert idempotente por tenant+app).
+  // La app base conserva su snapshot; los add-ons se guardan en su tabla propia.
   for (const line of lines) {
+    if (line.addon_slug) continue
     await supabase.from('tenant_app_subscriptions').upsert({
       tenant_id,
       app_id: line.app_id,
       plan: line.plan,
       status: 'pending',
+      list_price_at_signup: line.list_price,
+      contracted_price: line.price,
+      price_currency: line.currency,
+      trial_days_granted: line.offer?.trial_days || 0,
+      trial_requires_card: line.offer?.trial_requires_card || false,
+      trial_source: line.offer ? 'commercial_offer' : null,
+      commercial_offer_id: line.offer?.id || null,
+      promotion_code: line.offer?.code || null,
+      promotion_name: line.offer?.name || null,
       mp_preapproval_id: String(mp.id),
     }, { onConflict: 'tenant_id,app_id' })
+  }
+  for (const line of lines) {
+    if (!line.addon_slug || !line.subscription_id) continue
+    await supabase.from('tenant_app_subscription_addons').upsert({
+      subscription_id: line.subscription_id,
+      addon_slug: line.addon_slug,
+      list_price_at_signup: line.list_price,
+      contracted_price: line.price,
+      price_currency: line.currency,
+      commercial_offer_id: line.offer?.id || null,
+      promotion_code: line.offer?.code || null,
+      promotion_name: line.offer?.name || null,
+      trial_days_granted: line.offer?.trial_days || 0,
+      trial_requires_card: line.offer?.trial_requires_card || false,
+      trial_source: line.offer ? 'commercial_offer' : null,
+      status: 'active',
+    }, { onConflict: 'subscription_id,addon_slug' })
   }
 
   return json({ init_point: mp.init_point, preapproval_id: String(mp.id), total, currency })

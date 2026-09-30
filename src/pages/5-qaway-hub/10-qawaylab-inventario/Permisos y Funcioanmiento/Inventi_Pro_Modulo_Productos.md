@@ -467,3 +467,137 @@ El modulo Productos puede considerarse integrado cuando:
    reemplaza por archivado.
 7. Las pruebas cubren altas, importacion, permisos, multiempresa, stock,
    precios y las interconexiones con Ventas, Pedidos y Compras.
+
+## 11. Encaje en el modelo comercial de Qaway
+
+### 11.1 Modelo existente en Supabase
+
+La separacion comercial ya esta resuelta a nivel de aplicacion y empresa,
+no dentro de cada tabla funcional de Productos:
+
+```text
+app_catalog
+    └── inventario
+         └── tenant_app_subscriptions
+              └── plan: basico | intermedio | premium
+
+user_app_roles
+    └── usuario × empresa × app
+         └── role: admin | editor | viewer | guest
+```
+
+Las funciones RPC relevantes son:
+
+* `tenant_app_plan(tenant_id, app_slug)`: obtiene el plan activo de una
+  empresa para una app.
+* `user_can_use_app(app_slug)`: valida si el usuario puede utilizar la app,
+  incluyendo suscripcion activa o trial vigente.
+* `user_app_role(app_slug)`: obtiene el rol del usuario en la empresa y app
+  actuales.
+
+El catalogo comercial de planes se encuentra en `app_plan_pricing`. Las
+suscripciones soportan `pending`, `trialing`, `active`, `suspended`,
+`cancelled` y `expired`, con fechas de trial y periodo.
+
+### 11.2 Recomendacion de adaptacion
+
+Productos debe permanecer como **submodulo funcional de la app
+`inventario`**, no como una app adicional ni como tres productos distintos.
+La decision recomendada es:
+
+* **Basico:** catalogo, categorias, CRUD de productos, stock agregado,
+  ubicacion principal, busqueda y consulta basica.
+* **Intermedio:** todo lo anterior mas variantes, imagenes, movimientos,
+  importacion/exportacion, multiples listas de precios, paquetes y
+  operaciones de compras/ventas integradas.
+* **Premium:** todo lo anterior mas multisede/multialmacen avanzado, reglas
+  comerciales, catalogos publicos avanzados, liquidaciones, captura IA,
+  reportes avanzados e integraciones adicionales.
+
+Esta division es **una propuesta comercial, no una capacidad implementada**.
+Los registros actuales de `app_plan_pricing` fueron sembrados como
+pendientes (`price = 0`, `trial_days = 0`, `is_available = false`), por lo
+que no se debe presentar esta matriz como oferta activa ni usarla todavía
+para bloquear funcionalidades. No debe
+duplicarse como `products.plan`, `products.level` ni como tablas separadas
+para cada nivel. El plan pertenece a `tenant_app_subscriptions`; las
+capacidades deben resolverse mediante una matriz central de features.
+
+### 11.3 Separacion correcta de controles
+
+Hay tres decisiones diferentes y deben mantenerse separadas:
+
+1. **La empresa contrato Inventario:**
+   `user_can_use_app('inventario')` y estado de
+   `tenant_app_subscriptions`.
+2. **La empresa tiene un nivel comercial:**
+   `tenant_app_plan(tenant_id, 'inventario')`.
+3. **El usuario puede ejecutar una operacion:**
+   `user_app_roles` mas permisos granulares como
+   `can_create_products`, `can_adjust_stock` o `can_edit_prices`.
+
+Un plan no reemplaza los permisos de usuario. Por ejemplo, una empresa
+Premium puede tener un usuario viewer que solo consulta; un usuario admin de
+una empresa Basico no debe obtener capacidades que el plan no contrato.
+
+### 11.4 Matriz propuesta de features
+
+La siguiente matriz sirve como propuesta para producto y pricing; no es un
+contrato vigente ni debe activar gates por sí sola:
+
+| Feature | Basico | Intermedio | Premium |
+| --- | --- | --- | --- |
+| `products.core` | Si | Si | Si |
+| `products.stock` | Agregado | Movimientos | Multialmacen |
+| `products.images` | Basico | Si | Si |
+| `products.variants` | No | Si | Si |
+| `products.import_export` | No | Si | Si |
+| `products.pricing_lists` | No | Si | Reglas avanzadas |
+| `products.bundles` | No | Si | Si |
+| `products.public_catalog` | No | Si | Avanzado |
+| `products.ai_capture` | No | No | Si |
+| `products.advanced_reports` | No | No | Si |
+
+Mientras no exista una decisión comercial aprobada, el producto debe
+considerar que todas las capacidades disponibles siguen gobernadas por los
+permisos actuales y por el acceso global a la app. Una vez aprobada, la
+matriz puede vivir inicialmente en una constante compartida del frontend
+para controlar navegacion y UX, pero el bloqueo real debe implementarse en
+Supabase mediante una funcion RPC o helper de servidor. No debe confiarse en
+ocultar botones.
+
+### 11.5 Optimizacion de recursos y duplicidades a evitar
+
+* Mantener una sola app contratada: `inventario`.
+* Mantener una sola tabla maestra: `products`.
+* Mantener un solo servicio de productos y un solo adaptador Supabase.
+* Reutilizar `tenant_app_plan` para resolver el nivel comercial cuando la
+  oferta de planes este aprobada y activa.
+* Reutilizar `user_app_role` y `UserPermissions` para el nivel de usuario.
+* No crear suscripciones propias para Productos, Precios, Paquetes o
+  Catalogos.
+* No copiar el listado de Productos para cada plan.
+* No usar `subscription_plans` para controlar Inventario; esa tabla pertenece
+  al flujo de suscripciones de Academy. Para Inventario, la fuente correcta es
+  `tenant_app_subscriptions` junto con `app_plan_pricing`.
+* No hacer una consulta RPC por cada boton o feature. Cargar una vez el
+  contexto de acceso de la app y derivar las capacidades en memoria.
+
+### 11.6 Orden de implementacion recomendado
+
+1. Antes de activar planes, centralizar un `InventarioAccessContext` que
+   cargue una vez app, estado de suscripcion, rol y permisos. El plan puede
+   cargarse como dato informativo, sin bloquear features.
+2. Definir la matriz de features en un unico archivo compartido.
+3. Aplicar gates de navegacion y UX a Productos, Precios, Paquetes,
+   Catalogos y Captura IA.
+4. Aprobar la oferta y precios en `app_plan_pricing`; despues crear un
+   helper/RPC de Supabase para validar plan mas feature en las operaciones
+   sensibles.
+5. Mantener los permisos granulares para operaciones, sin mezclarlos con el
+   plan comercial.
+6. Medir uso y errores antes de agregar nuevos niveles o excepciones por
+   cliente.
+
+Con este enfoque el producto puede venderse en tres niveles sin generar tres
+implementaciones de Inventario ni alterar el modelo de datos de Productos.

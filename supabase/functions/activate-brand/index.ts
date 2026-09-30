@@ -1,6 +1,5 @@
-// Saca una marca del borrador (status draft -> active) al cerrar el
-// onboarding en modo prueba: el admin de la marca queda activo y operativo
-// (invitaciones + apps), y el pago del plan se decide después desde el panel.
+// Activa una marca únicamente cuando existe una suscripción activa o un trial
+// concedido por una oferta comercial explícita.
 // Solo el admin de esa marca. Idempotente. Fail-closed. 2026-09-24.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
@@ -39,6 +38,18 @@ serve(async (req: Request) => {
   const { data: tenant, error: tErr } = await admin.from('tenants').select('id, slug, status').eq('id', tenant_id).single()
   if (tErr || !tenant) return json({ error: 'Empresa no encontrada' }, 404)
   if (tenant.status !== 'draft') return json({ ok: true, tenant })
+
+  const { data: subscriptions } = await admin
+    .from('tenant_app_subscriptions')
+    .select('status, trial_ends_at, trial_days_granted')
+    .eq('tenant_id', tenant_id)
+  const canActivate = (subscriptions || []).some((subscription) =>
+    subscription.status === 'active'
+    || (subscription.status === 'trialing'
+      && Number(subscription.trial_days_granted || 0) > 0
+      && (!subscription.trial_ends_at || new Date(subscription.trial_ends_at) > new Date())),
+  )
+  if (!canActivate) return json({ error: 'La marca requiere una contratación o una oferta con trial vigente' }, 409)
 
   const { error: upErr } = await admin.from('tenants').update({ status: 'active' }).eq('id', tenant_id)
   if (upErr) return json({ error: 'No se pudo activar la empresa' }, 500)

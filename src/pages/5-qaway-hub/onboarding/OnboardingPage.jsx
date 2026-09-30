@@ -3,9 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/config/supabase'
 
 // Onboarding comercial SaaS (2026-09-21):
-// cuenta → empresa → apps/planes → resumen → pago/trial → equipo → hub.
-// El pago recurrente (Preapproval) lo integra el agente Commerce;
-// aquí se crea la marca en borrador + trialing/pending por app.
+// cuenta → empresa → apps/planes → resumen → contratación → equipo → hub.
+// El precio, la promoción y el trial se fijan en la contratación.
 const PLANS = ['basico', 'intermedio', 'premium']
 
 export default function OnboardingPage() {
@@ -15,6 +14,7 @@ export default function OnboardingPage() {
   const [brand, setBrand] = useState({ name: '', slug: '' })
   const [catalog, setCatalog] = useState([])
   const [pricing, setPricing] = useState([])
+  const [offers, setOffers] = useState([])
   const [chosen, setChosen] = useState({})
   const [msg, setMsg] = useState('')
   const [done, setDone] = useState(null)
@@ -23,7 +23,8 @@ export default function OnboardingPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session || null))
     supabase.from('app_catalog').select('*').order('name').then(({ data }) => setCatalog(data || []))
-    supabase.from('app_plan_pricing').select('*, app:app_catalog(slug)').eq('is_available', true).then(({ data }) => setPricing(data || []))
+     supabase.from('app_plan_pricing').select('*, app:app_catalog(slug)').eq('is_available', true).then(({ data }) => setPricing(data || []))
+     supabase.from('saas_commercial_offers').select('code, app_id, plan, price_override, discount_percent, trial_days, starts_at, ends_at').eq('is_active', true).then(({ data }) => setOffers((data || []).filter((offer) => (!offer.starts_at || new Date(offer.starts_at) <= new Date()) && (!offer.ends_at || new Date(offer.ends_at) > new Date()))))
   }, [])
 
   function priceFor(slug, plan) {
@@ -31,10 +32,23 @@ export default function OnboardingPage() {
     return row || null
   }
 
+  function offerFor(slug, plan) {
+    const row = priceFor(slug, plan)
+    return offers.find((o) => o.app_id === row?.app_id && o.plan === plan) || null
+  }
+
+  function contractedPriceFor(slug, plan) {
+    const regular = priceFor(slug, plan)
+    const offer = offerFor(slug, plan)
+    if (!regular || !offer) return regular ? Number(regular.price) : 0
+    if (offer.price_override !== null) return Number(offer.price_override)
+    return Math.round(Number(regular.price) * (1 - Number(offer.discount_percent || 0) / 100) * 100) / 100
+  }
+
   function total() {
     return Object.entries(chosen).reduce((sum, [slug, plan]) => {
       const row = priceFor(slug, plan)
-      return sum + (row ? Number(row.price) : 0)
+      return sum + contractedPriceFor(slug, plan)
     }, 0)
   }
 
@@ -53,9 +67,13 @@ export default function OnboardingPage() {
       return
     }
     setDone(data.tenant)
-    // Cobro recurrente con precios reales de BD (si existen; si no, queda trial/pending).
+     // Cobro recurrente con precio vigente o snapshot pendiente de la marca.
     try {
-      const items = plans.map((p) => ({ app_slug: p.slug, plan: p.plan }))
+       const items = plans.map((p) => ({
+         app_slug: p.slug,
+         plan: p.plan,
+         offer_code: offerFor(p.slug, p.plan)?.code,
+       }))
       const { data: payData } = await supabase.functions.invoke('mp-subscription-init', {
         body: { tenant_id: data.tenant.id, items },
       })
@@ -63,10 +81,10 @@ export default function OnboardingPage() {
         setPay(payData)
         setMsg('Marca creada. Completa tu suscripción para activar el cobro recurrente.')
       } else if (payData?.error) {
-        setMsg('Marca creada (' + payData.error + '). Tus trials activos ya funcionan.')
+        setMsg('Marca creada (' + payData.error + '). Completa la contratación para activar el acceso.')
       }
     } catch {
-      setMsg('Marca creada. El pago se configurará al publicar precios.')
+      setMsg('Marca creada. Completa la contratación para activar el acceso.')
     }
     setStep(6)
   }
@@ -117,7 +135,7 @@ export default function OnboardingPage() {
                       onClick={() => setChosen((c) => ({ ...c, [a.slug]: active ? undefined : p }))}
                       className={`rounded-full border px-4 py-2 text-sm ${active ? 'bg-white text-black' : 'text-zinc-300'}`}
                     >
-                      {p} · {row.currency} {row.price}{row.trial_days > 0 ? ` · ${row.trial_days}d trial` : ''}
+                      {p} · {row.currency} {offerFor(a.slug, p) ? `${row.price} → ${contractedPriceFor(a.slug, p)}` : row.price}{offerFor(a.slug, p)?.trial_days > 0 ? ` · ${offerFor(a.slug, p).trial_days}d trial` : ''}
                     </button>
                   )
                 })}
@@ -134,7 +152,7 @@ export default function OnboardingPage() {
           <ul className="mt-3 divide-y divide-zinc-800 rounded-2xl border border-zinc-800">
             {Object.entries(chosen).map(([slug, plan]) => {
               const row = priceFor(slug, plan)
-              return <li key={slug} className="flex justify-between px-4 py-3 text-sm"><span>{slug} · {plan}{row?.trial_days > 0 ? ` (${row.trial_days} días trial)` : ''}</span><span>{row?.currency} {row?.price}</span></li>
+              return <li key={slug} className="flex justify-between px-4 py-3 text-sm"><span>{slug} · {plan}{offerFor(slug, plan) ? ' · oferta aplicada' : ''}{offerFor(slug, plan)?.trial_days > 0 ? ` (${offerFor(slug, plan).trial_days} días trial)` : ''}</span><span>{row?.currency} {contractedPriceFor(slug, plan)}{offerFor(slug, plan) ? ` (regular ${row.price})` : ''}</span></li>
             })}
           </ul>
           <p className="mt-3 text-right font-bold">Total mensual: {total().toFixed(2)}</p>
