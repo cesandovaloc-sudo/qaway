@@ -61,11 +61,17 @@ function lastMonths(count: number): { key: string; label: string }[] {
 }
 
 export const categoryService = {
-  /** Catálogo global de categorías (la tabla `categories` no tiene tenant_id). */
-  async getCategories(): Promise<CategoryRow[]> {
-    const { data, error } = await supabase
+  /** Catálogo de categorías filtrado por tenant (con fallback al tenant base). */
+  async getCategories(tenantId?: string | null): Promise<CategoryRow[]> {
+    let query = supabase
       .from('categories')
       .select('id, name, slug, parent_id, icon, sort_order, created_at')
+
+    if (tenantId) {
+      query = query.or(`tenant_id.eq.${tenantId},tenant_id.eq.00000000-0000-0000-0000-000000000001,tenant_id.is.null`)
+    }
+
+    const { data, error } = await query
       .order('sort_order', { ascending: true })
       .order('name', { ascending: true })
 
@@ -75,25 +81,60 @@ export const categoryService = {
 
   /**
    * Métricas de categorías para las tarjetas superiores.
-   * Los conteos de productos salen de `products.category_id` filtrado por tenant,
-   * de modo que la tarjeta "Total de productos" refleja solo la empresa activa.
+   * Prioriza `products.category_id` (FK) y usa `products.category` (texto) como fallback.
+   * Cada producto se cuenta como máximo una vez.
+   * "Total de productos" refleja todos los productos reales de la empresa activa en el inventario.
    */
   async getCategoryStats(tenantId?: string | null): Promise<CategoryStats> {
-    const categories = await this.getCategories()
+    const categories = await this.getCategories(tenantId)
 
     let countQuery = supabase
       .from('products')
-      .select('category_id')
-      .not('category_id', 'is', null)
+      .select('id, category_id, category')
+
     if (tenantId) countQuery = countQuery.eq('tenant_id', tenantId)
 
     const { data: rows, error } = await countQuery
     if (error) throw error
 
+    const productRows = (rows ?? []) as { id: string; category_id?: string | null; category?: string | null }[]
+
+    // Mapas para resolución O(1):
+    // 1. Por ID directo (prioridad 1)
+    const categoryById = new Map<string, CategoryRow>()
+    // 2. Por nombre normalizado (prioridad 2 / fallback)
+    const categoryByName = new Map<string, CategoryRow>()
+
+    for (const c of categories) {
+      categoryById.set(c.id, c)
+      if (c.name) {
+        categoryByName.set(c.name.trim().toLowerCase(), c)
+      }
+    }
+
+    // Inicializar conteos por categoría
     const counts = new Map<string, number>()
-    for (const row of (rows ?? []) as { category_id: string }[]) {
-      if (!row.category_id) continue
-      counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+    for (const c of categories) {
+      counts.set(c.id, 0)
+    }
+
+    // Contar cada producto exactamente una sola vez
+    for (const p of productRows) {
+      let matchedCategoryId: string | null = null
+
+      if (p.category_id && categoryById.has(p.category_id)) {
+        matchedCategoryId = p.category_id
+      } else if (p.category) {
+        const normalizedName = p.category.trim().toLowerCase()
+        const matched = categoryByName.get(normalizedName)
+        if (matched) {
+          matchedCategoryId = matched.id
+        }
+      }
+
+      if (matchedCategoryId) {
+        counts.set(matchedCategoryId, (counts.get(matchedCategoryId) ?? 0) + 1)
+      }
     }
 
     const enriched: CategoryWithCount[] = categories.map(c => ({
@@ -114,7 +155,8 @@ export const categoryService = {
       total: enriched.length,
       withProducts: enriched.filter(c => c.products > 0).length,
       withoutProducts: enriched.filter(c => c.products === 0).length,
-      totalProducts: enriched.reduce((s, c) => s + toInt(c.products), 0),
+      // Total de productos: todos los productos reales del tenant en inventario
+      totalProducts: productRows.length,
       categories: enriched,
       createdByMonth: buckets.map(b => ({
         month: b.label,
@@ -149,19 +191,24 @@ export const categoryService = {
       .join(' ')
   },
 
-  async createCategory(input: CreateCategoryInput): Promise<CategoryRow | null> {
+  async createCategory(input: CreateCategoryInput, tenantId?: string | null): Promise<CategoryRow | null> {
     const name = input.name.trim()
     if (!name) throw new Error('El nombre de la categoría es obligatorio')
 
+    const payload: Record<string, unknown> = {
+      name,
+      slug: slugify(name),
+      parent_id: input.parent_id ?? null,
+      icon: input.icon ?? null,
+      sort_order: input.sort_order ?? 0,
+    }
+    if (tenantId) {
+      payload.tenant_id = tenantId
+    }
+
     const { data, error } = await supabase
       .from('categories')
-      .insert({
-        name,
-        slug: slugify(name),
-        parent_id: input.parent_id ?? null,
-        icon: input.icon ?? null,
-        sort_order: input.sort_order ?? 0,
-      })
+      .insert(payload)
       .select('id, name, slug, parent_id, icon, sort_order, created_at')
       .single()
 
