@@ -1541,6 +1541,7 @@ export default function ProductosPanel() {
                       value={commercialStatus}
                       onChange={s => { setCommercialStatus(s); setPage(1); }}
                       options={[{ v: "Todos", l: "Todos" }, { v: "Disponible", l: "Disponible" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }, { v: "Reservado", l: "Reservado" }, { v: "Agotado", l: "Agotado" }]}
+                      wrapStyle={{ width: "100%" }}
                     />
                   </div>
                   <div>
@@ -1562,6 +1563,7 @@ export default function ProductosPanel() {
                       onChange={v => { setLocationFilter(v); setPage(1); }}
                       options={[{ v: "Todos", l: "Todos los almacenes" }, { v: "Almacén Principal", l: "Almacén Principal" }, { v: "Tienda Sur", l: "Tienda Sur" }, { v: "Tienda Online", l: "Tienda Online" }]}
                       renderLabel={v => (v === "Todos" ? "Todos los almacenes" : v)}
+                      wrapStyle={{ width: "100%" }}
                     />
                   </div>
                 </div>
