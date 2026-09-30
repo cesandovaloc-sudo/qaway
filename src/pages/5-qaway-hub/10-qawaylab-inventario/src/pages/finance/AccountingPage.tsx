@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Search, Loader2, AlertCircle, BookOpen, Plus, X, Check, Trash2 } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 
@@ -69,6 +70,7 @@ export default function AccountingPage() {
   const [entryDesc, setEntryDesc] = useState('')
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0])
   const [entryReference, setEntryReference] = useState('')
+  const modalRef = useDismissOnEscapeOrOutside(showModal, () => setShowModal(false))
   const [lines, setLines] = useState<EntryLine[]>([
     { accountCode: '', accountName: '', description: '', debit: 0, credit: 0 },
     { accountCode: '', accountName: '', description: '', debit: 0, credit: 0 },
@@ -391,7 +393,7 @@ export default function AccountingPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
         >
-          <div className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+          <div ref={modalRef} className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
               <h2 className="text-lg font-semibold text-ink">Nuevo Asiento Contable</h2>

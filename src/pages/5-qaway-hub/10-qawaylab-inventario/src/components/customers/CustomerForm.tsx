@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { X, Save, Loader2, User, Building2, Search } from 'lucide-react'
 import type { Customer, CustomerDocType, CustomerType } from '@/types'
 import { docTypeOptions, isValidDocNumber, normalizeDocNumber } from '@/utils/fiscal'
@@ -34,6 +35,7 @@ export function CustomerForm({ customer, onSave, onClose }: CustomerFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [lookingUp, setLookingUp] = useState(false)
   const [lookupInfo, setLookupInfo] = useState<string | null>(null)
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
 
   const canLookup = formData.doc_type === 'DNI' || formData.doc_type === 'RUC'
 
@@ -110,7 +112,7 @@ export function CustomerForm({ customer, onSave, onClose }: CustomerFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">

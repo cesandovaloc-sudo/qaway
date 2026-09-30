@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Search, Plus, Loader2, AlertCircle, Receipt, X, Tag } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 import {
@@ -49,6 +50,7 @@ export default function ExpensesPage() {
   const [amount, setAmount] = useState('')
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(showForm, () => setShowForm(false))
   const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -298,7 +300,7 @@ export default function ExpensesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)} />
 
-          <div className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
+          <div ref={modalRef} className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 bg-red-500/5">
               <div className="flex items-center gap-3">

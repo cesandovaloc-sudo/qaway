@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { X, Tag } from 'lucide-react'
 import type { PriceList, PriceListType } from '@/types'
 import { priceListTypeLabels } from '@/services/priceListService'
@@ -18,6 +19,8 @@ export default function PriceListForm({ list, onSave, onClose, saving }: PriceLi
     is_active: list?.is_active ?? true,
   })
 
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSave(formData)
@@ -29,7 +32,7 @@ export default function PriceListForm({ list, onSave, onClose, saving }: PriceLi
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl w-full max-w-md shadow-elevated">
+      <div ref={modalRef} className="relative bg-white rounded-2xl w-full max-w-md shadow-elevated">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surface-muted">
           <div className="flex items-center gap-2">

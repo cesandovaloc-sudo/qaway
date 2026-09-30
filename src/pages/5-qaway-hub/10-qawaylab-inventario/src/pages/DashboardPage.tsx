@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import {
   Package,
   TrendingUp,
@@ -23,6 +24,7 @@ import { CollapsibleSection } from '@/components/dashboard/CollapsibleSection'
 
 export default function DashboardPage() {
   const [isOperationOpen, setIsOperationOpen] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(isOperationOpen, () => setIsOperationOpen(false))
 
   const {
     stats,
@@ -264,7 +266,7 @@ export default function DashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════ */}
       {isOperationOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" onClick={() => setIsOperationOpen(false)}>
-          <div className="bg-white border border-zinc-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5" onClick={(e) => e.stopPropagation()}>
+          <div ref={modalRef} className="bg-white border border-zinc-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 text-brand flex items-center justify-center font-bold text-xl">

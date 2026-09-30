@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Link, X, Copy, Check, Calendar, Users, Shield } from 'lucide-react'
 import type { UserPermissions } from '@/types/user'
 import { sharedAccessService } from '@/services/userService'
@@ -29,6 +30,7 @@ export function SharedLinkForm({ onClose, onCreated }: SharedLinkFormProps) {
   const [creating, setCreating] = useState(false)
   const [createdUrl, setCreatedUrl] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
 
   const handleCreate = async () => {
     try {
@@ -111,7 +113,7 @@ export function SharedLinkForm({ onClose, onCreated }: SharedLinkFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">

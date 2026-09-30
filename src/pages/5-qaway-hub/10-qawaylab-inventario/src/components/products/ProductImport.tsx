@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { AlertCircle, CheckCircle2, FileSpreadsheet, Loader2, Upload, X, Download } from 'lucide-react'
 import { parseProductExcel, EXCEL_TEMPLATE_COLUMNS, downloadExcelTemplate, type ExcelProductRow } from '@/utils/excelImport'
 import { productService } from '@/services/productService'
@@ -16,6 +17,7 @@ export default function ProductImport({
   const [parsing, setParsing] = useState(false)
   const [importing, setImporting] = useState(false)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return
@@ -71,6 +73,7 @@ export default function ProductImport({
       aria-label="Importar productos desde Excel"
     >
       <div
+        ref={modalRef}
         className="w-full max-w-lg max-h-[85vh] overflow-y-auto bg-white rounded-2xl shadow-elevated"
         onClick={(e) => e.stopPropagation()}
       >

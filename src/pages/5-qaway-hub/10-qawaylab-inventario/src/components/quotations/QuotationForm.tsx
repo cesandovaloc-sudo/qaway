@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { X, Trash2, Save, Loader2, Search, User, Package } from 'lucide-react'
 import { customerService } from '@/services/customerService'
 import { supabase } from '@/config/supabase'
@@ -33,6 +34,9 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
   const [items, setItems] = useState<QuotationItemForm[]>([])
   const [productSearch, setProductSearch] = useState('')
   const [showProductDropdown, setShowProductDropdown] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
+  const customerDropdownRef = useDismissOnEscapeOrOutside(showCustomerDropdown, () => setShowCustomerDropdown(false))
+  const productDropdownRef = useDismissOnEscapeOrOutside(showProductDropdown, () => setShowProductDropdown(false))
 
   const [discount, setDiscount] = useState(0)
   const [validUntil, setValidUntil] = useState('')
@@ -142,7 +146,7 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col" ref={modalRef}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
@@ -170,7 +174,7 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
               <User className="w-4 h-4 inline mr-1" />
               Cliente
             </label>
-            <div className="relative">
+            <div className="relative" ref={customerDropdownRef}>
               <input
                 type="text"
                 value={selectedCustomer ? `${selectedCustomer.name} ${selectedCustomer.company ? `(${selectedCustomer.company})` : ''}` : customerSearch}
@@ -217,7 +221,7 @@ export function QuotationForm({ quotation, onSave, onClose }: QuotationFormProps
               <Package className="w-4 h-4 inline mr-1" />
               Productos
             </label>
-            <div className="relative">
+            <div className="relative" ref={productDropdownRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"

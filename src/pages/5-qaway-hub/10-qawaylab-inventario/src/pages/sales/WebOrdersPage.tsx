@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import {
   Globe,
   Search,
@@ -107,6 +108,7 @@ export default function WebOrdersPage() {
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<WebOrder | null>(null)
+  const modalRef = useDismissOnEscapeOrOutside(!!selectedOrder, () => setSelectedOrder(null))
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -566,7 +568,7 @@ export default function WebOrdersPage() {
       {/* Modal Detalle de Pedido */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg bg-surface border border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5">
+          <div ref={modalRef} className="relative w-full max-w-lg bg-surface border border-zinc-200 rounded-2xl p-6 shadow-2xl space-y-5">
             {/* Cabecera Modal */}
             <div className="flex items-start justify-between">
               <div>

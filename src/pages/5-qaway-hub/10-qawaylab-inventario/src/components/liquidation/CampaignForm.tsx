@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { X, Save, Loader2 } from 'lucide-react'
 import type { LiquidationCampaign, CampaignStatus } from '@/types'
 
@@ -26,6 +27,7 @@ export function CampaignForm({ campaign, onSave, onClose }: CampaignFormProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,7 +57,7 @@ export function CampaignForm({ campaign, onSave, onClose }: CampaignFormProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">

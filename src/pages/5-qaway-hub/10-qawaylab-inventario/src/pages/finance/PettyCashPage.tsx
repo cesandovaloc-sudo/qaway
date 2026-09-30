@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Loader2, AlertCircle, DollarSign, TrendingUp, TrendingDown, X } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 
@@ -27,6 +28,7 @@ export default function PettyCashPage() {
   const [amount, setAmount] = useState('')
   const [reference, setReference] = useState('')
   const [saving, setSaving] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(showForm, () => setShowForm(false))
   const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -206,7 +208,7 @@ export default function PettyCashPage() {
           />
 
           {/* Modal */}
-          <div className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
+          <div ref={modalRef} className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
             {/* Header */}
             <div className={`flex items-center justify-between px-6 py-4 border-b border-zinc-200 ${
               formType === 'ingreso' ? 'bg-green-500/5' : 'bg-red-500/5'

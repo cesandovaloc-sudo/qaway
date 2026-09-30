@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Download, Loader2, X } from 'lucide-react'
 import type { SalesReportColumn } from '@/utils/salesExport'
 
@@ -34,6 +35,8 @@ export function ColumnPickerModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  const modalRef = useDismissOnEscapeOrOutside(open, onCancel)
+
   if (!open) return null
 
   const toggle = (key: string) => {
@@ -46,7 +49,7 @@ export function ColumnPickerModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-gray-200">
           <div>

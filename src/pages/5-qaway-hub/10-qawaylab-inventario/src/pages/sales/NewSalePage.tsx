@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   Search,
@@ -41,6 +42,8 @@ export default function NewSalePage() {
   const [productQuery, setProductQuery] = useState('')
   const [productResults, setProductResults] = useState<Product[]>([])
   const [productOpen, setProductOpen] = useState(false)
+  const customerDropdownRef = useDismissOnEscapeOrOutside(customerOpen, () => setCustomerOpen(false))
+  const productDropdownRef = useDismissOnEscapeOrOutside(productOpen, () => setProductOpen(false))
 
   const [lines, setLines] = useState<Line[]>([])
   const [discount, setDiscount] = useState('')
@@ -197,7 +200,7 @@ export default function NewSalePage() {
             ) : (
               <div className="relative">
                 <div className="flex gap-2">
-                  <div className="relative flex-1">
+                  <div className="relative flex-1" ref={customerDropdownRef}>
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       value={customerQuery}
@@ -246,7 +249,7 @@ export default function NewSalePage() {
           {/* Products */}
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Productos</label>
-            <div className="relative">
+            <div className="relative" ref={productDropdownRef}>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 value={productQuery}

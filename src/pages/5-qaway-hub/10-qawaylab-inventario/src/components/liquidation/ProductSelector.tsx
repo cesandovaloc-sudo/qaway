@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { Search, X, Plus, Check, Loader2 } from 'lucide-react'
 import { supabase } from '@/config/supabase'
 import type { Product } from '@/types'
@@ -15,6 +16,7 @@ export function ProductSelector({ selectedProducts, onSelect, onRemove, onClose 
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [prices, setPrices] = useState<Record<string, number>>({})
+  const modalRef = useDismissOnEscapeOrOutside(true, onClose)
 
   useEffect(() => {
     fetchProducts()
@@ -57,7 +59,7 @@ export function ProductSelector({ selectedProducts, onSelect, onRemove, onClose 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <div ref={modalRef} className="bg-white rounded-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div>

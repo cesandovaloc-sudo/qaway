@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useDismissOnEscapeOrOutside } from '@/hooks/useDismissOnEscapeOrOutside'
 import { useNavigate, Link } from 'react-router-dom'
 import { Search, Trash2, Loader2, AlertCircle, ArrowLeft, Plus, Truck, Check, UserPlus, X } from 'lucide-react'
 import { supabase } from '@/config/supabase'
@@ -42,6 +43,9 @@ export default function NewPurchaseOrderPage() {
   const [productQuery, setProductQuery] = useState('')
   const [productResults, setProductResults] = useState<Product[]>([])
   const [productOpen, setProductOpen] = useState(false)
+  const modalRef = useDismissOnEscapeOrOutside(showNewSupplier, () => setShowNewSupplier(false))
+  const supplierDropdownRef = useDismissOnEscapeOrOutside(supplierOpen, () => setSupplierOpen(false))
+  const productDropdownRef = useDismissOnEscapeOrOutside(productOpen, () => setProductOpen(false))
 
   // ── Líneas ──
   const [lines, setLines] = useState<Line[]>([])
@@ -320,7 +324,7 @@ export default function NewPurchaseOrderPage() {
                   </button>
                 </div>
               ) : (
-                <div className="relative">
+                <div className="relative" ref={supplierDropdownRef}>
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
                   <input
                     value={supplierQuery}
@@ -383,7 +387,7 @@ export default function NewPurchaseOrderPage() {
                     Agregar manual
                   </button>
                 </div>
-                <div className="relative">
+                <div className="relative" ref={productDropdownRef}>
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
                   <input
                     value={productQuery}
@@ -644,7 +648,7 @@ export default function NewPurchaseOrderPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={e => { if (e.target === e.currentTarget) setShowNewSupplier(false) }}
         >
-          <div className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-md mx-4">
+          <div ref={modalRef} className="bg-surface border border-zinc-200 rounded-2xl w-full max-w-md mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200">
               <h2 className="text-lg font-semibold text-ink">Crear Proveedor</h2>
               <button onClick={() => setShowNewSupplier(false)} className="p-1 text-muted hover:text-ink">
