@@ -40,10 +40,9 @@ import { productService } from "../../src/services/productService";
 import { useTenant } from "../../src/context/TenantContext";
 
 /**
- * ProductosPanel.jsx
- * Panel de productos de Inventi Pro conectado al ecosistema Supabase.
- * Soporta stock por almacén/tiendas, unidades de medida, listas de precios (base, mayorista, mínimo, venta)
- * y sincronización en tiempo real con Supabase.
+ * CategoriasPanel.jsx
+ * Panel de categorías de Inventi Pro.
+ * Tablero migrado al contexto de categorías (diseño superior + lógica a integrar).
  */
 
 const STOCK_IMAGES = {
@@ -169,7 +168,7 @@ function ProductThumb({ id, category = "", name = "", size = 40 }) {
 }
 
 const AVAILABLE_COLUMNS = [
-  { key: "product", label: "Producto" },
+  { key: "product", label: "Categoría" },
   { key: "sku", label: "SKU" },
   { key: "barcode", label: "Cód. Barras" },
   { key: "category", label: "Categoría" },
@@ -207,10 +206,10 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               </div>
               <div>
                 <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
-                  {editing ? "Editar producto" : "Nuevo producto / servicio"}
+                  {editing ? "Editar categoría" : "Nueva categoría"}
                 </h2>
                 <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>
-                  {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
+                  {editing ? `Modificando: ${editing.name}` : "Registra una nueva categoría en el inventario de Qaway Lab"}
                 </p>
               </div>
             </div>
@@ -271,7 +270,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {/* Nombre */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Nombre del producto <span style={{ color: "#ef4444" }}>*</span></div>
+                <div className="pxp-form-label">Nombre de la categoría <span style={{ color: "#ef4444" }}>*</span></div>
                 <input
                   required
                   className="pxp-form-input"
@@ -701,7 +700,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               Cancelar
             </button>
             <button type="submit" className="pxp-btn primary" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>
-              {editing ? "Guardar cambios" : "Crear producto"}
+              {editing ? "Guardar cambios" : "Crear categoría"}
             </button>
           </div>
         </form>
@@ -849,7 +848,7 @@ export default function ProductosPanel() {
 
   const handleBulkStatusChange = (newStatus) => {
     setProducts(prev => prev.map(p => selected.includes(p.id) ? { ...p, status: newStatus } : p));
-    showToast(`${selected.length} productos marcados como "${newStatus}"`);
+    showToast(`${selected.length} categorías marcadas como "${newStatus}"`);
     setShowBulkMenu(false);
   };
 
@@ -862,16 +861,16 @@ export default function ProductosPanel() {
       sku: `${p.sku}-COPY`
     }));
     setProducts(prev => [...copies, ...prev]);
-    showToast(`${toDuplicate.length} productos duplicados`);
+    showToast(`${toDuplicate.length} categorías duplicadas`);
     setShowBulkMenu(false);
   };
 
   const handleBulkDelete = () => {
-    if (window.confirm(`¿Estás seguro de eliminar los ${selected.length} productos seleccionados?`)) {
+    if (window.confirm(`¿Estás seguro de eliminar las ${selected.length} categorías seleccionadas?`)) {
       const count = selected.length;
       setProducts(prev => prev.filter(p => !selected.includes(p.id)));
       setSelected([]);
-      showToast(`${count} productos eliminados correctamente`);
+      showToast(`${count} categorías eliminadas correctamente`);
       setShowBulkMenu(false);
     }
   };
@@ -879,7 +878,7 @@ export default function ProductosPanel() {
   const handleBulkExportCSV = () => {
     const selectedItems = products.filter(p => selected.includes(p.id));
     if (selectedItems.length === 0) return;
-    const headers = ["ID", "Producto", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
+    const headers = ["ID", "Categoría", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
     const rows = selectedItems.map(p => [
       p.id,
       `"${(p.name || '').replace(/"/g, '""')}"`,
@@ -897,11 +896,11 @@ export default function ProductosPanel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `productos_seleccionados_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `categorias_seleccionadas_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(`${selectedItems.length} productos exportados en CSV`);
+    showToast(`${selectedItems.length} categorías exportadas en CSV`);
     setShowBulkMenu(false);
   };
 
@@ -923,7 +922,7 @@ export default function ProductosPanel() {
         const sourceProducts = Array.isArray(res?.data) ? res.data : [];
         const mapped = sourceProducts.map((p, idx) => ({
             id: p.id || `prod-sb-${idx}`,
-            name: p.name || "Producto sin nombre",
+            name: p.name || "Categoría sin nombre",
             detail: p.description ? p.description.slice(0, 35) : "",
             sku: p.sku || `SKU-${idx + 1}`,
             category: p.category || "General",
@@ -968,10 +967,10 @@ export default function ProductosPanel() {
 
   const handleExportCSV = () => {
     if (!filtered || filtered.length === 0) {
-      showToast("No hay productos para exportar");
+      showToast("No hay categorías para exportar");
       return;
     }
-    const headers = ["ID", "Producto", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
+    const headers = ["ID", "Categoría", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
     const rows = filtered.map(p => [
       p.id,
       `"${(p.name || '').replace(/"/g, '""')}"`,
@@ -989,7 +988,7 @@ export default function ProductosPanel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `inventi_productos_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `inventi_categorias_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1019,7 +1018,7 @@ export default function ProductosPanel() {
   
   const openNew = () => {
     if (isPlatformAdmin && !activeTenantId) {
-      showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+      showToast("Debes seleccionar una empresa en la barra superior antes de registrar una categoría.");
       return;
     }
     setEditing(null);
@@ -1124,15 +1123,15 @@ export default function ProductosPanel() {
             ]
           }));
         }
-        showToast("Producto actualizado correctamente");
+        showToast("Categoría actualizada correctamente");
         setModal("");
       } catch (err) {
-        console.error("[Inventi] Error al actualizar producto:", err);
+        console.error("[Inventi] Error al actualizar categoría:", err);
         showToast(`Error al actualizar: ${err.message || 'Error en base de datos'}`);
       }
     } else {
       if (isPlatformAdmin && !activeTenantId) {
-        showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+        showToast("Debes seleccionar una empresa en la barra superior antes de registrar una categoría.");
         return;
       }
       try {
@@ -1176,11 +1175,11 @@ export default function ProductosPanel() {
 
         setProducts(prev => [newP, ...prev]);
         setPage(1);
-        showToast("Producto creado correctamente en base de datos");
+        showToast("Categoría creada correctamente en base de datos");
         setModal("");
       } catch (err) {
-        console.error("[Inventi] Error al crear producto en Supabase:", err);
-        showToast(`Error al guardar producto: ${err.message || 'Error en base de datos'}`);
+        console.error("[Inventi] Error al crear categoría en Supabase:", err);
+        showToast(`Error al guardar categoría: ${err.message || 'Error en base de datos'}`);
       }
     } 
   };
@@ -1236,7 +1235,7 @@ export default function ProductosPanel() {
             ) : (
               <div style={{ textAlign: "center", color: "#94a3b8" }}>
                 <div style={{ fontSize: 52, marginBottom: 8 }}>📷</div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>Foto del producto</div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>Foto de la categoría</div>
               </div>
             )}
           </div>
@@ -1257,7 +1256,7 @@ export default function ProductosPanel() {
             </h1>
             <p style={{ color: "#64748b", lineHeight: 1.6, fontSize: 14, margin: "0 0 24px" }}>
               {fullProduct.description ||
-                "Lleva tus habilidades al siguiente nivel con este producto."}
+                "Lleva tus habilidades al siguiente nivel con esta categoría."}
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
@@ -1297,7 +1296,7 @@ export default function ProductosPanel() {
                   if (window.confirm(`¿Eliminar "${fullProduct.name}"?`)) {
                     setProducts(prev => prev.filter(x => x.id !== fullProduct.id));
                     setFullProduct(null);
-                    showToast("Producto eliminado");
+                    showToast("Categoría eliminada");
                   }
                 }}
               >
@@ -1363,10 +1362,10 @@ export default function ProductosPanel() {
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
-                  <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
+                  <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Categorías</h1>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
                     <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
-                      {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
+                      {isLoadingProducts ? "Cargando inventario..." : "Organiza tus productos en categorías para una mejor gestión del inventario."}
                     </p>
                     {isPlatformAdmin && (
                       activeTenant ? (
@@ -1395,7 +1394,7 @@ export default function ProductosPanel() {
                   className="pxp-btn"
                   style={{ background: "#1e293b", borderColor: "#1e293b", color: "#fff", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 7 }}
                   onClick={handleNavigateCapture}
-                  title="Capturar y digitalizar producto con IA / Cámara"
+                  title="Capturar y digitalizar categoría con IA / Cámara"
                 >
                   <Camera size={15} /> Capturar
                 </button>
@@ -1410,23 +1409,23 @@ export default function ProductosPanel() {
                     opacity: isPlatformAdmin && !activeTenantId ? 0.65 : 1,
                     cursor: isPlatformAdmin && !activeTenantId ? "not-allowed" : "pointer"
                   }}
-                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear productos" : "Crear nuevo producto"}
+                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear categorías" : "Crear nueva categoría"}
                 >
-                  <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
+                  <Plus size={15} /> Nueva categoría <ChevronDown size={13} />
                 </button>
               </div>
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Total de productos" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
-              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Con stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
-              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Stock bajo" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
-              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Sin stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
-              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor de inventario" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
+              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Total de categorías" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Categorías con productos" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Sin productos" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
+              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Total de productos" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
+              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Stock bajo" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
             </section>
 
             <div className="pxp-toolbar">
-              <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
+              <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar categoría..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
               <div className="pxp-select-wrap" ref={openFilter === "category" ? filterMenuRef : null}>
@@ -1740,7 +1739,7 @@ export default function ProductosPanel() {
               {view === "list" ? <div className="pxp-table-scroll"><table className="pxp-table">
                 <thead><tr>
                   <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
-                  {visibleColumns.includes("product") && <th>Producto ↕</th>}
+                  {visibleColumns.includes("product") && <th>Categoría ↕</th>}
                   {visibleColumns.includes("sku") && <th>SKU ↕</th>}
                   {visibleColumns.includes("barcode") && <th>Cód. Barras</th>}
                   {visibleColumns.includes("category") && <th>Categoría</th>}
@@ -1772,18 +1771,18 @@ export default function ProductosPanel() {
                     <td><div className="pxp-actions" ref={menuId === p.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
                       {menuId === p.id && <div className="pxp-action-menu">
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
-                        <button onClick={() => openEdit(p)}>✎　Editar producto</button>
-                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Producto duplicado"); }}>▣　Duplicar</button>
+                        <button onClick={() => openEdit(p)}>✎　Editar categoría</button>
+                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Categoría duplicada"); }}>▣　Duplicar</button>
                         <button onClick={() => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("stock"); setMenuId(null); }}>▤　Ajustar stock</button>
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Movimientos"); setMenuId(null); }}>⇄　Ver movimientos</button>
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Precios"); setMenuId(null); }}>⌁　Historial de precios</button>
                         <button onClick={() => { setMenuId(null); showToast("No hay ventas vinculadas en esta demo"); }}>🛒　Ver en ventas</button>
                         <button onClick={() => { setMenuId(null); showToast("No hay compras vinculadas en esta demo"); }}>▣　Ver en compras</button>
-                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Producto eliminado"); } }}>▤　Eliminar</button>
+                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Categoría eliminada"); } }}>▤　Eliminar</button>
                       </div>}
                     </div></td>
                   </tr>)}
-                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
+                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron categorías con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : (
                 <div
@@ -1845,10 +1844,10 @@ export default function ProductosPanel() {
                       </article>
                     );
                   })}
-                  {pageRows.length === 0 && <div className="pxp-empty">No se encontraron productos.</div>}
+                  {pageRows.length === 0 && <div className="pxp-empty">No se encontraron categorías.</div>}
                 </div>
               )}
-              <div className="pxp-table-footer"><span>Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0} a {Math.min(page * pageSize, filtered.length)} de {filtered.length.toLocaleString("es-PE")} productos</span><div className="pxp-footer-spacer" /><span>Filas por página</span><select className="pxp-select" style={{ height: 34, minWidth: 68 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select><div className="pxp-pagination"><button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>{Array.from({ length: Math.min(pages, 5) }, (_, i) => { const n = i + 1; return <button key={n} className={page === n ? "active" : ""} onClick={() => setPage(n)}>{n}</button>; })}<button disabled={page >= pages} onClick={() => setPage(p => Math.min(pages, p + 1))}>›</button></div></div>
+              <div className="pxp-table-footer"><span>Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0} a {Math.min(page * pageSize, filtered.length)} de {filtered.length.toLocaleString("es-PE")} categorías</span><div className="pxp-footer-spacer" /><span>Filas por página</span><select className="pxp-select" style={{ height: 34, minWidth: 68 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select><div className="pxp-pagination"><button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>{Array.from({ length: Math.min(pages, 5) }, (_, i) => { const n = i + 1; return <button key={n} className={page === n ? "active" : ""} onClick={() => setPage(n)}>{n}</button>; })}<button disabled={page >= pages} onClick={() => setPage(p => Math.min(pages, p + 1))}>›</button></div></div>
             </section>
           </div>
         </main>
@@ -1887,7 +1886,7 @@ export default function ProductosPanel() {
                   style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
                   onClick={() => openEdit(detailProduct)}
                 >
-                  ✎ Editar producto
+                  ✎ Editar categoría
                 </button>
                 <button
                   className="pxp-btn small"
@@ -1968,9 +1967,9 @@ export default function ProductosPanel() {
 
                   {/* Descripción oficial (único lugar) */}
                   <div className="pxp-detail-box full">
-                    <h3>▣ Descripción oficial del producto</h3>
+                    <h3>▣ Descripción oficial de la categoría</h3>
                     <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.7, margin: 0 }}>
-                      {detailProduct.description || "Sin descripción registrada para este producto."}
+                      {detailProduct.description || "Sin descripción registrada para esta categoría."}
                     </p>
                   </div>
                 </div>
@@ -2081,11 +2080,11 @@ export default function ProductosPanel() {
 
 
       {modal === "import" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" onClick={e => e.stopPropagation()}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar productos</h2><p>Carga productos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
+        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar categorías</h2><p>Carga categorías desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevas.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
         <div className="pxp-modal-body">
           <div className="pxp-stepper">{["Cargar archivo", "Mapear campos", "Validar datos", "Importar"].map((s, i) => <div key={s} className={`pxp-step ${importStep === i + 1 ? "active" : importStep > i + 1 ? "done" : ""}`}><span>{importStep > i + 1 ? "✓" : i + 1}</span><div><b>{s}</b><div className="pxp-muted">{["Selecciona tu archivo", "Relaciona las columnas", "Revisa los registros", "Confirma y procesa"][i]}</div></div></div>)}</div>
-          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar productos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
-          {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → SKU (obligatorio)", "Nombre del producto → Nombre (obligatorio)", "Categoría → Categoría", "Precio → Precio base", "Stock inicial → Stock", "Ubicación → Ubicación principal", "Descripción → Descripción", "Código de barras → Código de barras"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Stock</option><option>Precio base</option></select></div>)}</div>}
+          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar categorías nuevas o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
+          {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → SKU (obligatorio)", "Nombre de la categoría → Nombre (obligatorio)", "Categoría padre → Categoría", "Precio → Precio base", "Stock inicial → Stock", "Ubicación → Ubicación principal", "Descripción → Descripción", "Código de barras → Código de barras"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Stock</option><option>Precio base</option></select></div>)}</div>}
           {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>{products.slice(0, 5).map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.sku}</td><td>{p.name}</td><td>{p.category}</td><td>{p.price.toFixed(2)}</td><td>{p.stock}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td></tr>)}</tbody></table></div></div>}
           {importStep === 4 && <div className="pxp-info"><h3>4. Confirmar importación</h3><p>Revisa el modo de importación. La ejecución real requiere conectar el servicio de importación del backend.</p><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "merge"} onChange={() => setImportOption("merge")} /> Agregar nuevos y actualizar existentes</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "new"} onChange={() => setImportOption("new")} /> Solo agregar nuevos</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "update"} onChange={() => setImportOption("update")} /> Solo actualizar existentes</label></div>}
         </div>
