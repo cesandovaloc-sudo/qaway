@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, X } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, MapPin, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
@@ -11,6 +11,31 @@ const roleLabels: Record<string, string> = {
   editor: 'Administrador de empresa',
   viewer: 'Miembro del equipo',
   guest: 'Invitado',
+}
+
+const sedesList = [
+  { id: 'sed-01', name: 'Sede Principal', code: 'SED-01' },
+  { id: 'sed-02', name: 'Sede Surco', code: 'SED-SUR' },
+  { id: 'sed-03', name: 'Sede Miraflores', code: 'SED-MIR' },
+  { id: 'sed-04', name: 'Sede Online', code: 'SED-ONL' },
+]
+
+const warehousesBySede: Record<string, Array<{ id: string; name: string; code: string }>> = {
+  'sed-01': [
+    { id: 'alm-01', name: 'Almacén Central', code: 'ALM-01' },
+    { id: 'alm-02', name: 'Almacén Secundario', code: 'ALM-02' },
+  ],
+  'sed-02': [
+    { id: 'alm-sur-01', name: 'Depósito Surco', code: 'ALM-SUR' },
+    { id: 'alm-sur-02', name: 'Almacén Tienda', code: 'ALM-TND' },
+  ],
+  'sed-03': [
+    { id: 'alm-mir-01', name: 'Almacén Exhibición', code: 'ALM-EXH' },
+    { id: 'alm-mir-02', name: 'Depósito Rápido', code: 'ALM-RAP' },
+  ],
+  'sed-04': [
+    { id: 'alm-onl-01', name: 'Almacén E-Commerce', code: 'ALM-ONL' },
+  ],
 }
 
 const warehousesList = [
@@ -32,9 +57,22 @@ export default function Header({
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isTenantOpen, setIsTenantOpen] = useState(false)
+  const [isSedeOpen, setIsSedeOpen] = useState(false)
   const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
+  const [selectedSede, setSelectedSede] = useState<{ id: string; name: string; code: string } | null>(null)
   const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
+
+  // Reseteo en cascada cuando cambia la empresa seleccionada
+  useEffect(() => {
+    setSelectedSede(null)
+    setSelectedWarehouse(null)
+  }, [scopedTenant?.id])
+
+  // Reseteo en cascada cuando cambia la sede seleccionada
+  useEffect(() => {
+    setSelectedWarehouse(null)
+  }, [selectedSede?.id])
   const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
     if (raw === 'claro' || raw === 'blanco') return 'blanco'
@@ -291,58 +329,121 @@ export default function Header({
           ) : null}
         </div>
 
-        {/* Selector moderno de Almacén (reutilizado de HubPanelPage.jsx:2600-2660) */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setIsWarehouseOpen((o) => !o)}
-            className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
-            title="Seleccionar almacén (ver como)"
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="max-w-40 truncate">{selectedWarehouse ? selectedWarehouse.name : 'Todos los almacenes'}</span>
-            <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isWarehouseOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
-          </button>
-          {isWarehouseOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setIsWarehouseOpen(false)} aria-label="Cerrar selector" />
-              <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
-                <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                  <p className="text-xs font-extrabold text-[var(--hub-text)]">Cambiar de almacén</p>
-                  <p className="text-[10px] text-[var(--hub-dim)] mt-0.5">Filtra el inventario y operaciones por sede o almacén.</p>
-                </div>
-                <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
-                  {warehousesList.map((w) => (
+        {/* Selector de Sede: solo visible si hay una Empresa/Marca activa */}
+        {activeTenant && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsSedeOpen((o) => !o)}
+              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
+              title="Seleccionar sede"
+            >
+              <MapPin size={15} className="text-[#ff4b0b]" />
+              <span className="max-w-36 truncate">{selectedSede ? selectedSede.name : 'Todas las sedes'}</span>
+              <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isSedeOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
+            </button>
+            {isSedeOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsSedeOpen(false)} aria-label="Cerrar selector" />
+                <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
+                  <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={16} className="text-[#ff4b0b]" />
+                      <p className="text-xs font-extrabold text-[var(--hub-text)]">Cambiar de sede</p>
+                    </div>
+                    <p className="text-[10px] text-[var(--hub-dim)] mt-0.5">Filtra las operaciones por sucursal o sede física.</p>
+                  </div>
+                  <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
+                    {sedesList.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSede(s)
+                          setIsSedeOpen(false)
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedSede?.id === s.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedSede?.id === s.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
+                        <span className="truncate">{s.name}</span>
+                        <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{s.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
                     <button
-                      key={w.id}
                       type="button"
-                      onClick={() => {
-                        setSelectedWarehouse(w)
-                        setIsWarehouseOpen(false)
-                      }}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
+                      onClick={() => { setSelectedSede(null); setIsSedeOpen(false); }}
+                      disabled={!selectedSede}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedSede ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-brand' : 'bg-white/20'}`} />
-                      <span className="truncate">{w.name}</span>
-                      <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{w.code}</span>
+                      <MapPin size={14} className="w-3.5 h-3.5" />
+                      Todas las sedes (Vista general)
                     </button>
-                  ))}
+                  </div>
                 </div>
-                <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
-                  <button
-                    type="button"
-                    onClick={() => { setSelectedWarehouse(null); setIsWarehouseOpen(false); }}
-                    disabled={!selectedWarehouse}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
-                  >
-                    <Warehouse size={14} className="w-3.5 h-3.5" />
-                    Todos los almacenes (Vista global)
-                  </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Selector de Almacén: solo visible si hay una Sede seleccionada */}
+        {activeTenant && selectedSede && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsWarehouseOpen((o) => !o)}
+              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
+              title="Seleccionar almacén de la sede"
+            >
+              <Warehouse size={15} className="text-[#ff4b0b]" />
+              <span className="max-w-36 truncate">{selectedWarehouse ? selectedWarehouse.name : 'Todos los almacenes'}</span>
+              <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isWarehouseOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
+            </button>
+            {isWarehouseOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsWarehouseOpen(false)} aria-label="Cerrar selector" />
+                <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
+                  <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                    <div className="flex items-center gap-2">
+                      <Warehouse size={16} className="text-[#ff4b0b]" />
+                      <p className="text-xs font-extrabold text-[var(--hub-text)]">Almacén en {selectedSede.name}</p>
+                    </div>
+                    <p className="text-[10px] text-[var(--hub-dim)] mt-0.5">Filtra el stock de esta sede por depósito o almacén.</p>
+                  </div>
+                  <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
+                    {(warehousesBySede[selectedSede.id] || warehousesList).map((w) => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedWarehouse(w)
+                          setIsWarehouseOpen(false)
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
+                        <span className="truncate">{w.name}</span>
+                        <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{w.code}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                    <button
+                      type="button"
+                      onClick={() => { setSelectedWarehouse(null); setIsWarehouseOpen(false); }}
+                      disabled={!selectedWarehouse}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
+                    >
+                      <Warehouse size={14} className="w-3.5 h-3.5" />
+                      Todos los almacenes de la sede
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
-        </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Lado derecho: buscador con Ctrl K + campana + perfil Supabase */}
