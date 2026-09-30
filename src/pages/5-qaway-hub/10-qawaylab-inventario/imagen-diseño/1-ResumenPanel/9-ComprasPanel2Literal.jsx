@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import PxpPopup from "./PxpPopup";
 import { useNavigate } from "react-router-dom";
 import {
   FileSpreadsheet,
@@ -1423,23 +1424,19 @@ export default function ProductosPanel() {
               <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
-              <div className="pxp-select-wrap">
-                <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
-                  <option value="Todas">Categoría: Todas</option>
-                  {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-                </select>
-                <ChevronDown size={14} className="pxp-select-chevron" />
-              </div>
+              <PxpPopup
+                value={category}
+                onChange={c => { setCategory(c); setPage(1); }}
+                options={[{ v: "Todas", l: "Categoría: Todas" }, ...categories.filter(c => c !== "Todas").map(c => ({ v: c, l: c }))]}
+                renderLabel={v => (v === "Todas" ? "Categoría: Todas" : v)}
+              />
 
-              <div className="pxp-select-wrap">
-                <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
-                  <option value="Todos">Stock: Todos</option>
-                  <option>Con stock</option>
-                  <option>Stock bajo</option>
-                  <option>Sin stock</option>
-                </select>
-                <ChevronDown size={14} className="pxp-select-chevron" />
-              </div>
+              <PxpPopup
+                value={stockFilter}
+                onChange={s => { setStockFilter(s); setPage(1); }}
+                options={[{ v: "Todos", l: "Stock: Todos" }, { v: "Con stock", l: "Con stock" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }]}
+                renderLabel={v => (v === "Todos" ? "Stock: Todos" : v)}
+              />
               
               {/* Botón Más filtros con Icono Lucide */}
               <button
@@ -1540,17 +1537,11 @@ export default function ProductosPanel() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
-                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
-                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={commercialStatus} onChange={e => { setCommercialStatus(e.target.value); setPage(1); }}>
-                        <option value="Todos">Todos</option>
-                        <option value="Disponible">Disponible</option>
-                        <option value="Stock bajo">Stock bajo</option>
-                        <option value="Sin stock">Sin stock</option>
-                        <option value="Reservado">Reservado</option>
-                        <option value="Agotado">Agotado</option>
-                      </select>
-                      <ChevronDown size={14} className="pxp-select-chevron" />
-                    </div>
+                    <PxpPopup
+                      value={commercialStatus}
+                      onChange={s => { setCommercialStatus(s); setPage(1); }}
+                      options={[{ v: "Todos", l: "Todos" }, { v: "Disponible", l: "Disponible" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }, { v: "Reservado", l: "Reservado" }, { v: "Agotado", l: "Agotado" }]}
+                    />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Marca</label>
@@ -1566,15 +1557,12 @@ export default function ProductosPanel() {
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Almacén / Ubicación</label>
-                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
-                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={locationFilter} onChange={e => { setLocationFilter(e.target.value); setPage(1); }}>
-                        <option value="Todos">Todos los almacenes</option>
-                        <option value="Almacén Principal">Almacén Principal</option>
-                        <option value="Tienda Sur">Tienda Sur</option>
-                        <option value="Tienda Online">Tienda Online</option>
-                      </select>
-                      <ChevronDown size={14} className="pxp-select-chevron" />
-                    </div>
+                    <PxpPopup
+                      value={locationFilter}
+                      onChange={v => { setLocationFilter(v); setPage(1); }}
+                      options={[{ v: "Todos", l: "Todos los almacenes" }, { v: "Almacén Principal", l: "Almacén Principal" }, { v: "Tienda Sur", l: "Tienda Sur" }, { v: "Tienda Online", l: "Tienda Online" }]}
+                      renderLabel={v => (v === "Todos" ? "Todos los almacenes" : v)}
+                    />
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>

@@ -11,7 +11,7 @@ interface Supplier {
   address: string | null
   phone: string | null
   email: string | null
-  customer_type: string
+  type: string
   extra_data: Record<string, unknown> | null
   notes: string | null
 }
@@ -73,7 +73,7 @@ export default function SuppliersPage() {
     s =>
       s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       s.doc_number?.includes(searchTerm) ||
-      s.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()),
+      String(s.extra_data?.contact_name || '').toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   function resetForm() {
