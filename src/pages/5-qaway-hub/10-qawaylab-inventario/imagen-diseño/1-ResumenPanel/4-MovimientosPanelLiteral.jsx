@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import PxpPopup from "./PxpPopup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   FileSpreadsheet,
   Download,
@@ -773,7 +774,7 @@ export default function MovimientosPanelLiteral() {
   const [pageSize, setPageSize] = useState(10);
   const [view, setView] = useState("list");
   const [gridCols, setGridCols] = useState(5);
-  const [menuId, setMenuId] = useState(null);
+  const [detailMovement, setDetailMovement] = useState(null);
   const [selected, setSelected] = useState([]);
   const [detailProduct, setDetailProduct] = useState(null);
   const [fullProduct, setFullProduct] = useState(null);
@@ -1401,11 +1402,11 @@ export default function MovimientosPanelLiteral() {
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Entradas (últimos 30 días)" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
-              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Salidas (últimos 30 días)" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
-              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Transferencias" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
-              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Ajustes" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
-              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor movido (entradas − salidas)" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
+              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Entradas (últimos 30 días)" value={isLoadingProducts ? "—" : qtySum("Entrada").toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : count("Entrada")}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Salidas (últimos 30 días)" value={isLoadingProducts ? "—" : qtySum("Salida").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Salida")} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Transferencias" value={isLoadingProducts ? "—" : qtySum("Transferencia").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Transferencia")} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
+              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Ajustes" value={isLoadingProducts ? "—" : qtySum("Ajuste").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Ajuste")} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
+              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Total movido" value={isLoadingProducts ? "—" : (qtySum("Entrada") - qtySum("Salida")).toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
             </section>
 
             <div className="pxp-toolbar">
