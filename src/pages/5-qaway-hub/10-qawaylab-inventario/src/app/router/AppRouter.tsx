@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import AppLayout from '@/app/layouts/AppLayout'
 import RequireAuth from '@/app/router/RequireAuth'
 import RequirePermission from '@/app/router/RequirePermission'
+import RequirePlanFeature from '@/app/router/RequirePlanFeature'
 import LoginPage from '@/pages/LoginPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProductsPage from '@/pages/inventory/ProductsPage'
@@ -66,16 +67,16 @@ export default function AppRouter() {
           <Route index element={<DashboardPage />} />
 
           {/* Productos / Inventario — lectura: cualquier autenticado */}
-          <Route path="productos" element={<ProductsPage />} />
-          <Route path="productos/:id" element={<ProductDetailPage />} />
-          <Route path="sedes" element={<SedesPanelPage />} />
-          <Route path="logistica" element={<ProductsPage />} />
-          <Route path="logistica/:id" element={<ProductDetailPage />} />
-          <Route path="logistica/categorias" element={<CategoriesPage />} />
-          <Route path="logistica/movimientos" element={<MovementsPage />} />
-          <Route path="inventario" element={<ProductsPage />} />
-          <Route path="inventario/:id" element={<ProductDetailPage />} />
-          <Route path=":id" element={<ProductDetailPage />} />
+          <Route path="productos" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />
+          <Route path="productos/:id" element={<RequirePlanFeature feature="products"><ProductDetailPage /></RequirePlanFeature>} />
+          <Route path="sedes" element={<RequirePlanFeature feature="inventory"><SedesPanelPage /></RequirePlanFeature>} />
+          <Route path="logistica" element={<RequirePlanFeature feature="products"><ProductsPage /></RequirePlanFeature>} />
+          <Route path="logistica/:id" element={<RequirePlanFeature feature="products"><ProductDetailPage /></RequirePlanFeature>} />
+          <Route path="logistica/categorias" element={<RequirePlanFeature feature="products"><CategoriesPage /></RequirePlanFeature>} />
+          <Route path="logistica/movimientos" element={<RequirePlanFeature feature="movements"><MovementsPage /></RequirePlanFeature>} />
+          <Route path="inventario" element={<RequirePlanFeature feature="inventory"><ProductsPage /></RequirePlanFeature>} />
+          <Route path="inventario/:id" element={<RequirePlanFeature feature="inventory"><ProductDetailPage /></RequirePlanFeature>} />
+          <Route path=":id" element={<RequirePlanFeature feature="products"><ProductDetailPage /></RequirePlanFeature>} />
 
           {/* C-4: creación de productos exige el permiso del modelo de roles
               (guest/viewer niegan can_create_products en rolePermissions) */}
@@ -87,19 +88,19 @@ export default function AppRouter() {
           </Route>
 
           {/* Comercial */}
-          <Route path="clientes" element={<CustomersPage />} />
-          <Route path="precios" element={<PriceListsPage />} />
-          <Route path="precios/listas" element={<PriceListsPage />} />
+           <Route path="clientes" element={<RequirePlanFeature feature="customers"><CustomersPage /></RequirePlanFeature>} />
+           <Route path="precios" element={<RequirePlanFeature feature="price_lists"><PriceListsPage /></RequirePlanFeature>} />
+           <Route path="precios/listas" element={<RequirePlanFeature feature="price_lists"><PriceListsPage /></RequirePlanFeature>} />
           {/* Módulo de precios del panel de diseño (lista, cliente, canal,
               promociones, historial, configuración). Ruta propia: /precios y
               /precios/listas siguen siendo PriceListsPage. */}
           <Route path="precios-panel" element={<PreciosPanelPage />} />
-          <Route path="paquetes" element={<PackagesPage />} />
+           <Route path="paquetes" element={<RequirePlanFeature feature="packages"><PackagesPage /></RequirePlanFeature>} />
           {/* Módulo de kits y paquetes armables. Este módulo no existía: no
               había ruta, página ni entrada de menú. /paquetes sigue siendo
               PackagesPage, sin tocar. */}
           <Route path="kits" element={<KitsPage />} />
-          <Route path="cotizaciones" element={<QuotationsPage />} />
+           <Route path="cotizaciones" element={<RequirePlanFeature feature="quotations"><QuotationsPage /></RequirePlanFeature>} />
 
           {/* Ventas — lectura: exige can_view_sales (guest lo niega) */}
           <Route element={<RequirePermission permission="can_view_sales" />}>
@@ -133,7 +134,7 @@ export default function AppRouter() {
           <Route path="compras-panel" element={<ComprasPanelPage />} />
 
           {/* Promociones */}
-          <Route path="promociones" element={<LiquidationPage />} />
+           <Route path="promociones" element={<RequirePlanFeature feature="promotions"><LiquidationPage /></RequirePlanFeature>} />
           <Route path="promociones/catalogos" element={<CatalogsPage />} />
           {/* Liquidaciones a proveedores y clientes. Distinto de /promociones,
               que liquida stock para vender (LiquidationPage). */}
@@ -160,7 +161,7 @@ export default function AppRouter() {
         </Route>
 
         {/* Captura IA (protegida, fuera del layout principal) */}
-        <Route path="captura" element={<CapturePage />} />
+         <Route path="captura" element={<RequirePlanFeature feature="assisted_capture"><CapturePage /></RequirePlanFeature>} />
       </Route>
 
       {/* 404 */}

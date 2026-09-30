@@ -135,16 +135,11 @@ serve(async (req) => {
     return json({ success: false, error: 'No autorizado' }, 401)
   }
 
-  const { data: appRole, error: roleError } = await supabase.rpc('user_app_role', {
+  const { data: canUseCustomers, error: featureError } = await supabase.rpc('user_can_use_feature', {
     p_app_slug: 'inventario',
+    p_feature_key: 'customers',
   })
-  if (roleError) {
-    // Si el RPC no existe o falla, la capability se niega (fail-closed).
-    return json({ success: false, error: 'No autorizado (rol no verificable)' }, 403)
-  }
-  const allowedRoles = new Set(['admin', 'editor', 'viewer'])
-  if (typeof appRole !== 'string' || !allowedRoles.has(appRole)) {
-    // guest (o rol desconocido) no consulta servicios fiscales de pago.
+  if (featureError || canUseCustomers !== true) {
     return json({ success: false, error: 'No autorizado para consultas fiscales' }, 403)
   }
 
