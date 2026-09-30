@@ -6,7 +6,7 @@ import PriceListForm from '@/components/pricing/PriceListForm'
 import type { PriceList } from '@/types'
 
 export default function PriceListsPage() {
-  const { lists, loading, createList, updateList, deleteList, toggleActive } = usePriceLists()
+  const { lists, loading, error, createList, updateList, deleteList, toggleActive } = usePriceLists()
   const [showForm, setShowForm] = useState(false)
   const [editingList, setEditingList] = useState<PriceList | null>(null)
   const [saving, setSaving] = useState(false)
@@ -64,6 +64,11 @@ export default function PriceListsPage() {
       </div>
 
       {/* Content */}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          No se pudo guardar o cargar la lista: {error}
+        </div>
+      )}
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <Loader2 size={24} className="text-brand animate-spin" />

@@ -2,7 +2,7 @@ import { supabase } from '@/config/supabase'
 import type { Bundle, BundleItem, Product, PaginatedResponse, PaginationParams } from '@/types'
 
 // ── Extended Bundle with items ──
-export interface BundleWithItems extends Bundle {
+export interface BundleWithItems extends Omit<Bundle, 'id' | 'created_at'> {
   items?: BundleItemInput[]
 }
 

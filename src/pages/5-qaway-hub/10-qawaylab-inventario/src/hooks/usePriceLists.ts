@@ -32,19 +32,25 @@ export function usePriceLists(): UsePriceListsReturn {
   }, [])
 
   const createList = useCallback(async (data: Partial<PriceList>) => {
-    const list = await priceListService.createPriceList(data)
-    if (list) {
-      setLists((prev) => [...prev, list])
+    try {
+      const list = await priceListService.createPriceList(data)
+      if (list) setLists((prev) => [...prev, list])
+      return list
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear lista')
+      throw err
     }
-    return list
   }, [])
 
   const updateList = useCallback(async (id: string, data: Partial<PriceList>) => {
-    const list = await priceListService.updatePriceList(id, data)
-    if (list) {
-      setLists((prev) => prev.map((l) => (l.id === id ? list : l)))
+    try {
+      const list = await priceListService.updatePriceList(id, data)
+      if (list) setLists((prev) => prev.map((l) => (l.id === id ? list : l)))
+      return list
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar lista')
+      throw err
     }
-    return list
   }, [])
 
   const deleteList = useCallback(async (id: string) => {

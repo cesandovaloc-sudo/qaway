@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { FileText, Plus, Search, Loader2, AlertCircle } from 'lucide-react'
+import { FileText, Plus, Search, Loader2, AlertCircle, X } from 'lucide-react'
 import { useCatalogs } from '@/hooks/useCatalogs'
 import { CatalogCard } from '@/components/catalog/CatalogCard'
 import type { Catalog } from '@/types'
 
 export default function CatalogsPage() {
-  const { catalogs, loading, error, pagination, setPage, deleteCatalog } = useCatalogs()
+  const { catalogs, loading, error, pagination, setPage, deleteCatalog, createCatalog } = useCatalogs()
   const [searchTerm, setSearchTerm] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ name: '', description: '', is_public: false })
 
   const filteredCatalogs = catalogs.filter(catalog =>
     catalog.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -19,6 +22,25 @@ export default function CatalogsPage() {
     }
   }
 
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!form.name.trim()) return
+    try {
+      setSaving(true)
+      await createCatalog({
+        name: form.name.trim(),
+        description: form.description.trim() || null,
+        is_public: form.is_public,
+        template: 'professional',
+        campaign_id: null,
+      })
+      setForm({ name: '', description: '', is_public: false })
+      setShowForm(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -27,7 +49,7 @@ export default function CatalogsPage() {
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Catálogos</h1>
           <p className="text-sm text-gray-500">Genera catálogos PDF y vistas públicas de tus productos</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
           <Plus className="w-4 h-4" />
           Nuevo catálogo
         </button>
@@ -62,7 +84,7 @@ export default function CatalogsPage() {
           <p className="text-sm text-gray-500 mb-4">
             Crea tu primer catálogo para generar PDFs y compartir productos
           </p>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+           <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
             <Plus className="w-4 h-4" />
             Crear catálogo
           </button>
@@ -109,6 +131,21 @@ export default function CatalogsPage() {
             </div>
           )}
         </>
+      )}
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form onSubmit={handleCreate} className="w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Nuevo catálogo</h2>
+              <button type="button" onClick={() => setShowForm(false)}><X className="h-5 w-5 text-gray-500" /></button>
+            </div>
+            <input required placeholder="Nombre del catálogo" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <textarea placeholder="Descripción" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} /> Publicar catálogo</label>
+            <button disabled={saving} className="w-full rounded-lg bg-red-600 px-4 py-2 font-medium text-white disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar catálogo'}</button>
+          </form>
+        </div>
       )}
     </div>
   )

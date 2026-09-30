@@ -80,7 +80,7 @@ function getProductStockImage(product) {
 
 const css = `
 .pxp-root{--blue:#ff4b0b;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--soft:#f5f8fc;--green:#059669;--red:#e11d48;--amber:#d97706;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
-.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select-wrap{position:relative;display:inline-flex;align-items:center}.pxp-select{height:38px;border:1px solid #e2e8f0;border-radius:999px;background:#fff;padding:0 36px 0 16px;color:#0f172a;font:inherit;font-size:13px;font-weight:600;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;transition:all .15s ease}.pxp-select:hover{border-color:#cbd5e1;background:#f8fafc}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.12)}.pxp-toolbar .pxp-btn{border-radius:999px;box-shadow:0 1px 2px rgba(15,23,42,0.04)}.pxp-select:hover{border-color:#cbd5e1}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.1)}.pxp-select-chevron{position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
+.pxp-root *{box-sizing:border-box}.pxp-layout{display:flex;min-height:100vh}.pxp-sidebar{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:10px}.pxp-brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px}.pxp-logo{width:30px;height:30px;background:linear-gradient(135deg,#ff6b35,#ff4b0b);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);position:relative}.pxp-logo:after{content:"";position:absolute;inset:8px;background:#fff;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}.pxp-brand b{font-size:20px;letter-spacing:-.7px}.pxp-pro{font-size:11px;color:#ff4b0b;background:#fff2eb;border-radius:6px;padding:3px 7px;margin-left:4px}.pxp-brand small{display:block;color:var(--muted);font-size:11px;margin-top:1px}.pxp-nav{display:grid;gap:4px}.pxp-nav button{border:0;background:transparent;color:#34415b;text-align:left;padding:10px 12px;border-radius:7px;display:flex;align-items:center;gap:12px;font:inherit;cursor:pointer}.pxp-nav button.active{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-nav .sep{height:1px;background:var(--line);margin:8px 2px}.pxp-plan{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:12px;background:#f8faff}.pxp-plan b{display:block}.pxp-plan small{color:var(--muted)}.pxp-progress{height:6px;border-radius:10px;background:#dfe7f2;margin:10px 0 7px;overflow:hidden}.pxp-progress i{display:block;width:40%;height:100%;background:var(--blue);border-radius:10px}.pxp-main{min-width:0;flex:1}.pxp-topbar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 22px;gap:18px}.pxp-global-search{height:36px;max-width:600px;flex:1;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;gap:10px;padding:0 12px;color:var(--muted);background:#fbfcfe}.pxp-global-search input{border:0;outline:0;background:transparent;flex:1;font:inherit;min-width:0}.pxp-top-right{margin-left:auto;display:flex;align-items:center;gap:18px;color:#53627d}.pxp-avatar{width:32px;height:32px;border-radius:50%;background:#172b50;color:white;display:grid;place-items:center;font-weight:700}.pxp-content{padding:22px 20px;max-width:1800px;margin:auto}.pxp-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}.pxp-heading-icon{width:38px;height:38px;border-radius:10px;background:#f4f4f5;border:1px solid #e4e4e7;color:#18181b;display:grid;place-items:center;font-size:21px}.pxp-heading h1{font-size:28px;letter-spacing:-.8px;margin:0 0 2px;color:#111b2d}.pxp-heading p{margin:0;color:var(--muted)}.pxp-heading-actions{margin-left:auto;display:flex;gap:10px;align-items:center}.pxp-btn{border:1px solid var(--line);background:#fff;color:#34415b;border-radius:8px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.pxp-btn:hover{border-color:#b8c9e6;background:#f9fbff}.pxp-btn.primary{background:#ff4b0b;border-color:#ff4b0b;color:#fff;box-shadow:0 2px 8px rgba(255,75,11,0.25)}.pxp-btn.primary:hover{background:#ea3e00;border-color:#ea3e00;color:#fff}.pxp-btn.dark{background:#14213c;border-color:#14213c;color:#fff}.pxp-btn.small{padding:7px 10px;font-size:12px}.pxp-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}.pxp-metric{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:14px 16px;min-width:0;box-shadow:0 4px 20px rgba(0,0,0,0.03);display:flex;flex-direction:column;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}.pxp-metric:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(0,0,0,0.06)}.pxp-metric-icon{width:28px;height:28px;flex-shrink:0;border-radius:8px;display:grid;place-items:center;background:#f4f4f5;color:#52525b}.pxp-metric-label{font-size:12px;font-weight:600;color:#52525b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pxp-metric-value{font-size:26px;font-weight:800;letter-spacing:-.6px;color:#0f172a;margin-top:2px;white-space:nowrap}.pxp-metric-note{font-size:11px;font-weight:500;color:#71717a;margin-top:4px;display:flex;align-items:center;gap:5px}.pxp-up{color:#ff4b0b;font-weight:600}.pxp-toolbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(0,0,0,0.03)}.pxp-search{display:flex;align-items:center;gap:9px;flex:1;min-width:220px;max-width:480px;border:1px solid var(--line);background:#f9fbfd;border-radius:8px;padding:0 12px;height:38px;color:#7b8aa5}.pxp-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;font:inherit}.pxp-select-wrap{position:relative;display:inline-flex;align-items:center}.pxp-select{height:38px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;padding:0 34px 0 12px;color:#334155;font:inherit;font-size:13px;font-weight:500;appearance:none;-webkit-appearance:none;cursor:pointer;outline:none;transition:border-color .15s ease}.pxp-select:hover{border-color:#cbd5e1}.pxp-select:focus{border-color:#ff4b0b;box-shadow:0 0 0 3px rgba(255,75,11,0.1)}.pxp-select-chevron{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:#64748b}.pxp-dmenu{position:absolute;left:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:1200;color-scheme:light}.pxp-dmenu-item{display:flex;width:100%;align-items:center;gap:8px;padding:8px 10px;border:0;background:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;text-align:left;transition:background .12s ease}.pxp-dmenu-item:hover{background:#f1f5f9;color:#0f172a}.pxp-dmenu-item.sel{background:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-dmenu-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#e2e8f0}.pxp-dmenu-item.sel .pxp-dmenu-dot{background:#ff4b0b}.pxp-view-toggle{margin-left:auto;display:flex;gap:6px;align-items:center}.pxp-icon-btn{width:36px;height:36px;border:1px solid var(--line);background:#fff;border-radius:8px;color:#53627d;cursor:pointer;display:grid;place-items:center;font-size:17px}.pxp-icon-btn.selected{background:#eef4ff;border-color:#b7cdfa;color:#155de3}.pxp-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:visible;box-shadow:0 2px 10px rgba(0,0,0,0.02)}.pxp-table-scroll{overflow-x:auto}.pxp-table{width:100%;border-collapse:collapse;min-width:940px}.pxp-table th{background:#f8fafc;color:#475569;font-size:13px;font-weight:700;text-align:left;padding:15px 16px;border-bottom:1px solid #e2e8f0;white-space:nowrap;letter-spacing:.2px}.pxp-table td{padding:16px 16px;border-bottom:1px solid #f1f5f9;color:#334155;font-size:14.5px;white-space:nowrap}.pxp-table tr:last-child td{border-bottom:0}.pxp-table tbody tr:nth-child(even){background:#fafafa}.pxp-table tbody tr:hover{background:#f8fafc}.pxp-check{width:18px;height:18px;accent-color:var(--blue);cursor:pointer;border-radius:4px}.pxp-product-cell{display:flex;align-items:center;gap:13px;min-width:250px}.pxp-product-thumb{width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#f8fafc;display:grid;place-items:center;border:1px solid #e2e8f0}.pxp-product-name{color:#0f172a;font-weight:700;font-size:14.5px}.pxp-product-sub{font-size:12px;color:#64748b;margin-top:2px}.pxp-stock{font-weight:700;font-size:14px}.pxp-stock.ok{color:#166534}.pxp-stock.low{color:#b45309}.pxp-stock.zero{color:#71717a}.pxp-badge{display:inline-flex;align-items:center;border-radius:6px;padding:4px 9px;font-size:12px;font-weight:650}.pxp-badge.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}.pxp-badge.low{background:#fffbeb;color:#b45309;border:1px solid #fde68a}.pxp-badge.zero{background:#f4f4f5;color:#52525b;border:1px solid #e4e4e7}.pxp-actions{display:flex;gap:6px;justify-content:flex-end;position:relative}.pxp-action-menu{position:absolute;z-index:15;right:0;top:40px;width:190px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 35px #182c4a20}.pxp-action-menu button{display:flex;width:100%;gap:10px;align-items:center;border:0;background:transparent;text-align:left;padding:10px;border-radius:6px;color:#34415b;font:inherit;cursor:pointer}.pxp-action-menu button:hover{background:#f2f6fc}.pxp-action-menu button.danger{color:#e11d48}.pxp-table-footer{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#64748b;font-size:13px;border-top:1px solid var(--line);flex-wrap:wrap}.pxp-footer-spacer{flex:1}.pxp-pagination{display:flex;gap:6px;align-items:center}.pxp-pagination button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;color:#34415b;cursor:pointer}.pxp-pagination button.active{background:var(--blue);color:white;border-color:var(--blue)}.pxp-pagination button:disabled{opacity:.4;cursor:default}
 .pxp-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;padding:14px 0}
 .pxp-product-card{border:1px solid #e2e8f0;border-radius:12px;background:#fff;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(15,23,42,0.03);transition:border-color .15s ease,box-shadow .15s ease}
 .pxp-product-card:hover{border-color:#94a3b8;box-shadow:0 4px 14px rgba(15,23,42,0.06)}
@@ -811,9 +811,11 @@ export default function ProductosPanel() {
   const [form, setForm] = useState(defaultForm);
 
   const [showBulkMenu, setShowBulkMenu] = useState(false);
+  const [openFilter, setOpenFilter] = useState(null);
   const columnPickerRef = useRef(null);
   const actionsMenuRef = useRef(null);
   const bulkMenuRef = useRef(null);
+  const filterMenuRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -826,11 +828,15 @@ export default function ProductosPanel() {
       if (bulkMenuRef.current && !bulkMenuRef.current.contains(event.target)) {
         setShowBulkMenu(false);
       }
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target)) {
+        setOpenFilter(null);
+      }
     }
     function handleEscape(event) {
       if (event.key === "Escape") {
         setMenuId(null);
         setShowBulkMenu(false);
+        setOpenFilter(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -1423,22 +1429,36 @@ export default function ProductosPanel() {
               <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
-              <div className="pxp-select-wrap">
-                <select className="pxp-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
-                  <option value="Todas">Categoría: Todas</option>
-                  {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-                </select>
+              <div className="pxp-select-wrap" ref={openFilter === "category" ? filterMenuRef : null}>
+                <button type="button" className="pxp-select" style={{ textAlign: "left", width: "100%" }} onClick={() => setOpenFilter(openFilter === "category" ? null : "category")}>
+                  {category === "Todas" ? "Categoría: Todas" : category}
+                </button>
                 <ChevronDown size={14} className="pxp-select-chevron" />
+                {openFilter === "category" && (
+                  <div className="pxp-dmenu">
+                    {["Todas", ...categories.filter(c => c !== "Todas")].map(opt => (
+                      <button type="button" key={opt} className={`pxp-dmenu-item ${category === opt ? "sel" : ""}`} onClick={() => { setCategory(opt); setPage(1); setOpenFilter(null); }}>
+                        <span className="pxp-dmenu-dot" /> <span>{opt === "Todas" ? "Categoría: Todas" : opt}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div className="pxp-select-wrap">
-                <select className="pxp-select" value={stockFilter} onChange={e => { setStockFilter(e.target.value); setPage(1); }}>
-                  <option value="Todos">Stock: Todos</option>
-                  <option>Con stock</option>
-                  <option>Stock bajo</option>
-                  <option>Sin stock</option>
-                </select>
+              <div className="pxp-select-wrap" ref={openFilter === "stock" ? filterMenuRef : null}>
+                <button type="button" className="pxp-select" style={{ textAlign: "left", width: "100%" }} onClick={() => setOpenFilter(openFilter === "stock" ? null : "stock")}>
+                  {stockFilter === "Todos" ? "Stock: Todos" : stockFilter}
+                </button>
                 <ChevronDown size={14} className="pxp-select-chevron" />
+                {openFilter === "stock" && (
+                  <div className="pxp-dmenu">
+                    {[{ v: "Todos", l: "Stock: Todos" }, { v: "Con stock", l: "Con stock" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }].map(o => (
+                      <button type="button" key={o.v} className={`pxp-dmenu-item ${stockFilter === o.v ? "sel" : ""}`} onClick={() => { setStockFilter(o.v); setPage(1); setOpenFilter(null); }}>
+                        <span className="pxp-dmenu-dot" /> <span>{o.l}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               
               {/* Botón Más filtros con Icono Lucide */}
@@ -1540,16 +1560,20 @@ export default function ProductosPanel() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
-                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
-                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={commercialStatus} onChange={e => { setCommercialStatus(e.target.value); setPage(1); }}>
-                        <option value="Todos">Todos</option>
-                        <option value="Disponible">Disponible</option>
-                        <option value="Stock bajo">Stock bajo</option>
-                        <option value="Sin stock">Sin stock</option>
-                        <option value="Reservado">Reservado</option>
-                        <option value="Agotado">Agotado</option>
-                      </select>
+                    <div className="pxp-select-wrap" style={{ width: "100%" }} ref={openFilter === "status" ? filterMenuRef : null}>
+                      <button type="button" className="pxp-select" style={{ width: "100%", maxWidth: "100%", textAlign: "left" }} onClick={() => setOpenFilter(openFilter === "status" ? null : "status")}>
+                        {commercialStatus}
+                      </button>
                       <ChevronDown size={14} className="pxp-select-chevron" />
+                      {openFilter === "status" && (
+                        <div className="pxp-dmenu">
+                          {["Todos", "Disponible", "Stock bajo", "Sin stock", "Reservado", "Agotado"].map(opt => (
+                            <button type="button" key={opt} className={`pxp-dmenu-item ${commercialStatus === opt ? "sel" : ""}`} onClick={() => { setCommercialStatus(opt); setPage(1); setOpenFilter(null); }}>
+                              <span className="pxp-dmenu-dot" /> <span>{opt}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -1566,14 +1590,20 @@ export default function ProductosPanel() {
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Almacén / Ubicación</label>
-                    <div className="pxp-select-wrap" style={{ width: "100%" }}>
-                      <select className="pxp-select" style={{ width: "100%", maxWidth: "100%" }} value={locationFilter} onChange={e => { setLocationFilter(e.target.value); setPage(1); }}>
-                        <option value="Todos">Todos los almacenes</option>
-                        <option value="Almacén Principal">Almacén Principal</option>
-                        <option value="Tienda Sur">Tienda Sur</option>
-                        <option value="Tienda Online">Tienda Online</option>
-                      </select>
+                    <div className="pxp-select-wrap" style={{ width: "100%" }} ref={openFilter === "location" ? filterMenuRef : null}>
+                      <button type="button" className="pxp-select" style={{ width: "100%", maxWidth: "100%", textAlign: "left" }} onClick={() => setOpenFilter(openFilter === "location" ? null : "location")}>
+                        {locationFilter === "Todos" ? "Todos los almacenes" : locationFilter}
+                      </button>
                       <ChevronDown size={14} className="pxp-select-chevron" />
+                      {openFilter === "location" && (
+                        <div className="pxp-dmenu">
+                          {[{ v: "Todos", l: "Todos los almacenes" }, { v: "Almacén Principal", l: "Almacén Principal" }, { v: "Tienda Sur", l: "Tienda Sur" }, { v: "Tienda Online", l: "Tienda Online" }].map(o => (
+                            <button type="button" key={o.v} className={`pxp-dmenu-item ${locationFilter === o.v ? "sel" : ""}`} onClick={() => { setLocationFilter(o.v); setPage(1); setOpenFilter(null); }}>
+                              <span className="pxp-dmenu-dot" /> <span>{o.l}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

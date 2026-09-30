@@ -53,8 +53,7 @@ export const supabasePriceListAdapter: PriceListsAdapter = {
       .single()
 
     if (error) {
-      console.error('Error creating price list:', error)
-      return null
+      throw error
     }
     return data
   },
@@ -68,8 +67,7 @@ export const supabasePriceListAdapter: PriceListsAdapter = {
       .single()
 
     if (error) {
-      console.error('Error updating price list:', error)
-      return null
+      throw error
     }
     return data
   },

@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { Package, Plus, Search, Loader2, AlertCircle } from 'lucide-react'
+import { Package, Plus, Search, Loader2, AlertCircle, X } from 'lucide-react'
 import { useBundles } from '@/hooks/useBundles'
 import { BundleCard } from '@/components/bundles/BundleCard'
 
 export default function PackagesPage() {
-  const { bundles, loading, error, pagination, setPage, deleteBundle } = useBundles()
+  const { bundles, loading, error, pagination, setPage, deleteBundle, createBundle } = useBundles()
   const [searchTerm, setSearchTerm] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ name: '', sku: '', description: '', bundle_price: '' })
 
   const filteredBundles = bundles.filter(bundle =>
     bundle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -18,6 +21,29 @@ export default function PackagesPage() {
     }
   }
 
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!form.name.trim() || !form.sku.trim()) return
+    try {
+      setSaving(true)
+      await createBundle({
+        name: form.name.trim(),
+        sku: form.sku.trim(),
+        description: form.description.trim() || null,
+        bundle_price: Number(form.bundle_price) || 0,
+        discount: 0,
+        status: 'active',
+        image_url: null,
+        total_individual_price: 0,
+        items: [],
+      })
+      setForm({ name: '', sku: '', description: '', bundle_price: '' })
+      setShowForm(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -26,7 +52,7 @@ export default function PackagesPage() {
           <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Paquetes</h1>
           <p className="text-sm text-gray-500">Agrupa productos para ofrecer soluciones completas</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
           <Plus className="w-4 h-4" />
           Nuevo paquete
         </button>
@@ -61,7 +87,7 @@ export default function PackagesPage() {
           <p className="text-sm text-gray-500 mb-4">
             Crea tu primer paquete para agrupar productos relacionados
           </p>
-          <button className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+           <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
             <Plus className="w-4 h-4" />
             Crear paquete
           </button>
@@ -108,6 +134,22 @@ export default function PackagesPage() {
             </div>
           )}
         </>
+      )}
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form onSubmit={handleCreate} className="w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Nuevo paquete</h2>
+              <button type="button" onClick={() => setShowForm(false)}><X className="h-5 w-5 text-gray-500" /></button>
+            </div>
+            <input required placeholder="Nombre del paquete" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <input required placeholder="SKU" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <textarea placeholder="Descripción" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <input type="number" min="0" step="0.01" placeholder="Precio del paquete" value={form.bundle_price} onChange={e => setForm({ ...form, bundle_price: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
+            <button disabled={saving} className="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar paquete'}</button>
+          </form>
+        </div>
       )}
     </div>
   )
