@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Search, Building2, Bell, Moon, ChevronDown, ChevronUp, ChevronLeft,
   ChevronRight, Users, Package, Folder, MapPin, FileText, ShoppingCart,
@@ -222,6 +222,22 @@ export default function ClientsPage() {
   };
   useEffect(() => { load(page, Number(pageSize)); }, [page, pageSize]);
 
+  const actionsMenuRef = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) setMenuId(null);
+    }
+    function handleEscape(event) {
+      if (event.key === "Escape") setMenuId(null);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   // La paginación es la del servidor; la búsqueda y los filtros se aplican
   // sobre la página cargada. `hiddenByFilter` lo dice en pantalla para que
   // nunca quede oculto que hay filas ocultas.
@@ -314,7 +330,7 @@ export default function ClientsPage() {
               <td className="px-3"><div className="font-medium text-slate-900">{money(c.total)}</div><div className="mt-1 text-xs text-slate-500">{c.purchases} compras</div></td>
               <td className="whitespace-nowrap px-3 text-slate-500">{c.lastPurchase}</td>
               <td className="px-3"><span className={`rounded-full px-3 py-1 text-xs ${c.status==="Activo"?"bg-emerald-100 text-emerald-700":"bg-rose-100 text-rose-700"}`}>{c.status}</span></td>
-              <td className="px-3"><div className="flex items-center gap-2"><IconButton title="Editar" onClick={()=>setEditing(c)}><Pencil size={16}/></IconButton><div className="relative"><IconButton title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)} className={menuId===c.id?"border-blue-500":""}><MoreHorizontal size={19}/></IconButton>{menuId===c.id&&<div className="absolute right-0 top-11 z-20 w-48 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">{[[Eye,"Ver detalles",()=>{setSelected(c);setMenuId(null);}],[Pencil,"Editar",()=>{setEditing(c);setMenuId(null);}],[Copy,"Duplicar",()=>duplicate(c)],[CheckCircle2,c.status==="Activo"?"Cambiar a inactivo":"Cambiar a activo",()=>{changeStatus(c);setMenuId(null);}],[Clock,"Ver historial",()=>{setSelected(c);setMenuId(null);}],[Mail,"Enviar correo",()=>{setNotice(`Acción de correo para ${c.name}`);setMenuId(null);}],[Trash2,"Eliminar",()=>{if(window.confirm(`¿Eliminar a ${c.name}?`)){removeClient(c);setMenuId(null);}}]].map(([I,label,fn])=><button key={label} onClick={fn} className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${label==="Eliminar"?"text-red-600":""}`}><I size={16}/>{label}</button>)}</div>}</div></div></td>
+              <td className="px-3"><div className="flex items-center gap-2"><IconButton title="Editar" onClick={()=>setEditing(c)}><Pencil size={16}/></IconButton><div className="relative" ref={menuId === c.id ? actionsMenuRef : null}><IconButton title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)} className={menuId===c.id?"border-blue-500":""}><MoreHorizontal size={19}/></IconButton>{menuId===c.id&&<div className="absolute right-0 top-11 z-20 w-48 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">{[[Eye,"Ver detalles",()=>{setSelected(c);setMenuId(null);}],[Pencil,"Editar",()=>{setEditing(c);setMenuId(null);}],[Copy,"Duplicar",()=>duplicate(c)],[CheckCircle2,c.status==="Activo"?"Cambiar a inactivo":"Cambiar a activo",()=>{changeStatus(c);setMenuId(null);}],[Clock,"Ver historial",()=>{setSelected(c);setMenuId(null);}],[Mail,"Enviar correo",()=>{setNotice(`Acción de correo para ${c.name}`);setMenuId(null);}],[Trash2,"Eliminar",()=>{if(window.confirm(`¿Eliminar a ${c.name}?`)){removeClient(c);setMenuId(null);}}]].map(([I,label,fn])=><button key={label} onClick={fn} className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${label==="Eliminar"?"text-red-600":""}`}><I size={16}/>{label}</button>)}</div>}</div></div></td>
             </tr>)}</tbody>
           </table></div>
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 text-sm"><span className="text-slate-500">Mostrando {total?(page-1)*Number(pageSize)+1:0} a {Math.min(page*Number(pageSize),total)} de {total} clientes{hiddenByFilter>0&&<span className="ml-2 rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-700">{hiddenByFilter} oculto(s) por el filtro en esta página</span>}</span><div className="flex items-center gap-3"><label className="flex items-center gap-2 whitespace-nowrap">Filas por página <select value={pageSize} onChange={e=>{setPageSize(e.target.value);setPage(1);}} className="h-9 rounded-md border border-slate-200 bg-white px-3"><option>10</option><option>20</option><option>50</option></select></label><div className="flex items-center gap-1"><IconButton title="Anterior" onClick={()=>setPage(p=>Math.max(1,p-1))} className="h-9 w-9"><ChevronLeft size={17}/></IconButton>{Array.from({length:Math.min(pageCount,5)},(_,i)=>startPage+i).map(p=><button key={p} onClick={()=>setPage(p)} className={`h-9 w-9 rounded-lg border text-sm ${page===p?"border-blue-600 bg-blue-600 text-white":"border-slate-200 bg-white"}`}>{p}</button>)}<IconButton title="Siguiente" onClick={()=>setPage(p=>Math.min(pageCount,p+1))} className="h-9 w-9"><ChevronRight size={17}/></IconButton></div></div></div>

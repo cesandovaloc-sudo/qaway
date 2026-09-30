@@ -17,6 +17,7 @@ import {
   MessageCircle,
   X,
 } from "lucide-react";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * SupportPanel
@@ -248,6 +249,8 @@ export default function SupportPanel({
   const [itemsPerPage, setItemsPerPage] = useState(8);
   const [showTip, setShowTip] = useState(true);
 
+  useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
+
   const filteredTickets = useMemo(() => {
     const status = tabs[activeTab][1];
     const normalized = query.trim().toLowerCase();
@@ -377,6 +380,7 @@ export default function SupportPanel({
                 </div>
                 <button
                   type="button"
+                  data-dismissable
                   onClick={() => setShowFilters((value) => !value)}
                   className={cn(
                     "flex h-8 items-center gap-2 rounded-lg border px-4 text-[11px] font-semibold",
@@ -390,7 +394,7 @@ export default function SupportPanel({
             </div>
 
             {showFilters && (
-              <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3 text-[11px] text-gray-500">
+              <div data-dismissable className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3 text-[11px] text-gray-500">
                 <span>Filtros avanzados de tickets</span>
                 <button type="button" onClick={() => setShowFilters(false)} className="text-gray-400 hover:text-gray-700">
                   <X size={14} />

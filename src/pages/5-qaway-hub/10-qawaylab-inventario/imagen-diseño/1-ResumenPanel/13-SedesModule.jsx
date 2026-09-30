@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Building2, Warehouse, MapPin, Package, Store, Search, Plus, Filter,
   Pencil, MoreHorizontal, Eye, ChevronDown, ChevronLeft, ChevronRight,
@@ -100,6 +100,15 @@ export default function SedesModule() {
   const [typeFilter, setTypeFilter] = useState("Todos");
   const [modal, setModal] = useState(null);
   const [editItem, setEditItem] = useState(null);
+
+  useEffect(() => {
+    if (!modal) return;
+    function handleEscape(event) {
+      if (event.key === "Escape") setModal(null);
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [modal]);
   const [notice, setNotice] = useState("");
   const [configTab, setConfigTab] = useState("General");
   const [settings, setSettings] = useState({ timezone: "(GMT-05:00) Lima", currency: "PEN - Sol Peruano (S/)", dateFormat: "DD/MM/AAAA", timeFormat: "24 horas (14:30)", allowSales: true, allowPurchases: true, allowTransfers: true, visibleAll: false, stockByWarehouse: true });

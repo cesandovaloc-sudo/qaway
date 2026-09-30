@@ -20,6 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import { supabase } from "@/config/supabase";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * AplicacionesModule
@@ -286,6 +287,11 @@ export default function AplicacionesModule({ tenantId, session }) {
   const [showNewApp, setShowNewApp] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
 
+  useDismissOnEscapeOrOutside(!!menuId, () => setMenuId(null));
+  useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
+  useDismissOnEscapeOrOutside(showNewApp, () => setShowNewApp(false));
+  useDismissOnEscapeOrOutside(!!selectedApp, () => setSelectedApp(null));
+
   useEffect(() => {
     let mounted = true;
 
@@ -494,6 +500,7 @@ export default function AplicacionesModule({ tenantId, session }) {
 
                 <button
                   type="button"
+                  data-dismissable
                   onClick={() => setShowFilters((value) => !value)}
                   className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${
                     showFilters || statusFilter !== "all"
@@ -508,7 +515,7 @@ export default function AplicacionesModule({ tenantId, session }) {
             </div>
 
             {showFilters && (
-              <div className="mt-4 flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
+              <div data-dismissable className="mt-4 flex flex-wrap gap-2 rounded-xl bg-zinc-50 p-3">
                 {[
                   ["all", "Todas"],
                   ["active", "Activas"],
@@ -614,6 +621,7 @@ export default function AplicacionesModule({ tenantId, session }) {
                       <td className="relative px-4 py-3.5 text-right">
                         <button
                           type="button"
+                          data-dismissable
                           onClick={() =>
                             setMenuId((current) =>
                               current === app.id ? null : app.id
@@ -626,7 +634,7 @@ export default function AplicacionesModule({ tenantId, session }) {
                         </button>
 
                         {menuId === app.id && (
-                          <div className="absolute right-4 top-12 z-20 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl">
+                          <div data-dismissable className="absolute right-4 top-12 z-20 w-44 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl">
                             <button
                               type="button"
                               onClick={() => {
@@ -811,7 +819,7 @@ export default function AplicacionesModule({ tenantId, session }) {
       {/* Detail modal */}
       {selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+          <div data-dismissable className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-zinc-100 p-5">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">
@@ -885,7 +893,7 @@ export default function AplicacionesModule({ tenantId, session }) {
       {/* New app modal */}
       {showNewApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+          <div data-dismissable className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-zinc-100 p-5">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">

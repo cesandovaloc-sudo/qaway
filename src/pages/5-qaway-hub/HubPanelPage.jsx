@@ -515,8 +515,25 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       if (appTimeframeMenuRef.current && !appTimeframeMenuRef.current.contains(event.target)) setShowAppTimeframeMenu(false)
       if (planTimeframeMenuRef.current && !planTimeframeMenuRef.current.contains(event.target)) setShowPlanTimeframeMenu(false)
     }
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') return
+      setShowTimeMenu(false)
+      setShowActionsMenu(false)
+      setShowCategoryMenu(false)
+      setShowTenantMenu(false)
+      setShowAppMenu(false)
+      setShowPlanMenu(false)
+      setShowRendimientoMenu(false)
+      setShowAppTimeframeMenu(false)
+      setShowPlanTimeframeMenu(false)
+      setIsMetricModalOpen(false)
+    }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [])
 
   // Carga de datos globales (plataforma = is_admin)
@@ -1797,7 +1814,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
       {/* Modal Nueva Métrica (Super Administrador) */}
       {isMetricModalOpen && typeof document !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200" onMouseDown={(e) => { if (e.target === e.currentTarget) setIsMetricModalOpen(false) }}>
           <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between p-5 border-b border-zinc-100 bg-zinc-50/50">
               <div>
@@ -2177,6 +2194,32 @@ function HubPanelContent() {
   }, [location.pathname])
   const searchInputRef = useRef(null)
   const { denied } = useAppAccess()
+  const anyShellOverlay = isTenantSwitcherOpen || isBrandUsersOpen || isProfileOpen || globalSearchQuery.trim() !== ''
+  useEffect(() => {
+    if (!anyShellOverlay) return
+    function handlePointerDown(event) {
+      if (event.target instanceof Element && event.target.closest('[data-dismissable]')) return
+      if (isTenantSwitcherOpen) setIsTenantSwitcherOpen(false)
+      if (isBrandUsersOpen) setIsBrandUsersOpen(false)
+      if (isProfileOpen) setIsProfileOpen(false)
+      if (globalSearchQuery.trim() !== '') setGlobalSearchQuery('')
+    }
+    function handleKeyDown(event) {
+      if (event.key !== 'Escape') return
+      if (isTenantSwitcherOpen) setIsTenantSwitcherOpen(false)
+      if (isBrandUsersOpen) setIsBrandUsersOpen(false)
+      if (isProfileOpen) setIsProfileOpen(false)
+      if (globalSearchQuery.trim() !== '') setGlobalSearchQuery('')
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('touchstart', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('touchstart', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [anyShellOverlay, isTenantSwitcherOpen, isBrandUsersOpen, isProfileOpen, globalSearchQuery])
   // Contexto real (sesion + tenant) para las vistas que viven dentro del shell (30.X).
   const [panelAuth, setPanelAuth] = useState(null)
   useEffect(() => {
@@ -2614,7 +2657,7 @@ function HubPanelContent() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 6, scale: 0.97 }}
                           transition={{ duration: 0.15, ease: 'easeOut' }}
-                          className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                          className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden" data-dismissable
                         >
                           <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
                             <p className="text-xs font-extrabold text-white">Cambiar de marca</p>
@@ -2683,7 +2726,7 @@ function HubPanelContent() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 6, scale: 0.97 }}
                           transition={{ duration: 0.15, ease: 'easeOut' }}
-                          className="absolute left-0 top-[calc(100%+8px)] w-80 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                          className="absolute left-0 top-[calc(100%+8px)] w-80 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden" data-dismissable
                         >
                           <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
                             <p className="text-xs font-extrabold text-white">{effectiveTenantName}</p>
@@ -2761,7 +2804,7 @@ function HubPanelContent() {
 
           {/* Search, Notifications & User Profile */}
           <div className="flex items-center gap-3 lg:gap-5 relative">
-            <div className="relative block">
+            <div className="relative block" data-dismissable>
               <HubIcon icon={Search} size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--hub-faint)]" />
               <input ref={searchInputRef} type="text" value={globalSearchQuery} onChange={(e) => setGlobalSearchQuery(e.target.value)} placeholder="Buscar empresas, usuarios, apps..."
                 className="bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-full pl-10 pr-16 py-2.5 text-sm text-white placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-[#ff4b0b]/50 focus:bg-[var(--hub-surface-strong)] w-[240px] md:w-[320px] lg:w-[420px] transition-all shadow-inner" />
@@ -2776,7 +2819,7 @@ function HubPanelContent() {
               <AnimatePresence>
                 {globalSearchQuery.trim() !== '' && (
                   <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} transition={{ duration: 0.15 }}
-                    className="absolute top-[calc(100%+12px)] left-0 w-full bg-[var(--hub-pop)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden">
+                    className="absolute top-[calc(100%+12px)] left-0 w-full bg-[var(--hub-pop)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden" data-dismissable>
                     {(filtered.length === 0 && searchUsers.length === 0 && searchTenants.length === 0 && !isSearchingUsers) ? (
                       <div className="p-6 text-center"><p className="text-sm text-[var(--hub-dim)] font-medium">No se encontraron resultados para "{globalSearchQuery}"</p></div>
                     ) : (
@@ -2917,7 +2960,7 @@ function HubPanelContent() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} aria-label="Cerrar perfil" />
                     <motion.div initial={{ opacity: 0, scale: 0.95, originY: 0, originX: 1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden">
+                      className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[var(--hub-surface)] border border-[var(--hub-border)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden" data-dismissable>
                       <div className="p-5 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)] flex items-center gap-4">
                         {identityResolved && avatar ? (
                           <img key={avatar} src={avatar} alt={name} className="w-12 h-12 rounded-full border border-[var(--hub-border)] object-cover shrink-0" />

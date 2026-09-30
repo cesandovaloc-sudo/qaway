@@ -20,6 +20,7 @@ import {
   ArrowDownRight,
   ChevronDown,
 } from "lucide-react";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * Qaway Lab — Super Admin
@@ -423,6 +424,8 @@ export default function SuscripcionesPanel({
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
+  useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
+
   const pageSize = 8;
 
   const filtered = useMemo(() => {
@@ -572,6 +575,7 @@ export default function SuscripcionesPanel({
 
                 <button
                   type="button"
+                  data-dismissable
                   onClick={() => setShowFilters((value) => !value)}
                   className={`inline-flex h-9 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${
                     showFilters
@@ -586,7 +590,7 @@ export default function SuscripcionesPanel({
             </div>
 
             {showFilters && (
-              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+              <div data-dismissable className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                 <select
                   value={statusFilter}
                   onChange={(e) => {

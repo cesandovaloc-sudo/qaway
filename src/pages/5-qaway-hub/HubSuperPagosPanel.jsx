@@ -21,6 +21,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * PagosPanel.jsx
@@ -373,6 +374,9 @@ export default function PagosPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  useDismissOnEscapeOrOutside(!!openMenu, () => setOpenMenu(null));
+  useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
+
   const filteredPayments = useMemo(() => {
     const normalized = query.toLowerCase().trim();
 
@@ -571,6 +575,7 @@ export default function PagosPanel() {
 
                   <button
                     type="button"
+                    data-dismissable
                     onClick={() => setShowFilters((value) => !value)}
                     className={`h-9 rounded-xl border px-3 text-xs font-bold inline-flex items-center gap-2 ${
                       showFilters || statusFilter !== "Todos" || methodFilter !== "Todos"
@@ -585,7 +590,7 @@ export default function PagosPanel() {
               </div>
 
               {showFilters && (
-                <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 p-3">
+                <div data-dismissable className="mt-4 flex flex-wrap items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 p-3">
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -694,6 +699,7 @@ export default function PagosPanel() {
                       <td className="px-4 py-3 relative">
                         <button
                           type="button"
+                          data-dismissable
                           onClick={() =>
                             setOpenMenu(
                               openMenu === payment.id ? null : payment.id
@@ -705,7 +711,7 @@ export default function PagosPanel() {
                         </button>
 
                         {openMenu === payment.id && (
-                          <div className="absolute right-4 top-11 z-20 w-36 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg">
+                          <div data-dismissable className="absolute right-4 top-11 z-20 w-36 rounded-xl border border-zinc-200 bg-white p-1.5 shadow-lg">
                             <button
                               type="button"
                               onClick={() => setOpenMenu(null)}

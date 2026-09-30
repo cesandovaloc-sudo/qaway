@@ -109,4 +109,34 @@ Ninguno de los módulos `HubSuper*` tiene listener de click fuera ni de Escape. 
 ---
 
 ## Acciones aplicadas
-*(se llena al finalizar)*
+
+Se creó el hook compartido `src/pages/5-qaway-hub/hooks/useDismissOnEscapeOrOutside.js`: escucha `mousedown`, `touchstart` y `keydown` (Escape), y cierra el overlay cuando el click ocurre fuera de cualquier elemento marcado con `data-dismissable`. Integrado en los módulos `HubSuper*`; en el shell (`HubPanelPage.jsx`) y en los paneles de diseño `imagen-diseño` se usó el mismo patrón local (ref + listeners).
+
+| # | Elemento | Corrección |
+|---|----------|------------|
+| 1–9 | Dropdowns del dashboard (SuperAdminDashboard) | ✔ Escape añadido al listener global existente (`HubPanelPage.jsx`) |
+| 10 | Modal Nueva Métrica | ✔ Escape (mismo listener) + cierre al hacer click en el backdrop |
+| 11 | Popover de búsqueda global | ✔ Escape cierra (limpia `globalSearchQuery`) + click fuera vía `data-dismissable`. "Esc para cerrar" ahora funcional |
+| 12–14 | Overlays switcher de empresa / usuarios de marca / perfil | ✔ Escape cierra todos; click fuera vía panel `data-dismissable` |
+| 15–19 | HubSuperEmpresasModule | ✔ Menú de fila + modales (Importar/Editar/Eliminar/Ficha) con hook `useDismissOnEscapeOrOutside` |
+| 20–22 | HubSuperUsersModule | ✔ Menú de fila + panel de filtros + permisos inline |
+| 23–24 | HubSuperPagosPanel | ✔ Menú de fila + panel de filtros |
+| 25–28 | HubsuperAplicacionesModule | ✔ Menú de fila + filtros + modales Nueva app / Detalle |
+| 29 | HubSuperSuscripcionesPanel | ✔ Panel de filtros |
+| 30–32 | HubSuperPlanesPreciosPage | ✔ Modales Plan / Página pública; bug arreglado: botón "Nueva plan" ahora hace `setModalPlan({})` (abría/cerraba el modal con `null`) |
+| 33–34 | HubSuperReportesPanel | Sin cambio: botones sin `onClick` (no despliegan nada) |
+| 35 | HubSuperSupportPanel | ✔ Panel de filtros |
+| 36 | HubSuperSupportPanel tip | Sin cambio: se cierra con su X |
+| 37 | 5-ClientsPage.jsx | ✔ Menú 3pts por cliente: ref + Escape y click fuera |
+| 38 | 8-PedidosPanel.jsx | ✔ Menú 3pts por pedido: ref + Escape y click fuera |
+| 39 | 7-PanelVentas1.jsx | ✔ Menú 3pts por venta: ref + Escape y click fuera |
+| 40 | 13-SedesModule.jsx | ✔ Modal: Escape añadido (fondo ya cerraba) |
+| 41 | 12-Liquidaciones.jsx | ✔ Panel detalle: Escape + click fuera sobre el contenedor |
+| 42 | ProductTable.tsx | Sin cambio: `MoreHorizontal` no abre menú (no tiene `onClick`) |
+| 43 | PriceListCard.tsx | Sin cambio: `MoreHorizontal` llama a `onEdit` directamente (no abre menú) |
+
+## Verificación
+
+- `npm run lint` → sin errores en los archivos tocados (warnings pre-existentes solo).
+- `npm run typecheck` → sin errores.
+- Commit total (`git add -A`) incluyendo los cambios previos de `ESTANDAR-VISUAL-TABLEROS.md` y `3-CategoriasPanel.jsx`.

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "@/config/supabase";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * Qaway Hub — EmpresasModule
@@ -243,6 +244,20 @@ export default function EmpresasModule({
     parsing: false,
     importing: false,
   });
+
+  const closeImportModal = () => {
+    setShowImportModal(false);
+    setImportState({ fileName: null, rows: null, parsing: false, importing: false });
+  };
+  const closeEditModal = () => setEditModal({ isOpen: false, company: null, saving: false, form: { name: "", sector: "", plan: "Básico", status: "active" } });
+  const closeDeleteModal = () => setDeleteModal({ isOpen: false, company: null, loading: false });
+  const closeViewModal = () => setViewModal({ isOpen: false, company: null });
+
+  useDismissOnEscapeOrOutside(!!openMenu, () => setOpenMenu(null));
+  useDismissOnEscapeOrOutside(showImportModal, closeImportModal);
+  useDismissOnEscapeOrOutside(editModal.isOpen && !!editModal.company, closeEditModal);
+  useDismissOnEscapeOrOutside(deleteModal.isOpen && !!deleteModal.company, closeDeleteModal);
+  useDismissOnEscapeOrOutside(viewModal.isOpen && !!viewModal.company, closeViewModal);
 
   const handleExportExcel = () => {
     const list = companies.length ? companies : [];
@@ -763,7 +778,7 @@ export default function EmpresasModule({
       {/* Modal de Importación Excel (Flujo estilo Inventario / ProductImport) */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div data-dismissable className="w-full max-w-xl rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="grid h-9 w-9 place-items-center rounded-xl bg-orange-50 text-[#ff4b0b]">
@@ -776,10 +791,7 @@ export default function EmpresasModule({
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setShowImportModal(false);
-                  setImportState({ fileName: null, rows: null, parsing: false, importing: false });
-                }}
+                onClick={closeImportModal}
                 className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
               >
                 <X size={18} />
@@ -1108,6 +1120,7 @@ export default function EmpresasModule({
                           <button
                             type="button"
                             aria-label={`Acciones para ${company.name}`}
+                            data-dismissable
                             onClick={() =>
                               setOpenMenu((current) =>
                                 current === company.id ? null : company.id
@@ -1119,7 +1132,7 @@ export default function EmpresasModule({
                           </button>
 
                           {openMenu === company.id && (
-                            <div className="absolute right-2 top-12 z-20 w-40 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl">
+                            <div data-dismissable className="absolute right-2 top-12 z-20 w-40 rounded-xl border border-zinc-200 bg-white p-1.5 text-left shadow-xl">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1367,7 +1380,7 @@ export default function EmpresasModule({
       {/* Modal de Edición Rápida de Empresa (Requisito PANEL-05) */}
       {editModal.isOpen && editModal.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div data-dismissable className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
               <div>
                 <p className="text-[10px] font-bold text-[#ff4b0b] uppercase tracking-wider">Edición Rápida</p>
@@ -1375,7 +1388,7 @@ export default function EmpresasModule({
               </div>
               <button
                 type="button"
-                onClick={() => setEditModal({ isOpen: false, company: null, saving: false, form: { name: "", sector: "", plan: "Básico", status: "active" } })}
+                onClick={closeEditModal}
                 className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100"
               >
                 <X size={18} />
@@ -1458,7 +1471,7 @@ export default function EmpresasModule({
       {/* Modal In-App de Confirmación de Eliminación (Reemplaza window.confirm) */}
       {deleteModal.isOpen && deleteModal.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div data-dismissable className="w-full max-w-md rounded-2xl bg-white p-4 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-start gap-4">
               <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-red-100 text-red-600">
                 <ShieldAlert size={20} />
@@ -1496,7 +1509,7 @@ export default function EmpresasModule({
       {/* Modal de Ficha Completa de Empresa */}
       {viewModal.isOpen && viewModal.company && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
+          <div data-dismissable className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-zinc-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-start justify-between border-b border-zinc-100 pb-4">
               <div className="flex items-center gap-3">
                 <CompanyAvatar company={viewModal.company} />
@@ -1507,7 +1520,7 @@ export default function EmpresasModule({
               </div>
               <button
                 type="button"
-                onClick={() => setViewModal({ isOpen: false, company: null })}
+                onClick={closeViewModal}
                 className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
               >
                 <X size={18} />

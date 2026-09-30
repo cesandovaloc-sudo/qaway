@@ -18,6 +18,7 @@ import {
   Save,
   ShieldCheck,
 } from "lucide-react";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * Qaway Lab — Panel / Usuarios (rol + tenant)
@@ -346,6 +347,10 @@ export default function UsersModule({
   const [openMenu, setOpenMenu] = useState(null);
   const [permUserId, setPermUserId] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState([]);
+
+  useDismissOnEscapeOrOutside(!!openMenu, () => setOpenMenu(null));
+  useDismissOnEscapeOrOutside(showFilters, () => setShowFilters(false));
+  useDismissOnEscapeOrOutside(!!permUserId, () => setPermUserId(null));
 
   const handleDeleteUser = async (user) => {
     if (user.isSuperAdmin) {
@@ -762,6 +767,7 @@ export default function UsersModule({
 
                     <button
                       type="button"
+                      data-dismissable
                       onClick={() => setShowFilters((v) => !v)}
                       className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-bold transition ${
                         showFilters
@@ -776,7 +782,7 @@ export default function UsersModule({
                 </div>
 
                 {showFilters && (
-                  <div className="mt-4 flex flex-wrap items-end gap-3 rounded-xl bg-zinc-50 p-3">
+                  <div data-dismissable className="mt-4 flex flex-wrap items-end gap-3 rounded-xl bg-zinc-50 p-3">
                     <label className="text-xs font-bold text-zinc-500">
                       Rol
                       <select
@@ -973,6 +979,7 @@ export default function UsersModule({
                               <div className="relative">
                                 <button
                                   type="button"
+                                  data-dismissable
                                   onClick={() =>
                                     setOpenMenu(
                                       openMenu === user.id ? null : user.id
@@ -985,7 +992,7 @@ export default function UsersModule({
                                 </button>
 
                                 {openMenu === user.id && (
-                                  <div className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white p-1 shadow-xl">
+                                  <div data-dismissable className="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-xl border border-zinc-200 bg-white p-1 shadow-xl">
                                     <button
                                       type="button"
                                       onClick={() => {
@@ -1024,7 +1031,7 @@ export default function UsersModule({
                             </td>
                           </tr>
                           {user.id && permUserId === user.id && (
-                            <tr>
+                            <tr data-dismissable>
                               <td colSpan={8} className="p-0">
                                 <UserAccessEditor
                                   key={user.id}

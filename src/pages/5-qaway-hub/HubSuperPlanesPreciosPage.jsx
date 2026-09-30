@@ -23,6 +23,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
  * Qaway Lab — Super Admin / Planes y Precios
@@ -459,7 +460,7 @@ function ComparisonTable({ plans }) {
 }
 
 function PlanModal({ plan, onClose, onSave }) {
-  const isNew = !plan;
+  const isNew = !plan || !plan.name;
   const [form, setForm] = useState(
     plan
       ? { ...plan, features: [...plan.features] }
@@ -501,7 +502,7 @@ function PlanModal({ plan, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div data-dismissable className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-[#ff4b0b]">
@@ -610,6 +611,9 @@ export default function PlanesPreciosPage() {
   const [plans, setPlans] = useState(plansSeed);
   const [modalPlan, setModalPlan] = useState(null);
   const [showPublic, setShowPublic] = useState(false);
+
+  useDismissOnEscapeOrOutside(modalPlan !== null, () => setModalPlan(null));
+  useDismissOnEscapeOrOutside(showPublic, () => setShowPublic(false));
   // Paginación real (hallazgo P1 #4 de la auditoría: los controles se veían vivos pero no
   // tenían estado — de hecho el estado faltaba y reventaba en render). Corte por página
   // sobre la grilla; `page` acota para que borrar planes nunca deje la página fuera de rango.
@@ -687,7 +691,7 @@ export default function PlanesPreciosPage() {
             </button>
             <button
               type="button"
-              onClick={() => setModalPlan(null)}
+              onClick={() => setModalPlan({})}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#ff4b0b] px-5 text-sm font-bold text-white shadow-sm transition hover:bg-[#e03f06]"
             >
               <Plus size={15} strokeWidth={2.5} />
@@ -798,7 +802,7 @@ export default function PlanesPreciosPage() {
 
       {showPublic && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl">
+          <div data-dismissable className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-extrabold uppercase tracking-wider text-[#ff4b0b]">
