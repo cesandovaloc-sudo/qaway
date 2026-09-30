@@ -204,6 +204,8 @@ export interface User {
   permissions: Partial<UserPermissions>  // Override defaults
   created_at: string
   last_active_at: string | null
+  tenant_id?: string | null
+  is_platform_admin?: boolean
 }
 
 // ── Shared Access Link (for guests) ──

@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 
 import { productService } from "../../src/services/productService";
+import { useTenant } from "../../src/context/TenantContext";
 
 /**
  * ProductosPanel.jsx
@@ -643,6 +644,18 @@ export default function ProductosPanel() {
     navigate = null;
   }
 
+  let tenantCtx = null;
+  try {
+    tenantCtx = useTenant();
+  } catch (e) {
+    tenantCtx = null;
+  }
+
+  const activeTenant = tenantCtx?.activeTenant || null;
+  const activeTenantId = tenantCtx?.activeTenantId || null;
+  const isPlatformAdmin = Boolean(tenantCtx?.isPlatformAdmin);
+  const canCreateProduct = tenantCtx ? tenantCtx.canCreateProduct : true;
+
   const handleNavigateCapture = () => {
     const isHub = typeof window !== "undefined" && window.location.pathname.startsWith("/hub/inventario");
     const targetUrl = isHub ? "/hub/inventario/captura" : "/captura";
@@ -812,12 +825,21 @@ export default function ProductosPanel() {
     setShowBulkMenu(false);
   };
 
-  // Sincronización en vivo con Supabase
+  // Sincronización en vivo con Supabase por empresa activa
   useEffect(() => {
     let isMounted = true;
     async function loadSupabaseProducts() {
+      setIsLoadingProducts(true);
       try {
-        const res = await productService.getProducts();
+        if (isPlatformAdmin && !activeTenantId) {
+          if (isMounted) {
+            setProducts([]);
+            setIsLoadingProducts(false);
+          }
+          return;
+        }
+
+        const res = await productService.getProducts({ tenant_id: activeTenantId || undefined });
         const sourceProducts = Array.isArray(res?.data) ? res.data : [];
         const mapped = sourceProducts.map((p, idx) => ({
             id: p.id || `prod-sb-${idx}`,
@@ -858,7 +880,7 @@ export default function ProductosPanel() {
     }
     loadSupabaseProducts();
     return () => { isMounted = false; };
-  }, []);
+  }, [activeTenantId, isPlatformAdmin]);
 
   const toggleColumn = key => {
     setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -916,6 +938,10 @@ export default function ProductosPanel() {
   const showToast = msg => { setToast(msg); window.setTimeout(() => setToast(""), 2800); };
   
   const openNew = () => {
+    if (isPlatformAdmin && !activeTenantId) {
+      showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+      return;
+    }
     setEditing(null);
     setForm(defaultForm);
     setShowAdvanced(false);
@@ -1020,6 +1046,10 @@ export default function ProductosPanel() {
         showToast(`Error al actualizar: ${err.message || 'Error en base de datos'}`);
       }
     } else {
+      if (isPlatformAdmin && !activeTenantId) {
+        showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+        return;
+      }
       try {
         const created = await productService.createProduct({
           name: form.name,
@@ -1034,7 +1064,8 @@ export default function ProductosPanel() {
           status: "active",
           type: "simple",
           commercial_status: "available",
-          condition: 10
+          condition: 10,
+          tenant_id: activeTenantId || undefined
         });
 
         const newP = {
@@ -1248,9 +1279,24 @@ export default function ProductosPanel() {
                 <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
                   <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
-                  <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
-                    {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
-                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginTop: "2px" }}>
+                    <p style={{ margin: 0, color: "var(--muted)", fontSize: "13px" }}>
+                      {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
+                    </p>
+                    {isPlatformAdmin && (
+                      activeTenant ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 700, color: "#ff4b0b", background: "rgba(255,75,11,0.08)", padding: "2px 8px", borderRadius: "12px", border: "1px solid rgba(255,75,11,0.2)" }}>
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ff4b0b", display: "inline-block" }} />
+                          Empresa activa: {activeTenant.name}
+                        </span>
+                      ) : (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 700, color: "#d97706", background: "rgba(245,158,11,0.1)", padding: "2px 8px", borderRadius: "12px", border: "1px solid rgba(245,158,11,0.25)" }}>
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
+                          Sin empresa seleccionada
+                        </span>
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
@@ -1268,7 +1314,19 @@ export default function ProductosPanel() {
                 >
                   <Camera size={15} /> Capturar
                 </button>
-                <button className="pxp-btn primary" onClick={openNew} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontWeight: 650 }}>
+                <button
+                  className="pxp-btn primary"
+                  onClick={openNew}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontWeight: 650,
+                    opacity: isPlatformAdmin && !activeTenantId ? 0.65 : 1,
+                    cursor: isPlatformAdmin && !activeTenantId ? "not-allowed" : "pointer"
+                  }}
+                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear productos" : "Crear nuevo producto"}
+                >
                   <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
                 </button>
               </div>

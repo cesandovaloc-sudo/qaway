@@ -21,12 +21,97 @@ export interface ProductsAdapter {
   searchProducts(query: string): Promise<Product[]>
 }
 
+// ── Helpers Multi-Tenant ──
+function getStoredScopedTenant(): { id: string; name: string } | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = sessionStorage.getItem('qaway.scopedTenant')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed && typeof parsed.id === 'string') return parsed
+    }
+  } catch {}
+  return null
+}
+
+async function resolveTenantContext(providedTenantId?: string): Promise<{
+  tenantId: string | null
+  isPlatformAdmin: boolean
+  error?: string
+}> {
+  if (providedTenantId) {
+    return { tenantId: providedTenantId, isPlatformAdmin: false }
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return { tenantId: null, isPlatformAdmin: false, error: 'No hay sesión de usuario activa' }
+  }
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('tenant_id, is_platform_admin, role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const isPlatformAdmin = Boolean(
+    userData?.is_platform_admin === true ||
+    (userData?.role === 'admin' && !userData?.tenant_id)
+  )
+
+  if (isPlatformAdmin) {
+    const scoped = getStoredScopedTenant()
+    if (!scoped?.id) {
+      return {
+        tenantId: null,
+        isPlatformAdmin: true,
+        error: 'Debes seleccionar una empresa antes de realizar esta operación. Usa el selector de empresa en la barra superior.'
+      }
+    }
+    return { tenantId: scoped.id, isPlatformAdmin: true }
+  }
+
+  const userTenantId = userData?.tenant_id || null
+  if (!userTenantId) {
+    return {
+      tenantId: null,
+      isPlatformAdmin: false,
+      error: 'El usuario no tiene una empresa asignada en el sistema.'
+    }
+  }
+
+  return { tenantId: userTenantId, isPlatformAdmin: false }
+}
+
 // ── Supabase Implementation ──
 export const supabaseProductAdapter: ProductsAdapter = {
   async getProducts(filters = {}, pagination = { page: 1, per_page: 20 }) {
+    // 1. Resolver contexto multi-tenant para no mezclar productos de distintas marcas
+    let targetTenantId = filters.tenant_id
+    if (!targetTenantId) {
+      try {
+        const ctx = await resolveTenantContext()
+        if (ctx.isPlatformAdmin) {
+          if (!ctx.tenantId) {
+            // Super Administrador sin empresa seleccionada: lista vacía para evitar mezcla de marcas
+            return { data: [], total: 0, page: pagination.page, per_page: pagination.per_page, total_pages: 0 }
+          }
+          targetTenantId = ctx.tenantId
+        } else if (ctx.tenantId) {
+          targetTenantId = ctx.tenantId
+        }
+      } catch (err) {
+        console.warn('[supabaseProductAdapter] Error resolviendo tenant en getProducts:', err)
+      }
+    }
+
     let query = supabase
       .from('products')
       .select('*', { count: 'exact' })
+
+    if (targetTenantId) {
+      query = query.eq('tenant_id', targetTenantId)
+    }
 
     // Apply filters
     if (filters.search) {
@@ -111,22 +196,14 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
   async createProduct(productData) {
     let payload = { ...productData }
+    
+    // 2. Asignación de tenant_id sin fallback ciego al Master Tenant
     if (!payload.tenant_id) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('tenant_id')
-            .eq('id', user.id)
-            .single()
-          payload.tenant_id = userData?.tenant_id || '00000000-0000-0000-0000-000000000001'
-        } else {
-          payload.tenant_id = '00000000-0000-0000-0000-000000000001'
-        }
-      } catch {
-        payload.tenant_id = '00000000-0000-0000-0000-000000000001'
+      const ctx = await resolveTenantContext()
+      if (!ctx.tenantId) {
+        throw new Error(ctx.error || 'Debes seleccionar una empresa antes de registrar productos.')
       }
+      payload.tenant_id = ctx.tenantId
     }
 
     const { data, error } = await supabase
@@ -143,22 +220,14 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async createProducts(productsData) {
-    let resolvedTenantId = '00000000-0000-0000-0000-000000000001'
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('tenant_id')
-          .eq('id', user.id)
-          .single()
-        if (userData?.tenant_id) resolvedTenantId = userData.tenant_id
-      }
-    } catch {}
+    const ctx = await resolveTenantContext()
+    if (!ctx.tenantId) {
+      throw new Error(ctx.error || 'Debes seleccionar una empresa antes de registrar productos.')
+    }
 
     const payload = productsData.map(p => ({
       ...p,
-      tenant_id: p.tenant_id || resolvedTenantId
+      tenant_id: p.tenant_id || ctx.tenantId
     }))
 
     const { data, error } = await supabase
@@ -168,16 +237,46 @@ export const supabaseProductAdapter: ProductsAdapter = {
 
     if (error) {
       console.error('Error creating products:', error)
-      throw new Error(error.message)
+      throw new Error(error.message || 'Error al registrar lote de productos')
     }
     return data || []
   },
 
   async updateProduct(id, productData) {
-    const { data, error } = await supabase
+    // 3. Verificar que el producto exista y pertenezca al tenant activo antes de modificar
+    const { data: existing, error: fetchErr } = await supabase
+      .from('products')
+      .select('id, tenant_id')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (fetchErr || !existing) {
+      throw new Error('Producto no encontrado para actualizar.')
+    }
+
+    const ctx = await resolveTenantContext()
+    if (ctx.isPlatformAdmin) {
+      if (!ctx.tenantId) {
+        throw new Error('Debes seleccionar una empresa para modificar productos.')
+      }
+      if (existing.tenant_id && existing.tenant_id !== ctx.tenantId) {
+        throw new Error('No puedes modificar este producto porque pertenece a otra empresa.')
+      }
+    } else if (ctx.tenantId && existing.tenant_id && existing.tenant_id !== ctx.tenantId) {
+      throw new Error('No tienes permiso para modificar productos de otra empresa.')
+    }
+
+    const targetTenant = existing.tenant_id || ctx.tenantId
+    let query = supabase
       .from('products')
       .update({ ...productData, updated_at: new Date().toISOString() })
       .eq('id', id)
+
+    if (targetTenant) {
+      query = query.eq('tenant_id', targetTenant)
+    }
+
+    const { data, error } = await query
       .select()
       .single()
 
@@ -189,33 +288,70 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async deleteProduct(id) {
-    const { error } = await supabase
+    // 4. Verificar que el producto pertenezca al tenant activo antes de eliminar
+    const { data: existing, error: fetchErr } = await supabase
+      .from('products')
+      .select('id, tenant_id')
+      .eq('id', id)
+      .maybeSingle()
+
+    if (fetchErr || !existing) {
+      throw new Error('Producto no encontrado para eliminar.')
+    }
+
+    const ctx = await resolveTenantContext()
+    if (ctx.isPlatformAdmin) {
+      if (!ctx.tenantId) {
+        throw new Error('Debes seleccionar una empresa antes de eliminar productos.')
+      }
+      if (existing.tenant_id && existing.tenant_id !== ctx.tenantId) {
+        throw new Error('No puedes eliminar este producto porque pertenece a otra empresa.')
+      }
+    } else if (ctx.tenantId && existing.tenant_id && existing.tenant_id !== ctx.tenantId) {
+      throw new Error('No tienes permiso para eliminar productos de otra empresa.')
+    }
+
+    const targetTenant = existing.tenant_id || ctx.tenantId
+    let query = supabase
       .from('products')
       .delete()
       .eq('id', id)
 
+    if (targetTenant) {
+      query = query.eq('tenant_id', targetTenant)
+    }
+
+    const { error } = await query
+
     if (error) {
       console.error('Error deleting product:', error)
-      return false
+      throw new Error(error.message || 'Error al eliminar producto')
     }
     return true
   },
 
   async getDashboardStats() {
-    const { count: total_products } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
+    let targetTenantId: string | null = null
+    try {
+      const ctx = await resolveTenantContext()
+      if (ctx.tenantId) targetTenantId = ctx.tenantId
+    } catch {}
 
-    const { count: active_products } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'active')
+    let totalQ = supabase.from('products').select('*', { count: 'exact', head: true })
+    let activeQ = supabase.from('products').select('*', { count: 'exact', head: true }).eq('status', 'active')
+    let lowStockQ = supabase.from('products').select('*', { count: 'exact', head: true }).filter('min_stock', 'gt', 0).filter('stock', 'lte', 'min_stock')
 
-    const { count: low_stock_count } = await supabase
-      .from('products')
-      .select('*', { count: 'exact', head: true })
-      .filter('min_stock', 'gt', 0)
-      .filter('stock', 'lte', 'min_stock')
+    if (targetTenantId) {
+      totalQ = totalQ.eq('tenant_id', targetTenantId)
+      activeQ = activeQ.eq('tenant_id', targetTenantId)
+      lowStockQ = lowStockQ.eq('tenant_id', targetTenantId)
+    }
+
+    const [{ count: total_products }, { count: active_products }, { count: low_stock_count }] = await Promise.all([
+      totalQ,
+      activeQ,
+      lowStockQ
+    ])
 
     return {
       total_products: total_products || 0,
@@ -230,14 +366,19 @@ export const supabaseProductAdapter: ProductsAdapter = {
   },
 
   async searchProducts(query) {
-    // C-2: término saneado — nunca interpolar input crudo en el DSL or=
+    let targetTenantId: string | null = null
+    try {
+      const ctx = await resolveTenantContext()
+      if (ctx.tenantId) targetTenantId = ctx.tenantId
+    } catch {}
+
     const orFilter = ilikeOr(['name', 'sku'], query)
     let request = supabase
       .from('products')
       .select('*')
+    if (targetTenantId) request = request.eq('tenant_id', targetTenantId)
     if (orFilter) request = request.or(orFilter)
-    const { data, error } = await request
-      .limit(10)
+    const { data, error } = await request.limit(10)
 
     if (error) return []
     return data || []

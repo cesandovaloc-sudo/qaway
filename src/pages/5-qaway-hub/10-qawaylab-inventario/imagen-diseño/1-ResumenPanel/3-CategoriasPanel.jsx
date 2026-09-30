@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
+import { Bone, Coffee, Cpu, Diamond, Droplets, Grid2X2, Heart, MoreHorizontal, Package, PawPrint, Pill, Shirt, Star, Stethoscope, Utensils, Wrench } from "lucide-react";
 
 /**
  * CategoriasPanel.jsx
@@ -9,27 +10,28 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
  */
 
 const initialCategories = [
-  { id: 1, name: "Alimentos", description: "Productos de consumo humano.", products: 24, status: "Activa", created: "12 Sep 2026", updated: "25 Sep 2026, 14:30", icon: "🍴", color: "#F59E0B", parent: "", related: ["Bebidas", "Snacks", "Productos secos"], stock: 20, noStock: 1, lowStock: 3 },
-  { id: 2, name: "Mascotas", description: "Alimentos y accesorios para mascotas.", products: 42, status: "Activa", created: "10 Sep 2026", updated: "24 Sep 2026, 11:15", icon: "🐾", color: "#F97316", parent: "", related: ["Perros", "Gatos"], stock: 36, noStock: 2, lowStock: 4 },
-  { id: 3, name: "Veterinaria", description: "Productos veterinarios y de cuidado animal.", products: 28, status: "Activa", created: "08 Sep 2026", updated: "23 Sep 2026, 16:20", icon: "♧", color: "#EF4444", parent: "", related: ["Medicamentos", "Higiene"], stock: 23, noStock: 1, lowStock: 4 },
-  { id: 4, name: "Higiene y Limpieza", description: "Productos de limpieza y desinfección.", products: 18, status: "Activa", created: "05 Sep 2026", updated: "22 Sep 2026, 10:45", icon: "💧", color: "#1684F8", parent: "", related: ["Limpieza", "Desinfección"], stock: 15, noStock: 1, lowStock: 2 },
-  { id: 5, name: "Accesorios", description: "Accesorios y complementos.", products: 15, status: "Activa", created: "04 Sep 2026", updated: "21 Sep 2026, 09:30", icon: "🔧", color: "#64748B", parent: "", related: [], stock: 13, noStock: 0, lowStock: 2 },
-  { id: 6, name: "Salud y Bienestar", description: "Suplementos y productos de cuidado.", products: 12, status: "Activa", created: "01 Sep 2026", updated: "20 Sep 2026, 18:10", icon: "♡", color: "#EF4444", parent: "", related: ["Vitaminas", "Cuidado personal"], stock: 10, noStock: 0, lowStock: 2 },
-  { id: 7, name: "Juguetes", description: "Juguetes y entretenimiento.", products: 10, status: "Activa", created: "28 Ago 2026", updated: "19 Sep 2026, 12:05", icon: "🦴", color: "#F97316", parent: "", related: [], stock: 9, noStock: 0, lowStock: 1 },
-  { id: 8, name: "Ropa y Textiles", description: "Ropa, camas y textiles.", products: 8, status: "Activa", created: "25 Ago 2026", updated: "18 Sep 2026, 14:40", icon: "♧", color: "#7C3AED", parent: "", related: [], stock: 7, noStock: 0, lowStock: 1 },
-  { id: 9, name: "Electrónicos", description: "Equipos y accesorios electrónicos.", products: 5, status: "Activa", created: "20 Ago 2026", updated: "17 Sep 2026, 09:15", icon: "▣", color: "#475569", parent: "", related: [], stock: 4, noStock: 0, lowStock: 1 },
-  { id: 10, name: "Otros", description: "Productos varios.", products: 3, status: "Activa", created: "18 Ago 2026", updated: "15 Sep 2026, 14:20", icon: "•••", color: "#64748B", parent: "", related: [], stock: 0, noStock: 3, lowStock: 0 },
-  { id: 11, name: "Bebidas", description: "Bebidas frías y calientes.", products: 22, status: "Activa", created: "15 Ago 2026", updated: "14 Sep 2026, 12:00", icon: "☕", color: "#A16207", parent: "Alimentos", related: [], stock: 21, noStock: 0, lowStock: 1 },
-  { id: 12, name: "Snacks", description: "Snacks y aperitivos.", products: 14, status: "Activa", created: "12 Ago 2026", updated: "13 Sep 2026, 10:30", icon: "◇", color: "#F59E0B", parent: "Alimentos", related: [], stock: 13, noStock: 0, lowStock: 1 },
-  { id: 13, name: "Productos secos", description: "Granos, semillas y productos secos.", products: 9, status: "Activa", created: "10 Ago 2026", updated: "12 Sep 2026, 15:20", icon: "▦", color: "#A16207", parent: "Alimentos", related: [], stock: 8, noStock: 0, lowStock: 1 },
-  { id: 14, name: "Perros", description: "Productos para perros.", products: 20, status: "Activa", created: "08 Ago 2026", updated: "11 Sep 2026, 10:00", icon: "🐾", color: "#F97316", parent: "Mascotas", related: [], stock: 18, noStock: 0, lowStock: 2 },
-  { id: 15, name: "Gatos", description: "Productos para gatos.", products: 22, status: "Activa", created: "06 Ago 2026", updated: "10 Sep 2026, 11:30", icon: "🐈", color: "#F97316", parent: "Mascotas", related: [], stock: 18, noStock: 1, lowStock: 3 },
-  { id: 16, name: "Medicamentos", description: "Medicamentos y tratamientos veterinarios.", products: 12, status: "Activa", created: "04 Ago 2026", updated: "09 Sep 2026, 09:20", icon: "✚", color: "#EF4444", parent: "Veterinaria", related: [], stock: 10, noStock: 0, lowStock: 2 },
-  { id: 17, name: "Promocionales", description: "Productos de temporada y promoción.", products: 0, status: "Inactiva", created: "02 Ago 2026", updated: "08 Sep 2026, 12:15", icon: "☆", color: "#8B5CF6", parent: "", related: [], stock: 0, noStock: 0, lowStock: 0 },
-  { id: 18, name: "Sin clasificar", description: "Categoría pendiente de clasificación.", products: 0, status: "Inactiva", created: "01 Ago 2026", updated: "07 Sep 2026, 08:45", icon: "•••", color: "#94A3B8", parent: "", related: [], stock: 0, noStock: 0, lowStock: 0 },
+  { id: 1, name: "Alimentos", description: "Productos de consumo humano.", products: 24, status: "Activa", created: "12 Sep 2026", updated: "25 Sep 2026, 14:30", icon: "utensils", color: "#F59E0B", parent: "", related: ["Bebidas", "Snacks", "Productos secos"], stock: 20, noStock: 1, lowStock: 3 },
+  { id: 2, name: "Mascotas", description: "Alimentos y accesorios para mascotas.", products: 42, status: "Activa", created: "10 Sep 2026", updated: "24 Sep 2026, 11:15", icon: "paw-print", color: "#F97316", parent: "", related: ["Perros", "Gatos"], stock: 36, noStock: 2, lowStock: 4 },
+  { id: 3, name: "Veterinaria", description: "Productos veterinarios y de cuidado animal.", products: 28, status: "Activa", created: "08 Sep 2026", updated: "23 Sep 2026, 16:20", icon: "stethoscope", color: "#EF4444", parent: "", related: ["Medicamentos", "Higiene"], stock: 23, noStock: 1, lowStock: 4 },
+  { id: 4, name: "Higiene y Limpieza", description: "Productos de limpieza y desinfección.", products: 18, status: "Activa", created: "05 Sep 2026", updated: "22 Sep 2026, 10:45", icon: "droplets", color: "#1684F8", parent: "", related: ["Limpieza", "Desinfección"], stock: 15, noStock: 1, lowStock: 2 },
+  { id: 5, name: "Accesorios", description: "Accesorios y complementos.", products: 15, status: "Activa", created: "04 Sep 2026", updated: "21 Sep 2026, 09:30", icon: "wrench", color: "#64748B", parent: "", related: [], stock: 13, noStock: 0, lowStock: 2 },
+  { id: 6, name: "Salud y Bienestar", description: "Suplementos y productos de cuidado.", products: 12, status: "Activa", created: "01 Sep 2026", updated: "20 Sep 2026, 18:10", icon: "heart", color: "#EF4444", parent: "", related: ["Vitaminas", "Cuidado personal"], stock: 10, noStock: 0, lowStock: 2 },
+  { id: 7, name: "Juguetes", description: "Juguetes y entretenimiento.", products: 10, status: "Activa", created: "28 Ago 2026", updated: "19 Sep 2026, 12:05", icon: "bone", color: "#F97316", parent: "", related: [], stock: 9, noStock: 0, lowStock: 1 },
+  { id: 8, name: "Ropa y Textiles", description: "Ropa, camas y textiles.", products: 8, status: "Activa", created: "25 Ago 2026", updated: "18 Sep 2026, 14:40", icon: "shirt", color: "#7C3AED", parent: "", related: [], stock: 7, noStock: 0, lowStock: 1 },
+  { id: 9, name: "Electrónicos", description: "Equipos y accesorios electrónicos.", products: 5, status: "Activa", created: "20 Ago 2026", updated: "17 Sep 2026, 09:15", icon: "cpu", color: "#475569", parent: "", related: [], stock: 4, noStock: 0, lowStock: 1 },
+  { id: 10, name: "Otros", description: "Productos varios.", products: 3, status: "Activa", created: "18 Ago 2026", updated: "15 Sep 2026, 14:20", icon: "more-horizontal", color: "#64748B", parent: "", related: [], stock: 0, noStock: 3, lowStock: 0 },
+  { id: 11, name: "Bebidas", description: "Bebidas frías y calientes.", products: 22, status: "Activa", created: "15 Ago 2026", updated: "14 Sep 2026, 12:00", icon: "coffee", color: "#A16207", parent: "Alimentos", related: [], stock: 21, noStock: 0, lowStock: 1 },
+  { id: 12, name: "Snacks", description: "Snacks y aperitivos.", products: 14, status: "Activa", created: "12 Ago 2026", updated: "13 Sep 2026, 10:30", icon: "diamond", color: "#F59E0B", parent: "Alimentos", related: [], stock: 13, noStock: 0, lowStock: 1 },
+  { id: 13, name: "Productos secos", description: "Granos, semillas y productos secos.", products: 9, status: "Activa", created: "10 Ago 2026", updated: "12 Sep 2026, 15:20", icon: "grid-2x2", color: "#A16207", parent: "Alimentos", related: [], stock: 8, noStock: 0, lowStock: 1 },
+  { id: 14, name: "Perros", description: "Productos para perros.", products: 20, status: "Activa", created: "08 Ago 2026", updated: "11 Sep 2026, 10:00", icon: "paw-print", color: "#F97316", parent: "Mascotas", related: [], stock: 18, noStock: 0, lowStock: 2 },
+  { id: 15, name: "Gatos", description: "Productos para gatos.", products: 22, status: "Activa", created: "06 Ago 2026", updated: "10 Sep 2026, 11:30", icon: "paw-print", color: "#F97316", parent: "Mascotas", related: [], stock: 18, noStock: 1, lowStock: 3 },
+  { id: 16, name: "Medicamentos", description: "Medicamentos y tratamientos veterinarios.", products: 12, status: "Activa", created: "04 Ago 2026", updated: "09 Sep 2026, 09:20", icon: "pill", color: "#EF4444", parent: "Veterinaria", related: [], stock: 10, noStock: 0, lowStock: 2 },
+  { id: 17, name: "Promocionales", description: "Productos de temporada y promoción.", products: 0, status: "Inactiva", created: "02 Ago 2026", updated: "08 Sep 2026, 12:15", icon: "star", color: "#8B5CF6", parent: "", related: [], stock: 0, noStock: 0, lowStock: 0 },
+  { id: 18, name: "Sin clasificar", description: "Categoría pendiente de clasificación.", products: 0, status: "Inactiva", created: "01 Ago 2026", updated: "07 Sep 2026, 08:45", icon: "more-horizontal", color: "#94A3B8", parent: "", related: [], stock: 0, noStock: 0, lowStock: 0 },
 ];
 
-const categoryIcons = ["🍴", "🐾", "♧", "💧", "🔧", "♡", "🦴", "♧", "▣", "•••", "☕", "◇"];
+const categoryIcons = ["utensils", "paw-print", "stethoscope", "droplets", "wrench", "heart", "bone", "shirt", "cpu", "more-horizontal", "coffee", "diamond"];
+const categoryIconMap = { utensils: Utensils, "paw-print": PawPrint, stethoscope: Stethoscope, droplets: Droplets, wrench: Wrench, heart: Heart, bone: Bone, shirt: Shirt, cpu: Cpu, "more-horizontal": MoreHorizontal, coffee: Coffee, diamond: Diamond, "grid-2x2": Grid2X2, pill: Pill, star: Star };
 const palette = ["#1684F8", "#F97316", "#EF4444", "#10B981", "#8B5CF6", "#F59E0B", "#94A3B8"];
 const css = `
 .cat-root{--blue:#2165ed;--ink:#17233b;--muted:#71809e;--line:#e5ebf4;--green:#059669;--red:#e11d48;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:#f7f9fc;min-height:100vh;font-size:14px}
@@ -42,6 +44,7 @@ const css = `
 const fmt = n => new Intl.NumberFormat("es-PE").format(n);
 const iconBg = color => ({ background: `${color}18`, color });
 function Icon({ children }) { return <span aria-hidden="true" style={{display:"inline-grid",placeItems:"center",minWidth:18}}>{children}</span>; }
+function CategoryIcon({ name, size = 20, strokeWidth = 1.8 }) { const IconComponent = categoryIconMap[name] || MoreHorizontal; return <IconComponent size={size} strokeWidth={strokeWidth} aria-hidden="true" />; }
 
 export default function CategoriasPanel() {
   const [categories, setCategories] = useState(initialCategories);
@@ -58,7 +61,7 @@ export default function CategoriasPanel() {
   const [detailTab, setDetailTab] = useState("Resumen");
   const [moreFilters, setMoreFilters] = useState(false);
   const [hasProducts, setHasProducts] = useState("Todos");
-  const [form, setForm] = useState({ name:"", description:"", icon:"🍴", color:"#1684F8", status:"Activa", parent:"" });
+  const [form, setForm] = useState({ name:"", description:"", icon:"utensils", color:"#1684F8", status:"Activa", parent:"" });
   const [toast, setToast] = useState("");
   const actionsMenuRef = useRef(null);
 
@@ -95,7 +98,7 @@ export default function CategoriasPanel() {
   },[categories,query,statusFilter,sort,hasProducts]);
   const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
   const rows=filtered.slice((page-1)*pageSize,page*pageSize);
-  const resetForm = () => setForm({name:"",description:"",icon:"🍴",color:"#1684F8",status:"Activa",parent:""});
+  const resetForm = () => setForm({name:"",description:"",icon:"utensils",color:"#1684F8",status:"Activa",parent:""});
   const openCreate = () => { setEditing(null); resetForm(); setModal(true); setMenuId(null); };
   const openEdit = c => { setEditing(c); setForm({name:c.name,description:c.description,icon:c.icon,color:c.color,status:c.status,parent:c.parent||""}); setModal(true); setMenuId(null); };
   const saveCategory = e => {
@@ -211,7 +214,7 @@ export default function CategoriasPanel() {
          border-radius: 12px;
          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
        }
-       .cat-table { min-width: 940px; border-collapse: collapse; }
+        .cat-table { width: 100%; min-width: 940px; border-collapse: collapse; }
        .cat-table th {
          background: #f8fafc;
          padding: 15px 16px;
@@ -221,34 +224,113 @@ export default function CategoriasPanel() {
          letter-spacing: 0.2px;
          color: #475569;
        }
-       .cat-table td {
-         padding: 16px;
-         border-bottom: 1px solid #f1f5f9;
-         font-size: 14.5px;
-         color: #334155;
+        .cat-table td {
+          padding: 16px;
+          border-bottom: 1px solid #f1f5f9;
+          font-size: 14.5px;
+          color: #334155;
+          white-space: nowrap;
        }
        .cat-table tbody tr:nth-child(even) { background: #fafafa; }
        .cat-table tbody tr:hover { background: #f8fafc; }
-       .cat-table tbody tr.selected { background: rgba(255, 75, 11, 0.05); }
-       .cat-icon-box {
-         border-radius: 10px;
-         border: 1px solid #e2e8f0;
-       }
-       .cat-pagination { border-top: 1px solid #f1f5f9; }
-     `}</style>
+        .cat-table tbody tr.selected { background: rgba(255, 75, 11, 0.05); }
+        .cat-table th:first-child,
+        .cat-table td:first-child { width: 48px; text-align: center; }
+        .cat-icon-box {
+          width: 36px;
+          height: 36px;
+          border-radius: 9px;
+          border: 1px solid #e2e8f0;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .cat-category-cell {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+          color: #253653;
+          font-weight: 550;
+        }
+        .cat-status {
+          display: inline-flex;
+          align-items: center;
+          padding: 5px 10px;
+          border: 1px solid transparent;
+          border-radius: 7px;
+          font-size: 12px;
+          font-weight: 600;
+          background: #def8ed;
+          color: #059669;
+        }
+        .cat-status.inactive { background: #f1f4f8; color: #748198; }
+        .cat-status.empty { background: #fee8eb; color: #dc2626; }
+        .cat-actions {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 8px;
+        }
+        .cat-icon-btn {
+          width: 36px;
+          height: 36px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fff;
+          color: #53627d;
+          display: grid;
+          place-items: center;
+          font-size: 17px;
+          cursor: pointer;
+        }
+        .cat-icon-btn:hover {
+          border-color: #9dbbfa;
+          color: var(--blue);
+          background: #f8fbff;
+        }
+        .cat-pagination {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 18px 16px;
+          color: var(--muted);
+          border-top: 1px solid #f1f5f9;
+        }
+        .cat-pagination select {
+          height: 34px;
+          min-width: 68px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 0 10px;
+          background: #fff;
+          color: #34415b;
+          font: inherit;
+        }
+        .cat-page {
+          width: 36px;
+          height: 36px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #fff;
+          color: #34415b;
+          cursor: pointer;
+        }
+        .cat-page:hover:not(:disabled) { border-color: #b8c9e6; background: #f9fbff; }
+        .cat-page.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+        .cat-page:disabled { opacity: .5; cursor: not-allowed; }
+      `}</style>
     <div className="cat-layout">
       <div className="cat-main">
         <div className="cat-content">
           <div className="cat-heading">
-            <div className="cat-heading-icon">▱</div>
+             <div className="cat-heading-icon"><Grid2X2 size={20} strokeWidth={1.8} /></div>
             <div><h1>Categorías</h1><p>Organiza tus productos en categorías para una mejor gestión del inventario.</p></div>
             <div className="cat-heading-actions"><button className="cat-btn primary" onClick={openCreate}>＋ Nueva categoría</button></div>
           </div>
           <div className="cat-metrics">
-            <div className="cat-metric"><div className="cat-metric-icon">⬡</div><div><div className="cat-metric-label">Total de categorías</div><div className="cat-metric-value">{categories.length}</div><div className="cat-metric-note"><span className="cat-up">↑ 12%</span>　vs. mes anterior</div></div></div>
-            <div className="cat-metric"><div className="cat-metric-icon green">◇</div><div><div className="cat-metric-label">Categorías con productos</div><div className="cat-metric-value">{withProducts}</div><div className="cat-metric-note">{categories.length?Math.round(withProducts/categories.length*100):0}% del total</div></div></div>
-            <div className="cat-metric"><div className="cat-metric-icon red">◇</div><div><div className="cat-metric-label">Sin productos</div><div className="cat-metric-value">{noProducts}</div><div className="cat-metric-note">{categories.length?Math.round(noProducts/categories.length*100):0}% del total</div></div></div>
-            <div className="cat-metric"><div className="cat-metric-icon purple">⬡</div><div><div className="cat-metric-label">Total de productos</div><div className="cat-metric-value">{fmt(totalProducts)}</div><div className="cat-metric-note"><span className="cat-up">↑ 12%</span>　vs. mes anterior</div></div></div>
+             <div className="cat-metric"><div className="cat-metric-icon"><Grid2X2 size={16} /></div><div><div className="cat-metric-label">Total de categorías</div><div className="cat-metric-value">{categories.length}</div><div className="cat-metric-note"><span className="cat-up">↑ 12%</span>　vs. mes anterior</div></div></div>
+             <div className="cat-metric"><div className="cat-metric-icon green"><PawPrint size={16} /></div><div><div className="cat-metric-label">Categorías con productos</div><div className="cat-metric-value">{withProducts}</div><div className="cat-metric-note">{categories.length?Math.round(withProducts/categories.length*100):0}% del total</div></div></div>
+             <div className="cat-metric"><div className="cat-metric-icon red"><Package size={16} /></div><div><div className="cat-metric-label">Sin productos</div><div className="cat-metric-value">{noProducts}</div><div className="cat-metric-note">{categories.length?Math.round(noProducts/categories.length*100):0}% del total</div></div></div>
+             <div className="cat-metric"><div className="cat-metric-icon purple"><Utensils size={16} /></div><div><div className="cat-metric-label">Total de productos</div><div className="cat-metric-value">{fmt(totalProducts)}</div><div className="cat-metric-note"><span className="cat-up">↑ 12%</span>　vs. mes anterior</div></div></div>
           </div>
           <div className="cat-toolbar">
             <div className="cat-search"><Icon>⌕</Icon><input value={query} onChange={e=>{setQuery(e.target.value);setPage(1)}} placeholder="Buscar categoría..."/></div>
@@ -263,7 +345,7 @@ export default function CategoriasPanel() {
               <thead><tr><th><input type="checkbox" aria-label="Seleccionar todos" checked={rows.length>0&&rows.every(c=>selectedIds.includes(c.id))} onChange={e=>toggleAll(e.target.checked)}/></th><th>Categoría　↕</th><th>Descripción　↕</th><th>Productos　↕</th><th>Estado　↕</th><th>Fecha de creación　↕</th><th>Última actualización　↕</th><th style={{textAlign:"right"}}>Acciones</th></tr></thead>
               <tbody>{rows.map(c=><tr key={c.id} className={selectedIds.includes(c.id)?"selected":""}>
                 <td><input type="checkbox" checked={selectedIds.includes(c.id)} onChange={()=>toggleOne(c.id)} aria-label={`Seleccionar ${c.name}`}/></td>
-                <td><div className="cat-category-cell"><div className="cat-icon-box" style={iconBg(c.color)}>{c.icon}</div><button style={{border:0,background:"transparent",padding:0,color:"inherit",font:"inherit",cursor:"pointer"}} onClick={()=>{setDetail(c);setDetailTab("Resumen")}}>{c.name}</button></div></td>
+                 <td><div className="cat-category-cell"><div className="cat-icon-box" style={iconBg(c.color)}><CategoryIcon name={c.icon} /></div><button style={{border:0,background:"transparent",padding:0,color:"inherit",font:"inherit",cursor:"pointer"}} onClick={()=>{setDetail(c);setDetailTab("Resumen")}}>{c.name}</button></div></td>
                 <td title={c.description}>{c.description.length>47?c.description.slice(0,47)+"…":c.description}</td><td>{fmt(c.products)}</td><td><span className={`cat-status ${c.status==="Inactiva"?"inactive":c.products===0?"empty":""}`}>{c.products===0&&c.status==="Activa"?"Sin productos":c.status}</span></td><td>{c.created}</td><td>{c.updated}</td>
                 <td><div className="cat-actions" ref={menuId === c.id ? actionsMenuRef : null}><button className="cat-icon-btn" title="Editar" onClick={()=>openEdit(c)}>✎</button><div className="cat-action-wrap"><button className="cat-icon-btn" title="Más acciones" onClick={()=>setMenuId(menuId===c.id?null:c.id)}>•••</button>{menuId===c.id&&<div className="cat-dropdown"><button onClick={()=>{setDetail(c);setDetailTab("Resumen");setMenuId(null)}}>◉　Ver detalle</button><button onClick={()=>openEdit(c)}>✎　Editar categoría</button><button onClick={()=>{setForm({name:c.name,description:c.description,icon:c.icon,color:c.color,status:c.status,parent:c.parent||""});setEditing(null);setModal(true);setMenuId(null);showToast("Edita el nombre para duplicar")}}>▣　Duplicar</button><button className="danger" onClick={()=>removeCategory(c)}>♜　Eliminar</button></div>}</div></div></td>
               </tr>)}</tbody>
@@ -281,7 +363,7 @@ export default function CategoriasPanel() {
         <div className="cat-field"><label>Descripción</label><textarea maxLength={200} placeholder="Describe brevemente el tipo de productos que incluirá esta categoría." value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/><div className="cat-counter">{form.description.length}/200</div></div>
         <div className="cat-field"><label>Estado</label><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})}><option>Activa</option><option>Inactiva</option></select><small style={{color:"var(--muted)",lineHeight:1.5}}>Las categorías inactivas no se mostrarán al seleccionar productos.</small></div>
       </div><div>
-        <div className="cat-field"><label>Ícono</label><div className="cat-choice-icons">{categoryIcons.map((ic,i)=><button type="button" key={i} className={`cat-choice-icon ${form.icon===ic?"active":""}`} style={iconBg(palette[i%palette.length])} onClick={()=>setForm({...form,icon:ic,color:palette[i%palette.length]})}>{ic}</button>)}</div></div>
+         <div className="cat-field"><label>Ícono</label><div className="cat-choice-icons">{categoryIcons.map((ic,i)=><button type="button" key={i} className={`cat-choice-icon ${form.icon===ic?"active":""}`} style={iconBg(palette[i%palette.length])} onClick={()=>setForm({...form,icon:ic,color:palette[i%palette.length]})}><CategoryIcon name={ic} size={23} /></button>)}</div></div>
         <div className="cat-field"><label>Color</label><div className="cat-colors">{palette.map(color=><button type="button" key={color} aria-label={`Color ${color}`} className={`cat-color ${form.color===color?"active":""}`} style={{background:color}} onClick={()=>setForm({...form,color})}/>)}</div></div>
         <div className="cat-field"><label>Categoría padre (opcional)</label><select value={form.parent} onChange={e=>setForm({...form,parent:e.target.value})}><option value="">Sin categoría padre</option>{categories.filter(c=>c.id!==editing?.id).map(c=><option key={c.id} value={c.name}>{c.name}</option>)}</select><small style={{color:"var(--muted)",lineHeight:1.5}}>Útil para crear subcategorías dentro de una categoría existente.</small></div>
       </div></div></div>
@@ -289,7 +371,7 @@ export default function CategoriasPanel() {
     </form></div>}
 
     {detail&&<><div className="cat-overlay" style={{background:"#14233b66",padding:0}} onClick={()=>setDetail(null)}></div><aside className="cat-detail">
-      <div className="cat-detail-head"><button className="cat-icon-btn cat-detail-close" onClick={()=>setDetail(null)}>×</button><div className="cat-detail-title"><div className="cat-icon-box" style={iconBg(detail.color)}>{detail.icon}</div><div><h2>{detail.name} <span className={`cat-status ${detail.status==="Inactiva"?"inactive":""}`}>{detail.status}</span></h2><p>{detail.description}</p></div></div></div>
+       <div className="cat-detail-head"><button className="cat-icon-btn cat-detail-close" onClick={()=>setDetail(null)}>×</button><div className="cat-detail-title"><div className="cat-icon-box" style={iconBg(detail.color)}><CategoryIcon name={detail.icon} size={30} /></div><div><h2>{detail.name} <span className={`cat-status ${detail.status==="Inactiva"?"inactive":""}`}>{detail.status}</span></h2><p>{detail.description}</p></div></div></div>
       <div className="cat-detail-tabs">{["Resumen",`Productos (${detail.products})`,"Precios","Más datos"].map(t=><button key={t} className={detailTab===t?"active":""} onClick={()=>setDetailTab(t)}>{t}</button>)}</div>
       <div className="cat-detail-content">
         {detailTab==="Resumen"&&<>

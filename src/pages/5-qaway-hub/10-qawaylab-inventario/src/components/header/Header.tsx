@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home } from 'lucide-react'
+import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { useTenant } from '@/context/TenantContext'
 // @ts-ignore
 import { AppSwitcherDropdown } from '../../../../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
 
@@ -27,8 +28,10 @@ export default function Header({
   onToggleSidebar: () => void
 }) {
   const { session, profile, signOut, loading } = useAuth()
+  const { scopedTenant, setScopedTenant, isPlatformAdmin, tenantOptions, loadingTenants, activeTenant } = useTenant()
   const navigate = useNavigate()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isTenantOpen, setIsTenantOpen] = useState(false)
   const [isWarehouseOpen, setIsWarehouseOpen] = useState(false)
   const [isWaffleOpen, setIsWaffleOpen] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<{ id: string; name: string; code: string } | null>(null)
@@ -189,6 +192,103 @@ export default function Header({
               Inicio
             </span>
           </button>
+        </div>
+
+        {/* Selector / Indicador de Empresa (Multi-Tenant) */}
+        <div className="relative">
+          {isPlatformAdmin ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsTenantOpen((o) => !o)}
+                className={`hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all ${
+                  scopedTenant
+                    ? 'border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)]'
+                    : 'border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                }`}
+                title="Seleccionar empresa de trabajo"
+              >
+                <Building2 size={15} className={scopedTenant ? 'text-[#ff4b0b]' : 'text-amber-400'} />
+                <span className={`w-2 h-2 rounded-full ${scopedTenant ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                <span className="max-w-36 truncate">
+                  {scopedTenant ? scopedTenant.name : 'Sin empresa'}
+                </span>
+                <ChevronDown size={14} className={`w-3.5 h-3.5 text-[var(--hub-dim)] transition-transform duration-200 ${isTenantOpen ? 'rotate-180 text-[var(--hub-text)]' : ''}`} />
+              </button>
+
+              {isTenantOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsTenantOpen(false)} aria-label="Cerrar selector" />
+                  <div className="hub-chrome absolute left-0 top-[calc(100%+8px)] w-80 rounded-2xl bg-[var(--hub-surface)] border border-[var(--hub-border)] shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden text-left text-[var(--hub-text)]">
+                    <div className="p-4 border-b border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                      <div className="flex items-center gap-2">
+                        <Building2 size={16} className="text-[#ff4b0b]" />
+                        <p className="text-xs font-extrabold text-[var(--hub-text)]">Empresa de trabajo</p>
+                      </div>
+                      <p className="text-[10px] text-[var(--hub-dim)] mt-1">
+                        Selecciona la empresa sobre la que registrarás y gestionarás productos.
+                      </p>
+                    </div>
+                    <div className="p-2 max-h-64 overflow-y-auto space-y-0.5">
+                      {loadingTenants ? (
+                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">Cargando empresas...</div>
+                      ) : tenantOptions.length === 0 ? (
+                        <div className="p-3 text-xs text-[var(--hub-dim)] text-center">No se encontraron empresas</div>
+                      ) : (
+                        tenantOptions.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => {
+                              setScopedTenant(t)
+                              setIsTenantOpen(false)
+                            }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${
+                              scopedTenant?.id === t.id
+                                ? 'bg-[#ff4b0b]/15 text-[#ff4b0b] font-bold'
+                                : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scopedTenant?.id === t.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
+                            <span className="truncate">{t.name}</span>
+                            {t.client_code && (
+                              <span className="ml-auto text-[10px] font-semibold text-[var(--hub-dim)] shrink-0">{t.client_code}</span>
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    <div className="p-2 border-t border-[var(--hub-border-soft)] bg-[var(--hub-chip)]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScopedTenant(null)
+                          setIsTenantOpen(false)
+                        }}
+                        disabled={!scopedTenant}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                          scopedTenant
+                            ? 'text-red-400 hover:bg-red-400/10 cursor-pointer'
+                            : 'text-[var(--hub-faint)] cursor-default'
+                        }`}
+                      >
+                        <X size={14} className="w-3.5 h-3.5" />
+                        Desactivar selección (Sin empresa)
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          ) : activeTenant ? (
+            <div
+              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] text-[var(--hub-text)] text-sm font-bold"
+              title={`Empresa asignada: ${activeTenant.name}`}
+            >
+              <Building2 size={15} className="text-[#ff4b0b]" />
+              <span className="max-w-36 truncate">{activeTenant.name}</span>
+            </div>
+          ) : null}
         </div>
 
         {/* Selector moderno de Almacén (reutilizado de HubPanelPage.jsx:2600-2660) */}

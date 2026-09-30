@@ -21,6 +21,7 @@ export interface Product {
   stock: number
   min_stock: number
   location_id: string | null
+  tenant_id?: string
   cost: number | null
   base_price: number | null
   commercial_status: CommercialStatus
@@ -471,6 +472,7 @@ export interface PaginatedResponse<T> {
 
 // ── Filters ──
 export interface ProductFilters {
+  tenant_id?: string
   search?: string
   category_id?: string
   status?: ProductStatus

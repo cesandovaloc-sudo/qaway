@@ -356,3 +356,168 @@ DashboardPagination
 ```
 
 Los nombres `.pxp-*` identifican la implementación actual de Productos. La siguiente etapa técnica es extraerlos a componentes y tokens compartidos para que Ventas, Compras, Clientes, Proveedores y Reportes consuman exactamente las mismas reglas visuales.
+
+
+
+EXTRAS:
+---
+
+# Reglas de implementación, alcance y auditoría visual
+
+## 1. Breakpoints y diseño responsive
+
+El breakpoint de referencia para la adaptación móvil de los tableros es de 800 px.
+
+- Breakpoint móvil: 800 px.
+- Padding vertical móvil: 16 px.
+- Padding horizontal móvil: 12 px.
+
+Un módulo puede utilizar un breakpoint diferente únicamente cuando documente expresamente la excepción y su justificación.
+
+Estos valores deben aplicarse a la superficie del tablero, sin alterar el comportamiento responsive del shell global.
+
+## 2. Separación entre shell global y superficie del tablero
+
+El estándar distingue dos niveles de interfaz:
+
+### 2.1. Shell global de la aplicación
+
+Incluye los elementos compartidos de navegación y estructura general:
+
+- Sidebar.
+- Barra superior.
+- Navegación global.
+- Permisos y elementos externos al módulo.
+
+Estos elementos se documentan en el estándar del shell global y no deben considerarse parte del tablero cuando no estén presentes en el JSX del panel auditado.
+
+### 2.2. Superficie propia del tablero
+
+Incluye los elementos específicos del módulo:
+
+- Encabezado del módulo.
+- Métricas.
+- Barra de herramientas (toolbar).
+- Tabla.
+- Paginación.
+
+Las modificaciones visuales de un tablero deben limitarse a su superficie, salvo que se solicite expresamente modificar el shell global.
+
+## 3. Tokens y precedencia de estilos
+
+Los estilos de los tableros se organizan en dos niveles:
+
+### 3.1. Tokens globales
+
+Los tokens definidos en `src/index.css` establecen la base compartida de marca, colores y tipografía.
+
+### 3.2. Variables locales del tablero
+
+Las variables CSS locales definen los valores específicos de cada tablero.
+
+Cuando exista una variable local con el mismo propósito visual que un token global, prevalece la variable local del namespace del tablero para ese panel.
+
+### 3.3. Fuentes de estilos que deben revisarse
+
+Antes de modificar o documentar un tablero, deben revisarse:
+
+- Tokens globales.
+- Variables CSS locales.
+- CSS embebido.
+- Estilos inline.
+- Componentes visuales auxiliares.
+- Reglas responsive.
+
+No se deben asumir valores finales únicamente a partir de una clase CSS o de un token sin comprobar su aplicación efectiva.
+
+## 4. Auditoría visual y verificación
+
+Toda auditoría visual debe distinguir entre:
+
+1. Valores declarados en el código fuente.
+2. Valores heredados de estilos globales.
+3. Valores computados y efectivamente aplicados en el navegador.
+4. Valores que no pudieron verificarse.
+
+Cuando no se disponga de evidencia suficiente, el valor debe marcarse como no verificado.
+
+No se deben inventar valores, asumir equivalencias entre módulos ni convertir recomendaciones de diseño en reglas existentes del estándar.
+
+Las excepciones específicas de un módulo deben documentarse expresamente.
+
+---
+
+## Tipografía específica de Categorías
+
+- Las celdas de `.cat-table` utilizan `font-size: 14.5px`, `color: #334155` y `padding: 16px`.
+- Los nombres de categoría heredan la tipografía de la celda de tabla.
+- Las descripciones de categoría también heredan la tipografía de la celda.
+- Las descripciones se limitan en JSX a 47 caracteres y agregan `…` cuando superan ese límite.
+- `.cat-category-cell` aplica `font-weight: 550`, `color: #253653`, `display: flex`, `align-items: center` y `gap: 13px` al nombre y su contenedor.
+- Las descripciones no tienen una regla propia de peso ni `line-height`; heredan los valores de `.cat-table td` y de la cascada global.
+- No se declara un `line-height` específico para nombres ni descripciones en el panel.
+
+## Iconografía de Categorías
+
+- Los iconos de categoría se representan mediante caracteres Unicode y emojis almacenados en `categoryIcons` y en los datos de cada categoría.
+- La selección inicial de iconos está definida por el array `categoryIcons`.
+- La presentación final depende de la fuente y del renderizador Unicode del navegador.
+- `.cat-icon-box` tiene `width: 36px`, `height: 36px`, `border-radius: 9px`, `display: grid`, `place-items: center`, `font-size: 20px` y `flex-shrink: 0`.
+- Su borde declarado es `1px solid #e2e8f0`; su fondo y color se aplican inline mediante `iconBg(c.color)`.
+- El fondo del icono se genera dinámicamente mediante `iconBg(c.color)`.
+
+## Estados de Categorías
+
+- El estado se renderiza mediante `.cat-status`.
+- La clase `inactive` se aplica cuando la categoría está inactiva.
+- La clase `empty` se aplica cuando la categoría no tiene productos.
+- Cuando una categoría está activa y tiene cero productos, el texto visible se reemplaza por `Sin productos`.
+- `.cat-status` usa `display: inline-flex`, `align-items: center`, `padding: 5px 10px`, `border-radius: 7px`, `font-size: 12px`, `font-weight: 600`, `background: #def8ed` y `color: #059669`.
+- `.cat-status.inactive` usa `background: #f1f4f8` y `color: #748198`.
+- `.cat-status.empty` usa `background: #fee8eb` y `color: #dc2626`.
+- No se declara un `border` ni un `line-height` específico para `.cat-status`.
+
+## Tabla de Categorías
+
+- `.cat-table` tiene `min-width: 940px` y `border-collapse: collapse`.
+- Las cabeceras utilizan:
+  - Fondo: `#f8fafc`.
+  - Padding: `15px 16px`.
+  - Borde inferior: `1px solid #e2e8f0`.
+  - Tamaño de fuente: `13px`.
+  - Peso: `700`.
+  - Espaciado entre letras: `0.2px`.
+  - Color: `#475569`.
+- Las celdas utilizan:
+  - Padding: `16px`.
+  - Borde inferior: `1px solid #f1f5f9`.
+  - Tamaño de fuente: `14.5px`.
+  - Color: `#334155`.
+- Las filas pares utilizan el fondo `#fafafa`.
+- Las filas en estado hover utilizan el fondo `#f8fafc`.
+- Las filas seleccionadas utilizan el fondo `rgba(255, 75, 11, 0.05)`.
+
+## Paginación de Categorías
+
+- `.cat-pagination` tiene un borde superior `1px solid #f1f5f9`.
+- La paginación contiene el rango de resultados, el selector de filas por página y los botones de navegación `.cat-page`.
+- `.cat-pagination` usa `display: flex`, `align-items: center`, `gap: 9px`, `padding: 18px 16px` y `color: var(--muted)`; además tiene `border-top: 1px solid #f1f5f9`.
+- `.cat-page` tiene `width: 36px`, `height: 36px`, `border: 1px solid var(--line)`, `border-radius: 8px`, `background: #fff`, `color: #34415b` y `cursor: pointer`.
+- `.cat-page.active` usa `background: var(--blue)`, `border-color: var(--blue)` y `color: white`; en `.cat-root`, `--blue` es `#2165ed` y `--line` es `#e5ebf4`.
+- No existe una regla CSS específica para `.cat-page:disabled`; su apariencia deshabilitada depende del comportamiento nativo del navegador.
+
+## Acciones de fila
+
+- Los botones de edición y menú de Productos y Categorías utilizan caracteres Unicode, no componentes Lucide.
+- Los caracteres utilizados incluyen `✎`, `···` y `•••`.
+- Productos aplica la clase `selected` al botón de menú cuando el menú está abierto.
+- Categorías no aplica una clase de estado equivalente al abrir el menú.
+- `.cat-icon-btn` tiene `width: 37px`, `height: 37px`, `border: 1px solid var(--line)`, `border-radius: 8px`, `background: #fff`, `color: #344b70`, `display: grid`, `place-items: center`, `font-size: 18px` y `cursor: pointer`.
+- `.cat-icon-btn:hover` usa `border-color: #9dbbfa`, `color: var(--blue)` y `background: #f8fbff`.
+- No existe una regla `.cat-icon-btn.selected` en el panel de Categorías.
+- `.cat-actions` usa `display: flex`, `justify-content: flex-end` y `gap: 8px`.
+- No se pudo confirmar mediante estilos computados ningún valor final del DOM; los valores anteriores son los declarados en el CSS embebido.
+
+
+
+

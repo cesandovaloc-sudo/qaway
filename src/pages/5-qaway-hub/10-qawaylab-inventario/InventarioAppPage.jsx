@@ -1,5 +1,6 @@
 import { Component, Suspense } from 'react'
 import { AuthProvider } from './src/context/AuthContext'
+import { TenantProvider } from './src/context/TenantContext'
 import AppRouter from './src/app/router/AppRouter'
 import './src/index.css'
 
@@ -44,15 +45,17 @@ export default function InventarioAppPage() {
   return (
     <div className="qaway-inventario-root hub-shell" style={{ minHeight: '100vh' }}>
       <AuthProvider>
-        <ErrorBoundary>
-          <Suspense fallback={
-            <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
-              <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando Inventario...</span>
-            </div>
-          }>
-            <AppRouter />
-          </Suspense>
-        </ErrorBoundary>
+        <TenantProvider>
+          <ErrorBoundary>
+            <Suspense fallback={
+              <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5' }}>
+                <span style={{ fontSize: '14px', color: '#71717a' }}>Cargando Inventario...</span>
+              </div>
+            }>
+              <AppRouter />
+            </Suspense>
+          </ErrorBoundary>
+        </TenantProvider>
       </AuthProvider>
     </div>
   )
