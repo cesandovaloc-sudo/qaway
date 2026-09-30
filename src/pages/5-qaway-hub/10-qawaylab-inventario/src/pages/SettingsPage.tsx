@@ -95,15 +95,29 @@ function BusinessTab({ onError }: { onError: (e: string | null) => void }) {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
+    let alive = true
     if (!activeTenantId) {
       setLoading(false)
+      setSettings(null)
       return
     }
+    setLoading(true)
+    onError(null)
     fiscalService
       .getBusinessSettings(activeTenantId)
-      .then(setSettings)
-      .catch(err => onError(err instanceof Error ? err.message : 'Error al cargar la configuración'))
-      .finally(() => setLoading(false))
+      .then(value => {
+        if (alive) setSettings(value)
+      })
+      .catch(err => {
+        if (alive) onError(err instanceof Error ? err.message : 'Error al cargar la configuración')
+      })
+      .finally(() => {
+        if (alive) setLoading(false)
+      })
+
+    return () => {
+      alive = false
+    }
   }, [activeTenantId, onError])
 
   const update = (patch: Partial<BusinessSettings>) => {

@@ -41,10 +41,12 @@ import { productService } from "../../src/services/productService";
 import { useTenant } from "../../src/context/TenantContext";
 
 /**
- * ProductosPanel.jsx
- * Panel de productos de Inventi Pro conectado al ecosistema Supabase.
- * Soporta stock por almacén/tiendas, unidades de medida, listas de precios (base, mayorista, mínimo, venta)
- * y sincronización en tiempo real con Supabase.
+ * MovimientosPanelLiteral.jsx
+ * Tablero superior (diseño nuevo) del módulo Movimientos de Inventi Pro.
+ * NOTA DE MIGRACIÓN (FASE 1): este componente deriva del panel de Productos
+ * y todavía monta lógica de Productos (productos, stock, precios). La
+ * migración de lógica desde 4-MovimientosPanel.jsx (tablero inferior, fuente
+ * de verdad funcional) se realiza por fases; esta fase solo adapta textos.
  */
 
 const STOCK_IMAGES = {
@@ -172,13 +174,13 @@ function ProductThumb({ id, category = "", name = "", size = 40 }) {
 const AVAILABLE_COLUMNS = [
   { key: "product", label: "Producto" },
   { key: "sku", label: "SKU" },
-  { key: "barcode", label: "Cód. Barras" },
-  { key: "category", label: "Categoría" },
-  { key: "stock", label: "Stock" },
-  { key: "price", label: "Precio base" },
-  { key: "wholesale", label: "Precio mayorista" },
-  { key: "status", label: "Estado" },
-  { key: "location", label: "Ubicación" },
+  { key: "barcode", label: "Referencia" },
+  { key: "category", label: "Tipo" },
+  { key: "stock", label: "Cantidad" },
+  { key: "price", label: "Saldo" },
+  { key: "wholesale", label: "Motivo" },
+  { key: "status", label: "Usuario" },
+  { key: "location", label: "Almacén / Ubicación" },
 ];
 
 function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvanced, categories, onClose, onSave }) {
@@ -208,7 +210,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               </div>
               <div>
                 <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
-                  {editing ? "Editar producto" : "Nuevo producto / servicio"}
+                  {editing ? "Editar movimiento" : "Nuevo movimiento"}
                 </h2>
                 <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>
                   {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
@@ -242,7 +244,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   transition: "all .15s ease"
                 }}
               >
-                <span>✓</span> Con inventario / stock
+                <span>↓</span> Entrada (ingresa stock)
               </button>
               <button
                 type="button"
@@ -265,14 +267,14 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   transition: "all .15s ease"
                 }}
               >
-                <span>🏷️</span> Servicio / Intangible
+                <span>↑</span> Salida (retira stock)
               </button>
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {/* Nombre */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Nombre del producto <span style={{ color: "#ef4444" }}>*</span></div>
+                <div className="pxp-form-label">Producto <span style={{ color: "#ef4444" }}>*</span></div>
                 <input
                   required
                   className="pxp-form-input"
@@ -284,7 +286,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
 
               {/* SKU / Código */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Código / SKU <span style={{ color: "#ef4444" }}>*</span></div>
+                <div className="pxp-form-label">Código / SKU</div>
                 <input
                   required
                   className="pxp-form-input"
@@ -296,7 +298,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
 
               {/* Precio de venta con selector de moneda y switch de IGV */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Precio de venta <span style={{ color: "#ef4444" }}>*</span></div>
+                <div className="pxp-form-label">Cantidad <span style={{ color: "#ef4444" }}>*</span></div>
                 <div>
                   <div className="pxp-compound">
                     <select
@@ -328,9 +330,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     />
                   </div>
 
-                  {/* Selector diseñado de Afectación IGV */}
+                  {/* Toggle de dirección del stock */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8, padding: "0 2px" }}>
-                    <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Precio incluye IGV</span>
+                    <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Movimiento afecta existencias</span>
                     {isTaxExempt ? (
                       <span style={{ fontSize: 11.5, color: "#64748b", fontWeight: 600, background: "#f1f5f9", padding: "3px 10px", borderRadius: 6, border: "1px solid #e2e8f0" }}>
                         No aplica (0% IGV)
@@ -377,11 +379,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Impuesto */}
+              </div>                  {/* Tipo de movimiento */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Tipo de Impuesto</div>
+                <div className="pxp-form-label">Motivo</div>
                 <select
                   className="pxp-form-input"
                   value={form.igvType || "IGV (18.00%)"}
@@ -396,15 +396,20 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   }}
                   style={{ colorScheme: "light" }}
                 >
-                  <option value="IGV (18.00%)">IGV (18.00% - Gravado)</option>
-                  <option value="Exonerado (0.00%)">Exonerado (0.00% - Selva/Alimentos)</option>
-                  <option value="Inafecto (0.00%)">Inafecto (0.00%)</option>
+                  <option value="Compra a proveedor">Compra a proveedor</option>
+                  <option value="Venta">Venta</option>
+                  <option value="Traslado entre almacenes">Traslado entre almacenes</option>
+                  <option value="Traslado entre sedes">Traslado entre sedes</option>
+                  <option value="Ajuste por merma">Ajuste por merma</option>
+                  <option value="Ajuste por inventario">Ajuste por inventario</option>
+                  <option value="Devolución">Devolución</option>
+                  <option value="Otro">Otro</option>
                 </select>
               </div>
 
               {/* Unidad de medida */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Unidad de medida SUNAT</div>
+                <div className="pxp-form-label">Fecha del movimiento</div>
                 <select
                   className="pxp-form-input"
                   value={form.unit || "un."}
@@ -422,9 +427,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                 </select>
               </div>
 
-              {/* Categoría y Sede */}
+              {/* Tipo y Almacén */}
               <div className="pxp-form-row">
-                <div className="pxp-form-label">Categoría y Sede</div>
+                <div className="pxp-form-label">Tipo y Almacén</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <select
                     className="pxp-form-input"
@@ -432,11 +437,10 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     onChange={e => setForm({ ...form, category: e.target.value })}
                   >
                     {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-                    <option>Alimentos</option>
-                    <option>Veterinaria</option>
-                    <option>Mascotas</option>
-                    <option>Servicios</option>
-                    <option>General</option>
+                    <option>Entrada</option>
+                    <option>Salida</option>
+                    <option>Transferencia</option>
+                    <option>Ajuste</option>
                   </select>
                   <select
                     className="pxp-form-input"
@@ -453,7 +457,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               {/* Stock inicial (si aplica) */}
               {form.hasStock && (
                 <div className="pxp-form-row">
-                  <div className="pxp-form-label">Stock y Alerta Mínima</div>
+                  <div className="pxp-form-label">Cantidad y Alerta Mínima</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div>
                       <input
@@ -462,9 +466,9 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                         className="pxp-form-input"
                         value={form.stock}
                         onChange={e => setForm({ ...form, stock: e.target.value })}
-                        placeholder="Stock inicial"
+                        placeholder="Cantidad del movimiento"
                       />
-                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Stock inicial actual</span>
+                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Cantidad a mover (unidades)</span>
                     </div>
                     <div>
                       <input
@@ -475,7 +479,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                         onChange={e => setForm({ ...form, minStock: e.target.value })}
                         placeholder="Alerta mínima"
                       />
-                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Avisar cuando quede &le;</span>
+                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Costo unitario de referencia</span>
                     </div>
                   </div>
                 </div>
@@ -518,7 +522,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Costo de compra ({form.currency === "USD" ? "$" : "S/"})
+                        Costo unitario ({form.currency === "USD" ? "$" : "S/"})
                       </label>
                       <input
                         type="number"
@@ -556,7 +560,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Precio Mayorista (S/)
+Saldo posterior (S/)
                       </label>
                       <input
                         type="number"
@@ -570,7 +574,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     </div>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Precio Mínimo de venta (S/)
+Referencia (OC / VENTA / TRF / AJ)
                       </label>
                       <input
                         type="number"
@@ -602,7 +606,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     </div>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Marca o Laboratorio
+Usuario responsable
                       </label>
                       <input
                         className="pxp-form-input"
@@ -643,24 +647,24 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Peso (kg / gr)
+Motivo del movimiento
                       </label>
                       <input
                         className="pxp-form-input"
                         value={form.weight}
                         onChange={e => setForm({ ...form, weight: e.target.value })}
-                        placeholder="Ej. 0.25 kg"
+placeholder="Ej. Compra a proveedor"
                       />
                     </div>
                     <div>
                       <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
-                        Dimensiones (L × A × Alto cm)
+Almacén / Ubicación
                       </label>
                       <input
                         className="pxp-form-input"
                         value={form.dimensions}
                         onChange={e => setForm({ ...form, dimensions: e.target.value })}
-                        placeholder="Ej. 12 × 7 × 20 cm"
+placeholder="Ej. Almacén Principal · Estante A1"
                       />
                     </div>
                   </div>
@@ -668,8 +672,8 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                   {/* Toggle Visible en POS */}
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0" }}>
                     <div>
-                      <b style={{ fontSize: 13, color: "#1e293b", display: "block" }}>Visible en Punto de Venta (POS)</b>
-                      <span style={{ fontSize: 11.5, color: "#64748b" }}>Permitir cobrar este ítem en caja rápida</span>
+                      <b style={{ fontSize: 13, color: "#1e293b", display: "block" }}>Afecta stock agregado</b>
+                      <span style={{ fontSize: 11.5, color: "#64748b" }}>El movimiento actualiza la existencia del producto al guardarse</span>
                     </div>
                     <input
                       type="checkbox"
@@ -702,7 +706,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
               Cancelar
             </button>
             <button type="submit" className="pxp-btn primary" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>
-              {editing ? "Guardar cambios" : "Crear producto"}
+              {editing ? "Guardar cambios" : "Guardar movimiento"}
             </button>
           </div>
         </form>
@@ -711,7 +715,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
   );
 }
 
-export default function ProductosPanel() {
+export default function MovimientosPanelLiteral() {
   let navigate = null;
   try {
     navigate = useNavigate();
@@ -844,7 +848,7 @@ export default function ProductosPanel() {
 
   const handleBulkStatusChange = (newStatus) => {
     setProducts(prev => prev.map(p => selected.includes(p.id) ? { ...p, status: newStatus } : p));
-    showToast(`${selected.length} productos marcados como "${newStatus}"`);
+    showToast(`${selected.length} movimientos marcados como "${newStatus}"`);
     setShowBulkMenu(false);
   };
 
@@ -857,16 +861,16 @@ export default function ProductosPanel() {
       sku: `${p.sku}-COPY`
     }));
     setProducts(prev => [...copies, ...prev]);
-    showToast(`${toDuplicate.length} productos duplicados`);
+    showToast(`${toDuplicate.length} movimientos duplicados`);
     setShowBulkMenu(false);
   };
 
   const handleBulkDelete = () => {
-    if (window.confirm(`¿Estás seguro de eliminar los ${selected.length} productos seleccionados?`)) {
+    if (window.confirm(`¿Estás seguro de eliminar los ${selected.length} movimientos seleccionados?`)) {
       const count = selected.length;
       setProducts(prev => prev.filter(p => !selected.includes(p.id)));
       setSelected([]);
-      showToast(`${count} productos eliminados correctamente`);
+      showToast(`${count} movimientos eliminados correctamente`);
       setShowBulkMenu(false);
     }
   };
@@ -874,7 +878,7 @@ export default function ProductosPanel() {
   const handleBulkExportCSV = () => {
     const selectedItems = products.filter(p => selected.includes(p.id));
     if (selectedItems.length === 0) return;
-    const headers = ["ID", "Producto", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
+    const headers = ["ID", "Fecha", "Tipo", "Producto", "Referencia", "Almacén", "Cantidad", "Saldo", "Motivo", "Usuario"];
     const rows = selectedItems.map(p => [
       p.id,
       `"${(p.name || '').replace(/"/g, '""')}"`,
@@ -892,11 +896,11 @@ export default function ProductosPanel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `productos_seleccionados_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute("download", `movimientos_seleccionados_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast(`${selectedItems.length} productos exportados en CSV`);
+    showToast(`${selectedItems.length} movimientos exportados en CSV`);
     setShowBulkMenu(false);
   };
 
@@ -963,10 +967,10 @@ export default function ProductosPanel() {
 
   const handleExportCSV = () => {
     if (!filtered || filtered.length === 0) {
-      showToast("No hay productos para exportar");
+      showToast("No hay movimientos para exportar");
       return;
     }
-    const headers = ["ID", "Producto", "SKU", "Código de Barras", "Categoría", "Marca", "Stock", "Precio Base", "Precio Mayorista", "Estado", "Ubicación"];
+    const headers = ["ID", "Fecha", "Tipo", "Producto", "Referencia", "Almacén", "Cantidad", "Saldo", "Motivo", "Usuario"];
     const rows = filtered.map(p => [
       p.id,
       `"${(p.name || '').replace(/"/g, '""')}"`,
@@ -984,7 +988,7 @@ export default function ProductosPanel() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `inventi_productos_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `inventi_movimientos_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1014,7 +1018,7 @@ export default function ProductosPanel() {
   
   const openNew = () => {
     if (isPlatformAdmin && !activeTenantId) {
-      showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+      showToast("Debes seleccionar una empresa en la barra superior antes de registrar movimientos.");
       return;
     }
     setEditing(null);
@@ -1119,15 +1123,15 @@ export default function ProductosPanel() {
             ]
           }));
         }
-        showToast("Producto actualizado correctamente");
+        showToast("Movimiento actualizado correctamente");
         setModal("");
       } catch (err) {
-        console.error("[Inventi] Error al actualizar producto:", err);
+        console.error("[Inventi] Error al actualizar movimiento:", err);
         showToast(`Error al actualizar: ${err.message || 'Error en base de datos'}`);
       }
     } else {
       if (isPlatformAdmin && !activeTenantId) {
-        showToast("Debes seleccionar una empresa en la barra superior antes de registrar un producto.");
+        showToast("Debes seleccionar una empresa en la barra superior antes de registrar movimientos.");
         return;
       }
       try {
@@ -1171,11 +1175,11 @@ export default function ProductosPanel() {
 
         setProducts(prev => [newP, ...prev]);
         setPage(1);
-        showToast("Producto creado correctamente en base de datos");
+        showToast("Movimiento registrado correctamente en base de datos");
         setModal("");
       } catch (err) {
-        console.error("[Inventi] Error al crear producto en Supabase:", err);
-        showToast(`Error al guardar producto: ${err.message || 'Error en base de datos'}`);
+        console.error("[Inventi] Error al registrar movimiento en Supabase:", err);
+        showToast(`Error al guardar movimiento: ${err.message || 'Error en base de datos'}`);
       }
     } 
   };
@@ -1205,7 +1209,7 @@ export default function ProductosPanel() {
             padding: 0,
           }}
         >
-          <ArrowLeft size={16} /> Volver al inventario
+          <ArrowLeft size={16} /> Volver a movimientos
         </button>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, maxWidth: 1240, margin: "0 auto" }}>
@@ -1231,7 +1235,7 @@ export default function ProductosPanel() {
             ) : (
               <div style={{ textAlign: "center", color: "#94a3b8" }}>
                 <div style={{ fontSize: 52, marginBottom: 8 }}>📷</div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>Foto del producto</div>
+                <div style={{ fontSize: 13, fontWeight: 500 }}>Imagen del producto movido</div>
               </div>
             )}
           </div>
@@ -1252,33 +1256,32 @@ export default function ProductosPanel() {
             </h1>
             <p style={{ color: "#64748b", lineHeight: 1.6, fontSize: 14, margin: "0 0 24px" }}>
               {fullProduct.description ||
-                "Lleva tus habilidades al siguiente nivel con este producto."}
+                "Sin observaciones registradas para este movimiento."}
             </p>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Precio base</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Cantidad</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{money(fullProduct.price)}</div>
               </div>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Stock</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Saldo</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{fullProduct.stock}</div>
               </div>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Condición</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Tipo</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#059669", marginTop: 4 }}>Nuevo</div>
               </div>
               <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Costo</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Costo unitario</div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>—</div>
               </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 20px", fontSize: 13, color: "#64748b", marginBottom: 24 }}>
-              <div>Tipo: <b style={{ color: "#1e293b" }}>{fullProduct.category}</b></div>
-              <div>Marca: <b style={{ color: "#1e293b" }}>{fullProduct.brand || "—"}</b></div>
-              <div>Ubicación: <b style={{ color: "#1e293b" }}>{fullProduct.location || "—"}</b></div>
-              <div>Creado: <b style={{ color: "#1e293b" }}>18 set. 2026</b></div>
+              <div>Referencia: <b style={{ color: "#1e293b" }}>{fullProduct.sku}</b></div>
+              <div>Usuario: <b style={{ color: "#1e293b" }}>{fullProduct.brand || "—"}</b></div>
+              <div>Almacén: <b style={{ color: "#1e293b" }}>{fullProduct.location || "—"}</b></div>
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
@@ -1292,7 +1295,7 @@ export default function ProductosPanel() {
                   if (window.confirm(`¿Eliminar "${fullProduct.name}"?`)) {
                     setProducts(prev => prev.filter(x => x.id !== fullProduct.id));
                     setFullProduct(null);
-                    showToast("Producto eliminado");
+                    showToast("Movimiento eliminado");
                   }
                 }}
               >
@@ -1358,9 +1361,9 @@ export default function ProductosPanel() {
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div className="pxp-heading-icon"><Boxes size={22} strokeWidth={1.8} /></div>
                 <div>
-                  <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Productos</h1>
+                  <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Movimientos</h1>
                   <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: "13px" }}>
-                    {isLoadingProducts ? "Cargando inventario..." : `${products.length} productos en tu inventario.`}
+                    {isLoadingProducts ? "Cargando movimientos..." : "Registra y consulta todas las entradas, salidas y movimientos de inventario."}
                   </p>
                 </div>
               </div>
@@ -1390,37 +1393,36 @@ export default function ProductosPanel() {
                     opacity: isPlatformAdmin && !activeTenantId ? 0.65 : 1,
                     cursor: isPlatformAdmin && !activeTenantId ? "not-allowed" : "pointer"
                   }}
-                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear productos" : "Crear nuevo producto"}
+                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para registrar movimientos" : "Registrar nuevo movimiento"}
                 >
-                  <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
+                  <Plus size={15} /> Nuevo movimiento <ChevronDown size={13} />
                 </button>
               </div>
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Total de productos" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
-              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Con stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
-              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Stock bajo" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
-              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Sin stock" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
-              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor de inventario" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
+              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Entradas (últimos 30 días)" value={isLoadingProducts ? "—" : products.length.toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : "Data en vivo"}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Salidas (últimos 30 días)" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Transferencias" value={isLoadingProducts ? "—" : products.filter(p => p.stock > 0 && p.stock <= 10).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock > 0 && p.stock <= 10).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
+              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Ajustes" value={isLoadingProducts ? "—" : products.filter(p => p.stock === 0).length.toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : `${Math.round(products.filter(p => p.stock === 0).length / Math.max(products.length, 1) * 100)}% del total`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
+              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Valor movido (entradas − salidas)" value={isLoadingProducts ? "—" : money(inventoryValue)} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
             </section>
 
             <div className="pxp-toolbar">
-              <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por nombre, SKU o código..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
+              <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar por producto, referencia o motivo..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
-              <PxpPopup
-                value={category}
+              <PxpPopup                value={category}
                 onChange={c => { setCategory(c); setPage(1); }}
-                options={[{ v: "Todas", l: "Categoría: Todas" }, ...categories.filter(c => c !== "Todas").map(c => ({ v: c, l: c }))]}
-                renderLabel={v => (v === "Todas" ? "Categoría: Todas" : v)}
+                options={[{ v: "Todas", l: "Tipo: Todos" }, ...categories.filter(c => c !== "Todas").map(c => ({ v: c, l: c }))]}
+                renderLabel={v => (v === "Todas" ? "Tipo: Todos" : v)}
               />
 
               <PxpPopup
                 value={stockFilter}
                 onChange={s => { setStockFilter(s); setPage(1); }}
-                options={[{ v: "Todos", l: "Stock: Todos" }, { v: "Con stock", l: "Con stock" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }]}
-                renderLabel={v => (v === "Todos" ? "Stock: Todos" : v)}
+                options={[{ v: "Todos", l: "Almacén: Todos" }, { v: "Con stock", l: "Almacén Principal" }, { v: "Stock bajo", l: "Tienda Sur" }, { v: "Sin stock", l: "Tienda Online" }]}
+                renderLabel={v => (v === "Todos" ? "Almacén: Todos" : v)}
               />
               
               {/* Botón Más filtros con Icono Lucide */}
@@ -1521,24 +1523,24 @@ export default function ProductosPanel() {
               <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: "11px", padding: "16px 20px", marginBottom: "12px", boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Tipo de movimiento</label>
                     <PxpPopup
                       value={commercialStatus}
                       onChange={s => { setCommercialStatus(s); setPage(1); }}
-                      options={[{ v: "Todos", l: "Todos" }, { v: "Disponible", l: "Disponible" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }, { v: "Reservado", l: "Reservado" }, { v: "Agotado", l: "Agotado" }]}
+                      options={[{ v: "Todos", l: "Todos" }, { v: "Entrada", l: "Entrada" }, { v: "Salida", l: "Salida" }, { v: "Transferencia", l: "Transferencia" }, { v: "Ajuste", l: "Ajuste" }]}
                       wrapStyle={{ width: "100%" }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Marca</label>
-                    <input style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 12px", fontSize: 13, color: "var(--ink)", background: "#fff" }} placeholder="Buscar marca..." value={brandFilter} onChange={e => { setBrandFilter(e.target.value); setPage(1); }} />
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Usuario</label>
+                    <input style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 12px", fontSize: 13, color: "var(--ink)", background: "#fff" }} placeholder="Buscar usuario..." value={brandFilter} onChange={e => { setBrandFilter(e.target.value); setPage(1); }} />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Precio</label>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Cantidad</label>
                     <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <input type="number" placeholder="Min" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={minPrice} onChange={e => { setMinPrice(e.target.value); setPage(1); }} />
+                      <input type="number" placeholder="Min" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={minPrice} onChange={e => { setMinPrice(e.target.value); setPage(1); }} aria-label="Cantidad mínima" title="Cantidad mínima" />
                       <span style={{ color: "var(--muted)" }}>—</span>
-                      <input type="number" placeholder="Max" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={maxPrice} onChange={e => { setMaxPrice(e.target.value); setPage(1); }} />
+                      <input type="number" placeholder="Max" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={maxPrice} onChange={e => { setMaxPrice(e.target.value); setPage(1); }} aria-label="Cantidad máxima" />
                     </div>
                   </div>
                   <div>
@@ -1614,28 +1616,28 @@ export default function ProductosPanel() {
                         }}
                       >
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", padding: "6px 8px 4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          Estado Comercial
+                          Tipo de movimiento
                         </div>
                         <button
                           className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Disponible")}
+                          onClick={() => handleBulkStatusChange("Entrada")}
                         >
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
-                          Marcar como Disponible
+                          Marcar como Entrada
                         </button>
                         <button
                           className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Stock bajo")}
+                          onClick={() => handleBulkStatusChange("Salida")}
                         >
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706" }} />
-                          Marcar como Stock bajo
+                          Marcar como Salida
                         </button>
                         <button
                           className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Sin stock")}
+                          onClick={() => handleBulkStatusChange("Ajuste")}
                         >
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#94a3b8" }} />
-                          Marcar como Sin stock
+                          Marcar como Ajuste
                         </button>
                         
                         <div style={{ height: 1, background: "#f1f5f9", margin: "4px 0" }} />
@@ -1687,13 +1689,12 @@ export default function ProductosPanel() {
                   <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
                   {visibleColumns.includes("product") && <th>Producto ↕</th>}
                   {visibleColumns.includes("sku") && <th>SKU ↕</th>}
-                  {visibleColumns.includes("barcode") && <th>Cód. Barras</th>}
-                  {visibleColumns.includes("category") && <th>Categoría</th>}
-                  {visibleColumns.includes("stock") && <th>Stock ↕</th>}
-                  {visibleColumns.includes("price") && <th>Precio base</th>}
-                  {visibleColumns.includes("wholesale") && <th>Precio mayorista</th>}
-                  {visibleColumns.includes("status") && <th>Estado</th>}
-                  {visibleColumns.includes("location") && <th>Ubicación principal</th>}
+                  {visibleColumns.includes("category") && <th>Tipo</th>}
+                  {visibleColumns.includes("stock") && <th>Cantidad ↕</th>}
+                  {visibleColumns.includes("price") && <th>Saldo</th>}
+                  {visibleColumns.includes("wholesale") && <th>Motivo</th>}
+                  {visibleColumns.includes("status") && <th>Usuario</th>}
+                  {visibleColumns.includes("location") && <th>Almacén / Ubicación</th>}
                   <th style={{ textAlign: "right" }}>Acciones</th>
                 </tr></thead>
                 <tbody>
@@ -1718,17 +1719,17 @@ export default function ProductosPanel() {
                       {menuId === p.id && <div className="pxp-action-menu">
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
                         <button onClick={() => openEdit(p)}>✎　Editar producto</button>
-                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Producto duplicado"); }}>▣　Duplicar</button>
+                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Movimiento duplicado"); }}>▣　Duplicar</button>
                         <button onClick={() => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("stock"); setMenuId(null); }}>▤　Ajustar stock</button>
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Movimientos"); setMenuId(null); }}>⇄　Ver movimientos</button>
                         <button onClick={() => { setDetailProduct(p); setDetailTab("Precios"); setMenuId(null); }}>⌁　Historial de precios</button>
                         <button onClick={() => { setMenuId(null); showToast("No hay ventas vinculadas en esta demo"); }}>🛒　Ver en ventas</button>
                         <button onClick={() => { setMenuId(null); showToast("No hay compras vinculadas en esta demo"); }}>▣　Ver en compras</button>
-                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Producto eliminado"); } }}>▤　Eliminar</button>
+                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Movimiento eliminado"); } }}>▤　Eliminar</button>
                       </div>}
                     </div></td>
                   </tr>)}
-                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron productos con esos filtros.</div></td></tr>}
+                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}>                    <div className="pxp-empty">No se encontraron movimientos con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : (
                 <div
@@ -1790,10 +1791,10 @@ export default function ProductosPanel() {
                       </article>
                     );
                   })}
-                  {pageRows.length === 0 && <div className="pxp-empty">No se encontraron productos.</div>}
+                  {pageRows.length === 0 && <div className="pxp-empty">No se encontraron movimientos.</div>}
                 </div>
               )}
-              <div className="pxp-table-footer"><span>Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0} a {Math.min(page * pageSize, filtered.length)} de {filtered.length.toLocaleString("es-PE")} productos</span><div className="pxp-footer-spacer" /><span>Filas por página</span><select className="pxp-select" style={{ height: 34, minWidth: 68 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select><div className="pxp-pagination"><button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>{Array.from({ length: Math.min(pages, 5) }, (_, i) => { const n = i + 1; return <button key={n} className={page === n ? "active" : ""} onClick={() => setPage(n)}>{n}</button>; })}<button disabled={page >= pages} onClick={() => setPage(p => Math.min(pages, p + 1))}>›</button></div></div>
+              <div className="pxp-table-footer"><span>Mostrando {filtered.length ? (page - 1) * pageSize + 1 : 0} a {Math.min(page * pageSize, filtered.length)} de {filtered.length.toLocaleString("es-PE")} movimientos</span><div className="pxp-footer-spacer" /><span>Filas por página</span><select className="pxp-select" style={{ height: 34, minWidth: 68 }} value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}><option value={10}>10</option><option value={20}>20</option><option value={50}>50</option></select><div className="pxp-pagination"><button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))}>‹</button>{Array.from({ length: Math.min(pages, 5) }, (_, i) => { const n = i + 1; return <button key={n} className={page === n ? "active" : ""} onClick={() => setPage(n)}>{n}</button>; })}<button disabled={page >= pages} onClick={() => setPage(p => Math.min(pages, p + 1))}>›</button></div></div>
             </section>
           </div>
         </main>
@@ -1832,7 +1833,7 @@ export default function ProductosPanel() {
                   style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
                   onClick={() => openEdit(detailProduct)}
                 >
-                  ✎ Editar producto
+                  ✎ Editar movimiento
                 </button>
                 <button
                   className="pxp-btn small"
@@ -1850,23 +1851,23 @@ export default function ProductosPanel() {
                     setModal("stock");
                   }}
                 >
-                  ▤ Ajustar stock
+                  ▤ Duplicar movimiento
                 </button>
               </div>
               <div className="pxp-detail-grid" style={{ marginTop: 16 }}>
                 <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
                   <div className="pxp-kv"><span>SKU</span><b>{detailProduct.sku}</b></div>
-                  <div className="pxp-kv"><span>Código de barras</span><b>{detailProduct.barcode || "—"}</b></div>
+                  <div className="pxp-kv"><span>Tipo</span><b>{detailProduct.category}</b></div>
                 </div>
                 <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
-                  <div className="pxp-kv"><span>Precio de venta</span><b>{money(detailProduct.salePrice ?? detailProduct.price)}</b></div>
-                  <div className="pxp-kv"><span>Stock total</span><b className={`pxp-stock ${statusClass(detailProduct.status)}`}>{detailProduct.stock} un.</b></div>
+                  <div className="pxp-kv"><span>Cantidad movida</span><b>{detailProduct.stock} un.</b></div>
+                  <div className="pxp-kv"><span>Valor del movimiento</span><b>{money(detailProduct.stock * (detailProduct.salePrice ?? detailProduct.price))}</b></div>
                 </div>
               </div>
             </div>
 
             <div className="pxp-detail-tabs">
-              {["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas"].map(t => (
+              {["Resumen", "Cantidades", "Valores", "Historial", "Documentos"].map(t => (
                 <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>
                   {t}
                 </button>
@@ -1878,13 +1879,12 @@ export default function ProductosPanel() {
                 <div className="pxp-detail-grid">
                   {/* Ficha Técnica */}
                   <div className="pxp-detail-box">
-                    <h3>▤ Ficha técnica</h3>
+                    <h3>▤ Ficha del movimiento</h3>
                     {[
-                      ["Categoría", detailProduct.category],
-                      ["Marca", detailProduct.brand || "—"],
+                      ["Tipo", detailProduct.category],
+                      ["Referencia", detailProduct.sku],
                       ["Presentación", detailProduct.presentation ? (detailProduct.presentation.length > 2 && detailProduct.presentation === detailProduct.presentation.toUpperCase() ? detailProduct.presentation.charAt(0).toUpperCase() + detailProduct.presentation.slice(1).toLowerCase() : detailProduct.presentation) : "—"],
-                      ["Unidad de medida", detailProduct.unit ? (detailProduct.unit.length > 2 && detailProduct.unit === detailProduct.unit.toUpperCase() ? detailProduct.unit.charAt(0).toUpperCase() + detailProduct.unit.slice(1).toLowerCase() : detailProduct.unit) : "un."],
-                      ["Condición Qaway", `${detailProduct.condition || 10}/10`],
+                      ["Almacén", detailProduct.location || "—"],
                       ["Estado actual", detailProduct.status]
                     ].map(([k, v]) => (
                       <div className="pxp-kv" key={k}>
@@ -1896,13 +1896,13 @@ export default function ProductosPanel() {
 
                   {/* Disponibilidad y Valor */}
                   <div className="pxp-detail-box">
-                    <h3>▣ Disponibilidad y valor</h3>
+                    <h3>▣ Cantidades y valor</h3>
                     {[
-                      ["Stock global disponible", `${detailProduct.stock} un.`],
-                      ["Valorización en inventario", money(detailProduct.stock * detailProduct.price)],
-                      ["Ubicación principal", detailProduct.location || "Almacén Principal"],
-                      ["Precio de venta regular", money(detailProduct.salePrice ?? detailProduct.price)],
-                      ["Régimen tributario", "IGV (18% Gravado)"]
+                      ["Cantidad movida", `${detailProduct.stock} un.`],
+                      ["Costo unitario", money(detailProduct.salePrice ?? detailProduct.price)],
+                      ["Valor del movimiento", money(detailProduct.stock * detailProduct.price)],
+                      ["Ubicación", detailProduct.location || "Almacén Principal"],
+                      ["Usuario responsable", detailProduct.brand || "—"]
                     ].map(([k, v]) => (
                       <div className="pxp-kv" key={k}>
                         <span>{k}</span>
@@ -1913,23 +1913,23 @@ export default function ProductosPanel() {
 
                   {/* Descripción oficial (único lugar) */}
                   <div className="pxp-detail-box full">
-                    <h3>▣ Descripción oficial del producto</h3>
+                    <h3>▣ Observaciones del movimiento</h3>
                     <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.7, margin: 0 }}>
-                      {detailProduct.description || "Sin descripción registrada para este producto."}
+                      {detailProduct.description || "Sin observaciones registradas para este movimiento."}
                     </p>
                   </div>
                 </div>
               )}
 
-              {detailTab === "Inventario" && (
+              {detailTab === "Cantidades" && (
                 <div className="pxp-detail-box">
-                  <h3>▣ Stock detallado por sede / almacén</h3>
+                  <h3>▣ Cantidades del movimiento</h3>
                   <table className="pxp-detail-table">
                     <thead>
                       <tr>
-                        <th>Almacén / Tienda</th>
-                        <th style={{ textAlign: "right" }}>Stock disponible</th>
-                        <th style={{ textAlign: "right" }}>Alerta mínima</th>
+                        <th>Almacén / Ubicación</th>
+                        <th style={{ textAlign: "right" }}>Cantidad movida</th>
+                        <th style={{ textAlign: "right" }}>Costo unitario</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1937,14 +1937,14 @@ export default function ProductosPanel() {
                         <tr key={w.name}>
                           <td style={{ fontWeight: 600 }}>{w.name}</td>
                           <td style={{ textAlign: "right", color: w.stock > 0 ? "#059669" : "#71717a", fontWeight: 700 }}>{w.stock} un.</td>
-                          <td style={{ textAlign: "right", color: "#64748b" }}>{w.min ?? "—"}</td>
+                          <td style={{ textAlign: "right", color: "#64748b" }}>{money(w.min || 0)}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
                     <div style={{ fontSize: 13, color: "#64748b" }}>
-                      Total consolidado: <b style={{ color: "#059669" }}>{detailProduct.stock} unidades</b>
+                      Total movido: <b style={{ color: "#059669" }}>{detailProduct.stock} unidades</b>
                     </div>
                     <button
                       className="pxp-btn small"
@@ -1963,23 +1963,21 @@ export default function ProductosPanel() {
                         setModal("stock");
                       }}
                     >
-                      ▤ Ajustar stock
+                      ▤ Editar movimiento
                     </button>
                   </div>
                 </div>
               )}
 
-              {detailTab === "Precios" && (
+              {detailTab === "Valores" && (
                 <div className="pxp-detail-box">
-                  <h3>▣ Matriz comercial y listas de precios</h3>
+                  <h3>▣ Valores del movimiento</h3>
                   {[
-                    ["Precio de venta final (PVP)", money(detailProduct.salePrice ?? detailProduct.price)],
-                    ["Precio base / lista neto", money(detailProduct.price)],
-                    ["Precio mayorista (volumen)", money(detailProduct.wholesale ?? detailProduct.price)],
-                    ["Precio mínimo permitido (piso)", money(detailProduct.minPrice ?? detailProduct.price)],
-                    ["Costo referencial de compra", money(detailProduct.cost ?? (detailProduct.price * 0.5))],
-                    ["Moneda de operación", "PEN (S/)"],
-                    ["Régimen tributario", "IGV 18% Gravado"]
+                    ["Cantidad movida", `${detailProduct.stock} un.`],
+                    ["Costo unitario", money(detailProduct.salePrice ?? detailProduct.price)],
+                    ["Valor total", money(detailProduct.stock * detailProduct.price)],
+                    ["Saldo posterior", detailProduct.stock],
+                    ["Moneda", "PEN (S/)"]
                   ].map(([k, v]) => (
                     <div className="pxp-kv" key={k}>
                       <span>{k}</span>
@@ -1989,32 +1987,22 @@ export default function ProductosPanel() {
                 </div>
               )}
 
-              {detailTab === "Movimientos" && (
+              {detailTab === "Historial" && (
                 <div className="pxp-detail-box">
-                  <h3>⇄ Historial y Kardex de movimientos</h3>
+                  <h3>⇄ Historial del movimiento</h3>
                   <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Registro de entradas y salidas</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Se generarán automáticamente al emitir ventas, registrar compras o realizar ajustes de inventario.</p>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Historial de cambios del movimiento</p>
+                    <p style={{ margin: 0, fontSize: 13 }}>Cada edición o duplicado del movimiento quedará registrado aquí.</p>
                   </div>
                 </div>
               )}
 
-              {detailTab === "Proveedores" && (
+              {detailTab === "Documentos" && (
                 <div className="pxp-detail-box">
-                  <h3>🏢 Proveedores y Abastecimiento</h3>
+                  <h3>▣ Documentos vinculados</h3>
                   <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin proveedor principal vinculado</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Puedes asignar proveedores de origen desde el módulo de Compras y Proveedores.</p>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === "Ventas" && (
-                <div className="pxp-detail-box">
-                  <h3>🛒 Historial de Ventas y Salidas</h3>
-                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin ventas registradas en esta demo</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Las órdenes y boletas/facturas generadas en el POS se listarán aquí en tiempo real.</p>
+                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin documentos vinculados</p>
+                    <p style={{ margin: 0, fontSize: 13 }}>Las órdenes de compra, ventas o guías que originaron el movimiento se listarán aquí.</p>
                   </div>
                 </div>
               )}
@@ -2026,10 +2014,10 @@ export default function ProductosPanel() {
 
 
       {modal === "import" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" onClick={e => e.stopPropagation()}>
-        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar productos</h2><p>Carga productos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
+        <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar movimientos</h2><p>Carga movimientos desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevos.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
         <div className="pxp-modal-body">
           <div className="pxp-stepper">{["Cargar archivo", "Mapear campos", "Validar datos", "Importar"].map((s, i) => <div key={s} className={`pxp-step ${importStep === i + 1 ? "active" : importStep > i + 1 ? "done" : ""}`}><span>{importStep > i + 1 ? "✓" : i + 1}</span><div><b>{s}</b><div className="pxp-muted">{["Selecciona tu archivo", "Relaciona las columnas", "Revisa los registros", "Confirma y procesa"][i]}</div></div></div>)}</div>
-          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar productos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
+          {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar movimientos nuevos o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y SKU (o código).</li><li>Si el SKU ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir categorías, precios, stock y ubicaciones.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
           {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → SKU (obligatorio)", "Nombre del producto → Nombre (obligatorio)", "Categoría → Categoría", "Precio → Precio base", "Stock inicial → Stock", "Ubicación → Ubicación principal", "Descripción → Descripción", "Código de barras → Código de barras"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Stock</option><option>Precio base</option></select></div>)}</div>}
           {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>SKU</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th></tr></thead><tbody>{products.slice(0, 5).map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.sku}</td><td>{p.name}</td><td>{p.category}</td><td>{p.price.toFixed(2)}</td><td>{p.stock}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td></tr>)}</tbody></table></div></div>}
           {importStep === 4 && <div className="pxp-info"><h3>4. Confirmar importación</h3><p>Revisa el modo de importación. La ejecución real requiere conectar el servicio de importación del backend.</p><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "merge"} onChange={() => setImportOption("merge")} /> Agregar nuevos y actualizar existentes</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "new"} onChange={() => setImportOption("new")} /> Solo agregar nuevos</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "update"} onChange={() => setImportOption("update")} /> Solo actualizar existentes</label></div>}
@@ -2050,7 +2038,7 @@ export default function ProductosPanel() {
         />
       )}
 
-      {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>Ajustar stock</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Stock actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nuevo stock</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo del ajuste</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de inventario</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Stock actualizado"); }}>Guardar ajuste</button></div></section></div>}
+      {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>Editar movimiento</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Cantidad actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nueva cantidad</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo de la corrección</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de registro</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Movimiento actualizado"); }}>Guardar cambios</button></div></section></div>}
 
       {toast && <div className="pxp-toast">{toast}</div>}
     </div>

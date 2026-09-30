@@ -10,13 +10,32 @@ import type {
 export const fiscalService = {
   // ── Negocio ──
   async getBusinessSettings(tenantId: string): Promise<BusinessSettings> {
-    return safeQuery(() =>
-      supabase
-        .from('business_settings')
-        .select('*')
-        .eq('tenant_id', tenantId)
-        .single()
-    )
+    const { data, error } = await supabase
+      .from('business_settings')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .maybeSingle()
+
+    if (error) throw error
+    if (data) return data
+
+    // Una empresa puede tener Inventario contratado sin haber configurado
+    // todavía sus datos fiscales. Crear la fila evita tratar ese estado
+    // normal como un error de carga.
+    const { data: created, error: createError } = await supabase
+      .from('business_settings')
+      .insert({
+        tenant_id: tenantId,
+        regimen: 'general',
+        igv_rate: 18,
+        moneda: 'PEN',
+        sunat_connected: false,
+      })
+      .select()
+      .single()
+
+    if (createError) throw createError
+    return created
   },
 
   async updateBusinessSettings(tenantId: string, updates: Partial<Omit<BusinessSettings, 'id' | 'tenant_id' | 'created_at' | 'updated_at'>>): Promise<BusinessSettings> {

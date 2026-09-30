@@ -24,6 +24,11 @@ update public.taxes set tenant_id = '00000000-0000-0000-0000-000000000001' where
 update public.sunat_units set tenant_id = '00000000-0000-0000-0000-000000000001' where tenant_id is null;
 update public.series set tenant_id = '00000000-0000-0000-0000-000000000001' where tenant_id is null;
 
+-- business_settings was originally a singleton table with a fixed UUID.
+-- From this point each tenant needs its own generated row.
+alter table public.business_settings
+  alter column id set default gen_random_uuid();
+
 alter table public.business_settings alter column tenant_id set not null;
 alter table public.taxes alter column tenant_id set not null;
 alter table public.sunat_units alter column tenant_id set not null;
@@ -33,3 +38,6 @@ create index if not exists business_settings_tenant_idx on public.business_setti
 create index if not exists taxes_tenant_idx on public.taxes (tenant_id);
 create index if not exists sunat_units_tenant_idx on public.sunat_units (tenant_id);
 create index if not exists series_tenant_idx on public.series (tenant_id);
+
+create unique index if not exists business_settings_one_per_tenant_idx
+  on public.business_settings (tenant_id);
