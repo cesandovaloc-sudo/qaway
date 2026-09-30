@@ -73,6 +73,87 @@ export default function Header({
   useEffect(() => {
     setSelectedWarehouse(null)
   }, [selectedSede?.id])
+
+  // Cierre unificado de todos los desplegables del Header
+  const closeAllDropdowns = () => {
+    setIsTenantOpen(false)
+    setIsSedeOpen(false)
+    setIsWarehouseOpen(false)
+    setIsProfileOpen(false)
+    setIsWaffleOpen(false)
+  }
+
+  // Toggles mutuamente excluyentes (abrir uno colapsa todos los demás)
+  const toggleWaffle = () => {
+    setIsWaffleOpen((prev) => {
+      if (!prev) {
+        setIsTenantOpen(false)
+        setIsSedeOpen(false)
+        setIsWarehouseOpen(false)
+        setIsProfileOpen(false)
+      }
+      return !prev
+    })
+  }
+
+  const toggleTenant = () => {
+    setIsTenantOpen((prev) => {
+      if (!prev) {
+        setIsSedeOpen(false)
+        setIsWarehouseOpen(false)
+        setIsProfileOpen(false)
+        setIsWaffleOpen(false)
+      }
+      return !prev
+    })
+  }
+
+  const toggleSede = () => {
+    setIsSedeOpen((prev) => {
+      if (!prev) {
+        setIsTenantOpen(false)
+        setIsWarehouseOpen(false)
+        setIsProfileOpen(false)
+        setIsWaffleOpen(false)
+      }
+      return !prev
+    })
+  }
+
+  const toggleWarehouse = () => {
+    setIsWarehouseOpen((prev) => {
+      if (!prev) {
+        setIsTenantOpen(false)
+        setIsSedeOpen(false)
+        setIsProfileOpen(false)
+        setIsWaffleOpen(false)
+      }
+      return !prev
+    })
+  }
+
+  const toggleProfile = () => {
+    setIsProfileOpen((prev) => {
+      if (!prev) {
+        setIsTenantOpen(false)
+        setIsSedeOpen(false)
+        setIsWarehouseOpen(false)
+        setIsWaffleOpen(false)
+      }
+      return !prev
+    })
+  }
+
+  // Listener para colapsar con la tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeAllDropdowns()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
   const [themeMode, setThemeMode] = useState<'blanco' | 'grises' | 'contraste' | 'oscuro'>(() => {
     const raw = localStorage.getItem('qaway.hubTheme')
     if (raw === 'claro' || raw === 'blanco') return 'blanco'
@@ -194,7 +275,7 @@ export default function Header({
         <div className="relative">
           <button
             type="button"
-            onClick={() => setIsWaffleOpen(!isWaffleOpen)}
+            onClick={toggleWaffle}
             className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
             title="Ecosistema de Aplicaciones"
           >
@@ -238,7 +319,7 @@ export default function Header({
             <>
               <button
                 type="button"
-                onClick={() => setIsTenantOpen((o) => !o)}
+                onClick={toggleTenant}
                 className={`hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all ${
                   scopedTenant
                     ? 'border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)]'
@@ -281,10 +362,10 @@ export default function Header({
                               setScopedTenant(t)
                               setIsTenantOpen(false)
                             }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                               scopedTenant?.id === t.id
                                 ? 'bg-[#ff4b0b]/15 text-[#ff4b0b] font-bold'
-                                : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'
+                                : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
                             }`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${scopedTenant?.id === t.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
@@ -304,7 +385,7 @@ export default function Header({
                           setIsTenantOpen(false)
                         }}
                         disabled={!scopedTenant}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
                           scopedTenant
                             ? 'text-red-400 hover:bg-red-400/10 cursor-pointer'
                             : 'text-[var(--hub-faint)] cursor-default'
@@ -334,7 +415,7 @@ export default function Header({
           <div className="relative">
             <button
               type="button"
-              onClick={() => setIsSedeOpen((o) => !o)}
+              onClick={toggleSede}
               className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
               title="Seleccionar sede"
             >
@@ -362,7 +443,11 @@ export default function Header({
                           setSelectedSede(s)
                           setIsSedeOpen(false)
                         }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedSede?.id === s.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
+                          selectedSede?.id === s.id
+                            ? 'bg-brand/15 text-brand font-bold'
+                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
+                        }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedSede?.id === s.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
                         <span className="truncate">{s.name}</span>
@@ -375,7 +460,7 @@ export default function Header({
                       type="button"
                       onClick={() => { setSelectedSede(null); setIsSedeOpen(false); }}
                       disabled={!selectedSede}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedSede ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${selectedSede ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
                     >
                       <MapPin size={14} className="w-3.5 h-3.5" />
                       Todas las sedes (Vista general)
@@ -392,7 +477,7 @@ export default function Header({
           <div className="relative">
             <button
               type="button"
-              onClick={() => setIsWarehouseOpen((o) => !o)}
+              onClick={toggleWarehouse}
               className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
               title="Seleccionar almacén de la sede"
             >
@@ -420,7 +505,11 @@ export default function Header({
                           setSelectedWarehouse(w)
                           setIsWarehouseOpen(false)
                         }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors cursor-pointer ${selectedWarehouse?.id === w.id ? 'bg-brand/15 text-brand font-bold' : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)]'}`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
+                          selectedWarehouse?.id === w.id
+                            ? 'bg-brand/15 text-brand font-bold'
+                            : 'text-[var(--hub-text-soft)] hover:bg-[var(--hub-hover)] hover:text-[var(--hub-text)] font-semibold'
+                        }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedWarehouse?.id === w.id ? 'bg-[#ff4b0b]' : 'bg-white/20'}`} />
                         <span className="truncate">{w.name}</span>
@@ -433,7 +522,7 @@ export default function Header({
                       type="button"
                       onClick={() => { setSelectedWarehouse(null); setIsWarehouseOpen(false); }}
                       disabled={!selectedWarehouse}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
+                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${selectedWarehouse ? 'text-red-400 hover:bg-red-400/10 cursor-pointer' : 'text-[var(--hub-faint)] cursor-default'}`}
                     >
                       <Warehouse size={14} className="w-3.5 h-3.5" />
                       Todos los almacenes de la sede
@@ -472,7 +561,7 @@ export default function Header({
         {/* Dropdown de perfil */}
         <div className="relative z-[100]">
           <button
-            onClick={() => setIsProfileOpen((o) => !o)}
+            onClick={toggleProfile}
             aria-label={identityResolved ? displayName : 'Cargando perfil'}
             className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-3 pr-1 cursor-pointer rounded-full hover:bg-[var(--hub-chip)] transition-colors text-left border border-transparent focus:outline-none"
           >
