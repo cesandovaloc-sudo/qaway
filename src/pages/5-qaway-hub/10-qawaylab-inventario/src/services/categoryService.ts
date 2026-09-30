@@ -61,14 +61,14 @@ function lastMonths(count: number): { key: string; label: string }[] {
 }
 
 export const categoryService = {
-  /** Catálogo de categorías filtrado por tenant (con fallback al tenant base). */
+  /** Catálogo de categorías filtrado estrictamente por tenant. */
   async getCategories(tenantId?: string | null): Promise<CategoryRow[]> {
     let query = supabase
       .from('categories')
       .select('id, name, slug, parent_id, icon, sort_order, created_at')
 
     if (tenantId) {
-      query = query.or(`tenant_id.eq.${tenantId},tenant_id.eq.00000000-0000-0000-0000-000000000001,tenant_id.is.null`)
+      query = query.eq('tenant_id', tenantId)
     }
 
     const { data, error } = await query
@@ -81,59 +81,32 @@ export const categoryService = {
 
   /**
    * Métricas de categorías para las tarjetas superiores.
-   * Prioriza `products.category_id` (FK) y usa `products.category` (texto) como fallback.
-   * Cada producto se cuenta como máximo una vez.
-   * "Total de productos" refleja todos los productos reales de la empresa activa en el inventario.
+   * Relación relacional pura: Tenant -> Categories -> Products (FK category_id).
+   * Sin fallback textual y sin mezclas de tenants.
    */
   async getCategoryStats(tenantId?: string | null): Promise<CategoryStats> {
     const categories = await this.getCategories(tenantId)
 
     let countQuery = supabase
       .from('products')
-      .select('id, category_id, category')
+      .select('id, category_id')
 
     if (tenantId) countQuery = countQuery.eq('tenant_id', tenantId)
 
     const { data: rows, error } = await countQuery
     if (error) throw error
 
-    const productRows = (rows ?? []) as { id: string; category_id?: string | null; category?: string | null }[]
+    const productRows = (rows ?? []) as { id: string; category_id?: string | null }[]
 
-    // Mapas para resolución O(1):
-    // 1. Por ID directo (prioridad 1)
-    const categoryById = new Map<string, CategoryRow>()
-    // 2. Por nombre normalizado (prioridad 2 / fallback)
-    const categoryByName = new Map<string, CategoryRow>()
-
-    for (const c of categories) {
-      categoryById.set(c.id, c)
-      if (c.name) {
-        categoryByName.set(c.name.trim().toLowerCase(), c)
-      }
-    }
-
-    // Inicializar conteos por categoría
+    // Conteo relacional estricto O(1) por categories.id
     const counts = new Map<string, number>()
     for (const c of categories) {
       counts.set(c.id, 0)
     }
 
-    // Contar cada producto exactamente una sola vez
     for (const p of productRows) {
-      let matchedCategoryId: string | null = null
-
-      if (p.category_id && categoryById.has(p.category_id)) {
-        matchedCategoryId = p.category_id
-      } else if (p.category) {
-        const normalizedName = p.category.trim().toLowerCase()
-        const matched = categoryByName.get(normalizedName)
-        if (matched) {
-          matchedCategoryId = matched.id
-        }
-      }
-
-      if (matchedCategoryId) {
-        counts.set(matchedCategoryId, (counts.get(matchedCategoryId) ?? 0) + 1)
+      if (p.category_id && counts.has(p.category_id)) {
+        counts.set(p.category_id, counts.get(p.category_id)! + 1)
       }
     }
 
@@ -155,7 +128,7 @@ export const categoryService = {
       total: enriched.length,
       withProducts: enriched.filter(c => c.products > 0).length,
       withoutProducts: enriched.filter(c => c.products === 0).length,
-      // Total de productos: todos los productos reales del tenant en inventario
+      // Total de productos: todos los productos reales del tenant
       totalProducts: productRows.length,
       categories: enriched,
       createdByMonth: buckets.map(b => ({
