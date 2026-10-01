@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+
+<rect width="800" height="600" fill="#f2eee5"/>
+<rect x="100" y="90" width="600" height="420" rx="18" fill="none" stroke="#071914" stroke-opacity=".25" stroke-width="2"/>
+<text x="140" y="180" fill="#071914" font-family="Georgia" font-size="48">HORIZONTE</text>
+<text x="140" y="220" fill="#071914" font-family="monospace" font-size="14">INMOBILIARIA</text>
+<rect x="140" y="285" width="180" height="5" rx="2.5" fill="#c9a35a"/>
+<text x="140" y="460" fill="#071914" font-family="monospace" font-size="12">PAPELERÍA</text>
+
+</svg>
