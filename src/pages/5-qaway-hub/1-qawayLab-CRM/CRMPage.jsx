@@ -108,6 +108,7 @@ function CRMContent() {
     globalSearchQuery,
     setGlobalSearchQuery
   } = useCRM()
+  const searchInputRef = useRef(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [simulating, setSimulating] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
