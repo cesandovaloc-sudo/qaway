@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { supabase } from "@/config/supabase";
 import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
@@ -44,15 +45,80 @@ function Field({ label, placeholder, type = "text", value, onChange, lock, disab
 }
 
 function SelectField({ label, value, onChange, required, invalid, placeholder, disabled, error, children }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const items = React.useMemo(() => {
+    const list = [];
+    React.Children.forEach(children, (child) => {
+      if (child && child.props && child.props.value !== undefined) {
+        if (child.props.value !== "") {
+          list.push({
+            value: child.props.value,
+            label: child.props.children || child.props.value,
+          });
+        }
+      }
+    });
+    return list;
+  }, [children]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open]);
+
+  const selectedItem = items.find((it) => it.value === value);
+
   return (
-    <label className={`field ${invalid ? "invalid" : ""}`}>
+    <div className={`field custom-select-field ${invalid ? "invalid" : ""}`} ref={containerRef}>
       <span>{label}{required ? <b className="req"> *</b> : null}</span>
-      <select value={value} onChange={onChange} disabled={disabled}>
-        <option value="">{placeholder}</option>
-        {children}
-      </select>
+      <button
+        type="button"
+        disabled={disabled}
+        className={`custom-select-trigger ${open ? "open" : ""} ${invalid ? "invalid" : ""}`}
+        onClick={() => !disabled && setOpen((prev) => !prev)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span className={`trigger-label ${!value ? "is-placeholder" : ""}`}>
+          {selectedItem ? selectedItem.label : (value || placeholder || "Seleccionar…")}
+        </span>
+        <ChevronDown size={16} className={`trigger-chevron ${open ? "rotated" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="custom-select-dropdown" role="listbox">
+          {items.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={opt.value}
+                role="option"
+                aria-selected={isSelected}
+                className={`custom-select-option ${isSelected ? "selected" : ""}`}
+                onClick={() => {
+                  onChange({ target: { value: opt.value } });
+                  setOpen(false);
+                }}
+              >
+                <span className={`option-dot ${isSelected ? "dot-selected" : ""}`} aria-hidden="true" />
+                <span className="option-text">{opt.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {error ? <em className="field-error">{error}</em> : null}
-    </label>
+    </div>
   );
 }
 
@@ -796,7 +862,20 @@ export default function HubOnboardingPage() {
         .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#64748b;font-weight:400;font-size:13px;margin-top:3px;line-height:1.5}
         .req{color:#7c3aed;font-weight:700;font-size:14px;margin-left:2px}
         .field.invalid input,.field.invalid select{border:1.5px solid #ef4444!important;background:#fff!important}
-        .field.invalid input:focus,.field.invalid select:focus{border:2px solid #ef4444!important;background:#fff5f5!important;outline:none;box-shadow:none}
+        .custom-select-field{position:relative;margin-bottom:14px}
+        .custom-select-trigger{width:100%;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 14px;font-size:14px;background:#fff;color:#0f172a;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .15s ease;outline:none;text-align:left}
+        .custom-select-trigger:focus,.custom-select-trigger.open{border:2px solid #8b5cf6!important;background:#fdfaff!important;box-shadow:none}
+        .custom-select-trigger.invalid{border:1.5px solid #ef4444!important;background:#fff!important}
+        .trigger-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .trigger-label.is-placeholder{color:#94a3b8;font-weight:400}
+        .trigger-chevron{color:#64748b;flex-shrink:0;transition:transform .2s cubic-bezier(0.16,1,0.3,1)}
+        .trigger-chevron.rotated{transform:rotate(180deg)}
+        .custom-select-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:60}
+        .custom-select-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;cursor:pointer;transition:all .15s ease;color:#475569;font-weight:500}
+        .custom-select-option:hover{background:#f8fafc;color:#0f172a}
+        .custom-select-option.selected{background:#f1f5f9;color:#0f172a;font-weight:600}
+        .option-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;flex-shrink:0;transition:background .15s ease}
+        .option-dot.dot-selected{background:#475569}
         .field input:disabled{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
         .primary,.secondary{height:48px;border-radius:12px;padding:0 24px;font-size:14.5px;font-weight:700}.primary{background:linear-gradient(135deg,#7c3aed 0%,#9333ea 100%);color:#fff;border:0;box-shadow:0 4px 14px rgba(124,58,237,.25);cursor:pointer;transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .2s}.primary:hover:not(:disabled){transform:scale(1.015);box-shadow:0 6px 20px rgba(124,58,237,.35)}.primary:disabled{background:#cbd5e1;cursor:not-allowed;color:#f8fafc;box-shadow:none}.secondary{background:#fff;border:1.5px solid #e2e8f0;color:#475569;cursor:pointer;transition:background .2s,color .2s}.secondary:hover{background:#f8fafc;color:#0f172a}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
         .logoUpload{display:flex;align-items:center;gap:14px;border:1.5px dashed #cbd5e1;border-radius:14px;padding:16px;margin-bottom:22px;background:#fafafa}.logoUpload>div{width:48px;height:48px;border-radius:10px;background:#f1f5f9;display:grid;place-items:center;font-size:22px;color:#64748b}.logoUpload section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.logoUpload section b{font-size:14px;color:#0f172a}.logoUpload section small{font-size:13px;color:#64748b}.logoUpload button{margin-left:auto;border:1.5px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#1e293b;transition:all .2s}.logoUpload button:hover{background:#f8fafc}
