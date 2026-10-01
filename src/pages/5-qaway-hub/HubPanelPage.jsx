@@ -1921,6 +1921,52 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         document.body
       )}
 
+      {/* Row 3: Ecosystem Applications Grid */}
+      <div className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">Estado general de las aplicaciones en todas las empresas.</p>
+          </div>
+          <button onClick={() => setActiveTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
+            Gestionar aplicaciones <HubIcon icon={ArrowRight} size={14} className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(live ? live.ecosystem : []).map((app, i) => (
+            <div key={i} className="rounded-xl border border-zinc-200 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all group">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`w-9 h-9 rounded-xl ${app.tone} text-white flex items-center justify-center shadow-xs`}>
+                    <HubIcon icon={ecosystemIcon(app.slug)} size={18} className="w-4.5 h-4.5" />
+                  </span>
+                  {app.active > 0 ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Activo
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
+                      Sin activos
+                    </span>
+                  )}
+                </div>
+                <h4 className="text-xs font-bold text-zinc-950 group-hover:text-[#ff4b0b] transition-colors">{app.title}</h4>
+                <p className="text-[11px] text-zinc-500 mt-1">{app.active} {app.active === 1 ? 'empresa activa' : 'empresas activas'}</p>
+                <p className="text-[10px] text-zinc-400">{app.users} usuarios</p>
+              </div>
+              <Link to={app.path} className="mt-4 inline-flex items-center gap-1 text-[11px] font-bold text-zinc-700 hover:text-zinc-950 transition-colors">
+                Ver detalles <HubIcon icon={ArrowRight} size={12} className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+          ))}
+          {live && live.ecosystem.length === 0 && (
+            <p className="text-xs text-zinc-400 col-span-full py-2">Sin aplicaciones en el catálogo todavía.</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -2100,7 +2146,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
   )
 }
 
-function HubPanelContent({ canvasOnly = false }) {
+function HubPanelContent() {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(() => {
@@ -2512,9 +2558,9 @@ function HubPanelContent({ canvasOnly = false }) {
   const currentTabLabel = (TENANT_ADMIN_NAV.find((nav) => nav.id === activeTab) || SUPER_ADMIN_NAV.find((nav) => nav.id === activeTab))?.label || activeTab
 
   return (
-    <div data-mode={themeMode} className={`hub-shell flex ${canvasOnly ? 'min-h-0 w-full bg-transparent overflow-visible' : 'h-screen w-full bg-[var(--hub-bg)] overflow-hidden'} font-sans text-[var(--hub-text)] selection:bg-[#ff4b0b] selection:text-white`}>
+    <div data-mode={themeMode} className="hub-shell flex h-screen w-full bg-[var(--hub-bg)] overflow-hidden font-sans text-[var(--hub-text)] selection:bg-[#ff4b0b] selection:text-white">
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
-      <aside className={`${canvasOnly ? 'hidden' : 'hub-chrome'} ${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-[var(--hub-border)] bg-[var(--hub-bg)] transition-all duration-300 ease-in-out`}>
+      <aside className={`hub-chrome ${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-[var(--hub-border)] bg-[var(--hub-bg)] transition-all duration-300 ease-in-out`}>
         {/* LOGO */}
         <button onClick={() => goTab('Inicio')} className={`h-[72px] shrink-0 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-[var(--hub-border)] cursor-pointer hover:bg-[var(--hub-chip)] transition-colors group w-full text-left`}>
           <div className="flex items-center gap-3">
@@ -2570,7 +2616,7 @@ function HubPanelContent({ canvasOnly = false }) {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* HEADER TOPBAR */}
-        <header className={`${canvasOnly ? 'hidden' : 'hub-chrome'} h-[72px] border-b border-[var(--hub-border-soft)] flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[var(--hub-bg)] relative z-50 shadow-sm`}>
+        <header className="hub-chrome h-[72px] border-b border-[var(--hub-border-soft)] flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[var(--hub-bg)] relative z-50 shadow-sm">
           {/* Lado Izquierdo */}
           <div className="flex items-center gap-2 lg:gap-3">
             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-2 rounded-full text-[var(--hub-text-soft)] hover:text-white hover:bg-[var(--hub-hover)] transition-colors" title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}>
@@ -2968,7 +3014,7 @@ function HubPanelContent({ canvasOnly = false }) {
         </header>
 
         {/* ── MAIN CONTENT (Lienzo Maestro: #fafafa) ────────────────── */}
-        <main className={`flex-1 bg-[#fafafa] text-zinc-900 relative ${canvasOnly ? 'overflow-visible' : 'overflow-y-auto'}`}>
+        <main className="flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative">
           <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
           <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1300px] mx-auto">
             {activeTab === 'Empresas' && !globalSearchQuery.trim() ? (
@@ -3135,7 +3181,7 @@ function HubPanelContent({ canvasOnly = false }) {
         </main>
 
         {/* FLOATING ACTION BUTTONS */}
-        <div className={`${canvasOnly ? 'hidden' : 'fixed'} bottom-6 right-6 flex flex-col gap-3 z-50`}>
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
           <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-[var(--hub-border)]" title="Qaway IA Insights">
             <HubIcon icon={Sparkles} size={24} className="w-6 h-6 animate-pulse" />
           </button>
@@ -3148,6 +3194,6 @@ function HubPanelContent({ canvasOnly = false }) {
   )
 }
 
-export default function HubPanelPage({ canvasOnly = false }) {
-  return (<ErrorBoundary><HubPanelContent canvasOnly={canvasOnly} /></ErrorBoundary>)
+export default function HubPanelPage() {
+  return (<ErrorBoundary><HubPanelContent /></ErrorBoundary>)
 }

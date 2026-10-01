@@ -307,9 +307,6 @@ const PILLAR_GRADIENTS = {
   'Herramientas': 'bg-[linear-gradient(135deg,#ffffff_0%,#f8fafc_50%,#f1f5f9_100%)]',
 }
 
-// Flag para controlar la agrupación por área/título. En false muestra todas las tarjetas juntas sin separación.
-const SHOW_SECTION_HEADERS = false
-
 export default function HubPage() {
   useSetNavbarVariant('transparent')
   const [pillarFilter, setPillarFilter] = useState('Todas')
@@ -506,7 +503,7 @@ export default function HubPage() {
                 Restablecer filtros
               </button>
             </div>
-          ) : SHOW_SECTION_HEADERS && pillarFilter === 'Todas' && !searchQuery ? (
+          ) : pillarFilter === 'Todas' && !searchQuery ? (
             /* VISTA PRINCIPAL AGRUPADA POR EJE TEMÁTICO CON SUBTÍTULOS CLAROS */
             <div className="mb-16 space-y-12">
               {PILLARS.filter(p => p.match !== null).map((pillar) => {
