@@ -433,6 +433,7 @@ export default function CanvaPlanSelector({
                 <ChevronDown size={16} />
               </>
             )}
+          </button>
         </div>
       </div>
     </div>
