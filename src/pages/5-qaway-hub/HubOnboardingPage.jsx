@@ -5,8 +5,8 @@ import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
 import CanvaPlanSelector from "./CanvaPlanSelector";
 
-const steps = ["Tu cuenta", "Tu empresa", "Tu Hub", "Tu equipo", "Listo"];
-const SLUGS = ["tu-cuenta", "tu-empresa", "tu-hub", "tu-equipo", "listo"];
+const steps = ["Elige tu plan", "Tu cuenta", "Tu empresa", "Tu equipo", "Listo"];
+const SLUGS = ["tu-plan", "tu-cuenta", "tu-empresa", "tu-equipo", "listo"];
 
 const apps = [
   ["crm", "CRM Comercial", "Clientes, oportunidades y seguimiento comercial."],
@@ -385,8 +385,10 @@ export default function HubOnboardingPage() {
         }).eq("id", tenant.id);
         if (error) throw error;
         setTenant({ ...tenant, name: form.name, features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false } });
+      if (goNext) {
+        await saveApps(false, chosenPlan);
+        next();
       }
-      if (goNext) next();
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
     } finally {
@@ -583,7 +585,7 @@ export default function HubOnboardingPage() {
         <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
       </header>
 
-      <main className={step === 3 ? "step-3-main" : ""}>
+      <main className={step === 1 ? "step-3-main" : ""}>
         <div className="progress">
           {steps.map((label, i) => (
             <React.Fragment key={label}>
@@ -615,6 +617,21 @@ export default function HubOnboardingPage() {
         )}
 
         {!loading && step === 1 && (
+          <section className="card wider canva-onboarding-card">
+            <CanvaPlanSelector
+              selectedPlan={chosenPlan}
+              onSelectPlan={(pId) => setChosenPlan(pId)}
+              onContinue={(planObj) => {
+                if (planObj?.id) setChosenPlan(planObj.id);
+                next();
+              }}
+              loading={saving}
+            />
+            <Notice error={noteIsError}>{note}</Notice>
+          </section>
+        )}
+
+        {step === 2 && (
           <section className="card">
             <small className="eyebrow">{session ? "TU CUENTA" : "EMPECEMOS"}</small>
             <h1>{session ? "Tu cuenta" : "Crea tu cuenta."}</h1>
@@ -630,13 +647,14 @@ export default function HubOnboardingPage() {
             {!session && (
               <label className="check"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} /> Acepto los términos y condiciones.</label>
             )}
-            <div className="actions" style={{ justifyContent: "flex-end" }}>
+            <div className="actions" style={{ justifyContent: "space-between" }}>
+              <button className="secondary" onClick={back}>← Atrás</button>
               <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
             </div>
           </section>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <section className="card wide">
             <small className="eyebrow">TU EMPRESA</small>
             <h1>Ahora cuéntanos sobre tu marca.</h1>
@@ -686,24 +704,6 @@ export default function HubOnboardingPage() {
 
             <Notice error={noteIsError}>{note}</Notice>
             <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveEmpresa(true)}>{saving ? "Creando tu espacio…" : "Continuar →"}</button></div>
-          </section>
-        )}
-
-        {step === 3 && (
-          <section className="card wider canva-onboarding-card">
-            <CanvaPlanSelector
-              selectedPlan={chosenPlan}
-              onSelectPlan={(pId) => setChosenPlan(pId)}
-              onContinue={(planObj) => saveApps(true, planObj?.id || chosenPlan)}
-              loading={saving}
-            />
-
-            <Notice error={noteIsError}>{note}</Notice>
-            <div className="actions" style={{ marginTop: 24 }}>
-              <button type="button" className="secondary" onClick={back}>
-                ← Atrás
-              </button>
-            </div>
           </section>
         )}
 

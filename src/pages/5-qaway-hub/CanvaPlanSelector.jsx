@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Crown, Sparkles, X, Info } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Crown, Sparkles, X, Info, ChevronLeft, Bell, Gift } from "lucide-react";
+
+function getFormattedDateOffset(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  const day = d.getDate();
+  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "set", "oct", "nov", "dic"];
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
 
 export const PLAN_CONFIGS = [
   {
@@ -231,8 +241,11 @@ export default function CanvaPlanSelector({
   isModal = false,
   onClose,
 }) {
+  const [subStep, setSubStep] = useState(1);
   const [currentPlan, setCurrentPlan] = useState(selectedPlan);
   const [showAllBenefits, setShowAllBenefits] = useState(false);
+  const [billingType, setBillingType] = useState("recurring");
+  const [frequency, setFrequency] = useState("monthly");
 
   function handleSelect(planId) {
     setCurrentPlan(planId);
@@ -241,88 +254,101 @@ export default function CanvaPlanSelector({
 
   const selectedPlanObj = PLAN_CONFIGS.find((p) => p.id === currentPlan) || PLAN_CONFIGS[1];
 
+  // Cálculo dinámico para la frecuencia anual (ahorro de 2 meses)
+  const annualTotal = selectedPlanObj.priceMonthly === 30 ? 240 : (selectedPlanObj.priceMonthly === 50 ? 400 : 560);
+  const annualSavings = (selectedPlanObj.priceMonthly * 12) - annualTotal;
+  const annualPerMonth = Math.round(annualTotal / 12);
+  const currentPrice = frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly;
+
+  const dateDay24 = getFormattedDateOffset(24);
+  const dateDay30 = getFormattedDateOffset(30);
+
   const content = (
-    <div className="canva-plan-container">
-      {/* Columna Izquierda: Selector de Plan estilo Canva */}
-      <div className="canva-left-panel">
-        <div className="canva-badge-top">
-          <Sparkles size={14} className="text-purple-600" />
-          <span>Prueba gratuita de 30 días</span>
-        </div>
+    <div className="canva-plan-main-wrapper">
+      {/* PANTALLA 1: Selector de Plan y Comparativa de Beneficios (Captura 1) */}
+      {subStep === 1 && (
+        <div className="canva-plan-container">
+          {/* Columna Izquierda: Selector de Plan estilo Canva */}
+          <div className="canva-left-panel">
+            <div className="canva-badge-top">
+              <Sparkles size={14} className="text-purple-600" />
+              <span>Prueba gratuita de 30 días</span>
+            </div>
 
-        <h2 className="canva-title">
-          Prueba <span className="canva-brand-accent">Qaway Hub</span> gratis
-        </h2>
-        <p className="canva-subtitle">
-          Elige tu plan. Disfruta 30 días de acceso total sin costo. Puedes cancelar tu suscripción cuando quieras.
-        </p>
+            <h2 className="canva-title">
+              Prueba <span className="canva-brand-accent">Qaway Hub</span> gratis
+            </h2>
+            <p className="canva-subtitle">
+              Elige tu plan. Disfruta 30 días de acceso total sin costo. Puedes cancelar tu suscripción cuando quieras.
+            </p>
 
-        {/* Lista de planes seleccionables */}
-        <div className="canva-plans-list" role="radiogroup" aria-label="Planes de suscripción">
-          {PLAN_CONFIGS.map((plan) => {
-            const isSelected = currentPlan === plan.id;
-            return (
-              <div
-                key={plan.id}
-                role="radio"
-                aria-checked={isSelected}
-                tabIndex={0}
-                onClick={() => handleSelect(plan.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleSelect(plan.id);
-                  }
-                }}
-                className={`canva-plan-card ${isSelected ? "selected" : ""}`}
-              >
-                <div className="canva-radio-indicator">
-                  <div className={`canva-radio-circle ${isSelected ? "active" : ""}`}>
-                    {isSelected && <div className="canva-radio-dot" />}
-                  </div>
-                </div>
+            {/* Lista de planes seleccionables */}
+            <div className="canva-plans-list" role="radiogroup" aria-label="Planes de suscripción">
+              {PLAN_CONFIGS.map((plan) => {
+                const isSelected = currentPlan === plan.id;
+                return (
+                  <div
+                    key={plan.id}
+                    role="radio"
+                    aria-checked={isSelected}
+                    tabIndex={0}
+                    onClick={() => handleSelect(plan.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleSelect(plan.id);
+                      }
+                    }}
+                    className={`canva-plan-card ${isSelected ? "selected" : ""}`}
+                  >
+                    <div className="canva-radio-indicator">
+                      <div className={`canva-radio-circle ${isSelected ? "active" : ""}`}>
+                        {isSelected && <div className="canva-radio-dot" />}
+                      </div>
+                    </div>
 
-                <div className="canva-plan-info">
-                  <div className="canva-plan-header">
-                    <span className="canva-plan-name">{plan.name}</span>
-                    {plan.recommended && <span className="canva-badge-rec">Recomendado</span>}
-                    <div className="canva-plan-pricing">
-                      <span className="canva-price">S/{plan.priceMonthly}</span>
-                      <span className="canva-period">/mes</span>
-                      <span className="canva-reg-price">S/{plan.priceRegular}</span>
+                    <div className="canva-plan-info">
+                      <div className="canva-plan-header">
+                        <span className="canva-plan-name">{plan.name}</span>
+                        {plan.recommended && <span className="canva-badge-rec">Recomendado</span>}
+                        <div className="canva-plan-pricing">
+                          <span className="canva-price">S/{plan.priceMonthly}</span>
+                          <span className="canva-period">/mes</span>
+                          <span className="canva-reg-price">S/{plan.priceRegular}</span>
+                        </div>
+                      </div>
+                      <p className="canva-plan-desc">{plan.subtitle} · {plan.targetAudience}</p>
                     </div>
                   </div>
-                  <p className="canva-plan-desc">{plan.subtitle} · {plan.targetAudience}</p>
-                </div>
+                );
+              })}
+            </div>
+
+            {/* Botón Principal de Acción (Avanza a la Pantalla 2 de Frecuencia y Timeline) */}
+            <div className="canva-cta-block">
+              <button
+                type="button"
+                className="canva-cta-btn"
+                disabled={loading}
+                onClick={() => setSubStep(2)}
+              >
+                <Crown size={18} />
+                <span>{loading ? "Preparando tu prueba…" : "Probarlo gratis 30 días"}</span>
+              </button>
+
+              <p className="canva-cta-footnote">
+                <strong>S/ 0 cobrados hoy.</strong> Te enviaremos un recordatorio antes de que termine tu periodo de prueba. Puedes cancelar tu suscripción en cualquier momento con un clic.
+              </p>
+
+              <div className="canva-promo-pill">
+                <span className="canva-gift-emoji">🎁</span>
+                <span><strong>Incluye 3 Meses Gratis</strong> de Catálogo Web Público</span>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Botón Principal de Acción */}
-        <div className="canva-cta-block">
-          <button
-            type="button"
-            className="canva-cta-btn"
-            disabled={loading}
-            onClick={() => onContinue && onContinue(selectedPlanObj)}
-          >
-            <Crown size={18} />
-            <span>{loading ? "Preparando tu prueba…" : "Probarlo gratis 30 días"}</span>
-          </button>
-
-          <p className="canva-cta-footnote">
-            <strong>S/ 0 cobrados hoy.</strong> Te enviaremos un recordatorio antes de que termine tu periodo de prueba. Puedes cancelar tu suscripción en cualquier momento con un clic.
-          </p>
-
-          <div className="canva-promo-pill">
-            <span className="canva-gift-emoji">🎁</span>
-            <span><strong>Incluye 3 Meses Gratis</strong> de Catálogo Web Público</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Columna Derecha: Tabla Comparativa con Difuminado y Despliegue */}
+          {/* Columna Derecha: Tabla Comparativa con Difuminado y Despliegue */}
+
       <div className="canva-right-panel">
         <div className="canva-table-wrapper">
           <table className="canva-table">
@@ -407,9 +433,213 @@ export default function CanvaPlanSelector({
                 <ChevronDown size={16} />
               </>
             )}
-          </button>
         </div>
       </div>
+    </div>
+      )}
+
+      {/* PANTALLA 2 (Captura 2 Canva): Frecuencia, Timeline de 3 Hitos y Desglose S/ 0 Hoy */}
+      {subStep === 2 && (
+        <div className="canva-sub2-wrapper">
+          {/* Barra de navegación superior: Atrás y Cerrar */}
+          <div className="canva-sub2-topbar">
+            <button
+              type="button"
+              className="canva-sub2-back-btn"
+              onClick={() => setSubStep(1)}
+            >
+              <ChevronLeft size={20} strokeWidth={2.5} />
+              <span>Atrás</span>
+            </button>
+            {onClose && (
+              <button
+                type="button"
+                className="canva-sub2-close-btn"
+                onClick={onClose}
+              >
+                <X size={18} />
+                <span>Cerrar</span>
+              </button>
+            )}
+          </div>
+
+          <div className="canva-sub2-grid">
+            {/* Columna Izquierda: Frecuencia y selección */}
+            <div className="canva-sub2-left">
+              <h2 className="canva-sub2-title">Elige tu plan</h2>
+
+              {/* Toggle: Pago recurrente (Prueba gratis) vs Pago único */}
+              <div className="canva-tabs-wrapper">
+                <div className="canva-tab-pill-box">
+                  <span className="canva-badge-trial-top">Prueba gratis</span>
+                  <button
+                    type="button"
+                    className={`canva-tab-switch ${billingType === "recurring" ? "active" : ""}`}
+                    onClick={() => setBillingType("recurring")}
+                  >
+                    Pago recurrente
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className={`canva-tab-switch ${billingType === "one_time" ? "active" : ""}`}
+                  onClick={() => setBillingType("one_time")}
+                >
+                  Pago único
+                </button>
+              </div>
+
+              {/* Bullets con checks verdes */}
+              <div className="canva-sub2-bullets">
+                <div className="canva-sub2-bullet">
+                  <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                  <span>Gratis 30 días. Puedes cancelar cuando quieras.</span>
+                </div>
+                <div className="canva-sub2-bullet">
+                  <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                  <span>Te avisaremos antes de que termine tu prueba</span>
+                </div>
+              </div>
+
+              {/* Radio Cards: Mensual y Anual */}
+              <div className="canva-freq-cards-list" role="radiogroup" aria-label="Frecuencia de pago">
+                {/* Tarjeta Mensual */}
+                <div
+                  className={`canva-freq-card ${frequency === "monthly" ? "selected" : ""}`}
+                  onClick={() => setFrequency("monthly")}
+                  role="radio"
+                  aria-checked={frequency === "monthly"}
+                  tabIndex={0}
+                >
+                  <div className="canva-freq-radio">
+                    <div className={`canva-freq-circle ${frequency === "monthly" ? "active" : ""}`}>
+                      {frequency === "monthly" && <div className="canva-freq-dot" />}
+                    </div>
+                  </div>
+                  <div className="canva-freq-details">
+                    <span className="canva-freq-name">Mensual</span>
+                    <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
+                  </div>
+                </div>
+
+                {/* Tarjeta Anual */}
+                <div
+                  className={`canva-freq-card ${frequency === "annual" ? "selected" : ""}`}
+                  onClick={() => setFrequency("annual")}
+                  role="radio"
+                  aria-checked={frequency === "annual"}
+                  tabIndex={0}
+                >
+                  <div className="canva-freq-radio">
+                    <div className={`canva-freq-circle ${frequency === "annual" ? "active" : ""}`}>
+                      {frequency === "annual" && <div className="canva-freq-dot" />}
+                    </div>
+                  </div>
+                  <div className="canva-freq-details">
+                    <div className="canva-freq-header-line">
+                      <span className="canva-freq-name">Anual</span>
+                      <span className="canva-offer-tag">MEJOR OFERTA - Ahorra S/{annualSavings}</span>
+                    </div>
+                    <div className="canva-freq-cost">
+                      S/{annualTotal} <span className="canva-freq-month-part">(S/{annualPerMonth} al mes)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Derecha: Timeline y Desglose de cobro */}
+            <div className="canva-sub2-right">
+              {/* Card 1: Línea de tiempo gráfica de 3 hitos */}
+              <div className="canva-card-timeline">
+                <div className="canva-tl-step">
+                  <div className="canva-tl-indicator">
+                    <div className="canva-tl-node node-green">
+                      <Gift size={16} strokeWidth={2.4} />
+                    </div>
+                    <div className="canva-tl-bar bar-green" />
+                  </div>
+                  <div className="canva-tl-content">
+                    <strong className="canva-tl-date">Hoy</strong>
+                    <p className="canva-tl-text">
+                      Accede gratis a todo lo que {selectedPlanObj.name} tiene para ofrecer
+                    </p>
+                  </div>
+                </div>
+
+                <div className="canva-tl-step">
+                  <div className="canva-tl-indicator">
+                    <div className="canva-tl-node node-gray">
+                      <Bell size={16} strokeWidth={2.4} />
+                    </div>
+                    <div className="canva-tl-bar bar-gray" />
+                  </div>
+                  <div className="canva-tl-content">
+                    <strong className="canva-tl-date">{dateDay24}</strong>
+                    <p className="canva-tl-text">
+                      Te recordaremos cuando tu prueba esté por terminar.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="canva-tl-step">
+                  <div className="canva-tl-indicator">
+                    <div className="canva-tl-node node-gold">
+                      <Crown size={16} strokeWidth={2.4} />
+                    </div>
+                  </div>
+                  <div className="canva-tl-content">
+                    <strong className="canva-tl-date">{dateDay30}</strong>
+                    <p className="canva-tl-text">
+                      A menos que canceles tu plan, lo renovaremos de forma automática.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Desglose y CTA */}
+              <div className="canva-card-summary">
+                <div className="canva-summary-line-top">
+                  <div className="canva-sum-left">
+                    <span className="canva-sum-title">A pagar hoy</span>
+                    <span className="canva-trial-pill">Prueba gratis de 30 días</span>
+                  </div>
+                  <span className="canva-sum-zero">S/ 0</span>
+                </div>
+
+                <div className="canva-summary-line-next">
+                  <span className="canva-next-date">Próxima fecha de cobro: {dateDay30}</span>
+                  <span className="canva-next-price">
+                    S/{frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className="canva-sub2-btn-submit"
+                  disabled={loading}
+                  onClick={() => {
+                    if (onContinue) {
+                      onContinue({
+                        ...selectedPlanObj,
+                        billingType,
+                        frequency,
+                        currentPrice,
+                      });
+                    }
+                  }}
+                >
+                  <span>{loading ? "Iniciando tu prueba…" : "Siguiente"}</span>
+                </button>
+
+                <p className="canva-sub2-legal">
+                  Al continuar, aceptas las <a href="#terminos" onClick={(e) => e.preventDefault()}>Condiciones de uso de Qaway Lab</a> y confirmas que leíste nuestra <a href="#privacidad" onClick={(e) => e.preventDefault()}>Política de privacidad</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style>{`
         .canva-plan-container {
@@ -857,6 +1087,451 @@ export default function CanvaPlanSelector({
 
           .canva-table {
             min-width: 520px;
+          }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           ESTILOS SUB-PANTALLA 2 (Frecuencia, Timeline & CTA)
+           ═══════════════════════════════════════════════════ */
+        .canva-sub2-wrapper {
+          width: 100%;
+          animation: canvaFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes canvaFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .canva-sub2-topbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 24px;
+        }
+
+        .canva-sub2-back-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: transparent;
+          border: none;
+          color: #0f172a;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          padding: 6px 10px;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .canva-sub2-back-btn:hover {
+          background: #f1f5f9;
+        }
+
+        .canva-sub2-close-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          color: #475569;
+          font-size: 13.5px;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 6px 12px;
+          border-radius: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .canva-sub2-close-btn:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+        }
+
+        .canva-sub2-grid {
+          display: grid;
+          grid-template-columns: 1.05fr 1fr;
+          gap: 40px;
+          align-items: start;
+        }
+
+        .canva-sub2-left {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .canva-sub2-title {
+          font-size: 32px;
+          font-weight: 800;
+          color: #0f172a;
+          letter-spacing: -0.8px;
+          margin: 0 0 20px;
+          line-height: 1.15;
+        }
+
+        /* Tabs de Cobro */
+        .canva-tabs-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .canva-tab-pill-box {
+          position: relative;
+        }
+
+        .canva-badge-trial-top {
+          position: absolute;
+          top: -9px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: #ef4444;
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: 800;
+          padding: 1px 7px;
+          border-radius: 999px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+          z-index: 2;
+        }
+
+        .canva-tab-switch {
+          height: 42px;
+          padding: 0 22px;
+          border-radius: 999px;
+          border: 1.5px solid #e2e8f0;
+          background: #ffffff;
+          font-size: 14px;
+          font-weight: 600;
+          color: #64748b;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .canva-tab-switch:hover {
+          border-color: #cbd5e1;
+          color: #334155;
+        }
+
+        .canva-tab-switch.active {
+          border-color: #8b5cf6;
+          color: #0f172a;
+          box-shadow: 0 0 0 1px #8b5cf6;
+          font-weight: 700;
+        }
+
+        /* Bullets */
+        .canva-sub2-bullets {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin-bottom: 24px;
+        }
+
+        .canva-sub2-bullet {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+          font-weight: 500;
+          color: #334155;
+        }
+
+        .canva-check-green {
+          color: #10b981;
+          flex-shrink: 0;
+        }
+
+        /* Freq cards */
+        .canva-freq-cards-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .canva-freq-card {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px 18px;
+          border-radius: 14px;
+          border: 1.5px solid #e2e8f0;
+          background: #ffffff;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          outline: none;
+        }
+
+        .canva-freq-card:hover {
+          border-color: #cbd5e1;
+        }
+
+        .canva-freq-card.selected {
+          border-color: #8b5cf6;
+          background: #faf5ff;
+          box-shadow: 0 0 0 1.5px #8b5cf6;
+        }
+
+        .canva-freq-radio {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .canva-freq-circle {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          border: 2px solid #cbd5e1;
+          display: grid;
+          place-items: center;
+          transition: all 0.15s ease;
+        }
+
+        .canva-freq-circle.active {
+          border-color: #8b5cf6;
+        }
+
+        .canva-freq-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: #8b5cf6;
+        }
+
+        .canva-freq-details {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .canva-freq-name {
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .canva-freq-cost {
+          font-size: 14px;
+          font-weight: 600;
+          color: #475569;
+          margin-top: 2px;
+        }
+
+        .canva-freq-header-line {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+
+        .canva-offer-tag {
+          background: #8b5cf6;
+          color: #ffffff;
+          font-size: 10.5px;
+          font-weight: 800;
+          padding: 2px 8px;
+          border-radius: 999px;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .canva-freq-month-part {
+          color: #64748b;
+          font-size: 13px;
+          font-weight: 500;
+        }
+
+        /* Columna Derecha */
+        .canva-sub2-right {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .canva-card-timeline, .canva-card-summary {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 22px 24px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        }
+
+        .canva-tl-step {
+          display: flex;
+          gap: 14px;
+          position: relative;
+        }
+
+        .canva-tl-indicator {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          width: 32px;
+          flex-shrink: 0;
+        }
+
+        .canva-tl-node {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+        }
+
+        .node-green {
+          background: #15803d;
+          color: #ffffff;
+        }
+
+        .node-gray {
+          background: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+        }
+
+        .node-gold {
+          background: #fef3c7;
+          color: #d97706;
+          border: 1px solid #fde68a;
+        }
+
+        .canva-tl-bar {
+          width: 2px;
+          flex: 1;
+          min-height: 32px;
+          margin: 4px 0;
+        }
+
+        .bar-green {
+          background: #15803d;
+        }
+
+        .bar-gray {
+          background: #cbd5e1;
+        }
+
+        .canva-tl-content {
+          padding-bottom: 20px;
+        }
+
+        .canva-tl-date {
+          display: block;
+          font-size: 14px;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 2px;
+        }
+
+        .canva-tl-text {
+          margin: 0;
+          font-size: 13px;
+          color: #64748b;
+          line-height: 1.45;
+        }
+
+        /* Resumen de cobro */
+        .canva-summary-line-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #f1f5f9;
+          margin-bottom: 12px;
+        }
+
+        .canva-sum-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .canva-sum-title {
+          font-size: 16px;
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        .canva-trial-pill {
+          background: #dcfce7;
+          color: #15803d;
+          font-size: 11.5px;
+          font-weight: 700;
+          padding: 2px 9px;
+          border-radius: 999px;
+        }
+
+        .canva-sum-zero {
+          font-size: 20px;
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        .canva-summary-line-next {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+        }
+
+        .canva-next-date {
+          font-size: 13px;
+          color: #64748b;
+        }
+
+        .canva-next-price {
+          font-size: 14px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .canva-sub2-btn-submit {
+          width: 100%;
+          height: 48px;
+          background: #8b5cf6;
+          color: #ffffff;
+          border: none;
+          border-radius: 12px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+        }
+
+        .canva-sub2-btn-submit:hover {
+          background: #7c3aed;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
+        }
+
+        .canva-sub2-legal {
+          font-size: 11.5px;
+          color: #64748b;
+          text-align: left;
+          margin: 14px 0 0;
+          line-height: 1.45;
+        }
+
+        .canva-sub2-legal a {
+          color: #475569;
+          text-decoration: underline;
+        }
+
+        @media (max-width: 820px) {
+          .canva-sub2-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .canva-sub2-title {
+            font-size: 26px;
           }
         }
       `}</style>
