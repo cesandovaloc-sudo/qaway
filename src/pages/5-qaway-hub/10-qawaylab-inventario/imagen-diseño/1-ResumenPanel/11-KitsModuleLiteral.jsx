@@ -501,7 +501,7 @@ function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvance
                     padding: 0
                   }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{showAdvanced ? <>Ocultar opciones avanzadas <ChevronUp size={15} /></> : <>Opciones avanzadas <ChevronDown size={15} />}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{showAdvanced ? <>Ocultar opciones avanzadas <ChevronUp size={15} /></> : <>Opciones avanzadas <ChevronDown size={15} /></>}</span>
                 </button>
               </div>
 
