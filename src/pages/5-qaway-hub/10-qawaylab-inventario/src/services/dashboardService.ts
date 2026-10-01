@@ -83,13 +83,68 @@ const CATEGORY_COLORS: Record<string, string> = {
 // ── Dashboard Service ──
 export const dashboardService = {
   // Get all dashboard stats
-  async getStats(): Promise<DashboardStats> {
+  async getStats(tenantId?: string | null): Promise<DashboardStats> {
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - now.getDay())
     weekStart.setHours(0, 0, 0, 0)
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+    let productsQuery = supabase
+      .from('products')
+      .select('id, stock, min_stock, base_price, status, commercial_status')
+    if (tenantId) productsQuery = productsQuery.eq('tenant_id', tenantId)
+
+    let customersQuery = supabase
+      .from('customers')
+      .select('id', { count: 'exact', head: true })
+    if (tenantId) customersQuery = customersQuery.eq('tenant_id', tenantId)
+
+    let quotationsQuery = supabase
+      .from('quotations')
+      .select('id, status, total')
+    if (tenantId) quotationsQuery = quotationsQuery.eq('tenant_id', tenantId)
+
+    let campaignsQuery = supabase
+      .from('liquidation_campaigns')
+      .select('id, status')
+    if (tenantId) campaignsQuery = campaignsQuery.eq('tenant_id', tenantId)
+
+    let salesTodayQuery = supabase
+      .from('sales')
+      .select('id, total')
+      .eq('status', 'active')
+      .gte('created_at', todayStart)
+    if (tenantId) salesTodayQuery = salesTodayQuery.eq('tenant_id', tenantId)
+
+    let salesWeekQuery = supabase
+      .from('sales')
+      .select('id, total')
+      .eq('status', 'active')
+      .gte('created_at', weekStart.toISOString())
+    if (tenantId) salesWeekQuery = salesWeekQuery.eq('tenant_id', tenantId)
+
+    let salesMonthQuery = supabase
+      .from('sales')
+      .select('id, total, payment_status')
+      .eq('status', 'active')
+      .gte('created_at', monthStart)
+    if (tenantId) salesMonthQuery = salesMonthQuery.eq('tenant_id', tenantId)
+
+    let pendingPaymentsQuery = supabase
+      .from('sales')
+      .select('id, total')
+      .eq('status', 'active')
+      .in('payment_status', ['deuda', 'parcial'])
+    if (tenantId) pendingPaymentsQuery = pendingPaymentsQuery.eq('tenant_id', tenantId)
+
+    let purchasesMonthQuery = supabase
+      .from('purchase_orders')
+      .select('id, total')
+      .in('status', ['pending', 'approved', 'received'])
+      .gte('created_at', monthStart)
+    if (tenantId) purchasesMonthQuery = purchasesMonthQuery.eq('tenant_id', tenantId)
 
     const [
       productsResult,
@@ -102,52 +157,15 @@ export const dashboardService = {
       pendingPaymentsResult,
       purchasesMonthResult,
     ] = await Promise.all([
-      // Products stats
-      supabase
-        .from('products')
-        .select('id, stock, min_stock, base_price, status, commercial_status'),
-      // Customers count
-      supabase
-        .from('customers')
-        .select('id', { count: 'exact', head: true }),
-      // Quotations stats
-      supabase
-        .from('quotations')
-        .select('id, status, total'),
-      // Campaigns stats
-      supabase
-        .from('liquidation_campaigns')
-        .select('id, status'),
-      // Sales today
-      supabase
-        .from('sales')
-        .select('id, total')
-        .eq('status', 'active')
-        .gte('created_at', todayStart),
-      // Sales this week
-      supabase
-        .from('sales')
-        .select('id, total')
-        .eq('status', 'active')
-        .gte('created_at', weekStart.toISOString()),
-      // Sales this month
-      supabase
-        .from('sales')
-        .select('id, total, payment_status')
-        .eq('status', 'active')
-        .gte('created_at', monthStart),
-      // Pending payments
-      supabase
-        .from('sales')
-        .select('id, total')
-        .eq('status', 'active')
-        .in('payment_status', ['deuda', 'parcial']),
-      // Purchases this month
-      supabase
-        .from('purchase_orders')
-        .select('id, total')
-        .in('status', ['pending', 'approved', 'received'])
-        .gte('created_at', monthStart),
+      productsQuery,
+      customersQuery,
+      quotationsQuery,
+      campaignsQuery,
+      salesTodayQuery,
+      salesWeekQuery,
+      salesMonthQuery,
+      pendingPaymentsQuery,
+      purchasesMonthQuery,
     ])
 
     const products = productsResult.data || []
@@ -209,15 +227,17 @@ export const dashboardService = {
   },
 
   // Get recent activity
-  async getRecentActivity(limit: number = 10): Promise<RecentActivity[]> {
+  async getRecentActivity(limit: number = 10, tenantId?: string | null): Promise<RecentActivity[]> {
     const activities: RecentActivity[] = []
 
     // Get recent products
-    const { data: recentProducts } = await supabase
+    let productsQuery = supabase
       .from('products')
       .select('id, name, sku, created_at')
       .order('created_at', { ascending: false })
       .limit(5)
+    if (tenantId) productsQuery = productsQuery.eq('tenant_id', tenantId)
+    const { data: recentProducts } = await productsQuery
 
     if (recentProducts) {
       recentProducts.forEach((product: SupabaseResult) => {
@@ -233,11 +253,13 @@ export const dashboardService = {
     }
 
     // Get recent quotations
-    const { data: recentQuotations } = await supabase
+    let quotationsQuery = supabase
       .from('quotations')
       .select('id, status, total, created_at, customer:customers(name)')
       .order('created_at', { ascending: false })
       .limit(5)
+    if (tenantId) quotationsQuery = quotationsQuery.eq('tenant_id', tenantId)
+    const { data: recentQuotations } = await quotationsQuery
 
     if (recentQuotations) {
       recentQuotations.forEach((quotation: SupabaseResult) => {
@@ -254,11 +276,13 @@ export const dashboardService = {
     }
 
     // Get recent campaigns
-    const { data: recentCampaigns } = await supabase
+    let campaignsQuery = supabase
       .from('liquidation_campaigns')
       .select('id, name, status, created_at')
       .order('created_at', { ascending: false })
       .limit(3)
+    if (tenantId) campaignsQuery = campaignsQuery.eq('tenant_id', tenantId)
+    const { data: recentCampaigns } = await campaignsQuery
 
     if (recentCampaigns) {
       recentCampaigns.forEach((campaign: SupabaseResult) => {
@@ -280,14 +304,16 @@ export const dashboardService = {
   },
 
   // Get top products (by stock value)
-  async getTopProducts(limit: number = 5): Promise<TopProduct[]> {
-    const { data: products } = await supabase
+  async getTopProducts(limit: number = 5, tenantId?: string | null): Promise<TopProduct[]> {
+    let query = supabase
       .from('products')
       .select('id, name, sku, stock, base_price, image_url')
       .eq('status', 'active')
       .gt('stock', 0)
       .order('base_price', { ascending: false })
       .limit(limit)
+    if (tenantId) query = query.eq('tenant_id', tenantId)
+    const { data: products } = await query
 
     return (products || []).map((p: SupabaseResult) => ({
       id: p.id,
@@ -300,14 +326,16 @@ export const dashboardService = {
   },
 
   // Get low stock products
-  async getLowStockProducts(limit: number = 5): Promise<TopProduct[]> {
-    const { data: products } = await supabase
+  async getLowStockProducts(limit: number = 5, tenantId?: string | null): Promise<TopProduct[]> {
+    let query = supabase
       .from('products')
       .select('id, name, sku, stock, min_stock, base_price, image_url')
       .eq('status', 'active')
       .gt('stock', 0)
       .gt('min_stock', 0)
       .order('stock', { ascending: true })
+    if (tenantId) query = query.eq('tenant_id', tenantId)
+    const { data: products } = await query
 
     const candidates = (products || []).filter((p: SupabaseResult) => p.stock <= p.min_stock)
 
@@ -324,17 +352,19 @@ export const dashboardService = {
   // Get sales data for charts (last 6 months)
   // Optimización: 1 sola query para todo el rango (antes: 1 query por mes,
   // 6 round-trips secuenciales ≈ 2.7s con ~450ms de latencia por llamada).
-  async getSalesData(): Promise<SalesData[]> {
+  async getSalesData(tenantId?: string | null): Promise<SalesData[]> {
     const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
     const now = new Date()
 
     // Ventana completa: desde el 1° del mes hace 5 meses hasta hoy
     const rangeStart = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString()
 
-    const { data: quotations } = await supabase
+    let query = supabase
       .from('quotations')
       .select('id, total, status, created_at')
       .gte('created_at', rangeStart)
+    if (tenantId) query = query.eq('tenant_id', tenantId)
+    const { data: quotations } = await query
 
     // Buckets por año-mes para evitar colisiones de nombre entre años
     const buckets = new Map<number, SalesData>()
@@ -365,16 +395,19 @@ export const dashboardService = {
   },
 
   // Get category distribution
-  async getCategoryData(): Promise<CategoryData[]> {
-    const { data: products } = await supabase
+  async getCategoryData(tenantId?: string | null): Promise<CategoryData[]> {
+    let query = supabase
       .from('products')
-      .select('category')
+      .select('category, categories(name)')
       .eq('status', 'active')
+    if (tenantId) query = query.eq('tenant_id', tenantId)
+    const { data: products } = await query
 
     // Count products per category
     const categoryCount: Record<string, number> = {}
     ;(products || []).forEach((p: SupabaseResult) => {
-      const category = p.category || 'Otros'
+      const catRel = p.categories as { name: string } | null
+      const category = catRel?.name || p.category || 'Otros'
       categoryCount[category] = (categoryCount[category] || 0) + 1
     })
 
@@ -389,17 +422,19 @@ export const dashboardService = {
   // Get trend data (last 7 days)
   // Optimización: 1 sola query para los 7 días (antes: 1 query por día,
   // 7 round-trips secuenciales ≈ 3.1s con ~450ms de latencia por llamada).
-  async getTrendData(): Promise<TrendData[]> {
+  async getTrendData(tenantId?: string | null): Promise<TrendData[]> {
     const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
     const now = new Date()
 
     // Ventana completa: inicio del día hace 6 días
     const windowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString()
 
-    const { data: products } = await supabase
+    let query = supabase
       .from('products')
       .select('id, stock, base_price, created_at')
       .gte('created_at', windowStart)
+    if (tenantId) query = query.eq('tenant_id', tenantId)
+    const { data: products } = await query
 
     // Buckets por día (medianoche local como llave), pre-creados en orden
     const buckets = new Map<number, TrendData & { order: number }>()

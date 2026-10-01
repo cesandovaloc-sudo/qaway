@@ -144,7 +144,7 @@ export default function DashboardPage() {
       {/* KPIs PRINCIPALES (colapsable, data real)                        */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
-        <CollapsibleSection id="kpis-principales" title="Métricas Principales" defaultOpen={false}>
+        <CollapsibleSection id="kpis-principales" title="Métricas Principales" defaultOpen={true}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
               <div>

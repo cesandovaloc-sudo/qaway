@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   dashboardService, 
   type DashboardStats, 
@@ -8,8 +8,10 @@ import {
   type CategoryData,
   type TrendData
 } from '@/services/dashboardService'
+import { useTenant } from '@/context/TenantContext'
 
 export function useDashboard() {
+  const { activeTenantId } = useTenant()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const [topProducts, setTopProducts] = useState<TopProduct[]>([])
@@ -20,50 +22,11 @@ export function useDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-
-        const [
-          statsData, 
-          activityData, 
-          topData, 
-          lowStockData,
-          salesDataResult,
-          categoryDataResult,
-          trendDataResult
-        ] = await Promise.all([
-          dashboardService.getStats(),
-          dashboardService.getRecentActivity(10),
-          dashboardService.getTopProducts(5),
-          dashboardService.getLowStockProducts(5),
-          dashboardService.getSalesData(),
-          dashboardService.getCategoryData(),
-          dashboardService.getTrendData(),
-        ])
-
-        setStats(statsData)
-        setRecentActivity(activityData)
-        setTopProducts(topData)
-        setLowStockProducts(lowStockData)
-        setSalesData(salesDataResult)
-        setCategoryData(categoryDataResult)
-        setTrendData(trendDataResult)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error fetching dashboard')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchDashboard()
-  }, [])
-
-  const refresh = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true)
+      setError(null)
+
       const [
         statsData, 
         activityData, 
@@ -73,14 +36,15 @@ export function useDashboard() {
         categoryDataResult,
         trendDataResult
       ] = await Promise.all([
-        dashboardService.getStats(),
-        dashboardService.getRecentActivity(10),
-        dashboardService.getTopProducts(5),
-        dashboardService.getLowStockProducts(5),
-        dashboardService.getSalesData(),
-        dashboardService.getCategoryData(),
-        dashboardService.getTrendData(),
+        dashboardService.getStats(activeTenantId),
+        dashboardService.getRecentActivity(10, activeTenantId),
+        dashboardService.getTopProducts(5, activeTenantId),
+        dashboardService.getLowStockProducts(5, activeTenantId),
+        dashboardService.getSalesData(activeTenantId),
+        dashboardService.getCategoryData(activeTenantId),
+        dashboardService.getTrendData(activeTenantId),
       ])
+
       setStats(statsData)
       setRecentActivity(activityData)
       setTopProducts(topData)
@@ -89,10 +53,18 @@ export function useDashboard() {
       setCategoryData(categoryDataResult)
       setTrendData(trendDataResult)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error refreshing dashboard')
+      setError(err instanceof Error ? err.message : 'Error fetching dashboard')
     } finally {
       setLoading(false)
     }
+  }, [activeTenantId])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  const refresh = async () => {
+    await loadDashboardData()
   }
 
   return {
