@@ -56,7 +56,11 @@ const actions: QuickAction[] = [
   },
 ]
 
-export function QuickActions() {
+interface QuickActionsProps {
+  hideHeader?: boolean
+}
+
+export function QuickActions({ hideHeader = false }: QuickActionsProps = {}) {
   const getHref = (href: string) => {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : ''
     const basePrefix = pathname.startsWith('/hub/inventario')
@@ -70,12 +74,14 @@ export function QuickActions() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Acciones rápidas</h2>
-        <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
-          {actions.length}
-        </span>
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Acciones rápidas</h2>
+          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+            {actions.length}
+          </span>
+        </div>
+      )}
       
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {actions.map((action) => (

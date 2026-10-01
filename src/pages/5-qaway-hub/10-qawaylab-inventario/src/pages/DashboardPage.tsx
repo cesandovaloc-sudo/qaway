@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import { useDashboard } from '@/hooks/useDashboard'
 import { StatCard } from '@/components/dashboard/StatCard'
-import { QuickActions } from '@/components/dashboard/QuickActions'
 import { QuickAccessCards } from '@/components/dashboard/QuickAccessCards'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { TopProducts } from '@/components/dashboard/TopProducts'

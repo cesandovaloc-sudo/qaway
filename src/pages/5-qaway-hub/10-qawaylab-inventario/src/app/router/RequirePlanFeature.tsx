@@ -19,14 +19,24 @@ export default function RequirePlanFeature({ feature, children }: {
   feature: PlanFeature
   children: ReactNode
 }) {
-  const { session, loading } = useAuth()
+  const { session, profile, loading } = useAuth()
   const location = useLocation()
   const [allowed, setAllowed] = useState<boolean | null>(null)
+
+  const isPlatformAdmin = Boolean(
+    profile?.is_platform_admin === true ||
+    (profile?.role === 'admin' && !profile?.tenant_id)
+  )
 
   useEffect(() => {
     let alive = true
     setAllowed(null)
     if (!session) return () => { alive = false }
+
+    if (isPlatformAdmin) {
+      setAllowed(true)
+      return () => { alive = false }
+    }
 
     supabase.rpc('user_can_use_feature', {
       p_app_slug: 'inventario',
@@ -36,7 +46,7 @@ export default function RequirePlanFeature({ feature, children }: {
     })
 
     return () => { alive = false }
-  }, [feature, session])
+  }, [feature, session, isPlatformAdmin])
 
   if (loading || (session && allowed === null)) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="w-8 h-8 text-brand animate-spin" /></div>

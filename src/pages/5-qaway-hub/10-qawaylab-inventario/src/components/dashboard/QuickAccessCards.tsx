@@ -8,6 +8,7 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react'
+import { QuickActions } from './QuickActions'
 
 interface QuickAccessItem {
   id: string
@@ -158,6 +159,11 @@ export function QuickAccessCards() {
             </Link>
           )
         })}
+      </div>
+
+      {/* Fila 2: Acciones rápidas operativas (6 tarjetas) */}
+      <div className="pt-1">
+        <QuickActions hideHeader />
       </div>
     </section>
   )
