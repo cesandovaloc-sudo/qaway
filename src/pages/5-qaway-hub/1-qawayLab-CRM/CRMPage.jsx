@@ -13,6 +13,8 @@ import AutomatizacionesView from './components/AutomatizacionesView'
 import TareasView from './components/TareasView'
 import ConfiguracionView from './components/ConfiguracionView'
 import { AppSwitcherDropdown } from '../5-gestor-de-proyectos/components/v2/AppSwitcherDropdown'
+import { getSupabaseClient } from '@/pages/5-qaway-hub/blog-editor/services/supabaseClient'
+import { logoutUser } from '@/config/auth'
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -114,6 +116,15 @@ function CRMContent() {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const navigate = useNavigate()
   const searchInputRef = useRef(null)
+
+  const handleLogout = async () => {
+    logoutUser()
+    try {
+      const sb = getSupabaseClient()
+      if (sb) await sb.auth.signOut()
+    } catch (_) {}
+    navigate('/login', { replace: true })
+  }
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -601,7 +612,11 @@ function CRMContent() {
                       </div>
                       
                       <div className="p-2 border-t border-white/5 bg-black/20">
-                        <button className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold">
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold cursor-pointer"
+                        >
                           Cerrar Sesión
                         </button>
                       </div>

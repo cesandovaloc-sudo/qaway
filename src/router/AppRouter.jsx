@@ -447,6 +447,10 @@ export default function AppRouter() {
         />
         {/* CRM: standalone FUERA del Layout → sin navbar de marca */}
         <Route
+          path="/hub/crm"
+          element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
+        />
+        <Route
           path="hub/crm"
           element={renderRoute('hub', <ProtectedRoute><CRMPage /></ProtectedRoute>)}
         />
