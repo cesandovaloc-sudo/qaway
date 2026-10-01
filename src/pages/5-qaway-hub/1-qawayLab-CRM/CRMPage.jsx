@@ -257,7 +257,7 @@ function CRMContent() {
         {/* LOGO - Redirección a Inicio */}
         <button 
           onClick={() => setActiveTab('dashboard')}
-          className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} shrink-0 cursor-pointer transition-colors group w-full ${isDark ? 'border-b border-white/10 hover:bg-white/5' : 'border-b border-zinc-200 hover:bg-zinc-50'}`}
+          className={`h-[72px] flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} shrink-0 cursor-pointer transition-colors group w-full ${isDark ? 'border-b border-white/10 hover:bg-white/5' : 'border-b border-zinc-200 hover:bg-zinc-50'}`}
         >
           <div className="flex items-center gap-2">
             <span className={`font-bold tracking-wide text-lg ${isDark ? 'text-white' : 'text-zinc-900'}`}>
