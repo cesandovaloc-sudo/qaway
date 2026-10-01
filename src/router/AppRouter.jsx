@@ -75,6 +75,7 @@ const RestauracionFotograficaPage = lazy(() => import('@/pages/8-landings/4-rest
 const FotografiaLinkedinPage = lazy(() => import('@/pages/8-landings/5-fotografia-linkedin/FotografiaLinkedinPage'))
 const RestauracionFotografica2Page = lazy(() => import('@/pages/8-landings/6-restauracion-fotografica2/RestauracionFotografica2Page'))
 const DesarrolloWebQawayPage = lazy(() => import('@/pages/8-landings/8-desarollo web/DesarrolloWebQawayPage.jsx'))
+const MondayInventarioLandingPage = lazy(() => import('@/pages/5-qaway-hub/0-Landings/10-inventario/MondayInventarioLandingPage.jsx'))
 const BriefBrandingPage = lazy(() => import('@/pages/10-briefs/BriefBrandingPage.jsx'))
 import RutasPage from '@/pages/12-rutas/RutasPage.jsx'
 import BibliotecaPage from '@/pages/5-qaway-hub/biblioteca/BibliotecaPage.jsx'
@@ -253,6 +254,14 @@ export default function AppRouter() {
         <Route
           path="/landings/desarrollo-web-qaway"
           element={renderPublicPathRoute('landings', '/landings/desarrollo-web-qaway', <DesarrolloWebQawayPage />)}
+        />
+        <Route
+          path="/landings/inventario"
+          element={<RouteSuspense><MondayInventarioLandingPage /></RouteSuspense>}
+        />
+        <Route
+          path="/hub/landings/inventario"
+          element={<RouteSuspense><MondayInventarioLandingPage /></RouteSuspense>}
         />
         <Route
           path="/inicio-v3"

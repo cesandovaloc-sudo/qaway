@@ -20,6 +20,7 @@ import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { TopProducts } from '@/components/dashboard/TopProducts'
 import { SalesChartsSection } from '@/components/dashboard/SalesCharts'
 import { CollapsibleSection } from '@/components/dashboard/CollapsibleSection'
+import HubPanelPage from '../../../HubPanelPage'
 
 export default function DashboardPage() {
   const [isOperationOpen, setIsOperationOpen] = useState(false)
@@ -112,6 +113,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      <HubPanelPage canvasOnly />
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* CABECERA ÚNICA (diseño acoplado + botón Actualizar funcional)   */}
       {/* ═══════════════════════════════════════════════════════════════ */}

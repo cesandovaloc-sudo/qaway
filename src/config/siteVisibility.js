@@ -45,6 +45,8 @@ const publicPathAllowList = new Set([
   '/hub/pagos/purchases',
   '/landings/desarrollo-web',
   '/landings/identidad-visual',
+  '/landings/inventario',
+  '/hub/landings/inventario',
   '/landings/sistema-contenido-notion',
   '/login',
   '/onboarding',
