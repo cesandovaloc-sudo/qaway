@@ -14,82 +14,88 @@ export function BundleCard({ bundle, onEdit, onDelete, onView }: BundleCardProps
     : 0
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <Package className="w-5 h-5 text-purple-600" />
+    <div className="bg-white border border-zinc-200 rounded-xl p-5 hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:border-zinc-300 transition-all flex flex-col justify-between">
+      <div>
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
+              <Package size={20} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#111b2d', margin: 0 }} className="line-clamp-1">{bundle.name}</h3>
+              <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0 }}>{bundle.sku}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium text-gray-900 line-clamp-1">{bundle.name}</h3>
-            <p className="text-xs text-gray-500">{bundle.sku}</p>
-          </div>
+          
+          {discountPercent > 0 && (
+            <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200">
+              -{discountPercent}%
+            </span>
+          )}
         </div>
-        
-        {discountPercent > 0 && (
-          <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
-            -{discountPercent}%
-          </span>
+
+        {/* Description */}
+        {bundle.description && (
+          <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '12px' }} className="line-clamp-2">{bundle.description}</p>
         )}
-      </div>
 
-      {/* Description */}
-      {bundle.description && (
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{bundle.description}</p>
-      )}
-
-      {/* Pricing */}
-      <div className="flex items-baseline gap-3 mb-4">
-        <span className="text-lg font-semibold text-gray-900">
-          S/ {bundle.bundle_price.toFixed(2)}
-        </span>
-        {bundle.total_individual_price > bundle.bundle_price && (
-          <span className="text-sm text-gray-500 line-through">
-            S/ {bundle.total_individual_price.toFixed(2)}
+        {/* Pricing */}
+        <div className="flex items-baseline gap-2 mb-3">
+          <span style={{ fontSize: '18px', fontWeight: 800, color: '#111b2d' }}>
+            S/ {bundle.bundle_price.toFixed(2)}
           </span>
-        )}
-      </div>
+          {bundle.total_individual_price > bundle.bundle_price && (
+            <span style={{ fontSize: '13px', color: 'var(--muted)', textDecoration: 'line-through' }}>
+              S/ {bundle.total_individual_price.toFixed(2)}
+            </span>
+          )}
+        </div>
 
-      {/* Status */}
-      <div className="flex items-center gap-2 mb-4">
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-          bundle.status === 'active' 
-            ? 'bg-green-100 text-green-700' 
-            : bundle.status === 'inactive'
-            ? 'bg-gray-100 text-gray-600'
-            : 'bg-yellow-100 text-yellow-700'
-        }`}>
-          {bundle.status === 'active' ? 'Activo' : bundle.status === 'inactive' ? 'Inactivo' : 'Borrador'}
-        </span>
+        {/* Status */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${
+            bundle.status === 'active' 
+              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+              : bundle.status === 'inactive'
+              ? 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+              : 'bg-amber-50 text-amber-700 border border-amber-200'
+          }`}>
+            {bundle.status === 'active' ? 'Activo' : bundle.status === 'inactive' ? 'Inactivo' : 'Borrador'}
+          </span>
+        </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+      <div className="flex items-center gap-2 pt-3 border-t border-zinc-100">
         {onView && (
           <button
             onClick={() => onView(bundle)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+            className="flex-1 pxp-btn secondary"
+            style={{ height: '34px', fontSize: '12px', gap: 4 }}
           >
-            <Eye className="w-4 h-4" />
+            <Eye size={14} />
             Ver
           </button>
         )}
         {onEdit && (
           <button
             onClick={() => onEdit(bundle)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+            className="flex-1 pxp-btn secondary"
+            style={{ height: '34px', fontSize: '12px', gap: 4, color: '#0284c7' }}
           >
-            <Edit2 className="w-4 h-4" />
+            <Edit2 size={14} />
             Editar
           </button>
         )}
         {onDelete && (
           <button
             onClick={() => onDelete(bundle)}
-            className="flex items-center justify-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="pxp-btn secondary"
+            style={{ height: '34px', width: '34px', padding: 0, color: '#e11d48' }}
+            title="Eliminar"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 size={14} />
           </button>
         )}
       </div>

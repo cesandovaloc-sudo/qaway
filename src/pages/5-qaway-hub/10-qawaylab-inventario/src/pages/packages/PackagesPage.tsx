@@ -44,110 +44,185 @@ export default function PackagesPage() {
     }
   }
 
+  const activeCount = bundles.filter(b => b.status === 'active').length
+  const discountCount = bundles.filter(b => b.discount > 0).length
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Paquetes</h1>
-          <p className="text-sm text-gray-500">Agrupa productos para ofrecer soluciones completas</p>
-        </div>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-          <Plus className="w-4 h-4" />
-          Nuevo paquete
-        </button>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <Package size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Paquetes y Combos
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Agrupa productos para ofrecer soluciones completas y combos comerciales.
+                  </p>
+                </div>
+              </div>
 
-      {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md border border-zinc-200 py-1 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Buscar por nombre o SKU..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-        />
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-sm text-red-700">{error}</span>
-        </div>
-      ) : filteredBundles.length === 0 ? (
-        <div className="text-center py-12">
-          <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay paquetes</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Crea tu primer paquete para agrupar productos relacionados
-          </p>
-           <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-            <Plus className="w-4 h-4" />
-            Crear paquete
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredBundles.map(bundle => (
-              <BundleCard
-                key={bundle.id}
-                bundle={bundle}
-                onView={(b) => console.log('View bundle:', b)}
-                onEdit={(b) => console.log('Edit bundle:', b)}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <div className="flex items-center justify-between pt-4">
-              <p className="text-sm text-gray-500">
-                Mostrando {filteredBundles.length} de {pagination.total} paquetes
-              </p>
-              <div className="flex items-center gap-2">
+              <div className="pxp-heading-actions">
                 <button
-                  onClick={() => setPage(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setShowForm(true)}
+                  className="pxp-btn primary"
+                  title="Crear nuevo paquete"
                 >
-                  Anterior
-                </button>
-                <span className="text-sm text-gray-600">
-                  {pagination.page} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setPage(pagination.page + 1)}
-                  disabled={pagination.page === pagination.total_pages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Siguiente
+                  <Plus size={15} /> Nuevo Paquete
                 </button>
               </div>
             </div>
-          )}
-        </>
-      )}
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form onSubmit={handleCreate} className="w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Nuevo paquete</h2>
-              <button type="button" onClick={() => setShowForm(false)}><X className="h-5 w-5 text-gray-500" /></button>
+            {/* Resumen Métricas oficiales pxp */}
+            <section className="pxp-metrics" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Total Paquetes</span>
+                  <div className="pxp-metric-icon" style={{ color: '#0284c7', background: '#f0f9ff' }}><Package size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#0284c7' }}>{bundles.length}</div>
+                <div className="pxp-metric-note">En catálogo</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Paquetes Activos</span>
+                  <div className="pxp-metric-icon" style={{ color: '#059669', background: '#ecfdf5' }}><Package size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#059669' }}>{activeCount}</div>
+                <div className="pxp-metric-note">Listos para vender</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Con Descuento</span>
+                  <div className="pxp-metric-icon" style={{ color: '#7c3aed', background: '#f5f3ff' }}><Package size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#7c3aed' }}>{discountCount}</div>
+                <div className="pxp-metric-note">En promoción</div>
+              </div>
+            </section>
+
+            {/* Toolbar oficial pxp */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre o SKU..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
-            <input required placeholder="Nombre del paquete" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <input required placeholder="SKU" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <textarea placeholder="Descripción" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <input type="number" min="0" step="0.01" placeholder="Precio del paquete" value={form.bundle_price} onChange={e => setForm({ ...form, bundle_price: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <button disabled={saving} className="w-full rounded-lg bg-purple-600 px-4 py-2 font-medium text-white disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar paquete'}</button>
+
+            {/* Content */}
+            {loading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+                <Loader2 size={24} className="animate-spin text-brand" />
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
+                <AlertCircle size={18} />
+                <span className="text-sm">{error}</span>
+              </div>
+            ) : filteredBundles.length === 0 ? (
+              <div className="pxp-table-wrap" style={{ textAlign: 'center', padding: '48px 24px' }}>
+                <Package size={48} className="mx-auto text-muted mb-4" />
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#111b2d', marginBottom: '4px' }}>No hay paquetes</h3>
+                <p style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '16px' }}>
+                  Crea tu primer paquete para agrupar productos relacionados
+                </p>
+                <button onClick={() => setShowForm(true)} className="pxp-btn primary" style={{ margin: '0 auto' }}>
+                  <Plus size={15} /> Crear paquete
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredBundles.map(bundle => (
+                    <BundleCard
+                      key={bundle.id}
+                      bundle={bundle}
+                      onView={(b) => console.log('View bundle:', b)}
+                      onEdit={(b) => console.log('Edit bundle:', b)}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {pagination.total_pages > 1 && (
+                  <div className="pxp-toolbar" style={{ marginTop: '16px', justifyContent: 'space-between' }}>
+                    <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+                      Mostrando {filteredBundles.length} de {pagination.total} paquetes
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={() => setPage(pagination.page - 1)}
+                        disabled={pagination.page === 1}
+                        className="pxp-btn secondary"
+                        style={{ height: '32px', fontSize: '12px' }}
+                      >
+                        Anterior
+                      </button>
+                      <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
+                        {pagination.page} / {pagination.total_pages}
+                      </span>
+                      <button
+                        onClick={() => setPage(pagination.page + 1)}
+                        disabled={pagination.page === pagination.total_pages}
+                        className="pxp-btn secondary"
+                        style={{ height: '32px', fontSize: '12px' }}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Modal Nuevo Paquete */}
+      {showForm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={e => { if (e.target === e.currentTarget) setShowForm(false) }}
+        >
+          <form onSubmit={handleCreate} className="w-full max-w-md space-y-4 rounded-2xl bg-surface border border-zinc-200 p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3">
+              <h2 className="text-lg font-bold text-ink">Nuevo Paquete</h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-muted hover:text-ink"><X size={20} /></button>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted mb-1">Nombre del paquete *</label>
+              <input required placeholder="Ej: Combo Gamer Pro" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted mb-1">SKU *</label>
+              <input required placeholder="Ej: PKG-001" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted mb-1">Descripción</label>
+              <textarea placeholder="Detalle de los productos incluidos..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 resize-none" rows={3} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted mb-1">Precio del paquete (S/)</label>
+              <input type="number" min="0" step="0.01" placeholder="0.00" value={form.bundle_price} onChange={e => setForm({ ...form, bundle_price: e.target.value })} className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40" />
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-200">
+              <button type="button" onClick={() => setShowForm(false)} className="pxp-btn secondary" style={{ height: '36px' }}>Cancelar</button>
+              <button disabled={saving} className="pxp-btn primary" style={{ height: '36px' }}>{saving ? 'Guardando...' : 'Guardar Paquete'}</button>
+            </div>
           </form>
         </div>
       )}
