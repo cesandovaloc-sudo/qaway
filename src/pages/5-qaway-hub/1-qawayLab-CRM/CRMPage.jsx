@@ -733,8 +733,8 @@ function CRMContent() {
         </header>
 
         {/* ── MAIN CONTENT (Lienzo Maestro: 100% Fluido como Inventario) ─────────── */}
-        <main className={`flex-1 overflow-y-auto relative transition-colors duration-200 ${isCanvasDark ? 'bg-[#09090b] text-white' : 'bg-[#fafafa] text-zinc-900'}`}>
-          <div className="relative z-10 p-6 md:p-8 min-h-full w-full">
+        <main className={`flex-1 overflow-y-auto relative transition-colors duration-200 ${isCanvasDark ? 'bg-[#09090b] text-white' : 'bg-[#f7f9fc] text-zinc-900'}`}>
+          <div className="relative z-10 px-5 py-[22px] md:px-6 md:py-[22px] max-w-[1800px] mx-auto min-h-full w-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentRole}-${activeTab}`}
