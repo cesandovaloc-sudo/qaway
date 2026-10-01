@@ -338,7 +338,37 @@ export default function SuscripcionesPanel({
   const [loading, setLoading] = useState(true);
   const [selectedSub, setSelectedSub] = useState(null);
   const [modalPlan, setModalPlan] = useState("Básico");
+  const [modalRateMode, setModalRateMode] = useState("oferta"); // "oferta" | "regular" | "custom"
+  const [modalIncludeCatalog, setModalIncludeCatalog] = useState(false);
+  const [modalCustomPrice, setModalCustomPrice] = useState("");
   const [actionFeedback, setActionFeedback] = useState(null);
+
+  const calculatedApprovalAmount = useMemo(() => {
+    if (modalRateMode === "custom") {
+      return Number(modalCustomPrice) || 0;
+    }
+    const regularPrices = { Básico: 60, Intermedio: 100, Premium: 140 };
+    const offerPrices = { Básico: 30, Intermedio: 50, Premium: 70 };
+    const catalogRegular = { Básico: 60, Intermedio: 80, Premium: 100 };
+    const catalogOffer = { Básico: 30, Intermedio: 40, Premium: 50 };
+
+    const basePrice = modalRateMode === "oferta" ? (offerPrices[modalPlan] || 30) : (regularPrices[modalPlan] || 60);
+    const catalogPrice = modalIncludeCatalog
+      ? (modalRateMode === "oferta" ? (catalogOffer[modalPlan] || 30) : (catalogRegular[modalPlan] || 60))
+      : 0;
+    return basePrice + catalogPrice;
+  }, [modalPlan, modalRateMode, modalIncludeCatalog, modalCustomPrice]);
+
+  const openDetailModal = (item) => {
+    setSelectedSub(item);
+    setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
+    const isOffer = item.amount === 30 || item.amount === 50 || item.amount === 70 || item.amount === 90 || item.amount === 120;
+    setModalRateMode(isOffer ? "oferta" : "regular");
+    setModalIncludeCatalog(Array.isArray(item.apps) && item.apps.some((a) => /cat[áa]logo/i.test(a)));
+    setModalCustomPrice(item.amount || "");
+    setActionFeedback(null);
+    onOpenSubscription?.(item);
+  };
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
@@ -494,41 +524,77 @@ export default function SuscripcionesPanel({
     };
   }, [rawTenants, rawSubs, rawApps]);
 
-  const handleApproveSubscription = async (id, chosenPlan = null) => {
+  const handleApproveSubscription = async (id, options = null) => {
     const target = items.find((x) => x.id === id);
     if (!target) return;
 
-    const planPriceMap = { basico: 60, intermedio: 100, premium: 140 };
-    const planToUse = chosenPlan || (target.plan !== "Sin plan" ? target.plan : "Básico");
+    const planToUse = options?.plan || modalPlan || (target.plan !== "Sin plan" ? target.plan : "Básico");
     const rawPlan = planToUse.toLowerCase();
-    const newAmount = planPriceMap[rawPlan] || 60;
+    const finalAmount = options?.amount !== undefined ? options.amount : calculatedApprovalAmount;
+    const includeCatalog = options?.includeCatalog !== undefined ? options.includeCatalog : modalIncludeCatalog;
+    const rateMode = options?.rateMode || modalRateMode;
+
+    const newApps = ["Inventario"];
+    if (includeCatalog) newApps.push("Catálogo Web");
 
     // Actualización local inmediata
     setItems((prev) =>
-      prev.map((sub) => (sub.id === id ? { ...sub, status: "Activa", plan: planToUse, amount: newAmount } : sub))
+      prev.map((sub) =>
+        sub.id === id
+          ? {
+              ...sub,
+              status: "Activa",
+              plan: planToUse,
+              amount: finalAmount,
+              apps: newApps,
+            }
+          : sub
+      )
     );
     setSelectedSub((prev) =>
-      prev && prev.id === id ? { ...prev, status: "Activa", plan: planToUse, amount: newAmount } : prev
+      prev && prev.id === id
+        ? {
+            ...prev,
+            status: "Activa",
+            plan: planToUse,
+            amount: finalAmount,
+            apps: newApps,
+          }
+        : prev
     );
     setActionFeedback({
       type: "success",
-      message: `¡Suscripción aprobada y activada exitosamente con Plan ${planToUse} para ${target.company}!`,
+      message: `¡Suscripción aprobada y activada (${planToUse}${includeCatalog ? " + Catálogo Web" : ""} • S/ ${finalAmount}/mes) para ${target.company}!`,
     });
-    setTimeout(() => setActionFeedback(null), 4000);
+    setTimeout(() => setActionFeedback(null), 5000);
 
     // Persistencia real en Supabase
     if (target.tenant_id) {
       try {
         await supabase
           .from("tenants")
-          .update({ status: "active" })
+          .update({
+            status: "active",
+            features: {
+              ...(target.rawSub?.tenant?.features || {}),
+              catalog: includeCatalog,
+              ecommerce: includeCatalog,
+            },
+          })
           .eq("id", target.tenant_id);
 
-        if (target.rawSub?.id) {
+        let subId = target.rawSub?.id;
+        if (subId) {
           await supabase
             .from("tenant_app_subscriptions")
-            .update({ status: "active", plan: rawPlan })
-            .eq("tenant_id", target.tenant_id);
+            .update({
+              status: "active",
+              plan: rawPlan,
+              contracted_price: finalAmount,
+              promotion_code: rateMode === "oferta" ? "lanzamiento-combo" : null,
+              promotion_name: rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null,
+            })
+            .eq("id", subId);
         } else {
           const { data: appData } = await supabase
             .from("app_catalog")
@@ -537,12 +603,39 @@ export default function SuscripcionesPanel({
             .maybeSingle();
 
           if (appData?.id) {
-            await supabase.from("tenant_app_subscriptions").upsert({
-              tenant_id: target.tenant_id,
-              app_id: appData.id,
-              plan: rawPlan,
+            const { data: newSub } = await supabase
+              .from("tenant_app_subscriptions")
+              .upsert({
+                tenant_id: target.tenant_id,
+                app_id: appData.id,
+                plan: rawPlan,
+                status: "active",
+                contracted_price: finalAmount,
+                promotion_code: rateMode === "oferta" ? "lanzamiento-combo" : null,
+                promotion_name: rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null,
+              })
+              .select("id")
+              .maybeSingle();
+
+            subId = newSub?.id;
+          }
+        }
+
+        if (includeCatalog && subId) {
+          const catPrice =
+            rateMode === "oferta"
+              ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30)
+              : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60);
+
+          try {
+            await supabase.from("tenant_app_subscription_addons").upsert({
+              subscription_id: subId,
+              addon_slug: "catalogo_publico",
+              contracted_price: catPrice,
               status: "active",
             });
+          } catch (addonErr) {
+            console.warn("No se pudo registrar addon catalogo_publico:", addonErr);
           }
         }
       } catch (err) {
@@ -836,12 +929,7 @@ export default function SuscripcionesPanel({
                   {!loading && visibleRows.map((item) => (
                     <tr
                       key={item.id}
-                      onClick={() => {
-                        setSelectedSub(item);
-                        setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
-                        setActionFeedback(null);
-                        onOpenSubscription?.(item);
-                      }}
+                      onClick={() => openDetailModal(item)}
                       className="cursor-pointer border-b border-zinc-100 transition hover:bg-zinc-50/70"
                     >
                       <td className="px-3 py-3">
@@ -889,11 +977,9 @@ export default function SuscripcionesPanel({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedSub(item);
-                                setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
-                                setActionFeedback(null);
+                                openDetailModal(item);
                               }}
-                              title="Aprobar suscripción y elegir plan"
+                              title="Aprobar suscripción y configurar paquete"
                               className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer shadow-2xs"
                             >
                               <CheckCircle2 size={12} className="text-emerald-600" />
@@ -904,10 +990,7 @@ export default function SuscripcionesPanel({
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setSelectedSub(item);
-                              setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
-                              setActionFeedback(null);
-                              onOpenSubscription?.(item);
+                              openDetailModal(item);
                             }}
                             className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900 cursor-pointer"
                             aria-label={`Acciones de ${item.company}`}
@@ -1058,59 +1141,142 @@ export default function SuscripcionesPanel({
                 </div>
               )}
 
-              {/* Datos de la suscripción */}
-              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
-                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                    Plan
-                  </span>
-                  {selectedSub.status !== "Activa" ? (
-                    <select
-                      value={modalPlan}
-                      onChange={(e) => setModalPlan(e.target.value)}
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-bold text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400"
-                    >
-                      <option value="Básico">Básico — S/ 60 / mes</option>
-                      <option value="Intermedio">Intermedio — S/ 100 / mes</option>
-                      <option value="Premium">Premium — S/ 140 / mes</option>
-                    </select>
-                  ) : (
-                    <PlanBadge plan={selectedSub.plan} />
-                  )}
-                </div>
-
-                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
-                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                    Estado Actual
+              {/* Configuración Comercial para Aprobación / Modificación */}
+              <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50/70 p-4 space-y-3.5">
+                <div className="flex items-center justify-between border-b border-zinc-200/80 pb-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-zinc-800">
+                    Condiciones Comerciales y Paquete
                   </span>
                   <StatusBadge status={selectedSub.status} />
                 </div>
 
-                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
-                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                    Monto Mensual
+                {/* 1. Selector de Plan Base */}
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                    1. Plan Base (Inventi Pro)
                   </span>
-                  <span className="text-sm font-extrabold text-zinc-900">
-                    S/ {selectedSub.status !== "Activa" ? (modalPlan === "Premium" ? 140 : modalPlan === "Intermedio" ? 100 : 60) : selectedSub.amount}
-                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["Básico", "Intermedio", "Premium"].map((p) => {
+                      const isSel = modalPlan === p;
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setModalPlan(p)}
+                          className={`rounded-xl border py-2 px-3 text-xs font-bold transition text-center cursor-pointer ${
+                            isSel
+                              ? "border-[#ff4b0b] bg-orange-50/70 text-[#ff4b0b] shadow-2xs"
+                              : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
-                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                    Periodo de Renovación
+                {/* 2. Modalidad de Tarifa / Oferta */}
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1.5">
+                    2. Modalidad de Precio
                   </span>
-                  <span className="font-medium text-zinc-700">
-                    {selectedSub.start} → {selectedSub.renewal}
-                  </span>
-                </div>
-              </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      {
+                        key: "oferta",
+                        label: "⚡ Oferta Lanzamiento",
+                        sub: modalPlan === "Básico" ? "S/ 30" : modalPlan === "Intermedio" ? "S/ 50" : "S/ 70",
+                      },
+                      {
+                        key: "regular",
+                        label: "🏷️ Precio Regular",
+                        sub: modalPlan === "Básico" ? "S/ 60" : modalPlan === "Intermedio" ? "S/ 100" : "S/ 140",
+                      },
+                      {
+                        key: "custom",
+                        label: "✏️ Pactado Libre",
+                        sub: "Monto manual",
+                      },
+                    ].map((mode) => {
+                      const isSel = modalRateMode === mode.key;
+                      return (
+                        <button
+                          key={mode.key}
+                          type="button"
+                          onClick={() => setModalRateMode(mode.key)}
+                          className={`rounded-xl border p-2 text-left transition cursor-pointer ${
+                            isSel
+                              ? "border-emerald-600 bg-emerald-50 text-emerald-950 shadow-2xs"
+                              : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                          }`}
+                        >
+                          <div className="text-[11px] font-bold leading-tight">{mode.label}</div>
+                          <div className="text-[10px] text-zinc-400 font-semibold mt-0.5">{mode.sub}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              {/* Apps contratadas */}
-              <div className="mt-4">
-                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">
-                  Aplicaciones contratadas
-                </span>
-                <AppChips apps={selectedSub.apps} />
+                  {modalRateMode === "custom" && (
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <span className="text-xs font-bold text-zinc-600">Monto pactado:</span>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">S/</span>
+                        <input
+                          type="number"
+                          value={modalCustomPrice}
+                          onChange={(e) => setModalCustomPrice(e.target.value)}
+                          placeholder="Monto mensual"
+                          className="h-8 w-36 rounded-lg border border-zinc-300 bg-white pl-8 pr-2 text-xs font-extrabold text-zinc-900 outline-none focus:border-[#ff4b0b]"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Add-on Catálogo Público Web */}
+                <div className="rounded-xl border border-zinc-200 bg-white p-3">
+                  <label className="flex items-start gap-2.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={modalIncludeCatalog}
+                      onChange={(e) => setModalIncludeCatalog(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#ff4b0b] focus:ring-[#ff4b0b]"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-zinc-900">
+                          Incluir Add-on: Catálogo Público Web
+                        </span>
+                        <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          +{modalRateMode === "oferta" ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30) : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60)} S/ / mes
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400 mt-0.5">
+                        Permite a la marca tener su tienda y catálogo público web sincronizado con stock en tiempo real.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* 4. Resumen Total y Desglose */}
+                <div className="flex items-center justify-between rounded-xl bg-zinc-950 p-3 text-white">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-400 block">
+                      Total Mensual a Facturar
+                    </span>
+                    <span className="text-xs font-medium text-zinc-300">
+                      Inventi Pro {modalPlan} {modalIncludeCatalog ? "+ Catálogo Público" : ""} ({modalRateMode === "oferta" ? "Oferta Lanzamiento" : modalRateMode === "regular" ? "Tarifa Regular" : "Precio Pactado"})
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-extrabold text-emerald-400">
+                      S/ {calculatedApprovalAmount}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 block">/ mes</span>
+                  </div>
+                </div>
               </div>
 
               {/* Acciones de Super Administrador */}
@@ -1119,17 +1285,24 @@ export default function SuscripcionesPanel({
                   {selectedSub.status === "Pendiente" || selectedSub.status === "En prueba" ? (
                     <button
                       type="button"
-                      onClick={() => handleApproveSubscription(selectedSub.id, modalPlan)}
+                      onClick={() => handleApproveSubscription(selectedSub.id)}
                       className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 size={16} />
-                      Aprobar y Activar Plan {modalPlan}
+                      Aprobar y Activar Plan {modalPlan} {modalIncludeCatalog ? "+ Catálogo" : ""} (S/ {calculatedApprovalAmount}/mes)
                     </button>
                   ) : selectedSub.status === "Activa" ? (
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
                         <CheckCircle2 size={14} /> Activa y Operativa
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleApproveSubscription(selectedSub.id)}
+                        className="text-xs font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-200 transition cursor-pointer"
+                      >
+                        Actualizar Condiciones
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleStatusChange(selectedSub.id, "Vencida")}
@@ -1141,7 +1314,7 @@ export default function SuscripcionesPanel({
                   ) : (
                     <button
                       type="button"
-                      onClick={() => handleApproveSubscription(selectedSub.id, modalPlan)}
+                      onClick={() => handleApproveSubscription(selectedSub.id)}
                       className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 size={16} />

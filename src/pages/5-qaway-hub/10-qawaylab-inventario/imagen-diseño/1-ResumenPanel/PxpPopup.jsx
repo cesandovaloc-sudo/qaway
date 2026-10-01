@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState, memo } from "react";
 import { ChevronDown } from "lucide-react";
 
-const PXP_DMENU_CSS = `.pxp-dmenu{position:absolute;left:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:1200;color-scheme:light;background-color:#fff;color:#0f172a}.pxp-dmenu-item{display:flex;width:100%;align-items:center;gap:8px;padding:8px 10px;border:0;background:transparent;background-color:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;text-align:left;transition:background .12s ease}.pxp-dmenu-item:hover{background:#f1f5f9;background-color:#f1f5f9;color:#0f172a}.pxp-dmenu-item.sel{background:#fff2eb;background-color:#fff2eb;color:#ff4b0b;font-weight:600}.pxp-dmenu-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#e2e8f0;background-color:#e2e8f0}.pxp-dmenu-item.sel .pxp-dmenu-dot{background:#ff4b0b;background-color:#ff4b0b}`;
+const PXP_DMENU_CSS = `.pxp-dmenu{position:absolute;left:0;top:calc(100% + 8px);min-width:200px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:1200;color-scheme:light;background-color:#fff;color:#0f172a}.pxp-dmenu-item{display:flex;width:100%;align-items:center;gap:8px;padding:8px 10px;border:0;background:transparent;background-color:transparent;border-radius:8px;font-size:13px;font-weight:500;color:#334155;cursor:pointer;text-align:left;transition:background .12s ease}.pxp-dmenu-item:hover{background:#f1f5f9;background-color:#f1f5f9;color:#0f172a}.pxp-dmenu-item.sel{background:#f4f4f5;background-color:#f4f4f5;color:#0f172a;font-weight:600}.pxp-dmenu-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:#e2e8f0;background-color:#e2e8f0}.pxp-dmenu-item.sel .pxp-dmenu-dot{background:#52525b;background-color:#52525b}`;
 
 // Inyectar 1 sola vez a nivel documento (antes se inyectaba dentro de cada popup
 // y React recreaba el <style> al abrir/cerrar = flash negro por FOUC).
 function ensureMenuCssOnce() {
   try {
     if (typeof document === "undefined") return;
-    if (document.getElementById("pxp-dmenu-css")) return;
+    // v2 = gris neutro (antes melocotón). Se elimina la v1 si quedó de una sesión anterior con HMR.
+    const old = document.getElementById("pxp-dmenu-css");
+    if (old) old.remove();
+    if (document.getElementById("pxp-dmenu-css-v2")) return;
     const el = document.createElement("style");
-    el.id = "pxp-dmenu-css";
+    el.id = "pxp-dmenu-css-v2";
     el.textContent = PXP_DMENU_CSS;
     document.head.appendChild(el);
   } catch {}
@@ -55,7 +58,7 @@ function PxpPopupInner({ value, options, onChange, renderLabel, wrapStyle }) {
                 type="button"
                 key={opt.v}
                 className={`pxp-dmenu-item ${opt.v === value ? "sel" : ""}`}
-                style={{ backgroundColor: opt.v === value ? "#fff2eb" : "transparent", colorScheme: "light" }}
+                style={{ backgroundColor: opt.v === value ? "#f4f4f5" : "transparent", color: opt.v === value ? "#0f172a" : undefined, colorScheme: "light" }}
                 onClick={() => {
                   onChange(opt.v);
                   setOpen(false);
