@@ -418,6 +418,10 @@ export default function SuscripcionesPanel({
   onNewSubscription,
   onOpenSubscription,
 }) {
+  const [items, setItems] = useState(subscriptions);
+  const [selectedSub, setSelectedSub] = useState(null);
+  const [actionFeedback, setActionFeedback] = useState(null);
+
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [planFilter, setPlanFilter] = useState("Todos");
@@ -428,10 +432,38 @@ export default function SuscripcionesPanel({
 
   const pageSize = 8;
 
+  const handleApproveSubscription = (id) => {
+    setItems((prev) =>
+      prev.map((sub) => (sub.id === id ? { ...sub, status: "Activa" } : sub))
+    );
+    setSelectedSub((prev) =>
+      prev && prev.id === id ? { ...prev, status: "Activa" } : prev
+    );
+    setActionFeedback({
+      type: "success",
+      message: "¡Suscripción aprobada y activada exitosamente!",
+    });
+    setTimeout(() => setActionFeedback(null), 4000);
+  };
+
+  const handleStatusChange = (id, newStatus) => {
+    setItems((prev) =>
+      prev.map((sub) => (sub.id === id ? { ...sub, status: newStatus } : sub))
+    );
+    setSelectedSub((prev) =>
+      prev && prev.id === id ? { ...prev, status: newStatus } : prev
+    );
+    setActionFeedback({
+      type: "info",
+      message: `Estado actualizado a "${newStatus}".`,
+    });
+    setTimeout(() => setActionFeedback(null), 4000);
+  };
+
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
 
-    return subscriptions.filter((item) => {
+    return items.filter((item) => {
       const matchesQuery =
         !normalized ||
         item.company.toLowerCase().includes(normalized) ||
@@ -446,7 +478,7 @@ export default function SuscripcionesPanel({
 
       return matchesQuery && matchesStatus && matchesPlan;
     });
-  }, [subscriptions, query, statusFilter, planFilter]);
+  }, [items, query, statusFilter, planFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -455,9 +487,9 @@ export default function SuscripcionesPanel({
     safePage * pageSize
   );
 
-  const activeCount = subscriptions.filter((x) => x.status === "Activa").length;
-  const trialCount = subscriptions.filter((x) => x.status === "En prueba").length;
-  const expiredCount = subscriptions.filter((x) => x.status === "Vencida").length;
+  const activeCount = items.filter((x) => x.status === "Activa").length;
+  const trialCount = items.filter((x) => x.status === "En prueba").length;
+  const expiredCount = items.filter((x) => x.status === "Vencida").length;
 
   const resetFilters = () => {
     setQuery("");
@@ -504,7 +536,7 @@ export default function SuscripcionesPanel({
             icon={<Building2 size={16} className="text-blue-600" />}
             iconBg="bg-blue-50"
             label="Total de suscripciones"
-            value="12"
+            value={items.length}
             delta="20%"
             note="vs. mes anterior"
             trend="M3 32 C20 32, 28 31, 39 25 S57 22, 67 17 S82 11, 97 9"
@@ -514,7 +546,7 @@ export default function SuscripcionesPanel({
             icon={<CheckCircle2 size={16} className="text-emerald-600" />}
             iconBg="bg-emerald-50"
             label="Activas"
-            value="9"
+            value={activeCount}
             delta="29%"
             note="vs. mes anterior"
             trend="M3 33 C18 32, 28 29, 39 27 S57 16, 67 14 S83 9, 97 7"
@@ -524,7 +556,7 @@ export default function SuscripcionesPanel({
             icon={<Clock3 size={16} className="text-orange-500" />}
             iconBg="bg-orange-50"
             label="En prueba"
-            value="2"
+            value={trialCount}
             delta="0%"
             deltaDirection="neutral"
             note="vs. mes anterior"
@@ -535,7 +567,7 @@ export default function SuscripcionesPanel({
             icon={<XCircle size={16} className="text-red-500" />}
             iconBg="bg-red-50"
             label="Vencidas"
-            value="1"
+            value={expiredCount}
             delta="50%"
             deltaDirection="down"
             note="vs. mes anterior"
@@ -665,7 +697,11 @@ export default function SuscripcionesPanel({
                   {visibleRows.map((item) => (
                     <tr
                       key={item.id}
-                      onClick={() => onOpenSubscription?.(item)}
+                      onClick={() => {
+                        setSelectedSub(item);
+                        setActionFeedback(null);
+                        onOpenSubscription?.(item);
+                      }}
                       className="cursor-pointer border-b border-zinc-100 transition hover:bg-zinc-50/70"
                     >
                       <td className="px-3 py-3">
@@ -707,17 +743,35 @@ export default function SuscripcionesPanel({
                       </td>
 
                       <td className="px-3 py-3">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenSubscription?.(item);
-                          }}
-                          className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900"
-                          aria-label={`Acciones de ${item.company}`}
-                        >
-                          <Ellipsis size={15} />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {item.status === "En prueba" && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleApproveSubscription(item.id);
+                              }}
+                              title="Aprobar suscripción directamente"
+                              className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer shadow-2xs"
+                            >
+                              <CheckCircle2 size={12} className="text-emerald-600" />
+                              <span>Aprobar</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSub(item);
+                              setActionFeedback(null);
+                              onOpenSubscription?.(item);
+                            }}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 transition hover:border-zinc-300 hover:text-zinc-900 cursor-pointer"
+                            aria-label={`Acciones de ${item.company}`}
+                          >
+                            <Ellipsis size={15} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -808,11 +862,150 @@ export default function SuscripcionesPanel({
 
           {/* Right column */}
           <aside className="space-y-4">
-            <SubscriptionDistribution subscriptions={subscriptions} />
-            <UpcomingRenewals subscriptions={subscriptions} />
+            <SubscriptionDistribution subscriptions={items} />
+            <UpcomingRenewals subscriptions={items} />
             <TipCard />
           </aside>
         </section>
+
+        {/* Modal de Detalle y Aprobación de Suscripción */}
+        {selectedSub && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs transition-opacity"
+            onClick={() => setSelectedSub(null)}
+          >
+            <div
+              className="relative w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header Modal */}
+              <div className="flex items-start justify-between border-b border-zinc-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <Logo subscription={selectedSub} />
+                  <div>
+                    <h3 className="text-base font-bold text-zinc-950">
+                      {selectedSub.company}
+                    </h3>
+                    <p className="text-xs text-zinc-400">
+                      {selectedSub.industry} • ID: {selectedSub.id}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSub(null)}
+                  className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition cursor-pointer"
+                  aria-label="Cerrar modal"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Feedback banner */}
+              {actionFeedback && (
+                <div
+                  className={`mt-4 flex items-center gap-2 rounded-xl p-3 text-xs font-bold ${
+                    actionFeedback.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : "bg-blue-50 text-blue-800 border border-blue-200"
+                  }`}
+                >
+                  <CheckCircle2 size={16} className="shrink-0" />
+                  <span>{actionFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Datos de la suscripción */}
+              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    Plan
+                  </span>
+                  <PlanBadge plan={selectedSub.plan} />
+                </div>
+
+                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    Estado Actual
+                  </span>
+                  <StatusBadge status={selectedSub.status} />
+                </div>
+
+                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    Monto Mensual
+                  </span>
+                  <span className="text-sm font-extrabold text-zinc-900">
+                    S/ {selectedSub.amount}
+                  </span>
+                </div>
+
+                <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                    Periodo de Renovación
+                  </span>
+                  <span className="font-medium text-zinc-700">
+                    {selectedSub.start} → {selectedSub.renewal}
+                  </span>
+                </div>
+              </div>
+
+              {/* Apps contratadas */}
+              <div className="mt-4">
+                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">
+                  Aplicaciones contratadas
+                </span>
+                <AppChips apps={selectedSub.apps} />
+              </div>
+
+              {/* Acciones de Super Administrador */}
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4">
+                <div className="flex items-center gap-2">
+                  {selectedSub.status === "En prueba" ? (
+                    <button
+                      type="button"
+                      onClick={() => handleApproveSubscription(selectedSub.id)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
+                    >
+                      <CheckCircle2 size={16} />
+                      Aprobar y Activar Suscripción
+                    </button>
+                  ) : selectedSub.status === "Activa" ? (
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                        <CheckCircle2 size={14} /> Activa y Operativa
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleStatusChange(selectedSub.id, "Vencida")}
+                        className="text-xs font-semibold text-zinc-500 hover:text-red-600 px-3 py-1.5 rounded-lg border border-zinc-200 hover:border-red-200 transition cursor-pointer"
+                      >
+                        Pausar / Vencer
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleApproveSubscription(selectedSub.id)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
+                    >
+                      <CheckCircle2 size={16} />
+                      Reactivar Suscripción
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedSub(null)}
+                  className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-50 transition cursor-pointer"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
