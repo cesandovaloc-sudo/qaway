@@ -1373,16 +1373,16 @@ export default function ProductosPanel() {
                   </p>
                 </div>
               </div>
-              <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <button className="pxp-btn" onClick={resetImport} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+              <div className="pxp-heading-actions" style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "nowrap", flexShrink: 0 }}>
+                <button className="pxp-btn" onClick={resetImport} style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
                   <FileSpreadsheet size={15} /> Importar
                 </button>
-                <button className="pxp-btn" onClick={handleExportCSV} style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+                <button className="pxp-btn" onClick={handleExportCSV} style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
                   <Download size={15} /> Exportar
                 </button>
                 <button
                   className="pxp-btn"
-                  style={{ background: "#1e293b", borderColor: "#1e293b", color: "#fff", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 7 }}
+                  style={{ background: "#1e293b", borderColor: "#1e293b", color: "#fff", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}
                   onClick={handleNavigateCapture}
                   title="Capturar y digitalizar producto con IA / Cámara"
                 >
@@ -1392,14 +1392,17 @@ export default function ProductosPanel() {
                   className="pxp-btn primary"
                   onClick={openNew}
                   style={{
+                    background: "#ff4b0b",
+                    borderColor: "#ff4b0b",
+                    color: "#fff",
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 7,
                     fontWeight: 650,
-                    opacity: isPlatformAdmin && !activeTenantId ? 0.65 : 1,
-                    cursor: isPlatformAdmin && !activeTenantId ? "not-allowed" : "pointer"
+                    flexShrink: 0,
+                    cursor: "pointer"
                   }}
-                  title={isPlatformAdmin && !activeTenantId ? "Selecciona una empresa en la barra superior para crear productos" : "Crear nuevo producto"}
+                  title="Crear nuevo producto"
                 >
                   <Plus size={15} /> Nuevo producto <ChevronDown size={13} />
                 </button>

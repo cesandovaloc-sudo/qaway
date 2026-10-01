@@ -911,7 +911,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           <button
             type="button"
             onClick={() => setIsMetricModalOpen(true)}
-            className="flex items-center gap-1.5 bg-[#ff4b0b] hover:bg-[#e03f06] text-white text-sm font-semibold px-3.5 py-2.5 rounded-xl transition-all shadow-[0_2px_10px_rgba(255,75,11,0.25)] active:scale-[0.98] cursor-pointer"
+            className="inline-flex items-center gap-1.5 h-[38px] bg-[#ff4b0b] hover:bg-[#ea3e00] border border-[#ff4b0b] hover:border-[#ea3e00] text-white text-[13.5px] font-semibold px-3.5 rounded-[8px] transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] cursor-pointer flex-shrink-0"
             title="Crear métrica personalizada (Super Administrador)"
           >
             <HubIcon icon={Plus} size={15} className="w-4 h-4" />
@@ -928,7 +928,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <button
               type="button"
               onClick={() => setShowActionsMenu((v) => !v)}
-              className="h-[38px] w-[38px] flex items-center justify-center bg-zinc-100 hover:bg-zinc-200/80 border border-zinc-200 text-zinc-800 rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+              className="h-[38px] w-[38px] flex items-center justify-center bg-white hover:bg-[#f9fbff] border border-[#e5ebf4] hover:border-[#b8c9e6] text-[#34415b] rounded-[8px] transition-all cursor-pointer flex-shrink-0"
               title="Acciones Rápidas de Super Administrador"
             >
               <HubIcon icon={Zap} size={15} className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -972,7 +972,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <button
               type="button"
               onClick={() => setShowTimeMenu((v) => !v)}
-              className="flex items-center gap-2 bg-white border border-zinc-200 text-xs font-semibold px-3.5 py-2.5 rounded-xl hover:bg-zinc-50 transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-pointer"
+              className="inline-flex items-center gap-2 h-[38px] bg-white hover:bg-[#f9fbff] border border-[#e5ebf4] hover:border-[#b8c9e6] text-[#34415b] text-[13.5px] font-semibold px-3.5 rounded-[8px] transition-all cursor-pointer flex-shrink-0"
             >
               <HubIcon icon={Calendar} size={15} className="w-4 h-4 text-zinc-500" />
               <span>{TIME_LABELS[timeRange] || 'Tiempo Real'}</span>
@@ -1797,21 +1797,6 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
       </div>
 
-      {/* Notas del Administrador (Barra Informativa Exclusiva de Super Admin) */}
-      <div className="bg-amber-50/60 rounded-2xl p-4 border border-amber-200/80 shadow-2xs flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
-            <HubIcon icon={PenSquare} size={15} className="w-4 h-4" />
-          </span>
-          <div className="min-w-0">
-            <span className="text-xs font-bold text-amber-900 block">Notas del administrador</span>
-            <p className="text-xs text-amber-800/90 truncate font-medium">
-              Revisar renovaciones de planes este mes. Monitorear límites de almacenamiento y cuotas de consumo de agentes IA.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Modal Nueva Métrica (Super Administrador) */}
       {isMetricModalOpen && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200" onMouseDown={(e) => { if (e.target === e.currentTarget) setIsMetricModalOpen(false) }}>
@@ -1921,52 +1906,6 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
         document.body
       )}
 
-      {/* Row 3: Ecosystem Applications Grid */}
-      <div className="bg-white rounded-2xl p-4 border border-zinc-200 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-          <div>
-            <h3 className="text-sm font-bold text-zinc-950">Aplicaciones del ecosistema</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">Estado general de las aplicaciones en todas las empresas.</p>
-          </div>
-          <button onClick={() => setActiveTab('Aplicaciones')} className="text-xs font-bold text-zinc-700 hover:text-zinc-950 transition-colors flex items-center gap-1 self-start sm:self-auto">
-            Gestionar aplicaciones <HubIcon icon={ArrowRight} size={14} className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {(live ? live.ecosystem : []).map((app, i) => (
-            <div key={i} className="rounded-xl border border-zinc-200 p-4 bg-zinc-50/30 flex flex-col justify-between hover:border-zinc-300 transition-all group">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`w-9 h-9 rounded-xl ${app.tone} text-white flex items-center justify-center shadow-xs`}>
-                    <HubIcon icon={ecosystemIcon(app.slug)} size={18} className="w-4.5 h-4.5" />
-                  </span>
-                  {app.active > 0 ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      Activo
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-zinc-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
-                      Sin activos
-                    </span>
-                  )}
-                </div>
-                <h4 className="text-xs font-bold text-zinc-950 group-hover:text-[#ff4b0b] transition-colors">{app.title}</h4>
-                <p className="text-[11px] text-zinc-500 mt-1">{app.active} {app.active === 1 ? 'empresa activa' : 'empresas activas'}</p>
-                <p className="text-[10px] text-zinc-400">{app.users} usuarios</p>
-              </div>
-              <Link to={app.path} className="mt-4 inline-flex items-center gap-1 text-[11px] font-bold text-zinc-700 hover:text-zinc-950 transition-colors">
-                Ver detalles <HubIcon icon={ArrowRight} size={12} className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-            </div>
-          ))}
-          {live && live.ecosystem.length === 0 && (
-            <p className="text-xs text-zinc-400 col-span-full py-2">Sin aplicaciones en el catálogo todavía.</p>
-          )}
-        </div>
-      </div>
     </div>
   )
 }
@@ -2146,7 +2085,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
   )
 }
 
-function HubPanelContent() {
+function HubPanelContent({ canvasOnly = false }) {
   const navigate = useNavigate()
   const location = useLocation()
   const [activeTab, setActiveTab] = useState(() => {
@@ -2558,9 +2497,9 @@ function HubPanelContent() {
   const currentTabLabel = (TENANT_ADMIN_NAV.find((nav) => nav.id === activeTab) || SUPER_ADMIN_NAV.find((nav) => nav.id === activeTab))?.label || activeTab
 
   return (
-    <div data-mode={themeMode} className="hub-shell flex h-screen w-full bg-[var(--hub-bg)] overflow-hidden font-sans text-[var(--hub-text)] selection:bg-[#ff4b0b] selection:text-white">
+    <div data-mode={themeMode} className={`hub-shell flex ${canvasOnly ? 'min-h-0 w-full bg-transparent overflow-visible' : 'h-screen w-full bg-[var(--hub-bg)] overflow-hidden'} font-sans text-[var(--hub-text)] selection:bg-[#ff4b0b] selection:text-white`}>
       {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
-      <aside className={`hub-chrome ${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-[var(--hub-border)] bg-[var(--hub-bg)] transition-all duration-300 ease-in-out`}>
+      <aside className={`${canvasOnly ? 'hidden' : 'hub-chrome'} ${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-[var(--hub-border)] bg-[var(--hub-bg)] transition-all duration-300 ease-in-out`}>
         {/* LOGO */}
         <button onClick={() => goTab('Inicio')} className={`h-[72px] shrink-0 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-[var(--hub-border)] cursor-pointer hover:bg-[var(--hub-chip)] transition-colors group w-full text-left`}>
           <div className="flex items-center gap-3">
@@ -2616,7 +2555,7 @@ function HubPanelContent() {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         {/* HEADER TOPBAR */}
-        <header className="hub-chrome h-[72px] border-b border-[var(--hub-border-soft)] flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[var(--hub-bg)] relative z-50 shadow-sm">
+        <header className={`${canvasOnly ? 'hidden' : 'hub-chrome'} h-[72px] border-b border-[var(--hub-border-soft)] flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[var(--hub-bg)] relative z-50 shadow-sm`}>
           {/* Lado Izquierdo */}
           <div className="flex items-center gap-2 lg:gap-3">
             <button onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)} className="p-2 rounded-full text-[var(--hub-text-soft)] hover:text-white hover:bg-[var(--hub-hover)] transition-colors" title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}>
@@ -3014,7 +2953,7 @@ function HubPanelContent() {
         </header>
 
         {/* ── MAIN CONTENT (Lienzo Maestro: #fafafa) ────────────────── */}
-        <main className="flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative">
+        <main className={`flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative ${canvasOnly ? 'overflow-visible' : ''}`}>
           <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
           <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1300px] mx-auto">
             {activeTab === 'Empresas' && !globalSearchQuery.trim() ? (
@@ -3194,6 +3133,6 @@ function HubPanelContent() {
   )
 }
 
-export default function HubPanelPage() {
-  return (<ErrorBoundary><HubPanelContent /></ErrorBoundary>)
+export default function HubPanelPage({ canvasOnly = false }) {
+  return (<ErrorBoundary><HubPanelContent canvasOnly={canvasOnly} /></ErrorBoundary>)
 }
