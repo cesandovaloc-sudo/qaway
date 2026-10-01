@@ -40,9 +40,11 @@ export default function LoginPage() {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
       if (me && !me.is_platform_admin) {
         if (!me.tenant_id) return '/onboarding/tu-empresa'
-        // Si tiene empresa pero su estado sigue en borrador o el onboarding está incompleto, retomar en tu-hub
+        // Si tiene empresa pero su onboarding está explícitamente incompleto, retomar en tu-hub
         const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()
-        if (t && (t.status === 'draft' || t.features?.onboarding_completed === false)) return '/onboarding/tu-hub'
+        const isLocallyDone = localStorage.getItem(`qaway.onboarding_completed.${me.tenant_id}`) === 'true'
+        const isDone = t?.features?.onboarding_completed === true || isLocallyDone
+        if (t && t.features?.onboarding_completed === false && !isDone) return '/onboarding/tu-hub'
       }
     } catch (_) { /* error de lectura: cae al destino normal */ }
     return '/hub/panel'

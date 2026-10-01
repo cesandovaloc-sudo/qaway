@@ -2252,7 +2252,9 @@ function HubPanelContent() {
       if (me.tenant_id) {
         const { data: tenant } = await supabase.from('tenants').select('name, status, features').eq('id', me.tenant_id).maybeSingle()
         tenantName = tenant?.name || null
-        if (!isPlatformAdmin && (tenant?.status === 'draft' || tenant?.features?.onboarding_completed === false)) {
+        const isLocallyDone = localStorage.getItem(`qaway.onboarding_completed.${me.tenant_id}`) === 'true'
+        const isDone = tenant?.features?.onboarding_completed === true || isLocallyDone
+        if (!isPlatformAdmin && tenant?.features?.onboarding_completed === false && !isDone) {
           navigate('/onboarding/tu-hub', { replace: true })
           return
         }

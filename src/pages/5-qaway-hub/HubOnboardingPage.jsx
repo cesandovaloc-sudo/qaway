@@ -97,8 +97,19 @@ export default function HubOnboardingPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [prefix, setPrefix] = useState("+51");
 
-  const next = () => navigate(`/onboarding/${SLUGS[Math.min(5, step + 1) - 1]}`);
-  const back = () => navigate(`/onboarding/${SLUGS[Math.max(1, step - 1) - 1]}`);
+  const next = () => {
+    setNote("");
+    navigate(`/onboarding/${SLUGS[Math.min(5, step + 1) - 1]}`);
+  };
+  const back = () => {
+    setNote("");
+    navigate(`/onboarding/${SLUGS[Math.max(1, step - 1) - 1]}`);
+  };
+
+  useEffect(() => {
+    setNote("");
+  }, [step]);
+
   const noteIsError = note.startsWith("No se pudo") || note.startsWith("Escribe") || note.startsWith("Formato") || note.startsWith("Tiempo");
   const setF = (k) => (e) => {
     const v = e.target.value;
@@ -457,7 +468,6 @@ export default function HubOnboardingPage() {
       // La activación comercial debe ocurrir al contratar o al aplicar una
       // oferta con trial. No se concede acceso por seleccionar una app.
       if (tenant.status !== "active") {
-        setNote("Apps guardadas. Completa la contratación para activar la marca.");
         if (goNext) next();
         return;
       }
@@ -738,15 +748,19 @@ export default function HubOnboardingPage() {
                 className="primary"
                 style={{ flex: 1, marginLeft: 12 }}
                 onClick={async () => {
-                  if (tenant?.id) {
+                  const tId = tenant?.id;
+                  if (tId) {
                     try {
+                      localStorage.setItem(`qaway.onboarding_completed.${tId}`, 'true');
                       await supabase.from("tenants").update({
                         features: {
                           ...(tenant.features || {}),
                           onboarding_completed: true,
                         },
-                      }).eq("id", tenant.id);
-                    } catch (_) {}
+                      }).eq("id", tId);
+                    } catch (e) {
+                      console.warn("No se pudo actualizar onboarding_completed en BD:", e);
+                    }
                   }
                   navigate("/hub/panel", { replace: true });
                 }}
