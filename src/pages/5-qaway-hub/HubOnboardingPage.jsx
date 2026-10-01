@@ -581,26 +581,7 @@ export default function HubOnboardingPage() {
 
   return (
     <div className="onboarding">
-      {step !== 1 && (
-        <header>
-          <div className="logo">Qaway<span>Lab</span></div>
-          <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
-        </header>
-      )}
-
       <main className={step === 1 ? "step-3-main" : ""}>
-        {step !== 1 && (
-          <div className="progress">
-            {steps.map((label, i) => (
-              <React.Fragment key={label}>
-                <div className={step >= i + 1 ? "step active" : "step"}>
-                  <i>{i + 1}</i><span>{label}</span>
-                </div>
-                {i < 4 && <em className={step > i + 1 ? "bar active" : "bar"} />}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
 
         {loading && (
           <section className="card wide onboarding-skeleton">
@@ -801,32 +782,25 @@ export default function HubOnboardingPage() {
         )}
       </main>
 
-      {step !== 1 && (
-        <footer><b>Qaway Hub</b><span>Tu espacio de trabajo digital</span></footer>
-      )}
-
       <style>{`
-        *{box-sizing:border-box}body{margin:0;background:#f7f7f8;color:#111;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+        *{box-sizing:border-box}body{margin:0;background:#f8fafc;color:#111;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
         button,input{font:inherit}button{cursor:pointer}
-        .onboarding{min-height:100vh;display:flex;flex-direction:column}
-        header{height:76px;background:#fff;border-bottom:1px solid #e9e9ec;padding:0 6vw;display:flex;align-items:center;justify-content:space-between}
-        .logo{font-size:23px;font-weight:800;letter-spacing:-1px}.logo span{color:#ff4b0b}.login{font-size:14px;color:#64748b}.login b{color:#111;margin-left:5px;cursor:pointer}
-        main{width:min(820px,92vw);margin:auto;padding:42px 0 65px;flex:1}
-        .progress{display:flex;justify-content:center;align-items:center;margin-bottom:34px}.step{display:flex;align-items:center;gap:7px;color:#94a3b8}.step i{font-style:normal;width:29px;height:29px;border:1px solid #d8d8dd;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:white}.step span{font-size:13px;font-weight:700}.step.active{color:#0f172a}.step.active i{background:#0f172a;color:#fff;border-color:#0f172a}.bar{height:1px;width:48px;background:#cbd5e1;margin:0 11px}.bar.active{background:#0f172a}
-        .card{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:40px;box-shadow:0 15px 45px rgba(0,0,0,.045)}.card.wide{max-width:800px}.card.wider{max-width:900px}.card.done{text-align:center}
-        .eyebrow{display:block;color:#ff4b0b;font-size:11px;font-weight:800;letter-spacing:1.5px;margin-bottom:12px}
-        h1{font-size:34px;line-height:1.1;letter-spacing:-1.2px;margin:0 0 12px;color:#0f172a}p{color:#4b5563;font-size:15px;line-height:1.6;margin:0 0 27px;max-width:650px}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:13px;font-weight:700;color:#1e293b;margin-bottom:7px}.field input{width:100%;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 13px;font-size:14.5px;outline:none}.field input:focus{border-color:#0f172a}.field input.locked{background:#f8fafc;color:#475569;cursor:not-allowed;border-color:#e2e8f0}
-        .field select{width:100%;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 34px 0 13px;font-size:14.5px;outline:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;appearance:none;cursor:pointer}.field select:focus{border-color:#0f172a}
-        .phoneRow{display:flex;gap:8px}.phoneRow input{flex:1}.phoneRow .phonePrefix{flex:none;width:88px;background:#f8fafc;color:#1e293b;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
-        .check{display:flex;gap:8px;font-size:14px;color:#475569;margin:5px 0 23px}.check input{accent-color:#ff4b0b;width:16px;height:16px;margin-top:2px}
+        .onboarding{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#f8fafc;padding:16px 0}
+        main{width:min(840px,92vw);margin:auto;padding:20px 0;display:flex;flex-direction:column;justify-content:center;flex:none}
+        .card{background:#fff;border:1.5px solid #f1f5f9;border-radius:22px;padding:36px 40px;box-shadow:0 20px 50px rgba(0,0,0,.05)}.card.wide{max-width:840px}.card.wider{max-width:1120px}.card.done{text-align:center}
+        .eyebrow{display:inline-flex;align-items:center;background:#f3e8ff;color:#7e22ce;font-size:11px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:999px;margin-bottom:14px;text-transform:uppercase;width:fit-content}
+        h1{font-size:28px;line-height:1.2;letter-spacing:-0.8px;margin:0 0 10px;color:#0f172a;font-weight:800}p{color:#64748b;font-size:14.5px;line-height:1.55;margin:0 0 24px;max-width:650px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.field{display:block;margin-bottom:14px}.field span{display:block;font-size:13.5px;font-weight:700;color:#1e293b;margin-bottom:7px}.field input{width:100%;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;transition:all .2s}.field input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}.field input.locked{background:#f8fafc;color:#64748b;cursor:not-allowed;border-color:#e2e8f0}
+        .field select{width:100%;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 34px 0 14px;font-size:14.5px;outline:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;appearance:none;cursor:pointer;transition:all .2s}.field select:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+        .phoneRow{display:flex;gap:8px}.phoneRow input{flex:1;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;transition:all .2s}.phoneRow input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}.phoneRow .phonePrefix{flex:none;width:88px;background:#f8fafc;color:#1e293b;text-align:center;font-variant-numeric:tabular-nums;font-weight:600}
+        .check{display:flex;gap:10px;font-size:14px;color:#475569;margin:8px 0 22px}.check input{accent-color:#7c3aed;width:17px;height:17px;border-radius:4px;margin-top:2px}
         .check.constituida{align-items:flex-start}.check.constituida span{flex:1;min-width:0;line-height:1.5}.check.constituida small{display:block;color:#64748b;font-weight:400;font-size:13px;margin-top:3px;line-height:1.5}
         .req{color:#c0392b;font-weight:800;font-size:13px}
         .field.invalid input,.field.invalid select{border-color:#e0aba1!important}
         .field input:disabled{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
-        .primary,.secondary{height:48px;border-radius:9px;padding:0 22px;font-size:14px;font-weight:700}.primary{background:#0f172a;color:#fff;border:0}.primary:hover{background:#ff4b0b}.primary:disabled{background:#94a3b8;cursor:not-allowed;color:#fff}.secondary{background:#fff;border:1px solid #cbd5e1;color:#1e293b}.secondary:hover{background:#f8fafc}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
-        .logoUpload{display:flex;align-items:center;gap:12px;border:1px dashed #cbd5e1;border-radius:12px;padding:14px;margin-bottom:22px}.logoUpload>div{width:48px;height:48px;border-radius:9px;background:#f1f5f9;display:grid;place-items:center;font-size:22px;color:#64748b}.logoUpload section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.logoUpload section b{font-size:14px;color:#0f172a}.logoUpload section small{font-size:13px;color:#64748b}.logoUpload button{margin-left:auto;border:1px solid #cbd5e1;background:#fff;border-radius:7px;padding:8px 12px;font-size:13px;font-weight:700;color:#1e293b}
-        .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px}.app.selected{border-color:#ff4b0b;box-shadow:0 0 0 1px #ff4b0b}.appIcon{width:36px;height:36px;border-radius:9px;background:#fff0ea;color:#ff4b0b;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:15px;color:#0f172a}.app span small{font-size:13.5px;color:#64748b;line-height:1.4}.app>i{margin-left:auto;width:20px;height:20px;border:1px solid #cbd5e1;border-radius:50%;font-style:normal;font-size:11px;display:grid;place-items:center}.app.selected>i{background:#ff4b0b;border-color:#ff4b0b;color:#fff}
+        .primary,.secondary{height:48px;border-radius:12px;padding:0 24px;font-size:14.5px;font-weight:700}.primary{background:linear-gradient(135deg,#7c3aed 0%,#9333ea 100%);color:#fff;border:0;box-shadow:0 4px 14px rgba(124,58,237,.25);cursor:pointer;transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .2s}.primary:hover:not(:disabled){transform:scale(1.015);box-shadow:0 6px 20px rgba(124,58,237,.35)}.primary:disabled{background:#cbd5e1;cursor:not-allowed;color:#f8fafc;box-shadow:none}.secondary{background:#fff;border:1.5px solid #e2e8f0;color:#475569;cursor:pointer;transition:background .2s,color .2s}.secondary:hover{background:#f8fafc;color:#0f172a}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+        .logoUpload{display:flex;align-items:center;gap:14px;border:1.5px dashed #cbd5e1;border-radius:14px;padding:16px;margin-bottom:22px;background:#fafafa}.logoUpload>div{width:48px;height:48px;border-radius:10px;background:#f1f5f9;display:grid;place-items:center;font-size:22px;color:#64748b}.logoUpload section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.logoUpload section b{font-size:14px;color:#0f172a}.logoUpload section small{font-size:13px;color:#64748b}.logoUpload button{margin-left:auto;border:1.5px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#1e293b;transition:all .2s}.logoUpload button:hover{background:#f8fafc}
+        .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;transition:all .2s}.app.selected{border-color:#7c3aed;box-shadow:0 0 0 1.5px #7c3aed;background:#faf5ff}.appIcon{width:36px;height:36px;border-radius:9px;background:#f3e8ff;color:#7e22ce;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:15px;color:#0f172a}.app span small{font-size:13.5px;color:#64748b;line-height:1.4}.app>i{margin-left:auto;width:20px;height:20px;border:1.5px solid #cbd5e1;border-radius:50%;font-style:normal;font-size:11px;display:grid;place-items:center}.app.selected>i{background:#7c3aed;border-color:#7c3aed;color:#fff}
         .note{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-top:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:6px}
         .note b{font-size:15px;color:#0f172a;font-weight:700}
         .note span{font-size:14px;color:#475569;line-height:1.55}
@@ -836,11 +810,11 @@ export default function HubOnboardingPage() {
         .role-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
         .invite-box{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
         .invite-row{display:flex;gap:8px;align-items:center}
-        .invite-row input{flex:1;height:48px;border:1px solid #cbd5e1;border-radius:9px;padding:0 13px;font-size:14.5px;outline:none}
-        .invite-row input:focus{border-color:#0f172a}
+        .invite-row input{flex:1;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;transition:all .2s}
+        .invite-row input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
         .btn-remove-invite{width:36px;height:36px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;display:grid;place-items:center;font-size:13px;cursor:pointer;transition:all .15s}
         .btn-remove-invite:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
-        .btn-add-invite{align-self:flex-start;border:0;background:none;color:#ff4b0b;font-size:13px;font-weight:800;cursor:pointer;padding:6px 0}
+        .btn-add-invite{align-self:flex-start;border:0;background:none;color:#7c3aed;font-size:13.5px;font-weight:700;cursor:pointer;padding:6px 0}
         .btn-add-invite:hover{text-decoration:underline}
         .invite-max-hint{font-size:12.5px;color:#64748b;margin:4px 0 0}
         .field-error{display:block;margin-top:6px;font-size:12.5px;color:#b91c1c;font-weight:500;line-height:1.45}
@@ -848,8 +822,8 @@ export default function HubOnboardingPage() {
         .notice-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-weight:600}
         .notice-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-weight:600}
         .logo-note{display:block;font-style:normal;margin-top:5px;font-size:12px;font-weight:700;color:#16a34a}
-        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#334155;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:3px 8px}
-        .success{width:64px;height:64px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 20px}.summary{border:1px solid #e2e8f0;border-radius:11px;text-align:left;margin-top:22px}.summary div{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9}.summary div:last-child{border:0}.summary span{font-size:13px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
+        .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#7e22ce;background:#f3e8ff;border:1px solid #e9d5ff;border-radius:999px;padding:3px 10px}
+        .success{width:64px;height:64px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 20px}.summary{border:1.5px solid #e2e8f0;border-radius:14px;text-align:left;margin-top:22px;overflow:hidden}.summary div{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9}.summary div:last-child{border:0}.summary span{font-size:13px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
         @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
         .onboarding-skeleton{animation:skPulse 1.4s ease-in-out infinite}
         .sk-line{background:#eaeaee;border-radius:6px}
@@ -861,10 +835,9 @@ export default function HubOnboardingPage() {
         .sk-label{width:90px;height:11px;margin-bottom:7px}
         .sk-input{height:47px;border-radius:9px;background:#f3f3f5}
         .sk-btn{width:110px;height:48px;border-radius:9px;background:#eaeaee}
-        footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#64748b;font-size:13px}
         main.step-3-main{width:min(1120px,96vw);margin:auto;padding:24px 0;display:flex;flex-direction:column;justify-content:center}
         .canva-onboarding-card{max-width:1120px!important;padding:32px 36px;box-shadow:0 20px 50px rgba(0,0,0,.06)}
-        @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:28px}.grid,.apps{grid-template-columns:1fr}.canva-onboarding-card{padding:20px 14px}}
+        @media(max-width:700px){main{padding-top:20px}.card{padding:28px 20px}h1{font-size:24px}.grid,.apps{grid-template-columns:1fr}.canva-onboarding-card{padding:20px 14px}}
       `}</style>
     </div>
   );
