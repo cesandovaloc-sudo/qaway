@@ -385,6 +385,7 @@ export default function HubOnboardingPage() {
         }).eq("id", tenant.id);
         if (error) throw error;
         setTenant({ ...tenant, name: form.name, features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false } });
+      }
       if (goNext) {
         await saveApps(false, chosenPlan);
         next();
