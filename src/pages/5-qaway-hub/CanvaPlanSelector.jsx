@@ -1,5 +1,25 @@
-import React, { useState } from "react";
-import { Check, ChevronDown, ChevronUp, Crown, Sparkles, X, Info, ChevronLeft, Bell, Gift } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Crown,
+  Sparkles,
+  X,
+  Info,
+  ChevronLeft,
+  Bell,
+  Gift,
+  CreditCard,
+  User,
+  Calendar,
+  Mail,
+  Phone,
+  Clock,
+  Lock,
+  ShieldCheck,
+  ArrowRight,
+} from "lucide-react";
 
 function getFormattedDateOffset(days) {
   const d = new Date();
@@ -246,6 +266,53 @@ export default function CanvaPlanSelector({
   const [showAllBenefits, setShowAllBenefits] = useState(false);
   const [billingType, setBillingType] = useState("recurring");
   const [frequency, setFrequency] = useState("monthly");
+  const [oneTimeDuration, setOneTimeDuration] = useState("1_week");
+
+  // Estados de Checkout (subStep === 3)
+  const [paymentMethod, setPaymentMethod] = useState("card"); // "card" | "yape"
+  const [yapeStep, setYapeStep] = useState("input"); // "input" | "approval"
+  const [yapeSeconds, setYapeSeconds] = useState(294); // 04:54
+
+  const [cardForm, setCardForm] = useState({
+    name: "",
+    number: "",
+    expiry: "",
+    cvc: "",
+    email: "",
+    country: "Perú",
+  });
+
+  const [yapeForm, setYapeForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+    country: "Perú",
+  });
+
+  // Temporizador regresivo para aprobación push en Yape (Imagen 3 de Canva)
+  useEffect(() => {
+    let timer;
+    if (subStep === 3 && paymentMethod === "yape" && yapeStep === "approval") {
+      timer = setInterval(() => {
+        setYapeSeconds((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [subStep, paymentMethod, yapeStep]);
+
+  function formatCountdown(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
 
   function handleSelect(planId) {
     setCurrentPlan(planId);
@@ -254,11 +321,21 @@ export default function CanvaPlanSelector({
 
   const selectedPlanObj = PLAN_CONFIGS.find((p) => p.id === currentPlan) || PLAN_CONFIGS[1];
 
+  // Precios para Pago Único prepago (Imagen 5 de Canva)
+  const oneTimePriceMap = {
+    "1_week": 10.99,
+    "1_month": selectedPlanObj.priceMonthly,
+    "1_day": 3.99,
+  };
+  const activeOneTimePrice = oneTimePriceMap[oneTimeDuration] || 10.99;
+
   // Cálculo dinámico para la frecuencia anual (ahorro de 2 meses)
   const annualTotal = selectedPlanObj.priceMonthly === 30 ? 240 : (selectedPlanObj.priceMonthly === 50 ? 400 : 560);
   const annualSavings = (selectedPlanObj.priceMonthly * 12) - annualTotal;
   const annualPerMonth = Math.round(annualTotal / 12);
-  const currentPrice = frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly;
+  const currentPrice = billingType === "one_time" 
+    ? activeOneTimePrice 
+    : (frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly);
 
   const dateDay24 = getFormattedDateOffset(24);
   const dateDay30 = getFormattedDateOffset(30);
@@ -490,147 +567,695 @@ export default function CanvaPlanSelector({
                 </button>
               </div>
 
-              {/* Bullets con checks verdes */}
-              <div className="canva-sub2-bullets">
-                <div className="canva-sub2-bullet">
-                  <Check size={18} className="canva-check-green" strokeWidth={2.8} />
-                  <span>Gratis 30 días. Puedes cancelar cuando quieras.</span>
+              {/* Bullets con checks verdes dinámicos según el tipo de facturación */}
+              {billingType === "recurring" ? (
+                <div className="canva-sub2-bullets">
+                  <div className="canva-sub2-bullet">
+                    <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                    <span>Gratis 30 días. Puedes cancelar cuando quieras.</span>
+                  </div>
+                  <div className="canva-sub2-bullet">
+                    <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                    <span>Te avisaremos antes de que termine tu prueba</span>
+                  </div>
                 </div>
-                <div className="canva-sub2-bullet">
-                  <Check size={18} className="canva-check-green" strokeWidth={2.8} />
-                  <span>Te avisaremos antes de que termine tu prueba</span>
+              ) : (
+                <div className="canva-sub2-bullets">
+                  <div className="canva-sub2-bullet">
+                    <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                    <span>Sin suscripción. Sin renovación automática.</span>
+                  </div>
+                  <div className="canva-sub2-bullet">
+                    <Check size={18} className="canva-check-green" strokeWidth={2.8} />
+                    <span>Paga por adelantado. Conserva tus accesos y datos después de que venza.</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Radio Cards: Mensual y Anual */}
-              <div className="canva-freq-cards-list" role="radiogroup" aria-label="Frecuencia de pago">
-                {/* Tarjeta Mensual */}
-                <div
-                  className={`canva-freq-card ${frequency === "monthly" ? "selected" : ""}`}
-                  onClick={() => setFrequency("monthly")}
-                  role="radio"
-                  aria-checked={frequency === "monthly"}
-                  tabIndex={0}
-                >
-                  <div className="canva-freq-radio">
-                    <div className={`canva-freq-circle ${frequency === "monthly" ? "active" : ""}`}>
-                      {frequency === "monthly" && <div className="canva-freq-dot" />}
+              {/* Radio Cards: Opciones recurrentes vs Opciones de Pago Único (Imagen 5 de Canva) */}
+              {billingType === "recurring" ? (
+                <div className="canva-freq-cards-list" role="radiogroup" aria-label="Frecuencia de pago">
+                  {/* Tarjeta Mensual */}
+                  <div
+                    className={`canva-freq-card ${frequency === "monthly" ? "selected" : ""}`}
+                    onClick={() => setFrequency("monthly")}
+                    role="radio"
+                    aria-checked={frequency === "monthly"}
+                    tabIndex={0}
+                  >
+                    <div className="canva-freq-radio">
+                      <div className={`canva-freq-circle ${frequency === "monthly" ? "active" : ""}`}>
+                        {frequency === "monthly" && <div className="canva-freq-dot" />}
+                      </div>
+                    </div>
+                    <div className="canva-freq-details">
+                      <span className="canva-freq-name">Mensual</span>
+                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
                     </div>
                   </div>
-                  <div className="canva-freq-details">
-                    <span className="canva-freq-name">Mensual</span>
-                    <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
-                  </div>
-                </div>
 
-                {/* Tarjeta Anual */}
-                <div
-                  className={`canva-freq-card ${frequency === "annual" ? "selected" : ""}`}
-                  onClick={() => setFrequency("annual")}
-                  role="radio"
-                  aria-checked={frequency === "annual"}
-                  tabIndex={0}
-                >
-                  <div className="canva-freq-radio">
-                    <div className={`canva-freq-circle ${frequency === "annual" ? "active" : ""}`}>
-                      {frequency === "annual" && <div className="canva-freq-dot" />}
+                  {/* Tarjeta Anual */}
+                  <div
+                    className={`canva-freq-card ${frequency === "annual" ? "selected" : ""}`}
+                    onClick={() => setFrequency("annual")}
+                    role="radio"
+                    aria-checked={frequency === "annual"}
+                    tabIndex={0}
+                  >
+                    <div className="canva-freq-radio">
+                      <div className={`canva-freq-circle ${frequency === "annual" ? "active" : ""}`}>
+                        {frequency === "annual" && <div className="canva-freq-dot" />}
+                      </div>
                     </div>
-                  </div>
-                  <div className="canva-freq-details">
-                    <div className="canva-freq-header-line">
-                      <span className="canva-freq-name">Anual</span>
-                      <span className="canva-offer-tag">MEJOR OFERTA - Ahorra S/{annualSavings}</span>
-                    </div>
-                    <div className="canva-freq-cost">
-                      S/{annualTotal} <span className="canva-freq-month-part">(S/{annualPerMonth} al mes)</span>
+                    <div className="canva-freq-details">
+                      <div className="canva-freq-header-line">
+                        <span className="canva-freq-name">Anual</span>
+                        <span className="canva-offer-tag">MEJOR OFERTA - Ahorra S/{annualSavings}</span>
+                      </div>
+                      <div className="canva-freq-cost">
+                        S/{annualTotal} <span className="canva-freq-month-part">(S/{annualPerMonth} al mes)</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* Opciones de Pago Único (Imagen 5 de Canva) */
+                <div className="canva-freq-cards-list" role="radiogroup" aria-label="Duración de pago único">
+                  {/* 1 Semana */}
+                  <div
+                    className={`canva-freq-card ${oneTimeDuration === "1_week" ? "selected" : ""}`}
+                    onClick={() => setOneTimeDuration("1_week")}
+                    role="radio"
+                    aria-checked={oneTimeDuration === "1_week"}
+                    tabIndex={0}
+                  >
+                    <div className="canva-freq-radio">
+                      <div className={`canva-freq-circle ${oneTimeDuration === "1_week" ? "active" : ""}`}>
+                        {oneTimeDuration === "1_week" && <div className="canva-freq-dot" />}
+                      </div>
+                    </div>
+                    <div className="canva-freq-details">
+                      <span className="canva-freq-name">1 semana</span>
+                      <span className="canva-freq-cost">S/10.99</span>
+                    </div>
+                  </div>
+
+                  {/* 1 Mes */}
+                  <div
+                    className={`canva-freq-card ${oneTimeDuration === "1_month" ? "selected" : ""}`}
+                    onClick={() => setOneTimeDuration("1_month")}
+                    role="radio"
+                    aria-checked={oneTimeDuration === "1_month"}
+                    tabIndex={0}
+                  >
+                    <div className="canva-freq-radio">
+                      <div className={`canva-freq-circle ${oneTimeDuration === "1_month" ? "active" : ""}`}>
+                        {oneTimeDuration === "1_month" && <div className="canva-freq-dot" />}
+                      </div>
+                    </div>
+                    <div className="canva-freq-details">
+                      <span className="canva-freq-name">1 mes</span>
+                      <span className="canva-freq-cost">S/{selectedPlanObj.priceMonthly}</span>
+                    </div>
+                  </div>
+
+                  {/* 1 Día */}
+                  <div
+                    className={`canva-freq-card ${oneTimeDuration === "1_day" ? "selected" : ""}`}
+                    onClick={() => setOneTimeDuration("1_day")}
+                    role="radio"
+                    aria-checked={oneTimeDuration === "1_day"}
+                    tabIndex={0}
+                  >
+                    <div className="canva-freq-radio">
+                      <div className={`canva-freq-circle ${oneTimeDuration === "1_day" ? "active" : ""}`}>
+                        {oneTimeDuration === "1_day" && <div className="canva-freq-dot" />}
+                      </div>
+                    </div>
+                    <div className="canva-freq-details">
+                      <span className="canva-freq-name">1 día</span>
+                      <span className="canva-freq-cost">S/3.99</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Columna Derecha: Timeline y Desglose de cobro */}
+            {/* Columna Derecha: Timeline o Info del plan y Desglose de cobro */}
             <div className="canva-sub2-right">
-              {/* Card 1: Línea de tiempo gráfica de 3 hitos */}
-              <div className="canva-card-timeline">
-                <div className="canva-tl-step">
-                  <div className="canva-tl-indicator">
-                    <div className="canva-tl-node node-green">
-                      <Gift size={16} strokeWidth={2.4} />
+              {billingType === "recurring" ? (
+                /* Card 1: Línea de tiempo gráfica de 3 hitos para prueba recurrente */
+                <div className="canva-card-timeline">
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-green">
+                        <Gift size={16} strokeWidth={2.4} />
+                      </div>
+                      <div className="canva-tl-bar bar-green" />
                     </div>
-                    <div className="canva-tl-bar bar-green" />
-                  </div>
-                  <div className="canva-tl-content">
-                    <strong className="canva-tl-date">Hoy</strong>
-                    <p className="canva-tl-text">
-                      Accede gratis a todo lo que {selectedPlanObj.name} tiene para ofrecer
-                    </p>
-                  </div>
-                </div>
-
-                <div className="canva-tl-step">
-                  <div className="canva-tl-indicator">
-                    <div className="canva-tl-node node-gray">
-                      <Bell size={16} strokeWidth={2.4} />
-                    </div>
-                    <div className="canva-tl-bar bar-gray" />
-                  </div>
-                  <div className="canva-tl-content">
-                    <strong className="canva-tl-date">{dateDay24}</strong>
-                    <p className="canva-tl-text">
-                      Te recordaremos cuando tu prueba esté por terminar.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="canva-tl-step">
-                  <div className="canva-tl-indicator">
-                    <div className="canva-tl-node node-gold">
-                      <Crown size={16} strokeWidth={2.4} />
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">Hoy</strong>
+                      <p className="canva-tl-text">
+                        Accede gratis a todo lo que {selectedPlanObj.name} tiene para ofrecer
+                      </p>
                     </div>
                   </div>
-                  <div className="canva-tl-content">
-                    <strong className="canva-tl-date">{dateDay30}</strong>
-                    <p className="canva-tl-text">
-                      A menos que canceles tu plan, lo renovaremos de forma automática.
-                    </p>
+
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-gray">
+                        <Bell size={16} strokeWidth={2.4} />
+                      </div>
+                      <div className="canva-tl-bar bar-gray" />
+                    </div>
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">{dateDay24}</strong>
+                      <p className="canva-tl-text">
+                        Te recordaremos cuando tu prueba esté por terminar.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-gold">
+                        <Crown size={16} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">{dateDay30}</strong>
+                      <p className="canva-tl-text">
+                        A menos que canceles tu plan, lo renovaremos de forma automática.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                /* Card 1: Información del plan para Pago Único (Imagen 5 de Canva) */
+                <div className="canva-card-plan-info">
+                  <h3 className="canva-plan-info-title">Información del plan</h3>
+                  <div className="canva-plan-info-body">
+                    <div className="canva-plan-avatar">
+                      <Crown size={22} className="text-purple-600" />
+                    </div>
+                    <div className="canva-plan-info-text">
+                      <strong className="canva-plan-info-name">Qaway Hub ({selectedPlanObj.name})</strong>
+                      <span className="canva-plan-info-sub">Facturación prepaga</span>
+                      <span className="canva-plan-info-users">1 persona en el equipo</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              {/* Card 2: Desglose y CTA */}
+              {/* Card 2: Desglose y CTA (Avanza a la Pantalla 3 de Métodos de Pago) */}
               <div className="canva-card-summary">
                 <div className="canva-summary-line-top">
                   <div className="canva-sum-left">
                     <span className="canva-sum-title">A pagar hoy</span>
-                    <span className="canva-trial-pill">Prueba gratis de 30 días</span>
+                    {billingType === "recurring" ? (
+                      <span className="canva-trial-pill">Prueba gratis de 30 días</span>
+                    ) : (
+                      <span className="canva-trial-pill canva-pill-prepago">Acceso prepago</span>
+                    )}
                   </div>
-                  <span className="canva-sum-zero">S/ 0</span>
-                </div>
-
-                <div className="canva-summary-line-next">
-                  <span className="canva-next-date">Próxima fecha de cobro: {dateDay30}</span>
-                  <span className="canva-next-price">
-                    S/{frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly}
+                  <span className="canva-sum-zero">
+                    {billingType === "recurring" ? "S/ 0" : `S/ ${activeOneTimePrice}`}
                   </span>
                 </div>
+
+                {billingType === "recurring" ? (
+                  <div className="canva-summary-line-next">
+                    <span className="canva-next-date">Próxima fecha de cobro: {dateDay30}</span>
+                    <span className="canva-next-price">
+                      S/{frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="canva-summary-line-next">
+                    <span className="canva-next-date">
+                      Duración: {oneTimeDuration === "1_week" ? "1 semana" : (oneTimeDuration === "1_day" ? "1 día" : "1 mes")}
+                    </span>
+                    <span className="canva-next-price">Sin renovación</span>
+                  </div>
+                )}
 
                 <button
                   type="button"
                   className="canva-sub2-btn-submit"
                   disabled={loading}
+                  onClick={() => setSubStep(3)}
+                >
+                  <span>Siguiente</span>
+                </button>
+
+                <p className="canva-sub2-legal">
+                  Al continuar, aceptas las <a href="#terminos" onClick={(e) => e.preventDefault()}>Condiciones de uso de Qaway Lab</a> y confirmas que leíste nuestra <a href="#privacidad" onClick={(e) => e.preventDefault()}>Política de privacidad</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PANTALLA 3 (Imágenes 1, 2, 3, 4 de Canva): Método de Pago (Tarjeta y Yape con cuenta regresiva) */}
+      {subStep === 3 && (
+        <div className="canva-sub2-wrapper">
+          {/* Barra de navegación superior: Atrás y Cerrar */}
+          <div className="canva-sub2-topbar">
+            <button
+              type="button"
+              className="canva-sub2-back-btn"
+              onClick={() => setSubStep(2)}
+            >
+              <ChevronLeft size={20} strokeWidth={2.5} />
+              <span>Atrás</span>
+            </button>
+            {onClose && (
+              <button
+                type="button"
+                className="canva-sub2-close-btn"
+                onClick={onClose}
+              >
+                <X size={18} />
+                <span>Cerrar</span>
+              </button>
+            )}
+          </div>
+
+          <div className="canva-sub2-grid">
+            {/* Columna Izquierda: Acordeón interactivo de Métodos de Pago */}
+            <div className="canva-sub2-left">
+              <h2 className="canva-sub2-title">
+                {billingType === "recurring" ? "Prueba Qaway Hub gratis" : "Finaliza tu compra"}
+              </h2>
+              <p className="canva-pay-subtitle">Selecciona una opción de pago</p>
+
+              <div className="canva-pay-accordion">
+                {/* Opción 1: Tarjeta de crédito o débito (Imagen 1 de Canva) */}
+                <div className={`canva-pay-card ${paymentMethod === "card" ? "open" : ""}`}>
+                  <div
+                    className="canva-pay-header"
+                    onClick={() => setPaymentMethod("card")}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="canva-pay-header-left">
+                      <div className={`canva-freq-circle ${paymentMethod === "card" ? "active" : ""}`}>
+                        {paymentMethod === "card" && <div className="canva-freq-dot" />}
+                      </div>
+                      <CreditCard size={20} className="text-slate-700" />
+                      <span className="canva-pay-method-title">Tarjeta de crédito o débito</span>
+                    </div>
+
+                    <div className="canva-card-badges">
+                      <span className="badge-card badge-visa">VISA</span>
+                      <span className="badge-card badge-mc">MC</span>
+                      <span className="badge-card badge-amex">AMEX</span>
+                    </div>
+                  </div>
+
+                  {/* Formulario de Tarjeta expandido */}
+                  {paymentMethod === "card" && (
+                    <div className="canva-pay-body">
+                      {/* Nombre en la tarjeta */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">Nombre que figura en la tarjeta</label>
+                        <div className="canva-input-wrap">
+                          <User size={18} className="canva-input-icon" />
+                          <input
+                            type="text"
+                            placeholder="p. ej., Juan Pérez"
+                            value={cardForm.name}
+                            onChange={(e) => setCardForm({ ...cardForm, name: e.target.value })}
+                            className="canva-input-field"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Número de tarjeta */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">Número de tarjeta</label>
+                        <div className="canva-input-wrap">
+                          <CreditCard size={18} className="canva-input-icon" />
+                          <input
+                            type="text"
+                            maxLength={19}
+                            placeholder="0000 0000 0000 0000"
+                            value={cardForm.number}
+                            onChange={(e) => setCardForm({ ...cardForm, number: e.target.value })}
+                            className="canva-input-field"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Fecha de caducidad y CVV */}
+                      <div className="canva-grid-2col">
+                        <div className="canva-input-group">
+                          <label className="canva-input-label">Fecha de caducidad</label>
+                          <div className="canva-input-wrap">
+                            <Calendar size={18} className="canva-input-icon" />
+                            <input
+                              type="text"
+                              maxLength={5}
+                              placeholder="MM/AA"
+                              value={cardForm.expiry}
+                              onChange={(e) => setCardForm({ ...cardForm, expiry: e.target.value })}
+                              className="canva-input-field"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="canva-input-group">
+                          <label className="canva-input-label">Código de seguridad (CVV)</label>
+                          <div className="canva-input-wrap">
+                            <Lock size={18} className="canva-input-icon" />
+                            <input
+                              type="password"
+                              maxLength={4}
+                              placeholder="CVV"
+                              value={cardForm.cvc}
+                              onChange={(e) => setCardForm({ ...cardForm, cvc: e.target.value })}
+                              className="canva-input-field"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Correo electrónico */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">Correo electrónico</label>
+                        <div className="canva-input-wrap">
+                          <Mail size={18} className="canva-input-icon" />
+                          <input
+                            type="email"
+                            placeholder="nombre@ejemplo.com"
+                            value={cardForm.email}
+                            onChange={(e) => setCardForm({ ...cardForm, email: e.target.value })}
+                            className="canva-input-field"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Selector de País */}
+                      <div className="canva-input-group">
+                        <label className="canva-input-label">País</label>
+                        <div className="canva-select-country">
+                          <span className="canva-flag">🇵🇪</span>
+                          <span className="canva-country-name">Perú</span>
+                        </div>
+                      </div>
+
+                      {/* Nota legal de cargo simbólico temporal reembolsable (Imagen 1 Canva) */}
+                      <div className="canva-pay-card-notice">
+                        <Info size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                        <p>
+                          Es posible que autoricemos un cargo temporal por un importe simbólico en tu tarjeta para comprobar que funciona. No te preocupes, te lo reembolsaremos enseguida.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Opción 2: Yape (Imágenes 2, 3 y 4 de Canva) */}
+                <div className={`canva-pay-card ${paymentMethod === "yape" ? "open" : ""}`}>
+                  <div
+                    className="canva-pay-header"
+                    onClick={() => setPaymentMethod("yape")}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="canva-pay-header-left">
+                      <div className={`canva-freq-circle ${paymentMethod === "yape" ? "active" : ""}`}>
+                        {paymentMethod === "yape" && <div className="canva-freq-dot" />}
+                      </div>
+                      <div className="canva-yape-icon-badge">
+                        <span>Y</span>
+                      </div>
+                      <span className="canva-pay-method-title">Yape</span>
+                    </div>
+
+                    <div className="canva-yape-tag">
+                      <span>Perú</span>
+                    </div>
+                  </div>
+
+                  {/* Formulario de Yape expandido */}
+                  {paymentMethod === "yape" && (
+                    <div className="canva-pay-body">
+                      {yapeStep === "input" ? (
+                        /* Paso 1: Ingreso de Datos (Imágenes 2 y 4 de Canva) */
+                        <>
+                          {/* Nombre y apellido */}
+                          <div className="canva-input-group">
+                            <label className="canva-input-label">Nombre y apellido</label>
+                            <div className="canva-input-wrap">
+                              <User size={18} className="canva-input-icon" />
+                              <input
+                                type="text"
+                                placeholder="p. ej., Ana Morales"
+                                value={yapeForm.name}
+                                onChange={(e) => setYapeForm({ ...yapeForm, name: e.target.value })}
+                                className="canva-input-field"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Número de celular con prefijo +51 */}
+                          <div className="canva-input-group">
+                            <label className="canva-input-label">Número de celular Yape</label>
+                            <div className="canva-input-wrap">
+                              <span className="canva-phone-prefix">+51</span>
+                              <input
+                                type="tel"
+                                maxLength={9}
+                                placeholder="987 654 321"
+                                value={yapeForm.phone}
+                                onChange={(e) => setYapeForm({ ...yapeForm, phone: e.target.value.replace(/\D/g, "") })}
+                                className="canva-input-field canva-input-with-prefix"
+                              />
+                              <Phone size={18} className="canva-input-icon-right" />
+                            </div>
+                          </div>
+
+                          {/* Correo electrónico */}
+                          <div className="canva-input-group">
+                            <label className="canva-input-label">Correo electrónico</label>
+                            <div className="canva-input-wrap">
+                              <Mail size={18} className="canva-input-icon" />
+                              <input
+                                type="email"
+                                placeholder="nombre@ejemplo.com"
+                                value={yapeForm.email}
+                                onChange={(e) => setYapeForm({ ...yapeForm, email: e.target.value })}
+                                className="canva-input-field"
+                              />
+                            </div>
+                          </div>
+
+                          {/* País */}
+                          <div className="canva-input-group">
+                            <label className="canva-input-label">País</label>
+                            <div className="canva-select-country">
+                              <span className="canva-flag">🇵🇪</span>
+                              <span className="canva-country-name">Perú</span>
+                            </div>
+                          </div>
+
+                          <div className="canva-pay-card-notice yape-notice">
+                            <Info size={16} className="text-purple-600 shrink-0 mt-0.5" />
+                            <p>
+                              Al hacer clic en el botón te enviaremos una notificación push directa a tu app Yape para que apruebes la suscripción sin ingresar claves aquí.
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        /* Paso 2: Aprobación Push con Cuenta Regresiva (Imagen 3 de Canva) */
+                        <div className="canva-yape-approval-card">
+                          <div className="canva-yape-timer-banner">
+                            <div className="canva-timer-left">
+                              <Clock size={18} className="text-sky-600" />
+                              <span>Tiempo restante para aprobar en Yape:</span>
+                            </div>
+                            <span className="canva-timer-digits">
+                              {formatCountdown(yapeSeconds)}
+                            </span>
+                          </div>
+
+                          <div className="canva-yape-steps-box">
+                            <h4 className="canva-yape-steps-title">
+                              Sigue estos pasos en tu celular:
+                            </h4>
+                            <ol className="canva-yape-steps-list">
+                              <li>
+                                <span className="canva-step-num">1</span>
+                                <span>Abre tu app <strong>Yape</strong> en tu teléfono.</span>
+                              </li>
+                              <li>
+                                <span className="canva-step-num">2</span>
+                                <span>Toca la campanita de notificaciones o la alerta emergente.</span>
+                              </li>
+                              <li>
+                                <span className="canva-step-num">3</span>
+                                <span>
+                                  Aprueba la solicitud de <strong>Qaway Hub</strong> ({billingType === "recurring" ? "S/ 0 cobrado hoy" : `S/ ${activeOneTimePrice}`}).
+                                </span>
+                              </li>
+                            </ol>
+                          </div>
+
+                          <div className="canva-yape-actions-row">
+                            <button
+                              type="button"
+                              className="canva-btn-text-action"
+                              onClick={() => setYapeStep("input")}
+                            >
+                              Cambiar número de celular
+                            </button>
+                            <button
+                              type="button"
+                              className="canva-btn-text-action"
+                              onClick={() => setYapeSeconds(294)}
+                            >
+                              Reenviar notificación
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Derecha: Timeline / Resumen del Plan y Botón Final */}
+            <div className="canva-sub2-right">
+              {billingType === "recurring" ? (
+                /* Card 1: Línea de tiempo gráfica de 3 hitos */
+                <div className="canva-card-timeline">
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-green">
+                        <Gift size={16} strokeWidth={2.4} />
+                      </div>
+                      <div className="canva-tl-bar bar-green" />
+                    </div>
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">Hoy</strong>
+                      <p className="canva-tl-text">
+                        Accede gratis a todo lo que {selectedPlanObj.name} tiene para ofrecer
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-gray">
+                        <Bell size={16} strokeWidth={2.4} />
+                      </div>
+                      <div className="canva-tl-bar bar-gray" />
+                    </div>
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">{dateDay24}</strong>
+                      <p className="canva-tl-text">
+                        Te recordaremos cuando tu prueba esté por terminar.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="canva-tl-step">
+                    <div className="canva-tl-indicator">
+                      <div className="canva-tl-node node-gold">
+                        <Crown size={16} strokeWidth={2.4} />
+                      </div>
+                    </div>
+                    <div className="canva-tl-content">
+                      <strong className="canva-tl-date">{dateDay30}</strong>
+                      <p className="canva-tl-text">
+                        A menos que canceles tu plan, lo renovaremos de forma automática.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Card 1: Información del plan para Pago Único (Imagen 5 de Canva) */
+                <div className="canva-card-plan-info">
+                  <h3 className="canva-plan-info-title">Información del plan</h3>
+                  <div className="canva-plan-info-body">
+                    <div className="canva-plan-avatar">
+                      <Crown size={22} className="text-purple-600" />
+                    </div>
+                    <div className="canva-plan-info-text">
+                      <strong className="canva-plan-info-name">Qaway Hub ({selectedPlanObj.name})</strong>
+                      <span className="canva-plan-info-sub">Facturación prepaga</span>
+                      <span className="canva-plan-info-users">1 persona en el equipo</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Card 2: Desglose y CTA Final estilo Canva */}
+              <div className="canva-card-summary">
+                <div className="canva-summary-line-top">
+                  <div className="canva-sum-left">
+                    <span className="canva-sum-title">A pagar hoy</span>
+                    {billingType === "recurring" ? (
+                      <span className="canva-trial-pill">Prueba gratis de 30 días</span>
+                    ) : (
+                      <span className="canva-trial-pill canva-pill-prepago">Acceso prepago</span>
+                    )}
+                  </div>
+                  <span className="canva-sum-zero">
+                    {billingType === "recurring" ? "S/ 0" : `S/ ${activeOneTimePrice}`}
+                  </span>
+                </div>
+
+                {billingType === "recurring" ? (
+                  <div className="canva-summary-line-next">
+                    <span className="canva-next-date">Próxima fecha de cobro: {dateDay30}</span>
+                    <span className="canva-next-price">
+                      S/{frequency === "annual" ? annualTotal : selectedPlanObj.priceMonthly}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="canva-summary-line-next">
+                    <span className="canva-next-date">
+                      Duración: {oneTimeDuration === "1_week" ? "1 semana" : (oneTimeDuration === "1_day" ? "1 día" : "1 mes")}
+                    </span>
+                    <span className="canva-next-price">Sin renovación</span>
+                  </div>
+                )}
+
+                {/* Botón Principal CTA según el método y estado */}
+                <button
+                  type="button"
+                  className="canva-sub2-btn-submit"
+                  disabled={loading}
                   onClick={() => {
+                    if (paymentMethod === "yape" && yapeStep === "input") {
+                      setYapeStep("approval");
+                      return;
+                    }
                     if (onContinue) {
                       onContinue({
                         ...selectedPlanObj,
                         billingType,
-                        frequency,
-                        currentPrice,
+                        frequency: billingType === "recurring" ? frequency : undefined,
+                        oneTimeDuration: billingType === "one_time" ? oneTimeDuration : undefined,
+                        price: billingType === "recurring" ? currentPrice : activeOneTimePrice,
+                        paymentMethod,
+                        cardForm: paymentMethod === "card" ? cardForm : undefined,
+                        yapeForm: paymentMethod === "yape" ? yapeForm : undefined,
                       });
                     }
                   }}
                 >
-                  <span>{loading ? "Iniciando tu prueba…" : "Siguiente"}</span>
+                  {paymentMethod === "card" ? (
+                    billingType === "recurring" ? "Obtén tu prueba gratis" : "Pagar y activar ahora"
+                  ) : yapeStep === "input" ? (
+                    "Continuar a aprobación Yape"
+                  ) : (
+                    "He aprobado en mi app Yape"
+                  )}
                 </button>
 
                 <p className="canva-sub2-legal">
@@ -1552,6 +2177,408 @@ export default function CanvaPlanSelector({
         .canva-sub2-legal a {
           color: #475569;
           text-decoration: underline;
+        /* Tarjeta de Información del Plan Prepago (Imagen 5 de Canva) */
+        .canva-card-plan-info {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 22px 24px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+        }
+
+        .canva-plan-info-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 16px 0;
+        }
+
+        .canva-plan-info-body {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+
+        .canva-plan-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: #f5f3ff;
+          border: 1px solid #ddd6fe;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+        }
+
+        .canva-plan-info-text {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .canva-plan-info-name {
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .canva-plan-info-sub {
+          font-size: 13px;
+          color: #64748b;
+        }
+
+        .canva-plan-info-users {
+          font-size: 12px;
+          color: #94a3b8;
+        }
+
+        .canva-pill-prepago {
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        /* Pantalla 3: Métodos de Pago (Imágenes 1, 2, 3 y 4 de Canva) */
+        .canva-pay-subtitle {
+          font-size: 14px;
+          color: #64748b;
+          margin: 4px 0 20px 0;
+        }
+
+        .canva-pay-accordion {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .canva-pay-card {
+          background: #ffffff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .canva-pay-card.open {
+          border-color: #8b5cf6;
+          box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+        }
+
+        .canva-pay-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 20px;
+          cursor: pointer;
+          user-select: none;
+          background: #ffffff;
+        }
+
+        .canva-pay-header-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .canva-pay-method-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .canva-card-badges {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .badge-card {
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          padding: 2px 6px;
+          border-radius: 4px;
+          border: 1px solid #cbd5e1;
+          color: #475569;
+          background: #f8fafc;
+        }
+
+        .badge-visa {
+          color: #1e3a8a;
+          border-color: #93c5fd;
+          background: #eff6ff;
+        }
+
+        .badge-mc {
+          color: #b91c1c;
+          border-color: #fca5a5;
+          background: #fef2f2;
+        }
+
+        .badge-amex {
+          color: #0369a1;
+          border-color: #7dd3fc;
+          background: #f0f9ff;
+        }
+
+        /* Yape Icon Badge */
+        .canva-yape-icon-badge {
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          background: #730076;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-weight: 900;
+          font-size: 13px;
+        }
+
+        .canva-yape-tag {
+          font-size: 11px;
+          font-weight: 700;
+          color: #730076;
+          background: #fdf2f8;
+          border: 1px solid #fbcfe8;
+          padding: 2px 8px;
+          border-radius: 999px;
+        }
+
+        .canva-pay-body {
+          padding: 8px 20px 22px 20px;
+          border-top: 1px solid #f1f5f9;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+
+        .canva-input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .canva-input-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #334155;
+        }
+
+        .canva-input-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+        }
+
+        .canva-input-icon {
+          position: absolute;
+          left: 14px;
+          color: #94a3b8;
+          pointer-events: none;
+        }
+
+        .canva-input-icon-right {
+          position: absolute;
+          right: 14px;
+          color: #94a3b8;
+          pointer-events: none;
+        }
+
+        .canva-input-field {
+          width: 100%;
+          height: 44px;
+          padding: 0 14px 0 42px;
+          background: #ffffff;
+          border: 1.5px solid #cbd5e1;
+          border-radius: 10px;
+          font-size: 14px;
+          color: #0f172a;
+          outline: none;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+          font-family: inherit;
+        }
+
+        .canva-input-field:focus {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+
+        .canva-input-field::placeholder {
+          color: #94a3b8;
+        }
+
+        .canva-phone-prefix {
+          position: absolute;
+          left: 14px;
+          font-size: 14px;
+          font-weight: 700;
+          color: #475569;
+          pointer-events: none;
+        }
+
+        .canva-input-with-prefix {
+          padding-left: 50px !important;
+          padding-right: 42px !important;
+        }
+
+        .canva-grid-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .canva-select-country {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          height: 44px;
+          padding: 0 14px;
+          background: #f8fafc;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 10px;
+        }
+
+        .canva-flag {
+          font-size: 18px;
+        }
+
+        .canva-country-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+
+        .canva-pay-card-notice {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 12px 14px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          margin-top: 4px;
+        }
+
+        .canva-pay-card-notice p {
+          margin: 0;
+          font-size: 12.5px;
+          color: #64748b;
+          line-height: 1.45;
+        }
+
+        .yape-notice {
+          background: #faf5ff;
+          border-color: #e9d5ff;
+        }
+
+        .yape-notice p {
+          color: #6b21a8;
+        }
+
+        /* Yape Aprobación Push y Temporizador (Imagen 3 de Canva) */
+        .canva-yape-approval-card {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .canva-yape-timer-banner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
+          border-radius: 12px;
+          padding: 12px 16px;
+          color: #0369a1;
+          font-size: 13.5px;
+          font-weight: 600;
+        }
+
+        .canva-timer-left {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .canva-timer-digits {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 16px;
+          font-weight: 800;
+          background: #ffffff;
+          padding: 4px 10px;
+          border-radius: 8px;
+          border: 1px solid #bae6fd;
+          color: #0284c7;
+        }
+
+        .canva-yape-steps-box {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 16px;
+        }
+
+        .canva-yape-steps-title {
+          font-size: 14px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 12px 0;
+        }
+
+        .canva-yape-steps-list {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .canva-yape-steps-list li {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 13.5px;
+          color: #334155;
+          line-height: 1.45;
+        }
+
+        .canva-step-num {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #730076;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-size: 12px;
+          font-weight: 800;
+          flex-shrink: 0;
+          margin-top: 1px;
+        }
+
+        .canva-yape-actions-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 6px;
+        }
+
+        .canva-btn-text-action {
+          background: none;
+          border: none;
+          padding: 0;
+          font-size: 12.5px;
+          font-weight: 600;
+          color: #730076;
+          text-decoration: underline;
+          cursor: pointer;
+          transition: color 0.15s ease;
+        }
+
+        .canva-btn-text-action:hover {
+          color: #500052;
         }
 
         @media (max-width: 820px) {
@@ -1561,6 +2588,9 @@ export default function CanvaPlanSelector({
           }
           .canva-sub2-title {
             font-size: 26px;
+          }
+          .canva-grid-2col {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
