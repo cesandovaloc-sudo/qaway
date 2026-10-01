@@ -581,22 +581,26 @@ export default function HubOnboardingPage() {
 
   return (
     <div className="onboarding">
-      <header>
-        <div className="logo">Qaway<span>Lab</span></div>
-        <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
-      </header>
+      {step !== 1 && (
+        <header>
+          <div className="logo">Qaway<span>Lab</span></div>
+          <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
+        </header>
+      )}
 
       <main className={step === 1 ? "step-3-main" : ""}>
-        <div className="progress">
-          {steps.map((label, i) => (
-            <React.Fragment key={label}>
-              <div className={step >= i + 1 ? "step active" : "step"}>
-                <i>{i + 1}</i><span>{label}</span>
-              </div>
-              {i < 4 && <em className={step > i + 1 ? "bar active" : "bar"} />}
-            </React.Fragment>
-          ))}
-        </div>
+        {step !== 1 && (
+          <div className="progress">
+            {steps.map((label, i) => (
+              <React.Fragment key={label}>
+                <div className={step >= i + 1 ? "step active" : "step"}>
+                  <i>{i + 1}</i><span>{label}</span>
+                </div>
+                {i < 4 && <em className={step > i + 1 ? "bar active" : "bar"} />}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
 
         {loading && (
           <section className="card wide onboarding-skeleton">

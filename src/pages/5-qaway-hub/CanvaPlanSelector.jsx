@@ -117,7 +117,7 @@ export const FEATURE_ROWS = [
     basico: "1 principal",
     intermedio: "Hasta 5 fotos",
     premium: "Múltiples por variante",
-    visibleInitially: false,
+    visibleInitially: true,
   },
   {
     name: "Variantes (talla, color, modelo)",
@@ -125,7 +125,7 @@ export const FEATURE_ROWS = [
     basico: false,
     intermedio: "Variantes estándar",
     premium: "Avanzadas y atributos",
-    visibleInitially: false,
+    visibleInitially: true,
   },
   {
     name: "Movimientos de Kardex (entradas/salidas)",
@@ -133,7 +133,7 @@ export const FEATURE_ROWS = [
     basico: false,
     intermedio: true,
     premium: "Historial completo",
-    visibleInitially: false,
+    visibleInitially: true,
   },
   {
     name: "Transferencias entre sedes y almacenes",
@@ -429,7 +429,7 @@ export default function CanvaPlanSelector({
               </>
             ) : (
               <>
-                <span>Ver todos los beneficios ({FEATURE_ROWS.length})</span>
+                <span>Ver más beneficios</span>
                 <ChevronDown size={16} />
               </>
             )}
@@ -649,13 +649,16 @@ export default function CanvaPlanSelector({
           gap: 28px;
           background: #ffffff;
           border-radius: 20px;
-          overflow: hidden;
           width: 100%;
           text-align: left;
+          align-items: start;
         }
 
-        /* Columna Izquierda */
+        /* Columna Izquierda: Fija / Sticky */
         .canva-left-panel {
+          position: sticky;
+          top: 0;
+          align-self: start;
           padding: 24px 20px 24px 0;
           display: flex;
           flex-direction: column;
@@ -870,19 +873,38 @@ export default function CanvaPlanSelector({
           color: #334155;
         }
 
-        /* Columna Derecha: Tabla Comparativa */
+        /* Columna Derecha: Tabla Comparativa con Scroll Independiente */
         .canva-right-panel {
           position: relative;
           display: flex;
           flex-direction: column;
           border-left: 1px solid #f1f5f9;
           padding-left: 24px;
+          max-height: min(80vh, 760px);
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding-right: 6px;
+          scrollbar-width: thin;
+          scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .canva-right-panel::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .canva-right-panel::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .canva-right-panel::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 999px;
         }
 
         .canva-table-wrapper {
           position: relative;
           width: 100%;
-          overflow: hidden;
+          overflow: visible;
         }
 
         .canva-table {
@@ -893,6 +915,9 @@ export default function CanvaPlanSelector({
         }
 
         .canva-table thead tr th {
+          position: sticky;
+          top: 0;
+          z-index: 10;
           padding: 12px 10px;
           font-size: 13px;
           font-weight: 700;

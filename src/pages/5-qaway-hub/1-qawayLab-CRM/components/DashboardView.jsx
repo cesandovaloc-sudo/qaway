@@ -575,7 +575,7 @@ export default function DashboardView() {
     const activeCount = activeCampaignsList.filter(c => c.status === 'Activa').length
 
     return (
-      <div className="bg-transparent text-zinc-900 max-w-7xl mx-auto">
+      <div className="bg-transparent text-zinc-900 w-full min-w-0">
         
         {/* ENCABEZADO: Título, Telemetría y Botones Auxiliares */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
