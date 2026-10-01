@@ -255,12 +255,7 @@ export default function DashboardPage() {
         </section>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* ACCIONES RÁPIDAS (absorbe QuickActions del original)            */}
-      {/* ═══════════════════════════════════════════════════════════════ */}
-      <section>
-        <QuickActions />
-      </section>
+
 
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* MODAL NUEVA OPERACIÓN (diseño acoplado, sin cambios)            */}
