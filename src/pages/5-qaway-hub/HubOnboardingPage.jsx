@@ -1,6 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  Upload,
+  ImagePlus,
+  Lock,
+  CheckCircle2,
+  Plus,
+  Trash2,
+  Check,
+  Building2,
+  ShieldCheck,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
+} from "lucide-react";
 import { supabase } from "@/config/supabase";
 import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
@@ -37,7 +51,11 @@ const RUBROS = [
 function Field({ label, placeholder, type = "text", value, onChange, lock, disabled, required, invalid, maxLength, error }) {
   return (
     <label className={`field ${invalid ? "invalid" : ""}`}>
-      <span>{label}{required ? <b className="req"> *</b> : null}{lock ? " 🔒" : ""}</span>
+      <span>
+        {label}
+        {required ? <b className="req"> *</b> : null}
+        {lock ? <Lock size={12} style={{ display: "inline", verticalAlign: "middle", marginLeft: 5, color: "#64748b" }} /> : null}
+      </span>
       <input type={type} placeholder={placeholder} value={value} onChange={onChange} readOnly={lock} disabled={disabled} maxLength={maxLength} className={lock ? "locked" : ""} />
       {error ? <em className="field-error">{error}</em> : null}
     </label>
@@ -699,8 +717,14 @@ export default function HubOnboardingPage() {
               <label className="check"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} /> Acepto los términos y condiciones.</label>
             )}
             <div className="actions" style={{ justifyContent: "space-between" }}>
-              <button className="secondary" onClick={back}>← Atrás</button>
-              <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }}>Continuar →</button>
+              <button className="secondary" onClick={back} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <ArrowLeft size={16} />
+                <span>Atrás</span>
+              </button>
+              <button className="primary" disabled={!session && !terms} onClick={() => { if (session) { next(); } else { navigate("/login"); } }} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span>Continuar</span>
+                <ArrowRight size={16} />
+              </button>
             </div>
           </section>
         )}
@@ -712,12 +736,38 @@ export default function HubOnboardingPage() {
             <p>Esta información será la base de tu espacio de trabajo. Podrás completarla o modificarla después.</p>
 
             <div className="logoUpload">
-              {logoPreview
-                ? <img src={logoPreview} alt="Logo" style={{ width: 48, height: 48, objectFit: "contain", borderRadius: 9, border: "1px solid #e3e3e8" }} />
-                : <div>+</div>}
-              <section><b>Logo de tu empresa</b><small>PNG, JPG o WebP · se convierte a WebP automáticamente</small>{logoNote ? <em className="logo-note">✓ {logoNote}</em> : null}</section>
-              <button onClick={() => document.getElementById("hb-logo-file").click()}>Subir logo</button>
-              <input id="hb-logo-file" type="file" accept=".png,.jpg,.jpeg,.webp" style={{ display: "none" }} onChange={(e) => uploadLogo(e.target.files && e.target.files[0])} />
+              {logoPreview ? (
+                <img src={logoPreview} alt="Logo" className="logo-preview-img" />
+              ) : (
+                <div className="logo-icon-box">
+                  <ImagePlus size={22} strokeWidth={2} />
+                </div>
+              )}
+              <section className="logo-text-section">
+                <b>Logo de tu empresa</b>
+                <small>PNG, JPG o WebP · Se optimiza automáticamente a WebP</small>
+                {logoNote ? (
+                  <span className="logo-note">
+                    <CheckCircle2 size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
+                    {logoNote}
+                  </span>
+                ) : null}
+              </section>
+              <button
+                type="button"
+                className="btn-upload-logo"
+                onClick={() => document.getElementById("hb-logo-file").click()}
+              >
+                <Upload size={14} />
+                <span>Subir logo</span>
+              </button>
+              <input
+                id="hb-logo-file"
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp"
+                style={{ display: "none" }}
+                onChange={(e) => uploadLogo(e.target.files && e.target.files[0])}
+              />
             </div>
 
             <Field label="Nombre comercial" placeholder="Ej. CoraVet" value={form.name} onChange={setF("name")} required invalid={!!fieldErrors.name} error={fieldErrors.name} />
@@ -754,7 +804,16 @@ export default function HubOnboardingPage() {
             </div>
 
             <Notice error={noteIsError}>{note}</Notice>
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveEmpresa(true)}>{saving ? "Creando tu espacio…" : "Continuar →"}</button></div>
+            <div className="actions">
+              <button className="secondary" onClick={back} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <ArrowLeft size={16} />
+                <span>Atrás</span>
+              </button>
+              <button className="primary" disabled={saving} onClick={() => saveEmpresa(true)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span>{saving ? "Creando tu espacio…" : "Continuar"}</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
           </section>
         )}
 
@@ -775,7 +834,7 @@ export default function HubOnboardingPage() {
                   />
                   {inviteEmails.length > 1 && (
                     <button type="button" className="btn-remove-invite" onClick={() => removeInviteField(idx)} title="Eliminar fila">
-                      ✕
+                      <Trash2 size={14} />
                     </button>
                   )}
                 </div>
@@ -783,7 +842,8 @@ export default function HubOnboardingPage() {
 
               {inviteEmails.length < 5 ? (
                 <button type="button" className="btn-add-invite" onClick={addInviteField}>
-                  + Añadir otra persona ({inviteEmails.length}/5)
+                  <Plus size={15} />
+                  <span>Añadir otra persona ({inviteEmails.length}/5)</span>
                 </button>
               ) : null}
               <p className="invite-max-hint">Puedes invitar hasta 5 personas para arrancar. Podrás administrar accesos, roles y reenviar invitaciones en cualquier momento desde tu Panel de Usuarios.</p>
@@ -792,15 +852,22 @@ export default function HubOnboardingPage() {
             <Notice error={noteIsError}>{note}</Notice>
 
             <div className="note admin-role-box">
-              <div className="role-badge">ADMINISTRADOR DEL ESPACIO</div>
+              <div className="role-badge">
+                <ShieldCheck size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: 4 }} />
+                ADMINISTRADOR DEL ESPACIO
+              </div>
               <b>Tú eres el administrador de la empresa</b>
               <span>Tendrás el control total sobre las aplicaciones activas, facturación y la asignación de roles o permisos para cada miembro de tu equipo.</span>
             </div>
 
             <div className="actions">
-              <button className="secondary" onClick={back}>← Atrás</button>
-              <button className="primary" disabled={sending} onClick={finishEquipoAndNext}>
-                {sending ? "Invitando equipo…" : "Crear mi espacio →"}
+              <button className="secondary" onClick={back} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <ArrowLeft size={16} />
+                <span>Atrás</span>
+              </button>
+              <button className="primary" disabled={sending} onClick={finishEquipoAndNext} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <span>{sending ? "Invitando equipo…" : "Crear mi espacio"}</span>
+                <ArrowRight size={16} />
               </button>
             </div>
           </section>
@@ -808,7 +875,9 @@ export default function HubOnboardingPage() {
 
         {step === 5 && (
           <section className="card done">
-            <div className="success">✓</div>
+            <div className="success">
+              <Check size={32} strokeWidth={2.5} />
+            </div>
             <small className="eyebrow">TODO LISTO</small>
             <h1>Bienvenido a Qaway Hub.</h1>
             <p>Tu espacio de trabajo está preparado. Desde aquí podrás gestionar tus aplicaciones, equipo y operación digital.</p>
@@ -818,10 +887,13 @@ export default function HubOnboardingPage() {
               <div><span>Aplicaciones</span><b>{selected.join(" · ")}</b></div>
             </div>
             <div className="actions" style={{ marginTop: 24 }}>
-              <button className="secondary" onClick={back}>← Atrás</button>
+              <button className="secondary" onClick={back} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <ArrowLeft size={16} />
+                <span>Atrás</span>
+              </button>
               <button
                 className="primary"
-                style={{ flex: 1, marginLeft: 12 }}
+                style={{ flex: 1, marginLeft: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6 }}
                 onClick={async () => {
                   const tId = tenant?.id;
                   if (tId) {
@@ -840,7 +912,8 @@ export default function HubOnboardingPage() {
                   navigate("/hub/panel", { replace: true });
                 }}
               >
-                Entrar a mi Hub →
+                <span>Entrar a mi Hub</span>
+                <ArrowRight size={16} />
               </button>
             </div>
           </section>
@@ -870,39 +943,50 @@ export default function HubOnboardingPage() {
         .trigger-label.is-placeholder{color:#94a3b8;font-weight:400}
         .trigger-chevron{color:#64748b;flex-shrink:0;transition:transform .2s cubic-bezier(0.16,1,0.3,1)}
         .trigger-chevron.rotated{transform:rotate(180deg)}
-        .custom-select-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1.5px solid #e2e8f0;border-radius:16px;padding:6px;box-shadow:0 12px 32px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:60}
-        .custom-select-option{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px;cursor:pointer;transition:all .15s ease;color:#475569;font-weight:500}
-        .custom-select-option:hover{background:#f8fafc;color:#0f172a}
-        .custom-select-option.selected{background:#f1f5f9;color:#0f172a;font-weight:600}
-        .option-dot{width:7px;height:7px;border-radius:50%;background:#e2e8f0;flex-shrink:0;transition:background .15s ease}
-        .option-dot.dot-selected{background:#475569}
+        .custom-select-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:6px;box-shadow:0 16px 36px rgba(0,0,0,.08);max-height:240px;overflow-y:auto;z-index:60;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+        .custom-select-dropdown::-webkit-scrollbar{width:5px}
+        .custom-select-dropdown::-webkit-scrollbar-track{background:transparent}
+        .custom-select-dropdown::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+        .custom-select-option{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:14px;cursor:pointer;transition:all .15s ease;color:#475569;font-weight:500}
+        .custom-select-option:hover{background:#faf5ff;color:#7c3aed}
+        .custom-select-option.selected{background:#f3e8ff;color:#7e22ce;font-weight:600}
+        .option-dot{width:7px;height:7px;border-radius:50%;background:#cbd5e1;flex-shrink:0;transition:background .15s ease}
+        .option-dot.dot-selected{background:#7c3aed}
         .field input:disabled{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
         .primary,.secondary{height:48px;border-radius:12px;padding:0 24px;font-size:14.5px;font-weight:700}.primary{background:linear-gradient(135deg,#7c3aed 0%,#9333ea 100%);color:#fff;border:0;box-shadow:0 4px 14px rgba(124,58,237,.25);cursor:pointer;transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .2s}.primary:hover:not(:disabled){transform:scale(1.015);box-shadow:0 6px 20px rgba(124,58,237,.35)}.primary:disabled{background:#cbd5e1;cursor:not-allowed;color:#f8fafc;box-shadow:none}.secondary{background:#fff;border:1.5px solid #e2e8f0;color:#475569;cursor:pointer;transition:background .2s,color .2s}.secondary:hover{background:#f8fafc;color:#0f172a}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
-        .logoUpload{display:flex;align-items:center;gap:14px;border:1.5px dashed #cbd5e1;border-radius:14px;padding:16px;margin-bottom:22px;background:#fafafa}.logoUpload>div{width:48px;height:48px;border-radius:10px;background:#f1f5f9;display:grid;place-items:center;font-size:22px;color:#64748b}.logoUpload section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}.logoUpload section b{font-size:14px;color:#0f172a}.logoUpload section small{font-size:13px;color:#64748b}.logoUpload button{margin-left:auto;border:1.5px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#1e293b;transition:all .2s}.logoUpload button:hover{background:#f8fafc}
+        .logoUpload{display:flex;align-items:center;gap:16px;border:1.5px dashed #c084fc;border-radius:16px;padding:16px 20px;margin-bottom:22px;background:#faf5ff;transition:border-color .2s}
+        .logoUpload:hover{border-color:#a855f7}
+        .logo-icon-box{width:50px;height:50px;border-radius:14px;background:linear-gradient(135deg,#f3e8ff 0%,#ede9fe 100%);display:grid;place-items:center;color:#7c3aed;border:1px solid #e9d5ff;flex-shrink:0}
+        .logo-preview-img{width:50px;height:50px;object-fit:contain;border-radius:12px;border:1px solid #e2e8f0;background:#fff}
+        .logo-text-section{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+        .logo-text-section b{font-size:14.5px;color:#0f172a;font-weight:700}
+        .logo-text-section small{font-size:13px;color:#64748b}
+        .logo-note{display:inline-flex;align-items:center;gap:4px;font-style:normal;margin-top:4px;font-size:12.5px;font-weight:700;color:#16a34a}
+        .btn-upload-logo{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e2e8f0;background:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;color:#334155;cursor:pointer;transition:all .2s}
+        .btn-upload-logo:hover{background:#faf5ff;border-color:#c084fc;color:#7c3aed}
         .apps{display:grid;grid-template-columns:1fr 1fr;gap:11px}.app{display:flex;align-items:flex-start;gap:11px;text-align:left;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:16px;transition:all .2s}.app.selected{border-color:#7c3aed;box-shadow:0 0 0 1.5px #7c3aed;background:#faf5ff}.appIcon{width:36px;height:36px;border-radius:9px;background:#f3e8ff;color:#7e22ce;display:grid;place-items:center;font-weight:900;flex:none}.app span{display:flex;flex-direction:column;gap:4px}.app span b{font-size:15px;color:#0f172a}.app span small{font-size:13.5px;color:#64748b;line-height:1.4}.app>i{margin-left:auto;width:20px;height:20px;border:1.5px solid #cbd5e1;border-radius:50%;font-style:normal;font-size:11px;display:grid;place-items:center}.app.selected>i{background:#7c3aed;border-color:#7c3aed;color:#fff}
         .note{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 20px;margin-top:20px;box-shadow:0 4px 16px rgba(0,0,0,.03);display:flex;flex-direction:column;gap:6px}
         .note b{font-size:15px;color:#0f172a;font-weight:700}
         .note span{font-size:14px;color:#475569;line-height:1.55}
         .trial-box{border:1px solid #e2e8f0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
         .trial-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
-        .admin-role-box{border:1px solid #e2e8f0;background:linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)}
-        .role-badge{align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.4px;color:#334155;background:#e2e8f0;border-radius:999px;padding:3px 10px;margin-bottom:4px}
+        .admin-role-box{border:1.5px solid #e9d5ff;background:#faf5ff;border-radius:16px;padding:18px 20px}
+        .role-badge{display:inline-flex;align-items:center;align-self:flex-start;font-size:11px;font-weight:800;letter-spacing:.5px;color:#7e22ce;background:#f3e8ff;border-radius:999px;padding:4px 10px;margin-bottom:6px}
         .invite-box{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
         .invite-row{display:flex;gap:8px;align-items:center}
         .invite-row input{flex:1;height:48px;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 14px;font-size:14.5px;outline:none;transition:all .2s}
         .invite-row input:focus{border:2px solid #8b5cf6!important;background:#fdfaff!important;outline:none;box-shadow:none}
-        .btn-remove-invite{width:36px;height:36px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;display:grid;place-items:center;font-size:13px;cursor:pointer;transition:all .15s}
+        .btn-remove-invite{width:40px;height:48px;border-radius:12px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;display:grid;place-items:center;cursor:pointer;transition:all .15s}
         .btn-remove-invite:hover{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
-        .btn-add-invite{align-self:flex-start;border:0;background:none;color:#7c3aed;font-size:13.5px;font-weight:700;cursor:pointer;padding:6px 0}
-        .btn-add-invite:hover{text-decoration:underline}
+        .btn-add-invite{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;border:0;background:none;color:#7c3aed;font-size:13.5px;font-weight:700;cursor:pointer;padding:8px 0;transition:color .2s}
+        .btn-add-invite:hover{color:#6d28d9;text-decoration:underline}
         .invite-max-hint{font-size:12.5px;color:#64748b;margin:4px 0 0}
         .field-error{display:block;margin-top:5px;font-style:normal;font-size:12px;font-weight:600;color:#dc2626;line-height:1.4}
         .notice{display:flex;gap:8px;align-items:flex-start;margin-top:16px;padding:12px 16px;border-radius:10px;font-size:13.5px;line-height:1.55}
         .notice-error{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;font-weight:600}
         .notice-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-weight:600}
-        .logo-note{display:block;font-style:normal;margin-top:5px;font-size:12px;font-weight:700;color:#16a34a}
         .trialTag{align-self:flex-start;margin-top:1px;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.2px;color:#7e22ce;background:#f3e8ff;border:1px solid #e9d5ff;border-radius:999px;padding:3px 10px}
-        .success{width:64px;height:64px;border-radius:50%;background:#eaf8ef;color:#159b4e;display:grid;place-items:center;font-size:30px;font-weight:900;margin:0 auto 20px}.summary{border:1.5px solid #e2e8f0;border-radius:14px;text-align:left;margin-top:22px;overflow:hidden}.summary div{display:flex;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #f1f5f9}.summary div:last-child{border:0}.summary span{font-size:13px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
+        .success{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#f3e8ff 0%,#e0e7ff 100%);color:#7c3aed;display:grid;place-items:center;margin:0 auto 20px;box-shadow:0 10px 25px rgba(124,58,237,.15)}.summary{border:1.5px solid #e2e8f0;border-radius:16px;text-align:left;margin-top:22px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.03)}.summary div{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f8fafc}.summary div:last-child{border:0}.summary span{font-size:13.5px;color:#64748b}.summary b{font-size:14px;color:#0f172a}.full{width:100%;margin-top:20px}
         @keyframes skPulse{0%,100%{opacity:1}50%{opacity:.45}}
         .onboarding-skeleton{animation:skPulse 1.4s ease-in-out infinite}
         .sk-line{background:#eaeaee;border-radius:6px}
