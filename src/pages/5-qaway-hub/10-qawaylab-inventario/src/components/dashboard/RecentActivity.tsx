@@ -56,15 +56,15 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-orange-100 rounded-lg">
-            <Activity size={18} className="text-orange-600" />
+    <div className="bg-white rounded-[12px] border border-[#e4e4e7] p-[16px_18px] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0">
+            <Activity size={15} />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">Actividad reciente</h3>
+          <h3 className="text-[15px] font-bold text-[#0f172a]">Actividad reciente</h3>
         </div>
-        <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
+        <span className="px-2 py-0.5 bg-[#f4f4f5] text-[#52525b] text-[11px] font-semibold rounded-full border border-[#e4e4e7]">
           {activities.length}
         </span>
       </div>

@@ -262,8 +262,8 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
-          <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">{displayCompany}</h1>
-          <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona los usuarios, aplicaciones, suscripciones y soporte de tu empresa desde un solo lugar.</p>
+          <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d", lineHeight: 1.15 }}>{displayCompany}</h1>
+          <p style={{ margin: "2px 0 0", color: "#71809e", fontSize: "13px" }}>Gestiona los usuarios, aplicaciones, suscripciones y soporte de tu empresa desde un solo lugar.</p>
         </div>
         <div className="hidden lg:block text-right">
           <p className="text-xs italic text-zinc-400">“Tecnología para negocios que avanzan.”</p>
@@ -281,38 +281,38 @@ function TenantAdminDashboard({ tenantId, tenantName, setActiveTab }) {
         </div>
       )}
 
-      {/* KPIs (misma tarjeta visual que el resumen global) */}
+      {/* KPIs (misma tarjeta visual que el resumen global y ProductosPanel) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
+        <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><HubIcon icon={Building2} size={16} className="w-4 h-4" /></span>
-            <span className="text-xs font-bold text-zinc-500">Código de empresa</span>
+            <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0"><HubIcon icon={Building2} size={16} className="w-4 h-4" /></span>
+            <span className="text-[12px] font-semibold text-[#52525b]">Código de empresa</span>
           </div>
-          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : (company?.client_code || '—')}</div>
+          <div className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{loading ? '—' : (company?.client_code || '—')}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
+        <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
-            <span className="text-xs font-bold text-zinc-500">Aplicaciones contratadas</span>
+            <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0"><HubIcon icon={LayoutGrid} size={16} className="w-4 h-4" /></span>
+            <span className="text-[12px] font-semibold text-[#52525b]">Aplicaciones contratadas</span>
           </div>
-          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : subs.length}</div>
+          <div className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{loading ? '—' : subs.length}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
+        <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shrink-0"><HubIcon icon={Zap} size={16} className="w-4 h-4" /></span>
-            <span className="text-xs font-bold text-zinc-500">Aplicaciones activas</span>
+            <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0"><HubIcon icon={Zap} size={16} className="w-4 h-4" /></span>
+            <span className="text-[12px] font-semibold text-[#52525b]">Aplicaciones activas</span>
           </div>
-          <div className="text-2xl font-extrabold text-zinc-950">{loading ? '—' : activeApps.length}</div>
+          <div className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{loading ? '—' : activeApps.length}</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-xs">
+        <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><HubIcon icon={CreditCard} size={16} className="w-4 h-4" /></span>
-            <span className="text-xs font-bold text-zinc-500">Plan contratado</span>
+            <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0"><HubIcon icon={CreditCard} size={16} className="w-4 h-4" /></span>
+            <span className="text-[12px] font-semibold text-[#52525b]">Plan contratado</span>
           </div>
-          <div className="text-xl font-extrabold text-zinc-950 capitalize truncate">{loading ? '—' : (plans[0] ? plans.join(', ') : '—')}</div>
+          <div className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight capitalize truncate">{loading ? '—' : (plans[0] ? plans.join(', ') : '—')}</div>
         </div>
       </div>
 
@@ -891,16 +891,20 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
   return (
     <div className="space-y-6 pb-12">
       {/* Top Banner / Header Greeting con Botones de CRM (Paso 1) */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold text-zinc-400 capitalize">{today}</p>
-          <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Super Administrador</h1>
-          <p className="mt-1 text-xs md:text-sm text-zinc-500">Gestiona empresas, usuarios, facturación consolidada e inventario desde un solo lugar.</p>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+        <div className="flex items-center gap-3.5">
+          <div className="w-[38px] h-[38px] rounded-[10px] bg-[#f4f4f5] border border-[#e4e4e7] text-[#18181b] grid place-items-center flex-shrink-0">
+            <HubIcon icon={LayoutDashboard} size={22} className="w-[22px] h-[22px]" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d", lineHeight: 1.15 }}>Super Administrador</h1>
+            <p style={{ margin: "2px 0 0", color: "#71809e", fontSize: "13px" }}>Gestiona empresas, usuarios, facturación consolidada e inventario desde un solo lugar.</p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2.5 relative flex-wrap sm:flex-nowrap">
           {/* Cápsula de telemetría estilo CRM */}
-          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-100/90 border border-zinc-200 text-xs font-semibold text-zinc-700 shadow-2xs">
+          <span className="inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-[8px] bg-white border border-[#e5ebf4] text-[13px] font-semibold text-[#34415b] flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>{live.activeTenants} {live.activeTenants === 1 ? 'empresa activa' : 'empresas activas'}</span>
             <span className="text-zinc-300">·</span>
@@ -1016,7 +1020,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 setShowAppMenu(false)
                 setShowPlanMenu(false)
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 h-[38px] rounded-[8px] text-[13px] border transition-all flex items-center gap-2 px-3.5 font-medium ${
                 selectedCategories.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
                   : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
@@ -1080,7 +1084,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 setShowAppMenu(false)
                 setShowPlanMenu(false)
               }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-2 px-3 py-1.5 h-[38px] rounded-[8px] text-[13px] border transition-all flex items-center gap-2 px-3.5 font-medium ${
                 selectedTenantIds.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
                   : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
@@ -1172,7 +1176,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 setShowTenantMenu(false)
                 setShowPlanMenu(false)
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 h-[38px] rounded-[8px] text-[13px] border transition-all flex items-center gap-2 px-3.5 font-medium ${
                 selectedAppIds.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
                   : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
@@ -1236,7 +1240,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 setShowTenantMenu(false)
                 setShowAppMenu(false)
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-all active:scale-[0.98] ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 h-[38px] rounded-[8px] text-[13px] border transition-all flex items-center gap-2 px-3.5 font-medium ${
                 selectedPlans.length > 0
                   ? 'bg-zinc-100 hover:bg-zinc-200/70 border-zinc-300 text-zinc-900 font-bold shadow-2xs'
                   : 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200 text-zinc-600 font-medium'
@@ -1306,10 +1310,10 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
       {/* Row 1: KPI Cards con Telemetría Reactiva */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* KPI 1: Empresas Activas */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0">
                   <HubIcon icon={Building2} size={16} className="w-4 h-4" />
                 </span>
                 <span className="text-xs font-semibold text-zinc-600">Empresas activas</span>
@@ -1317,7 +1321,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-[10px] font-bold text-zinc-400">Total: {live.totalTenants}</span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.activeTenants}</span>
+              <span className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{live.activeTenants}</span>
             </div>
             {live.activeTenants > 0 ? (
               <p className="text-xs font-semibold text-blue-600 mt-1.5 flex items-center gap-1.5">
@@ -1328,7 +1332,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin empresas activas
               </p>
             )}
-            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
               {live.activeTenants > 0 ? (
                 <polyline fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 20,12 40,14 60,8 80,10 100,3" />
               ) : (
@@ -1338,10 +1342,10 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
 
           {/* KPI 2: MRR Recurrente */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0">
                   <HubIcon icon={CreditCard} size={16} className="w-4 h-4" />
                 </span>
                 <span className="text-xs font-semibold text-zinc-600">MRR Recurrente</span>
@@ -1349,7 +1353,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-[10px] font-bold text-emerald-600">Suscripciones</span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{mrrDisplay}</span>
+              <span className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{mrrDisplay}</span>
             </div>
             {live.mrr > 0 ? (
               <p className="text-xs font-semibold text-emerald-600 mt-1.5 flex items-center gap-1.5">
@@ -1360,7 +1364,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin cobros recurrentes
               </p>
             )}
-            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
               {live.mrr > 0 ? (
                 <polyline fill="none" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,18 20,14 40,16 60,8 80,9 100,2" />
               ) : (
@@ -1370,10 +1374,10 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
           </div>
 
           {/* KPI 3: Usuarios Totales */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
+                <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0">
                   <HubIcon icon={Users} size={16} className="w-4 h-4" />
                 </span>
                 <span className="text-xs font-semibold text-zinc-600">Usuarios totales</span>
@@ -1381,21 +1385,21 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-[10px] font-bold text-orange-600">Directorio BD</span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{live.totalUsers}</span>
+              <span className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{live.totalUsers}</span>
             </div>
             <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] animate-pulse" /> {live.activeApps} apps asignadas
             </p>
-            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
               <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,16 20,12 40,15 60,6 80,10 100,2" />
             </svg>
           </div>
 
           {/* KPI 4: Facturación Consolidada */}
-          <div className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default">
+          <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
+                <span className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0">
                   <HubIcon icon={Receipt} size={16} className="w-4 h-4" />
                 </span>
                 <span className="text-xs font-semibold text-zinc-600">Caja consolidada</span>
@@ -1403,7 +1407,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
               <span className="text-[10px] font-bold text-purple-600">Inventario + Pagos</span>
             </div>
             <div className="mt-2.5 flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold tracking-tight text-zinc-950">{money}</span>
+              <span className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">{money}</span>
             </div>
             {live.revenue > 0 ? (
               <p className="text-xs font-semibold text-purple-600 mt-1.5 flex items-center gap-1.5">
@@ -1414,7 +1418,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" /> Sin cobros registrados
               </p>
             )}
-            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
               {live.revenue > 0 ? (
                 <polyline fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,14 20,16 40,10 60,12 80,5 100,2" />
               ) : (
@@ -1425,7 +1429,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
 
         {/* Tarjetas de Métricas Personalizadas (Super Administrador) */}
         {customMetrics.map((cm) => (
-          <div key={cm.id} className="bg-white border border-zinc-200 rounded-xl p-5 shadow-xs hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default relative group">
+          <div key={cm.id} className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col min-w-0 relative group">
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-orange-50 text-[#ff4b0b]">
@@ -1448,7 +1452,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
             <p className="text-xs font-semibold text-[#ff4b0b] mt-1.5 flex items-center gap-1.5">
               Personalizada por Super Admin
             </p>
-            <svg className="w-full h-7 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
+            <svg className="w-full h-5 mt-2" viewBox="0 0 100 20" preserveAspectRatio="none">
               <polyline fill="none" stroke="#ff4b0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points="0,15 25,8 50,14 75,6 100,2" />
             </svg>
           </div>
@@ -1983,7 +1987,7 @@ function WorkerHome({ panelAuth, name, avatar }) {
           <p className="text-xs font-semibold text-zinc-400 capitalize">
             {new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
-          <h1 className="mt-1 text-2xl md:text-3xl font-extrabold tracking-tight text-zinc-950">Mi espacio</h1>
+          <h1 className="mt-1 text-2xl md:text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight">Mi espacio</h1>
           <p className="mt-1 text-xs md:text-sm text-zinc-500">Bienvenido{name ? `, ${name}` : ''}. Aquí están las aplicaciones que tu administrador habilitó para ti.</p>
         </div>
         <div className="hidden lg:block text-right">
@@ -2953,9 +2957,9 @@ function HubPanelContent({ canvasOnly = false }) {
         </header>
 
         {/* ── MAIN CONTENT (Lienzo Maestro: #fafafa) ────────────────── */}
-        <main className={`flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative ${canvasOnly ? 'overflow-visible' : ''}`}>
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
-          <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1300px] mx-auto">
+        <main className={`flex-1 ${canvasOnly ? 'bg-transparent overflow-visible' : 'bg-[#fafafa] overflow-y-auto'} text-zinc-900 relative`}>
+          <div className={`absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px] ${canvasOnly ? 'hidden' : ''}`} />
+          <div className={`relative z-10 min-h-full w-full mx-auto ${canvasOnly ? "p-0 max-w-[1800px]" : "p-6 md:p-8 max-w-[1800px]"}`}>
             {activeTab === 'Empresas' && !globalSearchQuery.trim() ? (
               /* Sección Empresas dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
               panelAuth ? (
@@ -3120,7 +3124,7 @@ function HubPanelContent({ canvasOnly = false }) {
         </main>
 
         {/* FLOATING ACTION BUTTONS */}
-        <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        <div className={`fixed bottom-6 right-6 flex flex-col gap-3 z-50 ${canvasOnly ? 'hidden' : ''}`}>
           <button className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-tr from-[#ff4b0b] to-[#ff7a45] text-white shadow-[0_8px_30px_rgba(255,75,11,0.4)] hover:-translate-y-1 transition-all duration-300 ease-out border border-[var(--hub-border)]" title="Qaway IA Insights">
             <HubIcon icon={Sparkles} size={24} className="w-6 h-6 animate-pulse" />
           </button>

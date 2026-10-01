@@ -112,25 +112,25 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-[1800px] mx-auto space-y-6">
       <HubPanelPage canvasOnly />
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* CABECERA ÚNICA (diseño acoplado + botón Actualizar funcional)   */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-brand/10 border border-brand/15 text-brand flex items-center justify-center font-bold text-lg">
+        <div className="flex items-center gap-3.5">
+          <div className="w-[38px] h-[38px] rounded-[10px] bg-[#f4f4f5] border border-[#e4e4e7] text-[#18181b] grid place-items-center text-[21px] flex-shrink-0">
             ☷
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Resumen</h1>
-            <p className="text-sm text-muted mt-0.5">Estado actual de tu inventario y operación comercial.</p>
+            <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d", lineHeight: 1.15 }}>Resumen</h1>
+            <p style={{ margin: "2px 0 0", color: "#71809e", fontSize: "13px" }}>Estado actual de tu inventario y operación comercial.</p>
           </div>
         </div>
         <button
           onClick={refresh}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-muted bg-surface border border-gray-300 rounded-xl hover:bg-gray-100 hover:text-ink disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="h-[38px] bg-white hover:bg-[#f9fbff] border border-[#e5ebf4] hover:border-[#b8c9e6] text-[#34415b] text-[13.5px] font-semibold px-3.5 rounded-[8px] transition-all cursor-pointer inline-flex items-center gap-2 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
@@ -148,36 +148,36 @@ export default function DashboardPage() {
       {stats && (
         <CollapsibleSection id="kpis-principales" title="Métricas Principales" defaultOpen={true}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-              <div>
-                <span className="text-xs font-medium text-zinc-500">Productos activos</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalProducts}</p>
+            <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[12px] font-semibold text-[#52525b] truncate">Productos activos</span>
+                <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center text-sm shrink-0">◇</div>
               </div>
-              <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">◇</div>
+              <p className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight truncate">{stats.totalProducts}</p>
             </div>
 
-            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-              <div>
-                <span className="text-xs font-medium text-zinc-500">Ventas del mes</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.revenueMonth)}</p>
+            <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[12px] font-semibold text-[#52525b] truncate">Ventas del mes</span>
+                <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center text-sm shrink-0">🛒</div>
               </div>
-              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">🛒</div>
+              <p className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight truncate">{formatCurrency(stats.revenueMonth)}</p>
             </div>
 
-            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-              <div>
-                <span className="text-xs font-medium text-zinc-500">Compras del mes</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.purchasesMonth)}</p>
+            <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[12px] font-semibold text-[#52525b] truncate">Compras del mes</span>
+                <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center text-sm shrink-0">🚚</div>
               </div>
-              <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">🚚</div>
+              <p className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight truncate">{formatCurrency(stats.purchasesMonth)}</p>
             </div>
 
-            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-              <div>
-                <span className="text-xs font-medium text-zinc-500">Stock disponible</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalStock ?? stats.totalProducts} un.</p>
+            <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[12px] font-semibold text-[#52525b] truncate">Stock disponible</span>
+                <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center text-sm shrink-0">▤</div>
               </div>
-              <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">▤</div>
+              <p className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight truncate">{stats.totalStock ?? stats.totalProducts} un.</p>
             </div>
           </div>
         </CollapsibleSection>

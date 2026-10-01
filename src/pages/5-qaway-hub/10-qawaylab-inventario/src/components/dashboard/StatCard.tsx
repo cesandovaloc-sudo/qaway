@@ -51,50 +51,26 @@ export function StatCard({ label, value, icon: Icon, color, change, changeLabel 
   }
 
   return (
-    <div className={`
-      relative overflow-hidden
-      bg-gradient-to-br ${styles.gradient}
-      rounded-2xl p-5 
-      border border-gray-100
-      hover:shadow-lg hover:shadow-gray-200/50 
-      hover:-translate-y-0.5
-      transition-all duration-300 ease-out
-      group
-    `}>
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(255,255,255,0.8),transparent_50%)]" />
-      
-      <div className="relative">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-medium text-gray-500 tracking-wide">{label}</span>
-          <div className={`
-            p-2.5 rounded-xl ${styles.accent}
-            ring-1 ${styles.ring}
-            group-hover:scale-110 group-hover:rotate-3
-            transition-transform duration-300
-          `}>
-            <Icon size={18} strokeWidth={2} />
+    <div className="bg-white border border-[#e4e4e7] rounded-[12px] p-[14px_16px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out cursor-default flex flex-col justify-between min-w-0 group">
+      <div>
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <span className="text-[12px] font-semibold text-[#52525b] truncate">{label}</span>
+          <div className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0 group-hover:text-[#ff4b0b] transition-colors">
+            <Icon size={15} strokeWidth={2} />
           </div>
         </div>
-        
-        <p className="text-3xl font-bold text-gray-900 tracking-tight">
+
+        <p className="text-[26px] font-[800] tracking-[-0.6px] text-[#0f172a] mt-0.5 leading-tight truncate">
           {value}
         </p>
-        
+
         {change !== undefined && (
-          <div className="flex items-center gap-1.5 mt-3">
-            <span className={`
-              inline-flex items-center gap-0.5
-              px-2 py-0.5 rounded-full text-xs font-semibold
-              ${change >= 0 
-                ? 'bg-green-100 text-green-700' 
-                : 'bg-red-100 text-red-700'
-              }
-            `}>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className={`text-[11px] font-semibold ${change >= 0 ? 'text-[#ff4b0b]' : 'text-rose-600'}`}>
               {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
             </span>
             {changeLabel && (
-              <span className="text-xs text-gray-500">{changeLabel}</span>
+              <span className="text-[11px] font-[500] text-[#71717a] truncate">{changeLabel}</span>
             )}
           </div>
         )}

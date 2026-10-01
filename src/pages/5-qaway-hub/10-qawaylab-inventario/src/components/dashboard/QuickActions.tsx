@@ -75,9 +75,9 @@ export function QuickActions({ hideHeader = false }: QuickActionsProps = {}) {
   return (
     <div>
       {!hideHeader && (
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Acciones rápidas</h2>
-          <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+        <div className="flex items-center gap-2 mb-3">
+          <h2 className="text-[15px] font-bold text-[#0f172a]">Acciones rápidas</h2>
+          <span className="px-2 py-0.5 bg-[#f4f4f5] text-[#52525b] text-[11px] font-semibold rounded-full border border-[#e4e4e7]">
             {actions.length}
           </span>
         </div>
@@ -90,25 +90,24 @@ export function QuickActions({ hideHeader = false }: QuickActionsProps = {}) {
             to={getHref(action.href)}
             className={`
               relative group
-              flex flex-col items-center gap-3 
-              p-4 rounded-2xl 
-              transition-all duration-300 ease-out
+              flex flex-col items-center gap-2.5 
+              p-[14px_12px] rounded-[12px] 
+              border border-[#e4e4e7]
+              shadow-[0_4px_20px_rgba(0,0,0,0.03)]
+              transition-all duration-200 ease-out
               ${action.primary
                 ? `
-                  bg-gradient-to-br from-orange-500 to-orange-600 
+                  bg-[#ff4b0b] 
                   text-white 
-                  shadow-lg shadow-orange-500/25
-                  hover:shadow-xl hover:shadow-orange-500/30
-                  hover:-translate-y-1
-                  hover:from-orange-400 hover:to-orange-500
+                  shadow-[0_2px_8px_rgba(255,75,11,0.25)]
+                  hover:bg-[#ea3e00]
+                  hover:-translate-y-0.5
                 `
                 : `
-                  bg-white text-gray-700 
-                  border border-gray-100
-                  hover:border-orange-200 
-                  hover:shadow-lg hover:shadow-gray-200/50
-                  hover:-translate-y-1
-                  hover:bg-gradient-to-br hover:from-orange-50 hover:to-white
+                  bg-white text-[#0f172a] 
+                  hover:border-[#cbd5e1] 
+                  hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)]
+                  hover:-translate-y-0.5
                 `
               }
             `}

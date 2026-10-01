@@ -104,7 +104,7 @@ export function QuickAccessCards() {
           to="/landings/desarrollo-web-qaway"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:text-white bg-brand/10 hover:bg-brand border border-brand/20 rounded-lg transition-all self-start sm:self-auto"
+          className="inline-flex items-center gap-1.5 h-[34px] px-3 text-[13px] font-semibold text-[#34415b] hover:text-white bg-white hover:bg-[#ff4b0b] border border-[#e5ebf4] hover:border-[#ff4b0b] rounded-[8px] transition-all self-start sm:self-auto shadow-2xs"
         >
            <span>Ver mi tienda online</span>
           <ExternalLink size={13} />
@@ -119,18 +119,15 @@ export function QuickAccessCards() {
             <Link
               key={item.id}
               to={getHref(item.href)}
-              className="group relative flex flex-col justify-between p-4 bg-white border border-zinc-200 hover:border-brand/40 rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/5 overflow-hidden"
+              className="group relative flex flex-col justify-between p-[14px_16px] bg-white border border-[#e4e4e7] rounded-[12px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgba(0,0,0,0.06)] transition-all duration-200 ease-out overflow-hidden"
             >
-              {/* Decorador sutil en hover */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-zinc-100 to-transparent rounded-bl-full pointer-events-none transition-opacity opacity-40 group-hover:opacity-100" />
-
               <div>
                 {/* Cabecera de la tarjeta: Icono y Badge */}
-                <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center justify-between gap-2 mb-2">
                   <div
-                    className={`p-2.5 rounded-xl transition-all duration-300 group-hover:scale-105 ${item.iconBg}`}
+                    className="w-7 h-7 rounded-[8px] bg-[#f4f4f5] text-[#52525b] grid place-items-center flex-shrink-0 group-hover:text-[#ff4b0b] transition-colors"
                   >
-                    <Icon size={20} className={item.iconColor} />
+                    <Icon size={15} strokeWidth={2} />
                   </div>
                   <span
                     className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${item.badgeColor}`}
@@ -140,19 +137,19 @@ export function QuickAccessCards() {
                 </div>
 
                 {/* Título y descripción ergonómica */}
-                <h3 className="text-base font-semibold text-ink group-hover:text-brand transition-colors duration-200 line-clamp-1">
+                <h3 className="text-[14.5px] font-bold text-[#0f172a] group-hover:text-[#ff4b0b] transition-colors duration-200 line-clamp-1">
                   {item.title}
                 </h3>
-                <p className="text-xs text-muted mt-1 leading-relaxed line-clamp-2">
+                <p className="text-[12px] text-[#71809e] mt-1 leading-relaxed line-clamp-2">
                   {item.subtitle}
                 </p>
               </div>
 
               {/* Pie con llamada a la acción */}
-              <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs font-medium text-muted group-hover:text-brand transition-colors">
+              <div className="mt-3 pt-2.5 border-t border-[#f1f5f9] flex items-center justify-between text-[11px] font-semibold text-[#71717a] group-hover:text-[#ff4b0b] transition-colors">
                 <span>Ingresar ahora</span>
                 <ArrowRight
-                  size={14}
+                  size={13}
                   className="transition-transform duration-200 group-hover:translate-x-1"
                 />
               </div>
