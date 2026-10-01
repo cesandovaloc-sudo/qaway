@@ -379,74 +379,83 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Reportes</h1>
-        <p className="text-muted text-sm mt-1">Análisis y exportación de datos</p>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <BarChart3 size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Centro de Reportes
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Análisis, kardex físico, comportamiento de clientes, ventas y balances contables.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-      {/* Report tabs */}
-      <div className="flex flex-wrap gap-2">
-        {reports.map(report => {
-          const Icon = report.icon
-          return (
-            <button
-              key={report.id}
-              onClick={() => setActiveReport(report.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                activeReport === report.id
-                  ? 'bg-brand text-white'
-                  : 'bg-surface border border-gray-300 text-muted hover:text-ink hover:bg-gray-100'
-              }`}
-            >
-              <Icon size={16} />
-              {report.label}
-            </button>
-          )
-        })}
-      </div>
+            {/* Toolbar con pestañas de reporte y rango de fechas */}
+            <div className="pxp-toolbar" style={{ flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, flex: 1 }}>
+                {reports.map(report => {
+                  const Icon = report.icon
+                  const active = activeReport === report.id
+                  return (
+                    <button
+                      key={report.id}
+                      onClick={() => setActiveReport(report.id)}
+                      className={`pxp-btn ${active ? 'primary' : 'secondary'}`}
+                      style={{ height: '36px', fontSize: '13px', gap: 6 }}
+                    >
+                      <Icon size={15} />
+                      {report.label}
+                    </button>
+                  )
+                })}
+              </div>
 
-      {/* Filtros de fecha — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border border-zinc-200 rounded-xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-muted " />
-            <span className="text-xs font-mono uppercase tracking-wider text-muted ">Período</span>
-          </div>
-          <div>
-            <label className="block text-xs text-muted mb-1">Desde</label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={e => setDateFrom(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-muted mb-1">Hasta</label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={e => setDateTo(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <button
-            onClick={() => {
-              const d = defaultDateRange()
-              setDateFrom(d.from)
-              setDateTo(d.to)
-            }}
-            className="px-3 py-2 text-xs text-muted hover:text-ink bg-zinc-50 hover:bg-zinc-100 rounded-lg transition-colors"
-          >
-            Este mes
-          </button>
-        </div>
-      </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', color: 'var(--muted)' }}>
+                  <Calendar size={14} />
+                  <span>Desde:</span>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={e => setDateFrom(e.target.value)}
+                    className="pxp-select"
+                    style={{ height: '36px', fontSize: '12px', padding: '0 8px' }}
+                  />
+                  <span>Hasta:</span>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={e => setDateTo(e.target.value)}
+                    className="pxp-select"
+                    style={{ height: '36px', fontSize: '12px', padding: '0 8px' }}
+                  />
+                  <button
+                    onClick={() => {
+                      const d = defaultDateRange()
+                      setDateFrom(d.from)
+                      setDateTo(d.to)
+                    }}
+                    className="pxp-btn secondary"
+                    style={{ height: '36px', fontSize: '12px' }}
+                  >
+                    Este mes
+                  </button>
+                </div>
+              </div>
+            </div>
 
-      {/* Report content */}
-      <div className="bg-surface border border-zinc-200 rounded-xl p-6">
+            {/* Report content */}
+            <div className="pxp-table-wrap" style={{ padding: '24px' }}>
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 size={24} className="animate-spin text-brand" />
@@ -1054,6 +1063,9 @@ export default function ReportsPage() {
             )}
           </>
         )}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   )

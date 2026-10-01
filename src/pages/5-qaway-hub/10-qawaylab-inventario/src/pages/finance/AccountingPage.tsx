@@ -232,51 +232,86 @@ export default function AccountingPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Contabilidad</h1>
-          <p className="text-muted text-sm mt-1">Asientos contables con doble partida</p>
-        </div>
-        <button
-          onClick={() => { resetForm(); setShowModal(true) }}
-          className="flex items-center gap-2 h-10 px-5 bg-brand text-white rounded-xl hover:bg-brand-hover transition-colors text-sm font-bold"
-        >
-          <Plus size={16} />
-          Nuevo Asiento
-        </button>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <BookOpen size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Libro Diario y Contabilidad
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Asientos contables con partida doble, débitos y créditos cuadrados.
+                  </p>
+                </div>
+              </div>
 
-      {/* Resumen */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Total Débitos</p>
-          <p className="text-2xl font-bold text-blue-400 mt-1">S/ {totalDebitAll.toFixed(2)}</p>
-        </div>
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Total Créditos</p>
-          <p className="text-2xl font-bold text-purple-400 mt-1">S/ {totalCreditAll.toFixed(2)}</p>
-        </div>
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Balance</p>
-          <p className={`text-2xl font-bold mt-1 ${Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? 'text-green-400' : 'text-red-400'}`}>
-            S/ {(totalDebitAll - totalCreditAll).toFixed(2)}
-          </p>
-        </div>
-      </div>
+              <div className="pxp-heading-actions">
+                <button
+                  onClick={() => { resetForm(); setShowModal(true) }}
+                  className="pxp-btn primary"
+                  title="Registrar nuevo asiento contable"
+                >
+                  <Plus size={15} /> Nuevo Asiento
+                </button>
+              </div>
+            </div>
 
-      {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md border border-zinc-200 py-1 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
-        <input
-          type="text"
-          placeholder="Buscar por descripción o número de asiento..."
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-surface border border-gray-300 rounded-lg text-ink text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/50"
-        />
-      </div>
+            {/* Resumen Métricas oficiales pxp */}
+            <section className="pxp-metrics" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Total Débitos</span>
+                  <div className="pxp-metric-icon" style={{ color: '#0284c7', background: '#f0f9ff' }}><BookOpen size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#0284c7' }}>S/ {totalDebitAll.toFixed(2)}</div>
+                <div className="pxp-metric-note">Cargos en el período</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Total Créditos</span>
+                  <div className="pxp-metric-icon" style={{ color: '#7c3aed', background: '#f5f3ff' }}><BookOpen size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#7c3aed' }}>S/ {totalCreditAll.toFixed(2)}</div>
+                <div className="pxp-metric-note">Abonos en el período</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Cuadre / Balance</span>
+                  <div className="pxp-metric-icon" style={{
+                    color: Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? '#059669' : '#e11d48',
+                    background: Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? '#ecfdf5' : '#fff1f2'
+                  }}><BookOpen size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? '#059669' : '#e11d48' }}>
+                  S/ {(totalDebitAll - totalCreditAll).toFixed(2)}
+                </div>
+                <div className="pxp-metric-note">
+                  {Math.abs(totalDebitAll - totalCreditAll) < 0.01 ? 'Asientos balanceados' : 'Descuadre detectado'}
+                </div>
+              </div>
+            </section>
+
+            {/* Toolbar oficial pxp */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por descripción o número de asiento..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
 
       {/* Error */}
       {error && (
@@ -386,6 +421,9 @@ export default function AccountingPage() {
           ))}
         </div>
       )}
+          </div>
+        </main>
+      </div>
 
       {/* ── Modal Nuevo Asiento ── */}
       {showModal && (

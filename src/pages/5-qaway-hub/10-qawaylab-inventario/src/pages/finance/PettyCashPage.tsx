@@ -14,7 +14,7 @@ interface PettyCashMovement {
 }
 
 const inputCls =
-  'w-full px-3 py-2 bg-background border border-zinc-200 rounded-lg text-ink text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand/50'
+  'w-full px-3.5 py-2.5 bg-white border border-[#e2e8f0] rounded-xl text-[#0f172a] text-sm placeholder:text-[#94a3b8] focus:outline-none focus:border-[#ff4b0b]'
 
 export default function PettyCashPage() {
   const [movements, setMovements] = useState<PettyCashMovement[]>([])
@@ -102,229 +102,235 @@ export default function PettyCashPage() {
   const balance = totalIngresos - totalEgresos
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Caja Chica</h1>
-          <p className="text-muted text-sm mt-1">Control de ingresos y egresos diarios</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => openForm('ingreso')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-          >
-            <TrendingUp size={16} />
-            Nuevo Ingreso
-          </button>
-          <button
-            onClick={() => openForm('egreso')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-          >
-            <TrendingDown size={16} />
-            Nuevo Egreso
-          </button>
-        </div>
-      </div>
-
-      {/* Resumen */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Ingresos</p>
-          <p className="text-2xl font-bold text-green-400 mt-1">S/ {totalIngresos.toFixed(2)}</p>
-        </div>
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Egresos</p>
-          <p className="text-2xl font-bold text-red-400 mt-1">S/ {totalEgresos.toFixed(2)}</p>
-        </div>
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <p className="text-xs font-mono uppercase tracking-wider text-muted ">Balance</p>
-          <p className={`text-2xl font-bold mt-1 ${balance >= 0 ? 'text-ink' : 'text-red-400'}`}>S/ {balance.toFixed(2)}</p>
-        </div>
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 size={24} className="animate-spin text-brand" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
-          <AlertCircle size={18} />
-          <span className="text-sm">{error}</span>
-        </div>
-      ) : movements.length === 0 ? (
-        <div className="text-center py-12">
-          <DollarSign size={48} className="mx-auto text-muted mb-4" />
-          <p className="text-muted ">No hay movimientos registrados</p>
-          <p className="text-muted text-sm mt-1">Registra tu primer ingreso o egreso</p>
-        </div>
-      ) : (
-        <div className="bg-surface border border-zinc-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-zinc-200">
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Fecha</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Tipo</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Descripción</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Ref</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase tracking-wider text-muted ">Monto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movements.map(movement => (
-                <tr key={movement.id} className="border-b border-zinc-100 hover:bg-zinc-50 transition-colors">
-                  <td className="px-4 py-3 text-sm text-muted ">
-                    {new Date(movement.created_at).toLocaleDateString('es-PE')}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-xs ${
-                      movement.type === 'ingreso' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                    }`}>
-                      {movement.type === 'ingreso' ? 'Ingreso' : 'Egreso'}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-ink">{movement.description}</td>
-                  <td className="px-4 py-3 text-sm text-muted ">{movement.reference || '—'}</td>
-                  <td className={`px-4 py-3 text-sm text-right font-medium ${
-                    movement.type === 'ingreso' ? 'text-green-400' : 'text-red-400'
-                  }`}>
-                    {movement.type === 'ingreso' ? '+' : '-'} S/ {movement.amount.toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* ── Modal: Nuevo Movimiento ── */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setShowForm(false)}
-          />
-
-          {/* Modal */}
-          <div ref={modalRef} className="relative w-full max-w-md bg-surface border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Header */}
-            <div className={`flex items-center justify-between px-6 py-4 border-b border-zinc-200 ${
-              formType === 'ingreso' ? 'bg-green-500/5' : 'bg-red-500/5'
-            }`}>
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  formType === 'ingreso' ? 'bg-green-500/20' : 'bg-red-500/20'
-                }`}>
-                  {formType === 'ingreso' ? (
-                    <TrendingUp size={20} className="text-green-400" />
-                  ) : (
-                    <TrendingDown size={20} className="text-red-400" />
-                  )}
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <DollarSign size={20} strokeWidth={1.8} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-ink">
-                    {formType === 'ingreso' ? 'Nuevo Ingreso' : 'Nuevo Egreso'}
-                  </h3>
-                  <p className="text-xs text-muted ">
-                    {formType === 'ingreso' ? 'Registra un ingreso a caja' : 'Registra un egreso de caja'}
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Caja Chica
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Control de ingresos y egresos de caja menor y gastos corrientes.
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowForm(false)}
-                className="p-2 text-muted hover:text-ink hover:bg-zinc-50 rounded-lg transition-colors"
-              >
-                <X size={18} />
-              </button>
+
+              <div className="pxp-heading-actions">
+                <button
+                  onClick={() => openForm('ingreso')}
+                  className="pxp-btn"
+                  style={{ color: '#059669', borderColor: '#a7f3d0', background: '#ecfdf5' }}
+                  title="Registrar nuevo ingreso a caja"
+                >
+                  <TrendingUp size={15} /> Nuevo Ingreso
+                </button>
+                <button
+                  onClick={() => openForm('egreso')}
+                  className="pxp-btn primary"
+                  title="Registrar nuevo egreso de caja"
+                >
+                  <TrendingDown size={15} /> Nuevo Egreso
+                </button>
+              </div>
             </div>
 
-            {/* Body */}
-            <div className="px-6 py-5 space-y-4">
-              {formError && (
-                <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                  <AlertCircle size={16} />
-                  {formError}
+            {/* Resumen Métricas oficiales pxp */}
+            <section className="pxp-metrics" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Ingresos Totales</span>
+                  <div className="pxp-metric-icon" style={{ color: '#059669', background: '#ecfdf5' }}><TrendingUp size={16} /></div>
                 </div>
-              )}
-
-              {/* Descripción */}
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
-                  Descripción *
-                </label>
-                <input
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  placeholder={formType === 'ingreso' ? 'Ej: Pago de cliente, préstamo...' : 'Ej: Pago de servicio, compra menor...'}
-                  className={inputCls}
-                  autoFocus
-                />
+                <div className="pxp-metric-value" style={{ color: '#059669' }}>S/ {totalIngresos.toFixed(2)}</div>
+                <div className="pxp-metric-note">Total sumado en caja</div>
               </div>
 
-              {/* Monto */}
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
-                  Monto (S/) *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm">S/</span>
-                  <input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={amount}
-                    onChange={e => setAmount(e.target.value)}
-                    placeholder="0.00"
-                    className={`${inputCls} pl-10 text-lg font-medium ${
-                      formType === 'ingreso' ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  />
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Egresos Totales</span>
+                  <div className="pxp-metric-icon" style={{ color: '#e11d48', background: '#fff1f2' }}><TrendingDown size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#e11d48' }}>S/ {totalEgresos.toFixed(2)}</div>
+                <div className="pxp-metric-note">Gastos y salidas efectuadas</div>
+              </div>
+
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Balance Disponible</span>
+                  <div className="pxp-metric-icon" style={{ color: balance >= 0 ? '#ff4b0b' : '#e11d48', background: '#fff2eb' }}><DollarSign size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: balance >= 0 ? '#0f172a' : '#e11d48' }}>S/ {balance.toFixed(2)}</div>
+                <div className="pxp-metric-note">{balance >= 0 ? 'Saldo a favor en caja' : 'Déficit en caja'}</div>
+              </div>
+            </section>
+
+            {/* Content & Table (TABLA 100% INTACTA) */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={28} className="animate-spin text-[#ff4b0b]" />
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 mb-6">
+                <AlertCircle size={18} className="shrink-0" />
+                <span className="text-sm">{error}</span>
+              </div>
+            ) : movements.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#e4e4e7] p-12 text-center shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#f4f4f5] text-[#52525b] grid place-items-center mx-auto mb-3 text-xl">
+                  <DollarSign size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#111b2d] mb-1">No hay movimientos registrados</h3>
+                <p className="text-sm text-[#71809e] mb-6 max-w-md mx-auto">
+                  Registra tu primer ingreso o egreso de caja menor para mantener el balance al día.
+                </p>
+                <div className="flex justify-center gap-3">
+                  <button
+                    onClick={() => openForm('ingreso')}
+                    className="pxp-btn"
+                  >
+                    <TrendingUp size={15} /> Registrar Ingreso
+                  </button>
+                  <button
+                    onClick={() => openForm('egreso')}
+                    className="pxp-btn primary"
+                  >
+                    <TrendingDown size={15} /> Registrar Egreso
+                  </button>
                 </div>
               </div>
-
-              {/* Referencia */}
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-muted mb-1.5">
-                  Referencia
-                </label>
-                <input
-                  value={reference}
-                  onChange={e => setReference(e.target.value)}
-                  placeholder="N° de comprobante, voucher, etc. (opcional)"
-                  className={inputCls}
-                />
+            ) : (
+              <div className="pxp-table-wrap">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Fecha</th>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Tipo</th>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Descripción</th>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Ref</th>
+                        <th className="text-right px-4 py-3 font-semibold text-[#475569]">Monto</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {movements.map(movement => (
+                        <tr key={movement.id} className="hover:bg-[#fafafa]">
+                          <td className="px-4 py-3 text-sm text-[#64748b]">
+                            {new Date(movement.created_at).toLocaleDateString('es-PE')}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                              movement.type === 'ingreso' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}>
+                              {movement.type === 'ingreso' ? 'Ingreso' : 'Egreso'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#0f172a] font-medium">{movement.description}</td>
+                          <td className="px-4 py-3 text-sm text-[#64748b]">{movement.reference || '—'}</td>
+                          <td className={`px-4 py-3 text-sm font-bold text-right ${
+                            movement.type === 'ingreso' ? 'text-emerald-600' : 'text-rose-600'
+                          }`}>
+                            {movement.type === 'ingreso' ? '+' : '-'} S/ {movement.amount.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-zinc-200 flex gap-3">
-              <button
+            {/* Modal */}
+            {showForm && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
                 onClick={() => setShowForm(false)}
-                className="flex-1 px-4 py-2.5 bg-zinc-50 border border-zinc-200 text-muted rounded-lg hover:bg-zinc-100 hover:text-ink transition-colors text-sm"
               >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-ink rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-                  formType === 'ingreso'
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                }`}
-              >
-                {saving ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <>Registrar {formType === 'ingreso' ? 'Ingreso' : 'Egreso'}</>
-                )}
-              </button>
-            </div>
+                <div
+                  ref={modalRef}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-md bg-white rounded-2xl p-6 shadow-2xl border border-[#e4e4e7] space-y-4"
+                >
+                  <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-3">
+                    <h2 className="text-lg font-bold text-[#111b2d]">
+                      Nuevo {formType === 'ingreso' ? 'Ingreso a Caja' : 'Egreso de Caja'}
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="text-[#71809e] hover:text-[#111b2d] font-bold text-lg cursor-pointer"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {formError && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl">
+                      {formError}
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#52525b] mb-1">Descripción *</label>
+                      <input
+                        placeholder="Ej. Pago de movilidad o recarga"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#52525b] mb-1">Monto (S/) *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={amount}
+                        onChange={e => setAmount(e.target.value)}
+                        className={inputCls}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#52525b] mb-1">Referencia / Comprobante</label>
+                      <input
+                        placeholder="N° de boleta, ticket o vale"
+                        value={reference}
+                        onChange={e => setReference(e.target.value)}
+                        className={inputCls}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-2 border-t border-[#f1f5f9]">
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="pxp-btn flex-1 justify-center"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="pxp-btn primary flex-1 justify-center disabled:opacity-50"
+                    >
+                      {saving ? 'Guardando...' : `Registrar ${formType === 'ingreso' ? 'Ingreso' : 'Egreso'}`}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        </main>
+      </div>
     </div>
   )
 }
