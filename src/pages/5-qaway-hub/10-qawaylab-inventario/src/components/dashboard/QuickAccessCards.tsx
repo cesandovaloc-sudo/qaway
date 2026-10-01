@@ -106,7 +106,7 @@ export function QuickAccessCards() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:text-white bg-brand/10 hover:bg-brand border border-brand/20 rounded-lg transition-all self-start sm:self-auto"
         >
-          <span>Ver mi Tienda Web Online</span>
+           <span>Ver mi tienda online</span>
           <ExternalLink size={13} />
         </Link>
       </div>

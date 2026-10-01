@@ -42,7 +42,6 @@ import {
   Copy,
 } from "lucide-react";
 
-import { productService } from "../../src/services/productService";
 import { useTenant } from "../../src/context/TenantContext";
 import { INITIAL_SEDES, INITIAL_ALMACENES } from "./13-SedesModule";
 
@@ -177,546 +176,17 @@ function ProductThumb({ id, category = "", name = "", size = 40 }) {
 }
 
 const AVAILABLE_COLUMNS = [
-  { key: "product", label: "Sede" },
-  { key: "sku", label: "SKU" },
-  { key: "barcode", label: "Cód. Barras" },
-  { key: "category", label: "Categoría" },
-  { key: "stock", label: "Stock" },
-  { key: "price", label: "Precio base" },
-  { key: "wholesale", label: "Precio mayorista" },
-  { key: "status", label: "Estado" },
-  { key: "location", label: "Ubicación" },
+  { key: "sede", label: "Sede" },
+  { key: "codigo", label: "Código" },
+  { key: "ciudad", label: "Ciudad" },
+  { key: "direccion", label: "Dirección" },
+  { key: "almacenes", label: "Almacenes" },
+  { key: "tipo", label: "Tipo de sede" },
+  { key: "responsable", label: "Responsable" },
+  { key: "estado", label: "Estado" },
+  { key: "telefono", label: "Teléfono" },
 ];
 
-function ProductModal({ editing, form: initialForm, showAdvanced, setShowAdvanced, categories, onClose, onSave }) {
-  const [form, setForm] = useState(initialForm || defaultForm);
-
-  useEffect(() => {
-    if (initialForm) {
-      setForm(initialForm);
-    }
-  }, [initialForm]);
-
-  const isTaxExempt = form.igvType === "Exonerado (0.00%)" || form.igvType === "Inafecto (0.00%)";
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(form, e);
-  };
-
-  return (
-    <div className="pxp-overlay" onClick={onClose} style={{ colorScheme: "light" }}>
-      <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light" }} onClick={e => e.stopPropagation()}>
-        <form onSubmit={handleSubmit}>
-          <div className="pxp-modal-head">
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div className="pxp-heading-icon">
-                <Boxes size={20} strokeWidth={1.8} />
-              </div>
-              <div>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.3px", lineHeight: 1.25 }}>
-                  {editing ? "Editar sede" : "Nueva sede"}
-                </h2>
-                <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", lineHeight: 1.5 }}>
-                  {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
-                </p>
-              </div>
-            </div>
-            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar"><X size={18} /></button>
-          </div>
-
-          <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px" }}>
-            {/* Pill selectors: Con inventario vs Servicio */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
-              <button
-                type="button"
-                className={`pxp-pill-btn ${form.hasStock ? "active" : ""}`}
-                onClick={() => setForm(prev => ({ ...prev, hasStock: true }))}
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  borderRadius: 10,
-                  border: form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
-                  background: form.hasStock ? "#f4f4f5" : "#fff",
-                  color: form.hasStock ? "#0f172a" : "#475569",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  transition: "all .15s ease"
-                }}
-              >
-                <Package size={15} /> Con inventario / stock
-              </button>
-              <button
-                type="button"
-                className={`pxp-pill-btn ${!form.hasStock ? "active" : ""}`}
-                onClick={() => setForm(prev => ({ ...prev, hasStock: false }))}
-                style={{
-                  flex: 1,
-                  padding: "10px 14px",
-                  borderRadius: 10,
-                  border: !form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
-                  background: !form.hasStock ? "#f4f4f5" : "#fff",
-                  color: !form.hasStock ? "#0f172a" : "#475569",
-                  fontWeight: 700,
-                  fontSize: 13,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  transition: "all .15s ease"
-                }}
-              >
-                <Briefcase size={15} /> Servicio / Intangible
-              </button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {/* Nombre */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Nombre de la sede <span style={{ color: "#ef4444" }}>*</span></div>
-                <input
-                  required
-                  className="pxp-form-input"
-                  value={form.name}
-                  onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Ej. Café Geisha Villa Rica 250g"
-                />
-              </div>
-
-              {/* SKU / Código */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Código / SKU <span style={{ color: "#ef4444" }}>*</span></div>
-                <input
-                  required
-                  className="pxp-form-input"
-                  value={form.sku}
-                  onChange={e => setForm(prev => ({ ...prev, sku: e.target.value }))}
-                  placeholder="Ej. CAF-GEI-250"
-                />
-              </div>
-
-              {/* Precio de venta con selector de moneda y switch de IGV */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Precio de venta <span style={{ color: "#ef4444" }}>*</span></div>
-                <div>
-                  <div className="pxp-compound">
-                    <select
-                      className="pxp-compound-sel"
-                      value={form.currency || "PEN"}
-                      onChange={e => setForm(prev => ({ ...prev, currency: e.target.value }))}
-                      style={{ colorScheme: "light" }}
-                    >
-                      <option value="PEN">S/ (PEN)</option>
-                      <option value="USD">$ (USD)</option>
-                    </select>
-                    <input
-                      required
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      className="pxp-compound-input"
-                      value={form.price}
-                      onChange={e => {
-                        const newPrice = e.target.value;
-                        const costVal = Number(form.cost) || 0;
-                        let margin = form.marginProfit;
-                        if (costVal && Number(newPrice) > 0) {
-                          margin = Math.round(((Number(newPrice) - costVal) / Number(newPrice)) * 100);
-                        }
-                        setForm(prev => ({ ...prev, price: newPrice, marginProfit: margin }));
-                      }}
-                      placeholder="0.00"
-                    />
-                  </div>
-
-                  {/* Selector diseñado de Afectación IGV */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8, padding: "0 2px" }}>
-                    <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>Precio incluye IGV</span>
-                    {isTaxExempt ? (
-                      <span style={{ fontSize: 11.5, color: "#64748b", fontWeight: 600, background: "#f1f5f9", padding: "3px 10px", borderRadius: 6, border: "1px solid #e2e8f0" }}>
-                        No aplica (0% IGV)
-                      </span>
-                    ) : (
-                      <div style={{ display: "inline-flex", background: "#f1f5f9", padding: 2, borderRadius: 8, gap: 2, border: "1px solid #e2e8f0" }}>
-                        <button
-                          type="button"
-                          onClick={() => setForm(prev => ({ ...prev, includesIgv: false }))}
-                          style={{
-                            border: 0,
-                            padding: "3px 12px",
-                            borderRadius: 6,
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            background: form.includesIgv === false ? "#fff" : "transparent",
-                            color: form.includesIgv === false ? "#0f172a" : "#64748b",
-                            boxShadow: form.includesIgv === false ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-                            transition: "all .15s ease"
-                          }}
-                        >
-                          No
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setForm(prev => ({ ...prev, includesIgv: true }))}
-                          style={{
-                            border: 0,
-                            padding: "3px 12px",
-                            borderRadius: 6,
-                            fontSize: 11.5,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            background: form.includesIgv !== false ? "#ff4b0b" : "transparent",
-                            color: form.includesIgv !== false ? "#fff" : "#64748b",
-                            boxShadow: form.includesIgv !== false ? "0 1px 3px rgba(255,75,11,0.25)" : "none",
-                            transition: "all .15s ease"
-                          }}
-                        >
-                          Sí [✓]
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Impuesto */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Tipo de Impuesto</div>
-                <select
-                  className="pxp-form-input"
-                  value={form.igvType || "IGV (18.00%)"}
-                  onChange={e => {
-                    const newIgv = e.target.value;
-                    const isZero = newIgv.includes("0.00%");
-                    setForm(prev => ({
-                      ...prev,
-                      igvType: newIgv,
-                      includesIgv: isZero ? false : (prev.includesIgv !== false)
-                    }));
-                  }}
-                  style={{ colorScheme: "light" }}
-                >
-                  <option value="IGV (18.00%)">IGV (18.00% - Gravado)</option>
-                  <option value="Exonerado (0.00%)">Exonerado (0.00% - Selva/Alimentos)</option>
-                  <option value="Inafecto (0.00%)">Inafecto (0.00%)</option>
-                </select>
-              </div>
-
-              {/* Unidad de medida */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Unidad de medida SUNAT</div>
-                <select
-                  className="pxp-form-input"
-                  value={form.unit || "un."}
-                  onChange={e => setForm(prev => ({ ...prev, unit: e.target.value }))}
-                  style={{ colorScheme: "light" }}
-                >
-                  <option value="un.">NIU - Unidades (Bienes)</option>
-                  <option value="kg">KGM - Kilogramos</option>
-                  <option value="l">LTR - Litros</option>
-                  <option value="serv.">ZZ - Servicio (Unidad)</option>
-                  <option value="caja">BX - Caja</option>
-                  <option value="bolsa">BG - Bolsa</option>
-                  <option value="frasco">FR - Frasco</option>
-                  <option value="saco">SA - Saco</option>
-                </select>
-              </div>
-
-              {/* Categoría y Sede */}
-              <div className="pxp-form-row">
-                <div className="pxp-form-label">Categoría y Sede</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <select
-                    className="pxp-form-input"
-                    value={form.category}
-                    onChange={e => setForm({ ...form, category: e.target.value })}
-                  >
-                    {categories.filter(c => c !== "Todas").map(c => <option key={c}>{c}</option>)}
-                    <option>Alimentos</option>
-                    <option>Veterinaria</option>
-                    <option>Mascotas</option>
-                    <option>Servicios</option>
-                    <option>General</option>
-                  </select>
-                  <select
-                    className="pxp-form-input"
-                    value={form.location}
-                    onChange={e => setForm({ ...form, location: e.target.value })}
-                  >
-                    <option value="Almacén Principal">Almacén Principal</option>
-                    <option value="Tienda Sur">Tienda Sur</option>
-                    <option value="Tienda Online">Tienda Online</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Stock inicial (si aplica) */}
-              {form.hasStock && (
-                <div className="pxp-form-row">
-                  <div className="pxp-form-label">Stock y Alerta Mínima</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <input
-                        type="number"
-                        min="0"
-                        className="pxp-form-input"
-                        value={form.stock}
-                        onChange={e => setForm({ ...form, stock: e.target.value })}
-                        placeholder="Stock inicial"
-                      />
-                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Stock inicial actual</span>
-                    </div>
-                    <div>
-                      <input
-                        type="number"
-                        min="0"
-                        className="pxp-form-input"
-                        value={form.minStock}
-                        onChange={e => setForm({ ...form, minStock: e.target.value })}
-                        placeholder="Alerta mínima"
-                      />
-                      <span style={{ fontSize: 11, color: "#64748b", marginTop: 3, display: "block" }}>Avisar cuando quede &le;</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Opciones avanzadas toggle */}
-              <div style={{ borderTop: "1px dashed #e2e8f0", paddingTop: 12, marginTop: 4 }}>
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  style={{
-                    background: "none",
-                    border: 0,
-                    color: "#ff4b0b",
-                    fontWeight: 700,
-                    fontSize: 13.5,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: 0
-                  }}
-                >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{showAdvanced ? <>Ocultar opciones avanzadas <ChevronUp size={15} /></> : <>Opciones avanzadas <ChevronDown size={15} /></>}</span>
-                </button>
-              </div>
-
-              {/* Acordeón Opciones avanzadas */}
-              {showAdvanced && (
-                <div style={{
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: 12,
-                  padding: 20,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 16
-                }}>
-                  {/* Costo de compra y Margen */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Costo de compra ({form.currency === "USD" ? "$" : "S/"})
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="pxp-form-input"
-                        value={form.cost}
-                        onChange={e => {
-                          const newCost = e.target.value;
-                          const priceVal = Number(form.price) || 0;
-                          let margin = form.marginProfit;
-                          if (priceVal > 0 && Number(newCost) > 0) {
-                            margin = Math.round(((priceVal - Number(newCost)) / priceVal) * 100);
-                          }
-                          setForm({ ...form, cost: newCost, marginProfit: margin });
-                        }}
-                        placeholder="Ej. 15.00"
-                      />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Margen de ganancia (%)
-                      </label>
-                      <input
-                        type="number"
-                        className="pxp-form-input"
-                        value={form.marginProfit}
-                        onChange={e => setForm({ ...form, marginProfit: e.target.value })}
-                        placeholder="Ej. 40"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Precios escalonados: Mayorista y Mínimo */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Precio Mayorista (S/)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="pxp-form-input"
-                        value={form.wholesale}
-                        onChange={e => setForm({ ...form, wholesale: e.target.value })}
-                        placeholder="Precio por volumen"
-                      />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Precio Mínimo de venta (S/)
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="pxp-form-input"
-                        value={form.minPrice}
-                        onChange={e => setForm({ ...form, minPrice: e.target.value })}
-                        placeholder="Límite piso descuento"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Escala de condición Qaway (1-10) y Marca */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Condición / Calidad (Escala 1-10)
-                      </label>
-                      <select
-                        className="pxp-form-input"
-                        value={form.condition}
-                        onChange={e => setForm({ ...form, condition: Number(e.target.value) })}
-                      >
-                        {[10, 9, 8, 7, 6, 5].map(n => (
-                          <option key={n} value={n}>{n}/10 - {n === 10 ? "Nuevo / Óptimo" : n >= 8 ? "Excelente estado" : "Aceptable"}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Marca o Laboratorio
-                      </label>
-                      <input
-                        className="pxp-form-input"
-                        value={form.brand}
-                        onChange={e => setForm({ ...form, brand: e.target.value })}
-                        placeholder="Ej. Origen Perú / Bayer"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Código de barras y Código SUNAT */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Código de barras (EAN-13)
-                      </label>
-                      <input
-                        className="pxp-form-input"
-                        value={form.barcode}
-                        onChange={e => setForm({ ...form, barcode: e.target.value })}
-                        placeholder="7750123456789"
-                      />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Código SUNAT (Catálogo 25)
-                      </label>
-                      <input
-                        className="pxp-form-input"
-                        value={form.sunatCode}
-                        onChange={e => setForm({ ...form, sunatCode: e.target.value })}
-                        placeholder="Ej. 50201706"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Peso y Dimensiones */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Peso (kg / gr)
-                      </label>
-                      <input
-                        className="pxp-form-input"
-                        value={form.weight}
-                        onChange={e => setForm({ ...form, weight: e.target.value })}
-                        placeholder="Ej. 0.25 kg"
-                      />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                        Dimensiones (L × A × Alto cm)
-                      </label>
-                      <input
-                        className="pxp-form-input"
-                        value={form.dimensions}
-                        onChange={e => setForm({ ...form, dimensions: e.target.value })}
-                        placeholder="Ej. 12 × 7 × 20 cm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Toggle Visible en POS */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 0" }}>
-                    <div>
-                      <b style={{ fontSize: 13, color: "#1e293b", display: "block" }}>Visible en Punto de Venta (POS)</b>
-                      <span style={{ fontSize: 11.5, color: "#64748b" }}>Permitir cobrar este ítem en caja rápida</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      className="pxp-check"
-                      checked={form.inPos}
-                      onChange={e => setForm({ ...form, inPos: e.target.checked })}
-                    />
-                  </div>
-
-                  {/* Descripción */}
-                  <div>
-                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
-                      Descripción detallada
-                    </label>
-                    <textarea
-                      className="pxp-form-input"
-                      style={{ minHeight: 70, resize: "vertical" }}
-                      value={form.description}
-                      onChange={e => setForm({ ...form, description: e.target.value })}
-                      placeholder="Notas, especificaciones o ingredientes..."
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="pxp-modal-foot">
-            <button type="button" className="pxp-btn" onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="submit" className="pxp-btn primary" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>
-              {editing ? "Guardar cambios" : "Crear sede"}
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
-  );
-}
 
 export default function SedesPanel() {
   let navigate = null;
@@ -733,10 +203,8 @@ export default function SedesPanel() {
     tenantCtx = null;
   }
 
-  const activeTenant = tenantCtx?.activeTenant || null;
   const activeTenantId = tenantCtx?.activeTenantId || null;
   const isPlatformAdmin = Boolean(tenantCtx?.isPlatformAdmin);
-  const canCreateProduct = tenantCtx ? tenantCtx.canCreateProduct : true;
 
   const handleNavigateCapture = () => {
     const isHub = typeof window !== "undefined" && window.location.pathname.startsWith("/hub/inventario");
@@ -747,39 +215,29 @@ export default function SedesPanel() {
       window.location.href = targetUrl;
     }
   };
-
-  // Do not render demo inventory while the authoritative source is loading.
-  const [products, setProducts] = useState([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const emptySedeForm = {
+    nombre: "", codigo: "", subtitulo: "", tipo: "Principal", estado: "Activa",
+    ciudad: "Lima", direccion: "", responsable: "", telefono: "", email: "",
+    almacenes: 0, descripcion: ""
+  };
+  const [form, setForm] = useState(emptySedeForm);
+  const [sedes, setSedes] = useState(INITIAL_SEDES);
+  const [almacenes] = useState(INITIAL_ALMACENES);
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("Todas");
-  const [status, setStatus] = useState("Todos");
-  const [stockFilter, setStockFilter] = useState("Todos");
-  const [commercialStatus, setCommercialStatus] = useState("Todos");
-  const [brandFilter, setBrandFilter] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [locationFilter, setLocationFilter] = useState("Todos");
+  const [tipo, setTipo] = useState("Todos");
+  const [estado, setEstado] = useState("Todos");
+  const [ciudad, setCiudad] = useState("Todas");
+  const [responsable, setResponsable] = useState("");
   const [showExtraFilters, setShowExtraFilters] = useState(false);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState([
-    "product",
-    "sku",
-    "category",
-    "stock",
-    "price",
-    "status",
-    "location",
-  ]);
-
+  const [visibleColumns, setVisibleColumns] = useState(["sede", "codigo", "ciudad", "direccion", "almacenes", "tipo", "responsable", "estado", "telefono"]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [view, setView] = useState("list");
   const [gridCols, setGridCols] = useState(5);
   const [menuId, setMenuId] = useState(null);
   const [selected, setSelected] = useState([]);
-  const [detailProduct, setDetailProduct] = useState(null);
-  const [fullProduct, setFullProduct] = useState(null);
+  const [detailSede, setDetailSede] = useState(null);
   const [detailTab, setDetailTab] = useState("Resumen");
   const [modal, setModal] = useState("");
   const [importStep, setImportStep] = useState(1);
@@ -787,37 +245,6 @@ export default function SedesPanel() {
   const [importOption, setImportOption] = useState("merge");
   const [toast, setToast] = useState("");
   const [editing, setEditing] = useState(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const defaultForm = {
-    name: "",
-    sku: "",
-    category: "Alimentos",
-    stock: 0,
-    minStock: 5,
-    price: "",
-    cost: "",
-    wholesale: "",
-    minPrice: "",
-    location: "Almacén Principal",
-    unit: "un.",
-    brand: "",
-    barcode: "",
-    weight: "",
-    dimensions: "",
-    condition: 10,
-    hasStock: true,
-    igvType: "IGV (18.00%)",
-    marginProfit: "",
-    discount: 0,
-    sunatCode: "",
-    inPos: true,
-    description: "",
-    currency: "PEN"
-  };
-
-  const [form, setForm] = useState(defaultForm);
-
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const columnPickerRef = useRef(null);
   const actionsMenuRef = useRef(null);
@@ -848,171 +275,16 @@ export default function SedesPanel() {
       document.removeEventListener("keydown", handleEscape);
     };
   }, []);
-
-  const handleBulkStatusChange = (newStatus) => {
-    setProducts(prev => prev.map(p => selected.includes(p.id) ? { ...p, status: newStatus } : p));
-    showToast(`${selected.length} sedes marcadas como "${newStatus}"`);
-    setShowBulkMenu(false);
-  };
-
-  const handleBulkDuplicate = () => {
-    const toDuplicate = products.filter(p => selected.includes(p.id));
-    const copies = toDuplicate.map((p, i) => ({
-      ...p,
-      id: `copy-${Date.now()}-${i}`,
-      name: `${p.name} (copia)`,
-      sku: `${p.sku}-COPY`
-    }));
-    setProducts(prev => [...copies, ...prev]);
-    showToast(`${toDuplicate.length} sedes duplicadas`);
-    setShowBulkMenu(false);
-  };
-
-  const handleBulkDelete = () => {
-    if (window.confirm(`¿Estás seguro de eliminar las ${selected.length} sedes seleccionadas?`)) {
-      const count = selected.length;
-      setProducts(prev => prev.filter(p => !selected.includes(p.id)));
-      setSelected([]);
-      showToast(`${count} sedes eliminadas correctamente`);
-      setShowBulkMenu(false);
-    }
-  };
-
-  const handleBulkExportCSV = () => {
-    const selectedItems = products.filter(p => selected.includes(p.id));
-    if (selectedItems.length === 0) return;
-    const headers = ["ID", "Sede", "Código", "Ciudad", "Dirección", "Tipo", "Almacenes", "Responsable", "Estado", "Teléfono"];
-    const rows = selectedItems.map(p => [
-      p.id,
-      `"${(p.name || '').replace(/"/g, '""')}"`,
-      `"${p.sku || ''}"`,
-      `"${p.barcode || ''}"`,
-      `"${p.category || ''}"`,
-      `"${p.brand || ''}"`,
-      p.stock || 0,
-      p.price || 0,
-      p.wholesale || p.price || 0,
-      `"${p.status || ''}"`,
-      `"${p.location || ''}"`
-    ]);
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `sedes_seleccionadas_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(`${selectedItems.length} sedes exportadas en CSV`);
-    setShowBulkMenu(false);
-  };
-
-  // Sincronización en vivo con Supabase por empresa activa
-  useEffect(() => {
-    let isMounted = true;
-    async function loadSupabaseProducts() {
-      setIsLoadingProducts(true);
-      try {
-        if (isPlatformAdmin && !activeTenantId) {
-          if (isMounted) {
-            setProducts([]);
-            setIsLoadingProducts(false);
-          }
-          return;
-        }
-
-        const res = await productService.getProducts({ tenant_id: activeTenantId || undefined });
-        const sourceProducts = Array.isArray(res?.data) ? res.data : [];
-        const mapped = sourceProducts.map((p, idx) => ({
-            id: p.id || `prod-sb-${idx}`,
-            name: p.name || "Sede sin nombre",
-            detail: p.description ? p.description.slice(0, 35) : "",
-            sku: p.sku || `SKU-${idx + 1}`,
-            category: p.category || "General",
-            stock: Number(p.stock) || 0,
-            price: Number(p.base_price) || 0,
-            cost: Number(p.cost) || 0,
-            salePrice: Number(p.base_price) || 0,
-            wholesale: Number(p.base_price ? p.base_price * 0.85 : 0),
-            minPrice: Number(p.base_price ? p.base_price * 0.75 : 0),
-            status: Number(p.stock) === 0 ? "Sin stock" : Number(p.stock) <= (p.min_stock || 10) ? "Stock bajo" : "Disponible",
-            location: "Almacén Principal",
-            image: "📦",
-            barcode: p.sku || "",
-            brand: p.brand || "—",
-            presentation: p.unit || "un.",
-            unit: p.unit || "un.",
-            weight: "—",
-            dimensions: "—",
-            condition: p.condition || 10,
-            description: p.description || "",
-            warehouse: [
-              { name: "Almacén Principal", stock: Number(p.stock) || 0, min: Number(p.min_stock) || 0 },
-              { name: "Tienda Sur", stock: 0, min: 0 }
-            ]
-        }));
-
-        if (isMounted) setProducts(mapped);
-      } catch (err) {
-        console.warn("[Inventi] Supabase live fetch fallback:", err);
-        if (isMounted) setProducts([]);
-      } finally {
-        if (isMounted) setIsLoadingProducts(false);
-      }
-    }
-    loadSupabaseProducts();
-    return () => { isMounted = false; };
-  }, [activeTenantId, isPlatformAdmin]);
-
-  const toggleColumn = key => {
-    setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
-  };
-
-  const handleExportCSV = () => {
-    if (!filtered || filtered.length === 0) {
-      showToast("No hay sedes para exportar");
-      return;
-    }
-    const headers = ["ID", "Sede", "Código", "Ciudad", "Dirección", "Tipo", "Almacenes", "Responsable", "Estado", "Teléfono"];
-    const rows = filtered.map(p => [
-      p.id,
-      `"${(p.name || '').replace(/"/g, '""')}"`,
-      `"${p.sku || ''}"`,
-      `"${p.barcode || ''}"`,
-      `"${p.category || ''}"`,
-      `"${p.brand || ''}"`,
-      p.stock || 0,
-      p.price || 0,
-      p.wholesale || p.price || 0,
-      `"${p.status || ''}"`,
-      `"${p.location || ''}"`
-    ]);
-    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `inventi_sedes_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast("Catálogo exportado en CSV");
-  };
-
-  const categories = useMemo(() => ["Todas", ...new Set(products.map(p => p.category))], [products]);
-
-  // ---- Datos del módulo Sedes (fase 2) ----
-  // Fuente única: las mismas constantes que consume el tablero inferior, sin copia.
-  // `products` sigue siendo la tabla; aquí se derivan los agregados reales de Sedes.
-  const [sedes, setSedes] = useState(INITIAL_SEDES);
-  const [almacenes] = useState(INITIAL_ALMACENES);
-
+  // ---- Datos del módulo Sedes (fuente: tablero inferior, misma fuente, sin copia) ----
+  // `sedes`/`almacenes` son el estado vivo del tablero superior; el inferior conserva el suyo
+  // (páginas independientes, no comparten estado). Sus initial* sí provienen del mismo archivo.
   const sedesActivas = useMemo(() => sedes.filter(s => s.estado === "Activa"), [sedes]);
   const ciudades = useMemo(() => Array.from(new Set(sedes.map(s => s.ciudad))), [sedes]);
   const puntosVenta = useMemo(() => sedes.filter(s => s.tipo === "Tienda"), [sedes]);
+  const responsables = useMemo(() => Array.from(new Set(sedes.map(s => s.responsable).filter(Boolean))), [sedes]);
 
   const metricasSedes = useMemo(() => {
     const total = sedes.length;
-    const pct = (n) => `${Math.round((n / Math.max(total, 1)) * 100)}% del total`;
     return {
       totalSedes: { valor: total, nota: "Data en vivo" },
       sedesActivas: { valor: sedesActivas.length, nota: `de ${total} sedes registradas` },
@@ -1022,360 +294,144 @@ export default function SedesPanel() {
     };
   }, [sedes, sedesActivas, almacenes, ciudades, puntosVenta]);
 
-  const filtered = useMemo(() => products.filter(p => {
+  const filtered = useMemo(() => sedes.filter(s => {
     const q = query.toLowerCase().trim();
-    const matchesQ = !q || [p.name, p.sku, p.category, p.barcode, p.brand].some(v => String(v || "").toLowerCase().includes(q));
-    const matchesCat = category === "Todas" || p.category === category;
-    const matchesStock = stockFilter === "Todos" || (stockFilter === "Con stock" && p.stock > 0) || (stockFilter === "Stock bajo" && p.stock > 0 && p.stock <= 10) || (stockFilter === "Sin stock" && p.stock === 0);
-    const matchesComm = commercialStatus === "Todos" || p.status === commercialStatus;
-    const matchesBrand = !brandFilter || (p.brand && p.brand.toLowerCase().includes(brandFilter.toLowerCase()));
-    const matchesMinPrice = !minPrice || p.price >= Number(minPrice);
-    const matchesMaxPrice = !maxPrice || p.price <= Number(maxPrice);
-    const matchesLoc = locationFilter === "Todos" || p.location === locationFilter;
-    return matchesQ && matchesCat && matchesStock && matchesComm && matchesBrand && matchesMinPrice && matchesMaxPrice && matchesLoc;
-  }), [products, query, category, stockFilter, commercialStatus, brandFilter, minPrice, maxPrice, locationFilter]);
+    const matchesQ = !q || [s.nombre, s.codigo, s.ciudad, s.direccion, s.responsable, s.subtitulo].some(v => String(v || "").toLowerCase().includes(q));
+    const matchesTipo = tipo === "Todos" || s.tipo === tipo;
+    const matchesEstado = estado === "Todos" || s.estado === estado;
+    const matchesCiudad = ciudad === "Todas" || s.ciudad === ciudad;
+    const matchesResp = !responsable || (s.responsable && s.responsable.toLowerCase().includes(responsable.toLowerCase()));
+    return matchesQ && matchesTipo && matchesEstado && matchesCiudad && matchesResp;
+  }), [sedes, query, tipo, estado, ciudad, responsable]);
 
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize);
-  const totalStock = products.reduce((s, p) => s + p.stock, 0);
-  const inventoryValue = products.reduce((s, p) => s + p.stock * p.price, 0);
   const showToast = msg => { setToast(msg); window.setTimeout(() => setToast(""), 2800); };
-  
+
   const openNew = () => {
     if (isPlatformAdmin && !activeTenantId) {
       showToast("Debes seleccionar una empresa en la barra superior antes de registrar una sede.");
       return;
     }
     setEditing(null);
-    setForm(defaultForm);
-    setShowAdvanced(false);
-    setModal("product");
+    setForm(emptySedeForm);
+    setModal("sede");
   };
 
-  const openEdit = p => {
-    setEditing(p);
-    const pCost = p.cost ?? (p.price ? Math.round(p.price * 0.5) : "");
-    const pMargin = pCost && p.price ? Math.round(((p.price - pCost) / p.price) * 100) : "";
+  const openEdit = s => {
+    setEditing(s);
     setForm({
-      ...defaultForm,
-      name: p.name || "",
-      sku: p.sku || "",
-      category: p.category || "Alimentos",
-      stock: p.stock ?? 0,
-      minStock: p.warehouse?.[0]?.min ?? 5,
-      price: p.price ?? "",
-      cost: pCost,
-      wholesale: p.wholesale ?? "",
-      minPrice: p.minPrice ?? "",
-      location: p.location || "Almacén Principal",
-      unit: p.unit || "un.",
-      brand: p.brand || "",
-      barcode: p.barcode || "",
-      weight: p.weight || "",
-      dimensions: p.dimensions || "",
-      condition: p.condition || 10,
-      hasStock: (p.stock ?? 0) > 0 || true,
-      igvType: "IGV (18.00%)",
-      marginProfit: pMargin,
-      discount: 0,
-      sunatCode: "",
-      inPos: true,
-      description: p.description || "",
-      currency: "PEN"
+      nombre: s.nombre || "", codigo: s.codigo || "", subtitulo: s.subtitulo || "",
+      tipo: s.tipo || "Principal", estado: s.estado || "Activa", ciudad: s.ciudad || "Lima",
+      direccion: s.direccion || "", responsable: s.responsable || "", telefono: s.telefono || "",
+      email: s.email || "", almacenes: s.almacenes ?? 0, descripcion: s.descripcion || ""
     });
-    setShowAdvanced(false);
-    setDetailProduct(null);
-    setModal("product");
+    setDetailSede(null);
     setMenuId(null);
+    setModal("sede");
   };
 
-  const saveProduct = async (formData, e) => {
-    if (e?.preventDefault) e.preventDefault();
-    else if (formData?.preventDefault) {
-      formData.preventDefault();
-      formData = null;
-    }
-    const currentForm = (formData && typeof formData === 'object' && 'name' in formData) ? formData : form;
-    const stock = Number(currentForm.stock) || 0;
-    const price = Number(currentForm.price) || 0;
-    const cost = Number(currentForm.cost) || Math.round(price * 0.5);
-    const wholesale = Number(currentForm.wholesale) || Number((price * 0.85).toFixed(2));
-    const minPrice = Number(currentForm.minPrice) || Number((price * 0.75).toFixed(2));
-    const minStock = Number(currentForm.minStock) || 5;
-    const statusText = stock === 0 ? "Sin stock" : stock <= minStock ? "Stock bajo" : "Disponible";
-
-    if (editing) {
-      try {
-        if (typeof editing.id === 'string' && !editing.id.startsWith('prod-')) {
-          await productService.updateProduct(editing.id, {
-            name: currentForm.name,
-            sku: currentForm.sku,
-            base_price: price,
-            price: price,
-            stock,
-            unit: currentForm.unit || "un.",
-            brand: currentForm.brand || "Marca Propia",
-            description: currentForm.description || ""
-          });
-        }
-        setProducts(prev => prev.map(p => p.id === editing.id ? {
-          ...p,
-          ...currentForm,
-          stock,
-          price,
-          cost,
-          wholesale,
-          minPrice,
-          status: statusText,
-          warehouse: [
-            { name: currentForm.location, stock, min: minStock },
-            ...(p.warehouse?.filter(w => w.name !== currentForm.location) || [])
-          ]
-        } : p));
-        if (detailProduct?.id === editing.id) {
-          setDetailProduct(prev => ({
-            ...prev,
-            ...currentForm,
-            stock,
-            price,
-            cost,
-            wholesale,
-            minPrice,
-            status: statusText,
-            warehouse: [
-              { name: currentForm.location, stock, min: minStock },
-              ...(prev.warehouse?.filter(w => w.name !== currentForm.location) || [])
-            ]
-          }));
-        }
-        showToast("Sede actualizada correctamente");
-        setModal("");
-      } catch (err) {
-        console.error("[Inventi] Error al actualizar sede:", err);
-        showToast(`Error al actualizar: ${err.message || 'Error en base de datos'}`);
-      }
-    } else {
-      if (isPlatformAdmin && !activeTenantId) {
-        showToast("Debes seleccionar una empresa en la barra superior antes de registrar una sede.");
-        return;
-      }
-      try {
-        const created = await productService.createProduct({
-          name: currentForm.name,
-          sku: currentForm.sku || undefined,
-          base_price: price,
-          price: price,
-          stock,
-          unit: currentForm.unit || "un.",
-          brand: currentForm.brand || "Marca Propia",
-          description: currentForm.description || "",
-          category: currentForm.category || "Alimentos",
-          status: "active",
-          type: "simple",
-          commercial_status: "available",
-          condition: 10,
-          tenant_id: activeTenantId || undefined
-        });
-
-        const newP = {
-          ...currentForm,
-          id: created?.id || `prod-${Date.now()}`,
-          stock,
-          price,
-          cost,
-          wholesale,
-          minPrice,
-          status: statusText,
-          detail: currentForm.description ? currentForm.description.slice(0, 35) : "",
-          image: "📦",
-          barcode: currentForm.barcode || currentForm.sku,
-          brand: currentForm.brand || "Marca Propia",
-          presentation: currentForm.unit || "un.",
-          unit: currentForm.unit || "un.",
-          weight: currentForm.weight || "—",
-          dimensions: currentForm.dimensions || "—",
-          condition: currentForm.condition || 10,
-          warehouse: [{ name: currentForm.location, stock, min: minStock }]
-        };
-
-        setProducts(prev => [newP, ...prev]);
-        setPage(1);
-        showToast("Sede creada correctamente en base de datos");
-        setModal("");
-      } catch (err) {
-        console.error("[Inventi] Error al crear sede en Supabase:", err);
-        showToast(`Error al guardar sede: ${err.message || 'Error en base de datos'}`);
-      }
-    } 
+  const saveSede = (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
+    const item = {
+      ...data,
+      id: editing?.id ?? Date.now(),
+      almacenes: Number(data.almacenes || 0),
+      subtitulo: data.subtitulo || data.tipo,
+      fechaCreacion: editing?.fechaCreacion || new Date().toLocaleDateString("es-PE"),
+      actualizacion: new Date().toLocaleString("es-PE"),
+      imagen: editing?.imagen || ""
+    };
+    setSedes(prev => editing ? prev.map(x => x.id === editing.id ? item : x) : [...prev, item]);
+    if (detailSede?.id === item.id) setDetailSede(item);
+    setModal("");
+    showToast(editing ? "Sede actualizada correctamente" : "Sede creada correctamente");
   };
-  const handleImportFile = file => { if (!file) return; setImportFile(file); setImportStep(2); };
-  const finishImport = () => { showToast(importFile ? `Archivo "${importFile.name}" listo para procesar (demo)` : "Selecciona un archivo para continuar"); setModal(""); setImportStep(1); setImportFile(null); };
+
   const toggleSelected = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const selectAll = checked => setSelected(checked ? pageRows.map(p => p.id) : []);
+
+  const handleBulkEstado = (newEstado) => {
+    setSedes(prev => prev.map(s => selected.includes(s.id) ? { ...s, estado: newEstado } : s));
+    showToast(`${selected.length} ${selected.length === 1 ? "sede marcada" : "sedes marcadas"} como "${newEstado}"`);
+    setShowBulkMenu(false);
+  };
+
+  const handleBulkDuplicate = () => {
+    const toDuplicate = sedes.filter(s => selected.includes(s.id));
+    const copies = toDuplicate.map((s, i) => ({
+      ...s,
+      id: `copy-${Date.now()}-${i}`,
+      nombre: `${s.nombre} (copia)`,
+      codigo: `${s.codigo}-COPY`
+    }));
+    setSedes(prev => [...copies, ...prev]);
+    showToast(`${toDuplicate.length} sedes duplicadas`);
+    setShowBulkMenu(false);
+  };
+
+  const handleBulkDelete = () => {
+    if (window.confirm(`¿Eliminar las ${selected.length} sedes seleccionadas?`)) {
+      const count = selected.length;
+      setSedes(prev => prev.filter(s => !selected.includes(s.id)));
+      setSelected([]);
+      showToast(`${count} sedes eliminadas correctamente`);
+      setShowBulkMenu(false);
+    }
+  };
+
+  const sedeToCsvRow = s => [
+    s.id,
+    `"${(s.nombre || '').replace(/"/g, '""')}"`,
+    `"${s.codigo || ''}"`,
+    `"${s.ciudad || ''}"`,
+    `"${s.direccion || ''}"`,
+    `"${s.tipo || ''}"`,
+    s.almacenes || 0,
+    `"${s.responsable || ''}"`,
+    `"${s.estado || ''}"`,
+    `"${s.telefono || ''}"`
+  ];
+  const SEDE_CSV_HEADERS = ["ID", "Sede", "Código", "Ciudad", "Dirección", "Tipo", "Almacenes", "Responsable", "Estado", "Teléfono"];
+
+  const downloadCsv = (rows, filename) => {
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" + [SEDE_CSV_HEADERS.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleBulkExportCSV = () => {
+    const selectedItems = sedes.filter(s => selected.includes(s.id));
+    if (selectedItems.length === 0) return;
+    downloadCsv(selectedItems.map(sedeToCsvRow), `sedes_seleccionadas_${new Date().toISOString().slice(0, 10)}.csv`);
+    showToast(`${selectedItems.length} sedes exportadas en CSV`);
+    setShowBulkMenu(false);
+  };
+
+  const handleExportCSV = () => {
+    if (!filtered || filtered.length === 0) {
+      showToast("No hay sedes para exportar");
+      return;
+    }
+    downloadCsv(filtered.map(sedeToCsvRow), `inventi_sedes_${new Date().toISOString().split("T")[0]}.csv`);
+    showToast("Catálogo de sedes exportado en CSV");
+  };
+
+  const handleImportFile = file => { if (!file) return; setImportFile(file); setImportStep(2); };
+  const finishImport = () => { showToast(importFile ? `Archivo "${importFile.name}" listo para procesar (demo)` : "Selecciona un archivo para continuar"); setModal(""); setImportStep(1); setImportFile(null); };
   const resetImport = () => { setImportStep(1); setImportFile(null); setModal("import"); };
 
-  if (fullProduct) {
-    return (
-      <div className="pxp-root" style={{ background: "#fff", minHeight: "100vh", padding: "28px 36px" }}>
-        <style>{css}</style>
-        <button
-          onClick={() => setFullProduct(null)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            background: "none",
-            border: 0,
-            color: "#64748b",
-            fontWeight: 600,
-            fontSize: 14,
-            cursor: "pointer",
-            marginBottom: 24,
-            padding: 0,
-          }}
-        >
-          <ArrowLeft size={16} /> Volver al inventario
-        </button>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, maxWidth: 1240, margin: "0 auto" }}>
-          {/* Galería limpia sin iconos genéricos */}
-          <div
-            style={{
-              background: "#f8fafc",
-              borderRadius: 16,
-              border: "1px solid #e2e8f0",
-              aspectRatio: "1/1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-            }}
-          >
-            {fullProduct.imageUrl ? (
-              <img
-                src={fullProduct.imageUrl}
-                alt={fullProduct.name}
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            ) : (
-              <div style={{ textAlign: "center", color: "#94a3b8" }}>
-                <div style={{ fontSize: 52, marginBottom: 8 }}>📷</div>
-                <div style={{ fontSize: 13, fontWeight: 500 }}>Foto de la sede</div>
-              </div>
-            )}
-          </div>
+  const toggleColumn = key => {
+    setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
 
-          {/* Información y métricas rápidas */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-              <span style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                {fullProduct.sku}
-              </span>
-              <span className={`pxp-badge ${statusClass(fullProduct.status)}`}>
-                {fullProduct.status}
-              </span>
-            </div>
-
-            <h1 style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", margin: "0 0 12px", letterSpacing: "-0.5px" }}>
-              {fullProduct.name}
-            </h1>
-            <p style={{ color: "#64748b", lineHeight: 1.6, fontSize: 14, margin: "0 0 24px" }}>
-              {fullProduct.description ||
-                "Administra tus sedes, almacenes y puntos de operación."}
-            </p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
-              <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Precio base</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{money(fullProduct.price)}</div>
-              </div>
-              <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Stock</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>{fullProduct.stock}</div>
-              </div>
-              <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Condición</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#059669", marginTop: 4 }}>Nuevo</div>
-              </div>
-              <div style={{ background: "#f8fafc", padding: "14px 12px", borderRadius: 10, border: "1px solid #f1f5f9" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase" }}>Costo</div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", marginTop: 4 }}>—</div>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 20px", fontSize: 13, color: "#64748b", marginBottom: 24 }}>
-              <div>Tipo: <b style={{ color: "#1e293b" }}>{fullProduct.category}</b></div>
-              <div>Marca: <b style={{ color: "#1e293b" }}>{fullProduct.brand || "—"}</b></div>
-              <div>Ubicación: <b style={{ color: "#1e293b" }}>{fullProduct.location || "—"}</b></div>
-              <div>Creado: <b style={{ color: "#1e293b" }}>18 set. 2026</b></div>
-            </div>
-
-            <div style={{ display: "flex", gap: 12 }}>
-              <button className="pxp-btn primary" onClick={() => openEdit(fullProduct)} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                <Edit size={15} /> Editar
-              </button>
-              <button
-                className="pxp-btn"
-                style={{ color: "#e11d48", borderColor: "#fecdd3", display: "inline-flex", alignItems: "center", gap: 6 }}
-                onClick={() => {
-                  if (window.confirm(`¿Eliminar "${fullProduct.name}"?`)) {
-                    setProducts(prev => prev.filter(x => x.id !== fullProduct.id));
-                    setFullProduct(null);
-                    showToast("Sede eliminada");
-                  }
-                }}
-              >
-                <Trash2 size={15} /> Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs y contenido inferior */}
-        <div style={{ maxWidth: 1240, margin: "40px auto 0", borderTop: "1px solid #e2e8f0", paddingTop: 20 }}>
-          <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #f1f5f9", paddingBottom: 12, marginBottom: 24 }}>
-            <button style={{ background: "none", border: 0, fontWeight: 700, color: "#ea580c", borderBottom: "2px solid #ea580c", paddingBottom: 10, cursor: "pointer", fontSize: 14 }}>
-              Información
-            </button>
-            <button style={{ background: "none", border: 0, fontWeight: 600, color: "#64748b", cursor: "pointer", fontSize: 14 }}>
-              Precios
-            </button>
-            <button style={{ background: "none", border: 0, fontWeight: 600, color: "#64748b", cursor: "pointer", fontSize: 14 }}>
-              Historial
-            </button>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32 }}>
-            <div>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1e293b", marginBottom: 6 }}>Variantes</h3>
-              <p style={{ fontSize: 13, color: "#94a3b8", margin: 0 }}>Sin variantes</p>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1e293b", marginTop: 24, marginBottom: 6 }}>Liquidaciones</h3>
-              <p style={{ fontSize: 13, color: "#94a3b8", margin: 0 }}>No está en ninguna liquidación</p>
-            </div>
-            <div>
-              <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1e293b", marginBottom: 6 }}>Paquetes</h3>
-              <p style={{ fontSize: 13, color: "#94a3b8", margin: 0 }}>No está en ningún paquete</p>
-            </div>
-          </div>
-        </div>
-
-        {modal === "product" && (
-          <ProductModal
-            editing={editing}
-            form={form}
-            setForm={setForm}
-            showAdvanced={showAdvanced}
-            setShowAdvanced={setShowAdvanced}
-            categories={categories}
-            onClose={() => setModal("")}
-            onSave={saveProduct}
-          />
-        )}
-
-        {toast && <div className="pxp-toast">{toast}</div>}
-      </div>
-    );
-  }
 
   return (
     <div className="pxp-root">
@@ -1389,7 +445,7 @@ export default function SedesPanel() {
                 <div>
                   <h1 style={{ fontSize: "28px", fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 2px", color: "#111b2d" }}>Sedes</h1>
                   <p style={{ margin: "2px 0 0", color: "var(--muted)", fontSize: "13px" }}>
-                    {isLoadingProducts ? "Cargando sedes..." : "Administra tus sedes, almacenes y puntos de operaci\u00f3n."}
+                    Administra tus sedes, almacenes y puntos de operación.
                   </p>
                 </div>
               </div>
@@ -1437,18 +493,18 @@ export default function SedesPanel() {
               <div className="pxp-search"><Search size={15} style={{ color: "var(--muted)" }} /><input value={query} placeholder="Buscar sede por nombre o ciudad..." onChange={e => { setQuery(e.target.value); setPage(1); }} /></div>
               
               {/* 2 Filtros Principales en la barra superior */}
-              <PxpPopup
-                value={category}
-                onChange={c => { setCategory(c); setPage(1); }}
-                options={[{ v: "Todas", l: "Categoría: Todas" }, ...categories.filter(c => c !== "Todas").map(c => ({ v: c, l: c }))]}
-                renderLabel={v => (v === "Todas" ? "Categoría: Todas" : v)}
+                            <PxpPopup
+                value={tipo}
+                onChange={v => { setTipo(v); setPage(1); }}
+                options={[{ v: "Todos", l: "Tipo: Todos" }, { v: "Principal", l: "Principal" }, { v: "Tienda", l: "Tienda" }, { v: "Almacén", l: "Almacén" }, { v: "Punto de venta", l: "Punto de venta" }]}
+                renderLabel={v => (v === "Todos" ? "Tipo: Todos" : v)}
               />
 
-              <PxpPopup
-                value={stockFilter}
-                onChange={s => { setStockFilter(s); setPage(1); }}
-                options={[{ v: "Todos", l: "Stock: Todos" }, { v: "Con stock", l: "Con stock" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }]}
-                renderLabel={v => (v === "Todos" ? "Stock: Todos" : v)}
+                            <PxpPopup
+                value={estado}
+                onChange={v => { setEstado(v); setPage(1); }}
+                options={[{ v: "Todos", l: "Estado: Todos" }, { v: "Activa", l: "Activa" }, { v: "Inactiva", l: "Inactiva" }]}
+                renderLabel={v => (v === "Todos" ? "Estado: Todos" : v)}
               />
               
               {/* Botón Más filtros con Icono Lucide */}
@@ -1549,39 +605,32 @@ export default function SedesPanel() {
               <div style={{ background: "#fff", border: "1px solid var(--line)", borderRadius: "11px", padding: "16px 20px", marginBottom: "12px", boxShadow: "0 4px 14px rgba(0,0,0,0.03)" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "16px" }}>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado Comercial</label>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Ciudad</label>
                     <PxpPopup
-                      value={commercialStatus}
-                      onChange={s => { setCommercialStatus(s); setPage(1); }}
-                      options={[{ v: "Todos", l: "Todos" }, { v: "Disponible", l: "Disponible" }, { v: "Stock bajo", l: "Stock bajo" }, { v: "Sin stock", l: "Sin stock" }, { v: "Reservado", l: "Reservado" }, { v: "Agotado", l: "Agotado" }]}
+                      value={ciudad}
+                      onChange={v => { setCiudad(v); setPage(1); }}
+                      options={[{ v: "Todas", l: "Todas" }, ...ciudades.map(c => ({ v: c, l: c }))]}
+                      renderLabel={v => (v === "Todas" ? "Todas" : v)}
                       wrapStyle={{ width: "100%" }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Marca</label>
-                    <input style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 12px", fontSize: 13, color: "var(--ink)", background: "#fff" }} placeholder="Buscar marca..." value={brandFilter} onChange={e => { setBrandFilter(e.target.value); setPage(1); }} />
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Responsable</label>
+                    <input style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 12px", fontSize: 13, color: "var(--ink)", background: "#fff" }} placeholder="Buscar responsable..." value={responsable} onChange={e => { setResponsable(e.target.value); setPage(1); }} />
                   </div>
                   <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Precio</label>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <input type="number" placeholder="Min" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={minPrice} onChange={e => { setMinPrice(e.target.value); setPage(1); }} />
-                      <span style={{ color: "var(--muted)" }}>—</span>
-                      <input type="number" placeholder="Max" style={{ width: "100%", height: 38, border: "1px solid var(--line)", borderRadius: 8, padding: "0 8px", fontSize: 13, background: "#fff" }} value={maxPrice} onChange={e => { setMaxPrice(e.target.value); setPage(1); }} />
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Almacén / Ubicación</label>
+                    <label style={{ display: "block", fontSize: "11px", fontWeight: 700, color: "#53627d", marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Estado</label>
                     <PxpPopup
-                      value={locationFilter}
-                      onChange={v => { setLocationFilter(v); setPage(1); }}
-                      options={[{ v: "Todos", l: "Todos los almacenes" }, { v: "Almacén Principal", l: "Almacén Principal" }, { v: "Tienda Sur", l: "Tienda Sur" }, { v: "Tienda Online", l: "Tienda Online" }]}
-                      renderLabel={v => (v === "Todos" ? "Todos los almacenes" : v)}
+                      value={estado}
+                      onChange={v => { setEstado(v); setPage(1); }}
+                      options={[{ v: "Todos", l: "Todos" }, { v: "Activa", l: "Activa" }, { v: "Inactiva", l: "Inactiva" }]}
+                      renderLabel={v => (v === "Todos" ? "Todos" : v)}
                       wrapStyle={{ width: "100%" }}
                     />
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>
-                  <button className="pxp-btn small" onClick={() => { setCommercialStatus("Todos"); setBrandFilter(""); setMinPrice(""); setMaxPrice(""); setLocationFilter("Todos"); setShowExtraFilters(false); }}>
+                  <button className="pxp-btn small" onClick={() => { setCiudad("Todas"); setResponsable(""); setTipo("Todos"); setEstado("Todos"); setPage(1); setShowExtraFilters(false); }}>
                     Cancelar / Limpiar
                   </button>
                   <button className="pxp-btn small" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff", fontWeight: 700 }} onClick={() => setShowExtraFilters(false)}>
@@ -1590,7 +639,6 @@ export default function SedesPanel() {
                 </div>
               </div>
             )}
-
             <section className="pxp-table-wrap">
               {selected.length > 0 && (
                 <div
@@ -1642,28 +690,15 @@ export default function SedesPanel() {
                         }}
                       >
                         <div style={{ fontSize: 10.5, fontWeight: 700, color: "#64748b", padding: "6px 8px 4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                          Estado Comercial
+                          Estado
                         </div>
-                        <button
-                          className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Disponible")}
-                        >
+                        <button className="pxp-bulk-menu-item" onClick={() => handleBulkEstado("Activa")}>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
-                          Marcar como Disponible
+                          Marcar como Activa
                         </button>
-                        <button
-                          className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Stock bajo")}
-                        >
-                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#d97706" }} />
-                          Marcar como Stock bajo
-                        </button>
-                        <button
-                          className="pxp-bulk-menu-item"
-                          onClick={() => handleBulkStatusChange("Sin stock")}
-                        >
+                        <button className="pxp-bulk-menu-item" onClick={() => handleBulkEstado("Inactiva")}>
                           <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#94a3b8" }} />
-                          Marcar como Sin stock
+                          Marcar como Inactiva
                         </button>
                         
                         <div style={{ height: 1, background: "#f1f5f9", margin: "4px 0" }} />
@@ -1712,51 +747,41 @@ export default function SedesPanel() {
               )}
               {view === "list" ? <div className="pxp-table-scroll"><table className="pxp-table">
                 <thead><tr>
-                  <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(p => selected.includes(p.id))} onChange={e => selectAll(e.target.checked)} /></th>
-                  {visibleColumns.includes("product") && <th>Sede ↕</th>}
-                  {visibleColumns.includes("sku") && <th>Código ↕</th>}
-                  {visibleColumns.includes("barcode") && <th>Ciudad</th>}
-                  {visibleColumns.includes("category") && <th>Dirección</th>}
-                  {visibleColumns.includes("stock") && <th>Almacenes ↕</th>}
-                  {visibleColumns.includes("price") && <th>Tipo de sede</th>}
-                  {visibleColumns.includes("wholesale") && <th>Responsable</th>}
-                  {visibleColumns.includes("status") && <th>Estado</th>}
-                  {visibleColumns.includes("location") && <th>Teléfono</th>}
+                  <th><input className="pxp-check" type="checkbox" checked={pageRows.length > 0 && pageRows.every(s => selected.includes(s.id))} onChange={e => selectAll(e.target.checked)} /></th>
+                  {visibleColumns.includes("sede") && <th>Sede ↕</th>}
+                  {visibleColumns.includes("codigo") && <th>Código ↕</th>}
+                  {visibleColumns.includes("ciudad") && <th>Ciudad</th>}
+                  {visibleColumns.includes("direccion") && <th>Dirección</th>}
+                  {visibleColumns.includes("almacenes") && <th>Almacenes ↕</th>}
+                  {visibleColumns.includes("tipo") && <th>Tipo de sede</th>}
+                  {visibleColumns.includes("responsable") && <th>Responsable</th>}
+                  {visibleColumns.includes("estado") && <th>Estado</th>}
+                  {visibleColumns.includes("telefono") && <th>Teléfono</th>}
                   <th style={{ textAlign: "right" }}>Acciones</th>
                 </tr></thead>
                 <tbody>
-                  {isLoadingProducts ? Array.from({ length: 6 }, (_, index) => (
-                    <tr key={`loading-${index}`} aria-busy="true">
-                      <td colSpan={visibleColumns.length + 2}>
-                        <div style={{ height: 22, borderRadius: 6, background: "#f1f5f9", animation: "pulse 1.5s ease-in-out infinite" }} />
-                      </td>
-                    </tr>
-                  )) : pageRows.map(p => <tr key={p.id}>
-                    <td><input className="pxp-check" type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleSelected(p.id)} /></td>
-                    {visibleColumns.includes("product") && <td onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><ProductThumb id={p.id} category={p.category} name={p.name} /><div><div className="pxp-product-name">{p.name}</div>{p.detail && <div className="pxp-product-sub">{p.detail}</div>}</div></div></td>}
-                    {visibleColumns.includes("sku") && <td>{p.sku}</td>}
-                    {visibleColumns.includes("barcode") && <td>{p.barcode || "—"}</td>}
-                    {visibleColumns.includes("category") && <td>{p.category}</td>}
-                    {visibleColumns.includes("stock") && <td><span className={`pxp-stock ${statusClass(p.status)}`}>{p.stock} un.</span></td>}
-                    {visibleColumns.includes("price") && <td>{money(p.price)}</td>}
-                    {visibleColumns.includes("wholesale") && <td>{money(p.wholesale || p.price)}</td>}
-                    {visibleColumns.includes("status") && <td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td>}
-                    {visibleColumns.includes("location") && <td>{p.location}</td>}
-                    <td><div className="pxp-actions" ref={menuId === p.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(p)}>✎</button><button className={`pxp-icon-btn ${menuId === p.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === p.id ? null : p.id)}>···</button>
-                      {menuId === p.id && <div className="pxp-action-menu">
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
-                        <button onClick={() => openEdit(p)}>✎　Editar sede</button>
-                        <button onClick={() => { setProducts(prev => [{ ...p, id: Date.now(), name: `${p.name} (copia)`, sku: `${p.sku}-COPY` }, ...prev]); setMenuId(null); showToast("Sede duplicada"); }}>▣　Duplicar</button>
-                        <button onClick={() => { setEditing(p); setForm({ name: p.name, sku: p.sku, category: p.category, stock: p.stock, price: p.price, location: p.location, description: p.description || "" }); setModal("stock"); setMenuId(null); }}>▤　Ajustar stock</button>
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Movimientos"); setMenuId(null); }}>⇄　Ver movimientos</button>
-                        <button onClick={() => { setDetailProduct(p); setDetailTab("Precios"); setMenuId(null); }}>⌁　Historial de precios</button>
-                        <button onClick={() => { setMenuId(null); showToast("No hay ventas vinculadas en esta demo"); }}>🛒　Ver en ventas</button>
-                        <button onClick={() => { setMenuId(null); showToast("No hay compras vinculadas en esta demo"); }}>▣　Ver en compras</button>
-                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar "${p.name}"?`)) { setProducts(prev => prev.filter(x => x.id !== p.id)); setMenuId(null); showToast("Sede eliminada"); } }}>▤　Eliminar</button>
+                  {pageRows.map(s => <tr key={s.id}>
+                    <td><input className="pxp-check" type="checkbox" checked={selected.includes(s.id)} onChange={() => toggleSelected(s.id)} /></td>
+                    {visibleColumns.includes("sede") && <td onClick={() => setDetailSede(s)} style={{ cursor: "pointer" }}><div className="pxp-product-cell"><div className="pxp-detail-art" style={{ width: 42, height: 42, color: "#ff4b0b" }}><Warehouse size={20} strokeWidth={1.75} /></div><div><div className="pxp-product-name">{s.nombre}</div>{s.subtitulo && <div className="pxp-product-sub">{s.subtitulo}</div>}</div></div></td>}
+                    {visibleColumns.includes("codigo") && <td>{s.codigo}</td>}
+                    {visibleColumns.includes("ciudad") && <td>{s.ciudad}</td>}
+                    {visibleColumns.includes("direccion") && <td style={{ maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis" }}>{s.direccion}</td>}
+                    {visibleColumns.includes("almacenes") && <td>{s.almacenes}</td>}
+                    {visibleColumns.includes("tipo") && <td>{s.tipo}</td>}
+                    {visibleColumns.includes("responsable") && <td>{s.responsable || "—"}</td>}
+                    {visibleColumns.includes("estado") && <td><span className={`pxp-badge ${s.estado === "Activa" ? "ok" : "zero"}`}>{s.estado}</span></td>}
+                    {visibleColumns.includes("telefono") && <td>{s.telefono || "—"}</td>}
+                    <td><div className="pxp-actions" ref={menuId === s.id ? actionsMenuRef : null}><button className="pxp-icon-btn" title="Ver detalle" onClick={() => { setDetailSede(s); setDetailTab("Resumen"); setMenuId(null); }}>◉</button><button className="pxp-icon-btn" title="Editar" onClick={() => openEdit(s)}>✎</button><button className={`pxp-icon-btn ${menuId === s.id ? "selected" : ""}`} title="Más acciones" onClick={() => setMenuId(menuId === s.id ? null : s.id)}>···</button>
+                      {menuId === s.id && <div className="pxp-action-menu" style={{ width: 210 }}>
+                        <button onClick={() => { setDetailSede(s); setDetailTab("Resumen"); setMenuId(null); }}>◉　Ver detalle</button>
+                        <button onClick={() => openEdit(s)}>✎　Editar sede</button>
+                        <button onClick={() => { setSedes(prev => [{ ...s, id: Date.now(), nombre: `${s.nombre} (copia)`, codigo: `${s.codigo}-COPY` }, ...prev]); setMenuId(null); showToast("Sede duplicada"); }}>▣　Duplicar</button>
+                        <button onClick={() => { setDetailSede(s); setDetailTab("Almacenes"); setMenuId(null); }}>▣　Ver almacenes</button>
+                        <button className="danger" onClick={() => { if (window.confirm(`¿Eliminar la sede "${s.nombre}"?`)) { setSedes(prev => prev.filter(x => x.id !== s.id)); setMenuId(null); showToast("Sede eliminada"); } }}>▤　Eliminar</button>
                       </div>}
                     </div></td>
                   </tr>)}
-                  {!isLoadingProducts && pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron sedes con esos filtros.</div></td></tr>}
+                  {pageRows.length === 0 && <tr><td colSpan={visibleColumns.length + 2}><div className="pxp-empty">No se encontraron sedes con esos filtros.</div></td></tr>}
                 </tbody>
               </table></div> : (
                 <div
@@ -1765,54 +790,32 @@ export default function SedesPanel() {
                     gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`
                   }}
                 >
-                  {pageRows.map(p => {
-                    const isSelected = selected.includes(p.id);
+                  {pageRows.map(s => {
+                    const isSelected = selected.includes(s.id);
                     return (
-                      <article className="pxp-product-card" key={p.id} onClick={() => setFullProduct(p)} style={{ cursor: "pointer" }}>
-                        <div className="pxp-card-media">
-                          <img
-                            src={getProductStockImage(p)}
-                            alt={p.name}
-                            className="pxp-card-img"
-                            loading="lazy"
-                            onError={e => {
-                              e.currentTarget.onerror = null;
-                              e.currentTarget.src = STOCK_IMAGES.default;
-                            }}
-                          />
+                      <article className="pxp-product-card" key={s.id} onClick={() => setDetailSede(s)} style={{ cursor: "pointer" }}>
+                        <div className="pxp-card-media" style={{ display: "grid", placeItems: "center", background: "linear-gradient(135deg,#f8fafc,#eef2f7)" }}>
+                          <div style={{ color: "#94a3b8" }}><Warehouse size={54} strokeWidth={1.5} /></div>
                           <div className="pxp-card-floating-bar" onClick={e => e.stopPropagation()}>
-                            <button
-                              type="button"
-                              className={`pxp-card-select-btn ${isSelected ? "selected" : ""}`}
-                              onClick={() => toggleSelected(p.id)}
-                              title={isSelected ? "Deseleccionar" : "Seleccionar"}
-                            >
+                            <button type="button" className={`pxp-card-select-btn ${isSelected ? "selected" : ""}`} onClick={() => toggleSelected(s.id)} title={isSelected ? "Deseleccionar" : "Seleccionar"}>
                               {isSelected && <Check size={14} strokeWidth={2.5} />}
                             </button>
                           </div>
                         </div>
-
                         <div className="pxp-card-body">
-                          <div className="pxp-card-meta">{p.sku} · {p.category}</div>
-                          <div className="pxp-card-name" title={p.name}>{p.name}</div>
-                          
-                          {/* Estado comercial minimalista entre título y precio */}
+                          <div className="pxp-card-meta">{s.codigo} · {s.ciudad}</div>
+                          <div className="pxp-card-name" title={s.nombre}>{s.nombre}</div>
                           <div className="pxp-card-status-line">
-                            <span className={`pxp-status-dot ${statusClass(p.status)}`} />
-                            <span className="pxp-status-text">{p.status}</span>
+                            <span className={`pxp-status-dot ${s.estado === "Activa" ? "ok" : "zero"}`} />
+                            <span className="pxp-status-text">{s.estado} · {s.tipo}</span>
                           </div>
-
                           <div className="pxp-card-bottom">
-                            <div>
-                              <span className="pxp-card-price">{money(p.price)}</span>
-                            </div>
-                            <div className="pxp-card-stock-pill">
-                              <span>{p.stock} {p.unit || "un."}</span>
-                            </div>
+                            <div><span className="pxp-card-price">{s.almacenes} almacenes</span></div>
+                            <div className="pxp-card-stock-pill"><span>{s.responsable || "Sin responsable"}</span></div>
                           </div>
                           <div className="pxp-card-actions" onClick={e => e.stopPropagation()}>
-                            <button className="pxp-btn small" onClick={() => { setDetailProduct(p); setDetailTab("Resumen"); }}>Ver detalle</button>
-                            <button className="pxp-btn small" onClick={() => openEdit(p)}>Editar</button>
+                            <button className="pxp-btn small" onClick={() => { setDetailSede(s); setDetailTab("Resumen"); }}>Ver detalle</button>
+                            <button className="pxp-btn small" onClick={() => openEdit(s)}>Editar</button>
                           </div>
                         </div>
                       </article>
@@ -1827,259 +830,209 @@ export default function SedesPanel() {
         </main>
       </div>
 
-      {detailProduct && (
+
+
+
+      {detailSede && (
         <>
-          <div className="pxp-overlay" onClick={() => setDetailProduct(null)} />
+          <div className="pxp-overlay" onClick={() => setDetailSede(null)} />
           <aside className="pxp-detail">
-            <button className="pxp-icon-btn pxp-detail-close" onClick={() => setDetailProduct(null)} title="Cerrar panel">×</button>
+            <button className="pxp-icon-btn pxp-detail-close" onClick={() => setDetailSede(null)} title="Cerrar panel">×</button>
             <div className="pxp-detail-head">
               <div className="pxp-detail-product">
-                <div className="pxp-detail-art">
-                  <ProductThumb id={detailProduct.id} category={detailProduct.category} name={detailProduct.name} size={60} />
-                </div>
+                <div className="pxp-detail-art" style={{ color: "#ff4b0b" }}><Warehouse size={30} strokeWidth={1.8} /></div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <h2 className="pxp-detail-title" style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#0f172a" }}>{detailProduct.name}</h2>
+                  <h2 className="pxp-detail-title" style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#0f172a" }}>{detailSede.nombre}</h2>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 5, flexWrap: "wrap" }}>
-                    <span className={`pxp-badge ${statusClass(detailProduct.status)}`} style={{ fontSize: 12 }}>
-                      {detailProduct.status}
-                    </span>
-                    <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>
-                      · {detailProduct.category}
-                    </span>
-                    {detailProduct.brand && detailProduct.brand !== "—" && (
-                      <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>
-                        · {detailProduct.brand}
-                      </span>
-                    )}
+                    <span className={`pxp-badge ${detailSede.estado === "Activa" ? "ok" : "zero"}`} style={{ fontSize: 12 }}>{detailSede.estado}</span>
+                    <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>· {detailSede.tipo}</span>
+                    <span style={{ color: "#64748b", fontSize: 13, fontWeight: 500 }}>· {detailSede.codigo}</span>
                   </div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 12, marginTop: 16, flexWrap: "wrap" }}>
-                <button
-                  className="pxp-btn small"
-                  style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
-                  onClick={() => openEdit(detailProduct)}
-                >
-                  ✎ Editar sede
-                </button>
-                <button
-                  className="pxp-btn small"
-                  onClick={() => {
-                    setEditing(detailProduct);
-                    setForm({
-                      name: detailProduct.name,
-                      sku: detailProduct.sku,
-                      category: detailProduct.category,
-                      stock: detailProduct.stock,
-                      price: detailProduct.price,
-                      location: detailProduct.location,
-                      description: detailProduct.description || ""
-                    });
-                    setModal("stock");
-                  }}
-                >
-                  ▤ Ajustar stock
-                </button>
+                <button className="pxp-btn small" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }} onClick={() => openEdit(detailSede)}>✎ Editar sede</button>
+                <button className="pxp-btn small" onClick={() => { setSedes(prev => [{ ...detailSede, id: Date.now(), nombre: `${detailSede.nombre} (copia)`, codigo: `${detailSede.codigo}-COPY` }, ...prev]); showToast("Sede duplicada"); }}>▣ Duplicar</button>
               </div>
               <div className="pxp-detail-grid" style={{ marginTop: 16 }}>
                 <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
-                  <div className="pxp-kv"><span>SKU</span><b>{detailProduct.sku}</b></div>
-                  <div className="pxp-kv"><span>Código de barras</span><b>{detailProduct.barcode || "—"}</b></div>
+                  <div className="pxp-kv"><span>Ciudad</span><b>{detailSede.ciudad}</b></div>
+                  <div className="pxp-kv"><span>Almacenes asociados</span><b>{detailSede.almacenes}</b></div>
                 </div>
                 <div className="pxp-detail-box" style={{ padding: "12px 14px" }}>
-                  <div className="pxp-kv"><span>Precio de venta</span><b>{money(detailProduct.salePrice ?? detailProduct.price)}</b></div>
-                  <div className="pxp-kv"><span>Stock total</span><b className={`pxp-stock ${statusClass(detailProduct.status)}`}>{detailProduct.stock} un.</b></div>
+                  <div className="pxp-kv"><span>Responsable</span><b>{detailSede.responsable || "—"}</b></div>
+                  <div className="pxp-kv"><span>Teléfono</span><b>{detailSede.telefono || "—"}</b></div>
                 </div>
               </div>
             </div>
 
             <div className="pxp-detail-tabs">
-              {["Resumen", "Inventario", "Precios", "Movimientos", "Proveedores", "Ventas"].map(t => (
-                <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>
-                  {t}
-                </button>
+              {["Resumen", "Contacto", "Almacenes"].map(t => (
+                <button key={t} className={detailTab === t ? "active" : ""} onClick={() => setDetailTab(t)}>{t}</button>
               ))}
             </div>
 
             <div className="pxp-detail-content">
               {detailTab === "Resumen" && (
                 <div className="pxp-detail-grid">
-                  {/* Ficha Técnica */}
                   <div className="pxp-detail-box">
-                    <h3>▤ Ficha técnica</h3>
-                    {[
-                      ["Categoría", detailProduct.category],
-                      ["Marca", detailProduct.brand || "—"],
-                      ["Presentación", detailProduct.presentation ? (detailProduct.presentation.length > 2 && detailProduct.presentation === detailProduct.presentation.toUpperCase() ? detailProduct.presentation.charAt(0).toUpperCase() + detailProduct.presentation.slice(1).toLowerCase() : detailProduct.presentation) : "—"],
-                      ["Unidad de medida", detailProduct.unit ? (detailProduct.unit.length > 2 && detailProduct.unit === detailProduct.unit.toUpperCase() ? detailProduct.unit.charAt(0).toUpperCase() + detailProduct.unit.slice(1).toLowerCase() : detailProduct.unit) : "un."],
-                      ["Condición Qaway", `${detailProduct.condition || 10}/10`],
-                      ["Estado actual", detailProduct.status]
-                    ].map(([k, v]) => (
-                      <div className="pxp-kv" key={k}>
-                        <span>{k}</span>
-                        <b>{v}</b>
-                      </div>
+                    <h3>▤ Ficha de la sede</h3>
+                    {[["Código", detailSede.codigo], ["Subtítulo", detailSede.subtitulo || "—"], ["Tipo de sede", detailSede.tipo], ["Estado", detailSede.estado], ["Ciudad", detailSede.ciudad], ["Almacenes", `${detailSede.almacenes} almacenes asociados`]].map(([k, v]) => (
+                      <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>
                     ))}
                   </div>
-
-                  {/* Disponibilidad y Valor */}
                   <div className="pxp-detail-box">
-                    <h3>▣ Disponibilidad y valor</h3>
-                    {[
-                      ["Stock global disponible", `${detailProduct.stock} un.`],
-                      ["Valorización en inventario", money(detailProduct.stock * detailProduct.price)],
-                      ["Ubicación principal", detailProduct.location || "Almacén Principal"],
-                      ["Precio de venta regular", money(detailProduct.salePrice ?? detailProduct.price)],
-                      ["Régimen tributario", "IGV (18% Gravado)"]
-                    ].map(([k, v]) => (
-                      <div className="pxp-kv" key={k}>
-                        <span>{k}</span>
-                        <b style={{ color: k.includes("Stock") ? "#059669" : "#0f172a" }}>{v}</b>
-                      </div>
+                    <h3>▣ Dirección y operación</h3>
+                    {[["Dirección", detailSede.direccion || "—"], ["Responsable", detailSede.responsable || "—"], ["Fecha de creación", detailSede.fechaCreacion || "—"], ["Última actualización", detailSede.actualizacion || "—"]].map(([k, v]) => (
+                      <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>
                     ))}
                   </div>
-
-                  {/* Descripción oficial (único lugar) */}
                   <div className="pxp-detail-box full">
                     <h3>▣ Descripción oficial de la sede</h3>
-                    <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.7, margin: 0 }}>
-                      {detailProduct.description || "Sin descripción registrada para esta sede."}
-                    </p>
+                    <p style={{ color: "#334155", fontSize: 13.5, lineHeight: 1.7, margin: 0 }}>{detailSede.descripcion || "Sin descripción registrada para esta sede."}</p>
                   </div>
                 </div>
               )}
 
-              {detailTab === "Inventario" && (
+              {detailTab === "Contacto" && (
                 <div className="pxp-detail-box">
-                  <h3>▣ Stock detallado por sede / almacén</h3>
-                  <table className="pxp-detail-table">
-                    <thead>
-                      <tr>
-                        <th>Almacén / Tienda</th>
-                        <th style={{ textAlign: "right" }}>Stock disponible</th>
-                        <th style={{ textAlign: "right" }}>Alerta mínima</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(detailProduct.warehouse || [{ name: detailProduct.location || "Almacén Principal", stock: detailProduct.stock, min: 0 }]).map(w => (
-                        <tr key={w.name}>
-                          <td style={{ fontWeight: 600 }}>{w.name}</td>
-                          <td style={{ textAlign: "right", color: w.stock > 0 ? "#059669" : "#71717a", fontWeight: 700 }}>{w.stock} un.</td>
-                          <td style={{ textAlign: "right", color: "#64748b" }}>{w.min ?? "—"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
-                    <div style={{ fontSize: 13, color: "#64748b" }}>
-                      Total consolidado: <b style={{ color: "#059669" }}>{detailProduct.stock} unidades</b>
-                    </div>
-                    <button
-                      className="pxp-btn small"
-                      style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}
-                      onClick={() => {
-                        setEditing(detailProduct);
-                        setForm({
-                          name: detailProduct.name,
-                          sku: detailProduct.sku,
-                          category: detailProduct.category,
-                          stock: detailProduct.stock,
-                          price: detailProduct.price,
-                          location: detailProduct.location,
-                          description: detailProduct.description || ""
-                        });
-                        setModal("stock");
-                      }}
-                    >
-                      ▤ Ajustar stock
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === "Precios" && (
-                <div className="pxp-detail-box">
-                  <h3>▣ Matriz comercial y listas de precios</h3>
-                  {[
-                    ["Precio de venta final (PVP)", money(detailProduct.salePrice ?? detailProduct.price)],
-                    ["Precio base / lista neto", money(detailProduct.price)],
-                    ["Precio mayorista (volumen)", money(detailProduct.wholesale ?? detailProduct.price)],
-                    ["Precio mínimo permitido (piso)", money(detailProduct.minPrice ?? detailProduct.price)],
-                    ["Costo referencial de compra", money(detailProduct.cost ?? (detailProduct.price * 0.5))],
-                    ["Moneda de operación", "PEN (S/)"],
-                    ["Régimen tributario", "IGV 18% Gravado"]
-                  ].map(([k, v]) => (
-                    <div className="pxp-kv" key={k}>
-                      <span>{k}</span>
-                      <b>{v}</b>
-                    </div>
+                  <h3>🏢 Datos de contacto</h3>
+                  {[["Teléfono", detailSede.telefono || "—"], ["Email", detailSede.email || "—"], ["Responsable", detailSede.responsable || "—"], ["Dirección", detailSede.direccion || "—"]].map(([k, v]) => (
+                    <div className="pxp-kv" key={k}><span>{k}</span><b>{v}</b></div>
                   ))}
                 </div>
               )}
 
-              {detailTab === "Movimientos" && (
+              {detailTab === "Almacenes" && (
                 <div className="pxp-detail-box">
-                  <h3>⇄ Historial y Kardex de movimientos</h3>
-                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Registro de entradas y salidas</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Se generarán automáticamente al emitir ventas, registrar compras o realizar ajustes de inventario.</p>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === "Proveedores" && (
-                <div className="pxp-detail-box">
-                  <h3>🏢 Proveedores y Abastecimiento</h3>
-                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin proveedor principal vinculado</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Puedes asignar proveedores de origen desde el módulo de Compras y Proveedores.</p>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === "Ventas" && (
-                <div className="pxp-detail-box">
-                  <h3>🛒 Historial de Ventas y Salidas</h3>
-                  <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin ventas registradas en esta demo</p>
-                    <p style={{ margin: 0, fontSize: 13 }}>Las órdenes y boletas/facturas generadas en el POS se listarán aquí en tiempo real.</p>
-                  </div>
+                  <h3>▣ Almacenes de la sede</h3>
+                  {almacenes.filter(a => a.sede === detailSede.nombre).length > 0 ? (
+                    <table className="pxp-detail-table">
+                      <thead><tr><th>Almacén</th><th>Tipo</th><th style={{ textAlign: "right" }}>Productos</th><th style={{ textAlign: "right" }}>Estado</th></tr></thead>
+                      <tbody>
+                        {almacenes.filter(a => a.sede === detailSede.nombre).map(a => (
+                          <tr key={a.id}>
+                            <td style={{ fontWeight: 600 }}>{a.nombre}</td>
+                            <td>{a.tipo}</td>
+                            <td style={{ textAlign: "right", color: "#059669", fontWeight: 700 }}>{a.productos.toLocaleString("es-PE")}</td>
+                            <td style={{ textAlign: "right" }}>{a.estado}</td>
+                          </tr>
+                        ))}
+                                            </tbody>
+                    </table>
+                  ) : (
+                    <div style={{ padding: "20px 0", textAlign: "center", color: "#64748b" }}>
+                      <p style={{ margin: "0 0 6px", fontWeight: 600, color: "#1e293b" }}>Sin almacenes asociados</p>
+                      <p style={{ margin: 0, fontSize: 13 }}>Registra almacenes desde el tablero inferior, sección Almacenes.</p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </aside>
         </>
       )}
-
-
-
       {modal === "import" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" onClick={e => e.stopPropagation()}>
         <div className="pxp-modal-head"><div className="pxp-heading-icon"><FileSpreadsheet size={20} /></div><div><h2>Importar sedes</h2><p>Carga sedes desde un archivo Excel o CSV. Puedes actualizar existentes o solo agregar nuevas.</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div>
         <div className="pxp-modal-body">
           <div className="pxp-stepper">{["Cargar archivo", "Mapear campos", "Validar datos", "Importar"].map((s, i) => <div key={s} className={`pxp-step ${importStep === i + 1 ? "active" : importStep > i + 1 ? "done" : ""}`}><span>{importStep > i + 1 ? "✓" : i + 1}</span><div><b>{s}</b><div className="pxp-muted">{["Selecciona tu archivo", "Relaciona las columnas", "Revisa los registros", "Confirma y procesa"][i]}</div></div></div>)}</div>
           {importStep === 1 && <div className="pxp-import-columns"><div className="pxp-panel"><h3>1. Cargar archivo</h3><p className="pxp-muted">Formatos soportados: Excel (.xlsx, .xls) o CSV (.csv). Tamaño máximo: 10 MB.</p><label className="pxp-dropzone"><div style={{ fontSize: 30, color: "#2165ed" }}><Download size={32} /></div><b>{importFile ? importFile.name : "Arrastra tu archivo aquí"}</b><span className="pxp-muted">o haz clic para seleccionar</span><input type="file" accept=".xlsx,.xls,.csv" onChange={e => handleImportFile(e.target.files?.[0])} /></label><button className="pxp-link" onClick={() => showToast("La plantilla de ejemplo estará disponible al conectar el módulo de archivos.")}>Descargar plantilla de ejemplo (Excel)</button></div><div className="pxp-info"><b>Información importante</b><ul><li>Puedes importar sedes nuevas o actualizar existentes.</li><li>Usa los campos obligatorios: nombre y código.</li><li>Si el código ya existe, se actualizará según la opción elegida.</li><li>Puedes incluir ciudades, direcciones, tipos y almacenes.</li><li>Se validarán errores antes de importar.</li></ul></div></div>}
           {importStep === 2 && <div className="pxp-panel"><h3>2. Mapear campos</h3><p className="pxp-muted">Relaciona las columnas de tu archivo con los campos del sistema.</p>{["Código → Código (obligatorio)", "Nombre de la sede → Nombre (obligatorio)", "Ciudad → Ciudad", "Dirección → Dirección", "Tipo → Tipo de sede", "Almacenes → Almacenes", "Responsable → Responsable", "Teléfono → Teléfono"].map(row => <div className="pxp-map-row" key={row}><input value={row.split(" → ")[0]} readOnly /><select defaultValue={row.split(" → ")[1]}><option>{row.split(" → ")[1]}</option><option>Omitir columna</option><option>Descripción</option><option>Almacenes</option><option>Tipo de sede</option></select></div>)}</div>}
-          {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>Código</th><th>Nombre</th><th>Ciudad</th><th>Tipo</th><th>Almacenes</th><th>Estado</th></tr></thead><tbody>{products.slice(0, 5).map((p, i) => <tr key={p.id}><td>{i + 1}</td><td>{p.sku}</td><td>{p.name}</td><td>{p.barcode || "—"}</td><td>{p.category}</td><td>{p.stock}</td><td><span className={`pxp-badge ${statusClass(p.status)}`}>{p.status}</span></td></tr>)}</tbody></table></div></div>}
+          {importStep === 3 && <div className="pxp-panel"><h3>3. Vista previa y validación</h3><p className="pxp-muted">{importFile ? `Archivo seleccionado: ${importFile.name}` : "Vista previa de registros de ejemplo."} Revisa los campos antes de continuar.</p><div className="pxp-preview-scroll"><table className="pxp-preview-table"><thead><tr><th>#</th><th>Código</th><th>Nombre</th><th>Ciudad</th><th>Tipo</th><th>Almacenes</th><th>Estado</th></tr></thead><tbody>{sedes.slice(0, 5).map((s, i) => <tr key={s.id}><td>{i + 1}</td><td>{s.codigo}</td><td>{s.nombre}</td><td>{s.ciudad}</td><td>{s.tipo}</td><td>{s.almacenes}</td><td><span className={`pxp-badge ${s.estado === "Activa" ? "ok" : "zero"}`}>{s.estado}</span></td></tr>)}</tbody></table></div></div>}
           {importStep === 4 && <div className="pxp-info"><h3>4. Confirmar importación</h3><p>Revisa el modo de importación. La ejecución real requiere conectar el servicio de importación del backend.</p><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "merge"} onChange={() => setImportOption("merge")} /> Agregar nuevos y actualizar existentes</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "new"} onChange={() => setImportOption("new")} /> Solo agregar nuevos</label><label style={{ display: "block", margin: "10px 0" }}><input type="radio" checked={importOption === "update"} onChange={() => setImportOption("update")} /> Solo actualizar existentes</label></div>}
         </div>
         <div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => importStep > 1 ? setImportStep(s => s - 1) : setModal("")}>{importStep > 1 ? "← Anterior" : "Cancelar"}</button><button className="pxp-btn primary" onClick={() => { if (importStep < 4) { if (importStep === 1 && !importFile) { showToast("Selecciona un archivo para continuar"); return; } setImportStep(s => s + 1); } else finishImport(); }}>{importStep === 4 ? "Confirmar e importar" : "Continuar →"}</button></div>
       </section></div>}
 
-      {modal === "product" && (
-        <ProductModal
-          editing={editing}
-          form={form}
-          setForm={setForm}
-          showAdvanced={showAdvanced}
-          setShowAdvanced={setShowAdvanced}
-          categories={categories}
-          onClose={() => setModal("")}
-          onSave={saveProduct}
-        />
+
+
+      {modal === "sede" && (
+        <div className="pxp-overlay" onClick={() => setModal("")} style={{ colorScheme: "light" }}>
+          <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light" }} onClick={e => e.stopPropagation()}>
+            <form onSubmit={saveSede}>
+              <div className="pxp-modal-head">
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div className="pxp-heading-icon"><Warehouse size={20} strokeWidth={1.8} /></div>
+                  <div>
+                    <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.3px", lineHeight: 1.25 }}>
+                      {editing ? "Editar sede" : "Nueva sede"}
+                    </h2>
+                    <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", lineHeight: 1.5 }}>
+                      {editing ? `Modificando: ${editing.nombre}` : "Registra una nueva sede con sus datos de operación"}
+                    </p>
+                  </div>
+                </div>
+                <button type="button" className="pxp-icon-btn close" onClick={() => setModal("")} title="Cerrar"><X size={18} /></button>
+              </div>
+
+              <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px" }}>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Nombre de la sede <span style={{ color: "#ef4444" }}>*</span></div>
+                  <input name="nombre" required defaultValue={form.nombre} className="pxp-form-input" placeholder="Ej. Sede Lima" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Código <span style={{ color: "#ef4444" }}>*</span></div>
+                  <input name="codigo" required defaultValue={form.codigo} className="pxp-form-input" placeholder={`Ej. SED-${String(sedes.length + 1).padStart(3, "0")}`} />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Subtítulo</div>
+                  <input name="subtitulo" defaultValue={form.subtitulo} className="pxp-form-input" placeholder="Ej. Oficina principal" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Tipo de sede</div>
+                  <select name="tipo" defaultValue={form.tipo} className="pxp-form-input" style={{ colorScheme: "light" }}>
+                    {["Principal", "Tienda", "Almacén", "Punto de venta"].map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Estado</div>
+                  <select name="estado" defaultValue={form.estado} className="pxp-form-input" style={{ colorScheme: "light" }}>
+                    <option>Activa</option>
+                    <option>Inactiva</option>
+                  </select>
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Ciudad</div>
+                  <select name="ciudad" defaultValue={form.ciudad} className="pxp-form-input" style={{ colorScheme: "light" }}>
+                    {["Lima", "Cusco", "Arequipa", "Trujillo"].map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Dirección <span style={{ color: "#ef4444" }}>*</span></div>
+                  <input name="direccion" required defaultValue={form.direccion} className="pxp-form-input" placeholder="Ej. Av. José Pardo 123, Miraflores" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Responsable</div>
+                  <input name="responsable" defaultValue={form.responsable} className="pxp-form-input" placeholder="Ej. Carlos Sandoval" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Teléfono</div>
+                  <input name="telefono" defaultValue={form.telefono} className="pxp-form-input" placeholder="+51 987 654 321" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Email</div>
+                  <input name="email" type="email" defaultValue={form.email} className="pxp-form-input" placeholder="sede@empresa.com" />
+                </div>
+                <div className="pxp-form-row">
+                  <div className="pxp-form-label">Cantidad de almacenes</div>
+                  <input name="almacenes" type="number" min="0" defaultValue={form.almacenes} className="pxp-form-input" placeholder="0" />
+                </div>
+                <div className="pxp-form-row" style={{ gridTemplateColumns: "160px 1fr", alignItems: "start" }}>
+                  <div className="pxp-form-label">Descripción</div>
+                  <textarea name="descripcion" defaultValue={form.descripcion} className="pxp-form-input" style={{ minHeight: 70, resize: "vertical" }} placeholder="Notas sobre la sede, giro u horarios..." />
+                </div>
+              </div>
+
+              <div className="pxp-modal-foot">
+                <button type="button" className="pxp-btn" onClick={() => setModal("")}>Cancelar</button>
+                <button type="submit" className="pxp-btn primary" style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>
+                  {editing ? "Guardar cambios" : "Crear sede"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
       )}
-
-      {modal === "stock" && <div className="pxp-overlay" onClick={() => setModal("")}><section className="pxp-modal" style={{ maxWidth: 480 }} onClick={e => e.stopPropagation()}><div className="pxp-modal-head"><div className="pxp-heading-icon"><Boxes size={20} strokeWidth={1.8} /></div><div><h2>Ajustar stock</h2><p>{editing?.name}</p></div><button className="pxp-icon-btn close" onClick={() => setModal("")}>×</button></div><div className="pxp-modal-body"><div className="pxp-field"><label>Stock actual</label><input value={`${editing?.stock ?? 0} unidades`} readOnly /></div><div className="pxp-field"><label>Nuevo stock</label><input type="number" min="0" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} /></div><div className="pxp-field"><label>Motivo del ajuste</label><select defaultValue="Conteo físico"><option>Conteo físico</option><option>Corrección de inventario</option><option>Merma o pérdida</option><option>Otro</option></select></div></div><div className="pxp-modal-foot"><button className="pxp-btn" onClick={() => setModal("")}>Cancelar</button><button className="pxp-btn primary" onClick={() => { const stock = Math.max(0, Number(form.stock) || 0); setProducts(prev => prev.map(p => p.id === editing.id ? { ...p, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" } : p)); if (detailProduct?.id === editing.id) setDetailProduct(prev => ({ ...prev, stock, status: stock === 0 ? "Sin stock" : stock <= 10 ? "Stock bajo" : "Disponible" })); setModal(""); showToast("Stock actualizado"); }}>Guardar ajuste</button></div></section></div>}
-
       {toast && <div className="pxp-toast">{toast}</div>}
     </div>
   );

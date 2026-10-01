@@ -20,6 +20,7 @@ import { RecentActivity } from '@/components/dashboard/RecentActivity'
 import { TopProducts } from '@/components/dashboard/TopProducts'
 import { SalesChartsSection } from '@/components/dashboard/SalesCharts'
 import { CollapsibleSection } from '@/components/dashboard/CollapsibleSection'
+import HubPanelPage from '../../../HubPanelPage'
 
 export default function DashboardPage() {
   const [isOperationOpen, setIsOperationOpen] = useState(false)
@@ -111,7 +112,10 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-8">
+    <>
+      <HubPanelPage canvasOnly />
+
+      <div className="space-y-8">
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* CABECERA ÚNICA (diseño acoplado + botón Actualizar funcional)   */}
       {/* ═══════════════════════════════════════════════════════════════ */}
@@ -141,7 +145,7 @@ export default function DashboardPage() {
       <QuickAccessCards />
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* KPIs PRINCIPALES (colapsable, data real)                        */}
+      {/* KPIs PRINCIPALES: contexto general de inventario y operación */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
         <CollapsibleSection id="kpis-principales" title="Métricas Principales" defaultOpen={true}>
@@ -149,7 +153,7 @@ export default function DashboardPage() {
             <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
               <div>
                 <span className="text-xs font-medium text-zinc-500">Productos activos</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalProducts}</p>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.activeProducts}</p>
               </div>
               <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">◇</div>
             </div>
@@ -165,7 +169,7 @@ export default function DashboardPage() {
             <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
               <div>
                 <span className="text-xs font-medium text-zinc-500">Compras del mes</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.purchasesMonth)}</p>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.purchasesMonthAmount)}</p>
               </div>
               <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">🚚</div>
             </div>
@@ -173,7 +177,7 @@ export default function DashboardPage() {
             <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
               <div>
                 <span className="text-xs font-medium text-zinc-500">Stock disponible</span>
-                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalStock ?? stats.totalProducts} un.</p>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalStock} un.</p>
               </div>
               <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">▤</div>
             </div>
@@ -182,35 +186,35 @@ export default function DashboardPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* MÉTRICAS EJECUTIVAS - VENTAS Y FLUJO DE CAJA (original)         */}
+      {/* DESGLOSE COMERCIAL: evita repetir el importe principal */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
         <CollapsibleSection id="ventas-caja" title="Ventas y Flujo de Caja" defaultOpen={false}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Ventas Hoy" value={stats.salesToday} icon={TrendingUp} color="text-brand" />
             <StatCard label="Esta Semana" value={stats.salesWeek} icon={TrendingUp} color="text-green-400" />
-            <StatCard label="Este Mes" value={stats.salesMonth} icon={TrendingUp} color="text-brand" />
-            <StatCard label="Por Cobrar" value={stats.pendingPayments} icon={FileText} color="text-yellow-400" />
+            <StatCard label="Transacciones del mes" value={stats.salesMonth} icon={TrendingUp} color="text-brand" />
+            <StatCard label="Por cobrar" value={formatCurrency(stats.pendingPaymentsAmount)} icon={FileText} color="text-yellow-400" />
           </div>
         </CollapsibleSection>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* MÉTRICAS DE INVENTARIO (original, colapsable)                   */}
+      {/* SALUD DEL INVENTARIO: alertas y valorización */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
         <CollapsibleSection id="inventario" title="Inventario" defaultOpen={false}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard label="Productos" value={stats.totalProducts} icon={Package} color="text-brand" />
             <StatCard label="Valor inventario" value={formatCurrency(stats.inventoryValue)} icon={TrendingUp} color="text-green-400" />
             <StatCard label="Stock bajo" value={stats.lowStockCount} icon={AlertTriangle} color="text-yellow-400" />
             <StatCard label="Sin stock" value={stats.outOfStockCount} icon={TrendingDown} color="text-red-400" />
+            <StatCard label="Productos" value={stats.totalProducts} icon={Package} color="text-brand" />
           </div>
         </CollapsibleSection>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* MÉTRICAS COMERCIALES (original, colapsable)                     */}
+      {/* CONTEXTO DE MÓDULOS RELACIONADOS */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
         <CollapsibleSection id="comercial" title="Comercial" defaultOpen={false}>
@@ -218,7 +222,7 @@ export default function DashboardPage() {
             <StatCard label="Clientes" value={stats.totalCustomers} icon={Users} color="text-purple-400" />
             <StatCard label="Cotizaciones pendientes" value={stats.pendingQuotations} icon={FileText} color="text-blue-400" />
             <StatCard label="Campañas activas" value={stats.activeCampaigns} icon={Zap} color="text-orange-400" />
-            <StatCard label="Compras mes" value={formatCurrency(stats.purchasesMonth)} icon={ShoppingCart} color="text-cyan-400" />
+            <StatCard label="Órdenes de compra" value={stats.purchasesMonth} icon={ShoppingCart} color="text-cyan-400" />
           </div>
         </CollapsibleSection>
       )}
@@ -324,6 +328,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   )
 }
