@@ -13,6 +13,8 @@ import {
   Search,
   X,
   ChevronDown,
+  ChevronUp,
+  Briefcase,
   ArrowLeft,
   Trash2,
   Edit,
@@ -231,19 +233,19 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
         <form onSubmit={handleSubmit}>
           <div className="pxp-modal-head">
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div className="pxp-heading-icon" style={{ background: "#fff2eb", borderColor: "#fed7aa", color: "#ff4b0b" }}>
+              <div className="pxp-heading-icon">
                 <Boxes size={20} strokeWidth={1.8} />
               </div>
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>
-                  {editing ? "Editar producto" : "Nuevo producto / servicio"}
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0, letterSpacing: "-0.3px", lineHeight: 1.25 }}>
+                  {editing ? "Editar producto" : "Nuevo producto"}
                 </h2>
-                <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>
-                  {editing ? `Modificando: ${editing.name}` : "Registra un nuevo ítem en el inventario de Qaway Lab"}
+                <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", lineHeight: 1.5 }}>
+                  {editing ? `Modificando: ${editing.name}` : "Completa los datos para registrarlo en tu inventario."}
                 </p>
               </div>
             </div>
-            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar">×</button>
+            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar"><X size={18} /></button>
           </div>
 
           <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px" }}>
@@ -257,9 +259,9 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   flex: 1,
                   padding: "10px 14px",
                   borderRadius: 10,
-                  border: form.hasStock ? "1.5px solid #ff4b0b" : "1px solid #e2e8f0",
-                  background: form.hasStock ? "#fff2eb" : "#fff",
-                  color: form.hasStock ? "#ff4b0b" : "#475569",
+                  border: form.hasStock ? "1.5px solid #52525b" : "1px solid #e2e8f0",
+                  background: form.hasStock ? "#f4f4f5" : "#fff",
+                  color: form.hasStock ? "#0f172a" : "#475569",
                   fontWeight: 700,
                   fontSize: 13,
                   cursor: "pointer",
@@ -270,7 +272,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   transition: "all .15s ease"
                 }}
               >
-                <span>✓</span> Con inventario / stock
+                <Package size={15} /> Con inventario / stock
               </button>
               <button
                 type="button"
@@ -293,7 +295,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   transition: "all .15s ease"
                 }}
               >
-                <span>🏷️</span> Servicio / Intangible
+                <Briefcase size={15} /> Servicio / Intangible
               </button>
             </div>
 
@@ -435,7 +437,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
               {/* Categoría y Sede */}
               <div className="pxp-form-row">
                 <div className="pxp-form-label">Categoría y Sede</div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <PxpPopup
                     value={form.category}
                     onChange={v => setForm(prev => ({ ...prev, category: v }))}
@@ -455,7 +457,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
               {form.hasStock && (
                 <div className="pxp-form-row">
                   <div className="pxp-form-label">Stock y Alerta Mínima</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
                       <input
                         type="text"
@@ -510,7 +512,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                     padding: 0
                   }}
                 >
-                  <span>{showAdvanced ? "Ocultar opciones avanzadas ⌃" : "Opciones avanzadas ⌄"}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>{showAdvanced ? <>Ocultar opciones avanzadas <ChevronUp size={15} /></> : <>Opciones avanzadas <ChevronDown size={15} /></>}</span>
                 </button>
               </div>
 
@@ -520,15 +522,15 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   background: "#f8fafc",
                   border: "1px solid #e2e8f0",
                   borderRadius: 12,
-                  padding: 16,
+                  padding: 20,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 12
+                  gap: 16
                 }}>
                   {/* Costo de compra y Margen */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Costo de compra ({form.currency === "USD" ? "$" : "S/"})
                       </label>
                       <input
@@ -551,7 +553,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Margen de ganancia (%)
                       </label>
                       <input
@@ -571,9 +573,9 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   </div>
 
                   {/* Precios escalonados: Mayorista y Mínimo */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Precio Mayorista (S/)
                       </label>
                       <input
@@ -591,7 +593,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Precio Mínimo de venta (S/)
                       </label>
                       <input
@@ -611,23 +613,20 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   </div>
 
                   {/* Escala de condición Qaway (1-10) y Marca */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Condición / Calidad (Escala 1-10)
                       </label>
-                      <select
-                        className="pxp-form-input"
+                      <PxpPopup
                         value={form.condition}
-                        onChange={e => setForm(prev => ({ ...prev, condition: Number(e.target.value) }))}
-                      >
-                        {[10, 9, 8, 7, 6, 5].map(n => (
-                          <option key={n} value={n}>{n}/10 - {n === 10 ? "Nuevo / Óptimo" : n >= 8 ? "Excelente estado" : "Aceptable"}</option>
-                        ))}
-                      </select>
+                        onChange={v => setForm(prev => ({ ...prev, condition: Number(v) }))}
+                        options={[10, 9, 8, 7, 6, 5].map(n => ({ v: n, l: `${n}/10 - ${n === 10 ? "Nuevo / Óptimo" : n >= 8 ? "Excelente estado" : "Aceptable"}` }))}
+                        wrapStyle={{ width: "100%" }}
+                      />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Marca o Laboratorio
                       </label>
                       <input
@@ -640,9 +639,9 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   </div>
 
                   {/* Código de barras y Código SUNAT */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Código de barras (EAN-13)
                       </label>
                       <input
@@ -653,7 +652,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Código SUNAT (Catálogo 25)
                       </label>
                       <input
@@ -666,9 +665,9 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                   </div>
 
                   {/* Peso y Dimensiones */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Peso (kg / gr)
                       </label>
                       <input
@@ -679,7 +678,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                      <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                         Dimensiones (L × A × Alto cm)
                       </label>
                       <input
@@ -707,7 +706,7 @@ const ProductModal = React.memo(function ProductModal({ editing, form: initialFo
 
                   {/* Descripción */}
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 4 }}>
+                    <label style={{ fontSize: 12, fontWeight: 650, color: "#475569", display: "block", marginBottom: 6 }}>
                       Descripción detallada
                     </label>
                     <textarea

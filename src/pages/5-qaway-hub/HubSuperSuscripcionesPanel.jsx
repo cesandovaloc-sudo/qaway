@@ -339,7 +339,7 @@ export default function SuscripcionesPanel({
   const [selectedSub, setSelectedSub] = useState(null);
   const [modalPlan, setModalPlan] = useState("Básico");
   const [modalRateMode, setModalRateMode] = useState("oferta"); // "oferta" | "regular" | "custom"
-  const [modalIncludeCatalog, setModalIncludeCatalog] = useState(false);
+  const [modalCatalogOption, setModalCatalogOption] = useState("none"); // "none" | "promo_free" | "paid"
   const [modalCustomPrice, setModalCustomPrice] = useState("");
   const [actionFeedback, setActionFeedback] = useState(null);
 
@@ -353,18 +353,19 @@ export default function SuscripcionesPanel({
     const catalogOffer = { Básico: 30, Intermedio: 40, Premium: 50 };
 
     const basePrice = modalRateMode === "oferta" ? (offerPrices[modalPlan] || 30) : (regularPrices[modalPlan] || 60);
-    const catalogPrice = modalIncludeCatalog
+    const catalogPrice = modalCatalogOption === "paid"
       ? (modalRateMode === "oferta" ? (catalogOffer[modalPlan] || 30) : (catalogRegular[modalPlan] || 60))
       : 0;
     return basePrice + catalogPrice;
-  }, [modalPlan, modalRateMode, modalIncludeCatalog, modalCustomPrice]);
+  }, [modalPlan, modalRateMode, modalCatalogOption, modalCustomPrice]);
 
   const openDetailModal = (item) => {
     setSelectedSub(item);
     setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
     const isOffer = item.amount === 30 || item.amount === 50 || item.amount === 70 || item.amount === 90 || item.amount === 120;
     setModalRateMode(isOffer ? "oferta" : "regular");
-    setModalIncludeCatalog(Array.isArray(item.apps) && item.apps.some((a) => /cat[áa]logo/i.test(a)));
+    const hasCat = Array.isArray(item.apps) && item.apps.some((a) => /cat[áa]logo/i.test(a));
+    setModalCatalogOption(hasCat ? "paid" : "none");
     setModalCustomPrice(item.amount || "");
     setActionFeedback(null);
     onOpenSubscription?.(item);
@@ -531,11 +532,15 @@ export default function SuscripcionesPanel({
     const planToUse = options?.plan || modalPlan || (target.plan !== "Sin plan" ? target.plan : "Básico");
     const rawPlan = planToUse.toLowerCase();
     const finalAmount = options?.amount !== undefined ? options.amount : calculatedApprovalAmount;
-    const includeCatalog = options?.includeCatalog !== undefined ? options.includeCatalog : modalIncludeCatalog;
+    const catalogOpt = options?.catalogOption || modalCatalogOption;
+    const includeCatalog = catalogOpt !== "none";
+    const isPromoFree = catalogOpt === "promo_free";
     const rateMode = options?.rateMode || modalRateMode;
 
     const newApps = ["Inventario"];
-    if (includeCatalog) newApps.push("Catálogo Web");
+    if (includeCatalog) {
+      newApps.push(isPromoFree ? "Catálogo Web (🎁 3M Gratis)" : "Catálogo Web");
+    }
 
     // Actualización local inmediata
     setItems((prev) =>
@@ -564,7 +569,7 @@ export default function SuscripcionesPanel({
     );
     setActionFeedback({
       type: "success",
-      message: `¡Suscripción aprobada y activada (${planToUse}${includeCatalog ? " + Catálogo Web" : ""} • S/ ${finalAmount}/mes) para ${target.company}!`,
+      message: `¡Suscripción aprobada y activada (${planToUse}${includeCatalog ? (isPromoFree ? " + 🎁 3M Catálogo Gratis" : " + Catálogo Web") : ""} • S/ ${finalAmount}/mes) para ${target.company}!`,
     });
     setTimeout(() => setActionFeedback(null), 5000);
 
@@ -591,8 +596,8 @@ export default function SuscripcionesPanel({
               status: "active",
               plan: rawPlan,
               contracted_price: finalAmount,
-              promotion_code: rateMode === "oferta" ? "lanzamiento-combo" : null,
-              promotion_name: rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null,
+              promotion_code: isPromoFree ? "promo-3m-catalogo" : (rateMode === "oferta" ? "lanzamiento-combo" : null),
+              promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
             })
             .eq("id", subId);
         } else {
@@ -611,8 +616,8 @@ export default function SuscripcionesPanel({
                 plan: rawPlan,
                 status: "active",
                 contracted_price: finalAmount,
-                promotion_code: rateMode === "oferta" ? "lanzamiento-combo" : null,
-                promotion_name: rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null,
+                promotion_code: isPromoFree ? "promo-3m-catalogo" : (rateMode === "oferta" ? "lanzamiento-combo" : null),
+                promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
               })
               .select("id")
               .maybeSingle();
@@ -622,16 +627,23 @@ export default function SuscripcionesPanel({
         }
 
         if (includeCatalog && subId) {
-          const catPrice =
-            rateMode === "oferta"
-              ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30)
-              : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60);
+          const catPrice = isPromoFree
+            ? 0
+            : (rateMode === "oferta"
+                ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30)
+                : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60));
+          const includedUntil = isPromoFree
+            ? new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+            : null;
 
           try {
             await supabase.from("tenant_app_subscription_addons").upsert({
               subscription_id: subId,
               addon_slug: "catalogo_publico",
               contracted_price: catPrice,
+              included_until: includedUntil,
+              promotion_code: isPromoFree ? "promo-3m-catalogo-free" : null,
+              promotion_name: isPromoFree ? "3 Meses Catálogo Virtual Gratis" : null,
               status: "active",
             });
           } catch (addonErr) {
@@ -1237,27 +1249,73 @@ export default function SuscripcionesPanel({
 
                 {/* 3. Add-on Catálogo Público Web */}
                 <div className="rounded-xl border border-zinc-200 bg-white p-3">
-                  <label className="flex items-start gap-2.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={modalIncludeCatalog}
-                      onChange={(e) => setModalIncludeCatalog(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-[#ff4b0b] focus:ring-[#ff4b0b]"
-                    />
-                    <div className="flex-1">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                      3. Catálogo Público Web
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-medium">
+                      Elige la modalidad para esta marca
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {/* Opción 1: Sin Catálogo */}
+                    <button
+                      type="button"
+                      onClick={() => setModalCatalogOption("none")}
+                      className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
+                        modalCatalogOption === "none"
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-950 shadow-2xs"
+                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-zinc-900">
-                          Incluir Add-on: Catálogo Público Web
-                        </span>
-                        <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          +{modalRateMode === "oferta" ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30) : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60)} S/ / mes
+                        <span className="text-[11px] font-bold">Sin Catálogo</span>
+                        <span className="text-[10px] font-bold text-zinc-500">S/ 0</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-400 font-semibold mt-1">Solo Inventi Pro interno</div>
+                    </button>
+
+                    {/* Opción 2: Promo 3 Meses Gratis */}
+                    <button
+                      type="button"
+                      onClick={() => setModalCatalogOption("promo_free")}
+                      className={`relative rounded-xl border p-2.5 text-left transition cursor-pointer ${
+                        modalCatalogOption === "promo_free"
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-950 shadow-2xs"
+                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                      }`}
+                    >
+                      <span className="absolute -top-2 right-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-2xs">
+                        🎁 3M GRATIS
+                      </span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold">🎁 Promo Catálogo</span>
+                        <span className="text-[10px] font-extrabold text-emerald-700">S/ 0 (90 días)</span>
+                      </div>
+                      <div className="text-[10px] text-zinc-500 font-medium mt-1">
+                        S/ 0 por 90 días, luego regular
+                      </div>
+                    </button>
+
+                    {/* Opción 3: Facturación Inmediata */}
+                    <button
+                      type="button"
+                      onClick={() => setModalCatalogOption("paid")}
+                      className={`rounded-xl border p-2.5 text-left transition cursor-pointer ${
+                        modalCatalogOption === "paid"
+                          ? "border-emerald-600 bg-emerald-50 text-emerald-950 shadow-2xs"
+                          : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold">Catálogo Facturable</span>
+                        <span className="text-[10px] font-extrabold text-emerald-700">
+                          +{modalRateMode === "oferta" ? (modalPlan === "Premium" ? 50 : modalPlan === "Intermedio" ? 40 : 30) : (modalPlan === "Premium" ? 100 : modalPlan === "Intermedio" ? 80 : 60)} S/
                         </span>
                       </div>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Permite a la marca tener su tienda y catálogo público web sincronizado con stock en tiempo real.
-                      </p>
-                    </div>
-                  </label>
+                      <div className="text-[10px] text-zinc-400 font-semibold mt-1">Facturación desde mes 1</div>
+                    </button>
+                  </div>
                 </div>
 
                 {/* 4. Resumen Total y Desglose */}
@@ -1267,7 +1325,13 @@ export default function SuscripcionesPanel({
                       Total Mensual a Facturar
                     </span>
                     <span className="text-xs font-medium text-zinc-300">
-                      Inventi Pro {modalPlan} {modalIncludeCatalog ? "+ Catálogo Público" : ""} ({modalRateMode === "oferta" ? "Oferta Lanzamiento" : modalRateMode === "regular" ? "Tarifa Regular" : "Precio Pactado"})
+                      Inventi Pro {modalPlan}{" "}
+                      {modalCatalogOption === "promo_free"
+                        ? "+ Catálogo (🎁 3M Gratis)"
+                        : modalCatalogOption === "paid"
+                        ? "+ Catálogo Público"
+                        : ""}{" "}
+                      ({modalRateMode === "oferta" ? "Oferta Lanzamiento" : modalRateMode === "regular" ? "Tarifa Regular" : "Precio Pactado"})
                     </span>
                   </div>
                   <div className="text-right">
@@ -1289,7 +1353,7 @@ export default function SuscripcionesPanel({
                       className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 size={16} />
-                      Aprobar y Activar Plan {modalPlan} {modalIncludeCatalog ? "+ Catálogo" : ""} (S/ {calculatedApprovalAmount}/mes)
+                      Aprobar y Activar Plan {modalPlan} {modalCatalogOption === "promo_free" ? "+ 🎁 3M Catálogo Gratis" : modalCatalogOption === "paid" ? "+ Catálogo" : ""} (S/ {calculatedApprovalAmount}/mes)
                     </button>
                   ) : selectedSub.status === "Activa" ? (
                     <div className="flex items-center gap-2">
