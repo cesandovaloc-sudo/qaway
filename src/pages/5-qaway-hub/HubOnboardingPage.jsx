@@ -354,10 +354,10 @@ export default function HubOnboardingPage() {
             name: form.name,
             legal_name: form.legal || null,
             content: { tagline: "", contact, tax_id: form.ruc || null },
-            features: { ...(nuevoTenant.features || {}), rubro: finalRubro || null },
+            features: { ...(nuevoTenant.features || {}), rubro: finalRubro || null, onboarding_completed: false },
           }).eq("id", newTenantId);
           if (updErr) throw updErr;
-          setTenant({ ...nuevoTenant, name: form.name, legal_name: form.legal || null, content: { tagline: "", contact, tax_id: form.ruc || null } });
+          setTenant({ ...nuevoTenant, name: form.name, legal_name: form.legal || null, content: { tagline: "", contact, tax_id: form.ruc || null }, features: { ...(nuevoTenant.features || {}), rubro: finalRubro || null, onboarding_completed: false } });
           if (pendingLogo) {
             await subirLogo(newTenantId, pendingLogo, nuevoTenant.branding);
             setPendingLogo(null);
@@ -368,10 +368,10 @@ export default function HubOnboardingPage() {
           name: form.name,
           legal_name: form.legal || null,
           content: { tagline: "", contact, tax_id: form.ruc || null },
-          features: { ...(tenant.features || {}), rubro: finalRubro },
+          features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false },
         }).eq("id", tenant.id);
         if (error) throw error;
-        setTenant({ ...tenant, name: form.name });
+        setTenant({ ...tenant, name: form.name, features: { ...(tenant.features || {}), rubro: finalRubro, onboarding_completed: false } });
       }
       if (goNext) next();
     } catch (e) {
@@ -436,6 +436,23 @@ export default function HubOnboardingPage() {
       });
 
       await Promise.all(upsertPromises);
+
+      // Sincronizar roles del usuario creador para las apps seleccionadas
+      if (session?.user?.id && tenant?.id && selectedAppIds.length > 0) {
+        try {
+          for (const appId of selectedAppIds) {
+            await supabase.from("user_app_roles").upsert(
+              {
+                user_id: session.user.id,
+                tenant_id: tenant.id,
+                app_id: appId,
+                role: "admin",
+              },
+              { onConflict: "user_id,tenant_id,app_id" }
+            );
+          }
+        } catch (_) {}
+      }
 
       // La activación comercial debe ocurrir al contratar o al aplicar una
       // oferta con trial. No se concede acceso por seleccionar una app.
@@ -717,7 +734,23 @@ export default function HubOnboardingPage() {
             </div>
             <div className="actions" style={{ marginTop: 24 }}>
               <button className="secondary" onClick={back}>← Atrás</button>
-              <button className="primary" style={{ flex: 1, marginLeft: 12 }} onClick={() => navigate("/hub/panel", { replace: true })}>
+              <button
+                className="primary"
+                style={{ flex: 1, marginLeft: 12 }}
+                onClick={async () => {
+                  if (tenant?.id) {
+                    try {
+                      await supabase.from("tenants").update({
+                        features: {
+                          ...(tenant.features || {}),
+                          onboarding_completed: true,
+                        },
+                      }).eq("id", tenant.id);
+                    } catch (_) {}
+                  }
+                  navigate("/hub/panel", { replace: true });
+                }}
+              >
                 Entrar a mi Hub →
               </button>
             </div>

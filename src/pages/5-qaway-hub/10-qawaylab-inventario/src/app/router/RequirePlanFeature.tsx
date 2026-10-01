@@ -41,8 +41,54 @@ export default function RequirePlanFeature({ feature, children }: {
     supabase.rpc('user_can_use_feature', {
       p_app_slug: 'inventario',
       p_feature_key: feature,
-    }).then(({ data, error }) => {
-      if (alive) setAllowed(!error && data === true)
+    }).then(async ({ data, error }) => {
+      if (!error && data === true) {
+        if (alive) setAllowed(true)
+        return
+      }
+
+      // Auto-reparación resiliente: si la empresa tiene suscripción activa en inventario
+      // pero el usuario no tenía el rol asignado en user_app_roles tras el registro/aprobación.
+      const currentTenantId = profile?.tenant_id
+      if (currentTenantId && session?.user?.id) {
+        try {
+          const { data: appRow } = await supabase
+            .from('app_catalog')
+            .select('id')
+            .eq('slug', 'inventario')
+            .maybeSingle()
+
+          if (appRow?.id) {
+            const { data: subRow } = await supabase
+              .from('tenant_app_subscriptions')
+              .select('id, status')
+              .eq('tenant_id', currentTenantId)
+              .eq('app_id', appRow.id)
+              .maybeSingle()
+
+            if (subRow && (subRow.status === 'active' || subRow.status === 'trialing')) {
+              await supabase.from('user_app_roles').upsert({
+                user_id: session.user.id,
+                tenant_id: currentTenantId,
+                app_id: appRow.id,
+                role: 'admin',
+              }, { onConflict: 'user_id,tenant_id,app_id' })
+
+              const retry = await supabase.rpc('user_can_use_feature', {
+                p_app_slug: 'inventario',
+                p_feature_key: feature,
+              })
+
+              if (alive && !retry.error && retry.data === true) {
+                setAllowed(true)
+                return
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (alive) setAllowed(false)
     })
 
     return () => { alive = false }

@@ -589,6 +589,16 @@ export default function SuscripcionesPanel({
           .eq("id", target.tenant_id);
 
         let subId = target.rawSub?.id;
+        let inventarioAppId = null;
+
+        const { data: appData } = await supabase
+          .from("app_catalog")
+          .select("id")
+          .eq("slug", "inventario")
+          .maybeSingle();
+
+        inventarioAppId = appData?.id || null;
+
         if (subId) {
           await supabase
             .from("tenant_app_subscriptions")
@@ -600,29 +610,47 @@ export default function SuscripcionesPanel({
               promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
             })
             .eq("id", subId);
-        } else {
-          const { data: appData } = await supabase
-            .from("app_catalog")
+        } else if (inventarioAppId) {
+          const { data: newSub } = await supabase
+            .from("tenant_app_subscriptions")
+            .upsert({
+              tenant_id: target.tenant_id,
+              app_id: inventarioAppId,
+              plan: rawPlan,
+              status: "active",
+              contracted_price: finalAmount,
+              promotion_code: isPromoFree ? "promo-3m-catalogo" : (rateMode === "oferta" ? "lanzamiento-combo" : null),
+              promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
+            })
             .select("id")
-            .eq("slug", "inventario")
             .maybeSingle();
 
-          if (appData?.id) {
-            const { data: newSub } = await supabase
-              .from("tenant_app_subscriptions")
-              .upsert({
-                tenant_id: target.tenant_id,
-                app_id: appData.id,
-                plan: rawPlan,
-                status: "active",
-                contracted_price: finalAmount,
-                promotion_code: isPromoFree ? "promo-3m-catalogo" : (rateMode === "oferta" ? "lanzamiento-combo" : null),
-                promotion_name: isPromoFree ? "Promo 3 Meses Gratis Catálogo" : (rateMode === "oferta" ? "Lanzamiento Qaway Lab" : null),
-              })
-              .select("id")
-              .maybeSingle();
+          subId = newSub?.id;
+        }
 
-            subId = newSub?.id;
+        // ── Sincronizar roles de usuario para que el admin y miembros de la marca operen de inmediato ──
+        if (inventarioAppId && target.tenant_id) {
+          try {
+            const { data: tenantUsers } = await supabase
+              .from("users")
+              .select("id, role")
+              .eq("tenant_id", target.tenant_id);
+
+            if (tenantUsers && tenantUsers.length > 0) {
+              for (const u of tenantUsers) {
+                if (u.role !== "admin") {
+                  await supabase.from("users").update({ role: "admin" }).eq("id", u.id);
+                }
+                await supabase.from("user_app_roles").upsert({
+                  user_id: u.id,
+                  tenant_id: target.tenant_id,
+                  app_id: inventarioAppId,
+                  role: "admin",
+                }, { onConflict: "user_id,tenant_id,app_id" });
+              }
+            }
+          } catch (roleErr) {
+            console.warn("No se pudo sincronizar user_app_roles:", roleErr);
           }
         }
 

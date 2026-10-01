@@ -40,9 +40,9 @@ export default function LoginPage() {
       const { data: me } = await supabase.from('users').select('tenant_id, is_platform_admin').eq('id', userId).maybeSingle()
       if (me && !me.is_platform_admin) {
         if (!me.tenant_id) return '/onboarding/tu-empresa'
-        // Si tiene empresa pero su estado sigue en borrador, retomar en tu-hub
-        const { data: t } = await supabase.from('tenants').select('status').eq('id', me.tenant_id).maybeSingle()
-        if (t && t.status === 'draft') return '/onboarding/tu-hub'
+        // Si tiene empresa pero su estado sigue en borrador o el onboarding está incompleto, retomar en tu-hub
+        const { data: t } = await supabase.from('tenants').select('status, features').eq('id', me.tenant_id).maybeSingle()
+        if (t && (t.status === 'draft' || t.features?.onboarding_completed === false)) return '/onboarding/tu-hub'
       }
     } catch (_) { /* error de lectura: cae al destino normal */ }
     return '/hub/panel'

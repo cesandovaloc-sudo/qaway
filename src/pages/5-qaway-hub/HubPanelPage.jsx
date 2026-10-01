@@ -2250,9 +2250,9 @@ function HubPanelContent() {
       }
       let tenantName = null
       if (me.tenant_id) {
-        const { data: tenant } = await supabase.from('tenants').select('name, status').eq('id', me.tenant_id).maybeSingle()
+        const { data: tenant } = await supabase.from('tenants').select('name, status, features').eq('id', me.tenant_id).maybeSingle()
         tenantName = tenant?.name || null
-        if (!isPlatformAdmin && tenant?.status === 'draft') {
+        if (!isPlatformAdmin && (tenant?.status === 'draft' || tenant?.features?.onboarding_completed === false)) {
           navigate('/onboarding/tu-hub', { replace: true })
           return
         }
