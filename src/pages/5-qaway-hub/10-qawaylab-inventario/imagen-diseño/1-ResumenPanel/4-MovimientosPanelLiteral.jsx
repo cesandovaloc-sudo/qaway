@@ -724,8 +724,8 @@ function MovementModal({ initial, products, onClose, onSave, saving }) {
   const set = (k, v) => setF(prev => ({ ...prev, [k]: v }));
   const subtotal = (Number(f.qty) || 0) * (Number(f.cost) || 0);
   return (
-    <div className="pxp-overlay" onClick={onClose} style={{ colorScheme: "light" }}>
-      <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light" }} onClick={e => e.stopPropagation()}>
+    <div className="pxp-overlay" onClick={onClose} style={{ colorScheme: "light", backdropFilter: "none", WebkitBackdropFilter: "none", backgroundColor: "rgba(15,23,42,0.45)" }}>
+      <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light", backgroundColor: "#fff" }} onClick={e => e.stopPropagation()}>
         <form onSubmit={e => { e.preventDefault(); onSave(f); }}>
           <div className="pxp-modal-head">
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -741,13 +741,13 @@ function MovementModal({ initial, products, onClose, onSave, saving }) {
           </div>
           <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
             <div className="pxp-form-row"><div className="pxp-form-label">Tipo de movimiento <span style={{ color: "#ef4444" }}>*</span></div>
-              <select className="pxp-form-input" value={f.type} onChange={e => set("type", e.target.value)}>{["Entrada", "Salida", "Transferencia", "Ajuste"].map(x => <option key={x}>{x}</option>)}</select></div>
+              <select className="pxp-form-input" style={{ backgroundColor: "#fff", color: "#0f172a", colorScheme: "light" }} value={f.type} onChange={e => set("type", e.target.value)}>{["Entrada", "Salida", "Transferencia", "Ajuste"].map(x => <option key={x}>{x}</option>)}</select></div>
             <div className="pxp-form-row"><div className="pxp-form-label">Fecha <span style={{ color: "#ef4444" }}>*</span></div>
-              <input type="date" required className="pxp-form-input" value={f.date} onChange={e => set("date", e.target.value)} /></div>
+              <input type="date" required className="pxp-form-input" style={{ backgroundColor: "#fff", color: "#0f172a", colorScheme: "light" }} value={f.date} onChange={e => set("date", e.target.value)} /></div>
             <div className="pxp-form-row"><div className="pxp-form-label">Referencia</div>
               <input className="pxp-form-input" value={f.ref} onChange={e => set("ref", e.target.value)} placeholder="Ej. OC-2026-046" /></div>
             <div className="pxp-form-row"><div className="pxp-form-label">Motivo <span style={{ color: "#ef4444" }}>*</span></div>
-              <select className="pxp-form-input" value={f.reason} onChange={e => set("reason", e.target.value)}>{["Compra a proveedor", "Venta", "Traslado entre almacenes", "Traslado entre sedes", "Ajuste por merma", "Ajuste por inventario", "Devolución", "Otro"].map(x => <option key={x}>{x}</option>)}</select></div>
+              <select className="pxp-form-input" style={{ backgroundColor: "#fff", color: "#0f172a", colorScheme: "light" }} value={f.reason} onChange={e => set("reason", e.target.value)}>{["Compra a proveedor", "Venta", "Traslado entre almacenes", "Traslado entre sedes", "Ajuste por merma", "Ajuste por inventario", "Devolución", "Otro"].map(x => <option key={x}>{x}</option>)}</select></div>
             <div className="pxp-form-row"><div className="pxp-form-label">Proveedor</div>
               <input className="pxp-form-input" value={f.supplier || ""} onChange={e => set("supplier", e.target.value)} placeholder="Seleccionar proveedor..." /></div>
             <div className="pxp-form-row"><div className="pxp-form-label">Almacén / Ubicación <span style={{ color: "#ef4444" }}>*</span></div>

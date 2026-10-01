@@ -52,9 +52,13 @@ const statusMeta = {
     dot: "bg-emerald-500",
     text: "text-emerald-600",
   },
-  "En prueba": {
-    dot: "bg-amber-400",
+  Pendiente: {
+    dot: "bg-amber-500",
     text: "text-amber-600",
+  },
+  "En prueba": {
+    dot: "bg-blue-400",
+    text: "text-blue-600",
   },
   Vencida: {
     dot: "bg-red-500",
@@ -333,6 +337,7 @@ export default function SuscripcionesPanel({
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSub, setSelectedSub] = useState(null);
+  const [modalPlan, setModalPlan] = useState("Básico");
   const [actionFeedback, setActionFeedback] = useState(null);
 
   const [query, setQuery] = useState("");
@@ -407,7 +412,7 @@ export default function SuscripcionesPanel({
                 ? "Intermedio"
                 : rawPlan === "basico"
                 ? "Básico"
-                : "Básico";
+                : "Sin plan";
 
             let subAppNames = tenantSubs
               .map((s) => appsMap.get(s.app_id))
@@ -417,10 +422,11 @@ export default function SuscripcionesPanel({
               subAppNames = ["Inventario"];
             }
 
-            let statusLabel = "En prueba";
+            let statusLabel = "Pendiente";
             if (activeSub) {
               if (activeSub.status === "active") statusLabel = "Activa";
               else if (activeSub.status === "trialing") statusLabel = "En prueba";
+              else if (activeSub.status === "pending") statusLabel = "Pendiente";
               else if (
                 activeSub.status === "canceled" ||
                 activeSub.status === "past_due"
@@ -428,9 +434,11 @@ export default function SuscripcionesPanel({
                 statusLabel = "Vencida";
             } else if (t.status === "active") {
               statusLabel = "Activa";
+            } else {
+              statusLabel = "Pendiente";
             }
 
-            const monthlyAmount = planPriceMap[rawPlan] || 60;
+            const monthlyAmount = planPriceMap[rawPlan] || 0;
 
             const createdDate = t.created_at
               ? new Date(t.created_at).toLocaleDateString("es-PE", {
@@ -486,20 +494,25 @@ export default function SuscripcionesPanel({
     };
   }, [rawTenants, rawSubs, rawApps]);
 
-  const handleApproveSubscription = async (id) => {
+  const handleApproveSubscription = async (id, chosenPlan = null) => {
     const target = items.find((x) => x.id === id);
     if (!target) return;
 
+    const planPriceMap = { basico: 60, intermedio: 100, premium: 140 };
+    const planToUse = chosenPlan || (target.plan !== "Sin plan" ? target.plan : "Básico");
+    const rawPlan = planToUse.toLowerCase();
+    const newAmount = planPriceMap[rawPlan] || 60;
+
     // Actualización local inmediata
     setItems((prev) =>
-      prev.map((sub) => (sub.id === id ? { ...sub, status: "Activa" } : sub))
+      prev.map((sub) => (sub.id === id ? { ...sub, status: "Activa", plan: planToUse, amount: newAmount } : sub))
     );
     setSelectedSub((prev) =>
-      prev && prev.id === id ? { ...prev, status: "Activa" } : prev
+      prev && prev.id === id ? { ...prev, status: "Activa", plan: planToUse, amount: newAmount } : prev
     );
     setActionFeedback({
       type: "success",
-      message: `¡Suscripción aprobada y activada exitosamente para ${target.company}!`,
+      message: `¡Suscripción aprobada y activada exitosamente con Plan ${planToUse} para ${target.company}!`,
     });
     setTimeout(() => setActionFeedback(null), 4000);
 
@@ -514,7 +527,7 @@ export default function SuscripcionesPanel({
         if (target.rawSub?.id) {
           await supabase
             .from("tenant_app_subscriptions")
-            .update({ status: "active" })
+            .update({ status: "active", plan: rawPlan })
             .eq("tenant_id", target.tenant_id);
         } else {
           const { data: appData } = await supabase
@@ -527,7 +540,7 @@ export default function SuscripcionesPanel({
             await supabase.from("tenant_app_subscriptions").upsert({
               tenant_id: target.tenant_id,
               app_id: appData.id,
-              plan: "basico",
+              plan: rawPlan,
               status: "active",
             });
           }
@@ -600,7 +613,7 @@ export default function SuscripcionesPanel({
   );
 
   const activeCount = items.filter((x) => x.status === "Activa").length;
-  const trialCount = items.filter((x) => x.status === "En prueba").length;
+  const pendingCount = items.filter((x) => x.status === "Pendiente" || x.status === "En prueba").length;
   const expiredCount = items.filter((x) => x.status === "Vencida").length;
 
   const resetFilters = () => {
@@ -665,13 +678,13 @@ export default function SuscripcionesPanel({
           />
 
           <KpiCard
-            icon={<Clock3 size={16} className="text-orange-500" />}
-            iconBg="bg-orange-50"
-            label="En prueba"
-            value={trialCount}
+            icon={<Clock3 size={16} className="text-amber-500" />}
+            iconBg="bg-amber-50"
+            label="Pendientes"
+            value={pendingCount}
             delta="0%"
             deltaDirection="neutral"
-            note="vs. mes anterior"
+            note="por aprobar / pago"
             trend="M3 29 C18 27, 28 25, 39 21 S57 19, 67 16 S83 17, 97 13"
           />
 
@@ -745,6 +758,7 @@ export default function SuscripcionesPanel({
                 >
                   <option>Todos</option>
                   <option>Activa</option>
+                  <option>Pendiente</option>
                   <option>En prueba</option>
                   <option>Vencida</option>
                 </select>
@@ -824,6 +838,7 @@ export default function SuscripcionesPanel({
                       key={item.id}
                       onClick={() => {
                         setSelectedSub(item);
+                        setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
                         setActionFeedback(null);
                         onOpenSubscription?.(item);
                       }}
@@ -869,14 +884,16 @@ export default function SuscripcionesPanel({
 
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-1.5">
-                          {item.status === "En prueba" && (
+                          {(item.status === "Pendiente" || item.status === "En prueba") && (
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleApproveSubscription(item.id);
+                                setSelectedSub(item);
+                                setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
+                                setActionFeedback(null);
                               }}
-                              title="Aprobar suscripción directamente"
+                              title="Aprobar suscripción y elegir plan"
                               className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 transition cursor-pointer shadow-2xs"
                             >
                               <CheckCircle2 size={12} className="text-emerald-600" />
@@ -888,6 +905,7 @@ export default function SuscripcionesPanel({
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedSub(item);
+                              setModalPlan(item.plan !== "Sin plan" ? item.plan : "Básico");
                               setActionFeedback(null);
                               onOpenSubscription?.(item);
                             }}
@@ -1046,7 +1064,19 @@ export default function SuscripcionesPanel({
                   <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
                     Plan
                   </span>
-                  <PlanBadge plan={selectedSub.plan} />
+                  {selectedSub.status !== "Activa" ? (
+                    <select
+                      value={modalPlan}
+                      onChange={(e) => setModalPlan(e.target.value)}
+                      className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs font-bold text-zinc-800 focus:outline-none focus:ring-1 focus:ring-zinc-400"
+                    >
+                      <option value="Básico">Básico — S/ 60 / mes</option>
+                      <option value="Intermedio">Intermedio — S/ 100 / mes</option>
+                      <option value="Premium">Premium — S/ 140 / mes</option>
+                    </select>
+                  ) : (
+                    <PlanBadge plan={selectedSub.plan} />
+                  )}
                 </div>
 
                 <div className="rounded-xl border border-zinc-100 bg-zinc-50/70 p-3">
@@ -1061,7 +1091,7 @@ export default function SuscripcionesPanel({
                     Monto Mensual
                   </span>
                   <span className="text-sm font-extrabold text-zinc-900">
-                    S/ {selectedSub.amount}
+                    S/ {selectedSub.status !== "Activa" ? (modalPlan === "Premium" ? 140 : modalPlan === "Intermedio" ? 100 : 60) : selectedSub.amount}
                   </span>
                 </div>
 
@@ -1086,14 +1116,14 @@ export default function SuscripcionesPanel({
               {/* Acciones de Super Administrador */}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4">
                 <div className="flex items-center gap-2">
-                  {selectedSub.status === "En prueba" ? (
+                  {selectedSub.status === "Pendiente" || selectedSub.status === "En prueba" ? (
                     <button
                       type="button"
-                      onClick={() => handleApproveSubscription(selectedSub.id)}
+                      onClick={() => handleApproveSubscription(selectedSub.id, modalPlan)}
                       className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 size={16} />
-                      Aprobar y Activar Suscripción
+                      Aprobar y Activar Plan {modalPlan}
                     </button>
                   ) : selectedSub.status === "Activa" ? (
                     <div className="flex items-center gap-2">
@@ -1111,7 +1141,7 @@ export default function SuscripcionesPanel({
                   ) : (
                     <button
                       type="button"
-                      onClick={() => handleApproveSubscription(selectedSub.id)}
+                      onClick={() => handleApproveSubscription(selectedSub.id, modalPlan)}
                       className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition cursor-pointer"
                     >
                       <CheckCircle2 size={16} />
