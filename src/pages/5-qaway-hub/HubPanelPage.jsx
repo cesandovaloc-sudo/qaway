@@ -3110,9 +3110,7 @@ function HubPanelContent({ canvasOnly = false }) {
             ) : (
               /* Inicio por rol: global (platform), "ver como" una marca (platform con selector),
                  resumen de la empresa (admin de marca) o "Mi espacio" (trabajador). */
-              actingAsBrand ? (
-                <TenantAdminDashboard tenantId={effectiveTenantId} tenantName={effectiveTenantName} setActiveTab={goTab} />
-              ) : panelAuth?.isPlatformAdmin ? (
+              canvasOnly || panelAuth?.isPlatformAdmin ? (
                 <SuperAdminDashboard setActiveTab={goTab} navigate={navigate} />
               ) : panelAuth?.isTenantAdmin ? (
                 <TenantAdminDashboard tenantId={panelAuth.tenantId} tenantName={panelAuth.tenantName} setActiveTab={goTab} />
