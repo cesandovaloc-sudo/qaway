@@ -285,6 +285,9 @@ import{a as e,r as t}from"./rolldown-runtime-B0Z9INg1.js";import{t as n}from"./r
         .th-feature {
           text-align: left;
           width: 44%;
+          font-size: 14px;
+          font-weight: 800;
+          color: #0f172a;
         }
 
         .th-plan {

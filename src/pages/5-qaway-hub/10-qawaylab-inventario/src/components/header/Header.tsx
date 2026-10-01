@@ -276,7 +276,7 @@ export default function Header({
           <button
             type="button"
             onClick={toggleWaffle}
-            className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
+            className="group hidden sm:flex items-center gap-2 h-10 px-3 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] hover:border-white/20 text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
             title="Ecosistema de Aplicaciones"
           >
             <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
@@ -303,7 +303,7 @@ export default function Header({
         <div className="hidden sm:block">
           <Link 
             to="/hub/panel"
-            className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
+            className="group flex items-center gap-2 h-10 px-3 rounded-xl border border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
             title="Volver al Panel del Hub (/hub/panel)"
           >
             <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
@@ -320,15 +320,15 @@ export default function Header({
               <button
                 type="button"
                 onClick={toggleTenant}
-                className={`hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all ${
+                className={`hidden md:flex items-center gap-2 h-10 px-3.5 rounded-xl border text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all ${
                   scopedTenant
                     ? 'border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)]'
-                    : 'border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                    : 'border-amber-500/25 bg-amber-500/5 text-amber-200/90 hover:bg-amber-500/10'
                 }`}
                 title="Seleccionar empresa de trabajo"
               >
-                <Building2 size={15} className={scopedTenant ? 'text-[#ff4b0b]' : 'text-amber-400'} />
-                <span className={`w-2 h-2 rounded-full ${scopedTenant ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                <Building2 size={15} className={scopedTenant ? 'text-[#ff4b0b]' : 'text-amber-400/80'} />
+                <span className={`w-2 h-2 rounded-full ${scopedTenant ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400/80'}`} />
                 <span className="max-w-36 truncate">
                   {scopedTenant ? scopedTenant.name : 'Sin empresa'}
                 </span>
@@ -416,7 +416,7 @@ export default function Header({
             <button
               type="button"
               onClick={toggleSede}
-              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-full border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
+              className="hidden md:flex items-center gap-2 h-10 px-3.5 rounded-xl border border-[var(--hub-border)] bg-[var(--hub-chip)] hover:bg-[var(--hub-hover)] text-[var(--hub-text)] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand/40 cursor-pointer transition-all"
               title="Seleccionar sede"
             >
               <MapPin size={15} className="text-[#ff4b0b]" />
@@ -542,7 +542,7 @@ export default function Header({
           <input
             type="text"
             placeholder="Buscar productos, SKU, categorías..."
-            className="w-full bg-[var(--hub-chip)] border border-[var(--hub-border)] rounded-full pl-10 pr-16 py-2 text-sm text-[var(--hub-text)] placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-brand/50 focus:bg-[var(--hub-hover)] transition-colors"
+            className="w-full bg-[var(--hub-chip)] border border-[var(--hub-border)] rounded-xl pl-10 pr-16 h-10 text-sm text-[var(--hub-text)] placeholder:text-[var(--hub-faint)] focus:outline-none focus:border-brand/50 focus:bg-[var(--hub-hover)] transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
             <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-[var(--hub-chip)] rounded text-[var(--hub-faint)] border border-[var(--hub-border)]">Ctrl</kbd>
@@ -551,7 +551,7 @@ export default function Header({
         </div>
 
         <button
-          className="relative p-2 rounded-full text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"
+          className="relative p-2 rounded-xl text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] hover:bg-[var(--hub-hover)] transition-colors cursor-pointer"
           title="Notificaciones"
         >
           <Bell size={18} />
@@ -563,7 +563,7 @@ export default function Header({
           <button
             onClick={toggleProfile}
             aria-label={identityResolved ? displayName : 'Cargando perfil'}
-            className="flex items-center gap-2 lg:gap-3 pl-2 lg:pl-3 pr-1 cursor-pointer rounded-full hover:bg-[var(--hub-chip)] transition-colors text-left border border-transparent focus:outline-none"
+            className="flex items-center gap-2 lg:gap-3 p-1.5 cursor-pointer rounded-xl hover:bg-[var(--hub-chip)] transition-colors text-left border border-transparent focus:outline-none"
           >
             {identityResolved && avatarUrl ? (
               <img src={avatarUrl} alt={displayName} className="w-8 h-8 lg:w-9 lg:h-9 rounded-full border border-[var(--hub-border)] object-cover" />

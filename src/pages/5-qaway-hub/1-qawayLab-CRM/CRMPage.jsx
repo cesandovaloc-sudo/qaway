@@ -335,7 +335,7 @@ function CRMContent() {
       <div className="flex-1 flex flex-col min-w-0 relative">
         
         {/* HEADER TOPBAR */}
-        <header className={`h-16 border-b flex items-center justify-between px-5 lg:px-6 shrink-0 relative z-50 transition-colors duration-200 ${
+        <header className={`h-[72px] border-b flex items-center justify-between px-5 lg:px-6 shrink-0 relative z-50 transition-colors duration-200 ${
           isDark 
             ? 'border-white/10 bg-[#111111] text-white shadow-sm' 
             : 'border-zinc-200 bg-white/95 backdrop-blur-md text-zinc-900 shadow-[0_1px_3px_rgba(0,0,0,0.02)]'
@@ -357,7 +357,7 @@ function CRMContent() {
               <button
                 type="button"
                 onClick={() => setIsWaffleOpen(!isWaffleOpen)}
-                className={`group flex items-center gap-2 h-[38px] px-3 rounded-xl border transition-all duration-200 cursor-pointer shadow-2xs ${
+                className={`group flex items-center gap-2 h-10 px-3 rounded-xl border transition-all duration-200 cursor-pointer shadow-2xs ${
                   isDark ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white/80' : 'border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-700'
                 }`}
                 title="Ecosistema de Aplicaciones"
@@ -386,7 +386,7 @@ function CRMContent() {
             <div className="hidden sm:block">
               <button 
                 onClick={() => navigate('/hub/panel')}
-                className={`group flex items-center gap-2 h-[38px] px-3 rounded-xl border transition-all duration-200 cursor-pointer ${
+                className={`group flex items-center gap-2 h-10 px-3 rounded-xl border transition-all duration-200 cursor-pointer ${
                   isDark ? 'border-transparent hover:bg-white/5 text-white/70 hover:text-white' : 'border-transparent hover:border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900'
                 }`}
                 title="Volver al Panel del Hub (/hub/panel)"
@@ -404,7 +404,7 @@ function CRMContent() {
                 <button
                   type="button"
                   onClick={() => setIsTenantOpen((o) => !o)}
-                  className={`flex items-center gap-2 h-[38px] px-3 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 cursor-pointer transition-all shadow-2xs ${
+                  className={`flex items-center gap-2 h-10 px-3.5 rounded-xl border text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 cursor-pointer transition-all shadow-2xs ${
                     isDark ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-800'
                   }`}
                   title="Cambiar Marca / Tenant Activo"
@@ -486,7 +486,7 @@ function CRMContent() {
                   activeTab === 'configuracion' ? "Buscar contactos globalmente..." :
                   "Buscar clientes u oportunidades..."
                 } 
-                className={`border rounded-xl pl-10 pr-16 h-[38px] text-sm focus:outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-[#ff4b0b]/20 w-[220px] md:w-[280px] lg:w-[360px] transition-all ${
+                className={`border rounded-xl pl-10 pr-16 h-10 text-sm focus:outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-[#ff4b0b]/20 w-[220px] md:w-[280px] lg:w-[360px] transition-all ${
                   isDark 
                     ? 'bg-[#18181b] border-white/10 text-white placeholder:text-white/40 focus:bg-[#202024]' 
                     : 'bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white'
@@ -584,10 +584,10 @@ function CRMContent() {
 
             <div className={`h-6 w-px ${isDark ? 'bg-white/10' : 'bg-zinc-200'}`} />
 
-            {/* 2. Botón Primario de Creación (Equilibrado 38px) */}
+            {/* 2. Botón Primario de Creación (Equilibrado 40px) */}
             <button 
               onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#e03f06] text-white px-3.5 h-[38px] rounded-xl text-[13px] font-bold transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] active:scale-[0.98] whitespace-nowrap cursor-pointer"
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#e03f06] text-white px-3.5 h-10 rounded-xl text-[13px] font-bold transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] active:scale-[0.98] whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="hidden sm:block">Nueva oportunidad</span>
