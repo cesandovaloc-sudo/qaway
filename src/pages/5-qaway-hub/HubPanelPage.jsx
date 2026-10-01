@@ -3073,11 +3073,7 @@ function HubPanelContent() {
               <PlanesPreciosPage />
             ) : activeTab === 'Suscripciones' && !globalSearchQuery.trim() ? (
               /* Sección Suscripciones dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
-              <SuscripcionesPanel
-                rawTenants={rawData.tenants}
-                rawSubs={rawData.subs}
-                rawApps={rawData.apps}
-              />
+              <SuscripcionesPanel />
             ) : activeTab === 'Pagos' && !globalSearchQuery.trim() ? (
               /* Sección Pagos dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
               <PagosPanel />
