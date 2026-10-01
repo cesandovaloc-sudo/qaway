@@ -5,7 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { HubIcon } from '@/components/ui/icons'
 import {
   AlertCircle, ArrowRight, BarChart3, Bell, Bot, Building2, Calendar, ChevronDown, ChevronRight, Clock, CreditCard,
-  FileImage, FolderKanban, HelpCircle, Home, Instagram, LayoutGrid, Menu, MessageSquare,
+  FileImage, FolderKanban, HelpCircle, Home, Instagram, LayoutDashboard, LayoutGrid, Menu, MessageSquare,
   Package, PenSquare, Plus, Receipt, Search, Settings, Shield, Sparkles,
   Star, Tag, User, UserPlus, Users, X, Zap, Check, Layers, Globe, Filter, SlidersHorizontal,
 } from '@/components/ui/icons/hubIcons'
