@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/config/supabase";
 import { convertirAWebp, esImagenWebpValida } from "@/lib/imagenToWebp";
 import { PAISES } from "@/config/paises";
+import CanvaPlanSelector from "./CanvaPlanSelector";
 
 const steps = ["Tu cuenta", "Tu empresa", "Tu Hub", "Tu equipo", "Listo"];
 const SLUGS = ["tu-cuenta", "tu-empresa", "tu-hub", "tu-equipo", "listo"];
@@ -76,7 +77,8 @@ export default function HubOnboardingPage() {
   const slugIdx = paso ? SLUGS.indexOf(String(paso).toLowerCase()) : -1;
   const validPaso = slugIdx >= 0 ? slugIdx + 1 : null;
   const [step, setStep] = useState(() => validPaso || 1);
-  const [selected, setSelected] = useState(["crm", "agenda"]);
+  const [selected, setSelected] = useState(["inventario", "crm", "agenda"]);
+  const [chosenPlan, setChosenPlan] = useState("intermedio");
   // Cableado SaaS (solo comportamiento; diseño intacto).
   const [session, setSession] = useState(null);
   const [tenant, setTenant] = useState(null);
@@ -392,16 +394,20 @@ export default function HubOnboardingPage() {
     }
   }
 
-  async function saveApps(goNext) {
+  async function saveApps(goNext, planToApply) {
     setNote("");
     setSaving(true);
     try {
       if (!tenant) throw new Error("Primero registra tu empresa.");
+      const activePlan = planToApply || chosenPlan || "intermedio";
       const alias = { inventory: "inventario" };
-      const selectedSlugs = selected.map((raw) => alias[raw] || raw);
+      let selectedSlugs = selected.map((raw) => alias[raw] || raw);
+      if (!selectedSlugs.includes("inventario")) {
+        selectedSlugs.push("inventario");
+      }
 
       const [preciosRes, appsRes] = await Promise.all([
-        supabase.from("app_plan_pricing").select("app_id, plan, price, currency, is_available").eq("plan", "basico"),
+        supabase.from("app_plan_pricing").select("app_id, plan, price, currency, is_available").eq("plan", activePlan),
         supabase.from("app_catalog").select("id, slug"),
       ]);
 
@@ -418,35 +424,70 @@ export default function HubOnboardingPage() {
           .not("app_id", "in", `(${selectedAppIds.join(",")})`);
       }
 
+      const now = new Date();
+      const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const in90Days = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+
+      const priceByPlan = {
+        basico: 30,
+        intermedio: 50,
+        premium: 70,
+      };
+
       const upsertPromises = selectedSlugs.map((slug) => {
         const app = catalogApps.find((a) => a.slug === slug);
         if (!app) return Promise.resolve();
         const precio = precios.find((p) => p.app_id === app.id);
-        // El onboarding no inventa trials. Una promoción se aplicará en el
-        // flujo de contratación y quedará guardada como snapshot.
-        const disponible = precio?.is_available === true && Number(precio.price) >= 0;
+        const listPrice = precio?.price ? Number(precio.price) : (activePlan === "intermedio" ? 100 : (activePlan === "premium" ? 140 : 60));
+
         return supabase.from("tenant_app_subscriptions").upsert(
           {
             tenant_id: tenant.id,
             app_id: app.id,
-            plan: "basico",
-            status: "pending",
-            trial_started_at: null,
-            trial_ends_at: null,
-            current_period_start: null,
-            current_period_end: null,
-            list_price_at_signup: disponible ? Number(precio.price) : null,
-             contracted_price: null,
+            plan: activePlan,
+            status: "trial",
+            trial_started_at: now.toISOString(),
+            trial_ends_at: in30Days.toISOString(),
+            current_period_start: now.toISOString(),
+            current_period_end: in30Days.toISOString(),
+            list_price_at_signup: listPrice,
+            contracted_price: priceByPlan[activePlan] || 50,
             price_currency: precio?.currency || "PEN",
-            trial_days_granted: 0,
-            trial_requires_card: false,
-            trial_source: null,
+            trial_days_granted: 30,
+            trial_requires_card: true,
+            trial_source: "onboarding_canva_30d",
           },
           { onConflict: "tenant_id,app_id" },
         );
       });
 
       await Promise.all(upsertPromises);
+
+      // Activar tenant para que disfrute de los 30 días de prueba
+      await supabase.from("tenants").update({
+        status: "active",
+        features: {
+          ...(tenant.features || {}),
+          trial_plan: activePlan,
+          trial_started_at: now.toISOString(),
+          trial_ends_at: in30Days.toISOString(),
+          catalog_promo_active: true,
+          catalog_promo_until: in90Days.toISOString(),
+        },
+      }).eq("id", tenant.id);
+
+      setTenant((prev) => (prev ? {
+        ...prev,
+        status: "active",
+        features: {
+          ...(prev.features || {}),
+          trial_plan: activePlan,
+          trial_started_at: now.toISOString(),
+          trial_ends_at: in30Days.toISOString(),
+          catalog_promo_active: true,
+          catalog_promo_until: in90Days.toISOString(),
+        },
+      } : prev));
 
       // Sincronizar roles del usuario creador para las apps seleccionadas
       if (session?.user?.id && tenant?.id && selectedAppIds.length > 0) {
@@ -465,13 +506,6 @@ export default function HubOnboardingPage() {
         } catch (_) {}
       }
 
-      // La activación comercial debe ocurrir al contratar o al aplicar una
-      // oferta con trial. No se concede acceso por seleccionar una app.
-      if (tenant.status !== "active") {
-        if (goNext) next();
-        return;
-      }
-      setTenant((prev) => (prev ? { ...prev, status: "active" } : prev));
       if (goNext) next();
     } catch (e) {
       setNote("No se pudo guardar: " + e.message);
@@ -549,7 +583,7 @@ export default function HubOnboardingPage() {
         <div className="login">{!session && <>¿Ya tienes una cuenta? <b onClick={() => navigate("/login")}>Acceder</b></>}</div>
       </header>
 
-      <main>
+      <main className={step === 3 ? "step-3-main" : ""}>
         <div className="progress">
           {steps.map((label, i) => (
             <React.Fragment key={label}>
@@ -656,30 +690,20 @@ export default function HubOnboardingPage() {
         )}
 
         {step === 3 && (
-          <section className="card wider">
-            <small className="eyebrow">CONFIGURACIÓN INICIAL</small>
-            <h1>¿Qué quieres gestionar desde Qaway?</h1>
-            <p>Selecciona las aplicaciones que quieres tener disponibles en tu espacio.</p>
-
-            <div className="apps">
-              {apps.map(([id, name, desc]) => (
-                <button key={id} className={selected.includes(id) ? "app selected" : "app"}
-                  onClick={() => setSelected(x => x.includes(id) ? x.filter(v => v !== id) : [...x, id])}>
-                  <div className="appIcon">Q</div>
-                  <span><b>{name}</b>{selected.includes(id) && <em className="trialTag">En prueba · sin costo</em>}<small>{desc}</small></span>
-                  <i>{selected.includes(id) ? "✓" : ""}</i>
-                </button>
-              ))}
-            </div>
-
-            <div className="note trial-box">
-              <div className="trial-badge">PRUEBA GRATUITA POR 14 DÍAS · ACCESO TOTAL</div>
-              <b>Empieza tu prueba gratuita sin tarjeta de crédito</b>
-               <span>Tus aplicaciones quedan pendientes de contratación. El acceso se activa cuando completes una contratación o una oferta comercial explícita que incluya un trial.</span>
-            </div>
+          <section className="card wider canva-onboarding-card">
+            <CanvaPlanSelector
+              selectedPlan={chosenPlan}
+              onSelectPlan={(pId) => setChosenPlan(pId)}
+              onContinue={(planObj) => saveApps(true, planObj?.id || chosenPlan)}
+              loading={saving}
+            />
 
             <Notice error={noteIsError}>{note}</Notice>
-            <div className="actions"><button className="secondary" onClick={back}>← Atrás</button><button className="primary" disabled={saving} onClick={() => saveApps(true)}>{saving ? "Guardando…" : "Continuar →"}</button></div>
+            <div className="actions" style={{ marginTop: 24 }}>
+              <button type="button" className="secondary" onClick={back}>
+                ← Atrás
+              </button>
+            </div>
           </section>
         )}
 
@@ -831,7 +855,9 @@ export default function HubOnboardingPage() {
         .sk-input{height:47px;border-radius:9px;background:#f3f3f5}
         .sk-btn{width:110px;height:48px;border-radius:9px;background:#eaeaee}
         footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#64748b;font-size:13px}
-        @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:28px}.grid,.apps{grid-template-columns:1fr}}
+        main.step-3-main{width:min(1120px,96vw);padding-top:24px}
+        .canva-onboarding-card{max-width:1120px!important;padding:32px 36px;box-shadow:0 20px 50px rgba(0,0,0,.06)}
+        @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:28px}.grid,.apps{grid-template-columns:1fr}.canva-onboarding-card{padding:20px 14px}}
       `}</style>
     </div>
   );
