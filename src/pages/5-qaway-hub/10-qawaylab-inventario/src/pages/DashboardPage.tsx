@@ -142,49 +142,51 @@ export default function DashboardPage() {
       <QuickAccessCards />
 
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* KPIs PRINCIPALES (diseño acoplado, data real)                   */}
+      {/* KPIs PRINCIPALES (colapsable, data real)                        */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-zinc-500">Productos activos</span>
-              <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalProducts}</p>
+        <CollapsibleSection id="kpis-principales" title="Métricas Principales" defaultOpen={false}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Productos activos</span>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalProducts}</p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">◇</div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">◇</div>
-          </div>
 
-          <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-zinc-500">Ventas del mes</span>
-              <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.revenueMonth)}</p>
+            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Ventas del mes</span>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.revenueMonth)}</p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">🛒</div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">🛒</div>
-          </div>
 
-          <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-zinc-500">Compras del mes</span>
-              <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.purchasesMonth)}</p>
+            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Compras del mes</span>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{formatCurrency(stats.purchasesMonth)}</p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">🚚</div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">🚚</div>
-          </div>
 
-          <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
-            <div>
-              <span className="text-xs font-medium text-zinc-500">Stock disponible</span>
-              <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalStock ?? stats.totalProducts} un.</p>
+            <div className="p-4 rounded-xl border border-zinc-200 bg-white flex items-center justify-between">
+              <div>
+                <span className="text-xs font-medium text-zinc-500">Stock disponible</span>
+                <p className="text-2xl font-bold text-zinc-950 mt-1">{stats.totalStock ?? stats.totalProducts} un.</p>
+              </div>
+              <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">▤</div>
             </div>
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-brand flex items-center justify-center text-xl shrink-0">▤</div>
           </div>
-        </div>
+        </CollapsibleSection>
       )}
 
       {/* ═══════════════════════════════════════════════════════════════ */}
       {/* MÉTRICAS EJECUTIVAS - VENTAS Y FLUJO DE CAJA (original)         */}
       {/* ═══════════════════════════════════════════════════════════════ */}
       {stats && (
-        <CollapsibleSection id="ventas-caja" title="Ventas y Flujo de Caja" defaultOpen={true}>
+        <CollapsibleSection id="ventas-caja" title="Ventas y Flujo de Caja" defaultOpen={false}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard label="Ventas Hoy" value={stats.salesToday} icon={TrendingUp} color="text-brand" />
             <StatCard label="Esta Semana" value={stats.salesWeek} icon={TrendingUp} color="text-green-400" />

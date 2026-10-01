@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Bell, LogOut, User, Menu, Shield, ChevronDown, Warehouse, Users, Settings, Sun, Moon, Contrast, Layers, Home, Building2, MapPin, X } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { useTenant } from '@/context/TenantContext'
 // @ts-ignore
@@ -301,8 +301,8 @@ export default function Header({
 
         {/* Home Animado (Volver a /hub/panel) */}
         <div className="hidden sm:block">
-          <button 
-            onClick={() => navigate('/hub/panel')}
+          <Link 
+            to="/hub/panel"
             className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-[var(--hub-hover)] text-[var(--hub-text-soft)] hover:text-[var(--hub-text)] transition-all duration-300 ease-out cursor-pointer"
             title="Volver al Panel del Hub (/hub/panel)"
           >
@@ -310,7 +310,7 @@ export default function Header({
             <span className="text-sm font-bold text-[var(--hub-text)] max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
               Inicio
             </span>
-          </button>
+          </Link>
         </div>
 
         {/* Selector / Indicador de Empresa (Multi-Tenant) */}
