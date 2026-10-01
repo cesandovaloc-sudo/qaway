@@ -42,111 +42,189 @@ export default function CatalogsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Catálogos</h1>
-          <p className="text-sm text-gray-500">Genera catálogos PDF y vistas públicas de tus productos</p>
-        </div>
-         <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-          <Plus className="w-4 h-4" />
-          Nuevo catálogo
-        </button>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <FileText size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Catálogos Digitales
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Genera catálogos PDF y vistas públicas de tus productos para clientes.
+                  </p>
+                </div>
+              </div>
 
-      {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md border border-zinc-200 py-1 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Buscar catálogos..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-        />
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-sm text-red-700">{error}</span>
-        </div>
-      ) : filteredCatalogs.length === 0 ? (
-        <div className="text-center py-12">
-          <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay catálogos</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Crea tu primer catálogo para generar PDFs y compartir productos
-          </p>
-           <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-            <Plus className="w-4 h-4" />
-            Crear catálogo
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCatalogs.map(catalog => (
-              <CatalogCard
-                key={catalog.id}
-                catalog={catalog}
-                onEdit={(c) => console.log('Edit:', c)}
-                onDelete={handleDelete}
-                onView={(c) => console.log('View:', c)}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <div className="flex items-center justify-between pt-4">
-              <p className="text-sm text-gray-500">
-                Mostrando {filteredCatalogs.length} de {pagination.total} catálogos
-              </p>
-              <div className="flex items-center gap-2">
+              <div className="pxp-heading-actions">
                 <button
-                  onClick={() => setPage(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setShowForm(true)}
+                  className="pxp-btn primary"
+                  title="Crear nuevo catálogo"
                 >
-                  Anterior
-                </button>
-                <span className="text-sm text-gray-600">
-                  {pagination.page} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setPage(pagination.page + 1)}
-                  disabled={pagination.page === pagination.total_pages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Siguiente
+                  <Plus size={15} /> Nuevo catálogo
                 </button>
               </div>
             </div>
-          )}
-        </>
-      )}
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <form onSubmit={handleCreate} className="w-full max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Nuevo catálogo</h2>
-              <button type="button" onClick={() => setShowForm(false)}><X className="h-5 w-5 text-gray-500" /></button>
+            {/* Toolbar oficial */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar catálogos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
-            <input required placeholder="Nombre del catálogo" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <textarea placeholder="Descripción" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full rounded-lg border border-gray-300 px-3 py-2" />
-            <label className="flex items-center gap-2 text-sm text-gray-700"><input type="checkbox" checked={form.is_public} onChange={e => setForm({ ...form, is_public: e.target.checked })} /> Publicar catálogo</label>
-            <button disabled={saving} className="w-full rounded-lg bg-red-600 px-4 py-2 font-medium text-white disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar catálogo'}</button>
-          </form>
-        </div>
-      )}
+
+            {/* Content */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={28} className="text-[#ff4b0b] animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            ) : filteredCatalogs.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#e4e4e7] p-12 text-center shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#f4f4f5] text-[#52525b] grid place-items-center mx-auto mb-3 text-xl">
+                  <FileText size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#111b2d] mb-1">
+                  {searchTerm ? 'Sin coincidencias' : 'No hay catálogos creados'}
+                </h3>
+                <p className="text-sm text-[#71809e] mb-6 max-w-md mx-auto">
+                  {searchTerm 
+                    ? 'No se encontraron catálogos que coincidan con tu búsqueda.' 
+                    : 'Crea tu primer catálogo para generar enlaces públicos o PDFs descargables.'}
+                </p>
+                {!searchTerm && (
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="pxp-btn primary"
+                  >
+                    <Plus size={15} /> Crear catálogo
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {filteredCatalogs.map(catalog => (
+                    <CatalogCard
+                      key={catalog.id}
+                      catalog={catalog}
+                      onEdit={(c) => console.log('Edit:', c)}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {pagination.total_pages > 1 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-[#e5ebf4]">
+                    <p className="text-sm text-[#71809e]">
+                      Mostrando {filteredCatalogs.length} de {pagination.total} catálogos
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage(pagination.page - 1)}
+                        disabled={pagination.page === 1}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Anterior
+                      </button>
+                      <span className="text-sm text-[#34415b] font-medium px-2">
+                        {pagination.page} / {pagination.total_pages}
+                      </span>
+                      <button
+                        onClick={() => setPage(pagination.page + 1)}
+                        disabled={pagination.page === pagination.total_pages}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Modal Form */}
+            {showForm && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                onClick={() => setShowForm(false)}
+              >
+                <form
+                  onSubmit={handleCreate}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow-2xl border border-[#e4e4e7]"
+                >
+                  <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-3">
+                    <h2 className="text-lg font-bold text-[#111b2d]">Nuevo catálogo</h2>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="text-[#71809e] hover:text-[#111b2d] font-bold text-lg cursor-pointer"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#52525b] mb-1.5">Nombre del catálogo</label>
+                    <input
+                      required
+                      placeholder="Ej. Colección Verano 2026"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
+                      className="w-full rounded-xl border border-[#e2e8f0] px-3.5 py-2.5 text-sm outline-none focus:border-[#ff4b0b]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#52525b] mb-1.5">Descripción (opcional)</label>
+                    <textarea
+                      placeholder="Detalles del catálogo o tarifas..."
+                      value={form.description}
+                      onChange={e => setForm({ ...form, description: e.target.value })}
+                      className="w-full rounded-xl border border-[#e2e8f0] px-3.5 py-2.5 text-sm outline-none focus:border-[#ff4b0b] min-h-[80px]"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2.5 text-sm text-[#34415b] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.is_public}
+                      onChange={e => setForm({ ...form, is_public: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#ff4b0b] focus:ring-[#ff4b0b]"
+                    />
+                    <span>Publicar catálogo (acceso público para clientes)</span>
+                  </label>
+                  <button
+                    disabled={saving}
+                    className="w-full pxp-btn primary justify-center"
+                    style={{ height: '42px', marginTop: '14px' }}
+                  >
+                    {saving ? 'Guardando catálogo...' : 'Guardar catálogo'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

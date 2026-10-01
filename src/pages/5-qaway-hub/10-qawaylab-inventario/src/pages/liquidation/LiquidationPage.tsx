@@ -35,118 +35,146 @@ export default function LiquidationPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Liquidación</h1>
-          <p className="text-sm text-gray-500">Gestiona campañas de remate y liquidación de inventario</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Nueva campaña
-        </button>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <Zap size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Promociones y Liquidaciones
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Gestiona campañas de remate, promociones y liquidación de inventario.
+                  </p>
+                </div>
+              </div>
 
-      {/* Search — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 relative bg-white/95 backdrop-blur-md border border-zinc-200 py-1 rounded-lg shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Buscar campañas..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-        />
-      </div>
-
-      {/* Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-orange-600 animate-spin" />
-        </div>
-      ) : error ? (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-sm text-red-700">{error}</span>
-        </div>
-      ) : filteredCampaigns.length === 0 ? (
-        <div className="text-center py-12">
-          <Zap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay campañas</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Crea tu primera campaña de liquidación para comenzar a vender inventario
-          </p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-          >
-            <Plus className="w-4 h-4" />
-            Crear campaña
-          </button>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCampaigns.map(campaign => (
-              <CampaignCard
-                key={campaign.id}
-                campaign={campaign}
-                onEdit={(c) => setEditingCampaign(c)}
-                onDelete={handleDelete}
-                onView={(c) => console.log('View campaign:', c)}
-              />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <div className="flex items-center justify-between pt-4">
-              <p className="text-sm text-gray-500">
-                Mostrando {filteredCampaigns.length} de {pagination.total} campañas
-              </p>
-              <div className="flex items-center gap-2">
+              <div className="pxp-heading-actions">
                 <button
-                  onClick={() => setPage(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setShowForm(true)}
+                  className="pxp-btn primary"
+                  title="Crear nueva campaña"
                 >
-                  Anterior
-                </button>
-                <span className="text-sm text-gray-600">
-                  {pagination.page} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setPage(pagination.page + 1)}
-                  disabled={pagination.page === pagination.total_pages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Siguiente
+                  <Plus size={15} /> Nueva campaña
                 </button>
               </div>
             </div>
-          )}
-        </>
-      )}
 
-      {/* Forms */}
-      {showForm && (
-        <CampaignForm
-          onSave={handleCreate}
-          onClose={() => setShowForm(false)}
-        />
-      )}
+            {/* Toolbar oficial */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar campañas..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
 
-      {editingCampaign && (
-        <CampaignForm
-          campaign={editingCampaign}
-          onSave={handleUpdate}
-          onClose={() => setEditingCampaign(null)}
-        />
-      )}
+            {/* Content */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={28} className="text-[#ff4b0b] animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            ) : filteredCampaigns.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#e4e4e7] p-12 text-center shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#f4f4f5] text-[#52525b] grid place-items-center mx-auto mb-3 text-xl">
+                  <Zap size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#111b2d] mb-1">
+                  {searchTerm ? 'Sin coincidencias' : 'No hay campañas activas'}
+                </h3>
+                <p className="text-sm text-[#71809e] mb-6 max-w-md mx-auto">
+                  {searchTerm 
+                    ? 'No se encontraron campañas que coincidan con tu búsqueda.' 
+                    : 'Crea tu primera campaña de liquidación o promoción para comenzar a rotar inventario.'}
+                </p>
+                {!searchTerm && (
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="pxp-btn primary"
+                  >
+                    <Plus size={15} /> Crear campaña
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {filteredCampaigns.map(campaign => (
+                    <CampaignCard
+                      key={campaign.id}
+                      campaign={campaign}
+                      onEdit={(c) => setEditingCampaign(c)}
+                      onDelete={handleDelete}
+                      onView={(c) => console.log('View campaign:', c)}
+                    />
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {pagination.total_pages > 1 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-[#e5ebf4]">
+                    <p className="text-sm text-[#71809e]">
+                      Mostrando {filteredCampaigns.length} de {pagination.total} campañas
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage(pagination.page - 1)}
+                        disabled={pagination.page === 1}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Anterior
+                      </button>
+                      <span className="text-sm text-[#34415b] font-medium px-2">
+                        {pagination.page} / {pagination.total_pages}
+                      </span>
+                      <button
+                        onClick={() => setPage(pagination.page + 1)}
+                        disabled={pagination.page === pagination.total_pages}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Forms */}
+            {showForm && (
+              <CampaignForm
+                onSave={handleCreate}
+                onClose={() => setShowForm(false)}
+              />
+            )}
+
+            {editingCampaign && (
+              <CampaignForm
+                campaign={editingCampaign}
+                onSave={handleUpdate}
+                onClose={() => setEditingCampaign(null)}
+              />
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
