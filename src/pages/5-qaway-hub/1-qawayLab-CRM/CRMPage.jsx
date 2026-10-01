@@ -227,18 +227,18 @@ function CRMContent() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#111111] overflow-hidden font-sans text-white selection:bg-[#ff4b0b] selection:text-white">
+    <div className="flex h-screen w-full bg-[#f8f9fa] overflow-hidden font-sans text-zinc-900 selection:bg-[#ff4b0b] selection:text-white">
       
-      {/* ── LEFT SIDEBAR (Dark Shell) ───────────────────────────────── */}
-      <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-white/10 bg-[#111111] transition-all duration-300 ease-in-out`}>
+      {/* ── LEFT SIDEBAR (Clean Light Shell) ─────────────────────────── */}
+      <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col border-r border-zinc-200 bg-white transition-all duration-300 ease-in-out`}>
         
         {/* LOGO - Redirección a Inicio */}
         <button 
           onClick={() => setActiveTab('dashboard')}
-          className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-white/10 shrink-0 cursor-pointer hover:bg-white/5 transition-colors group w-full`}
+          className={`h-16 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'px-6'} border-b border-zinc-200 shrink-0 cursor-pointer hover:bg-zinc-50 transition-colors group w-full`}
         >
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white tracking-wide text-lg">
+            <span className="font-bold text-zinc-900 tracking-wide text-lg">
               {isSidebarCollapsed ? (
                 <span className="text-[#ff4b0b]">Q</span>
               ) : (
@@ -249,7 +249,7 @@ function CRMContent() {
         </button>
 
         {/* NAVIGATION */}
-        <nav className={`flex-1 py-6 ${isSidebarCollapsed ? 'px-2' : 'px-4'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
+        <nav className={`flex-1 py-4 ${isSidebarCollapsed ? 'px-2' : 'px-3'} flex flex-col gap-1 overflow-y-auto custom-scrollbar`}>
           {tabs.map(tab => {
             const isActive = activeTab === tab.id
             return (
@@ -257,13 +257,13 @@ function CRMContent() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 title={isSidebarCollapsed ? tab.label : ''}
-                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-lg text-sm font-medium transition-all w-full text-left
+                className={`flex items-center ${isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'} rounded-xl text-[13.5px] font-medium transition-all w-full text-left
                   ${isActive 
-                    ? 'bg-white/10 text-white' 
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
+                    ? 'bg-zinc-900 text-white shadow-xs font-semibold' 
+                    : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
                   }`}
               >
-                <tab.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4b0b]' : ''}`} />
+                <tab.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#ff4b0b]' : 'text-zinc-400 group-hover:text-zinc-600'}`} />
                 {!isSidebarCollapsed && <span className="truncate">{tab.label}</span>}
               </button>
             )
@@ -271,12 +271,12 @@ function CRMContent() {
         </nav>
 
         {/* ZONA INFERIOR DEL SIDEBAR (Configuración & Webhook) */}
-        <div className="p-4 border-t border-white/5 flex flex-col gap-2">
+        <div className="p-3 border-t border-zinc-200 flex flex-col gap-1">
           {/* Simular Webhook (Dev Tools) */}
           <button 
             onClick={handleSimulate}
             disabled={simulating}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/40 hover:text-white hover:bg-white/5 transition-all text-sm font-medium group ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all text-[13px] font-medium group ${
               isSidebarCollapsed ? "justify-center" : ""
             }`}
             title={isSidebarCollapsed ? "Simular Entrada (Webhook)" : undefined}
@@ -292,15 +292,15 @@ function CRMContent() {
           {/* Módulo de Configuración */}
           <button 
             onClick={() => setActiveTab('configuracion')}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-sm font-medium ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-[13px] font-medium ${
               activeTab === 'configuracion'
-                ? "bg-white/10 text-white shadow-sm" 
-                : "text-white/60 hover:text-white hover:bg-white/5"
+                ? "bg-zinc-900 text-white shadow-xs font-semibold" 
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
             } ${isSidebarCollapsed ? "justify-center" : ""}`}
             title={isSidebarCollapsed ? "Configuración" : undefined}
           >
-            <Settings className={`w-5 h-5 transition-colors ${
-              activeTab === 'configuracion' ? "text-white" : "text-white/40 group-hover:text-white/80"
+            <Settings className={`w-4 h-4 transition-colors ${
+              activeTab === 'configuracion' ? "text-[#ff4b0b]" : "text-zinc-400 group-hover:text-zinc-600"
             }`} />
             {!isSidebarCollapsed && (
               <span className="truncate">Configuración</span>
@@ -312,18 +312,18 @@ function CRMContent() {
       {/* ── RIGHT AREA ────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 relative">
         
-        {/* HEADER TOPBAR (Escalado al estilo Google Workspace / Altura amplia) */}
-        <header className="h-[72px] border-b border-white/5 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-[#111111] relative z-50 shadow-sm">
+        {/* HEADER TOPBAR (Estandarizado a 64px, fondo blanco limpio) */}
+        <header className="h-16 border-b border-zinc-200 flex items-center justify-between px-5 lg:px-6 shrink-0 bg-white/95 backdrop-blur-md relative z-50 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
           
           {/* Lado Izquierdo: Toggle Sidebar, Waffle y App Home */}
           <div className="flex items-center gap-2 lg:gap-3">
             {/* Botón Toggle Sidebar */}
             <button 
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
               title={isSidebarCollapsed ? "Expandir menú" : "Contraer menú"}
             >
-              <Menu className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
+              <Menu className="w-5 h-5" />
             </button>
 
             {/* Waffle App Switcher */}
@@ -331,21 +331,21 @@ function CRMContent() {
               <button
                 type="button"
                 onClick={() => setIsWaffleOpen(!isWaffleOpen)}
-                className="group flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 transition-all duration-300 ease-out cursor-pointer"
+                className="group flex items-center gap-2 h-[38px] px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-zinc-700 transition-all duration-200 cursor-pointer shadow-2xs"
                 title="Ecosistema de Aplicaciones"
               >
                 <div className="grid grid-cols-3 gap-[3px] w-4 h-4 place-items-center">
                   {[...Array(9)].map((_, i) => (
                      <span
                       key={i}
-                      className="w-[3px] h-[3px] rounded-full bg-white/70 group-hover:bg-[#ff4b0b] transition-colors"
+                      className="w-[3px] h-[3px] rounded-full bg-zinc-600 group-hover:bg-[#ff4b0b] transition-colors"
                     />
                   ))}
                 </div>
-                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
+                <span className="text-sm font-bold text-zinc-800 max-w-0 overflow-hidden group-hover:max-w-16 transition-all duration-350 ease-out whitespace-nowrap">
                   Apps
                 </span>
-                <ChevronDown className="w-3.5 h-3.5 text-white/40 group-hover:text-white/80 transition-transform duration-200" />
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-700 transition-transform duration-200" />
               </button>
 
               <AppSwitcherDropdown
@@ -358,11 +358,11 @@ function CRMContent() {
             <div className="hidden sm:block">
               <button 
                 onClick={() => navigate('/hub/panel')}
-                className="group flex items-center gap-2 h-10 px-3 rounded-full border border-transparent hover:bg-white/5 text-white/70 hover:text-white transition-all duration-300 ease-out cursor-pointer"
+                className="group flex items-center gap-2 h-[38px] px-3 rounded-xl border border-transparent hover:border-zinc-200 hover:bg-zinc-50 text-zinc-600 hover:text-zinc-900 transition-all duration-200 cursor-pointer"
                 title="Volver al Panel del Hub (/hub/panel)"
               >
-                <Home className="w-5 h-5 shrink-0 group-hover:text-[#ff4b0b] transition-colors" />
-                <span className="text-sm font-bold text-white max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
+                <Home className="w-4 h-4 shrink-0 text-zinc-500 group-hover:text-[#ff4b0b] transition-colors" />
+                <span className="text-sm font-bold text-zinc-800 max-w-0 overflow-hidden group-hover:max-w-[48px] transition-all duration-350 ease-out whitespace-nowrap">
                   Inicio
                 </span>
               </button>
@@ -371,18 +371,15 @@ function CRMContent() {
             {/* Selector Multi-Tenant de Marca / Empresa */}
             {tenants && tenants.length > 0 && (
               <div className="relative">
-                {/* Trigger píldora (diseño Hub) + desplegable premium: mismo patrón visual del
-                    selector de marcas del Panel principal. La lógica de tenant es la misma
-                    del select anterior (selectedTenantId / 'all'). */}
                 <button
                   type="button"
                   onClick={() => setIsTenantOpen((o) => !o)}
-                  className="flex items-center gap-2 h-10 px-3 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/40 cursor-pointer transition-all"
+                  className="flex items-center gap-2 h-[38px] px-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 text-sm font-semibold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-[#ff4b0b]/20 cursor-pointer transition-all shadow-2xs"
                   title="Cambiar Marca / Tenant Activo"
                 >
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="max-w-40 truncate">{selectedTenantId === 'all' ? 'Todas las Marcas' : (tenants.find((t) => t.id === selectedTenantId)?.name || 'Todas las Marcas')}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-white/40 transition-transform duration-200 ${isTenantOpen ? 'rotate-180 text-white' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${isTenantOpen ? 'rotate-180 text-zinc-700' : ''}`} />
                 </button>
                 <AnimatePresence>
                   {isTenantOpen && (
@@ -393,11 +390,11 @@ function CRMContent() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.97 }}
                         transition={{ duration: 0.15, ease: 'easeOut' }}
-                        className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-[#18181b] border border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                        className="absolute left-0 top-[calc(100%+8px)] w-72 rounded-2xl bg-white border border-zinc-200 shadow-2xl z-[100] overflow-hidden"
                       >
-                        <div className="p-4 border-b border-white/5 bg-white/5">
-                          <p className="text-xs font-extrabold text-white">Cambiar de marca</p>
-                          <p className="text-[10px] text-white/50 mt-0.5">Las vistas se filtran por la marca activa.</p>
+                        <div className="p-4 border-b border-zinc-100 bg-zinc-50">
+                          <p className="text-xs font-extrabold text-zinc-900">Cambiar de marca</p>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">Las vistas se filtran por la marca activa.</p>
                         </div>
                         <div className="p-2 max-h-64 overflow-y-auto">
                           {tenants.map((t) => (
@@ -405,21 +402,21 @@ function CRMContent() {
                               key={t.id}
                               type="button"
                               onClick={() => { setSelectedTenantId(t.id); setIsTenantOpen(false) }}
-                              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors ${selectedTenantId === t.id ? 'bg-orange-500/15 text-orange-300' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-xs font-bold transition-colors ${selectedTenantId === t.id ? 'bg-orange-50 text-orange-700' : 'text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'}`}
                             >
-                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === t.id ? 'bg-orange-400' : 'bg-white/20'}`} />
+                              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === t.id ? 'bg-orange-500' : 'bg-zinc-300'}`} />
                               <span className="truncate">{t.name}</span>
-                              <span className="ml-auto text-[10px] font-semibold text-white/40 shrink-0">{t.client_code}</span>
+                              <span className="ml-auto text-[10px] font-semibold text-zinc-400 shrink-0">{t.client_code}</span>
                             </button>
                           ))}
                         </div>
-                        <div className="p-2 border-t border-white/5 bg-black/20">
+                        <div className="p-2 border-t border-zinc-100 bg-zinc-50">
                           <button
                             type="button"
                             onClick={() => { setSelectedTenantId('all'); setIsTenantOpen(false) }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTenantId === 'all' ? 'text-orange-300' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTenantId === 'all' ? 'text-orange-700 font-extrabold' : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'}`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === 'all' ? 'bg-orange-400' : 'bg-white/20'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedTenantId === 'all' ? 'bg-orange-500' : 'bg-zinc-300'}`} />
                             Todas las Marcas
                           </button>
                         </div>
@@ -432,11 +429,11 @@ function CRMContent() {
           </div>
 
           {/* Search, CTA, Notifications & User */}
-          <div className="flex items-center gap-3 lg:gap-5 relative">
+          <div className="flex items-center gap-3 lg:gap-4 relative">
             
             {/* 1. Buscador Omnibox con Command Palette */}
             <div className="relative block">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-white/40" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
               <input 
                 ref={searchInputRef}
                 type="text" 
@@ -447,19 +444,19 @@ function CRMContent() {
                   activeTab === 'configuracion' ? "Buscar contactos globalmente..." :
                   "Buscar clientes u oportunidades..."
                 } 
-                className="bg-[#18181b] border border-white/10 rounded-full pl-10 pr-16 py-2.5 text-sm text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff4b0b]/50 focus:bg-[#202024] w-[240px] md:w-[320px] lg:w-[420px] transition-all shadow-inner" 
+                className="bg-zinc-50 border border-zinc-200 rounded-xl pl-10 pr-16 h-[38px] text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-[#ff4b0b] focus:ring-2 focus:ring-[#ff4b0b]/20 focus:bg-white w-[220px] md:w-[280px] lg:w-[360px] transition-all" 
               />
               {globalSearchQuery ? (
                 <button 
                   onClick={() => setGlobalSearchQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               ) : (
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-white/10 rounded-md text-white/50 border border-white/5">⌘</kbd>
-                  <kbd className="px-2 py-0.5 text-[11px] font-mono bg-white/10 rounded-md text-white/50 border border-white/5">K</kbd>
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-200/60 rounded text-zinc-500 border border-zinc-300/50">⌘</kbd>
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-zinc-200/60 rounded text-zinc-500 border border-zinc-300/50">K</kbd>
                 </div>
               )}
 
@@ -471,7 +468,7 @@ function CRMContent() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 5 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-[calc(100%+12px)] left-0 w-full bg-[#1c1c1f] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                    className="absolute top-[calc(100%+8px)] left-0 w-full bg-white border border-zinc-200 rounded-2xl shadow-2xl z-[100] overflow-hidden"
                   >
                     {(() => {
                       const query = globalSearchQuery.toLowerCase();
@@ -485,17 +482,17 @@ function CRMContent() {
                       if (searchResults.length === 0) {
                         return (
                           <div className="p-6 text-center">
-                            <p className="text-sm text-white/50 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
+                            <p className="text-sm text-zinc-500 font-medium">No se encontraron resultados para "{globalSearchQuery}"</p>
                           </div>
                         );
                       }
 
                       return (
                         <div className="flex flex-col">
-                          <div className="px-4 py-3 border-b border-white/5 bg-white/5">
-                            <span className="text-xs font-bold text-white/50 uppercase tracking-wider">Resultados Rápidos</span>
+                          <div className="px-4 py-2.5 border-b border-zinc-100 bg-zinc-50">
+                            <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Resultados Rápidos</span>
                           </div>
-                          <ul className="py-2">
+                          <ul className="py-1">
                             {searchResults.map(lead => {
                               const titleName = lead.client_name || lead.name || 'Empresa';
                               const initials = titleName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'Q';
@@ -507,25 +504,25 @@ function CRMContent() {
                                       if (setSelectedLeadId) setSelectedLeadId(lead.id);
                                       setActiveTab('whatsapp');
                                     }}
-                                    className="w-full px-4 py-3 hover:bg-white/5 transition-colors flex items-center gap-4 text-left group"
+                                    className="w-full px-4 py-2.5 hover:bg-zinc-50 transition-colors flex items-center gap-3 text-left group"
                                   >
-                                    <div className="w-9 h-9 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[13px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">
+                                    <div className="w-8 h-8 rounded-full bg-[#ff4b0b]/10 text-[#ff4b0b] font-bold text-[12px] flex items-center justify-center shrink-0 border border-[#ff4b0b]/20">
                                       {initials}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-semibold text-white truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
-                                      <div className="flex items-center gap-2 text-xs text-white/40 mt-1">
+                                      <p className="text-sm font-semibold text-zinc-900 truncate group-hover:text-[#ff4b0b] transition-colors">{titleName}</p>
+                                      <div className="flex items-center gap-2 text-xs text-zinc-500">
                                         <span className="truncate">{lead.whatsapp || lead.email}</span>
-                                        <span className="px-1.5 py-0.5 rounded-sm bg-white/5 text-white/50">{lead.status || lead.stage}</span>
+                                        <span className="px-1.5 py-0.5 rounded-sm bg-zinc-100 text-zinc-600 text-[10px]">{lead.status || lead.stage}</span>
                                       </div>
                                     </div>
-                                    <MessageSquare className="w-5 h-5 text-white/20 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+                                    <MessageSquare className="w-4 h-4 text-zinc-400 group-hover:text-[#ff4b0b] opacity-0 group-hover:opacity-100 transition-all shrink-0" />
                                   </button>
                                 </li>
                               );
                             })}
                           </ul>
-                          <div className="px-4 py-3 bg-white/5 border-t border-white/5 flex items-center justify-between text-xs text-white/40">
+                          <div className="px-4 py-2 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400">
                             <span>Saltar directo al chat</span>
                             <span>Esc para cerrar</span>
                           </div>
@@ -537,12 +534,12 @@ function CRMContent() {
               </AnimatePresence>
             </div>
 
-            <div className="h-6 w-px bg-white/10" />
+            <div className="h-6 w-px bg-zinc-200" />
 
-            {/* 2. Botón Primario de Creación (Equilibrado) */}
+            {/* 2. Botón Primario de Creación (Equilibrado 38px) */}
             <button 
               onClick={() => alert("Registro Manual de Leads: Próximamente se abrirá aquí el panel lateral para ingresar nuevos clientes a mano.")}
-              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#e03f06] text-white px-3.5 py-2 rounded-xl text-[13px] font-bold transition-colors shadow-[0_0_15px_rgba(255,75,11,0.2)] whitespace-nowrap"
+              className="flex items-center gap-2 bg-[#ff4b0b] hover:bg-[#e03f06] text-white px-3.5 h-[38px] rounded-xl text-[13px] font-bold transition-all shadow-[0_2px_8px_rgba(255,75,11,0.25)] active:scale-[0.98] whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span className="hidden sm:block">Nueva oportunidad</span>
@@ -551,27 +548,27 @@ function CRMContent() {
             {/* 3. Campana / Notificaciones */}
             <button 
               onClick={() => alert("Centro de Notificaciones:\nAquí recibirás alertas cuando un nuevo Lead entre por Webhook, o cuando tu equipo te asigne una Tarea.")}
-              className="relative p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors ml-1 cursor-pointer"
+              className="relative p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors ml-1 cursor-pointer"
               title="Notificaciones (0)"
             >
-              <Bell className="w-5 h-5 lg:w-[22px] lg:h-[22px]" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-[#111111]" />
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-[#ff4b0b] rounded-full ring-2 ring-white" />
             </button>
             
-            {/* 4. Perfil del Usuario Estándar (Estilo Google) */}
+            {/* 4. Perfil del Usuario Estándar */}
             <div className="relative z-[100] ml-1">
               <button 
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-3 cursor-pointer p-1 lg:p-1.5 rounded-full hover:bg-white/5 transition-colors text-left border border-transparent focus:outline-none"
+                className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-zinc-100 transition-colors text-left border border-transparent focus:outline-none"
               >
-                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-8 h-8 lg:w-10 lg:h-10 rounded-full border border-white/10 object-cover" />
+                <img src={currentProfile.avatar} alt={currentProfile.name} className="w-8 h-8 rounded-full border border-zinc-200 object-cover" />
                 <div className="hidden lg:flex flex-col justify-center">
-                  <span className="text-white text-sm font-bold leading-none">{currentProfile.name}</span>
+                  <span className="text-zinc-900 text-sm font-bold leading-none">{currentProfile.name}</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 hidden lg:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-white' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 hidden lg:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-zinc-700' : ''}`} />
               </button>
 
-              {/* Dropdown de Perfil Estándar (Manejado por Clic) */}
+              {/* Dropdown de Perfil Estándar */}
               <AnimatePresence>
                 {isProfileOpen && (
                   <>
@@ -585,37 +582,37 @@ function CRMContent() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 top-[calc(100%+8px)] w-72 bg-[#18181b] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] z-[100] overflow-hidden"
+                      className="absolute right-0 top-[calc(100%+8px)] w-72 bg-white border border-zinc-200 rounded-2xl shadow-2xl z-[100] overflow-hidden"
                     >
-                      <div className="p-5 border-b border-white/5 bg-white/5 flex items-center gap-4">
-                        <img src={currentProfile.avatar} alt={currentProfile.name} className="w-12 h-12 rounded-full border border-white/10 object-cover shrink-0" />
+                      <div className="p-4 border-b border-zinc-100 bg-zinc-50 flex items-center gap-3">
+                        <img src={currentProfile.avatar} alt={currentProfile.name} className="w-10 h-10 rounded-full border border-zinc-200 object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-white truncate">{currentProfile.name}</p>
-                          <p className="text-xs text-white/50 truncate mt-0.5">admin@qaway.pe</p>
+                          <p className="text-sm font-bold text-zinc-900 truncate">{currentProfile.name}</p>
+                          <p className="text-xs text-zinc-500 truncate mt-0.5">admin@qaway.pe</p>
                         </div>
                       </div>
                       
                       {/* Opciones CRM Reales */}
-                      <div className="p-2 flex flex-col gap-0.5">
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                      <div className="p-1.5 flex flex-col gap-0.5">
+                        <button className="w-full flex items-center justify-between px-3.5 py-2 text-xs text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors font-medium">
                           Preferencias de Cuenta
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                        <button className="w-full flex items-center justify-between px-3.5 py-2 text-xs text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors font-medium">
                           Usuarios y Roles
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                        <button className="w-full flex items-center justify-between px-3.5 py-2 text-xs text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors font-medium">
                           Integraciones (Meta/WA)
                         </button>
-                        <button className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors font-semibold">
+                        <button className="w-full flex items-center justify-between px-3.5 py-2 text-xs text-zinc-700 hover:text-zinc-900 hover:bg-zinc-50 rounded-lg transition-colors font-medium">
                           Suscripción y Pagos
                         </button>
                       </div>
                       
-                      <div className="p-2 border-t border-white/5 bg-black/20">
+                      <div className="p-1.5 border-t border-zinc-100 bg-zinc-50">
                         <button
                           type="button"
                           onClick={handleLogout}
-                          className="w-full flex items-center px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors font-bold cursor-pointer"
+                          className="w-full flex items-center px-3.5 py-2 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors font-bold cursor-pointer"
                         >
                           Cerrar Sesión
                         </button>
@@ -629,12 +626,9 @@ function CRMContent() {
           </div>
         </header>
 
-        {/* ── MAIN CONTENT (Lienzo Maestro: Casi blanco neutro #fafafa) ────────────────── */}
-        <main className="flex-1 bg-[#fafafa] overflow-y-auto text-zinc-900 relative">
-          {/* Cuadrícula técnica ultrasutil e imperceptible */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.007] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:32px_32px]" />
-          
-          <div className="relative z-10 p-6 md:p-8 min-h-full">
+        {/* ── MAIN CONTENT (Lienzo Maestro: Fondo neutro suave #f8f9fa) ─────────── */}
+        <main className="flex-1 bg-[#f8f9fa] overflow-y-auto text-zinc-900 relative">
+          <div className="relative z-10 p-6 md:p-8 min-h-full max-w-[1600px] mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${currentRole}-${activeTab}`}
