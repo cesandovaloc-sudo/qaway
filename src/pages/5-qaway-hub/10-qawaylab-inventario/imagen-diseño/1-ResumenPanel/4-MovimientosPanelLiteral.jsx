@@ -39,15 +39,15 @@ import {
 } from "lucide-react";
 
 import { productService } from "../../src/services/productService";
+import { movementService } from "../../src/services/movementService";
 import { useTenant } from "../../src/context/TenantContext";
 
 /**
  * MovimientosPanelLiteral.jsx
  * Tablero superior (diseño nuevo) del módulo Movimientos de Inventi Pro.
- * NOTA DE MIGRACIÓN (FASE 1): este componente deriva del panel de Productos
- * y todavía monta lógica de Productos (productos, stock, precios). La
- * migración de lógica desde 4-MovimientosPanel.jsx (tablero inferior, fuente
- * de verdad funcional) se realiza por fases; esta fase solo adapta textos.
+ * FASE 2: métricas conectadas a inventory_movements reales vía movementService
+ * (con fallback a 0 si no hay datos; sin mocks). Fuente de verdad funcional:
+ * 4-MovimientosPanel.jsx (tablero inferior, conservado).
  */
 
 const STOCK_IMAGES = {
@@ -749,6 +749,11 @@ export default function MovimientosPanelLiteral() {
   // Do not render demo inventory while the authoritative source is loading.
   const [products, setProducts] = useState([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  // FASE 2: movimientos reales (inventory_movements) para métricas del tablero superior.
+  const [movements, setMovements] = useState([]);
+  const [isLoadingMovements, setIsLoadingMovements] = useState(true);
+  // Menú de acciones por fila (faltaba: provocaba ReferenceError).
+  const [menuId, setMenuId] = useState(null);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
   const [status, setStatus] = useState("Todos");
@@ -961,6 +966,47 @@ export default function MovimientosPanelLiteral() {
     loadSupabaseProducts();
     return () => { isMounted = false; };
   }, [activeTenantId, isPlatformAdmin]);
+
+  // FASE 2: carga de movimientos reales (1 query, sin N+1, con límite).
+  useEffect(() => {
+    let isMounted = true;
+    async function loadMovements() {
+      setIsLoadingMovements(true);
+      try {
+        if (isPlatformAdmin && !activeTenantId) {
+          if (isMounted) { setMovements([]); setIsLoadingMovements(false); }
+          return;
+        }
+        const data = await movementService.getMovements({ tenant_id: activeTenantId || undefined, limit: 500 });
+        if (isMounted) setMovements(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.warn("[Movimientos] fallback sin movimientos:", err);
+        if (isMounted) setMovements([]);
+      } finally {
+        if (isMounted) setIsLoadingMovements(false);
+      }
+    }
+    loadMovements();
+    return () => { isMounted = false; };
+  }, [activeTenantId, isPlatformAdmin]);
+
+  // FASE 2: métricas desde movimientos reales (misma regla que tablero inferior).
+  const movMetrics = useMemo(() => movementService.calcMetrics(movements || []), [movements]);
+  const qtySum = (kind) => {
+    if (kind === "Entrada") return movMetrics.entradas;
+    if (kind === "Salida") return movMetrics.salidas;
+    if (kind === "Transferencia") return movMetrics.transferencias;
+    if (kind === "Ajuste") return movMetrics.ajustes;
+    return 0;
+  };
+  const countMov = (kind) => {
+    if (kind === "Entrada") return movMetrics.cEntradas;
+    if (kind === "Salida") return movMetrics.cSalidas;
+    if (kind === "Transferencia") return movMetrics.cTransferencias;
+    if (kind === "Ajuste") return movMetrics.cAjustes;
+    return 0;
+  };
+  const isLoadingMetrics = isLoadingMovements;
 
   const toggleColumn = key => {
     setVisibleColumns(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
@@ -1402,11 +1448,11 @@ export default function MovimientosPanelLiteral() {
             </div>
 
             <section className="pxp-metrics">
-              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Entradas (últimos 30 días)" value={isLoadingProducts ? "—" : qtySum("Entrada").toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingProducts ? "Cargando..." : count("Entrada")}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
-              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Salidas (últimos 30 días)" value={isLoadingProducts ? "—" : qtySum("Salida").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Salida")} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
-              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Transferencias" value={isLoadingProducts ? "—" : qtySum("Transferencia").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Transferencia")} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
-              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Ajustes" value={isLoadingProducts ? "—" : qtySum("Ajuste").toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : count("Ajuste")} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
-              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Total movido" value={isLoadingProducts ? "—" : (qtySum("Entrada") - qtySum("Salida")).toLocaleString("es-PE")} note={isLoadingProducts ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>↑ 9% vs. mes anterior</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
+              <Metric icon={<Boxes size={16} strokeWidth={1.75} />} label="Entradas (últimos 30 días)" value={isLoadingMetrics ? "—" : qtySum("Entrada").toLocaleString("es-PE")} note={<><span className="w-1.5 h-1.5 rounded-full bg-[#ff4b0b] inline-block animate-pulse" /> {isLoadingMetrics ? "Cargando..." : `${countMov("Entrada")} movimientos`}</>} stroke="#ff4b0b" points="0,15 20,10 40,18 60,5 80,12 100,2" />
+              <Metric icon={<CheckCircle2 size={16} strokeWidth={1.75} />} label="Salidas (últimos 30 días)" value={isLoadingMetrics ? "—" : qtySum("Salida").toLocaleString("es-PE")} note={isLoadingMetrics ? "Cargando..." : `${countMov("Salida")} movimientos`} stroke="#10b981" points="0,18 20,14 40,16 60,8 80,10 100,2" />
+              <Metric icon={<AlertTriangle size={16} strokeWidth={1.75} />} label="Transferencias" value={isLoadingMetrics ? "—" : qtySum("Transferencia").toLocaleString("es-PE")} note={isLoadingMetrics ? "Cargando..." : `${countMov("Transferencia")} movimientos`} stroke="#f59e0b" points="0,14 20,16 40,10 60,15 80,8 100,12" />
+              <Metric icon={<XCircle size={16} strokeWidth={1.75} />} label="Ajustes" value={isLoadingMetrics ? "—" : qtySum("Ajuste").toLocaleString("es-PE")} note={isLoadingMetrics ? "Cargando..." : `${countMov("Ajuste")} movimientos`} stroke="#71717a" points="0,15 25,12 50,14 75,10 100,16" />
+              <Metric icon={<CircleDollarSign size={16} strokeWidth={1.75} />} label="Total movido" value={isLoadingMetrics ? "—" : (qtySum("Entrada") - qtySum("Salida")).toLocaleString("es-PE")} note={isLoadingMetrics ? "Cargando..." : <span style={{ color: "#ff4b0b", fontWeight: 600 }}>Entradas − salidas (30d)</span>} stroke="#ff4b0b" points="0,16 20,12 40,15 60,7 80,9 100,3" />
             </section>
 
             <div className="pxp-toolbar">

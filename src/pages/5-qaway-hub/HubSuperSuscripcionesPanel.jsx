@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Building2,
   CalendarClock,
@@ -19,7 +19,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
+import { supabase } from "@/config/supabase";
 import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside";
 
 /**
@@ -413,12 +415,20 @@ function TipCard() {
   );
 }
 
+function getInitials(name) {
+  if (!name) return "QL";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
 export default function SuscripcionesPanel({
   subscriptions = demoSubscriptions,
   onNewSubscription,
   onOpenSubscription,
 }) {
   const [items, setItems] = useState(subscriptions);
+  const [loading, setLoading] = useState(true);
   const [selectedSub, setSelectedSub] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
 
@@ -432,7 +442,141 @@ export default function SuscripcionesPanel({
 
   const pageSize = 8;
 
-  const handleApproveSubscription = (id) => {
+  // Carga reactiva de empresas y suscripciones reales desde Supabase
+  useEffect(() => {
+    let alive = true;
+
+    async function fetchRealSubscriptions() {
+      try {
+        setLoading(true);
+        const [tenantsRes, subsRes, appsRes] = await Promise.all([
+          supabase
+            .from("tenants")
+            .select("id, name, client_code, category, industry, sector, status, created_at")
+            .is("deleted_at", null)
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("tenant_app_subscriptions")
+            .select("id, tenant_id, app_id, plan, status, created_at, trial_ends_at"),
+          supabase
+            .from("app_catalog")
+            .select("id, name, slug"),
+        ]);
+
+        if (!alive) return;
+
+        const realTenants = tenantsRes.data || [];
+        const realSubs = subsRes.data || [];
+        const realApps = appsRes.data || [];
+
+        if (realTenants.length > 0) {
+          const appsMap = new Map(realApps.map((a) => [a.id, a.name]));
+
+          const planPriceMap = {
+            basico: 60,
+            intermedio: 100,
+            premium: 140,
+          };
+
+          const logoPalettes = [
+            "bg-blue-50 text-blue-600",
+            "bg-emerald-50 text-emerald-600",
+            "bg-orange-50 text-orange-600",
+            "bg-purple-50 text-purple-600",
+            "bg-stone-100 text-stone-700",
+          ];
+
+          const mapped = realTenants.map((t, idx) => {
+            const tenantSubs = realSubs.filter((s) => s.tenant_id === t.id);
+            const activeSub =
+              tenantSubs.find((s) => s.status === "active") || tenantSubs[0];
+
+            const rawPlan = activeSub?.plan?.toLowerCase() || "";
+            const planLabel =
+              rawPlan === "premium"
+                ? "Premium"
+                : rawPlan === "intermedio"
+                ? "Intermedio"
+                : rawPlan === "basico"
+                ? "Básico"
+                : "Sin plan";
+
+            const subAppNames = tenantSubs
+              .map((s) => appsMap.get(s.app_id))
+              .filter(Boolean);
+
+            let statusLabel = "En prueba";
+            if (activeSub) {
+              if (activeSub.status === "active") statusLabel = "Activa";
+              else if (activeSub.status === "trialing") statusLabel = "En prueba";
+              else if (
+                activeSub.status === "canceled" ||
+                activeSub.status === "past_due"
+              )
+                statusLabel = "Vencida";
+            } else if (t.status === "active") {
+              statusLabel = "Activa";
+            }
+
+            const monthlyAmount = rawPlan ? planPriceMap[rawPlan] || 0 : 0;
+
+            const createdDate = t.created_at
+              ? new Date(t.created_at).toLocaleDateString("es-PE", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Reciente";
+
+            const renewalDate = activeSub?.trial_ends_at
+              ? new Date(activeSub.trial_ends_at).toLocaleDateString("es-PE", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "-";
+
+            return {
+              id: activeSub?.id || t.id,
+              tenant_id: t.id,
+              company: t.name || "Empresa sin nombre",
+              industry: t.industry || t.category || "General",
+              initials: getInitials(t.name),
+              logoClass: logoPalettes[idx % logoPalettes.length],
+              plan: planLabel,
+              apps: subAppNames,
+              status: statusLabel,
+              start: createdDate,
+              renewal: renewalDate,
+              amount: monthlyAmount,
+              rawSub: activeSub,
+            };
+          });
+
+          setItems(mapped);
+        } else {
+          setItems(subscriptions);
+        }
+      } catch (err) {
+        console.error("Error al cargar suscripciones reales:", err);
+        setItems(subscriptions);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    fetchRealSubscriptions();
+
+    return () => {
+      alive = false;
+    };
+  }, [subscriptions]);
+
+  const handleApproveSubscription = async (id) => {
+    const target = items.find((x) => x.id === id);
+    if (!target) return;
+
+    // Actualización local inmediata
     setItems((prev) =>
       prev.map((sub) => (sub.id === id ? { ...sub, status: "Activa" } : sub))
     );
@@ -441,12 +585,49 @@ export default function SuscripcionesPanel({
     );
     setActionFeedback({
       type: "success",
-      message: "¡Suscripción aprobada y activada exitosamente!",
+      message: `¡Suscripción aprobada y activada exitosamente para ${target.company}!`,
     });
     setTimeout(() => setActionFeedback(null), 4000);
+
+    // Persistencia real en Supabase
+    if (target.tenant_id) {
+      try {
+        await supabase
+          .from("tenants")
+          .update({ status: "active" })
+          .eq("id", target.tenant_id);
+
+        if (target.rawSub?.id) {
+          await supabase
+            .from("tenant_app_subscriptions")
+            .update({ status: "active" })
+            .eq("tenant_id", target.tenant_id);
+        } else {
+          const { data: appData } = await supabase
+            .from("app_catalog")
+            .select("id")
+            .eq("slug", "inventario")
+            .maybeSingle();
+
+          if (appData?.id) {
+            await supabase.from("tenant_app_subscriptions").upsert({
+              tenant_id: target.tenant_id,
+              app_id: appData.id,
+              plan: "basico",
+              status: "active",
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error al persistir aprobación en Supabase:", err);
+      }
+    }
   };
 
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = async (id, newStatus) => {
+    const target = items.find((x) => x.id === id);
+    if (!target) return;
+
     setItems((prev) =>
       prev.map((sub) => (sub.id === id ? { ...sub, status: newStatus } : sub))
     );
@@ -458,6 +639,23 @@ export default function SuscripcionesPanel({
       message: `Estado actualizado a "${newStatus}".`,
     });
     setTimeout(() => setActionFeedback(null), 4000);
+
+    if (target.tenant_id) {
+      const dbStatus =
+        newStatus === "Activa"
+          ? "active"
+          : newStatus === "En prueba"
+          ? "trialing"
+          : "past_due";
+      try {
+        await supabase
+          .from("tenant_app_subscriptions")
+          .update({ status: dbStatus })
+          .eq("tenant_id", target.tenant_id);
+      } catch (err) {
+        console.error("Error al actualizar estado en Supabase:", err);
+      }
+    }
   };
 
   const filtered = useMemo(() => {
@@ -694,7 +892,20 @@ export default function SuscripcionesPanel({
                 </thead>
 
                 <tbody>
-                  {visibleRows.map((item) => (
+                  {loading && (
+                    <tr>
+                      <td colSpan={8} className="px-4 py-12 text-center">
+                        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-[#ff4b0b]">
+                          <Loader2 size={20} className="animate-spin text-[#ff4b0b]" />
+                        </div>
+                        <p className="mt-3 text-xs font-bold text-zinc-600">
+                          Sincronizando empresas y suscripciones desde Supabase...
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+
+                  {!loading && visibleRows.map((item) => (
                     <tr
                       key={item.id}
                       onClick={() => {
@@ -776,7 +987,7 @@ export default function SuscripcionesPanel({
                     </tr>
                   ))}
 
-                  {visibleRows.length === 0 && (
+                  {!loading && visibleRows.length === 0 && (
                     <tr>
                       <td colSpan={8} className="px-4 py-12 text-center">
                         <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
