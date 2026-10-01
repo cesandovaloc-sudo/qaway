@@ -39,117 +39,11 @@ import { useDismissOnEscapeOrOutside } from "./hooks/useDismissOnEscapeOrOutside
  * reemplaza `demoSubscriptions` por datos de Supabase/API.
  */
 
-const demoSubscriptions = [
-  {
-    id: "sub-001",
-    company: "CoraVet",
-    industry: "Veterinaria",
-    initials: "CV",
-    logoClass: "bg-blue-50 text-blue-600",
-    plan: "Premium",
-    apps: ["CRM", "Academia", "Analítica", "Agenda"],
-    status: "Activa",
-    start: "10 Ago 2026",
-    renewal: "10 Sep 2026",
-    amount: 199,
-  },
-  {
-    id: "sub-002",
-    company: "EPC Contable",
-    industry: "Estudio contable",
-    initials: "EPC",
-    logoClass: "bg-stone-100 text-stone-600",
-    plan: "Intermedio",
-    apps: ["CRM", "Academia", "Analítica", "Agenda"],
-    status: "Activa",
-    start: "03 Jul 2026",
-    renewal: "03 Ago 2026",
-    amount: 99,
-  },
-  {
-    id: "sub-003",
-    company: "Vallet Inmobiliaria",
-    industry: "Inmobiliaria",
-    initials: "V",
-    logoClass: "bg-black text-white",
-    plan: "Premium",
-    apps: ["CRM", "Academia", "Agenda", "Marketing"],
-    status: "Activa",
-    start: "28 Jun 2026",
-    renewal: "28 Jul 2026",
-    amount: 199,
-  },
-  {
-    id: "sub-004",
-    company: "Mesa Selecta",
-    industry: "Alimentos y bebidas",
-    initials: "MS",
-    logoClass: "bg-stone-50 text-zinc-700",
-    plan: "Básico",
-    apps: ["Inventario", "Academia", "Analítica", "CRM"],
-    status: "En prueba",
-    start: "15 Sep 2026",
-    renewal: "15 Oct 2026",
-    amount: 49,
-  },
-  {
-    id: "sub-005",
-    company: "Auréa Skincare",
-    industry: "Cuidado personal",
-    initials: "A",
-    logoClass: "bg-green-50 text-green-700",
-    plan: "Intermedio",
-    apps: ["CRM", "Agenda", "Marketing", "Analítica"],
-    status: "Activa",
-    start: "10 Sep 2026",
-    renewal: "10 Oct 2026",
-    amount: 99,
-  },
-  {
-    id: "sub-006",
-    company: "Josué Panadería",
-    industry: "Panadería",
-    initials: "JP",
-    logoClass: "bg-orange-50 text-orange-700",
-    plan: "Básico",
-    apps: ["Inventario", "Academia", "CRM"],
-    status: "Vencida",
-    start: "22 Ago 2026",
-    renewal: "22 Sep 2026",
-    amount: 49,
-  },
-  {
-    id: "sub-007",
-    company: "Brenda y Ely",
-    industry: "Café artesanal",
-    initials: "BE",
-    logoClass: "bg-amber-950 text-white",
-    plan: "Intermedio",
-    apps: ["CRM", "Academia", "Analítica", "Agenda"],
-    status: "Activa",
-    start: "18 Ago 2026",
-    renewal: "18 Oct 2026",
-    amount: 99,
-  },
-  {
-    id: "sub-008",
-    company: "VAR Sportswear",
-    industry: "Ropa deportiva",
-    initials: "V",
-    logoClass: "bg-black text-white",
-    plan: "Premium",
-    apps: ["CRM", "Analítica", "Agenda", "Marketing"],
-    status: "En prueba",
-    start: "30 Ago 2026",
-    renewal: "30 Sep 2026",
-    amount: 199,
-  },
-];
-
 const planMeta = {
   Premium: { color: "#ff4b0b", text: "text-orange-600", bg: "bg-orange-50" },
   Intermedio: { color: "#3b82f6", text: "text-blue-600", bg: "bg-blue-50" },
   Básico: { color: "#eab308", text: "text-yellow-600", bg: "bg-yellow-50" },
+  "Sin plan": { color: "#a8a29e", text: "text-stone-500", bg: "bg-stone-100" },
   Otro: { color: "#a8a29e", text: "text-stone-500", bg: "bg-stone-100" },
 };
 
@@ -360,29 +254,35 @@ function UpcomingRenewals({ subscriptions }) {
     <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-xs">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-bold text-zinc-950">Próximas renovaciones</h3>
-        <button className="text-[11px] font-bold text-zinc-500 hover:text-zinc-950">
-          Ver todas →
-        </button>
       </div>
 
       <div className="space-y-4">
-        {upcoming.map((item, index) => (
-          <div key={item.id} className="flex items-center gap-3">
-            <Logo subscription={item} />
+        {upcoming.length === 0 ? (
+          <p className="py-4 text-center text-xs text-zinc-400">No hay renovaciones pendientes</p>
+        ) : (
+          upcoming.map((item) => {
+            let daysText = "-";
+            if (item.rawSub?.trial_ends_at) {
+              const diff = Math.ceil((new Date(item.rawSub.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24));
+              daysText = diff > 0 ? `en ${diff} días` : diff === 0 ? "vence hoy" : "vencida";
+            }
+            return (
+              <div key={item.id} className="flex items-center gap-3">
+                <Logo subscription={item} />
 
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-zinc-900">{item.company}</p>
-              <p className="mt-0.5 text-[11px] text-zinc-400">Plan {item.plan}</p>
-            </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-bold text-zinc-900">{item.company}</p>
+                  <p className="mt-0.5 text-[11px] text-zinc-400">Plan {item.plan}</p>
+                </div>
 
-            <div className="text-right">
-              <p className="text-[11px] font-semibold text-zinc-500">{item.renewal}</p>
-              <p className="mt-0.5 text-[10px] text-zinc-400">
-                {index === 0 ? "en 5 días" : index === 1 ? "en 5 días" : `en ${13 + index * 6} días`}
-              </p>
-            </div>
-          </div>
-        ))}
+                <div className="text-right">
+                  <p className="text-[11px] font-semibold text-zinc-500">{item.renewal}</p>
+                  <p className="mt-0.5 text-[10px] text-zinc-400">{daysText}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
@@ -423,11 +323,14 @@ function getInitials(name) {
 }
 
 export default function SuscripcionesPanel({
-  subscriptions = demoSubscriptions,
+  subscriptions = [],
+  rawTenants = null,
+  rawSubs = null,
+  rawApps = null,
   onNewSubscription,
   onOpenSubscription,
 }) {
-  const [items, setItems] = useState(subscriptions);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSub, setSelectedSub] = useState(null);
   const [actionFeedback, setActionFeedback] = useState(null);
@@ -449,29 +352,34 @@ export default function SuscripcionesPanel({
     async function fetchRealSubscriptions() {
       try {
         setLoading(true);
-        const [tenantsRes, subsRes, appsRes] = await Promise.all([
-          supabase
-            .from("tenants")
-            .select("id, name, client_code, category, industry, sector, status, created_at")
-            .is("deleted_at", null)
-            .order("created_at", { ascending: false }),
-          supabase
-            .from("tenant_app_subscriptions")
-            .select("id, tenant_id, app_id, plan, status, created_at, trial_ends_at"),
-          supabase
-            .from("app_catalog")
-            .select("id, name, slug"),
-        ]);
+        let realTenants = rawTenants && rawTenants.length > 0 ? rawTenants : null;
+        let realSubs = rawSubs && rawSubs.length > 0 ? rawSubs : null;
+        let realApps = rawApps && rawApps.length > 0 ? rawApps : null;
 
-        if (!alive) return;
+        if (!realTenants) {
+          const [tenantsRes, subsRes, appsRes] = await Promise.all([
+            supabase
+              .from("tenants")
+              .select("*")
+              .order("created_at", { ascending: false }),
+            supabase
+              .from("tenant_app_subscriptions")
+              .select("id, tenant_id, app_id, plan, status, created_at, trial_ends_at"),
+            supabase
+              .from("app_catalog")
+              .select("id, name, slug"),
+          ]);
 
-        const realTenants = tenantsRes.data || [];
-        const realSubs = subsRes.data || [];
-        const realApps = appsRes.data || [];
+          if (!alive) return;
+          realTenants = (tenantsRes.data || []).filter((t) => !t.deleted_at);
+          realSubs = subsRes.data || [];
+          realApps = appsRes.data || [];
+        }
 
-        if (realTenants.length > 0) {
-          const appsMap = new Map(realApps.map((a) => [a.id, a.name]));
+        if (realTenants && realTenants.length > 0) {
+          const appsMap = new Map((realApps || []).map((a) => [a.id, a.name]));
 
+          // Precios oficiales vigentes Qaway Lab
           const planPriceMap = {
             basico: 60,
             intermedio: 100,
@@ -487,11 +395,11 @@ export default function SuscripcionesPanel({
           ];
 
           const mapped = realTenants.map((t, idx) => {
-            const tenantSubs = realSubs.filter((s) => s.tenant_id === t.id);
+            const tenantSubs = (realSubs || []).filter((s) => s.tenant_id === t.id);
             const activeSub =
               tenantSubs.find((s) => s.status === "active") || tenantSubs[0];
 
-            const rawPlan = activeSub?.plan?.toLowerCase() || "";
+            const rawPlan = (activeSub?.plan || "").toLowerCase();
             const planLabel =
               rawPlan === "premium"
                 ? "Premium"
@@ -499,11 +407,15 @@ export default function SuscripcionesPanel({
                 ? "Intermedio"
                 : rawPlan === "basico"
                 ? "Básico"
-                : "Sin plan";
+                : "Básico";
 
-            const subAppNames = tenantSubs
+            let subAppNames = tenantSubs
               .map((s) => appsMap.get(s.app_id))
               .filter(Boolean);
+
+            if (subAppNames.length === 0) {
+              subAppNames = ["Inventario"];
+            }
 
             let statusLabel = "En prueba";
             if (activeSub) {
@@ -518,7 +430,7 @@ export default function SuscripcionesPanel({
               statusLabel = "Activa";
             }
 
-            const monthlyAmount = rawPlan ? planPriceMap[rawPlan] || 0 : 0;
+            const monthlyAmount = planPriceMap[rawPlan] || 60;
 
             const createdDate = t.created_at
               ? new Date(t.created_at).toLocaleDateString("es-PE", {
@@ -536,11 +448,13 @@ export default function SuscripcionesPanel({
                 })
               : "-";
 
+            const subtitle = t.industry || t.category || t.sector || t.slug || "General";
+
             return {
               id: activeSub?.id || t.id,
               tenant_id: t.id,
-              company: t.name || "Empresa sin nombre",
-              industry: t.industry || t.category || "General",
+              company: t.name || t.client_code || "Empresa sin nombre",
+              industry: subtitle,
               initials: getInitials(t.name),
               logoClass: logoPalettes[idx % logoPalettes.length],
               plan: planLabel,
@@ -555,11 +469,11 @@ export default function SuscripcionesPanel({
 
           setItems(mapped);
         } else {
-          setItems(subscriptions);
+          setItems([]);
         }
       } catch (err) {
         console.error("Error al cargar suscripciones reales:", err);
-        setItems(subscriptions);
+        setItems([]);
       } finally {
         if (alive) setLoading(false);
       }
@@ -570,7 +484,7 @@ export default function SuscripcionesPanel({
     return () => {
       alive = false;
     };
-  }, [subscriptions]);
+  }, [rawTenants, rawSubs, rawApps]);
 
   const handleApproveSubscription = async (id) => {
     const target = items.find((x) => x.id === id);

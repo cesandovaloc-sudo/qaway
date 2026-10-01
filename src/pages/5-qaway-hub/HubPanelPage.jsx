@@ -542,7 +542,7 @@ function SuperAdminDashboard({ setActiveTab, navigate }) {
     ;(async () => {
       try {
         const [t, u, s, a, p, o, r] = await Promise.all([
-          supabase.from('tenants').select('id, name, client_code, category, industry, sector, status, deleted_at, created_at'),
+          supabase.from('tenants').select('*'),
           supabase.from('users').select('id, full_name, email, created_at'),
           supabase.from('tenant_app_subscriptions').select('tenant_id, app_id, plan, status'),
           supabase.from('app_catalog').select('id, name, slug'),
@@ -3073,7 +3073,11 @@ function HubPanelContent() {
               <PlanesPreciosPage />
             ) : activeTab === 'Suscripciones' && !globalSearchQuery.trim() ? (
               /* Sección Suscripciones dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
-              <SuscripcionesPanel />
+              <SuscripcionesPanel
+                rawTenants={rawData.tenants}
+                rawSubs={rawData.subs}
+                rawApps={rawData.apps}
+              />
             ) : activeTab === 'Pagos' && !globalSearchQuery.trim() ? (
               /* Sección Pagos dentro del panel (30.X: Page/View en el shell). Diseño del módulo intacto. */
               <PagosPanel />

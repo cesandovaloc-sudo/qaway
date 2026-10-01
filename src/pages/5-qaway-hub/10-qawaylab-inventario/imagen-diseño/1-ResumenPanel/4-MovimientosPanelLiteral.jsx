@@ -716,6 +716,65 @@ placeholder="Ej. Almacén Principal · Estante A1"
   );
 }
 
+// Lógica del tablero inferior (4-MovimientosPanel.jsx) con diseño/modal de arriba.
+// Campos: tipo, fecha, referencia, motivo, proveedor, ubicación, producto, SKU, cantidad, costo, nota.
+function MovementModal({ initial, products, onClose, onSave, saving }) {
+  const [f, setF] = useState(initial);
+  useEffect(() => { if (initial) setF(initial); }, [initial]);
+  const set = (k, v) => setF(prev => ({ ...prev, [k]: v }));
+  const subtotal = (Number(f.qty) || 0) * (Number(f.cost) || 0);
+  return (
+    <div className="pxp-overlay" onClick={onClose} style={{ colorScheme: "light" }}>
+      <section className="pxp-modal" style={{ maxWidth: 660, colorScheme: "light" }} onClick={e => e.stopPropagation()}>
+        <form onSubmit={e => { e.preventDefault(); onSave(f); }}>
+          <div className="pxp-modal-head">
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div className="pxp-heading-icon" style={{ background: "#fff2eb", borderColor: "#fed7aa", color: "#ff4b0b" }}>
+                <Boxes size={20} strokeWidth={1.8} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0f172a", margin: 0 }}>Nuevo movimiento</h2>
+                <p style={{ fontSize: 12.5, color: "#64748b", margin: "2px 0 0" }}>Registra una entrada, salida, transferencia o ajuste de inventario.</p>
+              </div>
+            </div>
+            <button type="button" className="pxp-icon-btn close" onClick={onClose} title="Cerrar">×</button>
+          </div>
+          <div className="pxp-modal-body" style={{ maxHeight: "75vh", overflowY: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="pxp-form-row"><div className="pxp-form-label">Tipo de movimiento <span style={{ color: "#ef4444" }}>*</span></div>
+              <select className="pxp-form-input" value={f.type} onChange={e => set("type", e.target.value)}>{["Entrada", "Salida", "Transferencia", "Ajuste"].map(x => <option key={x}>{x}</option>)}</select></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Fecha <span style={{ color: "#ef4444" }}>*</span></div>
+              <input type="date" required className="pxp-form-input" value={f.date} onChange={e => set("date", e.target.value)} /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Referencia</div>
+              <input className="pxp-form-input" value={f.ref} onChange={e => set("ref", e.target.value)} placeholder="Ej. OC-2026-046" /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Motivo <span style={{ color: "#ef4444" }}>*</span></div>
+              <select className="pxp-form-input" value={f.reason} onChange={e => set("reason", e.target.value)}>{["Compra a proveedor", "Venta", "Traslado entre almacenes", "Traslado entre sedes", "Ajuste por merma", "Ajuste por inventario", "Devolución", "Otro"].map(x => <option key={x}>{x}</option>)}</select></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Proveedor</div>
+              <input className="pxp-form-input" value={f.supplier || ""} onChange={e => set("supplier", e.target.value)} placeholder="Seleccionar proveedor..." /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Almacén / Ubicación <span style={{ color: "#ef4444" }}>*</span></div>
+              <input required className="pxp-form-input" value={f.location} onChange={e => set("location", e.target.value)} placeholder="Ej. Almacén Principal · Estante A1" /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Producto <span style={{ color: "#ef4444" }}>*</span></div>
+              <input required className="pxp-form-input" list="mov-prod-list" value={f.product} onChange={e => set("product", e.target.value)} placeholder="Nombre del producto" />
+              <datalist id="mov-prod-list">{(products || []).slice(0, 50).map(p => <option key={p.id} value={p.name}>{`${p.sku || ""}`}</option>)}</datalist></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Código / SKU</div>
+              <input className="pxp-form-input" value={f.sku} onChange={e => set("sku", e.target.value)} placeholder="Ej. CP-250-MOL" /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Cantidad <span style={{ color: "#ef4444" }}>*</span></div>
+              <input required type="number" min="1" className="pxp-form-input" value={f.qty} onChange={e => set("qty", e.target.value)} placeholder="0" /></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Costo unitario (S/)</div>
+              <input type="number" min="0" step="0.01" className="pxp-form-input" value={f.cost} onChange={e => set("cost", e.target.value)} placeholder="0.00" /></div>
+            <div style={{ fontSize: 13, color: "#64748b" }}>Subtotal estimado: <strong style={{ color: "#0f172a" }}>S/ {subtotal.toLocaleString("es-PE", { minimumFractionDigits: 2 })}</strong></div>
+            <div className="pxp-form-row"><div className="pxp-form-label">Observaciones</div>
+              <textarea className="pxp-form-input" maxLength={500} value={f.note || ""} onChange={e => set("note", e.target.value)} placeholder="Escribe una observación..." /></div>
+          </div>
+          <div className="pxp-modal-foot">
+            <button type="button" className="pxp-btn" onClick={onClose} disabled={!!saving}>Cancelar</button>
+            <button type="submit" className="pxp-btn primary" disabled={!!saving} style={{ background: "#ff4b0b", borderColor: "#ff4b0b", color: "#fff" }}>{saving ? "Guardando..." : "Guardar movimiento"}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 export default function MovimientosPanelLiteral() {
   let navigate = null;
   try {
@@ -820,6 +879,23 @@ export default function MovimientosPanelLiteral() {
   };
 
   const [form, setForm] = useState(defaultForm);
+
+  // Form de movimiento (lógica del tablero inferior, diseño de arriba). El de abajo no se toca.
+  const emptyMovForm = {
+    type: "Entrada",
+    date: new Date().toISOString().slice(0, 10),
+    ref: "",
+    reason: "Compra a proveedor",
+    supplier: "",
+    location: "Almacén Principal",
+    product: "",
+    sku: "",
+    qty: "",
+    cost: "",
+    note: ""
+  };
+  const [movForm, setMovForm] = useState(emptyMovForm);
+  const [savingMov, setSavingMov] = useState(false);
 
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const columnPickerRef = useRef(null);
@@ -1068,10 +1144,44 @@ export default function MovimientosPanelLiteral() {
       showToast("Debes seleccionar una empresa en la barra superior antes de registrar movimientos.");
       return;
     }
-    setEditing(null);
-    setForm(defaultForm);
-    setShowAdvanced(false);
-    setModal("product");
+    // Lógica de abajo (ref auto + form de movimiento), diseño de arriba (modal pxp).
+    const nextRef = `MOV-2026-${String((movements?.length || 0) + 1).padStart(3, "0")}`;
+    setMovForm({ ...emptyMovForm, date: new Date().toISOString().slice(0, 10), ref: nextRef });
+    setModal("movement");
+  };
+
+  const saveMovement = async (f) => {
+    if (!f?.product?.trim() || Number(f?.qty) <= 0) {
+      showToast("Completa el producto y una cantidad mayor que cero.");
+      return;
+    }
+    if (isPlatformAdmin && !activeTenantId) {
+      showToast("Debes seleccionar una empresa en la barra superior antes de registrar movimientos.");
+      return;
+    }
+    setSavingMov(true);
+    try {
+      const created = await movementService.createMovement({
+        tenant_id: activeTenantId || undefined,
+        tipo: f.type,
+        cantidad: Number(f.qty),
+        producto: f.product,
+        sku: f.sku,
+        referencia: f.ref,
+        motivo: f.reason,
+        ubicacion: f.location,
+        proveedor: f.supplier,
+        nota: f.note
+      });
+      setMovements(prev => [created, ...(prev || [])]);
+      setModal("");
+      showToast("Movimiento registrado correctamente.");
+    } catch (err) {
+      console.error("[Movimientos] Error al guardar:", err);
+      showToast(`Error al guardar: ${err.message || "Error en base de datos"}`);
+    } finally {
+      setSavingMov(false);
+    }
   };
 
   const openEdit = p => {
@@ -1458,10 +1568,10 @@ export default function MovimientosPanelLiteral() {
             {/* Tarjetas de abajo (tablero inferior) subidas debajo de tarjetas superiores. Mismos datos reales, sin query extra. */}
             <style>{`.movdup-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:0 0 14px}.movdup-card{display:flex;align-items:center;gap:15px;min-height:111px;background:#fff;border:1px solid #e5ebf5;border-radius:9px;padding:16px;box-shadow:0 2px 8px #1c3b7005}.movdup-icon{width:50px;height:50px;flex:0 0 50px;border-radius:12px;display:grid;place-items:center;font-size:30px}.movdup-icon.green{background:#e7f8ef;color:#00a65a}.movdup-icon.red{background:#ffebed;color:#ed1b2f}.movdup-icon.blue{background:#e9f2ff;color:#0861ee}.movdup-icon.orange{background:#fff1df;color:#f18a00}.movdup-card span{font-size:13px;display:block;white-space:nowrap;color:#101828}.movdup-line{display:flex;align-items:center;gap:16px;margin:6px 0 1px}.movdup-line strong{font-size:27px;line-height:1.1;color:#050b15}.movdup-line em{font-style:normal;color:#00a65a;font-size:14px}.movdup-line em.negative{color:#e31d2e}.movdup-card small{color:#7180ac;font-size:13px}@media(max-width:1200px){.movdup-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}`}</style>
             <section className="movdup-grid">
-              <article className="movdup-card"><div className="movdup-icon green">↓</div><div><span>Entradas (últimos 30 días)</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.entradas).toLocaleString("es-PE")}</strong></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cEntradas} movimientos`}</small></div></article>
-              <article className="movdup-card"><div className="movdup-icon red">↑</div><div><span>Salidas (últimos 30 días)</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.salidas).toLocaleString("es-PE")}</strong></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cSalidas} movimientos`}</small></div></article>
-              <article className="movdup-card"><div className="movdup-icon blue">⇄</div><div><span>Transferencias</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.transferencias).toLocaleString("es-PE")}</strong></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cTransferencias} movimientos`}</small></div></article>
-              <article className="movdup-card"><div className="movdup-icon orange">⚙</div><div><span>Ajustes</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.ajustes).toLocaleString("es-PE")}</strong></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cAjustes} movimientos`}</small></div></article>
+              <article className="movdup-card"><div className="movdup-icon green">↓</div><div><span>Entradas (últimos 30 días)</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.entradas).toLocaleString("es-PE")}</strong><em className={movMetrics.tEntradas?.dir === "down" ? "negative" : ""}>{isLoadingMetrics ? "" : movMetrics.tEntradas?.txt}</em></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cEntradas} movimientos`}</small></div></article>
+              <article className="movdup-card"><div className="movdup-icon red">↑</div><div><span>Salidas (últimos 30 días)</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.salidas).toLocaleString("es-PE")}</strong><em className={movMetrics.tSalidas?.dir === "up" ? "" : "negative"}>{isLoadingMetrics ? "" : movMetrics.tSalidas?.txt}</em></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cSalidas} movimientos`}</small></div></article>
+              <article className="movdup-card"><div className="movdup-icon blue">⇄</div><div><span>Transferencias</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.transferencias).toLocaleString("es-PE")}</strong><em>{isLoadingMetrics ? "" : movMetrics.tTransferencias?.txt}</em></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cTransferencias} movimientos`}</small></div></article>
+              <article className="movdup-card"><div className="movdup-icon orange">⚙</div><div><span>Ajustes</span><div className="movdup-line"><strong>{isLoadingMetrics ? "—" : Number(movMetrics.ajustes).toLocaleString("es-PE")}</strong><em className={movMetrics.tAjustes?.dir === "down" ? "negative" : ""}>{isLoadingMetrics ? "" : movMetrics.tAjustes?.txt}</em></div><small>{isLoadingMetrics ? "Cargando..." : `${movMetrics.cAjustes} movimientos`}</small></div></article>
             </section>
 
             <div className="pxp-toolbar">
@@ -2090,6 +2200,16 @@ export default function MovimientosPanelLiteral() {
           categories={categories}
           onClose={() => setModal("")}
           onSave={saveProduct}
+        />
+      )}
+
+      {modal === "movement" && (
+        <MovementModal
+          initial={movForm}
+          products={products}
+          saving={savingMov}
+          onClose={() => setModal("")}
+          onSave={saveMovement}
         />
       )}
 
