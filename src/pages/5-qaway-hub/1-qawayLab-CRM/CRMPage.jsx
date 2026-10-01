@@ -124,8 +124,9 @@ function CRMContent() {
 
   useEffect(() => {
     localStorage.setItem('qaway.hubTheme', themeMode)
-    document.documentElement.style.colorScheme = (themeMode === 'blanco' || themeMode === 'grises') ? 'light' : 'dark'
+    document.documentElement.style.colorScheme = (themeMode === 'oscuro') ? 'dark' : 'light'
     document.documentElement.setAttribute('data-theme', themeMode)
+    document.documentElement.setAttribute('data-mode', themeMode)
     if (themeMode === 'oscuro') {
       document.documentElement.classList.add('dark')
     } else {
@@ -134,7 +135,9 @@ function CRMContent() {
     window.dispatchEvent(new CustomEvent('qaway-theme-change', { detail: themeMode }))
   }, [themeMode])
 
-  const isDark = themeMode === 'oscuro' || themeMode === 'contraste'
+  const isChromeDark = themeMode === 'contraste' || themeMode === 'oscuro'
+  const isCanvasDark = themeMode === 'oscuro'
+  const isDark = isChromeDark
 
   const handleLogout = async () => {
     logoutUser()
@@ -246,7 +249,7 @@ function CRMContent() {
   }
 
   return (
-    <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-200 selection:bg-[#ff4b0b] selection:text-white ${isDark ? 'bg-[#111111] text-white' : 'bg-[#f8f9fa] text-zinc-900'}`}>
+    <div data-mode={themeMode} className={`hub-shell flex h-screen w-full overflow-hidden font-sans transition-colors duration-200 selection:bg-[#ff4b0b] selection:text-white ${isChromeDark ? 'bg-[#111111] text-white' : 'bg-[#f8f9fa] text-zinc-900'}`}>
       
       {/* ── LEFT SIDEBAR ────────────────────────────────────────────── */}
       <aside className={`${isSidebarCollapsed ? 'w-[72px]' : 'w-64'} shrink-0 flex flex-col transition-all duration-300 ease-in-out ${isDark ? 'border-r border-white/10 bg-[#111111]' : 'border-r border-zinc-200 bg-white'}`}>
@@ -730,7 +733,7 @@ function CRMContent() {
         </header>
 
         {/* ── MAIN CONTENT (Lienzo Maestro: 100% Fluido como Inventario) ─────────── */}
-        <main className={`flex-1 overflow-y-auto relative transition-colors duration-200 ${isDark ? 'bg-[#0c0c0c] text-white' : 'bg-[#f8f9fa] text-zinc-900'}`}>
+        <main className={`flex-1 overflow-y-auto relative transition-colors duration-200 ${isCanvasDark ? 'bg-[#09090b] text-white' : 'bg-[#fafafa] text-zinc-900'}`}>
           <div className="relative z-10 p-6 md:p-8 min-h-full w-full">
             <AnimatePresence mode="wait">
               <motion.div
