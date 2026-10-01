@@ -151,21 +151,34 @@ export default function NewSalePage() {
     'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link
-            to="/ventas"
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Nueva venta</h1>
-            <p className="text-sm text-gray-500">Venta de mostrador (POS)</p>
-          </div>
-        </div>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <Link
+                  to="/ventas"
+                  className="pxp-btn"
+                  style={{ width: 38, height: 38, padding: 0, justifyContent: 'center' }}
+                  title="Volver a ventas"
+                >
+                  <ArrowLeft size={16} />
+                </Link>
+                <div className="pxp-heading-icon">
+                  <Banknote size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Punto de Venta (POS)
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Emisión rápida de comprobantes de mostrador al contado o a crédito.
+                  </p>
+                </div>
+              </div>
+            </div>
 
       {error && (
         <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -447,6 +460,10 @@ export default function NewSalePage() {
           </div>
         </div>
       </div>
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
+

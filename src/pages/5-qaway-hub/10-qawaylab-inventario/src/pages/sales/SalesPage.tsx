@@ -70,188 +70,214 @@ export default function SalesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Ventas</h1>
-          <p className="text-sm text-gray-500">Ventas de mostrador al contado o al crédito</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <button
-            onClick={() => setExportOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Descargar reporte
-          </button>
-          <Link
-            to="nueva"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva venta
-          </Link>
-        </div>
-      </div>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Header oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <ShoppingCart size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                    Ventas Comerciales
+                  </h1>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Registro de ventas de mostrador y facturación al contado o a crédito.
+                  </p>
+                </div>
+              </div>
 
-      {/* Filters — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 bg-white/95 backdrop-blur-md border border-zinc-200 py-2 px-3.5 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por número, cliente o documento..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') load(1, search, statusFilter)
-            }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={e => {
-            const status = e.target.value as PaymentStatus | ''
-            setStatusFilter(status)
-            load(1, search, status)
-          }}
-          className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm"
-        >
-          <option value="">Todos los estados</option>
-          <option value="pagado">Pagado</option>
-          <option value="deuda">Deuda</option>
-          <option value="parcial">Parcial</option>
-        </select>
-      </div>
-
-      {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-sm text-red-700">{error}</span>
-        </div>
-      )}
-
-      {exportError && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-600" />
-          <span className="text-sm text-red-700">{exportError}</span>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-        </div>
-      ) : sales.length === 0 ? (
-        <div className="text-center py-12">
-          <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-1">No hay ventas</h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Registra tu primera venta de mostrador
-          </p>
-          <Link
-            to="nueva"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva venta
-          </Link>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">N°</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Fecha</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-500">Cliente</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
-                <th className="text-center px-4 py-3 font-medium text-gray-500">Estado</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sales.map(sale => {
-                const cfg = paymentStatusConfig[sale.payment_status]
-                return (
-                  <tr key={sale.id} className={sale.status === 'cancelled' ? 'opacity-50' : ''}>
-                    <td className="px-4 py-3 font-mono text-gray-900">{sale.sale_number}</td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {new Date(sale.created_at).toLocaleDateString('es-PE')}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="text-gray-900">{sale.customer_name || 'Cliente ocasional'}</div>
-                      {sale.doc_number && (
-                        <div className="text-xs text-gray-400">
-                          {sale.doc_type} {sale.doc_number}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right font-medium text-gray-900">
-                      {formatPEN(sale.total)}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${cfg.color} ${cfg.bgColor}`}>
-                        {cfg.label}
-                      </span>
-                      {sale.status === 'cancelled' && (
-                        <span className="ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-gray-500 bg-gray-200">
-                          Anulada
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        to={`/ventas/${sale.id}`}
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        Ver
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-              <p className="text-sm text-gray-500">
-                Página {page} de {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
+              <div className="pxp-heading-actions">
                 <button
-                  onClick={() => load(page - 1, search, statusFilter)}
-                  disabled={page === 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                  onClick={() => setExportOpen(true)}
+                  className="pxp-btn"
+                  title="Descargar reporte en Excel / CSV"
                 >
-                  Anterior
+                  <Download size={15} /> Descargar reporte
                 </button>
-                <button
-                  onClick={() => load(page + 1, search, statusFilter)}
-                  disabled={page === totalPages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                <Link
+                  to="nueva"
+                  className="pxp-btn primary"
+                  title="Registrar una nueva venta"
                 >
-                  Siguiente
-                </button>
+                  <Plus size={15} /> Nueva venta
+                </Link>
               </div>
             </div>
-          )}
-        </div>
-      )}
 
-      <ColumnPickerModal
-        open={exportOpen}
-        title="Descargar reporte de ventas"
-        subtitle="Selecciona las columnas que deseas incluir en el Excel"
-        options={SALES_REPORT_COLUMNS}
-        confirming={exporting}
-        onConfirm={handleExport}
-        onCancel={() => {
-          if (!exporting) setExportOpen(false)
-        }}
-      />
+            {/* Toolbar oficial */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por número, cliente o documento..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') load(1, search, statusFilter)
+                  }}
+                />
+              </div>
+
+              <div className="pxp-select-wrap">
+                <select
+                  value={statusFilter}
+                  onChange={e => {
+                    const status = e.target.value as PaymentStatus | ''
+                    setStatusFilter(status)
+                    load(1, search, status)
+                  }}
+                  className="pxp-select"
+                >
+                  <option value="">Todos los estados</option>
+                  <option value="pagado">Pagado</option>
+                  <option value="deuda">Deuda</option>
+                  <option value="parcial">Parcial</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Alerts */}
+            {error && (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <span className="text-sm text-red-700">{error}</span>
+              </div>
+            )}
+
+            {exportError && (
+              <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6">
+                <AlertCircle className="w-5 h-5 text-red-600 shrink-0" />
+                <span className="text-sm text-red-700">{exportError}</span>
+              </div>
+            )}
+
+            {/* Content & Table (TABLA 100% INTACTA) */}
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={28} className="text-[#ff4b0b] animate-spin" />
+              </div>
+            ) : sales.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#e4e4e7] p-12 text-center shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-[#f4f4f5] text-[#52525b] grid place-items-center mx-auto mb-3 text-xl">
+                  <ShoppingCart size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-[#111b2d] mb-1">No hay ventas registradas</h3>
+                <p className="text-sm text-[#71809e] mb-6 max-w-md mx-auto">
+                  Registra tu primera venta de mostrador para emitir comprobantes y llevar el control de cobros.
+                </p>
+                <Link
+                  to="nueva"
+                  className="pxp-btn primary"
+                >
+                  <Plus size={15} /> Nueva venta
+                </Link>
+              </div>
+            ) : (
+              <div className="pxp-table-wrap">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">N°</th>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Fecha</th>
+                        <th className="text-left px-4 py-3 font-semibold text-[#475569]">Cliente</th>
+                        <th className="text-right px-4 py-3 font-semibold text-[#475569]">Total</th>
+                        <th className="text-center px-4 py-3 font-semibold text-[#475569]">Estado</th>
+                        <th className="px-4 py-3" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#f1f5f9]">
+                      {sales.map(sale => {
+                        const cfg = paymentStatusConfig[sale.payment_status]
+                        return (
+                          <tr key={sale.id} className={sale.status === 'cancelled' ? 'opacity-50' : 'hover:bg-[#fafafa]'}>
+                            <td className="px-4 py-3 font-mono font-medium text-[#0f172a]">{sale.sale_number}</td>
+                            <td className="px-4 py-3 text-[#64748b]">
+                              {new Date(sale.created_at).toLocaleDateString('es-PE')}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="text-[#0f172a] font-medium">{sale.customer_name || 'Cliente ocasional'}</div>
+                              {sale.doc_number && (
+                                <div className="text-xs text-[#94a3b8]">
+                                  {sale.doc_type} {sale.doc_number}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right font-bold text-[#0f172a]">
+                              {formatPEN(sale.total)}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${cfg.color} ${cfg.bgColor}`}>
+                                {cfg.label}
+                              </span>
+                              {sale.status === 'cancelled' && (
+                                <span className="ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold text-gray-500 bg-gray-200">
+                                  Anulada
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <Link
+                                to={`/ventas/${sale.id}`}
+                                className="text-[#ff4b0b] hover:text-[#ea3e00] font-semibold"
+                              >
+                                Ver
+                              </Link>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e8f0]">
+                    <p className="text-sm text-[#64748b]">
+                      Página {page} de {totalPages} · ({total} ventas)
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => load(page - 1, search, statusFilter)}
+                        disabled={page === 1}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Anterior
+                      </button>
+                      <button
+                        onClick={() => load(page + 1, search, statusFilter)}
+                        disabled={page === totalPages}
+                        className="pxp-btn"
+                        style={{ height: '32px', padding: '6px 12px', fontSize: '12px' }}
+                      >
+                        Siguiente
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <ColumnPickerModal
+              open={exportOpen}
+              title="Descargar reporte de ventas"
+              subtitle="Selecciona las columnas que deseas incluir en el Excel"
+              options={SALES_REPORT_COLUMNS}
+              confirming={exporting}
+              onConfirm={handleExport}
+              onCancel={() => {
+                if (!exporting) setExportOpen(false)
+              }}
+            />
+          </div>
+        </main>
+      </div>
     </div>
   )
 }

@@ -287,130 +287,125 @@ export default function WebOrdersPage() {
   }, [orders])
 
   return (
-    <div className="space-y-6">
-      {/* Cabecera Principal */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-            <Globe size={24} className="text-blue-400" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">Pedidos Web</h1>
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                {orders.length} órdenes
-              </span>
+    <div className="pxp-root">
+      <div className="pxp-layout">
+        <main className="pxp-main">
+          <div className="pxp-content">
+            {/* Cabecera Principal oficial pxp */}
+            <div className="pxp-heading">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div className="pxp-heading-icon">
+                  <Globe size={20} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <h1 style={{ fontSize: '28px', fontWeight: 800, letterSpacing: '-0.8px', margin: '0 0 2px', color: '#111b2d' }}>
+                      Pedidos Web
+                    </h1>
+                    <span style={{ fontSize: '11.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '12px', background: '#eff6ff', color: '#1d4ed8', border: '1px solid #dbeafe' }}>
+                      {orders.length} órdenes
+                    </span>
+                  </div>
+                  <p style={{ margin: '2px 0 0', color: 'var(--muted)', fontSize: '13px' }}>
+                    Bandeja unificada de pedidos generados en el carrito web y tienda online.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pxp-heading-actions">
+                <button
+                  onClick={loadOrders}
+                  disabled={loading}
+                  className="pxp-btn"
+                  title="Actualizar bandeja de pedidos"
+                >
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                  <span>Actualizar</span>
+                </button>
+                <a
+                  href="/landings/desarrollo-web-qaway"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pxp-btn primary"
+                  title="Ver tienda online pública"
+                >
+                  <span>Ver Catálogo Web</span>
+                  <ExternalLink size={14} />
+                </a>
+              </div>
             </div>
-            <p className="text-sm text-muted mt-0.5">
-              Bandeja unificada de pedidos generados en el carrito web y tienda online
-            </p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={loadOrders}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted bg-surface border border-zinc-200 rounded-xl hover:bg-zinc-50 hover:text-ink transition-all disabled:opacity-50"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            <span>Actualizar</span>
-          </button>
-          <a
-            href="/landings/desarrollo-web-qaway"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-brand hover:bg-brand-hover rounded-xl shadow-lg shadow-brand/20 transition-all"
-          >
-            <span>Ver Catálogo Web</span>
-            <ExternalLink size={14} />
-          </a>
-        </div>
-      </div>
+            {/* Tarjetas de Métricas oficiales pxp */}
+            <section className="pxp-metrics" style={{ gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' }}>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Total Pedidos Web</span>
+                  <div className="pxp-metric-icon"><Package size={16} /></div>
+                </div>
+                <div className="pxp-metric-value">{stats.totalCount}</div>
+                <div className="pxp-metric-note">Registrados en tienda online</div>
+              </div>
 
-      {/* Tarjetas de Métricas de Pedidos Web */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
-              Total Pedidos Web
-            </span>
-            <Package size={16} className="text-muted " />
-          </div>
-          <p className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">{stats.totalCount}</p>
-          <p className="text-xs text-muted mt-1">Registrados en tienda online</p>
-        </div>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Por Confirmar</span>
+                  <div className="pxp-metric-icon" style={{ color: '#d97706', background: '#fffbeb' }}><Clock size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#d97706' }}>{stats.pendingCount}</div>
+                <div className="pxp-metric-note" style={{ color: '#b45309' }}>Requieren validar voucher/pago</div>
+              </div>
 
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
-              Por Confirmar
-            </span>
-            <Clock size={16} className="text-amber-400" />
-          </div>
-          <p className="text-2xl font-bold text-amber-400">{stats.pendingCount}</p>
-          <p className="text-xs text-amber-400/80 mt-1">Requieren validar voucher/pago</p>
-        </div>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Confirmados</span>
+                  <div className="pxp-metric-icon" style={{ color: '#059669', background: '#ecfdf5' }}><CheckCircle2 size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#059669' }}>{stats.paidCount}</div>
+                <div className="pxp-metric-note" style={{ color: '#047857' }}>Pagados o despachados</div>
+              </div>
 
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
-              Confirmados
-            </span>
-            <CheckCircle2 size={16} className="text-emerald-400" />
-          </div>
-          <p className="text-2xl font-bold text-emerald-400">{stats.paidCount}</p>
-          <p className="text-xs text-emerald-400/80 mt-1">Pagados o despachados</p>
-        </div>
+              <div className="pxp-metric">
+                <div className="pxp-metric-top">
+                  <span className="pxp-metric-label">Ingresos Confirmados</span>
+                  <div className="pxp-metric-icon" style={{ color: '#ff4b0b', background: '#fff2eb' }}><DollarSign size={16} /></div>
+                </div>
+                <div className="pxp-metric-value" style={{ color: '#ff4b0b' }}>{formatCurrency(stats.totalRevenue)}</div>
+                <div className="pxp-metric-note" style={{ color: '#ea3e00' }}>Total recaudado web</div>
+              </div>
+            </section>
 
-        <div className="bg-surface border border-zinc-200 rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-muted ">
-              Ingresos Confirmados
-            </span>
-            <DollarSign size={16} className="text-brand" />
-          </div>
-          <p className="text-2xl font-bold text-brand">{formatCurrency(stats.totalRevenue)}</p>
-          <p className="text-xs text-brand/80 mt-1">Total recaudado web</p>
-        </div>
-      </div>
+            {/* Toolbar oficial pxp */}
+            <div className="pxp-toolbar">
+              <div className="pxp-search">
+                <Search size={15} style={{ color: 'var(--muted)' }} />
+                <input
+                  type="text"
+                  placeholder="Buscar por código, cliente o producto..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
 
-      {/* Barra de Búsqueda y Filtros — sticky anti-scroll (ref HubPanelPage.jsx:990) */}
-      <div className="sticky top-0 z-30 flex flex-col sm:flex-row gap-3 items-center justify-between bg-white/95 backdrop-blur-md border border-zinc-200 p-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.03)]">
-        <div className="relative w-full sm:max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted " />
-          <input
-            type="text"
-            placeholder="Buscar por código, cliente o producto..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-ink placeholder:text-muted focus:outline-none focus:border-brand/50 transition-colors"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-          <span className="text-xs text-muted whitespace-nowrap pl-1">Filtrar:</span>
-          {[
-            { id: 'all', label: 'Todos' },
-            { id: 'pending', label: 'Pendientes' },
-            { id: 'paid', label: 'Pagados' },
-            { id: 'shipped', label: 'En camino' },
-            { id: 'delivered', label: 'Entregados' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterStatus(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                filterStatus === tab.id
-                  ? 'bg-brand text-white'
-                  : 'bg-zinc-50 text-muted hover:text-ink hover:bg-zinc-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12px', color: 'var(--muted)', marginRight: 4 }}>Filtrar:</span>
+                {[
+                  { id: 'all', label: 'Todos' },
+                  { id: 'pending', label: 'Pendientes' },
+                  { id: 'paid', label: 'Pagados' },
+                  { id: 'shipped', label: 'En camino' },
+                  { id: 'delivered', label: 'Entregados' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setFilterStatus(tab.id)}
+                    className={`pxp-btn small ${filterStatus === tab.id ? 'primary' : ''}`}
+                    style={{ height: '32px', padding: '0 12px', fontSize: '12px' }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
       {/* C-6: banner de error de datos — nunca ocultar fallos de carga con datos ficticios */}
       {dataError && (
@@ -691,6 +686,12 @@ export default function WebOrdersPage() {
           </div>
         </div>
       )}
+          </div>
+        </main>
+      </div>
     </div>
+
   )
 }
+
+
