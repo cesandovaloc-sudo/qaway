@@ -801,7 +801,9 @@ export default function HubOnboardingPage() {
         )}
       </main>
 
-      <footer><b>Qaway Hub</b><span>Tu espacio de trabajo digital</span></footer>
+      {step !== 1 && (
+        <footer><b>Qaway Hub</b><span>Tu espacio de trabajo digital</span></footer>
+      )}
 
       <style>{`
         *{box-sizing:border-box}body{margin:0;background:#f7f7f8;color:#111;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -860,7 +862,7 @@ export default function HubOnboardingPage() {
         .sk-input{height:47px;border-radius:9px;background:#f3f3f5}
         .sk-btn{width:110px;height:48px;border-radius:9px;background:#eaeaee}
         footer{height:60px;border-top:1px solid #e8e8eb;display:flex;justify-content:space-between;align-items:center;padding:0 6vw;color:#64748b;font-size:13px}
-        main.step-3-main{width:min(1120px,96vw);padding-top:24px}
+        main.step-3-main{width:min(1120px,96vw);margin:auto;padding:24px 0;display:flex;flex-direction:column;justify-content:center}
         .canva-onboarding-card{max-width:1120px!important;padding:32px 36px;box-shadow:0 20px 50px rgba(0,0,0,.06)}
         @media(max-width:700px){main{padding-top:25px}.progress{justify-content:flex-start;overflow:auto}.step span{display:none}.bar{width:24px}.card{padding:27px 21px}h1{font-size:28px}.grid,.apps{grid-template-columns:1fr}.canva-onboarding-card{padding:20px 14px}}
       `}</style>
